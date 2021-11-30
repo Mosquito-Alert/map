@@ -1,29 +1,26 @@
-# README #
+# Quasar App (mosquito2_public_frontend)
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Public map for Mosquito Alert
 
-### What is this repository for? ###
+## Install the dependencies
+```bash
+npm install
+```
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+```bash
+quasar dev
+```
 
-### How do I get set up? ###
+### Lint the files
+```bash
+npm run lint
+```
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### Build the app for production
+```bash
+quasar build
+```
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+### Customize the configuration
+See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
