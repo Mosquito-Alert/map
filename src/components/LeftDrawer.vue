@@ -9,9 +9,9 @@
       no-swipe-close>
     <!-- Main menu -->
     <q-toolbar class="text-primary">
-      <q-btn dense icon="layers" />
+      <fa-thin-button name="fa-layer-group" label="Capes"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
-      <q-btn flat round dense icon="more_vert" />
+      <fa-thin-button name="fa-user" label="Log in"></fa-thin-button>
     </q-toolbar>
     <!-- Drawer content -->
     <div>
@@ -19,6 +19,13 @@
     </div>
   </q-drawer>
 </template>
+
+<script>
+import FaThinButton from 'components/FaThinButton.vue';
+export default {
+  "components": { FaThinButton }
+}
+</script>
 
 <style scoped lang="scss">
 .q-drawer .q-toolbar {
@@ -33,7 +40,7 @@
 .q-drawer {
   width: 350px;
 }
-::v-deep .q-drawer__content {
+:deep(.q-drawer__content) {
   display: flex;
   flex-direction: row;
 }
