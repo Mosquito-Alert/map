@@ -12,7 +12,7 @@
       </q-toolbar-title>
     </q-toolbar>
   </q-footer>
-  
+
 </template>
 
 <style scoped lang="scss">
