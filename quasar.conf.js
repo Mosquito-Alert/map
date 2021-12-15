@@ -22,6 +22,7 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
+      "openlayers"
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -66,10 +67,10 @@ module.exports = configure(function (ctx) {
 
       // https://quasar.dev/quasar-cli/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      // chainWebpack (chain) {
-      //   chain.plugin('eslint-webpack-plugin')
-      //     .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
-      // }
+      chainWebpack (chain) {
+        chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
+      }
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
