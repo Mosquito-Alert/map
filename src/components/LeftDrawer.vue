@@ -3,7 +3,6 @@
       show-if-above
       side="left"
       behavior="desktop"
-      bordered
       :width="350"
       no-swipe-close>
     <!-- Main menu -->
@@ -24,9 +23,6 @@
           <!-- <i class="fa-thin fa-globe"></i> -->
           <span>English</span>
         </div>
-          <!-- <fa-thin-button name="fa-globe" :label="_('Català')" />
-          <fa-thin-button name="fa-globe" :label="_('Español')" />
-          <fa-thin-button name="fa-globe" :label="_('English')" /> -->
       </fa-thin-button-menu>
       <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
       <fa-thin-button name="fa-circle-info" :label="_('Help')"></fa-thin-button>
