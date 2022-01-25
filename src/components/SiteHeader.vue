@@ -12,8 +12,6 @@
 header {
   right: auto;
   width: 350px;
-  border-bottom: 1px solid $line-color;
-  border-right: 1px solid $line-color;
 }
 .q-toolbar {
   padding: 0;

@@ -18,7 +18,7 @@ export default {
 
 <style scoped lang="scss">
 button.fa-thin-button {
-  width: 55px;
+  width: 56px;
   height: 64px;
   background: white;
   border: none;

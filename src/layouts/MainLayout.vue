@@ -59,6 +59,6 @@ export default {
     margin-left: 350px;
   }
   :deep(.q-drawer), :deep(.q-header) {
-    width: 350px;
+    width: 349px;
   }
 </style>

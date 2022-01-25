@@ -112,7 +112,6 @@ export default {
     top: 0px;
     bottom: 0px;
     flex-direction: column;
-    border-right: 1px solid $grey-color;
     .q-toolbar__title {
       padding: 28px;
       border-top: 1px solid $grey-color;
