@@ -31,9 +31,10 @@
     <!-- Drawer content -->
     <div class="toc-layers">
       <ul>
-        <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)"><a href="#" @click="filterData" data-type="observations" :data-code="code">{{ layer }}</a></li>
+        <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
+          <a href="#" @click="filterData" data-type="observations" :data-code="code">{{ layer }}</a>
+        </li>
       </ul>
-      <p>{{ _('Open') }}</p>
     </div>
   </q-drawer>
 </template>
@@ -71,7 +72,6 @@ export default {
       return $store.getters['app/getText'](text)
     }
     return {
-
       initialClass,
       filterData,
       observations,

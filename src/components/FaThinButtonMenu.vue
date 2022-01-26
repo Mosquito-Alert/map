@@ -23,21 +23,23 @@ export default {
 
 <style scoped lang="scss">
 button {
-  width: 55px;
+  width: 56px;
   height: 64px;
   background: white;
   border: none;
   border-top: 1px solid $grey-color;
-  border-left: 1px solid white;
+  border-left: 6px solid white;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+  padding: 5px 6px 5px 0px;
   &>div:first-child {
     position: relative;
     z-index: 9;
     background: white;
+    padding: 5px 0px;
   }
   :deep(i.fa-thin) {
     padding: 0 8px;
@@ -62,9 +64,12 @@ button {
   .menu {
     display: flex;
     position: relative;
-    left: -300px;
-    height: 63px;
+    left: -60px;
+    height: 60px;
+    width: 56px;
+    top: -1px;
     visibility: hidden;
+    opacity: 0;
     &>div {
       position: relative;
       z-index: 1;
@@ -76,10 +81,12 @@ button {
     border-left: 6px solid #999;
     transition: all 0.3s ease-in;
     overflow: visible;
-    padding: 5px;
+    padding: 5px 6px 5px 6px;
     .menu {
+      width: auto;
       left: 0px;
       visibility: visible;
+      opacity: 1;
       transition: all 0.3s ease-in;
       &>div {
         position: relative;
