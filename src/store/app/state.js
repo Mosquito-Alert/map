@@ -7,6 +7,7 @@ export default function () {
       ]
     },
     BACKEND: 'http://localhost:8000/',
+    lang: 'ca',
     trans: {},
     layers: {
       observations: { // Mosquito observations

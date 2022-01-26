@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -26,7 +25,6 @@ import { ref } from 'vue'
 export default {
   components: { SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
-    const $store = useStore()
     const map = ref('null')
     const resizeMap = function (args) {
       if (args.start < args.end) {
@@ -41,7 +39,6 @@ export default {
       map.value.filter(data)
       // timeseries.value.filter(data.type, data.code);
     }
-    $store.dispatch('app/setTranslations')
     return {
       map,
       resizeMap,

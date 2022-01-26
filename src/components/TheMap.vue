@@ -22,8 +22,8 @@
         </ol-tile-layer>
 
         <!-- geojson layer -->
-        <ol-vector-layer ref='observations_layer'>
-          <ol-source-vector :features='features' :format='geoJson' ref='observations_source'>
+        <ol-vector-layer ref='observationsLayer'>
+          <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction='overrideStyleFunction'>
 
               <ol-style-circle>

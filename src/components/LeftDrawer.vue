@@ -11,16 +11,13 @@
       <fa-thin-button name="fa-chart-scatter" :label="_('Models')"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
       <fa-thin-button-menu name="fa-globe" :label="_('Lang')">
-        <div class="menuItem">
-          <!-- <i class="fa-thin fa-globe"></i> -->
+        <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
           <span>Català</span>
         </div>
-        <div class="menuItem">
-          <!-- <i class="fa-thin fa-globe"></i> -->
+        <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
           <span>Castellano</span>
         </div>
-        <div class="menuItem">
-          <!-- <i class="fa-thin fa-globe"></i> -->
+        <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
           <span>English</span>
         </div>
       </fa-thin-button-menu>
@@ -40,7 +37,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
@@ -49,13 +46,20 @@ export default {
   components: { FaThinButton, FaThinButtonMenu },
   emits: ['filter'],
   setup (props, context) {
+    const ca = ref(null)
+    const es = ref(null)
+    const en = ref(null)
     const $store = useStore()
     const filterData = function (event) {
-      context.emit('filter', { type: event.target.dataset.type, code: event.target.dataset.code })
-      if (event.target.parentNode.classList.contains('active')) {
-        event.target.parentNode.classList.remove('active')
+      context.emit('filter', {
+        type: event.target.dataset.type,
+        code: event.target.dataset.code
+      })
+      const classes = event.target.parentNode.classList
+      if (classes.contains('active')) {
+        classes.remove('active')
       } else {
-        event.target.parentNode.classList.add('active')
+        classes.add('active')
       }
     }
     const initialClass = function (_, code) {
@@ -68,10 +72,37 @@ export default {
     const observations = computed(() => {
       return $store.getters['app/layers'].observations
     })
+    // Language functions
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+    const clickLanguageSelector = (lang, event) => {
+      let object = event.target
+      if (!object.classList.contains('menuItem')) object = object.parentNode
+      setLanguage(lang, object)
+    }
+    const setLanguage = (lang, object) => {
+      $store.dispatch('app/setLanguage', lang)
+      object.parentNode.querySelectorAll('.menuItem').forEach(item => {
+        item.classList.remove('active')
+      })
+      object.classList.add('active')
+    }
+    onMounted(function () {
+      initLanguage()
+    })
+    function initLanguage () {
+      const lang = $store.getters['app/getLang']
+      let object = ca.value
+      if (lang === 'es') object = es.value
+      else if (lang === 'en') object = en.value
+      setLanguage(lang, object)
+    }
     return {
+      ca,
+      es,
+      en,
+      clickLanguageSelector,
       initialClass,
       filterData,
       observations,
@@ -90,10 +121,15 @@ export default {
   justify-content: center;
   align-items: center;
   width: 84px;
-  background: #dfdfdf;
+  background: #efefef;
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
 }
-.menuItem:hover {
+.menuItem.active {
+  background: white;
+  transition: all 0.3s ease-in;
+  font-weight: bold;
+}
+.menuItem:not(.active):hover {
   background: $grey-color;
   transition: all 0.3s ease-in;
   box-shadow: 6px 0 12px rgba(0,0,0,0.25), 4px 0 4px rgba(0,0,0,0.22);

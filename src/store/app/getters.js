@@ -14,3 +14,7 @@ export const getText = state => function (text) {
   if (text in state.trans) return state.trans[text]
   else return text
 }
+
+export const getLang = state => {
+  return state.lang
+}
