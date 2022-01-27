@@ -221,6 +221,10 @@ export default {
 
 .toc-layers ul{
   list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding:0 20px;
 }
 
 .toc-layers ul li{
@@ -228,11 +232,22 @@ export default {
 }
 
 .li-item img{
-  display: block
+  display: block;
+  margin:auto;
+}
+
+.li-item:hover img{
+  filter: grayscale(100%);
 }
 
 .li-item{
+  text-align: center;
   font-size:0.7rem;
   text-transform: capitalize;
+  width:70px;
+  margin:0 10px 10px 0px;
+  border-radius:10px;
+  border:1px solid black;
+  padding:5px;
 }
 </style>
