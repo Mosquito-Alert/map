@@ -7,30 +7,85 @@ export default function () {
       ]
     },
     BACKEND: 'http://localhost:8000/',
-    lang: 'ca',
     trans: {},
     layers: {
       observations: { // Mosquito observations
-        tiger: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
-        yellow: ['yellow_fever_probable', 'yellow_fever_confirmed'],
-        culex: ['culex_probable', 'culex_confirmed'],
-        japonicus: ['japonicus_probable', 'japonicus_confirmed'],
-        koreicus: ['koreicus_probable', 'koreicus_confirmed'],
-        other: ['other_species'],
-        unidentified: ['unidentified'],
-        pending: ['not_yet_validated'],
-        trash: ['trash_layer']
+        tiger: {
+          categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
+          icon: 'icons/marker_tiger.svg',
+          common_name: 'Mosquito tiger',
+          scientific_name: 'Aedes albopictus'
+        },
+        yellow: {
+          categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
+          icon: 'icons/marker_yellow.svg',
+          common_name: 'Mosquito yellow',
+          scientific_name: 'Aedes aegypti'
+        },
+        culex: {
+          categories: ['culex_probable', 'culex_confirmed'],
+          icon: 'icons/marker_culex.svg',
+          common_name: 'Mosquito culex',
+          scientific_name: 'Culex pipens'
+        },
+        japonicus: {
+          categories: ['japonicus_probable', 'japonicus_confirmed'],
+          icon: 'icons/marker_japonicus.svg',
+          common_name: 'Mosquito japonicus',
+          scientific_name: 'Aedes japonicus'
+        },
+        koreicus: {
+          categories: ['koreicus_probable', 'koreicus_confirmed'],
+          icon: 'icons/marker_koreicus.svg',
+          common_name: 'Mosquito koreicus',
+          scientific_name: 'Aedes koreicus'
+        },
+        other: {
+          categories: ['other_species'],
+          icon: 'icons/marker_other.svg',
+          common_name: 'Mosquito others'
+        },
+        unidentified: {
+          categories: ['unidentified'],
+          icon: 'icons/marker_unidentified.svg',
+          common_name: 'Mosquito unidentified'
+        },
+        pending: {
+          categories: ['not_yet_validated'],
+          icon: 'icons/marker_pending.svg',
+          common_name: 'Mosquito pending'
+        },
+        trash: {
+          categories: ['trash_layer'],
+          icon: 'icons/marker_trash.svg',
+          common_name: 'mosquito trash'
+        }
       },
       breeding: { // Breeding sites
-        pending: ['breeding_site_not_yet_filtered'],
-        other: ['breeding_site_other']
+        pending: {
+          categories: ['breeding_site_not_yet_filtered'],
+          icons: []
+        },
+        other: {
+          categories: ['breeding_site_other'],
+          icons: []
+        }
       },
       storm_drain: { // Storm drain
-        water: ['storm_drain_water'],
-        dry: ['storm_drain_dry']
+        water: {
+          categories: ['storm_drain_water'],
+          icons: []
+        },
+        dry: {
+          categories: ['storm_drain_dry'],
+          icons: []
+        }
       },
       other: { // ??
-        conflict: ['conflict']
+        conflict: {
+          categories: ['conflict'],
+          icons: []
+        }
       }
     }
   }

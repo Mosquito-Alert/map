@@ -28,18 +28,31 @@
     <!-- Drawer content -->
     <div class="toc-layers">
       <div class="toc-card filters">
-        <div class="toc-title" v-html="_('selecciona')"></div>
+        <div class="toc-title" v-html="_('Selecciona')"></div>
           <input type="text" name="localitat"/> <button>></button>
           <input type="text" name="hastag"/> <button>></button>
       </div>
 
       <div class="toc-card mosquitos">
-        <div class="toc-title" v-html="_('mosquits')"></div>
+        <div class="toc-title" v-html="_('Mosquits')"></div>
       </div>
 
+    <!--<div class="toc-layers">
       <ul>
         <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
           <a href="#" @click="filterData" data-type="observations" :data-code="code">{{ layer }}</a>
+        </li>
+      </ul>
+    </div>-->
+
+    <ul>
+        <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
+          <div class="li-item">
+            <a href="#" @click="filterData" data-type="observations" :data-code="code">
+              <img :src="layer.icon"/>
+              <div v-text="_(layer.common_name)"></div>
+            </a>
+          </div>
         </li>
       </ul>
     </div>
@@ -62,9 +75,10 @@ export default {
     const $store = useStore()
     const filterData = function (event) {
       context.emit('filter', {
-        type: event.target.dataset.type,
-        code: event.target.dataset.code
+        type: (event.target.dataset.type) ? event.target.dataset.type : event.target.parentNode.dataset.type,
+        code: (event.target.dataset.code) ? event.target.dataset.code : event.target.parentNode.dataset.code
       })
+
       const classes = event.target.parentNode.classList
       if (classes.contains('active')) {
         classes.remove('active')
@@ -77,11 +91,13 @@ export default {
       const isInitial = initialLayers.find(layer => {
         return layer.code === code
       })
+      console.log('initial class')
       if (isInitial) return 'active'
     }
     const observations = computed(() => {
       return $store.getters['app/layers'].observations
     })
+
     // Language functions
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -91,6 +107,7 @@ export default {
       if (!object.classList.contains('menuItem')) object = object.parentNode
       setLanguage(lang, object)
     }
+
     const setLanguage = (lang, object) => {
       $store.dispatch('app/setLanguage', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
@@ -203,5 +220,19 @@ export default {
 }
 
 .toc-layers ul{
+  list-style-type: none;
+}
+
+.toc-layers ul li{
+  display: block
+}
+
+.li-item img{
+  display: block
+}
+
+.li-item{
+  font-size:0.7rem;
+  text-transform: capitalize;
 }
 </style>
