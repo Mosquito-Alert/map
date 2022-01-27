@@ -27,6 +27,16 @@
     </q-toolbar>
     <!-- Drawer content -->
     <div class="toc-layers">
+      <div class="toc-card filters">
+        <div class="toc-title" v-html="_('selecciona')"></div>
+          <input type="text" name="localitat"/> <button>></button>
+          <input type="text" name="hastag"/> <button>></button>
+      </div>
+
+      <div class="toc-card mosquitos">
+        <div class="toc-title" v-html="_('mosquits')"></div>
+      </div>
+
       <ul>
         <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
           <a href="#" @click="filterData" data-type="observations" :data-code="code">{{ layer }}</a>
@@ -155,7 +165,43 @@ export default {
   flex-direction: row;
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
 }
+
+.toc-layers{
+
+}
+
+.toc-card{
+  padding: 30px 10px 0px 20px;
+}
+
+.toc-card.filters{
+  padding: 10px 10px 0px 20px;
+}
+
+.toc-title{
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.toc-layers .filters input{
+  padding: 3px 10px;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.toc-layers .filters button{
+  padding: 3px 10px;
+  background-color: $primary-button-background;
+  color: white;
+  border: 0px;
+  border-radius:5px;
+  margin-left: 3px;
+}
+
 .toc-layers ul li.active {
   font-weight: bold;
+}
+
+.toc-layers ul{
 }
 </style>
