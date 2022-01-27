@@ -44,7 +44,6 @@
         </li>
       </ul>
     </div>-->
-
     <ul>
         <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
           <div class="li-item">
@@ -54,7 +53,8 @@
             </a>
           </div>
         </li>
-      </ul>
+    </ul>
+
     </div>
   </q-drawer>
 </template>
@@ -216,7 +216,7 @@ export default {
 }
 
 .toc-layers ul li.active {
-  font-weight: bold;
+  // font-weight: bold;
 }
 
 .toc-layers ul{
@@ -228,16 +228,22 @@ export default {
 }
 
 .toc-layers ul li{
-  display: block
+  flex-grow: 1;
+  width: 33%;
+  // height: 100px;
 }
 
 .li-item img{
   display: block;
   margin:auto;
+  filter: grayscale(100%);
 }
 
+.li-item:hover{
+  background-color: #ccc;
+}
 .li-item:hover img{
-  filter: grayscale(100%);
+  filter: grayscale(0);
 }
 
 .li-item{
@@ -249,5 +255,9 @@ export default {
   border-radius:10px;
   border:1px solid black;
   padding:5px;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25), 1px 0 1px rgba(0, 0, 0, 0.22);
+  // flex-grow: 1;
+  // width: 10%;
+  // height: 100px;
 }
 </style>
