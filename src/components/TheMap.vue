@@ -21,21 +21,12 @@
             <ol-source-xyz crossOrigin='anonymous' url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
-        <!-- geojson layer -->
-        <ol-vector-layer>
-          <ol-source-vector :features='features' :format='geoJson'>
-            <ol-style :overrideStyleFunction='overrideStyleFunction'>
-
-              <ol-style-circle>
-                  <ol-style-fill color='indigo'></ol-style-fill>
-                  <ol-style-stroke color='grey' :width='20'></ol-style-stroke>
-              </ol-style-circle>
-
-              <ol-style-text>
-                  <ol-style-fill color="#fff"></ol-style-fill>
-                  <ol-style-stroke color="#b6ccb7" :width="0"></ol-style-stroke>
-              </ol-style-text>
+        <!-- CLUSTERS geojson layer -->
+        <ol-vector-layer ref='observations_layer'>
+          <ol-source-vector :features='features' :format='geoJson' ref='observations_source'>
+            <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
+
           </ol-source-vector>
         </ol-vector-layer>
 
@@ -52,6 +43,9 @@ import { transform } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+// import { Circle, Style, Text, Icon, Fill, Stroke } from 'ol/style'
+// import { asString } from 'ol/color'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -112,9 +106,11 @@ export default defineComponent({
           })
           return feat
         })
+
         // source.addFeatures(data)
         // $store.commit('map/updateFeatures', data)
         features.value = data
+
         // observations_layer.value.vectorLayer.changed()
       }
     }
@@ -186,33 +182,50 @@ export default defineComponent({
       })
     })
     const overrideStyleFunction = (feature, style) => {
-      const stroke = style.getImage().getStroke()
-      style.getText().setFont('bold 14px Roboto')
-      style.getImage().getFill().setColor('rgb(255, 221, 25)')
-      style.getText().setText('')
-      style.getImage().setRadius(10)
-      stroke.setWidth(1)
-      stroke.setColor('white')
-
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
+      // if ('point_count' in feature.values_.properties) {
         const size = feature.values_.properties.point_count
-        style.getImage().getFill().setColor('rgba(182, 204, 183, 0.7)')
-        style.getText().setText(size.toLocaleString())
-        stroke.setWidth(15)
-        // stroke.setOpacity(.1);
-        // stroke.setColor('rgba(255,255,0,0.5)')
-        stroke.setColor('rgba(201, 217, 204, 0.5)')
-        if (size < 100) style.getImage().setRadius(16)
-        if (size >= 100) style.getImage().setRadius(20)
-        if (size >= 1000) style.getImage().setRadius(30)
-        if (size >= 10000) style.getImage().setRadius(45)
+        let radius = 0
+        if (size < 100) radius = 16
+        if (size >= 100) radius = 20
+        if (size >= 1000) radius = 30
+        if (size >= 10000) radius = 45
+
+        const circle = new Circle({
+          fill: new Fill({
+            color: 'rgba(187, 208, 189, 0.7)'
+          }),
+          stroke: new Stroke({
+            color: 'rgba(201, 217, 204, 0.5)',
+            width: 15
+          }),
+          radius: radius
+        })
+        const text = new Text({
+          font: 'bold 12px Roboto',
+          text: size.toLocaleString(),
+          fill: new Fill({
+            color: 'white'
+          })
+        })
+        style.setImage(circle)
+        style.setText(text)
       } else {
-        style.getText().setText('')
-        style.getImage().setRadius(10)
-        stroke.setWidth(1)
-        stroke.setColor('#fff')
+        // This is no cluster, just an Icon
+        const observations = $store.getters['app/layers'].observations
+        const observationsKeys = Object.keys(observations)
+        const featureKey = observationsKeys.find(function (e) {
+          return (feature.values_.properties.c.includes(e)) ? e : ''
+        })
+        const iconUrl = observations[featureKey].icon
+        const tiger = new Icon({
+          src: iconUrl
+        })
+        style.setImage(tiger)
+        style.setText('')
       }
     }
+
     function filter (data) {
       data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(data)
