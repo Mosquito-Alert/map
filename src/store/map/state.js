@@ -4,6 +4,7 @@ export default function () {
       ZOOM: 6,
       CENTER: [-4, 40]
     },
-    features: []
+    features: [],
+    selectedFeature: null
   }
 }
