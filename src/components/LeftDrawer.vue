@@ -235,7 +235,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 
 .toc-layers{
-
+  overflow-y:scroll;
 }
 
 .toc-card{
