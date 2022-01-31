@@ -55,6 +55,36 @@
         </li>
     </ul>
 
+    <!-- BITES -->
+    <div class="toc-card mosquitos">
+      <div class="toc-title" v-html="_('Bites')"></div>
+    </div>
+    <ul>
+        <li v-for="layer, code in bites" :key="code">
+          <div class="li-item">
+            <a href="#" @click="filterData" data-type="bites" :data-code="code">
+              <img :src="layer.icon"/>
+              <div v-text="_(layer.common_name)"></div>
+            </a>
+          </div>
+        </li>
+    </ul>
+
+<!-- BREEDING SITES -->
+    <div class="toc-card mosquitos">
+      <div class="toc-title" v-html="_('Breeding')"></div>
+    </div>
+    <ul>
+        <li v-for="layer, code in breeding" :key="code">
+          <div class="li-item">
+            <a href="#" @click="filterData" data-type="breeding" :data-code="code">
+              <img :src="layer.icon"/>
+              <div v-text="_(layer.common_name)"></div>
+            </a>
+          </div>
+        </li>
+    </ul>
+
     </div>
   </q-drawer>
 </template>
@@ -98,6 +128,14 @@ export default {
       return $store.getters['app/layers'].observations
     })
 
+    const breeding = computed(() => {
+      return $store.getters['app/layers'].breeding
+    })
+
+    const bites = computed(() => {
+      return $store.getters['app/layers'].bites
+    })
+
     // Language functions
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -133,6 +171,8 @@ export default {
       initialClass,
       filterData,
       observations,
+      breeding,
+      bites,
       _
     }
   }
@@ -188,11 +228,12 @@ export default {
 }
 
 .toc-card{
-  padding: 30px 10px 0px 20px;
+  padding: 10px 10px 0px 20px;
 }
 
 .toc-card.filters{
   padding: 10px 10px 0px 20px;
+  margin-bottom: 10px;
 }
 
 .toc-title{
@@ -253,11 +294,17 @@ export default {
   width:70px;
   margin:0 10px 10px 0px;
   border-radius:10px;
-  border:1px solid black;
+  border:1px solid rgb(180, 174, 174);
   padding:5px;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25), 1px 0 1px rgba(0, 0, 0, 0.22);
+  // box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25), 1px 0 1px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
   // flex-grow: 1;
   // width: 10%;
   // height: 100px;
+}
+
+.li-item a.active,
+.li-item a.active img{
+  filter: grayscale(0);
 }
 </style>

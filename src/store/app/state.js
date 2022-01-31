@@ -61,14 +61,23 @@ export default function () {
           common_name: 'mosquito trash'
         }
       },
+      bites: { // Breeding sites
+        pending: {
+          categories: ['breeding_site_not_yet_filtered'],
+          icon: 'icons/marker_tiger.svg',
+          common_name: 'bites'
+        }
+      },
       breeding: { // Breeding sites
         pending: {
           categories: ['breeding_site_not_yet_filtered'],
-          icons: []
+          icon: 'icons/marker_tiger.svg',
+          common_name: 'Pending'
         },
         other: {
           categories: ['breeding_site_other'],
-          icons: []
+          icon: 'icons/marker_culex.svg',
+          common_name: 'Other'
         }
       },
       storm_drain: { // Storm drain
