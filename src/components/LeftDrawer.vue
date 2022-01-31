@@ -224,7 +224,7 @@ export default {
 }
 
 .toc-layers{
-
+  overflow-y:scroll;
 }
 
 .toc-card{
