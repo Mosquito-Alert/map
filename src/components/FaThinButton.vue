@@ -31,10 +31,8 @@ button.fa-thin-button {
   :deep(i.fa-thin) {
     padding: 0 8px;
     font-size: 2em;
-    color: $dark-grey;
   }
   :deep(span) {
-    color: $dark-grey;
     text-align: center;
     white-space: nowrap;
     font-size: 12px;

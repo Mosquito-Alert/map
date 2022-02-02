@@ -11,13 +11,14 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
+$primary-color: #efa501;
 $grey-color: #d5d5d5;
 $dark-grey: #333;
 $line-color: rgba(0, 0, 0, 0.12);
 $color-pestanya: white;
 $color-pestanya-text: black;
 $footer-background: $dark-grey;
-$primary-button-background: #efa501;
+$primary-button-background: $primary-color;
 $primary-button-text: #fde6b5;
 $primary-button-background-hover: #ffca56;
 $primary-button-text-hover: white;

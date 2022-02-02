@@ -113,6 +113,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+button.fa-thin-button, button.fa-thin-button-menu {
+  color: $dark-grey;
+}
+button.fa-thin-button.active, button.fa-thin-button-menu.active {
+  color: $primary-color;
+}
 .menuItem {
   border: 1px solid $grey-color;
   border-left: none;
@@ -128,6 +134,7 @@ export default {
   background: white;
   transition: all 0.3s ease-in;
   font-weight: bold;
+  color: $primary-color;
 }
 .menuItem:not(.active):hover {
   background: $grey-color;
