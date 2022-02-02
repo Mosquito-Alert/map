@@ -62,6 +62,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   border-radius: $popup-border-radius;
+  cursor: default;
   &:after {
     content: " ";
     border: $popup-vertical-offset solid transparent;
