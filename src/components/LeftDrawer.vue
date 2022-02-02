@@ -25,6 +25,7 @@
       <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
       <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
+
     <!-- Drawer content -->
     <div class="toc-layers">
       <div class="toc-card filters">
@@ -37,54 +38,52 @@
         <div class="toc-title" v-html="_('Mosquits')"></div>
       </div>
 
-    <!--<div class="toc-layers">
       <ul>
-        <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
-          <a href="#" @click="filterData" data-type="observations" :data-code="code">{{ layer }}</a>
-        </li>
+          <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
+            <div class="li-item">
+              <a href="#" @click="filterData" data-type="observations" :data-code="code">
+                <img :src="layer.icon"/>
+              </a>
+            </div>
+            <div v-text="_(layer.common_name)"></div>
+          </li>
       </ul>
-    </div>-->
-    <ul>
-        <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
-          <div class="li-item">
-            <a href="#" @click="filterData" data-type="observations" :data-code="code">
-              <img :src="layer.icon"/>
-              <div v-text="_(layer.common_name)"></div>
-            </a>
-          </div>
-        </li>
-    </ul>
 
-    <!-- BITES -->
-    <div class="toc-card mosquitos">
-      <div class="toc-title" v-html="_('Bites')"></div>
-    </div>
-    <ul>
-        <li v-for="layer, code in bites" :key="code">
-          <div class="li-item">
-            <a href="#" @click="filterData" data-type="bites" :data-code="code">
-              <img :src="layer.icon"/>
-              <div v-text="_(layer.common_name)"></div>
-            </a>
-          </div>
-        </li>
-    </ul>
+      <!-- SAMPLIING EFFORT -->
+      <div class="toc-card mosquitos">
+        <div class="toc-title" v-html="_('Sampling Effort')"></div>
+        <sampling-effort title="child"></sampling-effort>
+      </div>
 
-<!-- BREEDING SITES -->
-    <div class="toc-card mosquitos">
-      <div class="toc-title" v-html="_('Breeding')"></div>
-    </div>
-    <ul>
-        <li v-for="layer, code in breeding" :key="code">
-          <div class="li-item">
-            <a href="#" @click="filterData" data-type="breeding" :data-code="code">
-              <img :src="layer.icon"/>
-              <div v-text="_(layer.common_name)"></div>
-            </a>
-          </div>
-        </li>
-    </ul>
+      <!-- BITES -->
+      <div class="toc-card mosquitos">
+        <div class="toc-title" v-html="_('Bites')"></div>
+      </div>
+      <ul>
+          <li v-for="layer, code in bites" :key="code">
+            <div class="li-item">
+              <a href="#" @click="filterData" data-type="bites" :data-code="code">
+                <img :src="layer.icon"/>
+                <div v-text="_(layer.common_name)"></div>
+              </a>
+            </div>
+          </li>
+      </ul>
 
+      <!-- BREEDING SITES -->
+      <div class="toc-card mosquitos">
+        <div class="toc-title" v-html="_('Breeding')"></div>
+      </div>
+      <ul>
+          <li v-for="layer, code in breeding" :key="code">
+            <div class="li-item">
+              <a href="#" @click="filterData" data-type="breeding" :data-code="code">
+                <img :src="layer.icon"/>
+                <div v-text="_(layer.common_name)"></div>
+              </a>
+            </div>
+          </li>
+      </ul>
     </div>
   </q-drawer>
 </template>
@@ -93,10 +92,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import FaThinButton from 'components/FaThinButton.vue'
+import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu },
+  components: { FaThinButton, FaThinButtonMenu, SamplingEffort },
   emits: ['filter'],
   setup (props, context) {
     const ca = ref(null)
@@ -283,6 +283,11 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   flex-grow: 1;
   width: 33%;
   // height: 100px;
+}
+
+.toc-layers ul li div{
+  font-size:0.7em;
+  text-align:center;
 }
 
 .li-item img{

@@ -99,6 +99,15 @@ export default function () {
           categories: ['conflict'],
           icons: []
         }
+      },
+      sampling_effort: {
+        legend: {
+          0: '#cc6fa5',
+          10: '#bb3888',
+          100: '#a8006c',
+          1000: '#7f0051',
+          1500: '#550035'
+        }
       }
     }
   }
