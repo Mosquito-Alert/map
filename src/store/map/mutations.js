@@ -1,5 +1,3 @@
-// export const updateFeatures = (state, payload) => {
-//   console.log("updating features")
-//   state.features.value = payload
-//   console.log(state.features)
-// }
+export const selectFeature = (state, payload) => {
+  state.selectedFeature = payload
+}
