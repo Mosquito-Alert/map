@@ -19,10 +19,7 @@ header {
 .q-toolbar__title {
   display: flex;
   justify-content: center;
-  padding: 20px;
-  box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
-}
-.q-toolbar__title img {
-  max-height: 40px;
+  padding: 10px;
+  box-shadow: 3px 0 6px rgba(0, 0, 0, 0.25), 2px 0 2px rgba(0, 0, 0, 0.22);
 }
 </style>
