@@ -162,8 +162,14 @@ export default defineComponent({
               )
             })
           } else {
+            const resolution = ol.getView().getResolution()
+            const coords = [...feature.values_.geometry.flatCoordinates]
+            setTimeout(() => {
+              const overlay = document.querySelector('.overlay-content')
+              coords[1] += overlay.clientHeight / 2 * resolution
+              flyTo(coords, ol.getView().getZoom())
+            }, 100)
             $store.dispatch('map/selectFeature', feature.values_)
-            flyTo(feature.values_.geometry.flatCoordinates, ol.getView().getZoom())
           }
           return feature
         }, { hitTolerance: 10 })
