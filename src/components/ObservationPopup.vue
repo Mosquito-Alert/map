@@ -1,6 +1,6 @@
 <template>
   <ol-overlay
-      :title="selectedFeature.title"
+      :title="_(selectedFeature.title)"
       :position="selectedFeature.coordinates"
       positioning="bottom-center"
       :offset="[0, -35]"

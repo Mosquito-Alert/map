@@ -188,7 +188,6 @@ export default defineComponent({
     const overrideStyleFunction = (feature, style) => {
       const stroke = style.getImage().getStroke()
       style.getText().setFont('bold 14px Roboto')
-      // style.getImage().getFill().setColor('#efa501')
       style.getImage().getFill().setColor('rgb(255, 221, 25)')
       style.getText().setText('')
       style.getImage().setRadius(10)
