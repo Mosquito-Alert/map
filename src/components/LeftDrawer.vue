@@ -34,56 +34,63 @@
           <input type="text" name="hastag"/> <button>></button>
       </div>
 
-      <div class="toc-card mosquitos">
+      <div class="toc-category">
         <div class="toc-title" v-html="_('Mosquits')"></div>
       </div>
 
       <ul>
           <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
-            <div class="li-item">
-              <a href="#" @click="filterData" data-type="observations" :data-code="code">
-                <img :src="layer.icon"/>
-              </a>
+            <div class="item-container">
+              <div class="li-item" @click="filterData" data-type="observations" :data-code="code">
+                <a href="#">
+                  <img :src="layer.icon"/>
+                </a>
+              </div>
+              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
-            <div v-text="_(layer.common_name)"></div>
           </li>
       </ul>
 
-      <!-- SAMPLIING EFFORT -->
-      <div class="toc-card mosquitos">
-        <div class="toc-title" v-html="_('Sampling Effort')"></div>
-        <sampling-effort title="child"></sampling-effort>
-      </div>
-
       <!-- BITES -->
-      <div class="toc-card mosquitos">
+      <div class="toc-category">
         <div class="toc-title" v-html="_('Bites')"></div>
       </div>
       <ul>
           <li v-for="layer, code in bites" :key="code">
-            <div class="li-item">
-              <a href="#" @click="filterData" data-type="bites" :data-code="code">
-                <img :src="layer.icon"/>
-                <div v-text="_(layer.common_name)"></div>
-              </a>
+            <div class="item-container">
+              <div class="li-item">
+                <a href="#" @click="filterData" data-type="bites" :data-code="code">
+                  <img :src="layer.icon"/>
+                </a>
+              </div>
+              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
           </li>
       </ul>
 
       <!-- BREEDING SITES -->
-      <div class="toc-card mosquitos">
+      <div class="toc-category">
         <div class="toc-title" v-html="_('Breeding')"></div>
       </div>
       <ul>
           <li v-for="layer, code in breeding" :key="code">
-            <div class="li-item">
-              <a href="#" @click="filterData" data-type="breeding" :data-code="code">
-                <img :src="layer.icon"/>
-                <div v-text="_(layer.common_name)"></div>
-              </a>
+            <div class="item-container">
+              <div class="li-item">
+                <a href="#" @click="filterData" data-type="breeding" :data-code="code">
+                  <img :src="layer.icon"/>
+                </a>
+              </div>
+              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
           </li>
       </ul>
+
+      <!-- SAMPLIING EFFORT -->
+      <div class="toc-category">
+        <div class="toc-title" v-html="_('Sampling Effort')"></div>
+      </div>
+      <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
+
     </div>
   </q-drawer>
 </template>
@@ -104,12 +111,16 @@ export default {
     const en = ref(null)
     const $store = useStore()
     const filterData = function (event) {
+      let obj = event.target
+      if (!event.target.dataset.type) {
+        obj = obj.closest('.li-item')
+      }
       context.emit('filter', {
-        type: (event.target.dataset.type) ? event.target.dataset.type : event.target.parentNode.dataset.type,
-        code: (event.target.dataset.code) ? event.target.dataset.code : event.target.parentNode.dataset.code
+        type: obj.dataset.type,
+        code: obj.dataset.code
       })
 
-      const classes = event.target.parentNode.classList
+      const classes = obj.classList
       if (classes.contains('active')) {
         classes.remove('active')
       } else {
@@ -242,6 +253,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   padding: 10px 10px 0px 20px;
 }
 
+.toc-category,
 .toc-card.filters{
   padding: 10px 10px 0px 20px;
   margin-bottom: 10px;
@@ -267,26 +279,22 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   margin-left: 3px;
 }
 
-.toc-layers ul li.active {
-  // font-weight: bold;
-}
-
 .toc-layers ul{
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding:0 20px;
+  padding:0 0 0 20px;
+  margin: 0px;
 }
 
 .toc-layers ul li{
-  flex-grow: 1;
-  width: 33%;
-  // height: 100px;
+  // flex-grow: 1;
+  width: 50px;
+  margin: 0px;
 }
 
 .toc-layers ul li div{
-  font-size:0.7em;
   text-align:center;
 }
 
@@ -303,24 +311,39 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   filter: grayscale(0);
 }
 
+.item-container{
+  height:70px;
+  margin-right: 5px;
+}
+
 .li-item{
   text-align: center;
-  font-size:0.7rem;
   text-transform: capitalize;
-  width:70px;
-  margin:0 10px 10px 0px;
+  // height: 100%;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
   padding:5px;
-  // box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25), 1px 0 1px rgba(0, 0, 0, 0.22);
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
-  // flex-grow: 1;
-  // width: 10%;
-  // height: 100px;
+  display:flex;
+  align-items: center;
+  text-align: center;
 }
 
-.li-item a.active,
-.li-item a.active img{
+.li-item a{
+  margin:auto;
+}
+
+.li-item.active a,
+.li-item.active a img{
   filter: grayscale(0);
+}
+
+.toc-item-name{
+  // white-space: nowrap;
+  font-size:0.6em;
+}
+
+.toc-card-title{
+  margin-bottom: 10px;
 }
 </style>
