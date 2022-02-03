@@ -98,11 +98,11 @@ export default function () {
       },
       sampling_effort: {
         legend: {
-          0: '#cc6fa5',
-          10: '#bb3888',
-          100: '#a8006c',
-          1000: '#7f0051',
-          1500: '#550035'
+          0: '#ffffb2',
+          10: '#fecc5c',
+          100: '#fd8d3c',
+          1000: '#f03b20',
+          1500: '#bd0026'
         }
       }
     }
