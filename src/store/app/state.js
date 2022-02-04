@@ -17,30 +17,35 @@ export default function () {
         tiger: {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           icon: 'icons/marker_tiger.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito tiger',
           scientific_name: 'Aedes albopictus'
         },
         yellow: {
           categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
           icon: 'icons/marker_yellow.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito yellow',
           scientific_name: 'Aedes aegypti'
         },
         japonicus: {
           categories: ['japonicus_probable', 'japonicus_confirmed'],
           icon: 'icons/marker_japonicus.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito japonicus',
           scientific_name: 'Aedes japonicus'
         },
         koreicus: {
           categories: ['koreicus_probable', 'koreicus_confirmed'],
           icon: 'icons/marker_koreicus.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito koreicus',
           scientific_name: 'Aedes koreicus'
         },
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
           icon: 'icons/marker_culex.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito culex',
           scientific_name: 'Culex pipens',
           separator: true
@@ -48,6 +53,7 @@ export default function () {
         unidentified: {
           categories: ['unidentified'],
           icon: 'icons/marker_unidentified.svg',
+          icon_disabled: 'icons/marker_unidentified_disabled.svg',
           common_name: 'Mosquito unidentified'
         }
       },
@@ -55,6 +61,7 @@ export default function () {
         other: {
           categories: ['other_species'],
           icon: 'icons/marker_other.svg',
+          icon_disabled: 'icons/marker_mosquito_disabled.svg',
           common_name: 'Mosquito others'
         }
         // pending: {
