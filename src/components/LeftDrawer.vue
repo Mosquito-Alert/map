@@ -42,7 +42,8 @@
         <div class="item-container" v-for="layer, code in observations" :key="code">
           <div class="content">
             <div class="li-item" @click="filterData" data-type="observations" :data-code="code" :class="initialClass(layer, code)">
-              <img :src="layer.icon"/>
+              <img v-if="initialClass(layer, code) == 'active'" :src="layer.icon"/>
+              <img v-else :src="layer.icon_disabled"/>
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -95,7 +96,8 @@
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
             <div class="li-item" @click="filterData" data-type="otherObservations" :data-code="code">
-              <img :src="layer.icon"/>
+              <img v-if="initialClass(layer, code) == 'active'" :src="layer.icon"/>
+              <img v-else :src="layer.icon_disabled"/>
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -263,7 +265,7 @@ export default {
 }
 
 .toc-layers{
-  overflow-y:scroll;
+  overflow-y:auto;
 }
 
 .toc-card{
@@ -317,16 +319,28 @@ export default {
   filter: grayscale(100%);
 }
 
+.bites .li-item:hover i,
+.bites .li-item.active i{
+  background-color:  #cc6677;
+  color: #e2b3aa;
+}
+
 .bites .li-item i{
-  background-color: #cc6677;
+  background-color: #e6e6e6;
   color: #e2b3aa;
   padding:10px;
   border-radius:50%;
 }
 
-.breeding .li-item i{
-  background-color: #a8b9c1;
+.breeding .li-item:hover i,
+.breeding .li-item.active i{
+  background-color:  #a8b9c1;
   color: #1072ad;
+}
+
+.breeding .li-item i{
+  background-color: #e6e6e6;
+  color: #e2b3aa;
   padding:10px;
 }
 
@@ -360,6 +374,7 @@ export default {
   display:flex;
   align-items: center;
   text-align: center;
+  position: relative;
 }
 
 .li-item.active img{
@@ -390,10 +405,10 @@ export default {
 
 .li-item.separator::after{
   border-right:3px solid #c0c0c0;
-  position:fixed;
+  position:absolute;
   content:'';
   height: 45px;
-  left: 154px;
+  right: -13px;
 }
 
 .vertical-separator{
