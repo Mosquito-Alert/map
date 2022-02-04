@@ -74,17 +74,17 @@ export default function () {
       breeding: { // Breeding sites
         with_water: {
           categories: ['breeding_site_not_yet_filtered'],
-          icon: 'icons/marker_tiger.svg',
+          icon: 'fa-droplet',
           common_name: 'Pending'
         },
         without_water: {
           categories: ['breeding_site_not_yet_filtered'],
-          icon: 'icons/marker_tiger.svg',
+          icon: 'fa-droplet-slash',
           common_name: 'Pending'
         },
         other: {
           categories: ['breeding_site_other'],
-          icon: 'icons/marker_culex.svg',
+          icon: 'fa-dharmachakra',
           common_name: 'Other'
         }
       },

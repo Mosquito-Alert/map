@@ -56,11 +56,12 @@
           <div class="toc-category">
             <div class="toc-title" v-html="_('Bites')"></div>
           </div>
-          <div class="category-boxes">
+          <div class="category-boxes bites">
               <div class="item-container" v-for="layer, code in bites" :key="code">
                 <div class="content">
                   <div class="li-item" @click="filterData" data-type="bites" :data-code="code">
-                      <img :src="layer.icon"/>
+                      <!-- <img :src="layer.icon"/> -->
+                      <i class="fa-thin fa-child"></i>
                   </div>
                   <div v-text="_(layer.common_name)" class="toc-item-name"></div>
                 </div>
@@ -72,11 +73,11 @@
           <div class="toc-category lf-mg">
             <div class="toc-title" v-html="_('Breeding')"></div>
           </div>
-          <div class="category-boxes n-lf-pad">
+          <div class="category-boxes breeding n-lf-pad">
               <div class="item-container" v-for="layer, code in breeding" :key="code">
                   <div class="content">
                     <div class="li-item" @click="filterData" data-type="breeding" :data-code="code">
-                        <img :src="layer.icon" />
+                        <i class="fa-solid" :class="layer.icon"></i>
                     </div>
                     <div v-text="_(layer.common_name)" class="toc-item-name"></div>
                   </div>
@@ -301,7 +302,6 @@ export default {
 }
 
 .category-boxes div{
-  // flex-grow: 1;
   width: 60px;
   margin: 0 10px;
 }
@@ -310,15 +310,31 @@ export default {
   text-align:center;
 }
 
-.li-item img{
+.li-item img,
+.li-item i{
   display: block;
   margin:auto;
   filter: grayscale(100%);
 }
 
+.bites .li-item i{
+  background-color: #cc6677;
+  color: #e2b3aa;
+  padding:10px;
+  border-radius:50%;
+}
+
+.breeding .li-item i{
+  background-color: #a8b9c1;
+  color: #1072ad;
+  padding:10px;
+}
+
 .li-item:hover{
   background-color: #ccc;
 }
+
+.li-item:hover i,
 .li-item:hover img{
   filter: grayscale(0);
 }
@@ -326,12 +342,6 @@ export default {
 .item-container{
   margin-right: 5px;
   display: flex;
-}
-
-.item-separator{
-  width:1px;
-  height:30px;
-  background:red;
 }
 
 .item-container.item-separator,
