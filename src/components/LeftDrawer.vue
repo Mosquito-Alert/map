@@ -3,8 +3,8 @@
       show-if-above
       side="left"
       behavior="desktop"
-      :width="350"
-      no-swipe-close>
+      no-swipe-close
+      width="">
     <!-- Main menu -->
     <q-toolbar>
       <fa-thin-button name="fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
@@ -38,59 +38,73 @@
         <div class="toc-title" v-html="_('Mosquits')"></div>
       </div>
 
-      <ul>
-          <li v-for="layer, code in observations" :key="code" :class="initialClass(layer, code)">
-            <div class="item-container">
-              <div class="li-item" @click="filterData" data-type="observations" :data-code="code">
-                <a href="#">
-                  <img :src="layer.icon"/>
-                </a>
-              </div>
+      <div class="category-boxes">
+        <div class="item-container" v-for="layer, code in observations" :key="code">
+          <div class="content">
+            <div class="li-item" @click="filterData" data-type="observations" :data-code="code" :class="initialClass(layer, code)">
+              <img :src="layer.icon"/>
+            </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
-          </li>
-      </ul>
-
-      <!-- BITES -->
-      <div class="toc-category">
-        <div class="toc-title" v-html="_('Bites')"></div>
+        </div>
       </div>
-      <ul>
-          <li v-for="layer, code in bites" :key="code">
-            <div class="item-container">
-              <div class="li-item">
-                <a href="#" @click="filterData" data-type="bites" :data-code="code">
-                  <img :src="layer.icon"/>
-                </a>
-              </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            </div>
-          </li>
-      </ul>
 
-      <!-- BREEDING SITES -->
-      <div class="toc-category">
-        <div class="toc-title" v-html="_('Breeding')"></div>
-      </div>
-      <ul>
-          <li v-for="layer, code in breeding" :key="code">
-            <div class="item-container">
-              <div class="li-item">
-                <a href="#" @click="filterData" data-type="breeding" :data-code="code">
-                  <img :src="layer.icon"/>
-                </a>
+      <!-- BITES AND BREEDING SITES-->
+      <div class="breeding-sites-container">
+        <div>
+          <!-- BITES -->
+          <div class="toc-category">
+            <div class="toc-title" v-html="_('Bites')"></div>
+          </div>
+          <div class="category-boxes">
+              <div class="item-container" v-for="layer, code in bites" :key="code">
+                <div class="content">
+                  <div class="li-item" @click="filterData" data-type="bites" :data-code="code">
+                      <img :src="layer.icon"/>
+                  </div>
+                  <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+                </div>
               </div>
+          </div>
+        </div>
+        <div>
+          <!-- BREEDING SITES -->
+          <div class="toc-category lf-mg">
+            <div class="toc-title" v-html="_('Breeding')"></div>
+          </div>
+          <div class="category-boxes n-lf-pad">
+              <div class="item-container" v-for="layer, code in breeding" :key="code">
+                  <div class="content">
+                    <div class="li-item" @click="filterData" data-type="breeding" :data-code="code">
+                        <img :src="layer.icon" />
+                    </div>
+                    <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTHER OBSERVATIONS -->
+      <div class="toc-category">
+        <div class="toc-title" v-html="_('Other_species')"></div>
+      </div>
+
+      <div class="category-boxes">
+        <div class="item-container" v-for="layer, code in otherObservations" :key="code">
+          <div class="content">
+            <div class="li-item" @click="filterData" data-type="otherObservations" :data-code="code">
+              <img :src="layer.icon"/>
+            </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
-          </li>
-      </ul>
+        </div>
+      </div>
 
       <!-- SAMPLIING EFFORT -->
-      <div class="toc-category">
-        <div class="toc-title" v-html="_('Sampling Effort')"></div>
+      <div class="category-boxes last">
+        <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
       </div>
-      <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
-
     </div>
   </q-drawer>
 </template>
@@ -127,13 +141,16 @@ export default {
         classes.add('active')
       }
     }
-    const initialClass = function (_, code) {
+    const initialClass = function (layer, code) {
       const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
       const isInitial = initialLayers.find(layer => {
         return layer.code === code
       })
-      console.log('initial class')
-      if (isInitial) return 'active'
+
+      let cls = ''
+      if (isInitial) cls += 'active'
+      cls += (('separator' in layer) ? ' separator' : '')
+      return cls
     }
     const observations = computed(() => {
       return $store.getters['app/layers'].observations
@@ -141,6 +158,10 @@ export default {
 
     const breeding = computed(() => {
       return $store.getters['app/layers'].breeding
+    })
+
+    const otherObservations = computed(() => {
+      return $store.getters['app/layers'].other_observations
     })
 
     const bites = computed(() => {
@@ -151,6 +172,7 @@ export default {
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
       if (!object.classList.contains('menuItem')) object = object.parentNode
@@ -188,6 +210,7 @@ export default {
       showInfo,
       breeding,
       bites,
+      otherObservations,
       _
     }
   }
@@ -200,6 +223,10 @@ button.fa-thin-button, button.fa-thin-button-menu {
 }
 button.fa-thin-button.active, button.fa-thin-button-menu.active {
   color: $primary-color;
+}
+.q-header,
+.q-drawer{
+  width: $left-drawer-width;
 }
 .menuItem {
   border: 1px solid $grey-color;
@@ -255,7 +282,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 
 .toc-category,
 .toc-card.filters{
-  padding: 10px 10px 0px 20px;
+  padding: 10px 10px 0px 25px;
   margin-bottom: 10px;
 }
 
@@ -279,19 +306,15 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   margin-left: 3px;
 }
 
-.toc-layers ul{
-  list-style-type: none;
+.category-boxes{
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
-  padding:0 0 0 20px;
-  margin: 0px;
 }
 
-.toc-layers ul li{
+.category-boxes div{
   // flex-grow: 1;
-  width: 50px;
-  margin: 0px;
+  width: 60px;
+  margin: 0 10px;
 }
 
 .toc-layers ul li div{
@@ -312,14 +335,25 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 
 .item-container{
-  height:70px;
   margin-right: 5px;
+  display: flex;
+}
+
+.item-separator{
+  width:1px;
+  height:30px;
+  background:red;
+}
+
+.item-container.item-separator,
+.item-container .content{
+  display:inline;
 }
 
 .li-item{
   text-align: center;
   text-transform: capitalize;
-  // height: 100%;
+  height: 60px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
   padding:5px;
@@ -329,21 +363,46 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   text-align: center;
 }
 
-.li-item a{
-  margin:auto;
-}
-
-.li-item.active a,
-.li-item.active a img{
+.li-item.active img{
   filter: grayscale(0);
 }
 
 .toc-item-name{
   // white-space: nowrap;
   font-size:0.6em;
+  text-align: center;
+  line-height: 1;
+  padding: 10px 0 20px 0;
 }
 
 .toc-card-title{
   margin-bottom: 10px;
+}
+
+.breeding-sites-container{
+  display:flex;
+  flex-direction:row;
+}
+
+.n-lf-pad,
+.category-boxes.n-lf-pad{
+  padding-left:0px;
+}
+
+.li-item.separator::after{
+  border-right:3px solid #c0c0c0;
+  position:fixed;
+  content:'';
+  height: 45px;
+  left: 154px;
+}
+
+.vertical-separator{
+  position: absolute;
+  bottom: 20px;
+}
+
+.category-boxes.last{
+  border-top: 1px solid #b0b0b0;
 }
 </style>

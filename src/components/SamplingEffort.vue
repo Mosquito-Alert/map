@@ -1,15 +1,18 @@
 <template>
-  <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
-    <i :class="icon_code"></i>
-    <div class="colors">
-        <ul class="sampling-effort-categories">
-            <li v-for="value, key in samplingEffort.legend" :key="key">
-                <div class="category-label" >{{ key }}</div>
-                <div class="category-color" :style="{ backgroundColor: value }"></div>
-            </li>
-        </ul>
+    <div class="toc-category">
+      <div class="toc-title" v-html="_('Sampling Effort')"></div>
     </div>
-  </div>
+    <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
+      <i :class="icon_code"></i>
+      <div class="colors">
+          <ul class="sampling-effort-categories">
+              <li v-for="value, key in samplingEffort.legend" :key="key">
+                  <div class="category-label" >{{ key }}</div>
+                  <div class="category-color" :style="{ backgroundColor: value }"></div>
+              </li>
+          </ul>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -35,10 +38,15 @@ export default {
       isActive.value = !isActive.value
     }
 
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
     return {
       samplingEffort,
       toggleClass,
-      isActive
+      isActive,
+      _
     }
   }
 }
@@ -50,10 +58,12 @@ export default {
         padding:10px 15px;
         border-radius:5px;
         box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
-        /* display:block; */
+        max-width: 250px;
         display: flex;
+        flex-grow: 1;
         align-items: center;
     }
+
     .sampling-effort-box i{
       background-color: #e3d9a4;
     }
@@ -103,4 +113,15 @@ export default {
         left: -1px;
         color: #646262;
     }
+
+    .toc-category{
+      padding: 10px 10px 0px 25px;
+      margin-bottom: 10px;
+    }
+
+    .toc-title{
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
 </style>
