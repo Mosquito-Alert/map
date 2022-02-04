@@ -22,12 +22,6 @@ export default function () {
           common_name: 'Mosquito yellow',
           scientific_name: 'Aedes aegypti'
         },
-        culex: {
-          categories: ['culex_probable', 'culex_confirmed'],
-          icon: 'icons/marker_culex.svg',
-          common_name: 'Mosquito culex',
-          scientific_name: 'Culex pipens'
-        },
         japonicus: {
           categories: ['japonicus_probable', 'japonicus_confirmed'],
           icon: 'icons/marker_japonicus.svg',
@@ -40,26 +34,35 @@ export default function () {
           common_name: 'Mosquito koreicus',
           scientific_name: 'Aedes koreicus'
         },
-        other: {
-          categories: ['other_species'],
-          icon: 'icons/marker_other.svg',
-          common_name: 'Mosquito others'
+        culex: {
+          categories: ['culex_probable', 'culex_confirmed'],
+          icon: 'icons/marker_culex.svg',
+          common_name: 'Mosquito culex',
+          scientific_name: 'Culex pipens',
+          separator: true
         },
         unidentified: {
           categories: ['unidentified'],
           icon: 'icons/marker_unidentified.svg',
           common_name: 'Mosquito unidentified'
-        },
-        pending: {
-          categories: ['not_yet_validated'],
-          icon: 'icons/marker_pending.svg',
-          common_name: 'Mosquito pending'
-        },
-        trash: {
-          categories: ['trash_layer'],
-          icon: 'icons/marker_trash.svg',
-          common_name: 'mosquito trash'
         }
+      },
+      other_observations: {
+        other: {
+          categories: ['other_species'],
+          icon: 'icons/marker_other.svg',
+          common_name: 'Mosquito others'
+        }
+        // pending: {
+        //   categories: ['not_yet_validated'],
+        //   icon: 'icons/marker_pending.svg',
+        //   common_name: 'Mosquito pending'
+        // },
+        // trash: {
+        //   categories: ['trash_layer'],
+        //   icon: 'icons/marker_trash.svg',
+        //   common_name: 'mosquito trash'
+        // }
       },
       bites: { // Breeding sites
         pending: {
@@ -69,7 +72,12 @@ export default function () {
         }
       },
       breeding: { // Breeding sites
-        pending: {
+        with_water: {
+          categories: ['breeding_site_not_yet_filtered'],
+          icon: 'icons/marker_tiger.svg',
+          common_name: 'Pending'
+        },
+        without_water: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'icons/marker_tiger.svg',
           common_name: 'Pending'

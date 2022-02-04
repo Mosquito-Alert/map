@@ -11,7 +11,7 @@
 <style scoped lang="scss">
 header {
   right: auto;
-  width: 350px;
+  width: $left-drawer-width;
 }
 .q-toolbar {
   padding: 0;

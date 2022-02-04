@@ -48,14 +48,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
   .q-page {
     flex-direction: column;
     height: 100%;
     height: calc(100vh - 50px);
-    margin-left: 350px;
+    margin-left: $left-drawer-width;
   }
   :deep(.q-drawer), :deep(.q-header) {
-    width: 350px;
+    width: $left-drawer-width;
   }
 </style>
