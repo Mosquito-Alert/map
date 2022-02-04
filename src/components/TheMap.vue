@@ -33,7 +33,7 @@
 
               <ol-style-text>
                   <ol-style-fill color="#fff"></ol-style-fill>
-                  <ol-style-stroke color="#fff" :width="0"></ol-style-stroke>
+                  <ol-style-stroke color="#b6ccb7" :width="0"></ol-style-stroke>
               </ol-style-text>
             </ol-style>
           </ol-source-vector>
