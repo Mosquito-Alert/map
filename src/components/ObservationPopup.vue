@@ -18,12 +18,13 @@
             <p class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.description }}</p>
           </div>
           <div>
-            <div class="validation ok">
-              <i class="fa-thin fa-thumbs-up">
-                <i class="fa-thin fa-check" v-if="selectedFeature.validation==='Confirmed'"></i>
-              </i>
+            <div :class="getValidationClass(selectedFeature)">
+              <i :class="getValidationIcon(selectedFeature)"></i>
             </div>
-            <div class="validation-string">{{ _(selectedFeature.validation) }}</div>
+            <div class="validation-string">
+              <div>{{ getValidationTypeTitle(selectedFeature) }}</div>
+              {{ _(selectedFeature.validation) }}
+            </div>
           </div>
         </div>
       </div>
@@ -46,9 +47,24 @@ export default defineComponent({
       if (feature.img) return 'overlay-content'
       else return 'overlay-content small'
     }
+    const getValidationIcon = function (feature) {
+      if (feature.validation_type === 'human') return 'fa-light fa-users'
+      else return 'fa-light fa-robot'
+    }
+    const getValidationClass = feature => {
+      if (feature.validation === 'Confirmed') return 'validation confirmed'
+      else return 'validation probable'
+    }
+    const getValidationTypeTitle = function (feature) {
+      if (feature.validation_type === 'human') return _('Expert validation')
+      else return _('AI validation')
+    }
     return {
       _,
-      getPopupClass
+      getPopupClass,
+      getValidationClass,
+      getValidationIcon,
+      getValidationTypeTitle
     }
   }
 })
@@ -63,6 +79,7 @@ export default defineComponent({
   flex-direction: column;
   border-radius: $popup-border-radius;
   cursor: default;
+  font-size: .8em;
   &:after {
     content: " ";
     border: $popup-vertical-offset solid transparent;
@@ -119,15 +136,23 @@ export default defineComponent({
       align-items: center;
       .validation-string {
         padding-top: 10px;
-        font-weight: bold;
         text-transform: uppercase;
+        text-align: center;
+        &>div {
+          font-weight: bold;
+        }
       }
       .validation {
         height: 80px;
         width: 80px;
-        background: #22a973;
         border-radius: 50%;
         color: white;
+        &.confirmed {
+          background: #22a973;
+        }
+        &.probable {
+          background: #8fd3b8;
+        }
         i {
           height: 80px;
           width: 80px;

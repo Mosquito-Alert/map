@@ -33,7 +33,7 @@
 
               <ol-style-text>
                   <ol-style-fill color="#fff"></ol-style-fill>
-                  <ol-style-stroke color="rgb(0, 0, 0, 0.7)"></ol-style-stroke>
+                  <ol-style-stroke color="#fff" :width="0"></ol-style-stroke>
               </ol-style-text>
             </ol-style>
           </ol-source-vector>
@@ -196,7 +196,7 @@ export default defineComponent({
 
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
-        style.getImage().getFill().setColor('rgba(187, 208, 189, 0.7)')
+        style.getImage().getFill().setColor('rgba(182, 204, 183, 0.7)')
         style.getText().setText(size.toLocaleString())
         stroke.setWidth(15)
         // stroke.setOpacity(.1);
