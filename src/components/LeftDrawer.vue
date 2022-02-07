@@ -46,13 +46,14 @@
               <img v-else :src="layer.icon_disabled"/>
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+              <div class="toc-item-latin-name">Mosquito fiebre amarilla</div>
             </div>
         </div>
       </div>
 
       <!-- BITES AND BREEDING SITES-->
       <div class="breeding-sites-container">
-        <div>
+        <div class="bites-column">
           <!-- BITES -->
           <div class="toc-category">
             <div class="toc-title" v-html="_('Bites')"></div>
@@ -69,7 +70,7 @@
               </div>
           </div>
         </div>
-        <div>
+        <div class="breeding-column">
           <!-- BREEDING SITES -->
           <div class="toc-category lf-mg">
             <div class="toc-title" v-html="_('Breeding')"></div>
@@ -303,13 +304,20 @@ export default {
   flex-wrap: wrap;
 }
 
-.category-boxes div{
-  width: 60px;
-  margin: 0 10px;
+.bites-column{
+  width: 26%
+}
+
+.breeding-column{
+  width: 75%
 }
 
 .toc-layers ul li div{
   text-align:center;
+}
+
+.li-item{
+  width:60px;
 }
 
 .li-item img,
@@ -332,9 +340,16 @@ export default {
   border-radius:50%;
 }
 
-.breeding .li-item:hover i,
-.breeding .li-item.active i{
-  background-color:  #a8b9c1;
+.bites .item-container{
+  width:100%;
+}
+
+.breeding .item-container{
+  width:33%;
+}
+
+.breeding .li-item i{
+  background-color: #a8b9c1;
   color: #1072ad;
 }
 
@@ -354,13 +369,20 @@ export default {
 }
 
 .item-container{
-  margin-right: 5px;
+  // margin-right: 5px;
   display: flex;
+  width:25%;
 }
 
-.item-container.item-separator,
-.item-container .content{
+.item-container.item-separator{
   display:inline;
+}
+
+.item-container .content{
+  display:flex;
+  flex-direction:column;
+  align-items: center;
+  width:100%;
 }
 
 .li-item{
@@ -381,12 +403,21 @@ export default {
   filter: grayscale(0);
 }
 
-.toc-item-name{
-  // white-space: nowrap;
+.toc-item-name,
+.toc-item-latin-name{
   font-size:0.6em;
   text-align: center;
   line-height: 1;
-  padding: 10px 0 20px 0;
+}
+
+.toc-item-name{
+  margin-top:5px;
+  padding: 2px;
+}
+
+.toc-item-latin-name{
+  margin-bottom:20px;
+  font-style: italic;
 }
 
 .toc-card-title{
