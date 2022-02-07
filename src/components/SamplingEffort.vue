@@ -30,7 +30,6 @@ export default {
     const $store = useStore()
     const isActive = ref(false)
     const samplingEffort = computed(() => {
-      console.log($store.getters['app/layers'].sampling_effort)
       return $store.getters['app/layers'].sampling_effort
     })
 
@@ -64,8 +63,10 @@ export default {
         align-items: center;
     }
 
-    .sampling-effort-box i{
-      background-color: #e3d9a4;
+    .sampling-effort-box:hover i,
+    .sampling-effort-box.active i{
+      background-color: #e3d6a2;
+      color: #6a6b59;
     }
 
     .sampling-effort-box i{
@@ -75,7 +76,7 @@ export default {
         font-size:1.5em;
         background-color: #e6e6e6;
     }
-
+    .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;
     }
@@ -103,6 +104,7 @@ export default {
         height:10px;
     }
 
+    .sampling-effort-box:hover div.category-label,
     .sampling-effort-box.active div.category-label{
       color: rgb(58, 51, 51);
     }
