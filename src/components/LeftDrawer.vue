@@ -39,14 +39,19 @@
       </div>
 
       <div class="category-boxes">
-        <div class="item-container" v-for="layer, code in observations" :key="code">
+        <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
-            <div class="li-item" @click="filterData" data-type="observations" :data-code="code" :class="initialClass(layer, code)">
-              <img v-if="initialClass(layer, code) == 'active'" :src="layer.icon"/>
-              <img v-else :src="layer.icon_disabled"/>
+            <div class="li-item"
+                  @click="filterData(layer, $event)"
+                  data-type="observations"
+                  :data-code="code"
+                  :class="initialClass(layer, code)">
+
+              <!-- <img v-if="initialClass(layer, code).includes('active')" :src="layer.icon" />
+              <img v-else :src="layer.icon_disabled"/> -->
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-              <div class="toc-item-latin-name">Mosquito fiebre amarilla</div>
+              <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
             </div>
         </div>
       </div>
@@ -61,8 +66,7 @@
           <div class="category-boxes bites">
               <div class="item-container" v-for="layer, code in bites" :key="code">
                 <div class="content">
-                  <div class="li-item" @click="filterData" data-type="bites" :data-code="code">
-                      <!-- <img :src="layer.icon"/> -->
+                  <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
                       <i class="fa-thin fa-child"></i>
                   </div>
                   <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -78,7 +82,7 @@
           <div class="category-boxes breeding n-lf-pad">
               <div class="item-container" v-for="layer, code in breeding" :key="code">
                   <div class="content">
-                    <div class="li-item" @click="filterData" data-type="breeding" :data-code="code">
+                    <div class="li-item" @click="filterData(layer, $event)" data-type="breeding" :data-code="code">
                         <i class="fa-solid" :class="layer.icon"></i>
                     </div>
                     <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -96,9 +100,11 @@
       <div class="category-boxes">
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
-            <div class="li-item" @click="filterData" data-type="otherObservations" :data-code="code">
-              <img v-if="initialClass(layer, code) == 'active'" :src="layer.icon"/>
-              <img v-else :src="layer.icon_disabled"/>
+            <div class="li-item"
+              @click="filterData(layer, $event)"
+              data-type="otherObservations"
+              :data-code="code"
+              :class="initialClass(layer, code)">
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -128,7 +134,8 @@ export default {
     const es = ref(null)
     const en = ref(null)
     const $store = useStore()
-    const filterData = function (event) {
+
+    const filterData = function (layer, event) {
       let obj = event.target
       if (!event.target.dataset.type) {
         obj = obj.closest('.li-item')
@@ -141,21 +148,35 @@ export default {
       const classes = obj.classList
       if (classes.contains('active')) {
         classes.remove('active')
+        obj.querySelector('img').src = layer.icon_disabled
       } else {
         classes.add('active')
+        obj.querySelector('img').src = layer.icon
       }
     }
+
+    const mouseEnter = function (layer, event) {
+      const obj = event.target
+      obj.querySelector('img').src = layer.icon
+    }
+
+    const mouseOut = function (layer, event) {
+      const obj = event.target
+      obj.querySelector('img').src = layer.icon_disabled
+    }
+
     const initialClass = function (layer, code) {
       const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
       const isInitial = initialLayers.find(layer => {
         return layer.code === code
       })
 
-      let cls = ''
-      if (isInitial) cls += 'active'
+      let cls = code
+      if (isInitial) cls += ' active'
       cls += (('separator' in layer) ? ' separator' : '')
       return cls
     }
+
     const observations = computed(() => {
       return $store.getters['app/layers'].observations
     })
@@ -211,6 +232,8 @@ export default {
       breeding,
       bites,
       otherObservations,
+      mouseEnter,
+      mouseOut,
       _
     }
   }
@@ -320,11 +343,9 @@ export default {
   width:60px;
 }
 
-.li-item img,
 .li-item i{
   display: block;
   margin:auto;
-  filter: grayscale(100%);
 }
 
 .bites .li-item:hover i,
@@ -335,7 +356,7 @@ export default {
 
 .bites .li-item i{
   background-color: #e6e6e6;
-  color: #e2b3aa;
+  color: white;
   padding:10px;
   border-radius:50%;
 }
@@ -348,24 +369,16 @@ export default {
   width:33%;
 }
 
-.breeding .li-item i{
-  background-color: #a8b9c1;
+.breeding .li-item:hover i,
+.breeding .li-item.active i{
+  background-color:  #a8b9c1;
   color: #1072ad;
 }
 
 .breeding .li-item i{
   background-color: #e6e6e6;
-  color: #e2b3aa;
+  color: white;
   padding:10px;
-}
-
-.li-item:hover{
-  background-color: #ccc;
-}
-
-.li-item:hover i,
-.li-item:hover img{
-  filter: grayscale(0);
 }
 
 .item-container{
@@ -439,7 +452,7 @@ export default {
   position:absolute;
   content:'';
   height: 45px;
-  right: -13px;
+  left: 75px;
 }
 
 .vertical-separator{
@@ -449,5 +462,53 @@ export default {
 
 .category-boxes.last{
   border-top: 1px solid #b0b0b0;
+}
+
+// LAYER ICONS
+.li-item.tiger,
+.li-item.yellow,
+.li-item.koreicus,
+.li-item.japonicus,
+.li-item.culex,
+.li-item.other{
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-image: url($icon-mosquito-disabled);
+}
+.li-item.unidentified{
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-image: url($icon-unidentified-disabled);
+}
+
+.li-item.tiger.active,
+.li-item.tiger:hover{
+  background-image: url($icon-tiger);
+}
+.li-item.yellow.active,
+.li-item.yellow:hover{
+  background-image: url($icon-yellow);
+}
+.li-item.koreicus.active,
+.li-item.koreicus:hover{
+  background-image: url($icon-koreicus);
+}
+.li-item.japonicus.active,
+.li-item.japonicus:hover{
+  background-image: url($icon-japonicus);
+}
+.li-item.culex.active,
+.li-item.culex:hover{
+  background-image: url($icon-culex);
+}
+.li-item.unidentified.active,
+.li-item.unidentified:hover{
+  background-image: url($icon-unidentified);
+}
+.li-item.other.active,
+.li-item.other:hover{
+  background-image: url($icon-other);
 }
 </style>
