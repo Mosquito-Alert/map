@@ -166,7 +166,7 @@ export default defineComponent({
             const coords = [...feature.values_.geometry.flatCoordinates]
             setTimeout(() => {
               const overlay = document.querySelector('.overlay-content')
-              coords[1] += overlay.clientHeight / 2 * resolution
+              if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
               flyTo(coords, ol.getView().getZoom())
             }, 100)
             $store.dispatch('map/selectFeature', feature.values_)
