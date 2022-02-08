@@ -30,8 +30,8 @@ f<template>
     <div class="toc-layers">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('select')"></div>
-          <input type="text" name="localitat"/> <button>></button>
-          <input type="text" name="hastag"/> <button>></button>
+          <input type="text" name="localitat" :placeholder="_('placeholder location')"/> <button>></button>
+          <input type="text" name="hastag" :placeholder="_('placeholder hashtag')"/> <button>></button>
       </div>
 
       <div class="toc-category">
@@ -312,6 +312,15 @@ export default {
   text-transform: uppercase;
   font-weight: 700;
   color: #666666;
+}
+
+input{
+  width:80%;
+}
+
+.toc-layers input::placeholder {
+  color: #666666;
+  font-size: 0.9em;
 }
 
 .toc-layers .filters input{
