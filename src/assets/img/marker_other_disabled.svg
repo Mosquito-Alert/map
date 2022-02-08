@@ -8,7 +8,7 @@
    viewBox="0 0 39.999998 50.000001"
    xml:space="preserve"
    id="svg15"
-   sodipodi:docname="marker_other.svg"
+   sodipodi:docname="marker_other_disabled.svg"
    width="40"
    height="50"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
@@ -135,11 +135,11 @@
 <g
    id="TOC_CONTENT"
    transform="scale(0.66221482,0.61696)"
-   style="fill:#c0c0c0;fill-opacity:1">
+   style="fill:#e6e6e6;fill-opacity:1">
 	<path
    d="M 0,30.2 C 0,13.5 13.5,0 30.2,0 46.9,0 60.4,13.5 60.4,30.2 60.4,42.4 56.2,45.8 33.3,79 31.8,81.2 28.6,81.2 27.1,79 4.2,45.8 0,42.4 0,30.2 Z"
    id="path9"
-   style="fill:#c0c0c0;fill-opacity:1" />
+   style="fill:#e6e6e6;fill-opacity:1" />
 </g>
 <g
    id="MOBIL">

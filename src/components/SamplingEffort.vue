@@ -63,6 +63,7 @@ export default {
         align-items: center;
     }
 
+    .sampling-effort-box:hover i,
     .sampling-effort-box.active i{
       background-color: #e3d6a2;
       color: #6a6b59;
@@ -75,7 +76,7 @@ export default {
         font-size:1.5em;
         background-color: #e6e6e6;
     }
-
+    .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;
     }
@@ -103,6 +104,7 @@ export default {
         height:10px;
     }
 
+    .sampling-effort-box:hover div.category-label,
     .sampling-effort-box.active div.category-label{
       color: rgb(58, 51, 51);
     }

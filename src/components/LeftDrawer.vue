@@ -246,6 +246,7 @@ export default {
   width: $left-drawer-width;
 }
 .menuItem {
+  z-index: 100;
   border: 1px solid $grey-color;
   border-left: none;
   display: flex;
@@ -469,13 +470,20 @@ export default {
 .li-item.yellow,
 .li-item.koreicus,
 .li-item.japonicus,
-.li-item.culex,
-.li-item.other{
+.li-item.culex{
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center;
   background-image: url($icon-mosquito-disabled);
 }
+
+.li-item.other{
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-image: url($icon-other-disabled);
+}
+
 .li-item.unidentified{
   background-repeat: no-repeat;
   background-attachment: fixed;
