@@ -1,6 +1,6 @@
 <template>
     <div class="toc-category">
-      <div class="toc-title" v-html="_('Sampling Effort')"></div>
+      <div class="toc-title" v-html="_('sampling effort')"></div>
     </div>
     <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
       <i :class="icon_code"></i>
