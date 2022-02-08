@@ -22,7 +22,7 @@
         </div>
       </fa-thin-button-menu>
       <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
-      <fa-thin-button name="fa-circle-info" :label="_('Help')"></fa-thin-button>
+      <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
       <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
     <!-- Drawer content -->
@@ -98,6 +98,9 @@ export default {
       else if (lang === 'en') object = en.value
       setLanguage(lang, object)
     }
+    const showInfo = function () {
+      $store.commit('app/setModal', { id: 'info', visible: true })
+    }
     return {
       ca,
       es,
@@ -106,6 +109,7 @@ export default {
       initialClass,
       filterData,
       observations,
+      showInfo,
       _
     }
   }

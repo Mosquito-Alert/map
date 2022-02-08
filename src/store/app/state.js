@@ -4,11 +4,15 @@ export default function () {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
         // {type: 'observations', code: 'other'}
-      ]
+      ],
+      INFO_OPEN: true
     },
     BACKEND: 'http://localhost:8000/',
     lang: 'ca',
     trans: {},
+    modals: {
+      info: false
+    },
     layers: {
       observations: { // Mosquito observations
         tiger: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
