@@ -5,3 +5,7 @@ export const setTranslations = (state, payload) => {
 export const setLanguage = (state, lang) => {
   state.lang = lang
 }
+
+export const setModal = (state, payload) => {
+  state.modals[payload.id] = payload.visible
+}

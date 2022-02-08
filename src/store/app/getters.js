@@ -6,6 +6,10 @@ export const initialLayers = state => {
   return state.DEFAULTS.LAYERS
 }
 
+export const getDefaults = state => {
+  return state.DEFAULTS
+}
+
 export const getBackend = state => {
   return state.BACKEND
 }
@@ -17,4 +21,8 @@ export const getText = state => function (text) {
 
 export const getLang = state => {
   return state.lang
+}
+
+export const getModals = state => {
+  return state.modals
 }
