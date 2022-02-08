@@ -47,5 +47,9 @@ button.fa-thin-button {
   &.active {
     border-left: 6px solid $primary-button-background;
   }
+  &.active i,
+  &.active span{
+    color: #efa501;
+  }
 }
 </style>

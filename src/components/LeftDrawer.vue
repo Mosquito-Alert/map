@@ -1,4 +1,4 @@
-<template>
+f<template>
   <q-drawer
       show-if-above
       side="left"
@@ -30,8 +30,8 @@
     <div class="toc-layers">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('select')"></div>
-          <input type="text" name="localitat"/> <button>></button>
-          <input type="text" name="hastag"/> <button>></button>
+          <input type="text" name="localitat" :placeholder="_('placeholder location')"/> <button>></button>
+          <input type="text" name="hastag" :placeholder="_('placeholder hashtag')"/> <button>></button>
       </div>
 
       <div class="toc-category">
@@ -53,6 +53,7 @@
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
               <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
             </div>
+            <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
       </div>
 
@@ -71,7 +72,9 @@
                   </div>
                   <div v-text="_(layer.common_name)" class="toc-item-name"></div>
                 </div>
+
               </div>
+
           </div>
         </div>
         <div class="breeding-column">
@@ -89,6 +92,7 @@
                   </div>
               </div>
           </div>
+          <div class="separator"></div>
         </div>
       </div>
 
@@ -109,6 +113,7 @@
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
         </div>
+        <div class="separator"></div>
       </div>
 
       <!-- SAMPLIING EFFORT -->
@@ -173,7 +178,6 @@ export default {
 
       let cls = code
       if (isInitial) cls += ' active'
-      cls += (('separator' in layer) ? ' separator' : '')
       return cls
     }
 
@@ -321,6 +325,15 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   color: #666666;
 }
 
+input{
+  width:80%;
+}
+
+.toc-layers input::placeholder {
+  color: #666666;
+  font-size: 0.9em;
+}
+
 .toc-layers .filters input{
   padding: 3px 10px;
   border-radius:10px;
@@ -459,6 +472,9 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   margin-bottom: 10px;
 }
 
+.breeding {
+  height: 90px;
+}
 .breeding-sites-container{
   display:flex;
   flex-direction:row;
@@ -469,13 +485,13 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   padding-left:0px;
 }
 
-.li-item.separator::after{
-  border-right:3px solid #c0c0c0;
-  position:absolute;
-  content:'';
-  height: 45px;
-  left: 150px;
-}
+// .li-item.separator::after{
+//   border-right:3px solid #c0c0c0;
+//   position:absolute;
+//   content:'';
+//   height: 45px;
+//   left: 75px;
+// }
 
 .vertical-separator{
   position: absolute;
@@ -539,5 +555,10 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 .li-item.other.active,
 .li-item.other:hover{
   background-image: url($icon-other);
+}
+
+.separator.active{
+  border-right: 2px solid #c0c0c0;
+  margin:5px 0 50px 0;
 }
 </style>

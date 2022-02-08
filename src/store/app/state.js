@@ -55,7 +55,8 @@ export default function () {
         pending: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'icons/marker_tiger.svg',
-          common_name: 'bites'
+          common_name: 'bites',
+          separator: true
         }
       },
       breeding: { // Breeding sites

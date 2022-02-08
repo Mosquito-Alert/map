@@ -1,6 +1,7 @@
 <template>
     <div class="toc-category">
       <div class="toc-title" v-html="_('sampling effort')"></div>
+      <i class="fa-thin fa-circle-info"></i>
     </div>
     <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
       <i :class="icon_code"></i>
@@ -51,7 +52,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
     .sampling-effort-box{
         margin: 0 20px 0 20px;
         padding:10px 15px;
@@ -67,6 +68,7 @@ export default {
     .sampling-effort-box.active i{
       background-color: #e3d6a2;
       color: #6a6b59;
+      opacity: 1;
     }
 
     .sampling-effort-box i{
@@ -75,16 +77,19 @@ export default {
         border-radius:50%;
         font-size:1.5em;
         background-color: #e6e6e6;
+        opacity:0.5;
     }
     .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;
+      opacity:1;
     }
 
     div.colors{
         display: flex;
         align-items: center;
-        filter: grayscale(100%)
+        filter: grayscale(100%);
+        opacity:0.4;
     }
 
     .sampling-effort-categories{
@@ -119,7 +124,19 @@ export default {
     .toc-category{
       padding: 10px 10px 0px 25px;
       margin-bottom: 10px;
+      display: flex;
+      flex-flow: row;
+      align-items: center;
     }
+
+  .toc-category i{
+    margin-left:10px;
+    background-color: #a8b9c1;
+    color: #576c7e;
+    padding: 5px;
+    border-radius:50%;
+    cursor: pointer;
+  }
 
     .toc-title{
       text-transform: uppercase;
