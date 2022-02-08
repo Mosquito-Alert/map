@@ -16,52 +16,42 @@ export default function () {
       observations: { // Mosquito observations
         tiger: {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
-          common_name: 'Mosquito tiger',
+          common_name: 'tiger mosquito',
           scientific_name: 'Aedes albopictus'
         },
         yellow: {
           categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
-          common_name: 'Mosquito yellow',
+          common_name: 'yellow fever mosquito',
           scientific_name: 'Aedes aegypti'
         },
         japonicus: {
           categories: ['japonicus_probable', 'japonicus_confirmed'],
-          common_name: 'Mosquito japonicus',
+          common_name: 'japonicus mosquito',
           scientific_name: 'Aedes japonicus'
         },
         koreicus: {
           categories: ['koreicus_probable', 'koreicus_confirmed'],
-          common_name: 'Mosquito koreicus',
+          common_name: 'koreicus mosquito',
           scientific_name: 'Aedes koreicus'
         },
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
-          common_name: 'Mosquito culex',
+          common_name: 'culex mosquito',
           scientific_name: 'Culex pipens',
           separator: true
         },
         unidentified: {
           categories: ['unidentified'],
-          common_name: 'Mosquito unidentified'
+          common_name: 'unidentified mosquito'
         }
       },
       other_observations: {
         other: {
           categories: ['other_species'],
-          common_name: 'Mosquito others'
+          common_name: 'other species'
         }
-        // pending: {
-        //   categories: ['not_yet_validated'],
-        //   icon: 'icons/marker_pending.svg',
-        //   common_name: 'Mosquito pending'
-        // },
-        // trash: {
-        //   categories: ['trash_layer'],
-        //   icon: 'icons/marker_trash.svg',
-        //   common_name: 'mosquito trash'
-        // }
       },
-      bites: { // Breeding sites
+      bites: { // Bites
         pending: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'icons/marker_tiger.svg',
@@ -72,17 +62,17 @@ export default function () {
         with_water: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'fa-droplet',
-          common_name: 'Pending'
+          common_name: 'stormdrain with water'
         },
         without_water: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'fa-droplet-slash',
-          common_name: 'Pending'
+          common_name: 'stormdrain without water'
         },
         other: {
           categories: ['breeding_site_other'],
           icon: 'fa-dharmachakra',
-          common_name: 'Other'
+          common_name: 'breeding sites others'
         }
       },
       storm_drain: { // Storm drain

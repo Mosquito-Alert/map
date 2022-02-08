@@ -29,13 +29,13 @@
     <!-- Drawer content -->
     <div class="toc-layers">
       <div class="toc-card filters">
-        <div class="toc-title" v-html="_('Selecciona')"></div>
+        <div class="toc-title" v-html="_('select')"></div>
           <input type="text" name="localitat"/> <button>></button>
           <input type="text" name="hastag"/> <button>></button>
       </div>
 
       <div class="toc-category">
-        <div class="toc-title" v-html="_('Mosquits')"></div>
+        <div class="toc-title" v-html="_('mosquitos')"></div>
       </div>
 
       <div class="category-boxes">
@@ -61,7 +61,7 @@
         <div class="bites-column">
           <!-- BITES -->
           <div class="toc-category">
-            <div class="toc-title" v-html="_('Bites')"></div>
+            <div class="toc-title" v-html="_('bites')"></div>
           </div>
           <div class="category-boxes bites">
               <div class="item-container" v-for="layer, code in bites" :key="code">
@@ -77,7 +77,7 @@
         <div class="breeding-column">
           <!-- BREEDING SITES -->
           <div class="toc-category lf-mg">
-            <div class="toc-title" v-html="_('Breeding')"></div>
+            <div class="toc-title" v-html="_('breeding sites')"></div>
           </div>
           <div class="category-boxes breeding n-lf-pad">
               <div class="item-container" v-for="layer, code in breeding" :key="code">
@@ -94,10 +94,10 @@
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="_('Other_species')"></div>
+        <div class="toc-title" v-html="_('other species')"></div>
       </div>
 
-      <div class="category-boxes">
+      <div class="category-boxes other-species">
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
             <div class="li-item"
@@ -315,8 +315,10 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 
 .toc-title{
+  font-family: 'Roboto 15pt';
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 700;
+  color: #666666;
 }
 
 .toc-layers .filters input{
@@ -337,6 +339,10 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 .category-boxes{
   display: flex;
   flex-wrap: wrap;
+}
+
+.category-boxes.other-species{
+  margin-bottom:20px;
 }
 
 .bites-column{
@@ -433,6 +439,8 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   font-size:0.6em;
   text-align: center;
   line-height: 1;
+  font-family: 'Roboto';
+  color: #666666;
 }
 
 .toc-item-name{
@@ -443,6 +451,8 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 .toc-item-latin-name{
   margin-bottom:20px;
   font-style: italic;
+  font-family: 'Roboto';
+  color: #666666;
 }
 
 .toc-card-title{
