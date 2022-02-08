@@ -283,7 +283,7 @@ export default defineComponent({
     bottom: 4px;
     right: 10px;
     z-index: 9;
-    background: #8c929290;
+    background: #33333390;
     font-size: 10px;
     color: black;
     padding: 4px 20px;
