@@ -7,7 +7,7 @@
     </q-page-container> -->
     <q-page class='flex'>
       <the-map ref='map' />
-      <time-series @toggleTimeSeries='resizeMap'/>
+      <time-series @toggleTimeSeries='resizeMap' />
     </q-page>
 
     <base-modal :open="infoModalVisible" buttons="close">
@@ -39,7 +39,7 @@ import { useStore } from 'vuex'
 export default {
   components: { BaseModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
-    const map = ref('null')
+    const map = ref()
     const $store = useStore()
     const resizeMap = function (args) {
       if (args.start < args.end) {
@@ -56,17 +56,19 @@ export default {
       }
     })
     const filter = function (data) {
-      map.value.filter(data)
-      // timeseries.value.filter(data.type, data.code);
+      map.value.filter({
+        type: 'layer',
+        data: data
+      })
     }
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info
     })
     return {
+      filter,
       infoModalVisible,
       map,
-      resizeMap,
-      filter
+      resizeMap
     }
   }
 }
@@ -78,6 +80,7 @@ export default {
     height: 100%;
     height: calc(100vh - 50px);
     margin-left: $left-drawer-width;
+    overflow: hidden;
   }
   :deep(.q-drawer), :deep(.q-header) {
     width: $left-drawer-width;

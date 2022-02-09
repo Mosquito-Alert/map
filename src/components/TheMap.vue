@@ -34,12 +34,12 @@
         </ol-vector-layer>
 
         <ol-interaction-select @select="featureSelected"
-            :condition="selectCondition"
-            :filter="selectInteactionFilter">
-              <ol-style>
-                  <ol-style-icon :src="selectedIcon"></ol-style-icon>
-              </ol-style>
-          </ol-interaction-select>
+          :condition="selectCondition"
+          :filter="selectInteactionFilter">
+            <ol-style>
+                <ol-style-icon :src="selectedIcon"></ol-style-icon>
+            </ol-style>
+        </ol-interaction-select>
 
         <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
@@ -55,8 +55,6 @@ import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
-// import { Circle, Style, Text, Icon, Fill, Stroke } from 'ol/style'
-// import { asString } from 'ol/color'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -73,7 +71,6 @@ export default defineComponent({
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
-
       setTimeout(() => {
         const overlay = document.querySelector('.overlay-content')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
@@ -116,13 +113,11 @@ export default defineComponent({
       // otherwise
       if (event.selected.length) {
         selectedId.value = event.selected[0].values_.properties.id
-        console.log(event.selected[0].values_.properties.c)
         selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
         $store.dispatch('map/selectFeature', event.selected[0].values_)
       } else {
         // if not selected then call worker to refresh features
         selectedId.value = null
-        // $store.dispatch('map/selectFeature', {})
         $store.commit('map/selectFeature', {})
         const olmap = map.value.map
         const bounds = olmap.getView().calculateExtent(olmap.getSize())
@@ -136,7 +131,7 @@ export default defineComponent({
     }
 
     let ready = false
-    const worker = new Worker('TheMapWorker.js')
+    const worker = $store.getters['app/getWorker']
     const map = ref('null')
     const observationsSource = ref('null')
     const view = ref('null')
@@ -145,7 +140,6 @@ export default defineComponent({
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
-    // const projection = ref('EPSG:4326')
     // Map general configuration
     const zoom = computed(() => {
       return $store.getters['map/getDefault'].ZOOM
@@ -157,14 +151,22 @@ export default defineComponent({
     const features = ref([])
 
     worker.onmessage = function (event) {
-      // const source = observations_source.value.source
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
-          const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
-          initialLayers.forEach(layerFilter => {
-            filter(layerFilter)
+          const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          initial.LAYERS.forEach(layerFilter => {
+            filter({
+              type: 'layer',
+              data: layerFilter
+            })
           })
+          if ('DATES' in initial) {
+            filter({
+              type: 'date',
+              data: initial.DATES
+            })
+          }
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -173,15 +175,15 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        const data = event.data.map(f => {
+        const data = event.data.map.map(f => {
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
             properties: f.properties
           })
           return feat
         })
-
         features.value = data
+        $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
     function updateMap () {
@@ -197,7 +199,6 @@ export default defineComponent({
     }
     function flyTo (location, zoom, done) {
       const duration = 600
-      // const zoom = view.value.view.getZoom();
       let parts = 2
       let called = false
       function callback (complete) {
@@ -229,7 +230,6 @@ export default defineComponent({
 
     const overrideStyleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
-      // if ('point_count' in feature.values_.properties) {
         const size = feature.values_.properties.point_count
         let radius = 0
         if (size < 100) radius = 20
@@ -314,7 +314,7 @@ export default defineComponent({
 
     function filter (data) {
       $store.commit('map/selectFeature', {})
-      data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      data.data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(data)
     }
     return {

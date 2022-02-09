@@ -139,8 +139,8 @@ module.exports = configure(function (ctx) {
       },
 
       manifest: {
-        name: 'Quasar App',
-        short_name: 'Quasar App',
+        name: 'Mosquito Alert',
+        short_name: 'Moquito Alert',
         description: 'Public map for Mosquito Alert',
         display: 'standalone',
         orientation: 'portrait',

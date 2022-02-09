@@ -95,7 +95,7 @@ f<template>
           <div class="content">
             <div class="li-item"
               @click="filterData(layer, $event)"
-              data-type="otherObservations"
+              data-type="other_observations"
               :data-code="code"
               :class="initialClass(layer, code)">
             </div>
@@ -424,8 +424,8 @@ input{
 }
 
 .content.bites .li-item.active i{
-  background-color:  #cc6677;
-  color: #e2b3aa;
+  background-color:  $color-bites;
+  color: $text-color-bites;
 }
 
 .content.bites .li-item i{
@@ -456,8 +456,8 @@ input{
 }
 
 .content.breeding .li-item.active i {
-  background-color:  #a8b9c1;
-  color: #1072ad;
+  background-color:  $color-breeding;
+  color: $text-color-breeding;
 }
 
 .content.breeding .li-item i{
