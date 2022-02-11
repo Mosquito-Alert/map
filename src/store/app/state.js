@@ -13,32 +13,38 @@ export default function () {
         tiger: {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           common_name: 'tiger mosquito',
-          scientific_name: 'Aedes albopictus'
+          scientific_name: 'Aedes albopictus',
+          icon: 'icons/marker_tiger.svg'
         },
         yellow: {
           categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
           common_name: 'yellow fever mosquito',
-          scientific_name: 'Aedes aegypti'
+          scientific_name: 'Aedes aegypti',
+          icon: 'icons/marker_yellow.svg'
         },
         japonicus: {
           categories: ['japonicus_probable', 'japonicus_confirmed'],
           common_name: 'japonicus mosquito',
-          scientific_name: 'Aedes japonicus'
+          scientific_name: 'Aedes japonicus',
+          icon: 'icons/marker_japonicus.svg'
         },
         koreicus: {
           categories: ['koreicus_probable', 'koreicus_confirmed'],
           common_name: 'koreicus mosquito',
-          scientific_name: 'Aedes koreicus'
+          scientific_name: 'Aedes koreicus',
+          icon: 'icons/marker_koreicus.svg'
         },
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
           common_name: 'culex mosquito',
           scientific_name: 'Culex pipens',
+          icon: 'icons/marker_culex.svg',
           separator: true
         },
         unidentified: {
           categories: ['unidentified'],
-          common_name: 'unidentified mosquito'
+          common_name: 'unidentified mosquito',
+          icon: 'icons/marker_unidentified.svg'
         }
       },
       other_observations: {
@@ -69,7 +75,7 @@ export default function () {
         other: {
           categories: ['breeding_site_other'],
           icon: 'fa-dharmachakra',
-          common_name: 'breeding sites others'
+          common_name: 'breeding site others'
         }
       },
       storm_drain: { // Storm drain
