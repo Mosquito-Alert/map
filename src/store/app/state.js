@@ -18,43 +18,44 @@ export default function () {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           common_name: 'tiger mosquito',
           scientific_name: 'Aedes albopictus',
-          icon: 'icons/marker_tiger.svg'
+          icon: require('../../assets/img/marker_tiger.svg')
         },
         yellow: {
           categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
           common_name: 'yellow fever mosquito',
           scientific_name: 'Aedes aegypti',
-          icon: 'icons/marker_yellow.svg'
+          icon: require('../../assets/img/marker_yellow.svg')
         },
         japonicus: {
           categories: ['japonicus_probable', 'japonicus_confirmed'],
           common_name: 'japonicus mosquito',
           scientific_name: 'Aedes japonicus',
-          icon: 'icons/marker_japonicus.svg'
+          icon: require('../../assets/img/marker_japonicus.svg')
         },
         koreicus: {
           categories: ['koreicus_probable', 'koreicus_confirmed'],
           common_name: 'koreicus mosquito',
           scientific_name: 'Aedes koreicus',
-          icon: 'icons/marker_koreicus.svg'
+          icon: require('../../assets/img/marker_koreicus.svg')
         },
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
           common_name: 'culex mosquito',
           scientific_name: 'Culex pipens',
-          icon: 'icons/marker_culex.svg',
+          icon: require('../../assets/img/marker_culex.svg'),
           separator: true
         },
         unidentified: {
           categories: ['unidentified'],
           common_name: 'unidentified mosquito',
-          icon: 'icons/marker_unidentified.svg'
+          icon: require('../../assets/img/marker_unidentified.svg')
         }
       },
       other_observations: {
         other: {
           categories: ['other_species'],
-          common_name: 'other species'
+          common_name: 'other species',
+          icon: require('../../assets/img/marker_other.svg')
         }
       },
       bites: { // Bites
