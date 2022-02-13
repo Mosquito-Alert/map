@@ -153,10 +153,14 @@ export default {
       const classes = obj.classList
       if (classes.contains('active')) {
         classes.remove('active')
-        obj.querySelector('img').src = layer.icon_disabled
+        if (obj.querySelector('img')) {
+          obj.querySelector('img').src = layer.icon_disabled
+        }
       } else {
         classes.add('active')
-        obj.querySelector('img').src = layer.icon
+        if (obj.querySelector('img')) {
+          obj.querySelector('img').src = layer.icon
+        }
       }
     }
 

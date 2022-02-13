@@ -203,7 +203,6 @@ export default defineComponent({
           return (feature.values_.properties.c.includes(e)) ? e : ''
         })
         const iconUrl = observations[featureKey].icon
-        console.log(iconUrl)
         const tiger = new Icon({
           src: iconUrl
         })
