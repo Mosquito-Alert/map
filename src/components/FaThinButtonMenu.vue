@@ -1,5 +1,5 @@
 <template>
-  <button>
+  <button class="fa-thin-button-menu">
     <div>
       <i :class="icon_code"></i>
       <span>{{ label }} <i class="fas fa-caret-right menu-arrow"></i></span>
@@ -44,7 +44,6 @@ button {
   :deep(i.fa-thin) {
     padding: 0 8px;
     font-size: 2em;
-    color: $dark-grey;
   }
   :deep(i.menu-arrow) {
     margin: 0;
@@ -53,7 +52,6 @@ button {
     transition: all .3s ease-in;
   }
   :deep(span) {
-    color: $dark-grey;
     text-align: center;
     white-space: nowrap;
     font-size: 12px;

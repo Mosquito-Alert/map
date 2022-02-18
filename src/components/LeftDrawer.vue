@@ -22,7 +22,7 @@ f<template>
         </div>
       </fa-thin-button-menu>
       <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
-      <fa-thin-button name="fa-circle-info" :label="_('Help')"></fa-thin-button>
+      <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
       <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
 
@@ -229,6 +229,9 @@ export default {
       else if (lang === 'en') object = en.value
       setLanguage(lang, object)
     }
+    const showInfo = function () {
+      $store.commit('app/setModal', { id: 'info', visible: true })
+    }
     return {
       ca,
       es,
@@ -237,6 +240,7 @@ export default {
       initialClass,
       filterData,
       observations,
+      showInfo,
       breeding,
       bites,
       otherObservations,
@@ -249,6 +253,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+button.fa-thin-button, button.fa-thin-button-menu {
+  color: $dark-grey;
+}
+button.fa-thin-button.active, button.fa-thin-button-menu.active {
+  color: $primary-color;
+}
 .q-header,
 .q-drawer{
   width: $left-drawer-width;
@@ -269,6 +279,7 @@ export default {
   background: white;
   transition: all 0.3s ease-in;
   font-weight: bold;
+  color: $primary-color;
 }
 .menuItem:not(.active):hover {
   background: $grey-color;

@@ -5,3 +5,7 @@ export const getDefault = (state, payload) => {
 export const features = (state, payload) => {
   return state.features
 }
+
+export const getSelectedFeature = (state) => {
+  return state.selectedFeature
+}

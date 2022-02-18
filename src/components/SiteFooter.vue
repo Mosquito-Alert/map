@@ -5,9 +5,26 @@
       <q-toolbar-title>
         <div class="attribution"></div>
         <ul class="logos">
-          <li><img src="~assets/img/logo-creaf-white.png"></li>
-          <li><img src="~assets/img/ceab-csic-fusionat.png"></li>
-          <li><img src="~assets/img/logo-icrea-white.png"></li>
+          <li>
+            <a href="https://www.ceab.csic.es/" target="_blank">
+              <img src="~assets/img/CSIC-CEAB.png">
+            </a>
+          </li>
+          <li>
+            <a href="https://www.upf.edu/" target="_blank">
+              <img src="~assets/img/UPF.png">
+            </a>
+          </li>
+          <li>
+            <a href="https://www.creaf.cat/" target="_blank">
+              <img src="~assets/img/CREAF-SO.png">
+            </a>
+          </li>
+          <li>
+            <a href="https://www.icrea.cat/" target="_blank">
+              <img src="~assets/img/ICREA.png">
+            </a>
+          </li>
         </ul>
       </q-toolbar-title>
     </q-toolbar>
@@ -27,10 +44,16 @@
 .logos {
   list-style: none;
   display: flex;
+  align-items: center;
   margin: 0;
   padding: 0;
 }
+.logos li a {
+  display: flex;
+  align-items: center;
+}
 .logos li img {
-  max-height: 41px;
+  max-height: 35px;
+  margin-left: 30px;
 }
 </style>

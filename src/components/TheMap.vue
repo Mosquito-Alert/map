@@ -29,6 +29,12 @@
 
           </ol-source-vector>
         </ol-vector-layer>
+<<<<<<< HEAD
+=======
+
+        <observation-popup :selectedFeature="selectedFeature"></observation-popup>
+
+>>>>>>> 1230b437023d824799f061b7636d957dea2b95dc
     </ol-map>
   </div>
 </template>
@@ -37,6 +43,7 @@
 import { defineComponent, computed, ref, onMounted, inject } from 'vue'
 import { useStore } from 'vuex'
 import { transform } from 'ol/proj.js'
+import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
@@ -44,6 +51,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 // import { asString } from 'ol/color'
 
 export default defineComponent({
+  components: { ObservationPopup },
   name: 'TheMap',
   props: {},
   setup (props, context) {
@@ -52,12 +60,11 @@ export default defineComponent({
     const $store = useStore()
     const map = ref('null')
     const view = ref('null')
-    const markerIcon = ref('null')
-
-    // const observationsLayer = ref(null)
-    // const observationsSource = ref(null)
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
+    const selectedFeature = computed(() => {
+      return $store.getters['map/getSelectedFeature']
+    })
     // const projection = ref('EPSG:4326')
     // Map general configuration
     const zoom = computed(() => {
@@ -144,7 +151,7 @@ export default defineComponent({
     onMounted(function () {
       const ol = map.value.map
       ol.on('click', function (event) {
-        this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+        const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           if (feature.values_.properties.cluster_id) {
             worker.postMessage({
               getClusterExpansionZoom: feature.values_.properties.cluster_id,
@@ -153,9 +160,21 @@ export default defineComponent({
                 'EPSG:3857', 'EPSG:4326'
               )
             })
+          } else {
+            const resolution = ol.getView().getResolution()
+            const coords = [...feature.values_.geometry.flatCoordinates]
+            setTimeout(() => {
+              const overlay = document.querySelector('.overlay-content')
+              if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
+              flyTo(coords, ol.getView().getZoom())
+            }, 100)
+            $store.dispatch('map/selectFeature', feature.values_)
           }
           return feature
-        })
+        }, { hitTolerance: 10 })
+        if (!hit) {
+          $store.commit('map/selectFeature', {})
+        }
       })
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -165,7 +184,6 @@ export default defineComponent({
         else this.getTargetElement().style.cursor = ''
       })
     })
-
     const overrideStyleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
       // if ('point_count' in feature.values_.properties) {
@@ -220,13 +238,11 @@ export default defineComponent({
       filter,
       zoom,
       map,
-      markerIcon,
-      // observationsLayer,
-      // observationsSource,
       overrideStyleFunction,
       geoJson,
       features,
       updateMap,
+      selectedFeature,
       attributioncontrol: true,
       view
     }
@@ -283,7 +299,7 @@ export default defineComponent({
     bottom: 4px;
     right: 10px;
     z-index: 9;
-    background: #8c929290;
+    background: #33333390;
     font-size: 10px;
     color: black;
     padding: 4px 20px;
