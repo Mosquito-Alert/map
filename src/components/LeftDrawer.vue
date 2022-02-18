@@ -323,7 +323,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 
 .toc-title{
-  font-family: 'Roboto 15pt';
+  font-family: 'Roboto';
   text-transform: uppercase;
   font-weight: 700;
   color: #666666;

@@ -138,9 +138,11 @@ export default {
     cursor: pointer;
   }
 
-    .toc-title{
-      text-transform: uppercase;
-      font-weight: 500;
-    }
+  .toc-title{
+    font-family: "Roboto";
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #666666;
+  }
 
 </style>
