@@ -504,6 +504,7 @@ input{
 
 .category-boxes.last{
   border-top: 1px solid #b0b0b0;
+  margin-bottom:20px;
 }
 
 // LAYER ICONS

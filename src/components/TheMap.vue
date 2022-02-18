@@ -29,12 +29,9 @@
 
           </ol-source-vector>
         </ol-vector-layer>
-<<<<<<< HEAD
-=======
 
         <observation-popup :selectedFeature="selectedFeature"></observation-popup>
 
->>>>>>> 1230b437023d824799f061b7636d957dea2b95dc
     </ol-map>
   </div>
 </template>
