@@ -73,13 +73,6 @@ export default defineComponent({
     })
     const features = ref([])
 
-    // const features = computed(() => {
-    //   console.log($store)
-    //   const features = $store.getters['map/features']
-    //   console.log(features)
-    //   return ref($store.getters['map/features'])
-    // })
-
     worker.onmessage = function (event) {
       // const source = observations_source.value.source
       if (event.data.ready) {
@@ -97,8 +90,6 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        // source.clear()
-        // $store.commit('map/updateFeatures', [])
         const data = event.data.map(f => {
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
@@ -107,11 +98,7 @@ export default defineComponent({
           return feat
         })
 
-        // source.addFeatures(data)
-        // $store.commit('map/updateFeatures', data)
         features.value = data
-
-        // observations_layer.value.vectorLayer.changed()
       }
     }
     function updateMap () {
