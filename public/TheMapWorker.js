@@ -9,7 +9,7 @@ const DEBUG = true
 let index
 
 const now = Date.now()
-getJSON('totes.geojson', (geojson) => {
+getJSON('totes.json', (geojson) => {
   console.log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
   all_data = geojson.features
   postMessage({ ready: true })

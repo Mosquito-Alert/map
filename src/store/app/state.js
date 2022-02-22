@@ -7,7 +7,7 @@ export default function () {
       ],
       INFO_OPEN: true
     },
-    BACKEND: 'http://localhost:8000/',
+    BACKEND: 'https://sigserver4.udg.edu/apps/mosquito2_backend/',
     trans: {},
     modals: {
       info: false
