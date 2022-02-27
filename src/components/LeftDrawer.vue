@@ -10,6 +10,7 @@ f<template>
       <fa-thin-button name="fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
       <fa-thin-button name="fa-chart-scatter" :label="_('Models')"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
+      <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
       <fa-thin-button-menu name="fa-globe" :label="_('Lang')">
         <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
           <span>Català</span>
@@ -21,9 +22,8 @@ f<template>
           <span>English</span>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
       <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
-      <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
+      <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
     </q-toolbar>
 
     <!-- Drawer content -->
@@ -46,14 +46,11 @@ f<template>
                   data-type="observations"
                   :data-code="code"
                   :class="initialClass(layer, code)">
-
-              <!-- <img v-if="initialClass(layer, code).includes('active')" :src="layer.icon" />
-              <img v-else :src="layer.icon_disabled"/> -->
             </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-              <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
-            </div>
-            <div class="separator" :class="{ 'active': layer.separator }"></div>
+            <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+            <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
+          </div>
+          <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
       </div>
 
@@ -68,18 +65,16 @@ f<template>
               <div class="item-container" v-for="layer, code in bites" :key="code">
                 <div class="content">
                   <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
-                      <i class="fa-thin fa-child"></i>
+                      <i class="fa-solid fa-child"></i>
                   </div>
                   <div v-text="_(layer.common_name)" class="toc-item-name"></div>
                 </div>
-
               </div>
-
           </div>
         </div>
         <div class="breeding-column">
           <!-- BREEDING SITES -->
-          <div class="toc-category lf-mg">
+          <div class="toc-category">
             <div class="toc-title" v-html="_('breeding sites')"></div>
           </div>
           <div class="category-boxes breeding n-lf-pad">
@@ -115,7 +110,7 @@ f<template>
         </div>
         <div class="separator"></div>
       </div>
-
+      <div class="fill-space"></div>
       <!-- SAMPLIING EFFORT -->
       <div class="category-boxes last">
         <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
@@ -254,7 +249,7 @@ export default {
 
 <style scoped lang="scss">
 button.fa-thin-button, button.fa-thin-button-menu {
-  color: $dark-grey;
+  color: $toolbar-icons-color;
 }
 button.fa-thin-button.active, button.fa-thin-button-menu.active {
   color: $primary-color;
@@ -292,7 +287,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
     box-shadow: 2px 0 4px rgba(0,0,0,0.25), 1px 0 1px rgba(0,0,0,0.22);
     background: white;
     height: 100%;
-    width: 56px;
+    width: 60px;
     top: 0px;
     bottom: 0px;
     flex-direction: column;
@@ -310,6 +305,17 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 
 .toc-layers{
   overflow-y:auto;
+  display:flex;
+  flex-direction: column;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #EFA501 #ccc;
+}
+
+.fill-space{
+  flex-grow:1;
 }
 
 .toc-card{
@@ -322,6 +328,10 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   margin-bottom: 10px;
 }
 
+.breeding-column .toc-category{
+  padding-left: 18px;
+}
+
 .toc-title{
   font-family: 'Roboto';
   text-transform: uppercase;
@@ -331,6 +341,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 
 input{
   width:80%;
+  border: 1px solid $grey-color;
 }
 
 .toc-layers input::placeholder {
@@ -356,6 +367,7 @@ input{
 .category-boxes{
   display: flex;
   flex-wrap: wrap;
+  padding-left:10px;
 }
 
 .category-boxes.other-species{
@@ -363,7 +375,7 @@ input{
 }
 
 .bites-column{
-  width: 26%
+  width: 25%
 }
 
 .breeding-column{
@@ -381,6 +393,8 @@ input{
 .li-item i{
   display: block;
   margin:auto;
+  padding: 6px;
+  width:35px;
 }
 
 .bites .li-item:hover i,
@@ -392,8 +406,9 @@ input{
 .bites .li-item i{
   background-color: #e6e6e6;
   color: white;
-  padding:10px;
   border-radius:50%;
+  font-size:1.5em;
+  padding: 8px 6px;
 }
 
 .bites .item-container{
@@ -413,13 +428,19 @@ input{
 .breeding .li-item i{
   background-color: #e6e6e6;
   color: white;
-  padding:10px;
+  border-radius: 4px;
+  font-size:1.5em;
+}
+
+.breeding .li-item .fa-droplet-slash{
+  padding-left: 4px;
 }
 
 .item-container{
   // margin-right: 5px;
   display: flex;
-  width:25%;
+  width:24%;
+  position:relative;
 }
 
 .item-container.item-separator{
@@ -429,22 +450,22 @@ input{
 .item-container .content{
   display:flex;
   flex-direction:column;
-  align-items: center;
+  // align-items: center;
   width:100%;
 }
 
 .li-item{
-  text-align: center;
+  // text-align: center;
   text-transform: capitalize;
   height: 60px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
-  padding:5px;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
   display:flex;
   align-items: center;
   text-align: center;
   position: relative;
+  margin: 0 auto;
 }
 
 .li-item.active img{
@@ -453,11 +474,12 @@ input{
 
 .toc-item-name,
 .toc-item-latin-name{
-  font-size:0.6em;
+  font-size:0.8em;
   text-align: center;
-  line-height: 1;
+  line-height: 1.3em;
   font-family: 'Roboto';
-  color: #666666;
+  color: #000;
+  margin: auto;
 }
 
 .toc-item-name{
@@ -466,10 +488,9 @@ input{
 }
 
 .toc-item-latin-name{
-  margin-bottom:20px;
+  margin-bottom:10px;
   font-style: italic;
   font-family: 'Roboto';
-  color: #666666;
 }
 
 .toc-card-title{
@@ -496,11 +517,6 @@ input{
 //   height: 45px;
 //   left: 75px;
 // }
-
-.vertical-separator{
-  position: absolute;
-  bottom: 20px;
-}
 
 .category-boxes.last{
   border-top: 1px solid #b0b0b0;
@@ -562,5 +578,7 @@ input{
 .separator.active{
   border-right: 2px solid #c0c0c0;
   margin:5px 0 50px 0;
+  position: relative;
+  left:0px;
 }
 </style>

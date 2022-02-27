@@ -71,29 +71,46 @@ export default defineComponent({
 </script>
 
 <style scoped lang='scss'>
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #EFA501 #ccc;
+}
+
+.ol-overlaycontainer-stopevent{
+  padding-top:20px;
+}
+
 .overlay-content {
-  width: $popup-width;
+  max-width: $popup-width;
   max-height: $popup-height-with-image;
   background: white;
+  position:relative;
   display: flex;
   flex-direction: column;
   border-radius: $popup-border-radius;
   cursor: default;
-  font-size: .8em;
+  font-size: 1em;
   &:after {
     content: " ";
     border: $popup-vertical-offset solid transparent;
     border-top-color: white;
     width: $popup-vertical-offset * 2;
-    top: $popup-height-with-image;
-    left: $popup-width / 2 - $popup-vertical-offset;
-    position: absolute;
+    position: relative;
+    top: #{2*$popup-padding-info};
+    left: 0;
+    margin:auto;
   }
   &.small {
-    height: $popup-height;
     &:after {
-      top: $popup-height;
+      border: $popup-vertical-offset solid transparent;
+      border-top-color: white;
+      width: $popup-vertical-offset * 2;
+      position: relative;
+      top: #{2*$popup-padding-info};
+      left: 0;
+      margin:auto;
     }
+    max-height: calc(#{$popup-height} - #{50px});
     .info {
       &>div:first-child {
         max-height: calc(#{$popup-height} - #{50px});
@@ -102,7 +119,7 @@ export default defineComponent({
     }
   }
   .image {
-    height: $popup-height-with-image / 2;
+    max-height: $popup-height-with-image / 2;
     overflow: hidden;
     flex: 50%;
     display: flex;
@@ -114,7 +131,7 @@ export default defineComponent({
     }
   }
   .info {
-    padding: 25px;
+    padding: $popup-padding-info;
     display: flex;
     flex: 50%;
     .title {
@@ -185,5 +202,9 @@ export default defineComponent({
       width: 40%;
     }
   }
+}
+
+.info div{
+  // padding-right:15px;
 }
 </style>

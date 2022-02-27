@@ -11,9 +11,11 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
+$left-drawer-width: 450px;
 $primary-color: #efa501;
 $grey-color: #d5d5d5;
 $dark-grey: #666;
+$toolbar-icons-color: #000;
 $line-color: rgba(0, 0, 0, 0.12);
 $color-pestanya: white;
 $color-pestanya-text: black;
@@ -24,13 +26,14 @@ $primary-button-background-hover: #ffca56;
 $primary-button-text-hover: white;
 // POP UP
 $popup-border-radius: 25px;
-$popup-width: 400px;
-$popup-height: 200px; // MAX height when there is no image
-$popup-height-with-image: 400px; // MAX height when there is an image
+$popup-width: 50vw;
+$half-popup-width: 25vw;
+$popup-height: 50vh; // MAX height when there is no image
+$popup-height-with-image: 50vw; // MAX height when there is an image
 $popup-vertical-offset: 25px;
+$popup-padding-info: 25px;
 
 $li-item-padding: 5px;
-$left-drawer-width: 450px;
 $icon-tiger: '../assets/img/marker_tiger.svg';
 $icon-yellow: '../assets/img/marker_yellow.svg';
 $icon-koreicus: '../assets/img/marker_koreicus.svg';

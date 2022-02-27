@@ -106,16 +106,19 @@ export default {
     div.category-label,
     div.category-color{
         width:25px;
-        height:10px;
     }
 
+    div.category-color{
+      height:10px;
+    }
     .sampling-effort-box:hover div.category-label,
     .sampling-effort-box.active div.category-label{
       color: rgb(58, 51, 51);
     }
 
     div.category-label{
-        font-size: 0.55em;
+        height:15px;
+        font-size: 0.7em;
         position: relative;
         left: -1px;
         color: #646262;

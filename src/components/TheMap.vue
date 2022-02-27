@@ -180,7 +180,7 @@ export default defineComponent({
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgba(187, 208, 189, 0.7)'
+            color: 'rgba(187, 208, 189, 0.8)'
           }),
           stroke: new Stroke({
             color: 'rgba(201, 217, 204, 0.5)',
