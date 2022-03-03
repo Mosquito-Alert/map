@@ -18,7 +18,9 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox'>
-            <ol-source-xyz crossOrigin='anonymous' url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
+            <ol-source-xyz
+              crossOrigin='anonymous'
+              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
         <!-- CLUSTERS geojson layer -->
@@ -30,7 +32,15 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <observation-popup :selectedFeature="selectedFeature"></observation-popup>
+        <!-- <ol-interaction-select @select="featureSelected"
+            :condition="selectCondition"
+            :filter="selectInteactionFilter">
+              <ol-style>
+                  <ol-style-icon :src="selectedIcon"></ol-style-icon>
+              </ol-style>
+          </ol-interaction-select> -->
+
+        <observation-popup :selectedFeature="popupContent"></observation-popup>
 
     </ol-map>
   </div>
@@ -43,7 +53,7 @@ import { transform } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { Style, Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 // import { Circle, Style, Text, Icon, Fill, Stroke } from 'ol/style'
 // import { asString } from 'ol/color'
 
@@ -52,14 +62,23 @@ export default defineComponent({
   name: 'TheMap',
   props: {},
   setup (props, context) {
+    const selectedId = ref('null')
+    const $store = useStore()
+    const selectConditions = inject('ol-selectconditions')
+    const selectCondition = selectConditions.singleClick
+    const selectInteactionFilter = (feature) => {
+      return true
+    }
+
+    const selectedIcon = $store.getters['app/selectedIcon']
+
     let ready = false
     const worker = new Worker('TheMapWorker.js')
-    const $store = useStore()
     const map = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const selectedFeature = computed(() => {
+    const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
     // const projection = ref('EPSG:4326')
@@ -134,6 +153,9 @@ export default defineComponent({
     }
     onMounted(function () {
       const ol = map.value.map
+      let selectedFeat = null
+      let previousFeat = null
+
       ol.on('click', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           if (feature.values_.properties.cluster_id) {
@@ -147,19 +169,35 @@ export default defineComponent({
           } else {
             const resolution = ol.getView().getResolution()
             const coords = [...feature.values_.geometry.flatCoordinates]
+
             setTimeout(() => {
               const overlay = document.querySelector('.overlay-content')
               if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
               flyTo(coords, ol.getView().getZoom())
             }, 100)
+
+            selectedFeat = feature
+            setSelectedStyle(feature)
+            selectedId.value = feature.values_.properties.id
+
             $store.dispatch('map/selectFeature', feature.values_)
           }
           return feature
         }, { hitTolerance: 10 })
         if (!hit) {
+          if (selectedFeat !== null) {
+            selectedId.value = null
+            const oldStyle = setOriginalStyle(previousFeat)
+            console.log(oldStyle)
+            previousFeat.setStyle(oldStyle)
+            previousFeat.changed()
+          }
           $store.commit('map/selectFeature', {})
+        } else {
+          previousFeat = hit
         }
       })
+
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           return true
@@ -168,15 +206,43 @@ export default defineComponent({
         else this.getTargetElement().style.cursor = ''
       })
     })
+
+    const setOriginalStyle = (feature) => {
+      const observations = $store.getters['app/layers'].observations
+      const observationsKeys = Object.keys(observations)
+      const featureKey = observationsKeys.find(function (e) {
+        return (feature.values_.properties.c.includes(e)) ? e : ''
+      })
+      const iconUrl = observations[featureKey].icon
+      const icon = new Icon({
+        src: iconUrl
+      })
+      const style = new Style()
+      style.setImage(icon)
+      style.setText('')
+      return style
+    }
+
+    const setSelectedStyle = (feature) => {
+      const selectedUrl = $store.getters['app/selectedIcon']
+      const selectedIcon = new Icon({
+        src: selectedUrl
+      })
+      const style = new Style()
+      style.setImage(selectedIcon)
+      style.setText('')
+      feature.setStyle(style)
+    }
+
     const overrideStyleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
       // if ('point_count' in feature.values_.properties) {
         const size = feature.values_.properties.point_count
         let radius = 0
-        if (size < 100) radius = 16
-        if (size >= 100) radius = 20
-        if (size >= 1000) radius = 30
-        if (size >= 10000) radius = 45
+        if (size < 100) radius = 20
+        if (size >= 100) radius = 25
+        if (size >= 1000) radius = 35
+        if (size >= 10000) radius = 50
 
         const circle = new Circle({
           fill: new Fill({
@@ -189,7 +255,7 @@ export default defineComponent({
           radius: radius
         })
         const text = new Text({
-          font: 'bold 12px Roboto',
+          font: 'bold 14px Roboto',
           text: size.toLocaleString(),
           fill: new Fill({
             color: 'white'
@@ -199,17 +265,21 @@ export default defineComponent({
         style.setText(text)
       } else {
         // This is no cluster, just an Icon
-        const observations = $store.getters['app/layers'].observations
-        const observationsKeys = Object.keys(observations)
-        const featureKey = observationsKeys.find(function (e) {
-          return (feature.values_.properties.c.includes(e)) ? e : ''
-        })
-        const iconUrl = observations[featureKey].icon
-        const tiger = new Icon({
-          src: iconUrl
-        })
-        style.setImage(tiger)
-        style.setText('')
+        if (feature.values_.properties.id === selectedId.value) {
+          setSelectedStyle(feature)
+        } else {
+          const observations = $store.getters['app/layers'].observations
+          const observationsKeys = Object.keys(observations)
+          const featureKey = observationsKeys.find(function (e) {
+            return (feature.values_.properties.c.includes(e)) ? e : ''
+          })
+          const iconUrl = observations[featureKey].icon
+          const tiger = new Icon({
+            src: iconUrl
+          })
+          style.setImage(tiger)
+          style.setText('')
+        }
       }
     }
 
@@ -226,9 +296,12 @@ export default defineComponent({
       geoJson,
       features,
       updateMap,
-      selectedFeature,
+      popupContent,
       attributioncontrol: true,
-      view
+      view,
+      selectCondition,
+      selectInteactionFilter,
+      selectedIcon
     }
   }
 })
@@ -248,6 +321,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background: none;
+    right:15px;
   }
   :deep(.ol-zoom) button {
     background: $primary-button-background;

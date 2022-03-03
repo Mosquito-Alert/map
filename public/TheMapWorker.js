@@ -3,7 +3,7 @@
 importScripts('supercluster.min.js')
 
 let all_data = []
-const LAYER_TYPES = ['observations', 'breeding_sites', 'storm_drain']
+const LAYER_TYPES = ['observations', 'otherObservations', 'breeding_sites', 'storm_drain']
 const filters = { layers: [] }
 const DEBUG = true
 let index
@@ -44,7 +44,9 @@ function addFilter (type, code) {
       return isTheSame
     })
     // Add the filter if it was not there
-    if (!exists) filters.layers.push({ type: type, code: code })
+    if (!exists) {
+      filters.layers.push({ type: type, code: code })
+    }
   }
 }
 

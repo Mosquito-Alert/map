@@ -8,14 +8,18 @@
     <template v-slot="slotProps">
       <div :class="getPopupClass(selectedFeature)">
         {{ slotProps.empty }}
-        <div class="image" v-if="selectedFeature.img">
-          <img :src="selectedFeature.img">
+        <div class="image" v-if="selectedFeature.photo_url">
+          <img :src="'//webserver.mosquitoalert.com' + selectedFeature.photo_url">
         </div>
         <div class="info">
           <div>
-            <p class="title"><label>{{ _(selectedFeature.title) }}</label></p>
-            <p class="date"><label>{{ _('Date') }}</label>: {{ selectedFeature.date }}</p>
-            <p class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.description }}</p>
+            <label>{{ _(selectedFeature.title) }}</label>:
+            <p class="title"></p>
+            <label>{{ _('Date') }}</label>:
+            <p class="date" v-html="formatData(selectedFeature)"></p>
+            <p
+              v-if="selectedFeature.edited_user_notes"
+              class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.edited_user_notes }}</p>
           </div>
           <div>
             <div :class="getValidationClass(selectedFeature)">
@@ -35,6 +39,7 @@
 <script>
 import { defineComponent } from 'vue'
 import { useStore } from 'vuex'
+import moment from 'moment'
 
 export default defineComponent({
   props: ['selectedFeature'],
@@ -44,7 +49,7 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
     const getPopupClass = function (feature) {
-      if (feature.img) return 'overlay-content'
+      if (feature.photo_url) return 'overlay-content'
       else return 'overlay-content small'
     }
     const getValidationIcon = function (feature) {
@@ -59,8 +64,14 @@ export default defineComponent({
       if (feature.validation_type === 'human') return _('Expert validation')
       else return _('AI validation')
     }
+
+    const formatData = function (feature) {
+      return moment.unix(feature.observation_date).format('MM/DD/YYYY')
+    }
+
     return {
       _,
+      formatData,
       getPopupClass,
       getValidationClass,
       getValidationIcon,
@@ -76,13 +87,13 @@ export default defineComponent({
   scrollbar-color: #EFA501 #ccc;
 }
 
-.ol-overlaycontainer-stopevent{
+.ol-overlaycontainer{
   padding-top:20px;
+  max-height: 80vh;
 }
 
 .overlay-content {
   max-width: $popup-width;
-  max-height: $popup-height-with-image;
   background: white;
   position:relative;
   display: flex;
@@ -110,7 +121,7 @@ export default defineComponent({
       left: 0;
       margin:auto;
     }
-    max-height: calc(#{$popup-height} - #{50px});
+    // max-height: calc(#{$popup-height} - #{50px});
     .info {
       &>div:first-child {
         max-height: calc(#{$popup-height} - #{50px});
@@ -119,6 +130,7 @@ export default defineComponent({
     }
   }
   .image {
+    // max-height: $popup-height-with-image / 2;
     max-height: $popup-height-with-image / 2;
     overflow: hidden;
     flex: 50%;
@@ -132,6 +144,7 @@ export default defineComponent({
   }
   .info {
     padding: $popup-padding-info;
+    padding-bottom: 0px;
     display: flex;
     flex: 50%;
     .title {
@@ -143,7 +156,7 @@ export default defineComponent({
     }
     &>div:first-child {
       width: 60%;
-      max-height: calc(#{$popup-height-with-image / 2} - #{50px});
+      max-height: calc(#{$popup-height-with-image / 2} - #{$popup-padding-info});
       overflow: auto;
     }
     &>div:last-child {

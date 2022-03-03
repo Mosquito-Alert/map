@@ -1,4 +1,11 @@
 export default function () {
+  let backendUrl = ''
+  if (process.env.DEV) {
+    backendUrl = 'http://localhost:8000/'
+  } else {
+    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
+  }
+
   return {
     DEFAULTS: {
       LAYERS: [
@@ -7,11 +14,12 @@ export default function () {
       ],
       INFO_OPEN: true
     },
-    BACKEND: 'https://sigserver4.udg.edu/apps/mosquito2_backend/',
+    BACKEND: backendUrl,
     trans: {},
     modals: {
       info: false
     },
+    selectedIcon: require('../../assets/img/marker_selected.svg'),
     layers: {
       observations: { // Mosquito observations
         tiger: {
@@ -51,7 +59,7 @@ export default function () {
           icon: require('../../assets/img/marker_unidentified.svg')
         }
       },
-      other_observations: {
+      otherObservations: {
         other: {
           categories: ['other_species'],
           common_name: 'other species',
@@ -62,8 +70,7 @@ export default function () {
         pending: {
           categories: ['breeding_site_not_yet_filtered'],
           icon: 'icons/marker_tiger.svg',
-          common_name: 'bites',
-          separator: true
+          common_name: 'bites'
         }
       },
       breeding: { // Breeding sites
