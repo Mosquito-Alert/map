@@ -10,7 +10,7 @@ export default {
   props: ['name', 'label'],
   computed: {
     icon_code (props) {
-      return `fa-thin ${props.name}`
+      return `${props.name}`
     }
   }
 }

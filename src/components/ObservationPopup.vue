@@ -8,12 +8,12 @@
     <template v-slot="slotProps">
       <div :class="getPopupClass(selectedFeature)">
         {{ slotProps.empty }}
-        <div class="image" v-if="selectedFeature.photo_url">
-          <img @load="$emit('popupImageLoaded')" :src="'//webserver.mosquitoalert.com' + selectedFeature.photo_url">
+        <div class="image" :class="(imageRatio > 1)?'landscape':'portrait'" v-if="selectedFeature.photo_url">
+          <img @load="imageLoaded" :src="selectedFeature.photo_url">
         </div>
         <div class="info">
           <div>
-            <label>{{ _(selectedFeature.title) }}</label>:
+            <label class="popup-title">{{ _(selectedFeature.title) }}</label>
             <p class="title"></p>
             <label>{{ _('Date') }}</label>:
             <p class="date" v-html="formatData(selectedFeature)"></p>
@@ -37,17 +37,23 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
 export default defineComponent({
   props: ['selectedFeature'],
-  emits: ['popupImageLoaded'],
+  emits: ['popupimageloaded'],
   setup (props, context) {
     const $store = useStore()
+    const imageRatio = ref('null')
     const _ = function (text) {
       return $store.getters['app/getText'](text)
+    }
+    const imageLoaded = function (e) {
+      imageRatio.value = (e.target.naturalWidth / e.target.naturalHeight)
+      console.log(imageRatio.value)
+      context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
       if (feature.photo_url) return 'overlay-content'
@@ -67,11 +73,13 @@ export default defineComponent({
     }
 
     const formatData = function (feature) {
-      return moment.unix(feature.observation_date).format('MM/DD/YYYY')
+      return moment(feature.observation_date).format('MM/DD/YYYY')
     }
 
     return {
       _,
+      imageRatio,
+      imageLoaded,
       formatData,
       getPopupClass,
       getValidationClass,
@@ -88,11 +96,25 @@ export default defineComponent({
   scrollbar-color: #EFA501 #ccc;
 }
 
+.info div::-webkit-scrollbar {
+    height: 12px;
+    width: 4px;
+    background: #ccc;
+}
+
+.info div::-webkit-scrollbar-thumb {
+    background: #EFA501;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
 .ol-overlaycontainer{
   padding-top:20px;
   max-height: 80vh;
 }
-
+.popup-title{
+  text-transform: uppercase;
+}
 .overlay-content {
   max-width: $popup-width;
   background: white;
@@ -127,19 +149,29 @@ export default defineComponent({
       &>div:first-child {
         max-height: calc(#{$popup-height} - #{50px});
         overflow: auto;
+        padding-right: 20px;
       }
     }
   }
-  .image {
+  .image.landscape {
     max-height: $popup-height-with-image / 2;
     overflow: hidden;
-    flex: 50%;
-    display: flex;
-    align-items: center;
+    // display: flex;
+    // align-items: center;
     border-top-left-radius: $popup-border-radius;
     border-top-right-radius: $popup-border-radius;
-    img {
+    img{
       width: 100%;
+      object-fit: fill;
+      border-top-left-radius: $popup-border-radius;
+      border-top-right-radius: $popup-border-radius;
+    }
+  }
+  .image.portrait {
+    max-height: $popup-height-with-image / 2;
+    text-align: center;
+    img{
+      height: 100%;
     }
   }
   .info {
@@ -158,6 +190,7 @@ export default defineComponent({
       width: 60%;
       max-height: calc(#{$popup-height-with-image / 2} - #{$popup-padding-info});
       overflow: auto;
+      padding-right:20px;
     }
     &>div:last-child {
       display: flex;

@@ -3,7 +3,7 @@
 importScripts('supercluster.min.js')
 
 let all_data = []
-const LAYER_TYPES = ['observations', 'bites', 'breeding', 'otherObservations']
+const LAYER_TYPES = ['observations', 'otherObservations', 'breeding_sites', 'storm_drain']
 const filters = { layers: [] }
 const DEBUG = true
 let index
@@ -34,6 +34,7 @@ self.onmessage = function (e) {
 }
 
 function addFilter (type, code) {
+  console.log('add filter')
   if (LAYER_TYPES.indexOf(type) > -1) {
     // Remove the filter if it was already there
     const exists = filters.layers.find((layer, index) => {
@@ -57,8 +58,9 @@ function thereAreFilters () {
 
 function filter (type, code, layers) {
   addFilter(type, code)
-  let data = all_data
+  let data = {}
   if (thereAreFilters()) {
+    data = all_data
     // Filter the data
     data = all_data.filter(feature => {
       // If it is a layer and the feature has a validation string
@@ -72,6 +74,7 @@ function filter (type, code, layers) {
       }
     })
   }
+
   index = new Supercluster({
     log: DEBUG,
     radius: 180,

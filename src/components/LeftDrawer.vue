@@ -7,13 +7,13 @@ f<template>
       width="">
     <!-- Main menu -->
     <q-toolbar>
-      <fa-thin-button name="fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
-      <fa-thin-button name="fa-chart-scatter" :label="_('Models')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-chart-scatter" :label="_('Models')"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
 
-      <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
-      <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
-      <fa-thin-button-menu name="fa-globe" :label="_('Lang')">
+      <fa-thin-button name="fa-thin fa-share-nodes" :label="_('Share')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
         <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
           <span>Català</span>
         </div>
@@ -24,19 +24,19 @@ f<template>
           <span>English</span>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
 
     <!-- Drawer content -->
     <div class="toc-layers">
       <div class="toc-card filters">
-        <div class="toc-title" v-html="_('select')"></div>
-          <input type="text" name="localitat" :placeholder="_('placeholder location')"/> <button>></button>
-          <input type="text" name="hastag" :placeholder="_('placeholder hashtag')"/> <button>></button>
+        <div class="toc-title" v-html="_('Select')"></div>
+          <input type="text" name="localitat" :placeholder="_('Placeholder location')"/> <button>></button>
+          <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
       </div>
 
       <div class="toc-category">
-        <div class="toc-title" v-html="_('mosquitos')"></div>
+        <div class="toc-title" v-html="_('Mosquitos')"></div>
       </div>
 
       <div class="category-box">
@@ -57,8 +57,8 @@ f<template>
 
       <!-- BITES AND BREEDING SITES-->
       <div class="toc-category">
-          <div class="bites-title" v-html="_('bites')"></div>
-          <div class="breeding-title" v-html="_('breeding')"></div>
+          <div class="bites-title" v-html="_('Bites')"></div>
+          <div class="breeding-title" v-html="_('Breeding sites')"></div>
       </div>
 
       <div class="category-box bites-and-breeding">
@@ -66,7 +66,7 @@ f<template>
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
               <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
-                  <i class="fa-solid fa-child"></i>
+                  <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -87,7 +87,7 @@ f<template>
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="_('other species')"></div>
+        <div class="toc-title" v-html="_('Other species')"></div>
       </div>
 
       <div class="category-box other-species">
@@ -108,7 +108,7 @@ f<template>
       <div class="fill-space"></div>
       <!-- SAMPLIING EFFORT -->
         <div class="toc-category last">
-          <div class="toc-title" v-html="_('sampling effort')"></div>
+          <div class="toc-title" v-html="_('Sampling effort')"></div>
           <i class="fa-thin fa-circle-info"></i>
         </div>
         <div class="category-box">
@@ -418,11 +418,14 @@ input{
 
 .content.bites .li-item:hover i,
 .content.bites .li-item.active i{
-  background-color:  #cc6677;
-  color: #e2b3aa;
   padding:8px 6px;
   border-radius:50%;
   font-size:1.2rem;
+}
+
+.content.bites .li-item.active i{
+  background-color:  #cc6677;
+  color: #e2b3aa;
 }
 
 .content.bites .li-item i{
@@ -441,8 +444,18 @@ input{
   padding: 8px 6px;
 }
 
-.content.breeding .li-item:hover i,
-.content.breeding .li-item.active i{
+.content.bites .li-item:hover i,
+.content.breeding .li-item:hover i{
+  background-color:  #a8b9c1;
+  color: white;
+}
+
+.content.bites .li-item.active:hover i {
+  background-color:  #cc6677;
+  color: #e2b3aa;
+}
+
+.content.breeding .li-item.active i {
   background-color:  #a8b9c1;
   color: #1072ad;
 }
@@ -591,8 +604,20 @@ input{
 .li-item.yellow:hover,
 .li-item.koreicus:hover,
 .li-item.japonicus:hover,
-.li-item.culex:hover{
+.li-item.culex:hover,
+.li-item.unidentified:hover,
+.li-item.other:hover{
   opacity:0.7;
+}
+
+.content.bites .li-item:hover,
+.content.breeding .li-item:hover{
+  opacity:0.7;
+}
+
+.content.bites .li-item:hover i,
+.content.breeding .li-item:hover i{
+  opacity:0.3;
 }
 
 .separator{

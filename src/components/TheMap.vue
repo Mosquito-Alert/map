@@ -41,7 +41,7 @@
               </ol-style>
           </ol-interaction-select>
 
-        <observation-popup @popupImageLoaded="autopanPopup" :selectedFeature="popupContent"></observation-popup>
+        <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
     </ol-map>
   </div>
@@ -54,7 +54,7 @@ import { transform } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 // import { Circle, Style, Text, Icon, Fill, Stroke } from 'ol/style'
 // import { asString } from 'ol/color'
 
@@ -64,12 +64,23 @@ export default defineComponent({
   props: {},
   setup (props, context) {
     const selectedId = ref('null')
+    const selectedFeat = ref('null')
     const $store = useStore()
     const selectConditions = inject('ol-selectconditions')
     const selectCondition = selectConditions.singleClick
-    const autoPanPopup = function (e) {
-      console.log('listened!')
+
+    const autoPanPopup = function () {
+      const ol = map.value.map
+      const resolution = ol.getView().getResolution()
+      const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
+
+      setTimeout(() => {
+        const overlay = document.querySelector('.overlay-content')
+        if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
+        flyTo(coords, ol.getView().getZoom())
+      }, 100)
     }
+
     const selectInteactionFilter = (feature) => {
       if ('cluster_id' in feature.values_.properties) {
         worker.postMessage({
@@ -84,12 +95,11 @@ export default defineComponent({
       }
     }
 
-    const selectedIcon = $store.getters['app/selectedIcon']
+    const selectedIcon = ref('null')
     const featureSelected = function (event) {
-      console.log('SELECTED EVENT')
       if (event.selected[0]) {
         const feature = event.selected[0]
-
+        selectedFeat.value = feature
         // check if click on cluster
         if (feature.values_.properties.cluster_id) {
           worker.postMessage({
@@ -100,11 +110,14 @@ export default defineComponent({
             )
           })
         }
+        autoPanPopup()
       }
 
       // otherwise
       if (event.selected.length) {
         selectedId.value = event.selected[0].values_.properties.id
+        console.log(event.selected[0].values_.properties.c)
+        selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
         $store.dispatch('map/selectFeature', event.selected[0].values_)
       } else {
         // if not selected then call worker to refresh features
@@ -204,50 +217,6 @@ export default defineComponent({
     }
     onMounted(function () {
       const ol = map.value.map
-      // const selectedFeat = null
-      // let previousFeat = null
-
-      // ol.on('click', function (event) {
-      //   const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-      //     if (feature.values_.properties.cluster_id) {
-      //       worker.postMessage({
-      //         getClusterExpansionZoom: feature.values_.properties.cluster_id,
-      //         center: transform(
-      //           feature.values_.geometry.flatCoordinates,
-      //           'EPSG:3857', 'EPSG:4326'
-      //         )
-      //       })
-      //     } else {
-      //       const resolution = ol.getView().getResolution()
-      //       const coords = [...feature.values_.geometry.flatCoordinates]
-
-      //       setTimeout(() => {
-      //         const overlay = document.querySelector('.overlay-content')
-      //         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
-      //         flyTo(coords, ol.getView().getZoom())
-      //       }, 100)
-
-      //       // selectedFeat = feature
-      //       console.log(selectedFeat)
-      //       // setSelectedStyle(feature)
-      //       selectedId.value = feature.values_.properties.id
-
-      //       // $store.dispatch('map/selectFeature', feature.values_)
-      //     }
-      //     return feature
-      //   }, { hitTolerance: 10 })
-      //   if (!hit) {
-      //     if (selectedFeat !== null) {
-      //       selectedId.value = null
-      //       const oldStyle = setOriginalStyle(previousFeat)
-      //       previousFeat.setStyle(oldStyle)
-      //       previousFeat.changed()
-      //     }
-      //     // $store.commit('map/selectFeature', {})
-      //   } else {
-      //     previousFeat = hit
-      //   }
-      // })
 
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -257,33 +226,6 @@ export default defineComponent({
         else this.getTargetElement().style.cursor = ''
       })
     })
-
-    // const setOriginalStyle = (feature) => {
-    //   const observations = $store.getters['app/layers'].observations
-    //   const observationsKeys = Object.keys(observations)
-    //   const featureKey = observationsKeys.find(function (e) {
-    //     return (feature.values_.properties.c.includes(e)) ? e : ''
-    //   })
-    //   const iconUrl = observations[featureKey].icon
-    //   const icon = new Icon({
-    //     src: iconUrl
-    //   })
-    //   const style = new Style()
-    //   style.setImage(icon)
-    //   style.setText('')
-    //   return style
-    // }
-
-    const setSelectedStyle = (feature) => {
-      const selectedUrl = $store.getters['app/selectedIcon']
-      const selectedIcon = new Icon({
-        src: selectedUrl
-      })
-      const style = new Style()
-      style.setImage(selectedIcon)
-      style.setText('')
-      feature.setStyle(style)
-    }
 
     const overrideStyleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
@@ -317,7 +259,12 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         if (feature.values_.properties.id === selectedId.value) {
-          setSelectedStyle(feature)
+          console.log(feature.values_.properties.c)
+          const selectedIcon = new Icon({
+            src: $store.getters['app/selectedIcons'][feature.values_.properties.c]
+          })
+          style.setImage(selectedIcon)
+          style.setText('')
         } else {
           // Search inside observations layers
           let observations = $store.getters['app/layers'].observations
@@ -352,19 +299,21 @@ export default defineComponent({
               return observations[e].categories.includes(feature.values_.properties.c)
             })
           }
-          // Icon is image
-          console.log('icon is svg')
-          const iconUrl = observations[featureKey].icon
-          const tiger = new Icon({
-            src: iconUrl
-          })
-          style.setImage(tiger)
-          style.setText('')
+          // if no layer selected then featurekey is null
+          if (featureKey) {
+            const iconUrl = observations[featureKey].icon
+            const tiger = new Icon({
+              src: iconUrl
+            })
+            style.setImage(tiger)
+            style.setText('')
+          }
         }
       }
     }
 
     function filter (data) {
+      $store.commit('map/selectFeature', {})
       data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(data)
     }
@@ -418,7 +367,8 @@ export default defineComponent({
     font-size: 2em;
     cursor: pointer;
     padding: 0 0 20px 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    box-shadow: $box-shadow;
+    // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   :deep(.ol-zoom) button:hover {
     background: $primary-button-background-hover;
