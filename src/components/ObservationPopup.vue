@@ -2,14 +2,14 @@
   <ol-overlay
       :title="_(selectedFeature.title)"
       :position="selectedFeature.coordinates"
-      positioning="bottom-center"
+      positioning='bottom-center'
       :offset="[0, -35]"
       v-if="selectedFeature">
     <template v-slot="slotProps">
       <div :class="getPopupClass(selectedFeature)">
         {{ slotProps.empty }}
         <div class="image" v-if="selectedFeature.photo_url">
-          <img :src="'//webserver.mosquitoalert.com' + selectedFeature.photo_url">
+          <img @load="$emit('popupImageLoaded')" :src="'//webserver.mosquitoalert.com' + selectedFeature.photo_url">
         </div>
         <div class="info">
           <div>
@@ -43,6 +43,7 @@ import moment from 'moment'
 
 export default defineComponent({
   props: ['selectedFeature'],
+  emits: ['popupImageLoaded'],
   setup (props, context) {
     const $store = useStore()
     const _ = function (text) {
@@ -130,7 +131,6 @@ export default defineComponent({
     }
   }
   .image {
-    // max-height: $popup-height-with-image / 2;
     max-height: $popup-height-with-image / 2;
     overflow: hidden;
     flex: 50%;

@@ -3,7 +3,7 @@
 importScripts('supercluster.min.js')
 
 let all_data = []
-const LAYER_TYPES = ['observations', 'otherObservations', 'breeding_sites', 'storm_drain']
+const LAYER_TYPES = ['observations', 'bites', 'breeding', 'otherObservations']
 const filters = { layers: [] }
 const DEBUG = true
 let index
@@ -51,6 +51,7 @@ function addFilter (type, code) {
 }
 
 function thereAreFilters () {
+  console.log(filters)
   return filters.layers.length > 0
 }
 
@@ -77,8 +78,6 @@ function filter (type, code, layers) {
     extent: 256,
     maxZoom: 17
   }).load(data)
-
-  // console.log(index.getTile(0, 0, 0));
 
   postMessage({ ready: true })
 }

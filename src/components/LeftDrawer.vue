@@ -77,7 +77,7 @@ f<template>
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
                 <div class="li-item" @click="filterData(layer, $event)" data-type="breeding" :data-code="code">
-                    <i class="fa-solid" :class="layer.icon"></i>
+                    <i class="fa-solid" :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
               </div>

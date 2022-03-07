@@ -6,7 +6,7 @@
       <router-view />
     </q-page-container> -->
     <q-page class='flex'>
-      <the-map ref='map'/>
+      <the-map ref='map' />
       <time-series @toggleTimeSeries='resizeMap'/>
     </q-page>
 

@@ -75,18 +75,21 @@ export default function () {
       },
       breeding: { // Breeding sites
         with_water: {
-          categories: ['breeding_site_not_yet_filtered'],
-          icon: 'fa-droplet',
+          categories: ['storm_drain_water'],
+          icon: require('../../assets/img/droplet-solid.svg'),
+          faIcon: 'fa-droplet',
           common_name: 'stormdrain with water'
         },
         without_water: {
-          categories: ['breeding_site_not_yet_filtered'],
-          icon: 'fa-droplet-slash',
+          categories: ['storm_drain_dry'],
+          icon: require('../../assets/img/droplet-slash-solid.svg'),
+          faIcon: 'fa-droplet-slash',
           common_name: 'stormdrain without water'
         },
         other: {
           categories: ['breeding_site_other'],
-          icon: 'fa-dharmachakra',
+          icon: require('../../assets/img/dharmachakra-solid.svg'),
+          faIcon: 'fa-dharmachakra',
           common_name: 'breeding site others'
         }
       },

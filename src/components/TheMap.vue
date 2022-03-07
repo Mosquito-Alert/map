@@ -5,6 +5,7 @@
             :loadTilesWhileInteracting='true'
             @moveend='updateMap'
             style='height:100%'>
+
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
             :center='center'
@@ -20,27 +21,27 @@
         <ol-tile-layer ref='baseMap' title='mapbox'>
             <ol-source-xyz
               crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
+              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
         <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observations_layer'>
-          <ol-source-vector :features='features' :format='geoJson' ref='observations_source'>
+        <ol-vector-layer ref='observationsLayer'>
+          <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
 
           </ol-source-vector>
         </ol-vector-layer>
 
-        <!-- <ol-interaction-select @select="featureSelected"
+        <ol-interaction-select @select="featureSelected"
             :condition="selectCondition"
             :filter="selectInteactionFilter">
               <ol-style>
                   <ol-style-icon :src="selectedIcon"></ol-style-icon>
               </ol-style>
-          </ol-interaction-select> -->
+          </ol-interaction-select>
 
-        <observation-popup :selectedFeature="popupContent"></observation-popup>
+        <observation-popup @popupImageLoaded="autopanPopup" :selectedFeature="popupContent"></observation-popup>
 
     </ol-map>
   </div>
@@ -66,15 +67,65 @@ export default defineComponent({
     const $store = useStore()
     const selectConditions = inject('ol-selectconditions')
     const selectCondition = selectConditions.singleClick
+    const autoPanPopup = function (e) {
+      console.log('listened!')
+    }
     const selectInteactionFilter = (feature) => {
-      return true
+      if ('cluster_id' in feature.values_.properties) {
+        worker.postMessage({
+          getClusterExpansionZoom: feature.values_.properties.cluster_id,
+          center: transform(
+            feature.values_.geometry.flatCoordinates,
+            'EPSG:3857', 'EPSG:4326'
+          )
+        })
+      } else {
+        return !('cluster_id' in feature.values_.properties)
+      }
     }
 
     const selectedIcon = $store.getters['app/selectedIcon']
+    const featureSelected = function (event) {
+      console.log('SELECTED EVENT')
+      if (event.selected[0]) {
+        const feature = event.selected[0]
+
+        // check if click on cluster
+        if (feature.values_.properties.cluster_id) {
+          worker.postMessage({
+            getClusterExpansionZoom: feature.values_.properties.cluster_id,
+            center: transform(
+              feature.values_.geometry.flatCoordinates,
+              'EPSG:3857', 'EPSG:4326'
+            )
+          })
+        }
+      }
+
+      // otherwise
+      if (event.selected.length) {
+        selectedId.value = event.selected[0].values_.properties.id
+        $store.dispatch('map/selectFeature', event.selected[0].values_)
+      } else {
+        // if not selected then call worker to refresh features
+        selectedId.value = null
+        // $store.dispatch('map/selectFeature', {})
+        $store.commit('map/selectFeature', {})
+        const olmap = map.value.map
+        const bounds = olmap.getView().calculateExtent(olmap.getSize())
+        const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+        const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+        worker.postMessage({
+          bbox: southWest.concat(northEast),
+          zoom: olmap.getView().getZoom()
+        })
+      }
+    }
 
     let ready = false
     const worker = new Worker('TheMapWorker.js')
     const map = ref('null')
+    const observationsSource = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
@@ -153,50 +204,50 @@ export default defineComponent({
     }
     onMounted(function () {
       const ol = map.value.map
-      let selectedFeat = null
-      let previousFeat = null
+      // const selectedFeat = null
+      // let previousFeat = null
 
-      ol.on('click', function (event) {
-        const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-          if (feature.values_.properties.cluster_id) {
-            worker.postMessage({
-              getClusterExpansionZoom: feature.values_.properties.cluster_id,
-              center: transform(
-                feature.values_.geometry.flatCoordinates,
-                'EPSG:3857', 'EPSG:4326'
-              )
-            })
-          } else {
-            const resolution = ol.getView().getResolution()
-            const coords = [...feature.values_.geometry.flatCoordinates]
+      // ol.on('click', function (event) {
+      //   const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+      //     if (feature.values_.properties.cluster_id) {
+      //       worker.postMessage({
+      //         getClusterExpansionZoom: feature.values_.properties.cluster_id,
+      //         center: transform(
+      //           feature.values_.geometry.flatCoordinates,
+      //           'EPSG:3857', 'EPSG:4326'
+      //         )
+      //       })
+      //     } else {
+      //       const resolution = ol.getView().getResolution()
+      //       const coords = [...feature.values_.geometry.flatCoordinates]
 
-            setTimeout(() => {
-              const overlay = document.querySelector('.overlay-content')
-              if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
-              flyTo(coords, ol.getView().getZoom())
-            }, 100)
+      //       setTimeout(() => {
+      //         const overlay = document.querySelector('.overlay-content')
+      //         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
+      //         flyTo(coords, ol.getView().getZoom())
+      //       }, 100)
 
-            selectedFeat = feature
-            setSelectedStyle(feature)
-            selectedId.value = feature.values_.properties.id
+      //       // selectedFeat = feature
+      //       console.log(selectedFeat)
+      //       // setSelectedStyle(feature)
+      //       selectedId.value = feature.values_.properties.id
 
-            $store.dispatch('map/selectFeature', feature.values_)
-          }
-          return feature
-        }, { hitTolerance: 10 })
-        if (!hit) {
-          if (selectedFeat !== null) {
-            selectedId.value = null
-            const oldStyle = setOriginalStyle(previousFeat)
-            console.log(oldStyle)
-            previousFeat.setStyle(oldStyle)
-            previousFeat.changed()
-          }
-          $store.commit('map/selectFeature', {})
-        } else {
-          previousFeat = hit
-        }
-      })
+      //       // $store.dispatch('map/selectFeature', feature.values_)
+      //     }
+      //     return feature
+      //   }, { hitTolerance: 10 })
+      //   if (!hit) {
+      //     if (selectedFeat !== null) {
+      //       selectedId.value = null
+      //       const oldStyle = setOriginalStyle(previousFeat)
+      //       previousFeat.setStyle(oldStyle)
+      //       previousFeat.changed()
+      //     }
+      //     // $store.commit('map/selectFeature', {})
+      //   } else {
+      //     previousFeat = hit
+      //   }
+      // })
 
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -207,21 +258,21 @@ export default defineComponent({
       })
     })
 
-    const setOriginalStyle = (feature) => {
-      const observations = $store.getters['app/layers'].observations
-      const observationsKeys = Object.keys(observations)
-      const featureKey = observationsKeys.find(function (e) {
-        return (feature.values_.properties.c.includes(e)) ? e : ''
-      })
-      const iconUrl = observations[featureKey].icon
-      const icon = new Icon({
-        src: iconUrl
-      })
-      const style = new Style()
-      style.setImage(icon)
-      style.setText('')
-      return style
-    }
+    // const setOriginalStyle = (feature) => {
+    //   const observations = $store.getters['app/layers'].observations
+    //   const observationsKeys = Object.keys(observations)
+    //   const featureKey = observationsKeys.find(function (e) {
+    //     return (feature.values_.properties.c.includes(e)) ? e : ''
+    //   })
+    //   const iconUrl = observations[featureKey].icon
+    //   const icon = new Icon({
+    //     src: iconUrl
+    //   })
+    //   const style = new Style()
+    //   style.setImage(icon)
+    //   style.setText('')
+    //   return style
+    // }
 
     const setSelectedStyle = (feature) => {
       const selectedUrl = $store.getters['app/selectedIcon']
@@ -268,11 +319,41 @@ export default defineComponent({
         if (feature.values_.properties.id === selectedId.value) {
           setSelectedStyle(feature)
         } else {
-          const observations = $store.getters['app/layers'].observations
-          const observationsKeys = Object.keys(observations)
-          const featureKey = observationsKeys.find(function (e) {
-            return (feature.values_.properties.c.includes(e)) ? e : ''
+          // Search inside observations layers
+          let observations = $store.getters['app/layers'].observations
+          let observationsKeys = Object.keys(observations)
+          let featureKey = observationsKeys.find(function (e) {
+            return observations[e].categories.includes(feature.values_.properties.c)
           })
+
+          // If not found check on Bites
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].bites
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+
+          // If not found check on breeding sites
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].breeding
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+
+          // If not found check on otherObservations
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].otherObservations
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+          // Icon is image
+          console.log('icon is svg')
           const iconUrl = observations[featureKey].icon
           const tiger = new Icon({
             src: iconUrl
@@ -288,10 +369,12 @@ export default defineComponent({
       worker.postMessage(data)
     }
     return {
+      autoPanPopup,
       center,
       filter,
       zoom,
       map,
+      observationsSource,
       overrideStyleFunction,
       geoJson,
       features,
@@ -299,6 +382,7 @@ export default defineComponent({
       popupContent,
       attributioncontrol: true,
       view,
+      featureSelected,
       selectCondition,
       selectInteactionFilter,
       selectedIcon
