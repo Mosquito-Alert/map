@@ -10,7 +10,7 @@ export default {
   props: ['name', 'label'],
   computed: {
     icon_code (props) {
-      return `fa-thin ${props.name}`
+      return `${props.name}`
     }
   }
 }
@@ -18,7 +18,7 @@ export default {
 
 <style scoped lang="scss">
 button.fa-thin-button {
-  width: 56px;
+  width: 60px;
   height: 64px;
   background: white;
   border: none;

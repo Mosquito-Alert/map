@@ -1,8 +1,4 @@
 <template>
-    <div class="toc-category">
-      <div class="toc-title" v-html="_('sampling effort')"></div>
-      <i class="fa-thin fa-circle-info"></i>
-    </div>
     <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
       <i :class="icon_code"></i>
       <div class="colors">
@@ -54,7 +50,7 @@ export default {
 
 <style scoped>
     .sampling-effort-box{
-        margin: 0 20px 0 20px;
+        margin: 0 20px 20px 16px;
         padding:10px 15px;
         border-radius:5px;
         box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
@@ -62,6 +58,7 @@ export default {
         display: flex;
         flex-grow: 1;
         align-items: center;
+        border: 1px solid #b4aeae;
     }
 
     .sampling-effort-box:hover i,
@@ -71,14 +68,6 @@ export default {
       opacity: 1;
     }
 
-    .sampling-effort-box i{
-        float:inline;
-        padding: 10px;
-        border-radius:50%;
-        font-size:1.5em;
-        background-color: #e6e6e6;
-        opacity:0.5;
-    }
     .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;
@@ -106,16 +95,19 @@ export default {
     div.category-label,
     div.category-color{
         width:25px;
-        height:10px;
     }
 
+    div.category-color{
+      height:10px;
+    }
     .sampling-effort-box:hover div.category-label,
     .sampling-effort-box.active div.category-label{
       color: rgb(58, 51, 51);
     }
 
     div.category-label{
-        font-size: 0.55em;
+        height:15px;
+        font-size: 0.7em;
         position: relative;
         left: -1px;
         color: #646262;
@@ -129,13 +121,14 @@ export default {
       align-items: center;
     }
 
-  .toc-category i{
-    margin-left:10px;
-    background-color: #a8b9c1;
+  .sampling-effort-box i{
+    background-color: #e6e6e6;
+    opacity:0.75;
     color: #576c7e;
-    padding: 5px;
+    padding: 8px;
     border-radius:50%;
     cursor: pointer;
+    font-size:1.5em;
   }
 
   .toc-title{

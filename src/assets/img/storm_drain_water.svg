@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 40 50"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="storm_drain_water.svg"
+   width="40"
+   height="50"
+   inkscape:version="1.1.2 (b8e25be8, 2022-02-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1493"
+     inkscape:window-height="988"
+     id="namedview6"
+     showgrid="false"
+     inkscape:zoom="17.068323"
+     inkscape:cx="21.94123"
+     inkscape:cy="26.423217"
+     inkscape:window-x="402"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4"
+     inkscape:pagecheckerboard="0" />
+  <path
+     class="st0"
+     d="M 33.767772,42.5 H 6.2322276 c -1.5758294,0 -2.819905,-1.244076 -2.819905,-2.819905 v -29.36019 c 0,-1.5758293 1.2440756,-2.8199051 2.819905,-2.8199051 H 33.767772 c 1.575829,0 2.819905,1.2440758 2.819905,2.8199051 v 29.277251 c 0,1.57583 -1.244076,2.902844 -2.819905,2.902844 z"
+     id="path5"
+     style="fill:#a7b9c1;stroke-width:0.829384" />
+  <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
+  <path
+     id="path2"
+     inkscape:connector-curvature="0"
+     class="st1"
+     d="m 12.188841,27.7897 c 0,-3.004292 4.549356,-9.356224 6.695279,-12.274679 0.515021,-0.686695 1.716738,-0.686695 2.23176,0 2.145922,2.832618 6.695279,9.270387 6.695279,12.274679 C 27.811159,31.824034 24.291845,35 20,35 15.708154,35 12.188841,31.824034 12.188841,27.7897 Z m 4.291845,0 c 0,-0.343348 -0.343347,-0.686696 -0.686695,-0.686696 -0.429184,0 -0.686695,0.343348 -0.686695,0.686696 0,2.575107 2.23176,4.635193 4.978541,4.635193 0.429184,0 0.686695,-0.257511 0.686695,-0.686696 0,-0.343347 -0.343348,-0.686695 -0.686695,-0.686695 -2.060086,0.08584 -3.605151,-1.37339 -3.605151,-3.261802 z"
+     style="fill:#0071af;stroke-width:0.858369" />
+</svg>

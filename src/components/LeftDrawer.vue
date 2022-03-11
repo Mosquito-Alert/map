@@ -7,10 +7,13 @@ f<template>
       width="">
     <!-- Main menu -->
     <q-toolbar>
-      <fa-thin-button name="fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
-      <fa-thin-button name="fa-chart-scatter" :label="_('Models')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-chart-scatter" :label="_('Models')"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
-      <fa-thin-button-menu name="fa-globe" :label="_('Lang')">
+
+      <fa-thin-button name="fa-thin fa-share-nodes" :label="_('Share')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
         <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
           <span>Català</span>
         </div>
@@ -21,24 +24,22 @@ f<template>
           <span>English</span>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-share-nodes" :label="_('Share')"></fa-thin-button>
-      <fa-thin-button name="fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
-      <fa-thin-button name="fa-user" :label="_('Log in')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
 
     <!-- Drawer content -->
     <div class="toc-layers">
       <div class="toc-card filters">
-        <div class="toc-title" v-html="_('select')"></div>
-          <input type="text" name="localitat" :placeholder="_('placeholder location')"/> <button>></button>
-          <input type="text" name="hastag" :placeholder="_('placeholder hashtag')"/> <button>></button>
+        <div class="toc-title" v-html="_('Select')"></div>
+          <input type="text" name="localitat" :placeholder="_('Placeholder location')"/> <button>></button>
+          <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
       </div>
 
       <div class="toc-category">
-        <div class="toc-title" v-html="_('mosquitos')"></div>
+        <div class="toc-title" v-html="_('Mosquitos')"></div>
       </div>
 
-      <div class="category-boxes">
+      <div class="category-box">
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
             <div class="li-item"
@@ -46,62 +47,50 @@ f<template>
                   data-type="observations"
                   :data-code="code"
                   :class="initialClass(layer, code)">
-
-              <!-- <img v-if="initialClass(layer, code).includes('active')" :src="layer.icon" />
-              <img v-else :src="layer.icon_disabled"/> -->
             </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-              <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
-            </div>
-            <div class="separator" :class="{ 'active': layer.separator }"></div>
+            <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+            <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
+          </div>
+          <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
       </div>
 
       <!-- BITES AND BREEDING SITES-->
-      <div class="breeding-sites-container">
-        <div class="bites-column">
-          <!-- BITES -->
-          <div class="toc-category">
-            <div class="toc-title" v-html="_('bites')"></div>
-          </div>
-          <div class="category-boxes bites">
-              <div class="item-container" v-for="layer, code in bites" :key="code">
-                <div class="content">
-                  <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
-                      <i class="fa-thin fa-child"></i>
-                  </div>
-                  <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-                </div>
-
-              </div>
-
-          </div>
-        </div>
-        <div class="breeding-column">
-          <!-- BREEDING SITES -->
-          <div class="toc-category lf-mg">
-            <div class="toc-title" v-html="_('breeding sites')"></div>
-          </div>
-          <div class="category-boxes breeding n-lf-pad">
-              <div class="item-container" v-for="layer, code in breeding" :key="code">
-                  <div class="content">
-                    <div class="li-item" @click="filterData(layer, $event)" data-type="breeding" :data-code="code">
-                        <i class="fa-solid" :class="layer.icon"></i>
-                    </div>
-                    <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-                  </div>
-              </div>
-          </div>
-          <div class="separator"></div>
-        </div>
+      <div class="toc-category">
+          <div class="bites-title" v-html="_('Bites')"></div>
+          <div class="breeding-title" v-html="_('Breeding sites')"></div>
       </div>
+
+      <div class="category-box bites-and-breeding">
+          <!-- BITES -->
+          <div class="item-container" v-for="layer, code in bites" :key="code">
+            <div class="content bites">
+              <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
+                  <i class="fa-solid" :class="layer.faIcon"></i>
+              </div>
+              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+            </div>
+            <div class="separator" :class="{ 'active': layer.separator }"></div>
+          </div>
+
+          <!-- BREEDING SITES -->
+          <div class="item-container" v-for="layer, code in breeding" :key="code">
+              <div class="content breeding">
+                <div class="li-item" @click="filterData(layer, $event)" data-type="breeding" :data-code="code">
+                    <i class="fa-solid" :class="layer.faIcon"></i>
+                </div>
+                <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+              </div>
+              <div class="separator" :class="{ 'active': layer.separator }"></div>
+          </div>
+      </DIV>
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="_('other species')"></div>
+        <div class="toc-title" v-html="_('Other species')"></div>
       </div>
 
-      <div class="category-boxes other-species">
+      <div class="category-box other-species">
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
             <div class="li-item"
@@ -116,10 +105,15 @@ f<template>
         <div class="separator"></div>
       </div>
 
+      <div class="fill-space"></div>
       <!-- SAMPLIING EFFORT -->
-      <div class="category-boxes last">
-        <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
-      </div>
+        <div class="toc-category last">
+          <div class="toc-title" v-html="_('Sampling effort')"></div>
+          <i class="fa-thin fa-circle-info"></i>
+        </div>
+        <div class="category-box">
+          <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
+        </div>
     </div>
   </q-drawer>
 </template>
@@ -194,7 +188,7 @@ export default {
     })
 
     const otherObservations = computed(() => {
-      return $store.getters['app/layers'].other_observations
+      return $store.getters['app/layers'].otherObservations
     })
 
     const bites = computed(() => {
@@ -254,7 +248,7 @@ export default {
 
 <style scoped lang="scss">
 button.fa-thin-button, button.fa-thin-button-menu {
-  color: $dark-grey;
+  color: $toolbar-icons-color;
 }
 button.fa-thin-button.active, button.fa-thin-button-menu.active {
   color: $primary-color;
@@ -292,7 +286,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
     box-shadow: 2px 0 4px rgba(0,0,0,0.25), 1px 0 1px rgba(0,0,0,0.22);
     background: white;
     height: 100%;
-    width: 56px;
+    width: 60px;
     top: 0px;
     bottom: 0px;
     flex-direction: column;
@@ -310,16 +304,47 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 
 .toc-layers{
   overflow-y:auto;
+  display:flex;
+  flex-direction: column;
+}
+
+.toc-layers::-webkit-scrollbar {
+    height: 12px;
+    width: 4px;
+    background: #ccc;
+}
+
+.toc-layers::-webkit-scrollbar-thumb {
+    background: #EFA501;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #EFA501 #ccc;
+}
+
+.fill-space{
+  flex-grow:1;
 }
 
 .toc-card{
   padding: 10px 10px 0px 20px;
 }
 
+.toc-category{
+  display:flex;
+  align-items:center;
+}
 .toc-category,
 .toc-card.filters{
-  padding: 10px 10px 0px 25px;
+  padding: 20px 10px 0px 25px;
   margin-bottom: 10px;
+}
+
+.breeding-column .toc-category{
+  padding-left: 18px;
 }
 
 .toc-title{
@@ -328,9 +353,22 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   font-weight: 700;
   color: #666666;
 }
+.bites-title{
+  width:25%;
+}
 
+.bites-title,
+.breeding-title{
+  display:inline;
+  font-family: "Roboto";
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #666666;
+}
 input{
   width:80%;
+  border: 1px solid $grey-color;
+  line-height: 1.5rem;
 }
 
 .toc-layers input::placeholder {
@@ -353,21 +391,14 @@ input{
   margin-left: 3px;
 }
 
-.category-boxes{
+.category-box{
   display: flex;
   flex-wrap: wrap;
+  padding-left:10px;
 }
 
-.category-boxes.other-species{
+.category-box.other-species{
   margin-bottom:20px;
-}
-
-.bites-column{
-  width: 26%
-}
-
-.breeding-column{
-  width: 75%
 }
 
 .toc-layers ul li div{
@@ -381,45 +412,70 @@ input{
 .li-item i{
   display: block;
   margin:auto;
+  padding: 6px;
+  width:35px;
 }
 
-.bites .li-item:hover i,
-.bites .li-item.active i{
+.content.bites .li-item:hover i,
+.content.bites .li-item.active i{
+  padding:8px 6px;
+  border-radius:50%;
+  font-size:1.2rem;
+}
+
+.content.bites .li-item.active i{
   background-color:  #cc6677;
   color: #e2b3aa;
 }
 
-.bites .li-item i{
+.content.bites .li-item i{
+  background-color:  #e6e6e6;
+  color: white;
+  padding:8px 6px;
+  border-radius:50%;
+  font-size:1.2rem;
+}
+
+.content.breeding .li-item i{
   background-color: #e6e6e6;
   color: white;
-  padding:10px;
   border-radius:50%;
+  font-size:1.5em;
+  padding: 8px 6px;
 }
 
-.bites .item-container{
-  width:100%;
+.content.bites .li-item:hover i,
+.content.breeding .li-item:hover i{
+  background-color:  #a8b9c1;
+  color: white;
 }
 
-.breeding .item-container{
-  width:33%;
+.content.bites .li-item.active:hover i {
+  background-color:  #cc6677;
+  color: #e2b3aa;
 }
 
-.breeding .li-item:hover i,
-.breeding .li-item.active i{
+.content.breeding .li-item.active i {
   background-color:  #a8b9c1;
   color: #1072ad;
 }
 
-.breeding .li-item i{
+.content.breeding .li-item i{
   background-color: #e6e6e6;
   color: white;
-  padding:10px;
+  border-radius: 4px;
+  font-size:1.5em;
+}
+
+.content.breeding .li-item .fa-droplet-slash{
+  padding-left: 4px;
 }
 
 .item-container{
   // margin-right: 5px;
   display: flex;
-  width:25%;
+  width:24%;
+  position:relative;
 }
 
 .item-container.item-separator{
@@ -429,22 +485,22 @@ input{
 .item-container .content{
   display:flex;
   flex-direction:column;
-  align-items: center;
+  // align-items: center;
   width:100%;
 }
 
 .li-item{
-  text-align: center;
+  // text-align: center;
   text-transform: capitalize;
   height: 60px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
-  padding:5px;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
   display:flex;
   align-items: center;
   text-align: center;
   position: relative;
+  margin: 0 auto;
 }
 
 .li-item.active img{
@@ -453,11 +509,12 @@ input{
 
 .toc-item-name,
 .toc-item-latin-name{
-  font-size:0.6em;
+  font-size:0.8em;
   text-align: center;
-  line-height: 1;
+  line-height: 1.3em;
   font-family: 'Roboto';
-  color: #666666;
+  color: #000;
+  margin: auto;
 }
 
 .toc-item-name{
@@ -466,48 +523,39 @@ input{
 }
 
 .toc-item-latin-name{
-  margin-bottom:20px;
+  margin-bottom:10px;
   font-style: italic;
   font-family: 'Roboto';
-  color: #666666;
 }
 
 .toc-card-title{
   margin-bottom: 10px;
 }
 
-.breeding {
-  height: 90px;
-}
 .breeding-sites-container{
   display:flex;
   flex-direction:row;
 }
 
-.n-lf-pad,
-.category-boxes.n-lf-pad{
-  padding-left:0px;
-}
-
-// .li-item.separator::after{
-//   border-right:3px solid #c0c0c0;
-//   position:absolute;
-//   content:'';
-//   height: 45px;
-//   left: 75px;
-// }
-
-.vertical-separator{
-  position: absolute;
-  bottom: 20px;
-}
-
-.category-boxes.last{
+.toc-category.last{
   border-top: 1px solid #b0b0b0;
   margin-bottom:20px;
 }
 
+.toc-category.last i{
+  margin-left:10px;
+  background-color: #e6e6e6;
+  color: #576c7e;
+  border-radius:50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
 // LAYER ICONS
+.li-item{
+  background-size:35px;
+}
+
 .li-item.tiger,
 .li-item.yellow,
 .li-item.koreicus,
@@ -530,37 +578,56 @@ input{
   background-image: url($icon-unidentified-disabled);
 }
 
-.li-item.tiger.active,
-.li-item.tiger:hover{
+.li-item.tiger.active{
   background-image: url($icon-tiger);
 }
-.li-item.yellow.active,
-.li-item.yellow:hover{
+.li-item.yellow.active{
   background-image: url($icon-yellow);
 }
-.li-item.koreicus.active,
-.li-item.koreicus:hover{
+.li-item.koreicus.active{
   background-image: url($icon-koreicus);
 }
-.li-item.japonicus.active,
-.li-item.japonicus:hover{
+.li-item.japonicus.active{
   background-image: url($icon-japonicus);
 }
-.li-item.culex.active,
-.li-item.culex:hover{
+.li-item.culex.active{
   background-image: url($icon-culex);
 }
-.li-item.unidentified.active,
-.li-item.unidentified:hover{
+.li-item.unidentified.active{
   background-image: url($icon-unidentified);
 }
-.li-item.other.active,
-.li-item.other:hover{
+.li-item.other.active{
   background-image: url($icon-other);
 }
 
+.li-item.tiger:hover,
+.li-item.yellow:hover,
+.li-item.koreicus:hover,
+.li-item.japonicus:hover,
+.li-item.culex:hover,
+.li-item.unidentified:hover,
+.li-item.other:hover{
+  opacity:0.7;
+}
+
+.content.bites .li-item:hover,
+.content.breeding .li-item:hover{
+  opacity:0.7;
+}
+
+.content.bites .li-item:hover i,
+.content.breeding .li-item:hover i{
+  opacity:0.3;
+}
+
+.separator{
+  margin:5px 0 50px 0;
+  position: relative;
+  left:0px;
+  border-right: 2px solid transparent;
+}
 .separator.active{
   border-right: 2px solid #c0c0c0;
-  margin:5px 0 50px 0;
 }
+
 </style>

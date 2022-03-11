@@ -5,6 +5,7 @@
             :loadTilesWhileInteracting='true'
             @moveend='updateMap'
             style='height:100%'>
+
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
             :center='center'
@@ -18,19 +19,29 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox'>
-            <ol-source-xyz crossOrigin='anonymous' url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
+            <ol-source-xyz
+              crossOrigin='anonymous'
+              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
         <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observations_layer'>
-          <ol-source-vector :features='features' :format='geoJson' ref='observations_source'>
+        <ol-vector-layer ref='observationsLayer'>
+          <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
 
           </ol-source-vector>
         </ol-vector-layer>
 
-        <observation-popup :selectedFeature="selectedFeature"></observation-popup>
+        <ol-interaction-select @select="featureSelected"
+            :condition="selectCondition"
+            :filter="selectInteactionFilter">
+              <ol-style>
+                  <ol-style-icon :src="selectedIcon"></ol-style-icon>
+              </ol-style>
+          </ol-interaction-select>
+
+        <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
     </ol-map>
   </div>
@@ -52,14 +63,86 @@ export default defineComponent({
   name: 'TheMap',
   props: {},
   setup (props, context) {
+    const selectedId = ref('null')
+    const selectedFeat = ref('null')
+    const $store = useStore()
+    const selectConditions = inject('ol-selectconditions')
+    const selectCondition = selectConditions.singleClick
+
+    const autoPanPopup = function () {
+      const ol = map.value.map
+      const resolution = ol.getView().getResolution()
+      const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
+
+      setTimeout(() => {
+        const overlay = document.querySelector('.overlay-content')
+        if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
+        flyTo(coords, ol.getView().getZoom())
+      }, 100)
+    }
+
+    const selectInteactionFilter = (feature) => {
+      if ('cluster_id' in feature.values_.properties) {
+        worker.postMessage({
+          getClusterExpansionZoom: feature.values_.properties.cluster_id,
+          center: transform(
+            feature.values_.geometry.flatCoordinates,
+            'EPSG:3857', 'EPSG:4326'
+          )
+        })
+      } else {
+        return !('cluster_id' in feature.values_.properties)
+      }
+    }
+
+    const selectedIcon = ref('null')
+    const featureSelected = function (event) {
+      if (event.selected[0]) {
+        const feature = event.selected[0]
+        selectedFeat.value = feature
+        // check if click on cluster
+        if (feature.values_.properties.cluster_id) {
+          worker.postMessage({
+            getClusterExpansionZoom: feature.values_.properties.cluster_id,
+            center: transform(
+              feature.values_.geometry.flatCoordinates,
+              'EPSG:3857', 'EPSG:4326'
+            )
+          })
+        }
+        autoPanPopup()
+      }
+
+      // otherwise
+      if (event.selected.length) {
+        selectedId.value = event.selected[0].values_.properties.id
+        console.log(event.selected[0].values_.properties.c)
+        selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
+        $store.dispatch('map/selectFeature', event.selected[0].values_)
+      } else {
+        // if not selected then call worker to refresh features
+        selectedId.value = null
+        // $store.dispatch('map/selectFeature', {})
+        $store.commit('map/selectFeature', {})
+        const olmap = map.value.map
+        const bounds = olmap.getView().calculateExtent(olmap.getSize())
+        const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+        const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+        worker.postMessage({
+          bbox: southWest.concat(northEast),
+          zoom: olmap.getView().getZoom()
+        })
+      }
+    }
+
     let ready = false
     const worker = new Worker('TheMapWorker.js')
-    const $store = useStore()
     const map = ref('null')
+    const observationsSource = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const selectedFeature = computed(() => {
+    const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
     // const projection = ref('EPSG:4326')
@@ -134,32 +217,7 @@ export default defineComponent({
     }
     onMounted(function () {
       const ol = map.value.map
-      ol.on('click', function (event) {
-        const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-          if (feature.values_.properties.cluster_id) {
-            worker.postMessage({
-              getClusterExpansionZoom: feature.values_.properties.cluster_id,
-              center: transform(
-                feature.values_.geometry.flatCoordinates,
-                'EPSG:3857', 'EPSG:4326'
-              )
-            })
-          } else {
-            const resolution = ol.getView().getResolution()
-            const coords = [...feature.values_.geometry.flatCoordinates]
-            setTimeout(() => {
-              const overlay = document.querySelector('.overlay-content')
-              if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
-              flyTo(coords, ol.getView().getZoom())
-            }, 100)
-            $store.dispatch('map/selectFeature', feature.values_)
-          }
-          return feature
-        }, { hitTolerance: 10 })
-        if (!hit) {
-          $store.commit('map/selectFeature', {})
-        }
-      })
+
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           return true
@@ -168,19 +226,20 @@ export default defineComponent({
         else this.getTargetElement().style.cursor = ''
       })
     })
+
     const overrideStyleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
       // if ('point_count' in feature.values_.properties) {
         const size = feature.values_.properties.point_count
         let radius = 0
-        if (size < 100) radius = 16
-        if (size >= 100) radius = 20
-        if (size >= 1000) radius = 30
-        if (size >= 10000) radius = 45
+        if (size < 100) radius = 20
+        if (size >= 100) radius = 25
+        if (size >= 1000) radius = 35
+        if (size >= 10000) radius = 50
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgba(187, 208, 189, 0.7)'
+            color: 'rgba(187, 208, 189, 0.8)'
           }),
           stroke: new Stroke({
             color: 'rgba(201, 217, 204, 0.5)',
@@ -189,7 +248,7 @@ export default defineComponent({
           radius: radius
         })
         const text = new Text({
-          font: 'bold 12px Roboto',
+          font: 'bold 14px Roboto',
           text: size.toLocaleString(),
           fill: new Fill({
             color: 'white'
@@ -199,36 +258,83 @@ export default defineComponent({
         style.setText(text)
       } else {
         // This is no cluster, just an Icon
-        const observations = $store.getters['app/layers'].observations
-        const observationsKeys = Object.keys(observations)
-        const featureKey = observationsKeys.find(function (e) {
-          return (feature.values_.properties.c.includes(e)) ? e : ''
-        })
-        const iconUrl = observations[featureKey].icon
-        const tiger = new Icon({
-          src: iconUrl
-        })
-        style.setImage(tiger)
-        style.setText('')
+        if (feature.values_.properties.id === selectedId.value) {
+          console.log(feature.values_.properties.c)
+          const selectedIcon = new Icon({
+            src: $store.getters['app/selectedIcons'][feature.values_.properties.c]
+          })
+          style.setImage(selectedIcon)
+          style.setText('')
+        } else {
+          // Search inside observations layers
+          let observations = $store.getters['app/layers'].observations
+          let observationsKeys = Object.keys(observations)
+          let featureKey = observationsKeys.find(function (e) {
+            return observations[e].categories.includes(feature.values_.properties.c)
+          })
+
+          // If not found check on Bites
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].bites
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+
+          // If not found check on breeding sites
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].breeding
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+
+          // If not found check on otherObservations
+          if (!featureKey) {
+            observations = $store.getters['app/layers'].otherObservations
+            observationsKeys = Object.keys(observations)
+            featureKey = observationsKeys.find(function (e) {
+              return observations[e].categories.includes(feature.values_.properties.c)
+            })
+          }
+          // if no layer selected then featurekey is null
+          if (featureKey) {
+            const iconUrl = observations[featureKey].icon
+            const tiger = new Icon({
+              src: iconUrl
+            })
+            style.setImage(tiger)
+            style.setText('')
+          }
+        }
       }
     }
 
     function filter (data) {
+      $store.commit('map/selectFeature', {})
       data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(data)
     }
     return {
+      autoPanPopup,
       center,
       filter,
       zoom,
       map,
+      observationsSource,
       overrideStyleFunction,
       geoJson,
       features,
       updateMap,
-      selectedFeature,
+      popupContent,
       attributioncontrol: true,
-      view
+      view,
+      featureSelected,
+      selectCondition,
+      selectInteactionFilter,
+      selectedIcon
     }
   }
 })
@@ -248,6 +354,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background: none;
+    right:15px;
   }
   :deep(.ol-zoom) button {
     background: $primary-button-background;
@@ -260,7 +367,8 @@ export default defineComponent({
     font-size: 2em;
     cursor: pointer;
     padding: 0 0 20px 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    box-shadow: $box-shadow;
+    // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   :deep(.ol-zoom) button:hover {
     background: $primary-button-background-hover;

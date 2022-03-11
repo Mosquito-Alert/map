@@ -1,13 +1,14 @@
 <template>
   <div :class="timeSeriesClass">
     <div class="toggle-time">
-      <q-btn flat round dense icon="schedule" label="Sèrie temporal" @click="toggleTimeSeries"/>
+      <q-btn flat round dense icon="expand_more" :class="iconStatus" :label="_('Time series')" @click="toggleTimeSeries"/>
     </div>
   </div>
 </template>
 
 <script>
 import { defineComponent, computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'TimeSeries',
@@ -16,7 +17,12 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, { emit }) {
+    const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
+    const iconStatus = ref('null')
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
     // Timeseries properties
     const timeSeriesClass = computed(() => {
       let classes = 'text-black map-footer'
@@ -27,9 +33,12 @@ export default defineComponent({
     })
     const toggleTimeSeries = function () {
       timeIsVisible.value = !timeIsVisible.value
+      iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
       emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     return {
+      _,
+      iconStatus,
       timeSeriesClass,
       toggleTimeSeries,
       timeIsVisible
@@ -39,6 +48,15 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+  :deep(.q-btn.open span i){
+    transform: rotate(-180deg);
+    transition: ease all 1s;
+  }
+  :deep(.q-btn.closed span i){
+    transform: rotate(0deg);
+    transition: ease all 1s;
+  }
+
   .map-footer {
     flex: 1;
     width: 100%;

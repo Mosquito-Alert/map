@@ -23,7 +23,7 @@ export default {
 
 <style scoped lang="scss">
 button {
-  width: 56px;
+  width: 60px;
   height: 64px;
   background: white;
   border: none;
@@ -64,7 +64,7 @@ button {
     position: relative;
     left: -60px;
     height: 60px;
-    width: 56px;
+    width: 60px;
     top: -1px;
     visibility: hidden;
     opacity: 0;
@@ -79,7 +79,7 @@ button {
     border-left: 6px solid #999;
     transition: all 0.3s ease-in;
     overflow: visible;
-    padding: 5px 6px 5px 6px;
+    padding: 5px 6px 5px 10px;
     .menu {
       width: auto;
       left: 0px;

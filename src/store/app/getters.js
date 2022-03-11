@@ -1,3 +1,7 @@
+export const selectedIcons = state => {
+  return state.selectedIcons
+}
+
 export const layers = state => {
   return state.layers
 }
