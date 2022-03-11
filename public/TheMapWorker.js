@@ -3,7 +3,7 @@
 importScripts('supercluster.min.js')
 
 let all_data = []
-const LAYER_TYPES = ['observations', 'otherObservations', 'breeding_sites', 'storm_drain']
+const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'storm_drain', 'bites']
 const filters = { layers: [] }
 const DEBUG = true
 let index
