@@ -75,7 +75,7 @@ export default defineComponent({
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
 
       setTimeout(() => {
-        const overlay = document.querySelector('.overlay-content')
+        const overlay = document.querySelector('.parentContainer')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
         flyTo(coords, ol.getView().getZoom())
       }, 100)
