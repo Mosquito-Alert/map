@@ -230,13 +230,6 @@ export default defineComponent({
     text-transform: uppercase;
     font-size: 1.2em;
   }
-  .image.portrait {
-    height: $popup-height-with-image / 2;
-    text-align: center;
-    img{
-      height: 100%;
-    }
-  }
   .validation {
     height: 80px;
     width: 80px;
