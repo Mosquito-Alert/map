@@ -31,8 +31,6 @@ f<template>
     <div class="toc-layers">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
-          <q-search inverted color="orange" v-model="search" />
-          <q-input v-model = "search" />
           <input type="text" name="localitat" :placeholder="_('Placeholder location')"/> <button>></button>
           <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
       </div>
@@ -126,17 +124,14 @@ import { useStore } from 'vuex'
 import FaThinButton from 'components/FaThinButton.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
-import { QSearch } from 'quasar-framewok'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, QSearch },
+  components: { FaThinButton, FaThinButtonMenu, SamplingEffort },
   emits: ['filter'],
   setup (props, context) {
-    const search = ref(null)
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
-
     const $store = useStore()
 
     const filterData = function (layer, event) {
@@ -231,9 +226,7 @@ export default {
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', visible: true })
     }
-
     return {
-      search,
       ca,
       es,
       en,
