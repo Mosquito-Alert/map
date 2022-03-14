@@ -168,7 +168,7 @@ export default defineComponent({
     }
   }
   .image.portrait {
-    max-height: $popup-height-with-image / 2;
+    height: $popup-height-with-image / 2;
     text-align: center;
     img{
       height: 100%;

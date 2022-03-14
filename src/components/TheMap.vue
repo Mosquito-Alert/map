@@ -239,10 +239,10 @@ export default defineComponent({
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgba(187, 208, 189, 0.8)'
+            color: 'rgb(127, 153, 136, 1)'
           }),
           stroke: new Stroke({
-            color: 'rgba(201, 217, 204, 0.5)',
+            color: 'rgb(127, 153, 136, 0.5)',
             width: 15
           }),
           radius: radius

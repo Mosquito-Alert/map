@@ -33,7 +33,7 @@ export const selectFeature = (context, feature) => {
     }
 
     json.title = titles[json.private_webmap_layer]
-    json.validation = (titles[json.private_webmap_layer].indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
+    json.validation = (json.private_webmap_layer.toLowerCase().indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
 
     // check img url
     let preUrl = ''
