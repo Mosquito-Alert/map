@@ -301,7 +301,11 @@ export default defineComponent({
           }
           // if no layer selected then featurekey is null
           if (featureKey) {
-            const iconUrl = observations[featureKey].icon
+            console.log(feature.values_.properties.c)
+            let iconUrl = observations[featureKey].icon
+            if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
+              iconUrl = observations[featureKey].iconConflict
+            }
             const tiger = new Icon({
               src: iconUrl
             })

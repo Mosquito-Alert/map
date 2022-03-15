@@ -5,8 +5,12 @@ export default function () {
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
   }
-
+  // first language is default
+  const allowedLangs = ['en', 'es', 'ca']
+  const browserLang = navigator.language.toLowerCase().substring(0, 2)
+  const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
   return {
+    lang: defaultLang,
     DEFAULTS: {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
@@ -57,18 +61,18 @@ export default function () {
           icon: require('../../assets/img/marker_yellow.svg')
         },
         japonicus: {
-          categories: ['japonicus_probable', 'japonicus_confirmed'],
+          categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Japonicus mosquito',
           scientific_name: 'Aedes japonicus',
           icon: require('../../assets/img/marker_japonicus.svg'),
-          iconConflict: require('../../assets/img/marker_koreicus_japonicus.svg')
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg')
         },
         koreicus: {
-          categories: ['koreicus_probable', 'koreicus_confirmed'],
+          categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Koreicus mosquito',
           scientific_name: 'Aedes koreicus',
           icon: require('../../assets/img/marker_koreicus.svg'),
-          iconConflict: require('../../assets/img/marker_koreicus_japonicus.svg')
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg')
         },
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
