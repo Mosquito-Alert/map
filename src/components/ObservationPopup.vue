@@ -220,6 +220,9 @@ export default defineComponent({
 }
 
 .info {
+  label {
+    font-weight: bold;
+  }
   padding: $popup-padding-info;
   padding-bottom: 0px;
   display: flex;
