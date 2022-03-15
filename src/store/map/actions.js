@@ -37,7 +37,7 @@ export const selectFeature = (context, feature) => {
 
     // check img url
     let preUrl = ''
-    if (process.env.DEV) {
+    if (process.env.DEV && json.photo_url) {
       preUrl = '//webserver.mosquitoalert.com'
     }
     json.photo_url = preUrl + json.photo_url
