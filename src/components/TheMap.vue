@@ -50,11 +50,10 @@
 <script>
 import { defineComponent, computed, ref, onMounted, inject } from 'vue'
 import { useStore } from 'vuex'
-import { transform } from 'ol/proj.js'
+import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
 export default defineComponent({
@@ -69,15 +68,19 @@ export default defineComponent({
     const selectCondition = selectConditions.singleClick
 
     const fitFeature = function (location) {
-      console.log(location)
+      const bb = location.boundingbox
+      const extent = [bb[2], bb[0], bb[3], bb[1]]
       if (location.geojson.type.toLowerCase().indexOf('polygon') > -1) {
-        const feat = new Feature({
-          geometry: new Polygon(location.geojson.coordinates)
-        })
-        const extent = feat.getGeometry().getExtent()
+        // const feat = new Feature({
+        //   geometry: new Polygon(location.geojson.coordinates)
+        // })
+        // const extent = feat.getGeometry().getExtent()
         console.log(extent)
         // map.value.map.getView().fit(extent, { minResolution: 50 })
-        map.value.map.getView().fit([2, 41, 3, 42], { minResolution: 50 })
+        map.value.map.getView().fit(
+          transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
+          { minResolution: 50, nearest: true }
+        )
       }
     }
     const autoPanPopup = function () {
