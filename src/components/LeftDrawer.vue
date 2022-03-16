@@ -1,4 +1,4 @@
-f<template>
+<template>
   <q-drawer
       show-if-above
       side="left"
@@ -31,7 +31,7 @@ f<template>
     <div class="toc-layers">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
-          <input type="text" name="localitat" :placeholder="_('Placeholder location')"/> <button>></button>
+          <search-location @locationSelected="locationSelected"/>
           <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
       </div>
 
@@ -136,10 +136,11 @@ import { useStore } from 'vuex'
 import FaThinButton from 'components/FaThinButton.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
+import SearchLocation from 'components/SearchLocation.vue'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu, SamplingEffort },
-  emits: ['filter'],
+  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
+  emits: ['filter', 'locationSelected'],
   setup (props, context) {
     const ca = ref(null)
     const es = ref(null)
@@ -238,6 +239,11 @@ export default {
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', visible: true })
     }
+
+    const locationSelected = function (location) {
+      context.emit('locationSelected', location)
+    }
+
     return {
       ca,
       es,
@@ -252,6 +258,7 @@ export default {
       otherObservations,
       mouseEnter,
       mouseOut,
+      locationSelected,
       _
     }
   }
@@ -365,6 +372,8 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   font-weight: 700;
   color: #666666;
 }
+
+.toc-title .input
 .bites-title{
   width:25%;
 }

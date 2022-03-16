@@ -1,0 +1,101 @@
+<template>
+  <div>
+    <input type="search" v-model="term" name="localitat" :placeholder="_('Placeholder location')"/>
+        <button @click="search">></button>
+
+    <div>
+      <ul v-for="result, id in results" :key="id" class="result">
+          <li @click="goLocation(result)"> {{result.display_name}} </li>
+      </ul>
+    </div>
+    <div v-if="noResults">
+        Sorry, but no results were found. I blame Apple.
+    </div>
+
+    <div v-if="searching">
+        <i>{{ _('Searching ...') }}</i>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue'
+import { useStore } from 'vuex'
+
+export default {
+  props: [],
+  emits: ['locationSelected'],
+  setup (props, context) {
+    const term = ref(null)
+    const results = ref(null)
+    const noResults = ref(null)
+    const searching = ref(null)
+
+    results.value = []
+    noResults.value = false
+    searching.value = false
+
+    const $store = useStore()
+
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
+    const search = function () {
+      this.searching = true
+      fetch(`https://nominatim.openstreetmap.org/search?q=${term.value}&format=json&polygon_geojson=1&addressdetails=1`)
+        .then(res => res.json())
+        .then(res => {
+          this.searching = false
+          this.results = res
+          this.noResults = this.results.length === 0
+        })
+    }
+
+    const goLocation = function (result) {
+      console.log(result)
+      // Emit event with coords so map can fly to coords
+      context.emit('locationSelected', result)
+    }
+
+    return {
+      _,
+      term,
+      results,
+      noResults,
+      searching,
+      search,
+      goLocation
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+input{
+  width:80%;
+  border: 1px solid $grey-color;
+  line-height: 1.5rem;
+}
+
+.toc-layers input::placeholder {
+  color: #666666;
+  font-size: 0.9em;
+}
+
+.toc-layers .filters input{
+  padding: 3px 10px;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.toc-layers .filters button{
+  padding: 3px 10px;
+  background-color: $primary-button-background;
+  color: white;
+  border: 0px;
+  border-radius:5px;
+  margin-left: 3px;
+}
+
+</style>

@@ -1,7 +1,7 @@
 <template>
   <q-layout view='hHh lpR fFf'>
     <site-header/>
-    <left-drawer @filter='filter'/>
+    <left-drawer @filter='filter' @locationSelected="locationSelected"/>
     <!-- <q-page-container>
       <router-view />
     </q-page-container> -->
@@ -50,6 +50,10 @@ export default {
         }, 1)
       }
     }
+    const locationSelected = function (location) {
+      map.value.fitFeature(location)
+    }
+
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', visible: true })
@@ -65,7 +69,7 @@ export default {
       return $store.getters['app/getModals'].info
     })
     return {
-      filter,
+      locationSelected,
       infoModalVisible,
       map,
       resizeMap
