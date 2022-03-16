@@ -6,6 +6,10 @@ export const layers = state => {
   return state.layers
 }
 
+export const getLayers = state => {
+  return state.layers
+}
+
 export const initialLayers = state => {
   return state.DEFAULTS.LAYERS
 }
@@ -29,4 +33,8 @@ export const getLang = state => {
 
 export const getModals = state => {
   return state.modals
+}
+
+export const getWorker = state => {
+  return state.worker
 }
