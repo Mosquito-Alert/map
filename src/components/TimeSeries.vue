@@ -9,7 +9,7 @@
           <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
           <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i> {{ _(set.label) }}
         </div>
-        <q-btn icon="event" class="calendar-button" :label="_('select')">
+        <q-btn icon="event" class="calendar-button" :label="_('Select')">
           <q-popup-proxy
             @before-show="updateProxy"
             cover
