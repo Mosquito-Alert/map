@@ -241,7 +241,22 @@ export default {
     }
 
     const locationSelected = function (location) {
-      context.emit('locationSelected', location)
+      const bb = location.boundingbox
+      const bounding = [bb[2], bb[0], bb[3], bb[1]]
+      const geojson = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              boundingBox: bounding
+            },
+            geometry: location.geojson
+          }
+        ]
+      }
+
+      context.emit('locationSelected', geojson)
     }
 
     return {

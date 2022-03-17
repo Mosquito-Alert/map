@@ -1,7 +1,8 @@
 <template>
   <div>
-    <input type="search" v-model="term" name="localitat" :placeholder="_('Placeholder location')"/>
-        <button @click="search">></button>
+    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
+    <!-- <input type="search" v-model="term" name="localitat" :placeholder="_('Placeholder location')"/> -->
+        <!-- <button @click="search">></button> -->
 
     <div>
       <ul v-for="result, id in results" :key="id" class="result">
@@ -42,19 +43,17 @@ export default {
     }
 
     const search = function () {
-      this.searching = true
+      searching.value = true
       fetch(`https://nominatim.openstreetmap.org/search?q=${term.value}&format=json&polygon_geojson=1&addressdetails=1`)
         .then(res => res.json())
         .then(res => {
-          this.searching = false
-          this.results = res
-          this.noResults = this.results.length === 0
+          searching.value = false
+          results.value = res
+          noResults.value = results.value.length === 0
         })
     }
 
     const goLocation = function (result) {
-      console.log(result)
-      // Emit event with coords so map can fly to coords
       context.emit('locationSelected', result)
     }
 

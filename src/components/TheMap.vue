@@ -33,6 +33,12 @@
           </ol-source-vector>
         </ol-vector-layer>
 
+        <!-- ADMINISTRATIVE LIMITS LAYER -->
+        <ol-vector-layer ref='locationLayer'>
+          <ol-source-vector :features="locationFeature" :format='geoJson'>
+          </ol-source-vector>
+        </ol-vector-layer>
+
         <ol-interaction-select @select="featureSelected"
           :condition="selectCondition"
           :filter="selectInteactionFilter">
@@ -54,6 +60,7 @@ import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+// import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
 export default defineComponent({
@@ -66,23 +73,37 @@ export default defineComponent({
     const $store = useStore()
     const selectConditions = inject('ol-selectconditions')
     const selectCondition = selectConditions.singleClick
+    const selectedIcon = ref('null')
+    const features = ref([])
+    const locationLayer = ref('null')
+    const locationFeature = ref()
+    let ready = false
+    const worker = new Worker('TheMapWorker.js')
+    const map = ref('null')
+    const observationsSource = ref('null')
+    const view = ref('null')
+    const format = inject('ol-format')
+    const geoJson = new format.GeoJSON()
 
     const fitFeature = function (location) {
-      const bb = location.boundingbox
-      const extent = [bb[2], bb[0], bb[3], bb[1]]
-      if (location.geojson.type.toLowerCase().indexOf('polygon') > -1) {
-        // const feat = new Feature({
+      // const bb = location.boundingbox
+      // const extent = [bb[2], bb[0], bb[3], bb[1]]
+      const extent = location.features[0].properties.boundingBox
+      console.log(extent)
+      map.value.map.getView().fit(
+        transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
+        { minResolution: 50, nearest: true }
+      )
+
+      if (location.features[0].geometry.type.toLowerCase().indexOf('polygon') > -1) {
+        // const Feat = new Feature({
         //   geometry: new Polygon(location.geojson.coordinates)
         // })
-        // const extent = feat.getGeometry().getExtent()
-        console.log(extent)
-        // map.value.map.getView().fit(extent, { minResolution: 50 })
-        map.value.map.getView().fit(
-          transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
-          { minResolution: 50, nearest: true }
-        )
+        console.log(location)
+        locationFeature.value = location
       }
     }
+
     const autoPanPopup = function () {
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
@@ -108,7 +129,6 @@ export default defineComponent({
       }
     }
 
-    const selectedIcon = ref('null')
     const featureSelected = function (event) {
       if (event.selected[0]) {
         const feature = event.selected[0]
@@ -164,7 +184,6 @@ export default defineComponent({
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
-    const features = ref([])
 
     worker.onmessage = function (event) {
       if (event.data.ready) {
@@ -344,6 +363,8 @@ export default defineComponent({
       zoom,
       map,
       observationsSource,
+      locationLayer,
+      locationFeature,
       overrideStyleFunction,
       geoJson,
       features,
