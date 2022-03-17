@@ -49,7 +49,7 @@ f<template>
                   :class="initialClass(layer, code)">
             </div>
             <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
+            <!-- <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div> -->
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
