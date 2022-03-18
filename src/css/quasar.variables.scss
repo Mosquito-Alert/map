@@ -11,7 +11,7 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
-$left-drawer-width: 450px;
+$left-drawer-width: 350px;
 $primary-color: #efa501;
 $grey-color: #d5d5d5;
 $dark-grey: #666;
@@ -28,20 +28,22 @@ $primary-button-text-hover: white;
 $box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
 // POP UP
 $popup-border-radius: 25px;
-$popup-width: 40vw;
+$popup-width-landscape: 40vw;
+$popup-width-portrait: 60vw;
 $half-popup-width: 25vw;
 $popup-height: 50vh; // MAX height when there is no image
-$popup-height-with-image: 75vh; // MAX height when there is an image
+$popup-height-with-image-landscape: 55vh; // MAX height when there is an image
+$popup-height-with-image-portrait: 55vh; // MAX height when there is an image
 $popup-vertical-offset: 25px;
 $popup-padding-info: 25px;
 
 $li-item-padding: 5px;
-$icon-tiger: '../assets/img/marker_tiger.svg';
+$icon-tiger: '../assets/img/marker_tiger30_40.svg';
 $icon-yellow: '../assets/img/marker_yellow.svg';
 $icon-koreicus: '../assets/img/marker_koreicus.svg';
 $icon-japonicus: '../assets/img/marker_japonicus.svg';
 $icon-culex: '../assets/img/marker_culex.svg';
-$icon-unidentified: '../assets/img/marker_unidentified.svg';
+$icon-unidentified: '../assets/img/marker_tiger30_40.svg';
 $icon-other: '../assets/img/marker_other.svg';
 $icon-mosquito-disabled: '../assets/img/marker_mosquito_disabled.svg';
 $icon-unidentified-disabled: '../assets/img/marker_unidentified_disabled.svg';

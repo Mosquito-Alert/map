@@ -72,7 +72,7 @@ export default defineComponent({
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
       setTimeout(() => {
-        const overlay = document.querySelector('.overlay-content')
+        const overlay = document.querySelector('.parentContainer')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
         flyTo(coords, ol.getView().getZoom())
       }, 100)
@@ -239,10 +239,10 @@ export default defineComponent({
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgba(187, 208, 189, 0.8)'
+            color: 'rgb(127, 153, 136, 1)'
           }),
           stroke: new Stroke({
-            color: 'rgba(201, 217, 204, 0.5)',
+            color: 'rgb(127, 153, 136, 0.5)',
             width: 15
           }),
           radius: radius
@@ -301,7 +301,11 @@ export default defineComponent({
           }
           // if no layer selected then featurekey is null
           if (featureKey) {
-            const iconUrl = observations[featureKey].icon
+            console.log(feature.values_.properties.c)
+            let iconUrl = observations[featureKey].icon
+            if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
+              iconUrl = observations[featureKey].iconConflict
+            }
             const tiger = new Icon({
               src: iconUrl
             })

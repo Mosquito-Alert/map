@@ -6,28 +6,30 @@
       :offset="[0, -35]"
       v-if="selectedFeature">
     <template v-slot="slotProps">
-      <div :class="getPopupClass(selectedFeature)">
-        {{ slotProps.empty }}
-        <div class="image" :class="(imageRatio > 1)?'landscape':'portrait'" v-if="selectedFeature.photo_url">
-          <img @load="imageLoaded" :src="selectedFeature.photo_url">
-        </div>
-        <div class="info">
-          <div>
-            <label class="popup-title">{{ _(selectedFeature.title) }}</label>
-            <p class="title"></p>
-            <label>{{ _('Date') }}</label>:
-            <p class="date" v-html="formatData(selectedFeature)"></p>
-            <p
-              v-if="selectedFeature.edited_user_notes"
-              class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.edited_user_notes }}</p>
+      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.1) ? 'portrait':''">
+        <div :class="getPopupClass(selectedFeature)">
+          {{ slotProps.empty }}
+          <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
+            <img @load="imageLoaded" :src="selectedFeature.photo_url">
           </div>
-          <div>
-            <div :class="getValidationClass(selectedFeature)">
-              <i :class="getValidationIcon(selectedFeature)"></i>
+          <div class="info">
+            <div>
+              <label class="popup-title">{{ _(selectedFeature.title) }}</label>
+              <p class="title"></p>
+              <label>{{ _('Date') }}</label>:
+              <p class="date" v-html="formatData(selectedFeature)"></p>
+              <p
+                v-if="selectedFeature.edited_user_notes"
+                class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.edited_user_notes }}</p>
             </div>
-            <div class="validation-string">
-              <div>{{ getValidationTypeTitle(selectedFeature) }}</div>
-              {{ _(selectedFeature.validation) }}
+            <div>
+              <div :class="getValidationClass(selectedFeature)">
+                <i :class="getValidationIcon(selectedFeature)"></i>
+              </div>
+              <div class="validation-string">
+                <div>{{ getValidationTypeTitle(selectedFeature) }}</div>
+                {{ _(selectedFeature.validation) }}
+              </div>
             </div>
           </div>
         </div>
@@ -47,17 +49,23 @@ export default defineComponent({
   setup (props, context) {
     const $store = useStore()
     const imageRatio = ref('null')
+    const ratio = ref('null')
+    ratio.value = 0
+    imageRatio.value = 0
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
     const imageLoaded = function (e) {
-      imageRatio.value = (e.target.naturalWidth / e.target.naturalHeight)
-      console.log(imageRatio.value)
+      ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
+      imageRatio.value = (ratio.value > 1.1) ? 'landscape' : 'portrait'
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
-      if (feature.photo_url) return 'overlay-content'
-      else return 'overlay-content small'
+      if (feature.photo_url) return 'overlay-content ' + imageRatio.value
+      else {
+        ratio.value = 0
+        return 'overlay-content small'
+      }
     }
     const getValidationIcon = function (feature) {
       if (feature.validation_type === 'human') return 'fa-light fa-users'
@@ -78,6 +86,7 @@ export default defineComponent({
 
     return {
       _,
+      ratio,
       imageRatio,
       imageLoaded,
       formatData,
@@ -115,8 +124,71 @@ export default defineComponent({
 .popup-title{
   text-transform: uppercase;
 }
+.overlay-content.landscape .image{
+  max-height: $popup-height-with-image-landscape / 2;
+  overflow: hidden;
+  border-top-left-radius: $popup-border-radius;
+  border-top-right-radius: $popup-border-radius;
+}
+
+.overlay-content.landscape .image img{
+  width: 100%;
+  object-fit: fill;
+  border-top-left-radius: $popup-border-radius;
+  border-top-right-radius: $popup-border-radius;
+}
+
+.overlay-content.portrait .image{
+  height: $popup-height-with-image-portrait;
+  text-align: center;
+}
+
+.overlay-content.portrait .image img{
+  height: 100%;
+  border-top-left-radius: $popup-border-radius;
+  border-bottom-left-radius: $popup-border-radius;
+}
+
+.overlay-content.landscape {
+    max-width: $popup-width-landscape;
+}
+
+.overlay-content.portrait {
+  max-width: calc(#{$popup-width-portrait} - #{$left-drawer-width});
+  display:flex;
+  flex-direction: row;
+}
+
+.overlay-content.landscape::after {
+  content: " ";
+  border: $popup-vertical-offset solid transparent;
+  border-top-color: white;
+  width: $popup-vertical-offset * 2;
+  position: relative;
+  top: #{2*$popup-padding-info};
+  left: 0;
+  margin:auto;
+  align-items: center;
+}
+
+.parentContainer {
+  // display:flex;
+  // flex-direction: column;
+  text-align: center;
+}
+.parentContainer.portrait::after{
+  content: ' ';
+  border: $popup-vertical-offset solid transparent;
+  border-top-color: white;
+  width: $popup-vertical-offset * 2;
+  position: relative;
+  top: $popup-padding-info;
+  left: 0;
+  margin:auto;
+  align-items: center;
+}
+
 .overlay-content {
-  max-width: $popup-width;
   background: white;
   position:relative;
   display: flex;
@@ -124,18 +196,9 @@ export default defineComponent({
   border-radius: $popup-border-radius;
   cursor: default;
   font-size: 1em;
-  &:after {
-    content: " ";
-    border: $popup-vertical-offset solid transparent;
-    border-top-color: white;
-    width: $popup-vertical-offset * 2;
-    position: relative;
-    top: #{2*$popup-padding-info};
-    left: 0;
-    margin:auto;
-  }
   &.small {
     &:after {
+      content: ' ';
       border: $popup-vertical-offset solid transparent;
       border-top-color: white;
       width: $popup-vertical-offset * 2;
@@ -150,107 +213,118 @@ export default defineComponent({
         max-height: calc(#{$popup-height} - #{50px});
         overflow: auto;
         padding-right: 20px;
+        text-align:left;
       }
-    }
-  }
-  .image.landscape {
-    max-height: $popup-height-with-image / 2;
-    overflow: hidden;
-    // display: flex;
-    // align-items: center;
-    border-top-left-radius: $popup-border-radius;
-    border-top-right-radius: $popup-border-radius;
-    img{
-      width: 100%;
-      object-fit: fill;
-      border-top-left-radius: $popup-border-radius;
-      border-top-right-radius: $popup-border-radius;
-    }
-  }
-  .image.portrait {
-    max-height: $popup-height-with-image / 2;
-    text-align: center;
-    img{
-      height: 100%;
-    }
-  }
-  .info {
-    padding: $popup-padding-info;
-    padding-bottom: 0px;
-    display: flex;
-    flex: 50%;
-    .title {
-      text-transform: uppercase;
-      font-size: 1.2em;
-    }
-    label {
-      font-weight: bold;
-    }
-    &>div:first-child {
-      width: 60%;
-      max-height: calc(#{$popup-height-with-image / 2} - #{$popup-padding-info});
-      overflow: auto;
-      padding-right:20px;
-    }
-    &>div:last-child {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      .validation-string {
-        padding-top: 10px;
-        text-transform: uppercase;
-        text-align: center;
-        &>div {
-          font-weight: bold;
-        }
-      }
-      .validation {
-        height: 80px;
-        width: 80px;
-        border-radius: 50%;
-        color: white;
-        &.confirmed {
-          background: #22a973;
-        }
-        &.probable {
-          background: #8fd3b8;
-        }
-        i {
-          height: 80px;
-          width: 80px;
-          font-size: 3em;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          position: relative;
-          .fa-check {
-            background: #f6db63;
-            color: white;
-            border-radius: 50%;
-            height: 25px;
-            width: 25px;
-            font-size: 0.3em;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            &::before {
-              position: relative;
-              top: 1px;
-            }
-          }
-        }
-      }
-      width: 40%;
     }
   }
 }
 
-.info div{
-  // padding-right:15px;
+.info {
+  label {
+    font-weight: bold;
+  }
+  padding: $popup-padding-info;
+  padding-bottom: 0px;
+  display: flex;
+  flex-direction: row;
+  text-align:left;
+  width: 100%;
+  .title {
+    text-transform: uppercase;
+    font-size: 1.2em;
+  }
+  .validation {
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    color: white;
+    &.confirmed {
+      background: #22a973;
+    }
+    &.probable {
+      background: #8fd3b8;
+    }
+    i {
+      height: 80px;
+      width: 80px;
+      font-size: 3em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      .fa-check {
+        background: #f6db63;
+        color: white;
+        border-radius: 50%;
+        height: 25px;
+        width: 25px;
+        font-size: 0.3em;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        &::before {
+          position: relative;
+          top: 1px;
+        }
+      }
+    }
+  }
 }
+.landscape .info,
+.small .info {
+  width: 100%;
+  &>div:first-child {
+    text-align:left;
+    width: 60%;
+    max-height: calc(#{$popup-height-with-image-landscape / 2} - #{$popup-padding-info});
+    overflow: auto;
+    padding-right:20px;
+  }
+  &>div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width:40%;
+    .validation-string {
+      padding-top: 10px;
+      text-transform: uppercase;
+      text-align: center;
+      &>div {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.portrait .info {
+  display:flex;
+  flex-direction:column;
+  flex-grow: 1;
+  &>div:first-child {
+    max-height: calc(#{$popup-height-with-image-landscape / 1.5});
+    overflow: auto;
+    padding-top:20px;
+    text-align:left;
+  }
+  &>div:last-child {
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .validation-string {
+      padding-top: 10px;
+      text-transform: uppercase;
+      text-align: center;
+      &>div {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
 </style>

@@ -49,7 +49,7 @@ f<template>
                   :class="initialClass(code, 'observations')">
             </div>
             <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
+            <!-- <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div> -->
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
@@ -417,10 +417,6 @@ input{
   text-align:center;
 }
 
-.li-item{
-  width:60px;
-}
-
 .li-item i{
   display: block;
   margin:auto;
@@ -428,7 +424,6 @@ input{
   width:35px;
 }
 
-.content.bites .li-item:hover i,
 .content.bites .li-item.active i{
   padding:8px 6px;
   border-radius:50%;
@@ -454,17 +449,6 @@ input{
   border-radius:50%;
   font-size:1.5em;
   padding: 8px 6px;
-}
-
-.content.bites .li-item:hover i,
-.content.breeding .li-item:hover i{
-  background-color:  #a8b9c1;
-  color: white;
-}
-
-.content.bites .li-item.active:hover i {
-  background-color:  #cc6677;
-  color: #e2b3aa;
 }
 
 .content.breeding .li-item.active i {
@@ -504,7 +488,8 @@ input{
 .li-item{
   // text-align: center;
   text-transform: capitalize;
-  height: 60px;
+  width:50px;
+  height: 50px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
@@ -565,7 +550,7 @@ input{
 
 // LAYER ICONS
 .li-item{
-  background-size:35px;
+  // background-size:30px;
 }
 
 .li-item.tiger,
@@ -622,14 +607,9 @@ input{
   opacity:0.7;
 }
 
-.content.bites .li-item:hover,
-.content.breeding .li-item:hover{
-  opacity:0.7;
-}
-
 .content.bites .li-item:hover i,
 .content.breeding .li-item:hover i{
-  opacity:0.3;
+  opacity:0.7;
 }
 
 .separator{
