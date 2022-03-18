@@ -119,9 +119,8 @@ function thereAreFilters () {
 
 function filter (params, code, layers) {
   addFilter(params)
-  let data = all_data
+  let data = []
   if (thereAreFilters()) {
-    data = all_data
     // Filter the data
     data = all_data.filter(feature => {
       // If it is a layer and the feature has a validation string
