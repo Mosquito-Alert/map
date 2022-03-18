@@ -46,7 +46,7 @@ f<template>
                   @click="filterData(layer, $event)"
                   data-type="observations"
                   :data-code="code"
-                  :class="initialClass(layer, code)">
+                  :class="initialClass(code, 'observations')">
             </div>
             <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
@@ -65,7 +65,13 @@ f<template>
           <!-- BITES -->
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
-              <div class="li-item" @click="filterData(layer, $event)" data-type="bites" :data-code="code">
+              <div
+                class="li-item"
+                @click="filterData(layer, $event)"
+                data-type="bites"
+                :data-code="code"
+                :class="initialClass(code, 'bites')"
+                >
                   <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -76,7 +82,13 @@ f<template>
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
-                <div class="li-item" @click="filterData(layer, $event)" data-type="breeding" :data-code="code">
+                <div
+                  class="li-item"
+                  @click="filterData(layer, $event)"
+                  data-type="breeding"
+                  :data-code="code"
+                  :class="initialClass(code, 'breeding')"
+                  >
                     <i class="fa-solid" :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -97,7 +109,7 @@ f<template>
               @click="filterData(layer, $event)"
               data-type="other_observations"
               :data-code="code"
-              :class="initialClass(layer, code)">
+              :class="initialClass(code, 'other')">
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -168,10 +180,10 @@ export default {
       obj.querySelector('img').src = layer.icon_disabled
     }
 
-    const initialClass = function (layer, code) {
+    const initialClass = function (code, type) {
       const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
-      const isInitial = initialLayers.find(layer => {
-        return layer.code === code
+      const isInitial = initialLayers.find(initialLayer => {
+        return initialLayer.code === code && initialLayer.type === type
       })
 
       let cls = code
