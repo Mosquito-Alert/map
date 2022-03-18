@@ -625,7 +625,7 @@ input{
 }
 
 .separator{
-  margin:5px 0 50px 0;
+  margin:6px 0 45px 0;
   position: relative;
   left:0px;
   border-right: 2px solid transparent;

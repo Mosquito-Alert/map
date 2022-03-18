@@ -1,6 +1,5 @@
 <template>
   <div>
-    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
      <!-- <q-select
         outlined
         bottom-slots
@@ -20,7 +19,7 @@
           Field hint
         </template>
       </q-select> -->
-
+    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
     <div>
       <ul v-for="result, id in results" :key="id" class="result">
           <li @click="filterLocation(result)"> {{result.display_name}} </li>
@@ -35,7 +34,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { ref } from 'vue'
 import { useStore } from 'vuex'

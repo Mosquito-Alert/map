@@ -24,6 +24,18 @@ export const selectFeature = (context, feature) => {
     breeding_site_not_yet_filtered: 'Breeding_site_not_yet_filtered',
     breeding_site_other: 'Breeding site other'
   }
+  const latinNames = {
+    mosquito_tiger_confirmed: 'Aedes albopictus',
+    mosquito_tiger_probable: 'Aedes albopictus',
+    yellow_fever_confirmed: 'Aedes aegypti',
+    yellow_fever_probable: 'Aedes aegypti',
+    japonicus_confirmed: 'Aedes japonicus',
+    japonicus_probable: 'Aedes japonicus',
+    culex_confirmed: 'Culex pipens',
+    culex_probable: 'Culex pipens',
+    koreicus_confirmed: 'Aedes koreicus',
+    koreicus_probable: 'Aedes koreicus'
+  }
 
   fetch(url).then(response => response.json()).then(json => {
     json.coordinates = feature.geometry.flatCoordinates
@@ -31,7 +43,9 @@ export const selectFeature = (context, feature) => {
     if (!('validation_type' in json)) {
       json.validation_type = 'human'
     }
-
+    if (json.private_webmap_layer in latinNames) {
+      json.latinName = latinNames[json.private_webmap_layer]
+    }
     json.title = titles[json.private_webmap_layer]
     json.validation = (json.private_webmap_layer.toLowerCase().indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
 
@@ -41,6 +55,7 @@ export const selectFeature = (context, feature) => {
     //   preUrl = '//webserver.mosquitoalert.com'
     // }
     json.photo_url = preUrl + json.photo_url
+    console.log(json)
     context.commit('selectFeature', json)
   })
 }

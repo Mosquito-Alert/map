@@ -5,12 +5,12 @@
    version="1.1"
    x="0px"
    y="0px"
-   viewBox="0 0 39.999998 50.000001"
+   viewBox="0 0 29.999998 40.000001"
    xml:space="preserve"
    id="svg15"
-   sodipodi:docname="marker_disabled_unidentified.svg"
-   width="40"
-   height="50"
+   sodipodi:docname="marker_unidentified_disabled.svg"
+   width="30"
+   height="40"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -30,9 +30,9 @@
      xlink:href="#linearGradient18697"
      id="linearGradient18699"
      x1="0"
-     y1="40.325"
-     x2="60.4"
-     y2="40.325"
+     y1="40.325001"
+     x2="60.400002"
+     y2="40.325001"
      gradientUnits="userSpaceOnUse" /></defs><sodipodi:namedview
    id="namedview17"
    pagecolor="#ffffff"
@@ -151,7 +151,7 @@
 </g>
 <g
    id="TOC_CONTENT"
-   transform="scale(0.66221482,0.61696)"
+   transform="matrix(0.49146627,0,0,0.49464367,0.11210014,2.6020537e-8)"
    style="fill:#e6e6e6;fill-opacity:1">
 	<path
    d="M 0,30.2 C 0,13.5 13.5,0 30.2,0 46.9,0 60.4,13.5 60.4,30.2 60.4,42.4 56.2,45.8 33.3,79 31.8,81.2 28.6,81.2 27.1,79 4.2,45.8 0,42.4 0,30.2 Z"
@@ -167,25 +167,27 @@
 <g
    id="POPUP">
 </g>
-<circle
+<ellipse
    id="path14613"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /><circle
+   style="fill:#ffffff;stroke:#000000;stroke-width:0.771374"
+   cx="17.4711"
+   cy="33.253956"
+   rx="0.041883167"
+   ry="0.045245994" /><ellipse
    id="path14615"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /><text
+   style="fill:#ffffff;stroke:#000000;stroke-width:0.771374"
+   cx="17.4711"
+   cy="33.253956"
+   rx="0.041883167"
+   ry="0.045245994" /><text
    xml:space="preserve"
-   style="font-style:normal;font-weight:normal;font-size:31.29px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.782249"
-   x="11.233268"
-   y="29.704763"
+   style="font-style:normal;font-weight:normal;font-size:24.1363px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.603407"
+   x="8.6650534"
+   y="22.91349"
    id="text20157"
-   transform="scale(1.01139,0.9887383)"><tspan
+   transform="scale(0.97307953,1.0276652)"><tspan
      sodipodi:role="line"
      id="tspan20155"
-     x="11.233268"
-     y="29.704763"
-     style="stroke-width:0.782249">?</tspan></text></svg>
+     x="8.6650534"
+     y="22.91349"
+     style="stroke-width:0.603407">?</tspan></text></svg>

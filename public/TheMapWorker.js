@@ -29,15 +29,12 @@ self.onmessage = function (e) {
 
     if (f.observations.length > 0) {
       filteredData = filterObservations(filteredData, e.data.layers, f.observations)
+    } else {
+      filteredData = []
     }
     if (f.locations.length > 0) {
-      const poly = JSON.parse(f.locations[0]).features[0].geometry
-      let polyCoords = poly.coordinates
-      if (poly.type.toLowerCase() === 'polygon') {
-        polyCoords = [poly.coordinates]
-      }
-      filteredData = filterLocations(filteredData, polyCoords)
-      console.log(filteredData)
+      const poly = JSON.parse(f.locations[0]).features[0]
+      filteredData = filterLocations(filteredData, poly)
     }
     loadMapData(filteredData)
   } else if (e.data) {
@@ -53,23 +50,6 @@ self.onmessage = function (e) {
     const series = {}
     const seriesMap = {}
 
-    filters.layers.forEach(layer => {
-      all_layers[layer.type][layer.code].categories.forEach(validationType => {
-        seriesMap[validationType] = layer.code
-      })
-      series[layer.code] = []
-    })
-
-    const temp = {}
-
-    time.forEach(feature => {
-      const type = seriesMap[feature.properties.c]
-      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
-      const dateSeries = temp[feature.properties.d]
-      if (!(type in dateSeries)) dateSeries[type] = 0
-      dateSeries[type] += 1
-    })
-
 function loadMapData (data) {
   index = new Supercluster({
     log: DEBUG,
@@ -78,6 +58,69 @@ function loadMapData (data) {
     maxZoom: 17
   }).load(data)
   postMessage({ ready: true })
+}
+// function addObservationsFilter (type, code) {
+//   if (LAYER_TYPES.indexOf(type) > -1) {
+//     // Remove the filter if it was already there
+//     const exists = filters.layers.find((layer, index) => {
+//       const isTheSame = layer.type === type && layer.code === code
+//       if (isTheSame) {
+//         filters.layers.splice(index, 1)
+//       }
+//       return isTheSame
+//     })
+//     // Add the filter if it was not there
+//     if (!exists) {
+//       filters.layers.push({ type: type, code: code })
+//     }
+//   }
+// }
+
+function filterLocations (data, poly) {
+  let filtered = {}
+  let polyCoords = poly.geometry.coordinates
+  console.log(poly.properties.boundingBox)
+  const bb = poly.properties.boundingBox.map(parseFloat)
+  const features = turf.featureCollection([
+    turf.point([bb[0], bb[1]]),
+    turf.point([bb[2], bb[3]])
+  ])
+  const enveloped = turf.envelope(features)
+  console.log(enveloped)
+
+  if (poly.geometry.type.toLowerCase() === 'polygon') {
+    polyCoords = [poly.geometry.coordinates]
+  }
+
+  // get first candidates inside bounding box
+  const candidates = data.filter(point => {
+    const ptCoords = point.geometry.coordinates
+    return turf.booleanPointInPolygon(ptCoords, enveloped)
+  })
+  console.log(candidates)
+  // from candidates get points inside poly
+  filtered = candidates.filter(point => {
+    const ptCoords = point.geometry.coordinates
+    return turf.booleanPointInPolygon(ptCoords, polyCoords)
+  })
+  return filtered
+}
+
+
+function filterObservations (data, layers, filters) {
+  // addObservationsFilter(type, code)
+  let filteredData = {}
+  // Get all visible layers categories from filters
+  let visibleCategories = []
+  filters.forEach(f => {
+    visibleCategories = [...visibleCategories, ...layers[f.type][f.code].categories]
+  })
+  // Filter the data
+  filteredData = data.filter(feature => {
+    return visibleCategories.includes(feature.properties.c)
+  })
+
+  return filteredData
 }
 
 function filterLocations (data, polyCoords) {

@@ -11,10 +11,12 @@
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
             <img @load="imageLoaded" :src="selectedFeature.photo_url">
+            <div class="credits">Anónimo, <a href="https://creativecommons.org/license" target="_blank">CC</a> BY Mosquito Alert</div>
           </div>
           <div class="info">
             <div>
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
+              <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <p class="title"></p>
               <label>{{ _('Date') }}</label>:
               <p class="date" v-html="formatData(selectedFeature)"></p>
@@ -57,6 +59,7 @@ export default defineComponent({
     }
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
+      console.log(ratio.value)
       imageRatio.value = (ratio.value > 1.1) ? 'landscape' : 'portrait'
       context.emit('popupimageloaded')
     }
@@ -122,11 +125,13 @@ export default defineComponent({
   max-height: 80vh;
 }
 .popup-title{
+  font-size: 1.2em;
   text-transform: uppercase;
 }
 .overlay-content.landscape .image{
   max-height: $popup-height-with-image-landscape / 2;
   overflow: hidden;
+  position:relative;
   border-top-left-radius: $popup-border-radius;
   border-top-right-radius: $popup-border-radius;
 }
@@ -140,6 +145,7 @@ export default defineComponent({
 
 .overlay-content.portrait .image{
   height: $popup-height-with-image-portrait;
+  position: relative;
   text-align: center;
 }
 
@@ -182,7 +188,7 @@ export default defineComponent({
   border-top-color: white;
   width: $popup-vertical-offset * 2;
   position: relative;
-  top: $popup-padding-info;
+  top: $popup-padding-info - 2;
   left: 0;
   margin:auto;
   align-items: center;
@@ -305,10 +311,12 @@ export default defineComponent({
   display:flex;
   flex-direction:column;
   flex-grow: 1;
+  &>div {
+    padding-right:20px;
+  }
   &>div:first-child {
-    max-height: calc(#{$popup-height-with-image-landscape / 1.5});
+    max-height: calc(#{$popup-height-with-image-portrait / 1.75});
     overflow: auto;
-    padding-top:20px;
     text-align:left;
   }
   &>div:last-child {
@@ -327,4 +335,18 @@ export default defineComponent({
   }
 }
 
+.latin-name{
+  font-style: italic;
+}
+.credits{
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  padding:5px;
+  background: $dark-grey;
+  border-radius: 10px;
+  text-align: right;
+  font-size:0.8em;
+  color: white;
+}
 </style>

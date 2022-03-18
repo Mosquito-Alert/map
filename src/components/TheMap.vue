@@ -25,13 +25,13 @@
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <ol-vector-layer ref='locationLayer'>
+        <ol-vector-layer ref='locationLayer' name="locationLayer">
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
           </ol-source-vector>
         </ol-vector-layer>
 
         <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observationsLayer'>
+        <ol-vector-layer ref='observationsLayer' name="observationsLayer">
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -88,7 +88,6 @@ export default defineComponent({
     const mapFilters = { observations: [], locations: [], hastags: [] }
 
     const fitFeature = function (location) {
-      console.log('inside fitFeature')
       const extent = location.features[0].properties.boundingBox
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -106,7 +105,7 @@ export default defineComponent({
       }
       if (Feat) {
         Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857')
-        locationFeatures.value.push(Feat)
+        locationFeatures.value = [Feat]
       }
     }
 
@@ -121,8 +120,10 @@ export default defineComponent({
       }, 100)
     }
 
-    const selectInteactionFilter = (feature) => {
-      console.log(feature)
+    const selectInteactionFilter = (feature, layer) => {
+      if (layer.values_.name !== 'observationsLayer') {
+        return false
+      }
       if ('cluster_id' in feature.values_.properties) {
         worker.postMessage({
           getClusterExpansionZoom: feature.values_.properties.cluster_id,
@@ -255,6 +256,7 @@ export default defineComponent({
         callback
       )
     }
+
     onMounted(function () {
       const ol = map.value.map
 
@@ -298,9 +300,9 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         if (feature.values_.properties.id === selectedId.value) {
-          console.log(feature.values_.properties.c)
           const selectedIcon = new Icon({
-            src: $store.getters['app/selectedIcons'][feature.values_.properties.c]
+            src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
+            anchor: [0.5, 1]
           })
           style.setImage(selectedIcon)
           style.setText('')
@@ -345,7 +347,8 @@ export default defineComponent({
               iconUrl = observations[featureKey].iconConflict
             }
             const tiger = new Icon({
-              src: iconUrl
+              src: iconUrl,
+              anchor: [0.5, 1]
             })
             style.setImage(tiger)
             style.setText('')
@@ -374,7 +377,7 @@ export default defineComponent({
 
     function filterLocations (location) {
       const workerData = {}
-      mapFilters.locations.push(JSON.stringify(location))
+      mapFilters.locations = [JSON.stringify(location)]
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)

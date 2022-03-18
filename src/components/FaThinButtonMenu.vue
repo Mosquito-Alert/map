@@ -97,6 +97,11 @@ button {
       transition: all .3s ease-in;
     }
   }
+  &:hover span,
+  &:hover i{
+    font-weight: bold;
+    color: #efa501;
+  }
   &.active {
     border-left: 6px solid $primary-button-background;
   }

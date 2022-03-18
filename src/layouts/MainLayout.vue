@@ -57,14 +57,11 @@ export default {
         $store.commit('app/setModal', { id: 'info', visible: true })
       }
     })
-<<<<<<< HEAD
     const filter = function (data) {
       map.value.filter({
         type: 'layer',
         data: data
       })
-=======
-
     const filterLocations = function (location) {
       map.value.filterLocations(location)
       map.value.fitFeature(location)
@@ -72,7 +69,6 @@ export default {
 
     const filterObservations = function (data) {
       map.value.filterObservations(data)
->>>>>>> Restructure map filters
     }
 
     const infoModalVisible = computed(() => {

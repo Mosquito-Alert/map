@@ -3,11 +3,12 @@ const worker = new Worker('TheMapWorker.js')
 export default function () {
   let backendUrl = ''
   if (process.env.DEV) {
-    backendUrl = 'http://localhost:8001/'
+    backendUrl = 'http://localhost:8000/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
   }
 
+  // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
   const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
