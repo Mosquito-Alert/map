@@ -21,7 +21,6 @@ export default function () {
       DATES: { from: '2021/01/01', to: '2021/12/31' }
       // INFO_OPEN: false
     },
-    lang: 'ca',
     BACKEND: backendUrl,
     trans: {},
     modals: {
