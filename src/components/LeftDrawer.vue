@@ -405,10 +405,6 @@ input{
   text-align:center;
 }
 
-.li-item{
-  width:60px;
-}
-
 .li-item i{
   display: block;
   margin:auto;
@@ -477,7 +473,8 @@ input{
 .li-item{
   // text-align: center;
   text-transform: capitalize;
-  height: 60px;
+  width:50px;
+  height: 50px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
@@ -538,7 +535,7 @@ input{
 
 // LAYER ICONS
 .li-item{
-  background-size:35px;
+  // background-size:30px;
 }
 
 .li-item.tiger,
@@ -599,14 +596,6 @@ input{
 .content.breeding .li-item:hover i{
   opacity:0.7;
 }
-
-// .content.bites .li-item.active:hover i{
-//   color: #ECC6CC;
-// }
-
-// .content.breeding .li-item.active:hover i{
-//   color: #DEE5E8;
-// }
 
 .separator{
   margin:5px 0 50px 0;

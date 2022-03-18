@@ -53,7 +53,8 @@ export default function () {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
-          icon: require('../../assets/img/marker_tiger.svg')
+          // icon: require('../../assets/img/marker_tiger.svg')
+          icon: require('../../assets/img/marker_tiger35_45.svg')
         },
         yellow: {
           categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
@@ -85,7 +86,7 @@ export default function () {
         unidentified: {
           categories: ['unidentified'],
           common_name: 'Unidentified mosquito',
-          icon: require('../../assets/img/marker_unidentified.svg')
+          icon: require('../../assets/img/marker_unidentified35_45.svg')
         }
       },
       otherObservations: {
