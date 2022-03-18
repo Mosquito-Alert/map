@@ -1,10 +1,11 @@
 export default function () {
-  let backendUrl = ''
-  if (process.env.DEV) {
-    backendUrl = 'http://localhost:8000/'
-  } else {
-    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
-  }
+  // let backendUrl = ''
+  // if (process.env.DEV) {
+  //   backendUrl = 'http://localhost:8000/'
+  // } else {
+  //   backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
+  // }
+  const backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
