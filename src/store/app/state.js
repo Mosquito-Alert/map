@@ -13,8 +13,8 @@ export default function () {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
       ],
-      DATES: { from: '2021/01/01', to: '2021/12/31' },
-      INFO_OPEN: false
+      DATES: { from: '2021/01/01', to: '2021/12/31' }
+      // INFO_OPEN: false
     },
     lang: 'ca',
     BACKEND: backendUrl,
@@ -129,16 +129,16 @@ export default function () {
           color: '#1072ad'
         }
       },
-      storm_drain: { // Storm drain
-        water: {
-          categories: ['storm_drain_water'],
-          icons: []
-        },
-        dry: {
-          categories: ['storm_drain_dry'],
-          icons: []
-        }
-      },
+      // storm_drain: { // Storm drain
+      //   water: {
+      //     categories: ['storm_drain_water'],
+      //     icons: []
+      //   },
+      //   dry: {
+      //     categories: ['storm_drain_dry'],
+      //     icons: []
+      //   }
+      // },
       other: { // ??
         conflict: {
           categories: ['conflict'],
