@@ -35,7 +35,7 @@
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
         <ol-vector-layer ref='locationLayer'>
-          <ol-source-vector :features="locationFeature" :format='geoJson'>
+          <ol-source-vector :features="locationFeatures" :format='geoJson'>
           </ol-source-vector>
         </ol-vector-layer>
 
@@ -60,6 +60,7 @@ import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import { Polygon, MultiPolygon } from 'ol/geom'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
@@ -76,7 +77,7 @@ export default defineComponent({
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
-    const locationFeature = ref()
+    const locationFeatures = ref([])
     let ready = false
     const worker = new Worker('TheMapWorker.js')
     const map = ref('null')
@@ -84,23 +85,28 @@ export default defineComponent({
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
+    const mapFilters = { observations: [], locations: [], hastags: [] }
 
     const fitFeature = function (location) {
-      // const bb = location.boundingbox
-      // const extent = [bb[2], bb[0], bb[3], bb[1]]
+      console.log('inside fitFeature')
       const extent = location.features[0].properties.boundingBox
-      console.log(extent)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
         { minResolution: 50, nearest: true }
       )
-
-      if (location.features[0].geometry.type.toLowerCase().indexOf('polygon') > -1) {
-        // const Feat = new Feature({
-        //   geometry: new Polygon(location.geojson.coordinates)
-        // })
-        console.log(location)
-        locationFeature.value = location
+      let Feat = null
+      if (location.features[0].geometry.type.toLowerCase() === 'polygon') {
+        Feat = new Feature({
+          geometry: new Polygon(location.features[0].geometry.coordinates)
+        })
+      } else if (location.features[0].geometry.type.toLowerCase() === 'multipolygon') {
+        Feat = new Feature({
+          geometry: new MultiPolygon(location.features[0].geometry.coordinates)
+        })
+      }
+      if (Feat) {
+        Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857')
+        locationFeatures.value.push(Feat)
       }
     }
 
@@ -189,12 +195,9 @@ export default defineComponent({
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
-          const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          initial.LAYERS.forEach(layerFilter => {
-            filter({
-              type: 'layer',
-              data: layerFilter
-            })
+          const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
+          initialLayers.forEach(layerFilter => {
+            filterObservations(layerFilter)
           })
           if ('DATES' in initial) {
             filter({
@@ -350,21 +353,43 @@ export default defineComponent({
       }
     }
 
-    function filter (data) {
+    function filterObservations (observation) {
       $store.commit('map/selectFeature', {})
-      data.data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-      worker.postMessage(data)
+      // toggle selected layer
+      const filterIndex = mapFilters.observations.findIndex(element => {
+        return element.type === observation.type && element.code === observation.code
+      })
+
+      if (filterIndex > -1) {
+        mapFilters.observations.splice(filterIndex, 1)
+      } else {
+        mapFilters.observations.push({ type: observation.type, code: observation.code })
+      }
+      const workerData = {}
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      workerData.filters = mapFilters
+      worker.postMessage(workerData)
     }
+
+    function filterLocations (location) {
+      const workerData = {}
+      mapFilters.locations.push(JSON.stringify(location))
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
     return {
       fitFeature,
       autoPanPopup,
       center,
-      filter,
+      filterObservations,
+      filterLocations,
       zoom,
       map,
       observationsSource,
       locationLayer,
-      locationFeature,
+      locationFeatures,
       overrideStyleFunction,
       geoJson,
       features,

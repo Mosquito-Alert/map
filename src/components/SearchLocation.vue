@@ -6,7 +6,7 @@
 
     <div>
       <ul v-for="result, id in results" :key="id" class="result">
-          <li @click="goLocation(result)"> {{result.display_name}} </li>
+          <li @click="filterLocation(result)"> {{result.display_name}} </li>
       </ul>
     </div>
     <div v-if="noResults">
@@ -48,13 +48,19 @@ export default {
         .then(res => res.json())
         .then(res => {
           searching.value = false
-          results.value = res
+          // Get only polygon and multipolygons
+          const polygons = res.filter(feature => {
+            return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+          })
+          results.value = polygons
           noResults.value = results.value.length === 0
         })
     }
 
-    const goLocation = function (result) {
-      context.emit('locationSelected', result)
+    const filterLocation = function (result) {
+      context.emit('locationSelected', {
+        location: result
+      })
     }
 
     return {
@@ -64,7 +70,7 @@ export default {
       noResults,
       searching,
       search,
-      goLocation
+      filterLocation
     }
   }
 }

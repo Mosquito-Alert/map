@@ -43,7 +43,7 @@
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
             <div class="li-item"
-                  @click="filterData(layer, $event)"
+                  @click="filterObservations(layer, $event)"
                   data-type="observations"
                   :data-code="code"
                   :class="initialClass(code, 'observations')">
@@ -65,13 +65,7 @@
           <!-- BITES -->
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
-              <div
-                class="li-item"
-                @click="filterData(layer, $event)"
-                data-type="bites"
-                :data-code="code"
-                :class="initialClass(code, 'bites')"
-                >
+              <div class="li-item" @click="filterObservations(layer, $event)" data-type="bites" :data-code="code">
                   <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -82,13 +76,7 @@
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
-                <div
-                  class="li-item"
-                  @click="filterData(layer, $event)"
-                  data-type="breeding"
-                  :data-code="code"
-                  :class="initialClass(code, 'breeding')"
-                  >
+                <div class="li-item" @click="filterObservations(layer, $event)" data-type="breeding" :data-code="code">
                     <i class="fa-solid" :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -106,8 +94,8 @@
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
             <div class="li-item"
-              @click="filterData(layer, $event)"
-              data-type="other_observations"
+              @click="filterObservations(layer, $event)"
+              data-type="otherObservations"
               :data-code="code"
               :class="initialClass(code, 'other')">
             </div>
@@ -140,19 +128,19 @@ import SearchLocation from 'components/SearchLocation.vue'
 
 export default {
   components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
-  emits: ['filter', 'locationSelected'],
+  emits: ['filterObservations', 'filterLocations'],
   setup (props, context) {
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
     const $store = useStore()
 
-    const filterData = function (layer, event) {
+    const filterObservations = function (layer, event) {
       let obj = event.target
       if (!event.target.dataset.type) {
         obj = obj.closest('.li-item')
       }
-      context.emit('filter', {
+      context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code
       })
@@ -241,7 +229,8 @@ export default {
     }
 
     const locationSelected = function (location) {
-      const bb = location.boundingbox
+      const loc = location.location
+      const bb = loc.boundingbox
       const bounding = [bb[2], bb[0], bb[3], bb[1]]
       const geojson = {
         type: 'FeatureCollection',
@@ -251,12 +240,11 @@ export default {
             properties: {
               boundingBox: bounding
             },
-            geometry: location.geojson
+            geometry: loc.geojson
           }
         ]
       }
-
-      context.emit('locationSelected', geojson)
+      context.emit('filterLocations', geojson)
     }
 
     return {
@@ -265,7 +253,7 @@ export default {
       en,
       clickLanguageSelector,
       initialClass,
-      filterData,
+      filterObservations,
       observations,
       showInfo,
       breeding,

@@ -1,10 +1,11 @@
 <template>
   <q-layout view='hHh lpR fFf'>
     <site-header/>
-    <left-drawer @filter='filter' @locationSelected="locationSelected"/>
-    <!-- <q-page-container>
-      <router-view />
-    </q-page-container> -->
+    <left-drawer
+      @filterObservations='filterObservations'
+      @filterLocations="filterLocations"
+    />
+
     <q-page class='flex'>
       <the-map ref='map' />
       <time-series @toggleTimeSeries='resizeMap' />
@@ -50,29 +51,39 @@ export default {
         }, 1)
       }
     }
-    const locationSelected = function (location) {
-      map.value.fitFeature(location)
-    }
 
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', visible: true })
       }
     })
+<<<<<<< HEAD
     const filter = function (data) {
       map.value.filter({
         type: 'layer',
         data: data
       })
+=======
+
+    const filterLocations = function (location) {
+      map.value.filterLocations(location)
+      map.value.fitFeature(location)
     }
+
+    const filterObservations = function (data) {
+      map.value.filterObservations(data)
+>>>>>>> Restructure map filters
+    }
+
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info
     })
     return {
-      locationSelected,
+      filterLocations,
       infoModalVisible,
       map,
-      resizeMap
+      resizeMap,
+      filterObservations
     }
   }
 }
