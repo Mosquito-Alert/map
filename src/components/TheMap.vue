@@ -122,6 +122,7 @@ export default defineComponent({
     }
 
     const selectInteactionFilter = (feature) => {
+      console.log(feature)
       if ('cluster_id' in feature.values_.properties) {
         worker.postMessage({
           getClusterExpansionZoom: feature.values_.properties.cluster_id,

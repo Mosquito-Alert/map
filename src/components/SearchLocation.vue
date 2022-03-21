@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" /> -->
-     <q-select
+    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
+     <!-- <q-select
         outlined
         bottom-slots
         v-model="results"
@@ -19,9 +19,9 @@
         <template v-slot:hint>
           Field hint
         </template>
-      </q-select>
+      </q-select> -->
 
-    <!-- <div>
+    <div>
       <ul v-for="result, id in results" :key="id" class="result">
           <li @click="filterLocation(result)"> {{result.display_name}} </li>
       </ul>
@@ -32,7 +32,7 @@
 
     <div v-if="searching">
         <i>{{ _('Searching ...') }}</i>
-    </div> -->
+    </div>
   </div>
 </template>
 

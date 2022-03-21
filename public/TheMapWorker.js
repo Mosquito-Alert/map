@@ -1,6 +1,6 @@
 /* global importScripts Supercluster */
-
 importScripts('supercluster.min.js')
+importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
 
 let all_data = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
@@ -24,13 +24,20 @@ self.onmessage = function (e) {
     })
   } else if (e.data.filters) {
     // This is fired when the map is filtered.
-    let filteredData = []
+    let filteredData = all_data
     const f = e.data.filters
+
     if (f.observations.length > 0) {
-      filteredData = filterObservations(e.data.layers, f.observations)
+      filteredData = filterObservations(filteredData, e.data.layers, f.observations)
     }
     if (f.locations.length > 0) {
-      console.log(JSON.parse(f.locations[0]))
+      const poly = JSON.parse(f.locations[0]).features[0].geometry
+      let polyCoords = poly.coordinates
+      if (poly.type.toLowerCase() === 'polygon') {
+        polyCoords = [poly.coordinates]
+      }
+      filteredData = filterLocations(filteredData, polyCoords)
+      console.log(filteredData)
     }
     loadMapData(filteredData)
   } else if (e.data) {
@@ -73,22 +80,34 @@ function loadMapData (data) {
   postMessage({ ready: true })
 }
 
-function filterObservations (layers, filters) {
+function filterLocations (data, polyCoords) {
+  let filtered = {}
+  console.log(data[0])
+  filtered = data.filter(point => {
+    if (point.geometry) {
+      const ptCoords = point.geometry.coordinates
+      return turf.booleanPointInPolygon(ptCoords, polyCoords)
+    } else {
+      return false
+    }
+  })
+  return filtered
+}
+
+function filterObservations (data, layers, filters) {
   // addObservationsFilter(type, code)
   let filteredData = {}
-  data = all_data
   // Get all visible layers categories from filters
   let visibleCategories = []
   filters.forEach(f => {
     visibleCategories = [...visibleCategories, ...layers[f.type][f.code].categories]
   })
   // Filter the data
-  filteredData = all_data.filter(feature => {
+  filteredData = data.filter(feature => {
     return visibleCategories.includes(feature.properties.c)
   })
 
   return filteredData
-
 }
 
 function getJSON (url, callback) {
