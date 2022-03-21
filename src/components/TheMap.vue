@@ -24,18 +24,18 @@
               url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
+        <!-- ADMINISTRATIVE LIMITS LAYER -->
+        <ol-vector-layer ref='locationLayer'>
+          <ol-source-vector :features="locationFeatures" :format='geoJson'>
+          </ol-source-vector>
+        </ol-vector-layer>
+
         <!-- CLUSTERS geojson layer -->
         <ol-vector-layer ref='observationsLayer'>
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
 
-          </ol-source-vector>
-        </ol-vector-layer>
-
-        <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <ol-vector-layer ref='locationLayer'>
-          <ol-source-vector :features="locationFeatures" :format='geoJson'>
           </ol-source-vector>
         </ol-vector-layer>
 

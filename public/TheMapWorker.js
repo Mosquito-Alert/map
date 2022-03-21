@@ -82,12 +82,13 @@ function loadMapData (data) {
 
 function filterLocations (data, polyCoords) {
   let filtered = {}
-  console.log(data[0])
   filtered = data.filter(point => {
     if (point.geometry) {
       const ptCoords = point.geometry.coordinates
       return turf.booleanPointInPolygon(ptCoords, polyCoords)
     } else {
+      console.log('no geometry in point')
+      console.log(point)
       return false
     }
   })
