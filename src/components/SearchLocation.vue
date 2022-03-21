@@ -1,10 +1,27 @@
 <template>
   <div>
-    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
-    <!-- <input type="search" v-model="term" name="localitat" :placeholder="_('Placeholder location')"/> -->
-        <!-- <button @click="search">></button> -->
+    <!-- <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" /> -->
+     <q-select
+        outlined
+        bottom-slots
+        v-model="results"
+        :options="options"
+        :label="_('Placeholder location')"
+        :dense="dense"
+        :options-dense="denseOpts"
+        use-input
+        @keyup.enter="search"
+      >
+        <template v-slot:append>
+          <q-icon name="search" @click.stop />
+        </template>
 
-    <div>
+        <template v-slot:hint>
+          Field hint
+        </template>
+      </q-select>
+
+    <!-- <div>
       <ul v-for="result, id in results" :key="id" class="result">
           <li @click="filterLocation(result)"> {{result.display_name}} </li>
       </ul>
@@ -15,7 +32,7 @@
 
     <div v-if="searching">
         <i>{{ _('Searching ...') }}</i>
-    </div>
+    </div> -->
   </div>
 </template>
 
