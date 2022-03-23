@@ -15,6 +15,7 @@ getJSON('totes.json', (geojson) => {
 })
 
 self.onmessage = function (e) {
+  console.log('worker working')
   if (e.data.getClusterExpansionZoom) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -28,6 +29,7 @@ self.onmessage = function (e) {
     const f = e.data.filters
 
     if (f.observations.length > 0) {
+      console.log('call filter locations')
       filteredData = filterObservations(filteredData, e.data.layers, f.observations)
     } else {
       filteredData = []
@@ -77,6 +79,7 @@ function loadMapData (data) {
 // }
 
 function filterLocations (data, poly) {
+  console.log('filter location worker')
   let filtered = {}
   let polyCoords = poly.geometry.coordinates
   console.log(poly.properties.boundingBox)
@@ -86,7 +89,6 @@ function filterLocations (data, poly) {
     turf.point([bb[2], bb[3]])
   ])
   const enveloped = turf.envelope(features)
-  console.log(enveloped)
 
   if (poly.geometry.type.toLowerCase() === 'polygon') {
     polyCoords = [poly.geometry.coordinates]
@@ -97,7 +99,7 @@ function filterLocations (data, poly) {
     const ptCoords = point.geometry.coordinates
     return turf.booleanPointInPolygon(ptCoords, enveloped)
   })
-  console.log(candidates)
+
   // from candidates get points inside poly
   filtered = candidates.filter(point => {
     const ptCoords = point.geometry.coordinates

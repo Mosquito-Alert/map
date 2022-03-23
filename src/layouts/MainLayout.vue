@@ -1,14 +1,23 @@
 <template>
-  <q-layout view='hHh lpR fFf'>
-    <site-header/>
+  <q-layout
+    view='hHh lpR fFf'
+    :class="expanded?'expanded':'collapsed'"
+  >
+    <site-header :expanded="expanded"/>
     <left-drawer
       @filterObservations='filterObservations'
       @filterLocations="filterLocations"
+      :expanded="expanded"
     />
 
-    <q-page class='flex'>
-      <the-map ref='map' />
-      <time-series @toggleTimeSeries='resizeMap' />
+    <q-page
+      class='flex'
+      :class="expanded?'expanded':'collapsed'"
+    >
+      <the-map ref='map'
+        @toogleLeftDrawer="toogleLeftDrawer"
+      />
+      <time-series @toggleTimeSeries='resizeMap'/>
     </q-page>
 
     <base-modal :open="infoModalVisible" buttons="close">
@@ -40,7 +49,8 @@ import { useStore } from 'vuex'
 export default {
   components: { BaseModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
-    const map = ref()
+    const map = ref('null')
+    const expanded = ref(true)
     const $store = useStore()
     const resizeMap = function (args) {
       if (args.start < args.end) {
@@ -63,8 +73,8 @@ export default {
         data: data
       })
     const filterLocations = function (location) {
-      map.value.filterLocations(location)
       map.value.fitFeature(location)
+      map.value.filterLocations(location)
     }
 
     const filterObservations = function (data) {
@@ -74,7 +84,15 @@ export default {
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info
     })
+
+    const toogleLeftDrawer = function () {
+      console.log(expanded.value)
+      expanded.value = !expanded.value
+      resizeMap({ start: 0, end: 400 })
+    }
     return {
+      expanded,
+      toogleLeftDrawer,
       filterLocations,
       infoModalVisible,
       map,
@@ -85,7 +103,15 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
+  .q-page.collapsed{
+    margin-left:$left-toolbar-width;
+    transition: margin-left ease 1s;
+  }
+  .q-page.expanded{
+    margin-left:$left-drawer-width;
+    transition: margin-left ease 1s;
+  }
   .q-page {
     flex-direction: column;
     height: 100%;
@@ -93,7 +119,47 @@ export default {
     margin-left: $left-drawer-width;
     overflow: hidden;
   }
-  :deep(.q-drawer), :deep(.q-header) {
+  .q-header.collapsed {
+    width: $left-toolbar-width;
+    transition: width ease 1s;
+  }
+  .q-header.expanded {
     width: $left-drawer-width;
+    transition: width ease 1s;
+  }
+  .toc-layers.collapsed{
+    opacity:0;
+    overflow:hidden;
+    z-index: -10;
+    transition: opacity ease 1s;
+  }
+
+  .toc-layers.expanded{
+    opacity: 1;
+    z-index: 10;
+    overflow:auto;
+    transition: opacity ease 0.6s;
+  }
+ .q-drawer-left{
+    width: $left-drawer-width;
+  }
+  aside {
+    width: 350px;
+  }
+  .q-layout.collapsed aside{
+    width: $left-toolbar-width;
+    box-shadow: none;
+    transition:width ease 1s;
+  }
+  .q-layout.expanded aside{
+    width: $left-drawer-width;
+    box-shadow: none;
+    transition:width ease 1s;
+  }
+  .q-layout .q-drawer-left{
+    width: $left-drawer-width !important;
+  }
+  .q-layout.collapsed .q-drawer__content{
+    overflow-x:hidden;
   }
 </style>

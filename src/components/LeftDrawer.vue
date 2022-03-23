@@ -3,8 +3,10 @@
       show-if-above
       side="left"
       behavior="desktop"
-      no-swipe-close
-      width="">
+      width=""
+      class ="toni"
+      :class="expanded?'expanded':'collapsed'"
+  >
     <!-- Main menu -->
     <q-toolbar>
       <fa-thin-button name="fa-thin fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
@@ -14,21 +16,25 @@
       <fa-thin-button name="fa-thin fa-share-nodes" :label="_('Share')"></fa-thin-button>
       <fa-thin-button name="fa-thin fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
-        <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
-          <span>Català</span>
-        </div>
-        <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
-          <span>Castellano</span>
-        </div>
-        <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
-          <span>English</span>
+        <div class="lang-wrapper">
+          <div class="lang-container">
+            <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
+              <span>Català</span>
+            </div>
+            <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
+              <span>Castellano</span>
+            </div>
+            <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
+              <span>English</span>
+            </div>
+          </div>
         </div>
       </fa-thin-button-menu>
       <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
 
     <!-- Drawer content -->
-    <div class="toc-layers">
+    <div class="toc-layers" :class="expanded?'expanded':'collapsed'">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
           <search-location @locationSelected="locationSelected"/>
@@ -129,6 +135,7 @@ import SearchLocation from 'components/SearchLocation.vue'
 export default {
   components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
   emits: ['filterObservations', 'filterLocations'],
+  props: ['expanded'],
   setup (props, context) {
     const ca = ref(null)
     const es = ref(null)
@@ -322,6 +329,11 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   display: flex;
   flex-direction: row;
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
+  width: $left-drawer-width;
+}
+
+.collapsed :deep(.q-drawer__content.fit){
+  width: 60px !important;
 }
 
 .toc-layers{
@@ -361,7 +373,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 .toc-category,
 .toc-card.filters{
-  padding: 20px 10px 0px 25px;
+  padding: 20px 10px 0px 18px;
   margin-bottom: 10px;
 }
 
@@ -633,5 +645,16 @@ input{
 .separator.active{
   border-right: 2px solid #c0c0c0;
 }
-
+.toc-layers{
+  position:relative;
+}
+.toc-layers.expanded{
+  left: 0px;
+}
+.q-drawer__content.fit.scroll.expanded{
+  width: 250px !important;
+}
+.lang-wrapper{
+  position: relative;
+}
 </style>

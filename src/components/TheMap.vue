@@ -1,5 +1,8 @@
 <template>
   <div id='mapa' class='bg-white'>
+    <div class="drawer-handler" @click="$emit('toogleLeftDrawer')">
+      x
+    </div>
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -60,13 +63,14 @@ import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Polygon, MultiPolygon } from 'ol/geom'
+import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
+  emits: ['toogleLeftDrawer'],
   props: {},
   setup (props, context) {
     const selectedId = ref('null')
@@ -103,8 +107,39 @@ export default defineComponent({
           geometry: new MultiPolygon(location.features[0].geometry.coordinates)
         })
       }
+
+      // transform geometry to MERCATOR
+      Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+
       if (Feat) {
-        Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857')
+        let lineString = null
+        let maxLength = 0
+        if (Feat.getGeometry().getType() === 'MultiPolygon') {
+          const polis = Feat.getGeometry().getPolygons()
+          polis.forEach(function (poli, i, a) {
+            lineString = new LineString(
+              poli.getLinearRing(0).getCoordinates()
+            )
+            const poliLength = lineString.getLength()
+            if (poliLength > maxLength) {
+              maxLength = poliLength
+            }
+          })
+        } else {
+          lineString = new LineString(
+            Feat.getGeometry().getLinearRing(0).getCoordinates()
+          )
+          maxLength = lineString.getLength()
+        }
+
+        // simplify tolerance of 5% of perimeter
+        let tolerance = (maxLength * 0.005)
+        if (tolerance > 1000) {
+          tolerance = 1000
+        }
+        console.log('theMap add feature location')
+        // Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857').simplify(1000))
+        Feat.setGeometry(Feat.getGeometry().simplify(1))
         locationFeatures.value = [Feat]
       }
     }
@@ -376,6 +411,7 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
+      console.log('initiate filter locations')
       const workerData = {}
       mapFilters.locations = [JSON.stringify(location)]
       workerData.filters = mapFilters
@@ -471,5 +507,15 @@ export default defineComponent({
   }
   :deep(.ol-attribution) a {
     color: black;
+  }
+  .drawer-handler{
+    background-color: $primary-color;
+    color: white;
+    position: fixed;
+    top: $header-height;
+    z-index: 1100;
+    padding: 20px 10px;
+    cursor: pointer;
+    border-radius: 0 10px 10px 0;
   }
 </style>

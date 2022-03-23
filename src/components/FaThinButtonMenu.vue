@@ -4,9 +4,9 @@
       <i :class="icon_code"></i>
       <span>{{ label }} <i class="fas fa-caret-right menu-arrow"></i></span>
     </div>
-    <div class="menu">
-      <slot></slot>
-    </div>
+      <div class="menu">
+          <slot></slot>
+      </div>
   </button>
 </template>
 
@@ -59,43 +59,19 @@ button {
   &:first-child {
     border: none;
   }
-  .menu {
-    display: flex;
-    position: relative;
-    left: -60px;
-    height: 60px;
-    width: 60px;
-    top: -1px;
-    visibility: hidden;
-    opacity: 0;
-    &>div {
-      position: relative;
-      z-index: 1;
-      height: 30px;
-      border: 12px solid $grey-color;
-    }
-  }
   &:hover {
     border-left: 6px solid #999;
-    transition: all 0.3s ease-in;
     overflow: visible;
     padding: 5px 6px 5px 10px;
-    .menu {
-      width: auto;
-      left: 0px;
-      visibility: visible;
-      opacity: 1;
-      transition: all 0.3s ease-in;
-      &>div {
-        position: relative;
-        z-index: 1;
-        border: 12px solid $grey-color;
-      }
-    }
     :deep(i.menu-arrow) {
       transform: rotate(180deg);
       transition: all .3s ease-in;
     }
+  }
+  &:hover :deep(.lang-container){
+    left: 44px;
+    opacity: 1;
+    transition: all 0.3s ease-in;
   }
   &:hover span,
   &:hover i{
@@ -109,5 +85,22 @@ button {
     border: none;
     background: blue;
   }
+}
+
+:deep(.lang-container){
+  position: relative;
+  display: flex;
+  opacity: 0;
+  left: -290px;
+  transition: left ease 0.5s;
+  height: 62px;
+}
+
+.fa-thin-button-menu{
+  position:relative;
+}
+.fa-thin-button-menu:hover .menu{
+  position:fixed;
+  z-index: 100;
 }
 </style>
