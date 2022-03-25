@@ -339,6 +339,7 @@ export default defineComponent({
   font-style: italic;
 }
 .credits{
+  opacity: 0.5;
   position: absolute;
   bottom: 5px;
   right: 5px;

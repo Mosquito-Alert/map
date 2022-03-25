@@ -17,7 +17,10 @@
       <the-map ref='map'
         @toogleLeftDrawer="toogleLeftDrawer"
       />
-      <time-series @toggleTimeSeries='resizeMap'/>
+      <time-series
+        @toggleTimeSeries='resizeMap'
+        @dateSelected='filterDate'
+      />
     </q-page>
 
     <base-modal :open="infoModalVisible" buttons="close">
@@ -78,6 +81,10 @@ export default {
       map.value.filterLocations(location)
     }
 
+    const filterDate = function (date) {
+      map.value.filterDate(date.data)
+    }
+
     const filterObservations = function (data) {
       map.value.filterObservations(data)
     }
@@ -87,18 +94,18 @@ export default {
     })
 
     const toogleLeftDrawer = function () {
-      console.log(expanded.value)
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
     }
     return {
       expanded,
       toogleLeftDrawer,
+      filterObservations,
+      filterDate,
       filterLocations,
       infoModalVisible,
       map,
-      resizeMap,
-      filterObservations
+      resizeMap
     }
   }
 }

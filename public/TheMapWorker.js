@@ -5,8 +5,10 @@ importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
 let all_data = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
 const DEBUG = true
-let index,unclustered
+let index, unclustered
 const now = Date.now()
+let filters ={}
+let all_layers = null
 
 function log (text) {
   if (DEBUG) console.log(text)
@@ -19,7 +21,6 @@ getJSON('totes.json', (geojson) => {
 })
 
 self.onmessage = function (e) {
-  console.log('worker working')
   if (e.data.getClusterExpansionZoom) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -29,23 +30,26 @@ self.onmessage = function (e) {
     })
   } else if (e.data.filters) {
     // This is fired when the map is filtered.
+    all_layers = e.data.layers
     let filteredData = all_data
-    const f = e.data.filters
-
-    if (f.observations.length > 0) {
-      console.log('call filter locations')
-      filteredData = filterObservations(filteredData, e.data.layers, f.observations)
+    filters = e.data.filters
+    if (filters.observations.length > 0) {
+      filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
     } else {
       filteredData = []
     }
-    if (f.locations.length > 0) {
-      const poly = JSON.parse(f.locations[0]).features[0]
+    if (filters.date.length > 0) {
+      // array with only one date
+      filteredData = filterDate(filteredData, filters.date[0])
+    }
+    if (filters.locations.length > 0) {
+      const poly = JSON.parse(filters.locations[0]).features[0]
       filteredData = filterLocations(filteredData, poly)
     }
     loadMapData(filteredData)
   } else if (e.data) {
     // This is fired when the user navigates the map.
-    const map = index.getClusters(e.data.bbox, e.data.zoom);
+    const map = index.getClusters(e.data.bbox, e.data.zoom)
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
@@ -55,6 +59,50 @@ self.onmessage = function (e) {
     const dates = []
     const series = {}
     const seriesMap = {}
+    filters.observations.forEach(layer => {
+      all_layers[layer.type][layer.code].categories.forEach(validationType => {
+        seriesMap[validationType] = layer.code
+      })
+      series[layer.code] = []
+    })
+
+    const temp = {}
+
+    time.forEach(feature => {
+      const type = seriesMap[feature.properties.c]
+      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+      const dateSeries = temp[feature.properties.d]
+      if (!(type in dateSeries)) dateSeries[type] = 0
+      dateSeries[type] += 1
+    })
+
+    const tempDates = Object.keys(temp)
+    let start = new Date(tempDates[0])
+    const end = new Date(tempDates[tempDates.length - 1])
+    while (start <= end) {
+      start = new Date(start.setDate(start.getDate() + 1))
+      const dateLabel = start.toISOString().split('T')[0]
+      const values = temp[dateLabel]
+      dates.push(dateLabel)
+      Object.keys(series).forEach(type => {
+        if (values && type in values) {
+          const value = values[type]
+          series[type].push(value)
+        } else {
+          series[type].push(0)
+        }
+      })
+    }
+
+    postMessage({
+      map: map,
+      timeseries: {
+        dates: dates,
+        data: series
+      }
+    })
+  }
+}
 
 function loadMapData (data) {
   index = new Supercluster({
@@ -63,30 +111,31 @@ function loadMapData (data) {
     extent: 256,
     maxZoom: 17
   }).load(data)
+
+  unclustered = new Supercluster({
+    log: DEBUG,
+    radius: 1,
+    extent: 256,
+    maxZoom: 1
+  }).load(data);
+
   postMessage({ ready: true })
 }
-// function addObservationsFilter (type, code) {
-//   if (LAYER_TYPES.indexOf(type) > -1) {
-//     // Remove the filter if it was already there
-//     const exists = filters.layers.find((layer, index) => {
-//       const isTheSame = layer.type === type && layer.code === code
-//       if (isTheSame) {
-//         filters.layers.splice(index, 1)
-//       }
-//       return isTheSame
-//     })
-//     // Add the filter if it was not there
-//     if (!exists) {
-//       filters.layers.push({ type: type, code: code })
-//     }
-//   }
-// }
+
+function filterDate (data, date) {
+  let filtered = {}
+  filtered = data.filter(feature => {
+    const feature_date = new Date(feature.properties.d)
+    if (new Date(date.from) <= feature_date && feature_date <= new Date(date.to)) {
+      return true
+    }
+  })
+  return filtered
+}
 
 function filterLocations (data, poly) {
-  console.log('filter location worker')
   let filtered = {}
   let polyCoords = poly.geometry.coordinates
-  console.log(poly.properties.boundingBox)
   const bb = poly.properties.boundingBox.map(parseFloat)
   const features = turf.featureCollection([
     turf.point([bb[0], bb[1]]),
@@ -112,7 +161,6 @@ function filterLocations (data, poly) {
   return filtered
 }
 
-
 function filterObservations (data, layers, filters) {
   // addObservationsFilter(type, code)
   let filteredData = {}
@@ -123,37 +171,8 @@ function filterObservations (data, layers, filters) {
   })
   // Filter the data
   filteredData = data.filter(feature => {
-    return visibleCategories.includes(feature.properties.c)
-  })
-
-  return filteredData
-}
-
-function filterLocations (data, polyCoords) {
-  let filtered = {}
-  filtered = data.filter(point => {
-    if (point.geometry) {
-      const ptCoords = point.geometry.coordinates
-      return turf.booleanPointInPolygon(ptCoords, polyCoords)
-    } else {
-      console.log('no geometry in point')
-      console.log(point)
-      return false
-    }
-  })
-  return filtered
-}
-
-function filterObservations (data, layers, filters) {
-  // addObservationsFilter(type, code)
-  let filteredData = {}
-  // Get all visible layers categories from filters
-  let visibleCategories = []
-  filters.forEach(f => {
-    visibleCategories = [...visibleCategories, ...layers[f.type][f.code].categories]
-  })
-  // Filter the data
-  filteredData = data.filter(feature => {
+    // if (feature.properties.c.indexOf('storm') > -1) {
+    // }
     return visibleCategories.includes(feature.properties.c)
   })
 

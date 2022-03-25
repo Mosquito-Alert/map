@@ -60,7 +60,7 @@ button {
     border: none;
   }
   &:hover {
-    border-left: 6px solid #999;
+    border-left: 6px solid $primary-color;
     overflow: visible;
     padding: 5px 6px 5px 10px;
     :deep(i.menu-arrow) {
@@ -71,7 +71,8 @@ button {
   &:hover :deep(.lang-container){
     left: 44px;
     opacity: 1;
-    transition: all 0.3s ease-in;
+    transition: left 0.3s ease-in;
+    transition: opacity 0.5s ease-in;
   }
   &:hover span,
   &:hover i{

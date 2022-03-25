@@ -46,7 +46,7 @@
           :condition="selectCondition"
           :filter="selectInteactionFilter">
             <ol-style>
-                <ol-style-icon :src="selectedIcon"></ol-style-icon>
+                <ol-style-icon :src="selectedIcon" :anchor="[0.5, 1]"></ol-style-icon>
             </ol-style>
         </ol-interaction-select>
 
@@ -64,6 +64,7 @@ import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
@@ -93,7 +94,7 @@ export default defineComponent({
     const mapFilters = { observations: [], locations: [], hastags: [], date: [] }
 
     const fitFeature = function (location) {
-      const extent = location.features[0].properties.boundingBox
+      const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
         { minResolution: 50, nearest: true }
@@ -108,9 +109,6 @@ export default defineComponent({
           geometry: new MultiPolygon(location.features[0].geometry.coordinates)
         })
       }
-
-      // transform geometry to MERCATOR
-      Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
 
       if (Feat) {
         let lineString = null
@@ -138,10 +136,16 @@ export default defineComponent({
         if (tolerance > 1000) {
           tolerance = 1000
         }
-        console.log('theMap add feature location')
-        // Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857').simplify(1000))
-        Feat.setGeometry(Feat.getGeometry().simplify(1))
-        locationFeatures.value = [Feat]
+
+        Feat = new Feature({
+          geometry: fromExtent(extent)
+        })
+
+        // transform geometry to MERCATOR
+        // Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+        // Feat.setGeometry(Feat.getGeometry().simplify(1))
+        // for the moment do not add boundary feature to map
+        // locationFeatures.value = [Feat]
       }
     }
 
@@ -226,19 +230,27 @@ export default defineComponent({
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
-          const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          initial.LAYERS.forEach(layerFilter => {
-            filterObservations({
-              type: 'layer',
-              data: layerFilter
-            })
-          })
-          if ('DATES' in initial) {
-            filterObservations({
-              type: 'date',
-              data: initial.DATES
-            })
+          const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          const initialLayers = defaults.LAYERS
+          if (defaults.DATES) {
+            mapFilters.date = [defaults.DATES]
           }
+          initialLayers.forEach(layerFilter => {
+            filterObservations(layerFilter)
+          })
+          // const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          // initial.LAYERS.forEach(layerFilter => {
+          //   filterObservations({
+          //     type: 'layer',
+          //     data: layerFilter
+          //   })
+          // })
+          // if ('DATES' in initial) {
+          //   filterObservations({
+          //     type: 'date',
+          //     data: initial.DATES
+          //   })
+          // }
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -408,9 +420,18 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
-      console.log('initiate filter locations')
       const workerData = {}
       mapFilters.locations = [JSON.stringify(location)]
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
+    function filterDate (date) {
+      const workerData = {}
+      console.log(date)
+      mapFilters.date = [JSON.parse(JSON.stringify(date))]
+      console.log(mapFilters)
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -422,6 +443,7 @@ export default defineComponent({
       center,
       filterObservations,
       filterLocations,
+      filterDate,
       zoom,
       map,
       observationsSource,
@@ -502,8 +524,8 @@ export default defineComponent({
     height: 20px;
     line-height: 13px;
   }
-  :deep(.ol-attribution) a {
-    color: black;
+  :deep(.ol-attribution) {
+    color: white;
   }
   .drawer-handler{
     background-color: $primary-color;

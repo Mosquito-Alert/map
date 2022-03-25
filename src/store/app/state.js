@@ -118,18 +118,21 @@ export default function () {
       breeding: { // Breeding sites
         with_water: {
           categories: ['storm_drain_water'],
+          icon: require('../../assets/img/storm_drain_water.svg'),
           faIcon: 'fa-solid fa-droplet breeding',
           common_name: 'Stormdrain with water',
           color: '#1072ad'
         },
         without_water: {
           categories: ['storm_drain_dry'],
+          icon: require('../../assets/img/storm_drain_dry.svg'),
           faIcon: 'fa-solid fa-droplet-slash breeding',
           common_name: 'Stormdrain without water',
           color: '#1072ad'
         },
         other_water: {
           categories: ['breeding_site_other'],
+          icon: require('../../assets/img/breeding_other.svg'),
           faIcon: 'fa-light fa-dharmachakra breeding',
           common_name: 'Breeding site others',
           color: '#1072ad'

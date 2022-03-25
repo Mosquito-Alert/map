@@ -41,7 +41,7 @@ button.fa-thin-button {
     border: none;
   }
   &:hover {
-    border-left: 6px solid #999;
+    border-left: 6px solid $primary-color;
     transition: all 0.1s ease-in;
   }
   &:hover span,

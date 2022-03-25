@@ -4,7 +4,6 @@
       side="left"
       behavior="desktop"
       width=""
-      class ="toni"
       :class="expanded?'expanded':'collapsed'"
   >
     <!-- Main menu -->
@@ -147,6 +146,7 @@ export default {
       if (!event.target.dataset.type) {
         obj = obj.closest('.li-item')
       }
+
       context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code
