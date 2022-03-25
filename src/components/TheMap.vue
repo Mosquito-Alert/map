@@ -83,13 +83,14 @@ export default defineComponent({
     const locationLayer = ref('null')
     const locationFeatures = ref([])
     let ready = false
-    const worker = new Worker('TheMapWorker.js')
     const map = ref('null')
     const observationsSource = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const mapFilters = { observations: [], locations: [], hastags: [] }
+    // const worker = $store.getters['app/getWorker']
+    const worker = new Worker('TheMapWorker.js')
+    const mapFilters = { observations: [], locations: [], hastags: [], date: [] }
 
     const fitFeature = function (location) {
       const extent = location.features[0].properties.boundingBox
@@ -209,13 +210,6 @@ export default defineComponent({
       }
     }
 
-    let ready = false
-    const worker = $store.getters['app/getWorker']
-    const map = ref('null')
-    const observationsSource = ref('null')
-    const view = ref('null')
-    const format = inject('ol-format')
-    const geoJson = new format.GeoJSON()
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
@@ -232,12 +226,15 @@ export default defineComponent({
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
-          const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
-          initialLayers.forEach(layerFilter => {
-            filterObservations(layerFilter)
+          const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          initial.LAYERS.forEach(layerFilter => {
+            filterObservations({
+              type: 'layer',
+              data: layerFilter
+            })
           })
           if ('DATES' in initial) {
-            filter({
+            filterObservations({
               type: 'date',
               data: initial.DATES
             })

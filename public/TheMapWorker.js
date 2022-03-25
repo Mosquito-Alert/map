@@ -5,9 +5,13 @@ importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
 let all_data = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
 const DEBUG = true
-let index
-
+let index,unclustered
 const now = Date.now()
+
+function log (text) {
+  if (DEBUG) console.log(text)
+}
+
 getJSON('totes.json', (geojson) => {
   log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
   all_data = geojson.features

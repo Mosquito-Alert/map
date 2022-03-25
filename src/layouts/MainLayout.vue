@@ -67,11 +67,12 @@ export default {
         $store.commit('app/setModal', { id: 'info', visible: true })
       }
     })
-    const filter = function (data) {
-      map.value.filter({
-        type: 'layer',
-        data: data
-      })
+    // const filter = function (data) {
+    //   map.value.filter({
+    //     type: 'layer',
+    //     data: data
+    //   })
+    // }
     const filterLocations = function (location) {
       map.value.fitFeature(location)
       map.value.filterLocations(location)
