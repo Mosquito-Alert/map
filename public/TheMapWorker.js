@@ -30,6 +30,7 @@ self.onmessage = function (e) {
       center: e.data.center
     })
   } else if (e.data.type) {
+    // Type is layer or date
     // This is fired when the map is filtered.
     all_layers = e.data.data.layers
     filter(e.data, e.data.code, e.data.layers);
@@ -150,11 +151,11 @@ function filter (params, code, layers) {
   }).load(data)
 
   unclustered = new Supercluster({
-      log: DEBUG,
-      radius: 1,
-      extent: 256,
-      maxZoom: 1
-  }).load(data);
+    log: DEBUG,
+    radius: 1,
+    extent: 256,
+    maxZoom: 1
+  }).load(data)
 
   postMessage({ ready: true })
 }

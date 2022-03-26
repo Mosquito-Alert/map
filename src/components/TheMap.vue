@@ -186,6 +186,7 @@ export default defineComponent({
         $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
+
     function updateMap () {
       const olmap = map.value.map
       if (!ready) return
@@ -197,6 +198,7 @@ export default defineComponent({
         zoom: olmap.getView().getZoom()
       })
     }
+
     function flyTo (location, zoom, done) {
       const duration = 600
       let parts = 2
@@ -216,6 +218,7 @@ export default defineComponent({
         callback
       )
     }
+
     onMounted(function () {
       const ol = map.value.map
 
@@ -315,6 +318,7 @@ export default defineComponent({
     function filter (data) {
       $store.commit('map/selectFeature', {})
       data.data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      console.log(data)
       worker.postMessage(data)
     }
     return {
