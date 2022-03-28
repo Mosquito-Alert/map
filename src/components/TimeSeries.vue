@@ -48,6 +48,9 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, context) {
+    // $q.lang.set('es') // returns a string
+    // console.log($q.lang.getLocale()) // returns a string
+
     const chart = ref()
     const dateRange = ref()
     const $store = useStore()
