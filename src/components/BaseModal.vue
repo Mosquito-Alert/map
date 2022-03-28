@@ -52,6 +52,23 @@ export default {
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.75);
 }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #EFA501 #ccc;
+}
+
+.dialog div::-webkit-scrollbar {
+    height: 12px;
+    width: 4px;
+    background: #ccc;
+}
+
+.dialog div::-webkit-scrollbar-thumb {
+    background: #EFA501;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
 .dialog {
   width: 100%;
   height: 100%;
@@ -63,12 +80,14 @@ export default {
   z-index: 2001;
 }
 dialog {
-  width: 80vh;
+  max-width: 80vw;
+  max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
   background-color: white;
   z-index: 2001;
   border: none;
+  overflow:auto;
 }
 .backdrop-enter-from,
 .backdrop-leave-to {

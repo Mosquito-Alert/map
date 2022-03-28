@@ -1,10 +1,11 @@
-f<template>
+<template>
   <q-drawer
       show-if-above
       side="left"
       behavior="desktop"
-      no-swipe-close
-      width="">
+      width=""
+      :class="expanded?'expanded':'collapsed'"
+  >
     <!-- Main menu -->
     <q-toolbar>
       <fa-thin-button name="fa-thin fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
@@ -14,24 +15,28 @@ f<template>
       <fa-thin-button name="fa-thin fa-share-nodes" :label="_('Share')"></fa-thin-button>
       <fa-thin-button name="fa-thin fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
-        <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
-          <span>Català</span>
-        </div>
-        <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
-          <span>Castellano</span>
-        </div>
-        <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
-          <span>English</span>
+        <div class="lang-wrapper">
+          <div class="lang-container">
+            <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
+              <span>Català</span>
+            </div>
+            <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
+              <span>Castellano</span>
+            </div>
+            <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
+              <span>English</span>
+            </div>
+          </div>
         </div>
       </fa-thin-button-menu>
       <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
     </q-toolbar>
 
     <!-- Drawer content -->
-    <div class="toc-layers">
+    <div class="toc-layers" :class="expanded?'expanded':'collapsed'">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
-          <input type="text" name="localitat" :placeholder="_('Placeholder location')"/> <button>></button>
+          <search-location @locationSelected="locationSelected"/>
           <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
       </div>
 
@@ -43,13 +48,13 @@ f<template>
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
             <div class="li-item"
-                  @click="filterData(layer, $event)"
+                  @click="filterObservations(layer, $event)"
                   data-type="observations"
                   :data-code="code"
                   :class="initialClass(code, 'observations')">
             </div>
             <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div>
+            <!-- <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div> -->
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
@@ -65,13 +70,7 @@ f<template>
           <!-- BITES -->
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
-              <div
-                class="li-item"
-                @click="filterData(layer, $event)"
-                data-type="bites"
-                :data-code="code"
-                :class="initialClass(code, 'bites')"
-                >
+              <div class="li-item" @click="filterObservations(layer, $event)" data-type="bites" :data-code="code">
                   <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -82,13 +81,7 @@ f<template>
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
-                <div
-                  class="li-item"
-                  @click="filterData(layer, $event)"
-                  data-type="breeding"
-                  :data-code="code"
-                  :class="initialClass(code, 'breeding')"
-                  >
+                <div class="li-item" @click="filterObservations(layer, $event)" data-type="breeding" :data-code="code">
                     <i class="fa-solid" :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -106,8 +99,8 @@ f<template>
         <div class="item-container" v-for="layer, code in otherObservations" :key="code">
           <div class="content">
             <div class="li-item"
-              @click="filterData(layer, $event)"
-              data-type="other_observations"
+              @click="filterObservations(layer, $event)"
+              data-type="otherObservations"
               :data-code="code"
               :class="initialClass(code, 'other')">
             </div>
@@ -136,22 +129,25 @@ import { useStore } from 'vuex'
 import FaThinButton from 'components/FaThinButton.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
+import SearchLocation from 'components/SearchLocation.vue'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu, SamplingEffort },
-  emits: ['filter'],
+  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
+  emits: ['filterObservations', 'filterLocations'],
+  props: ['expanded'],
   setup (props, context) {
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
     const $store = useStore()
 
-    const filterData = function (layer, event) {
+    const filterObservations = function (layer, event) {
       let obj = event.target
       if (!event.target.dataset.type) {
         obj = obj.closest('.li-item')
       }
-      context.emit('filter', {
+
+      context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code
       })
@@ -238,13 +234,33 @@ export default {
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', visible: true })
     }
+
+    const locationSelected = function (location) {
+      const loc = location.location
+      const bb = loc.boundingbox
+      const bounding = [bb[2], bb[0], bb[3], bb[1]]
+      const geojson = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              boundingBox: bounding
+            },
+            geometry: loc.geojson
+          }
+        ]
+      }
+      context.emit('filterLocations', geojson)
+    }
+
     return {
       ca,
       es,
       en,
       clickLanguageSelector,
       initialClass,
-      filterData,
+      filterObservations,
       observations,
       showInfo,
       breeding,
@@ -252,6 +268,7 @@ export default {
       otherObservations,
       mouseEnter,
       mouseOut,
+      locationSelected,
       _
     }
   }
@@ -312,6 +329,11 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   display: flex;
   flex-direction: row;
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
+  width: $left-drawer-width;
+}
+
+.collapsed :deep(.q-drawer__content.fit){
+  width: 60px !important;
 }
 
 .toc-layers{
@@ -351,7 +373,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 .toc-category,
 .toc-card.filters{
-  padding: 20px 10px 0px 25px;
+  padding: 20px 10px 0px 18px;
   margin-bottom: 10px;
 }
 
@@ -365,6 +387,8 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   font-weight: 700;
   color: #666666;
 }
+
+.toc-title .input
 .bites-title{
   width:25%;
 }
@@ -417,10 +441,6 @@ input{
   text-align:center;
 }
 
-.li-item{
-  width:60px;
-}
-
 .li-item i{
   display: block;
   margin:auto;
@@ -428,7 +448,6 @@ input{
   width:35px;
 }
 
-.content.bites .li-item:hover i,
 .content.bites .li-item.active i{
   padding:8px 6px;
   border-radius:50%;
@@ -454,17 +473,6 @@ input{
   border-radius:50%;
   font-size:1.5em;
   padding: 8px 6px;
-}
-
-.content.bites .li-item:hover i,
-.content.breeding .li-item:hover i{
-  background-color:  #a8b9c1;
-  color: white;
-}
-
-.content.bites .li-item.active:hover i {
-  background-color:  #cc6677;
-  color: #e2b3aa;
 }
 
 .content.breeding .li-item.active i {
@@ -504,7 +512,8 @@ input{
 .li-item{
   // text-align: center;
   text-transform: capitalize;
-  height: 60px;
+  width:50px;
+  height: 50px;
   border-radius:10px;
   border:1px solid rgb(180, 174, 174);
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
@@ -565,7 +574,7 @@ input{
 
 // LAYER ICONS
 .li-item{
-  background-size:35px;
+  // background-size:30px;
 }
 
 .li-item.tiger,
@@ -622,18 +631,13 @@ input{
   opacity:0.7;
 }
 
-.content.bites .li-item:hover,
-.content.breeding .li-item:hover{
+.content.bites .li-item:hover i,
+.content.breeding .li-item:hover i{
   opacity:0.7;
 }
 
-.content.bites .li-item:hover i,
-.content.breeding .li-item:hover i{
-  opacity:0.3;
-}
-
 .separator{
-  margin:5px 0 50px 0;
+  margin:6px 0 45px 0;
   position: relative;
   left:0px;
   border-right: 2px solid transparent;
@@ -641,5 +645,16 @@ input{
 .separator.active{
   border-right: 2px solid #c0c0c0;
 }
-
+.toc-layers{
+  position:relative;
+}
+.toc-layers.expanded{
+  left: 0px;
+}
+.q-drawer__content.fit.scroll.expanded{
+  width: 250px !important;
+}
+.lang-wrapper{
+  position: relative;
+}
 </style>

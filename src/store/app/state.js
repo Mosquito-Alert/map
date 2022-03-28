@@ -3,12 +3,18 @@ const worker = new Worker('TheMapWorker.js')
 export default function () {
   let backendUrl = ''
   if (process.env.DEV) {
-    backendUrl = 'http://localhost:8001/'
+    backendUrl = 'http://localhost:8000/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
   }
 
+  // first language is default
+  const allowedLangs = ['en', 'es', 'ca']
+  const browserLang = navigator.language.toLowerCase().substring(0, 2)
+  const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+
   return {
+    lang: defaultLang,
     DEFAULTS: {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
@@ -16,7 +22,6 @@ export default function () {
       DATES: { from: '2021/01/01', to: '2021/12/31' }
       // INFO_OPEN: false
     },
-    lang: 'ca',
     BACKEND: backendUrl,
     trans: {},
     modals: {
@@ -43,7 +48,7 @@ export default function () {
       storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
       breeding_site_other: require('../../assets/img/breeding_not_yet_filtered_selected.svg'),
       breeding_site_not_yet_filtered: require('../../assets/img/breeding_not_yet_filtered_selected.svg'),
-      conflict: require('../../assets/img/marker_koreicus_japonicus_selected.svg')
+      bite: require('../../assets/img/marker_bite_selected.svg')
     },
     worker,
     layers: {
@@ -52,7 +57,7 @@ export default function () {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
-          icon: require('../../assets/img/marker_tiger.svg'),
+          icon: require('../../assets/img/marker_tiger35_45.svg'),
           color: '#4d4d4d'
         },
         yellow: {
@@ -63,19 +68,19 @@ export default function () {
           color: '#ffdd19'
         },
         japonicus: {
-          categories: ['japonicus_probable', 'japonicus_confirmed'],
+          categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Japonicus mosquito',
           scientific_name: 'Aedes japonicus',
           icon: require('../../assets/img/marker_japonicus.svg'),
-          iconConflict: require('../../assets/img/marker_koreicus_japonicus.svg'),
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
           color: '#49a999'
         },
         koreicus: {
-          categories: ['koreicus_probable', 'koreicus_confirmed'],
+          categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Koreicus mosquito',
           scientific_name: 'Aedes koreicus',
           icon: require('../../assets/img/marker_koreicus.svg'),
-          iconConflict: require('../../assets/img/marker_koreicus_japonicus.svg'),
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
           color: '#499fff'
         },
         culex: {
@@ -89,7 +94,7 @@ export default function () {
         unidentified: {
           categories: ['unidentified'],
           common_name: 'Unidentified mosquito',
-          icon: require('../../assets/img/marker_unidentified.svg'),
+          icon: require('../../assets/img/marker_unidentified35_45.svg'),
           color: '#c0c0c0'
         }
       },
@@ -103,7 +108,8 @@ export default function () {
       },
       bites: { // Bites
         pending: {
-          categories: ['bites'],
+          categories: ['bite'],
+          icon: require('../../assets/img/marker_bite.svg'),
           faIcon: 'fa-solid fa-child bites',
           common_name: 'Bites',
           color: '#cc6677'
@@ -112,18 +118,21 @@ export default function () {
       breeding: { // Breeding sites
         with_water: {
           categories: ['storm_drain_water'],
+          icon: require('../../assets/img/storm_drain_water.svg'),
           faIcon: 'fa-solid fa-droplet breeding',
           common_name: 'Stormdrain with water',
           color: '#1072ad'
         },
         without_water: {
           categories: ['storm_drain_dry'],
+          icon: require('../../assets/img/storm_drain_dry.svg'),
           faIcon: 'fa-solid fa-droplet-slash breeding',
           common_name: 'Stormdrain without water',
           color: '#1072ad'
         },
         other_water: {
           categories: ['breeding_site_other'],
+          icon: require('../../assets/img/breeding_other.svg'),
           faIcon: 'fa-light fa-dharmachakra breeding',
           common_name: 'Breeding site others',
           color: '#1072ad'

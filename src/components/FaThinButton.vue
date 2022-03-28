@@ -41,8 +41,13 @@ button.fa-thin-button {
     border: none;
   }
   &:hover {
-    border-left: 6px solid #999;
+    border-left: 6px solid $primary-color;
     transition: all 0.1s ease-in;
+  }
+  &:hover span,
+  &:hover i{
+    font-weight: bold;
+    color: #efa501;
   }
   &.active {
     border-left: 6px solid $primary-button-background;
@@ -50,6 +55,7 @@ button.fa-thin-button {
   &.active i,
   &.active span{
     color: #efa501;
+    font-weight: bold;
   }
 }
 </style>

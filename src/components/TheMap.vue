@@ -1,5 +1,8 @@
 <template>
   <div id='mapa' class='bg-white'>
+    <div class="drawer-handler" @click="$emit('toogleLeftDrawer')">
+      x
+    </div>
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -24,8 +27,14 @@
               url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
         </ol-tile-layer>
 
+        <!-- ADMINISTRATIVE LIMITS LAYER -->
+        <ol-vector-layer ref='locationLayer' name="locationLayer">
+          <ol-source-vector :features="locationFeatures" :format='geoJson'>
+          </ol-source-vector>
+        </ol-vector-layer>
+
         <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observationsLayer'>
+        <ol-vector-layer ref='observationsLayer' name="observationsLayer">
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -37,7 +46,7 @@
           :condition="selectCondition"
           :filter="selectInteactionFilter">
             <ol-style>
-                <ol-style-icon :src="selectedIcon"></ol-style-icon>
+                <ol-style-icon :src="selectedIcon" :anchor="[0.5, 1]"></ol-style-icon>
             </ol-style>
         </ol-interaction-select>
 
@@ -50,15 +59,19 @@
 <script>
 import { defineComponent, computed, ref, onMounted, inject } from 'vue'
 import { useStore } from 'vuex'
-import { transform } from 'ol/proj.js'
+import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import { fromExtent } from 'ol/geom/Polygon'
+// import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
+  emits: ['toogleLeftDrawer'],
   props: {},
   setup (props, context) {
     const selectedId = ref('null')
@@ -66,19 +79,91 @@ export default defineComponent({
     const $store = useStore()
     const selectConditions = inject('ol-selectconditions')
     const selectCondition = selectConditions.singleClick
+    const selectedIcon = ref('null')
+    const features = ref([])
+    const locationLayer = ref('null')
+    const locationFeatures = ref([])
+    let ready = false
+    const map = ref('null')
+    const observationsSource = ref('null')
+    const view = ref('null')
+    const format = inject('ol-format')
+    const geoJson = new format.GeoJSON()
+    // const worker = $store.getters['app/getWorker']
+    const worker = new Worker('TheMapWorker.js')
+    const mapFilters = { observations: [], locations: [], hastags: [], date: [] }
+
+    const fitFeature = function (location) {
+      const extent = location.features[0].properties.boundingBox.map(parseFloat)
+      map.value.map.getView().fit(
+        transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
+        { minResolution: 50, nearest: true }
+      )
+      let Feat = null
+      if (location.features[0].geometry.type.toLowerCase() === 'polygon') {
+        Feat = new Feature({
+          geometry: new Polygon(location.features[0].geometry.coordinates)
+        })
+      } else if (location.features[0].geometry.type.toLowerCase() === 'multipolygon') {
+        Feat = new Feature({
+          geometry: new MultiPolygon(location.features[0].geometry.coordinates)
+        })
+      }
+
+      if (Feat) {
+        let lineString = null
+        let maxLength = 0
+        if (Feat.getGeometry().getType() === 'MultiPolygon') {
+          const polis = Feat.getGeometry().getPolygons()
+          polis.forEach(function (poli, i, a) {
+            lineString = new LineString(
+              poli.getLinearRing(0).getCoordinates()
+            )
+            const poliLength = lineString.getLength()
+            if (poliLength > maxLength) {
+              maxLength = poliLength
+            }
+          })
+        } else {
+          lineString = new LineString(
+            Feat.getGeometry().getLinearRing(0).getCoordinates()
+          )
+          maxLength = lineString.getLength()
+        }
+
+        // simplify tolerance of 5% of perimeter
+        let tolerance = (maxLength * 0.005)
+        if (tolerance > 1000) {
+          tolerance = 1000
+        }
+
+        Feat = new Feature({
+          geometry: fromExtent(extent)
+        })
+
+        // transform geometry to MERCATOR
+        // Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+        // Feat.setGeometry(Feat.getGeometry().simplify(1))
+        // for the moment do not add boundary feature to map
+        // locationFeatures.value = [Feat]
+      }
+    }
 
     const autoPanPopup = function () {
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
       setTimeout(() => {
-        const overlay = document.querySelector('.overlay-content')
+        const overlay = document.querySelector('.parentContainer')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
         flyTo(coords, ol.getView().getZoom())
       }, 100)
     }
 
-    const selectInteactionFilter = (feature) => {
+    const selectInteactionFilter = (feature, layer) => {
+      if (layer.values_.name !== 'observationsLayer') {
+        return false
+      }
       if ('cluster_id' in feature.values_.properties) {
         worker.postMessage({
           getClusterExpansionZoom: feature.values_.properties.cluster_id,
@@ -92,7 +177,6 @@ export default defineComponent({
       }
     }
 
-    const selectedIcon = ref('null')
     const featureSelected = function (event) {
       if (event.selected[0]) {
         const feature = event.selected[0]
@@ -130,13 +214,6 @@ export default defineComponent({
       }
     }
 
-    let ready = false
-    const worker = $store.getters['app/getWorker']
-    const map = ref('null')
-    const observationsSource = ref('null')
-    const view = ref('null')
-    const format = inject('ol-format')
-    const geoJson = new format.GeoJSON()
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
@@ -148,25 +225,32 @@ export default defineComponent({
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
-    const features = ref([])
 
     worker.onmessage = function (event) {
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
-          const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          initial.LAYERS.forEach(layerFilter => {
-            filter({
-              type: 'layer',
-              data: layerFilter
-            })
-          })
-          if ('DATES' in initial) {
-            filter({
-              type: 'date',
-              data: initial.DATES
-            })
+          const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          const initialLayers = defaults.LAYERS
+          if (defaults.DATES) {
+            mapFilters.date = [defaults.DATES]
           }
+          initialLayers.forEach(layerFilter => {
+            filterObservations(layerFilter)
+          })
+          // const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+          // initial.LAYERS.forEach(layerFilter => {
+          //   filterObservations({
+          //     type: 'layer',
+          //     data: layerFilter
+          //   })
+          // })
+          // if ('DATES' in initial) {
+          //   filterObservations({
+          //     type: 'date',
+          //     data: initial.DATES
+          //   })
+          // }
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -242,10 +326,10 @@ export default defineComponent({
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgba(187, 208, 189, 0.8)'
+            color: 'rgb(127, 153, 136, 1)'
           }),
           stroke: new Stroke({
-            color: 'rgba(201, 217, 204, 0.5)',
+            color: 'rgb(127, 153, 136, 0.5)',
             width: 15
           }),
           radius: radius
@@ -262,9 +346,9 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         if (feature.values_.properties.id === selectedId.value) {
-          console.log(feature.values_.properties.c)
           const selectedIcon = new Icon({
-            src: $store.getters['app/selectedIcons'][feature.values_.properties.c]
+            src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
+            anchor: [0.5, 1]
           })
           style.setImage(selectedIcon)
           style.setText('')
@@ -304,9 +388,13 @@ export default defineComponent({
           }
           // if no layer selected then featurekey is null
           if (featureKey) {
-            const iconUrl = observations[featureKey].icon
+            let iconUrl = observations[featureKey].icon
+            if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
+              iconUrl = observations[featureKey].iconConflict
+            }
             const tiger = new Icon({
-              src: iconUrl
+              src: iconUrl,
+              anchor: [0.5, 1]
             })
             style.setImage(tiger)
             style.setText('')
@@ -315,19 +403,54 @@ export default defineComponent({
       }
     }
 
-    function filter (data) {
+    function filterObservations (observation) {
       $store.commit('map/selectFeature', {})
-      data.data.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-      console.log(data)
-      worker.postMessage(data)
+      // toggle selected layer
+      const filterIndex = mapFilters.observations.findIndex(element => {
+        return element.type === observation.type && element.code === observation.code
+      })
+
+      if (filterIndex > -1) {
+        mapFilters.observations.splice(filterIndex, 1)
+      } else {
+        mapFilters.observations.push({ type: observation.type, code: observation.code })
+      }
+      const workerData = {}
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      workerData.filters = mapFilters
+      worker.postMessage(workerData)
     }
+
+    function filterLocations (location) {
+      const workerData = {}
+      mapFilters.locations = [JSON.stringify(location)]
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
+    function filterDate (date) {
+      const workerData = {}
+      console.log(date)
+      mapFilters.date = [JSON.parse(JSON.stringify(date))]
+      console.log(mapFilters)
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
     return {
+      fitFeature,
       autoPanPopup,
       center,
-      filter,
+      filterObservations,
+      filterLocations,
+      filterDate,
       zoom,
       map,
       observationsSource,
+      locationLayer,
+      locationFeatures,
       overrideStyleFunction,
       geoJson,
       features,
@@ -403,7 +526,17 @@ export default defineComponent({
     height: 20px;
     line-height: 13px;
   }
-  :deep(.ol-attribution) a {
-    color: black;
+  :deep(.ol-attribution) {
+    color: white;
+  }
+  .drawer-handler{
+    background-color: $primary-color;
+    color: white;
+    position: fixed;
+    top: $header-height;
+    z-index: 1100;
+    padding: 20px 10px;
+    cursor: pointer;
+    border-radius: 0 10px 10px 0;
   }
 </style>

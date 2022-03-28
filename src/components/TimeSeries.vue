@@ -43,11 +43,11 @@ Chart.register(...registerables)
 export default defineComponent({
   name: 'TimeSeries',
   components: { LineChart },
-  emits: ['toggleTimeSeries'],
+  emits: ['toggleTimeSeries', 'dateSelected'],
   props: {
     timeSeriesVisible: { type: Boolean }
   },
-  setup (props, { emit }) {
+  setup (props, context) {
     const chart = ref()
     const dateRange = ref()
     const $store = useStore()
@@ -64,7 +64,7 @@ export default defineComponent({
     const toggleTimeSeries = function () {
       timeIsVisible.value = !timeIsVisible.value
       iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
-      emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
+      context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     const getData = () => {
       const rawData = $store.getters['timeseries/getData']
@@ -112,10 +112,11 @@ export default defineComponent({
       return data
     })
     const datePicked = function (event) {
-      $store.dispatch(
-        'app/setFilter',
-        { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) }
-      )
+      context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
+      // $store.dispatch(
+      //   'app/setFilter',
+      //   { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) }
+      // )
     }
     const chartOptions = computed(() => {
       return $store.getters['timeseries/getChartOptions']

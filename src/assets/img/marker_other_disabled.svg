@@ -5,12 +5,12 @@
    version="1.1"
    x="0px"
    y="0px"
-   viewBox="0 0 39.999998 50.000001"
+   viewBox="0 0 29.999998 40.000001"
    xml:space="preserve"
    id="svg15"
    sodipodi:docname="marker_other_disabled.svg"
-   width="40"
-   height="50"
+   width="30"
+   height="40"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -30,9 +30,9 @@
      xlink:href="#linearGradient18697"
      id="linearGradient18699"
      x1="0"
-     y1="40.325"
-     x2="60.4"
-     y2="40.325"
+     y1="40.325001"
+     x2="60.400002"
+     y2="40.325001"
      gradientUnits="userSpaceOnUse" /></defs><sodipodi:namedview
    id="namedview17"
    pagecolor="#ffffff"
@@ -151,7 +151,7 @@
 </g>
 <g
    id="TOC_CONTENT"
-   transform="matrix(0.66221482,0,0,0.61696,0.11210014,0)"
+   transform="matrix(0.49332223,0,0,0.49603363,0.11210014,0)"
    style="fill:#e6e6e6;fill-opacity:1">
 	<path
    d="M 0,30.2 C 0,13.5 13.5,0 30.2,0 46.9,0 60.4,13.5 60.4,30.2 60.4,42.4 56.2,45.8 33.3,79 31.8,81.2 28.6,81.2 27.1,79 4.2,45.8 0,42.4 0,30.2 Z"
@@ -167,14 +167,4 @@
 <g
    id="POPUP">
 </g>
-<circle
-   id="path14613"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /><circle
-   id="path14615"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /></svg>
+</svg>

@@ -5,12 +5,12 @@
    version="1.1"
    x="0px"
    y="0px"
-   viewBox="0 0 39.999998 50.000001"
+   viewBox="0 0 29.999998 40.000001"
    xml:space="preserve"
    id="svg15"
    sodipodi:docname="marker_other.svg"
-   width="40"
-   height="50"
+   width="30"
+   height="40"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -30,9 +30,9 @@
      xlink:href="#linearGradient18697"
      id="linearGradient18699"
      x1="0"
-     y1="40.325"
-     x2="60.4"
-     y2="40.325"
+     y1="40.325001"
+     x2="60.400002"
+     y2="40.325001"
      gradientUnits="userSpaceOnUse" /></defs><sodipodi:namedview
    id="namedview17"
    pagecolor="#ffffff"
@@ -42,15 +42,15 @@
    inkscape:pageopacity="0.0"
    inkscape:pagecheckerboard="0"
    showgrid="false"
-   width="24px"
+   width="30px"
    inkscape:zoom="8.9205957"
-   inkscape:cx="30.210987"
-   inkscape:cy="40.299999"
-   inkscape:window-width="1920"
-   inkscape:window-height="1017"
-   inkscape:window-x="-8"
-   inkscape:window-y="-8"
-   inkscape:window-maximized="1"
+   inkscape:cx="15.694019"
+   inkscape:cy="29.818636"
+   inkscape:window-width="1493"
+   inkscape:window-height="988"
+   inkscape:window-x="312"
+   inkscape:window-y="13"
+   inkscape:window-maximized="0"
    inkscape:current-layer="svg15" />
 <style
    type="text/css"
@@ -151,12 +151,12 @@
 </g>
 <g
    id="TOC_CONTENT"
-   transform="matrix(0.66221482,0,0,0.61696,0.11210014,0)"
-   style="fill:#c0c0c0;fill-opacity:1">
+   transform="matrix(0.49668874,0,0,0.49192505,0,0.10204473)"
+   style="fill:#999999;fill-opacity:1">
 	<path
    d="M 0,30.2 C 0,13.5 13.5,0 30.2,0 46.9,0 60.4,13.5 60.4,30.2 60.4,42.4 56.2,45.8 33.3,79 31.8,81.2 28.6,81.2 27.1,79 4.2,45.8 0,42.4 0,30.2 Z"
    id="path9"
-   style="fill:#c0c0c0;fill-opacity:1" />
+   style="fill:#999999;fill-opacity:1" />
 </g>
 <g
    id="MOBIL">
@@ -167,14 +167,4 @@
 <g
    id="POPUP">
 </g>
-<circle
-   id="path14613"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /><circle
-   id="path14615"
-   style="fill:#ffffff;stroke:#000000"
-   cx="23.541029"
-   cy="41.477051"
-   r="0.056434501" /></svg>
+</svg>
