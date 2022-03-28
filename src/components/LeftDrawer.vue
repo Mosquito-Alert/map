@@ -130,6 +130,7 @@ import FaThinButton from 'components/FaThinButton.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import SearchLocation from 'components/SearchLocation.vue'
+import { useQuasar } from 'quasar'
 
 export default {
   components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
@@ -140,6 +141,7 @@ export default {
     const es = ref(null)
     const en = ref(null)
     const $store = useStore()
+    const $q = useQuasar()
 
     const filterObservations = function (layer, event) {
       let obj = event.target
@@ -220,7 +222,13 @@ export default {
         item.classList.remove('active')
       })
       object.classList.add('active')
+      // NASTY
+      if (lang === 'en') lang = 'en-US'
+      import('quasar/lang/' + lang).then(({ default: messages }) => {
+        $q.lang.set(messages)
+      })
     }
+
     onMounted(function () {
       initLanguage()
     })

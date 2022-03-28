@@ -30,6 +30,10 @@
         <!-- ADMINISTRATIVE LIMITS LAYER -->
         <ol-vector-layer ref='locationLayer' name="locationLayer">
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
+            <ol-style>
+              <ol-style-fill :color="fillLocationColor"></ol-style-fill>
+              <ol-style-stroke :color="strokeLocationColor" width="2"></ol-style-stroke>
+            </ol-style>
           </ol-source-vector>
         </ol-vector-layer>
 
@@ -64,7 +68,7 @@ import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
-import { fromExtent } from 'ol/geom/Polygon'
+// import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 
@@ -74,6 +78,9 @@ export default defineComponent({
   emits: ['toogleLeftDrawer'],
   props: {},
   setup (props, context) {
+    let simplifyTolerance = null
+    const fillLocationColor = ref('null')
+    const strokeLocationColor = ref('null')
     const selectedId = ref('null')
     const selectedFeat = ref('null')
     const $store = useStore()
@@ -119,7 +126,7 @@ export default defineComponent({
             lineString = new LineString(
               poli.getLinearRing(0).getCoordinates()
             )
-            const poliLength = lineString.getLength()
+            const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
             if (poliLength > maxLength) {
               maxLength = poliLength
             }
@@ -128,24 +135,24 @@ export default defineComponent({
           lineString = new LineString(
             Feat.getGeometry().getLinearRing(0).getCoordinates()
           )
-          maxLength = lineString.getLength()
+          maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
         }
 
         // simplify tolerance of 5% of perimeter
-        let tolerance = (maxLength * 0.005)
-        if (tolerance > 1000) {
-          tolerance = 1000
+        simplifyTolerance = (maxLength * 0.001)
+        if (simplifyTolerance > 500) {
+          simplifyTolerance = 200
         }
-
-        Feat = new Feature({
-          geometry: fromExtent(extent)
-        })
+        // Geometry to show bounding box
+        // Feat = new Feature({
+        //   geometry: fromExtent(extent)
+        // })
 
         // transform geometry to MERCATOR
-        // Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
-        // Feat.setGeometry(Feat.getGeometry().simplify(1))
+        Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+        Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
-        // locationFeatures.value = [Feat]
+        locationFeatures.value = [Feat]
       }
     }
 
@@ -304,6 +311,9 @@ export default defineComponent({
     }
 
     onMounted(function () {
+      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      fillLocationColor.value = defaults.fillLocationColor
+      strokeLocationColor.value = defaults.strokeLocationColor
       const ol = map.value.map
 
       ol.on('pointermove', function (event) {
@@ -424,6 +434,7 @@ export default defineComponent({
     function filterLocations (location) {
       const workerData = {}
       mapFilters.locations = [JSON.stringify(location)]
+      mapFilters.tolerance = simplifyTolerance
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -440,6 +451,8 @@ export default defineComponent({
     }
 
     return {
+      fillLocationColor,
+      strokeLocationColor,
       fitFeature,
       autoPanPopup,
       center,
