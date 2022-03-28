@@ -7,8 +7,9 @@ const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
 const DEBUG = false
 let index, unclustered
 const now = Date.now()
-let filters ={}
+let filters = {}
 let all_layers = null
+let simplifyTolerance = null
 
 function log (text) {
   if (DEBUG) console.log('[TheMapWorker]', text)
@@ -43,6 +44,9 @@ self.onmessage = function (e) {
       filteredData = filterDate(filteredData, filters.date[0])
     }
     if (filters.locations.length > 0) {
+      if (filters.tolerance) {
+        simplifyTolerance = filters.tolerance
+      }
       const poly = JSON.parse(filters.locations[0]).features[0]
       filteredData = filterLocations(filteredData, poly)
     }
@@ -137,6 +141,7 @@ function filterDate (data, date) {
 
 function filterLocations (data, poly) {
   let filtered = {}
+  let turfPoligon = null
   let polyCoords = poly.geometry.coordinates
   const bb = poly.properties.boundingBox.map(parseFloat)
   const features = turf.featureCollection([
@@ -144,22 +149,41 @@ function filterLocations (data, poly) {
     turf.point([bb[2], bb[3]])
   ])
   const enveloped = turf.envelope(features)
-
+  const polyMercator = turf.toMercator(poly)
   if (poly.geometry.type.toLowerCase() === 'polygon') {
     polyCoords = [poly.geometry.coordinates]
+    turfPoligon = turf.polygon(polyMercator.geometry.coordinates)
+  } else {
+    polyCoords = poly.geometry.coordinates
+    turfPoligon = turf.multiPolygon([polyMercator.geometry.coordinates])
   }
 
+  // var options = {tolerance: 0.01, highQuality: false}
+  // var simplified = turf.simplify(geojson, options)
+
   // get first candidates inside bounding box
+  const myCoords = []
   const candidates = data.filter(point => {
     const ptCoords = point.geometry.coordinates
-    return turf.booleanPointInPolygon(ptCoords, enveloped)
+    if (turf.booleanPointInPolygon(ptCoords, enveloped)) {
+      myCoords.push(ptCoords)
+      return true
+    } else {
+      return false
+    }
   })
+  console.log(simplifyTolerance)
+  const options = {tolerance: simplifyTolerance, highQuality: true}
+  const simplified = turf.simplify(polyMercator, options)
 
   // from candidates get points inside poly
   filtered = candidates.filter(point => {
-    const ptCoords = point.geometry.coordinates
-    return turf.booleanPointInPolygon(ptCoords, polyCoords)
+    const pt = turf.toMercator(point)
+    const ptCoords = pt.geometry.coordinates
+    return turf.booleanPointInPolygon(ptCoords, simplified)
   })
+  // const ptsWithin = turf.pointsWithinPolygon(turf.points(myCoords), simplified)
+  // console.log(ptsWithin)
   return filtered
 }
 
