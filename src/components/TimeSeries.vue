@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue'
+import { defineComponent, computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 // import { LineChart } from 'vue-chart-3'
 import { LineChart } from './VueChartJS.js'
@@ -61,6 +61,12 @@ export default defineComponent({
       }
       return classes
     })
+
+    onMounted(function () {
+      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      dateRange.value = defaults.DATES
+    })
+
     const toggleTimeSeries = function () {
       timeIsVisible.value = !timeIsVisible.value
       iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
