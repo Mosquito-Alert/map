@@ -396,13 +396,13 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   color: #666666;
 }
 
-.toc-title .input
+.toc-title .input,
 .bites-title{
-  width:25%;
+  min-width:55px;
 }
 
 .breeding-title{
-  margin-left: 27px;
+  margin-left: 10px;
 }
 .bites-title,
 .breeding-title{
