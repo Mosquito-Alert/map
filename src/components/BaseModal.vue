@@ -80,7 +80,7 @@ export default {
   z-index: 2001;
 }
 dialog {
-  max-width: 80vw;
+  max-width: 50vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;

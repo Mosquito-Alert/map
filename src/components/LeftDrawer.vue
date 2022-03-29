@@ -82,7 +82,7 @@
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
                 <div class="li-item" @click="filterObservations(layer, $event)" data-type="breeding" :data-code="code">
-                    <i class="fa-solid" :class="layer.faIcon"></i>
+                    <i :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
               </div>
@@ -401,6 +401,9 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
   width:25%;
 }
 
+.breeding-title{
+  margin-left: 27px;
+}
 .bites-title,
 .breeding-title{
   display:inline;

@@ -43,13 +43,13 @@ export default function () {
       albopictus_cretinus: require('../../assets/img/marker_selected.svg'),
       unidentified: require('../../assets/img/marker_unidentified_selected.svg'),
       other_species: require('../../assets/img/marker_other_selected.svg'),
-      japonicus_koreicus: require('../../assets/img/marker_selected.svg'),
-      not_yet_validated: require('../../assets/img/marker_selected.svg'),
+      japonicus_koreicus: require('../../assets/img/marker_japonicus_koreicus_selected.svg'),
+      // not_yet_validated: require('../../assets/img/marker_selected.svg'),
       trash_layer: require('../../assets/img/marker_selected.svg'),
       storm_drain_water: require('../../assets/img/storm_drain_water_selected.svg'),
       storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
-      breeding_site_other: require('../../assets/img/breeding_not_yet_filtered_selected.svg'),
-      breeding_site_not_yet_filtered: require('../../assets/img/breeding_not_yet_filtered_selected.svg'),
+      breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
+      // breeding_site_not_yet_filtered: require('../../assets/img/breeding_other_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
     worker,
@@ -112,7 +112,7 @@ export default function () {
         pending: {
           categories: ['bite'],
           icon: require('../../assets/img/marker_bite.svg'),
-          faIcon: 'fa-solid fa-child bites',
+          faIcon: 'fa-solid fa-child-reaching bites',
           common_name: 'Bites',
           color: '#cc6677'
         }

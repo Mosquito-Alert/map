@@ -1,7 +1,7 @@
 <template>
   <div :class="timeSeriesClass">
     <div class="toggle-time">
-      <q-btn flat round dense icon="expand_more" :class="iconStatus" :label="_('Time series')" @click="toggleTimeSeries"/>
+      <q-btn flat round dense icon="expand_more" class="white-text" :class="iconStatus" :label="_('Time series')" @click="toggleTimeSeries"/>
     </div>
     <div class="body">
       <div class="legend">
@@ -237,5 +237,8 @@ export default defineComponent({
     background-color: $color-breeding;
     color: $text-color-breeding;
     border-radius: 2px;
+  }
+  .white-text{
+    color:white;
   }
 </style>

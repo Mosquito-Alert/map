@@ -31,21 +31,21 @@ $box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12)
 // POP UP
 $popup-border-radius: 25px;
 $popup-width-landscape: 40vw;
-$popup-width-portrait: 70vw;
+$popup-width-portrait: 50vw;
 $half-popup-width: 25vw;
 $popup-height: 50vh; // MAX height when there is no image
 $popup-height-with-image-landscape: 75vh; // MAX height when there is an image
-$popup-height-with-image-portrait: 55vh; // MAX height when there is an image
+$popup-height-with-image-portrait: 45vh; // MAX height when there is an image
 $popup-vertical-offset: 25px;
 $popup-padding-info: 25px;
 
 $li-item-padding: 5px;
-$icon-tiger: '../assets/img/marker_tiger30_40.svg';
+$icon-tiger: '../assets/img/marker_tiger.svg';
 $icon-yellow: '../assets/img/marker_yellow.svg';
 $icon-koreicus: '../assets/img/marker_koreicus.svg';
 $icon-japonicus: '../assets/img/marker_japonicus.svg';
 $icon-culex: '../assets/img/marker_culex.svg';
-$icon-unidentified: '../assets/img/marker_tiger30_40.svg';
+$icon-unidentified: '../assets/img/marker_unidentified.svg';
 $icon-other: '../assets/img/marker_other.svg';
 $icon-mosquito-disabled: '../assets/img/marker_mosquito_disabled.svg';
 $icon-unidentified-disabled: '../assets/img/marker_unidentified_disabled.svg';

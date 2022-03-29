@@ -15,6 +15,7 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <the-map ref='map'
+        :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
       />
       <time-series
