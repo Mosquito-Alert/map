@@ -1,8 +1,6 @@
 <template>
   <div id='mapa' class='bg-white'>
-    <div class="drawer-handler" @click="$emit('toogleLeftDrawer')">
-      x
-    </div>
+    <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -74,6 +72,7 @@ export default defineComponent({
   emits: ['toogleLeftDrawer'],
   props: {},
   setup (props, context) {
+    const leftDrawerIcon = ref('null')
     const selectedId = ref('null')
     const selectedFeat = ref('null')
     const $store = useStore()
@@ -92,6 +91,11 @@ export default defineComponent({
     // const worker = $store.getters['app/getWorker']
     const worker = new Worker('TheMapWorker.js')
     const mapFilters = { observations: [], locations: [], hastags: [], date: [] }
+
+    const toogleLeftDrawer = function () {
+      context.emit('toogleLeftDrawer', {})
+      leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
+    }
 
     const fitFeature = function (location) {
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
@@ -305,6 +309,7 @@ export default defineComponent({
 
     onMounted(function () {
       const ol = map.value.map
+      leftDrawerIcon.value = 'keyboard_arrow_left'
 
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -440,6 +445,8 @@ export default defineComponent({
     }
 
     return {
+      toogleLeftDrawer,
+      leftDrawerIcon,
       fitFeature,
       autoPanPopup,
       center,
@@ -535,7 +542,7 @@ export default defineComponent({
     position: fixed;
     top: $header-height;
     z-index: 1100;
-    padding: 20px 10px;
+    padding: 20px 5px;
     cursor: pointer;
     border-radius: 0 10px 10px 0;
   }

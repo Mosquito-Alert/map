@@ -11,7 +11,7 @@
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
             <a target="_blank" :href="selectedFeature.photo_url"><img @load="imageLoaded" :src="selectedFeature.photo_url"></a>
-            <div class="credits">Anónimo, <a href="https://creativecommons.org/license" target="_blank">CC</a> BY Mosquito Alert</div>
+            <div class="credits">Anónimo, <a href="https://creativecommons.org/license" target="_blank">CCBY</a> Mosquito Alert</div>
           </div>
           <div class="info">
             <div>
