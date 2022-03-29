@@ -402,7 +402,7 @@ button.fa-thin-button.active, button.fa-thin-button-menu.active {
 }
 
 .breeding-title{
-  margin-left: 25px;
+  margin-left: 27px;
 }
 .bites-title,
 .breeding-title{

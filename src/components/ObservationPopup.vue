@@ -6,7 +6,7 @@
       :offset="[0, -35]"
       v-if="selectedFeature">
     <template v-slot="slotProps">
-      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.1) ? 'portrait':''">
+      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.1) ? 'portrait':'landscape'">
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
@@ -157,25 +157,32 @@ export default defineComponent({
 
 .overlay-content.landscape {
     max-width: $popup-width-landscape;
+    border:0px;
 }
 
 .overlay-content.portrait {
+  max-width: $popup-width-portrait;
+  display:flex;
+  flex-direction: row;
+}
+
+.q-page.expended .overlay-content.portrait {
   max-width: calc(#{$popup-width-portrait} - #{$left-drawer-width});
   display:flex;
   flex-direction: row;
 }
 
-.overlay-content.landscape::after {
+.parentContainer.landscape::after {
   content: " ";
   border: $popup-vertical-offset solid transparent;
   border-top-color: white;
   width: $popup-vertical-offset * 2;
   position: relative;
-  top: #{2*$popup-padding-info};
+  top: $popup-padding-info - 2px;
   left: 0;
   margin:auto;
   align-items: center;
-}
+  }
 
 .parentContainer {
   // display:flex;
@@ -188,7 +195,7 @@ export default defineComponent({
   border-top-color: white;
   width: $popup-vertical-offset * 2;
   position: relative;
-  top: $popup-padding-info - 2;
+  top: 23px;
   left: 0;
   margin:auto;
   align-items: center;
@@ -230,7 +237,6 @@ export default defineComponent({
     font-weight: bold;
   }
   padding: $popup-padding-info;
-  padding-bottom: 0px;
   display: flex;
   flex-direction: row;
   text-align:left;
@@ -308,6 +314,7 @@ export default defineComponent({
 }
 
 .portrait .info {
+  padding-bottom:0px;
   display:flex;
   flex-direction:column;
   flex-grow: 1;
@@ -349,5 +356,8 @@ export default defineComponent({
   text-align: right;
   font-size:0.8em;
   color: white;
+}
+.ol-overlay-container{
+  padding:25px;
 }
 </style>
