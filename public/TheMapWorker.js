@@ -4,14 +4,14 @@ importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
 
 let all_data = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
-const DEBUG = true
+const DEBUG = false
 let index, unclustered
 const now = Date.now()
 let filters ={}
 let all_layers = null
 
 function log (text) {
-  if (DEBUG) console.log(text)
+  if (DEBUG) console.log('[TheMapWorker]', text)
 }
 
 getJSON('totes.json', (geojson) => {
@@ -78,9 +78,10 @@ self.onmessage = function (e) {
 
     const tempDates = Object.keys(temp)
     let start = new Date(tempDates[0])
-    const end = new Date(tempDates[tempDates.length - 1])
+    start = new Date(start.setDate(start.getDate() - 1))  // Start on the day before the first date
+    let end = new Date(tempDates[tempDates.length - 1])
+    end = new Date(end.setDate(end.getDate() + 1))  // Finish on the day after the last date
     while (start <= end) {
-      start = new Date(start.setDate(start.getDate() + 1))
       const dateLabel = start.toISOString().split('T')[0]
       const values = temp[dateLabel]
       dates.push(dateLabel)
@@ -92,6 +93,7 @@ self.onmessage = function (e) {
           series[type].push(0)
         }
       })
+      start = new Date(start.setDate(start.getDate() + 1))
     }
 
     postMessage({
