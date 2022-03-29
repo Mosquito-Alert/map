@@ -322,7 +322,7 @@ export default defineComponent({
     padding-right:20px;
   }
   &>div:first-child {
-    max-height: calc(#{$popup-height-with-image-portrait / 1.75});
+    max-height: calc(#{$popup-height-with-image-portrait / 2});
     overflow: auto;
     text-align:left;
   }
