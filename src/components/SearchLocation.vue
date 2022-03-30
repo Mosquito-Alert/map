@@ -1,37 +1,22 @@
 <template>
   <div>
-     <!-- <q-select
-        outlined
-        bottom-slots
-        v-model="results"
-        :options="options"
-        :label="_('Placeholder location')"
-        :dense="dense"
-        :options-dense="denseOpts"
+      <q-select
+        hint="Hint available"
+        v-model="searchString"
         use-input
-        @keyup.enter="search"
+        input-debounce="0"
+        :label="_('Placeholder location')"
+        :options="searchOptions"
+        style="width: 250px"
+        color="orange"
+        clearable
+        @filter="search"
+        @keyup.enter="enterPressed"
+        @update:model-value="filterLocation"
+        :loading="loading"
+        ref="mySelect"
       >
-        <template v-slot:append>
-          <q-icon name="search" @click.stop />
-        </template>
-
-        <template v-slot:hint>
-          Field hint
-        </template>
-      </q-select> -->
-    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
-    <div>
-      <ul v-for="result, id in results" :key="id" class="result">
-          <li @click="filterLocation(result)"> {{result.display_name}} </li>
-      </ul>
-    </div>
-    <div v-if="noResults">
-        Sorry, but no results were found. I blame Apple.
-    </div>
-
-    <div v-if="searching">
-        <i>{{ _('Searching ...') }}</i>
-    </div>
+      </q-select>
   </div>
 </template>
 <script>
@@ -42,48 +27,65 @@ export default {
   props: [],
   emits: ['locationSelected'],
   setup (props, context) {
-    const term = ref(null)
-    const results = ref(null)
-    const noResults = ref(null)
-    const searching = ref(null)
-
-    results.value = []
-    noResults.value = false
-    searching.value = false
-
+    const searchOptions = ref(null)
+    const searchString = ref()
+    const loading = ref(null)
+    const model = ref(null)
     const $store = useStore()
-
+    const mySelect = ref()
+    const enterPressed = function (e) {
+      console.log(e)
+    }
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    const search = function () {
-      searching.value = true
-      fetch(`https://nominatim.openstreetmap.org/search?q=${term.value}&format=json&polygon_geojson=1&addressdetails=1`)
-        .then(res => res.json())
-        .then(res => {
-          searching.value = false
-          // Get only polygon and multipolygons
-          const polygons = res.filter(feature => {
-            return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+    const search = function (val, update, abort) {
+      if (val.length < 2) {
+        abort()
+        return
+      }
+      update(() => {
+        loading.value = true
+        fetch(`https://nominatim.openstreetmap.org/search?q=${val}&format=json&polygon_geojson=1&addressdetails=1`)
+          .then(res => res.json())
+          .then(res => {
+            // Get only polygon and multipolygons
+            const polygons = res.filter(feature => {
+              return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+            })
+            const results = []
+            polygons.forEach(function (feature) {
+              results.push({
+                label: feature.display_name,
+                labelShort: feature.display_name.substring(0, 10) + '...',
+                value: feature
+              })
+            })
+            loading.value = false
+            searchOptions.value = results
           })
-          results.value = polygons
-          noResults.value = results.value.length === 0
-        })
+      })
     }
 
-    const filterLocation = function (result) {
+    const filterLocation = function (res) {
+      let locationValue = null
+      if (res) {
+        locationValue = res.value
+      }
       context.emit('locationSelected', {
-        location: result
+        location: locationValue
       })
     }
 
     return {
       _,
-      term,
-      results,
-      noResults,
-      searching,
+      mySelect,
+      enterPressed,
+      searchString,
+      searchOptions,
+      model,
+      loading,
       search,
       filterLocation
     }

@@ -3,7 +3,7 @@
     <div class="toggle-time">
       <q-btn
         flat dense
-        icon="expand_more"
+        icon="expand_less"
         class="white-text"
         :class="iconStatus"
         :label="_('Time series')"
@@ -53,7 +53,7 @@
           </q-btn>
         </div>
       </div>
-      <LineChart :chartData="chartData" :height="150" :options="chartOptions" ref="chart" />
+      <LineChart class="graph-canvas" :chartData="chartData" :height="230" :options="chartOptions" ref="chart" />
     </div>
   </div>
 </template>
@@ -221,8 +221,8 @@ export default defineComponent({
     transition: max-height .3s ease-out;
     border-top: 1px solid $line-color;
     &.visible {
-      max-height: 200px;
-      height: 200px;
+      max-height: $timeseries-height;
+      height: $timeseries-height;
       transition: max-height .3s ease-in;
     }
     box-shadow: 7px 0 14px rgba(0,0,0,0.25), 5px 0 5px rgba(0,0,0,0.22);
@@ -241,6 +241,11 @@ export default defineComponent({
     border-right: 1px solid $line-color;
     border-top-right-radius: 10px;
   }
+  .body{
+    overflow-x: auto;
+    display:flex;
+    flex-direction: column;
+  }
   .legend {
     margin-left: 30px;
     display: flex;
@@ -250,6 +255,8 @@ export default defineComponent({
   .legend>div {
     display: flex;
     // margin-right: 10px;
+    margin-right: 10px;
+    white-space:nowrap;
   }
   .legend>div .symbol {
     margin-right: 10px;
@@ -298,5 +305,14 @@ export default defineComponent({
   }
   .mr-10{
     margin-right: 10px;
+  }
+  .legend div{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-height: 16px;     /* fallback */
+    max-height: 32px;      /* fallback */
+    -webkit-line-clamp: 2; /* number of lines to show */
+    -webkit-box-orient: vertical;
   }
 </style>

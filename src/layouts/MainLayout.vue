@@ -78,7 +78,11 @@ export default {
     //   })
     // }
     const filterLocations = function (location) {
-      map.value.fitFeature(location)
+      if (location !== null) {
+        map.value.fitFeature(location)
+      } else {
+        map.value.clearAdministrativeFeatures()
+      }
       map.value.filterLocations(location)
     }
 
