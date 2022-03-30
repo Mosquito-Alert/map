@@ -104,6 +104,11 @@ export default defineComponent({
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
+    const clearAdministrativeFeatures = function () {
+      console.log('clear')
+      locationFeatures.value = []
+    }
+
     const fitFeature = function (location) {
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
@@ -438,8 +443,13 @@ export default defineComponent({
 
     function filterLocations (location) {
       const workerData = {}
-      mapFilters.locations = [JSON.stringify(location)]
-      mapFilters.tolerance = simplifyTolerance
+      if (location) {
+        mapFilters.locations = [JSON.stringify(location)]
+        mapFilters.tolerance = simplifyTolerance
+      } else {
+        mapFilters.locations = []
+      }
+
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -461,6 +471,7 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       fitFeature,
+      clearAdministrativeFeatures,
       autoPanPopup,
       center,
       filterObservations,

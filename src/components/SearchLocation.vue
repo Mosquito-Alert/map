@@ -1,15 +1,18 @@
 <template>
   <div>
-     <!-- <q-select
-        outlined
+     <q-select
+        ref="llista"
         bottom-slots
-        v-model="results"
-        :options="options"
+        :options="results"
         :label="_('Placeholder location')"
-        :dense="dense"
-        :options-dense="denseOpts"
         use-input
         @keyup.enter="search"
+        @input-value="setSearchWord"
+        option-label="label"
+        option-value="value"
+        v-model="model"
+        clearable
+        @update:model-value="filterLocation"
       >
         <template v-slot:append>
           <q-icon name="search" @click.stop />
@@ -18,11 +21,16 @@
         <template v-slot:hint>
           Field hint
         </template>
-      </q-select> -->
-    <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
+      </q-select>
+    <!-- <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
     <div>
-      <ul v-for="result, id in results" :key="id" class="result">
-          <li @click="filterLocation(result)"> {{result.display_name}} </li>
+      <ul class="result" ref="llista">
+          <li
+            v-for="result, id in results" :key="id"
+            @click="filterLocation(result)"
+          >
+            {{result.display_name}}
+           </li>
       </ul>
     </div>
     <div v-if="noResults">
@@ -31,7 +39,7 @@
 
     <div v-if="searching">
         <i>{{ _('Searching ...') }}</i>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -42,10 +50,12 @@ export default {
   props: [],
   emits: ['locationSelected'],
   setup (props, context) {
+    const llista = ref(null)
     const term = ref(null)
     const results = ref(null)
     const noResults = ref(null)
     const searching = ref(null)
+    const model = ref(null)
 
     results.value = []
     noResults.value = false
@@ -56,7 +66,9 @@ export default {
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
-
+    const setSearchWord = function (e) {
+      term.value = e
+    }
     const search = function () {
       searching.value = true
       fetch(`https://nominatim.openstreetmap.org/search?q=${term.value}&format=json&polygon_geojson=1&addressdetails=1`)
@@ -67,19 +79,33 @@ export default {
           const polygons = res.filter(feature => {
             return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
           })
-          results.value = polygons
+          results.value = []
+          polygons.forEach(function (feature) {
+            results.value.push({
+              label: feature.display_name,
+              labelShort: feature.display_name.substring(0, 10) + '...',
+              value: feature
+            })
+          })
           noResults.value = results.value.length === 0
         })
     }
 
-    const filterLocation = function (result) {
+    const filterLocation = function (res) {
+      let locationValue = null
+      if (res) {
+        locationValue = res.value
+      }
       context.emit('locationSelected', {
-        location: result
+        location: locationValue
       })
     }
 
     return {
       _,
+      llista,
+      model,
+      setSearchWord,
       term,
       results,
       noResults,
