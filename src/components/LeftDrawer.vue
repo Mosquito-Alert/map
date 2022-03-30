@@ -244,20 +244,23 @@ export default {
     }
 
     const locationSelected = function (location) {
-      const loc = location.location
-      const bb = loc.boundingbox
-      const bounding = [bb[2], bb[0], bb[3], bb[1]]
-      const geojson = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              boundingBox: bounding
-            },
-            geometry: loc.geojson
-          }
-        ]
+      let geojson = null
+      if (location.location !== null) {
+        const loc = location.location
+        const bb = loc.boundingbox
+        const bounding = [bb[2], bb[0], bb[3], bb[1]]
+        geojson = {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {
+                boundingBox: bounding
+              },
+              geometry: loc.geojson
+            }
+          ]
+        }
       }
       context.emit('filterLocations', geojson)
     }
