@@ -86,7 +86,6 @@ self.onmessage = function (e) {
     start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
     let end = new Date(tempDates[tempDates.length - 1])
     end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
-
     while (start <= end) {
       const dateLabel = start.toISOString().split('T')[0]
       const values = temp[dateLabel]

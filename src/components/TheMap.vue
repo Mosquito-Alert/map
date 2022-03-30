@@ -66,6 +66,7 @@ import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
@@ -103,6 +104,11 @@ export default defineComponent({
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
+    }
+
+    const clearAdministrativeFeatures = function () {
+      console.log('clear')
+      locationFeatures.value = []
     }
 
     const fitFeature = function (location) {
@@ -267,6 +273,11 @@ export default defineComponent({
           return feat
         })
         features.value = data
+        const graphDates = event.data.timeseries.dates
+        const sDate = graphDates[0]
+        const eDate = graphDates[graphDates.length - 1]
+        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
@@ -427,8 +438,13 @@ export default defineComponent({
 
     function filterLocations (location) {
       const workerData = {}
-      mapFilters.locations = [JSON.stringify(location)]
-      mapFilters.tolerance = simplifyTolerance
+      if (location) {
+        mapFilters.locations = [JSON.stringify(location)]
+        mapFilters.tolerance = simplifyTolerance
+      } else {
+        mapFilters.locations = []
+      }
+
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -469,6 +485,7 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       fitFeature,
+      clearAdministrativeFeatures,
       autoPanPopup,
       center,
       filterObservations,

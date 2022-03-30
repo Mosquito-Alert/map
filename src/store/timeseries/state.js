@@ -33,7 +33,8 @@ export default function () {
             time: {
               unit: 'month',
               displayFormats: {
-                month: 'MMM YY'
+                month: 'MMM YY',
+                day: 'd MMM YY'
               }
             }
           }
