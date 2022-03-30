@@ -1,7 +1,20 @@
 <template>
   <div :class="timeSeriesClass">
     <div class="toggle-time">
-      <q-btn flat round dense icon="expand_more" class="white-text" :class="iconStatus" :label="_('Time series')" @click="toggleTimeSeries"/>
+      <q-btn
+        flat dense
+        icon="expand_more"
+        class="white-text"
+        :class="iconStatus"
+        :label="_('Time series')"
+        @click="toggleTimeSeries"
+      />
+      <q-btn
+        dense
+        class="white-text"
+        :label="dateFilter"
+        @click="toggleTimeSeries"
+      />
     </div>
     <div class="body">
       <div class="legend">
@@ -15,7 +28,16 @@
             cover
             transition-show="scale"
             transition-hide="scale">
-            <q-date v-model="dateRange" range class="calendar" color="orange-4" text-color="black">
+            <q-date
+              navigation-min-year-month='2015/01'
+              :navigation-max-year-month="getCurrentDate"
+              mask="MM-DD-YYYY"
+              v-model="dateRange"
+              range
+              class="calendar"
+              color="orange-4"
+              text-color="black"
+            >
               <div class="row items-center justify-end q-gutter-sm">
                 <q-btn label="Cancel" color="red" flat v-close-popup />
                 <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
@@ -52,10 +74,13 @@ export default defineComponent({
     // console.log($q.lang.getLocale()) // returns a string
 
     const chart = ref()
+    const getCurrentDate = ref()
     const dateRange = ref()
+    const dateFilter = ref()
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
+
     // Timeseries properties
     const timeSeriesClass = computed(() => {
       let classes = 'text-black map-footer'
@@ -68,6 +93,9 @@ export default defineComponent({
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       dateRange.value = defaults.DATES
+      dateFilter.value = dateRange.value.from + '/' + dateRange.value.to
+      const d = new Date()
+      getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
     })
 
     const toggleTimeSeries = function () {
@@ -121,6 +149,7 @@ export default defineComponent({
       return data
     })
     const datePicked = function (event) {
+      dateFilter.value = dateRange.value.from + '/' + dateRange.value.to
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
       // $store.dispatch(
       //   'app/setFilter',
@@ -136,6 +165,8 @@ export default defineComponent({
     }
     return {
       _,
+      getCurrentDate,
+      dateFilter,
       chart,
       chartOptions,
       chartData,
@@ -240,5 +271,10 @@ export default defineComponent({
   }
   .white-text{
     color:white;
+    border:0px;
+    box-shadow: none;
+  }
+  button::before{
+    box-shadow: none;
   }
 </style>

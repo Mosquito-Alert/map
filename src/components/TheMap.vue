@@ -447,9 +447,7 @@ export default defineComponent({
 
     function filterDate (date) {
       const workerData = {}
-      console.log(date)
       mapFilters.date = [JSON.parse(JSON.stringify(date))]
-      console.log(mapFilters)
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
