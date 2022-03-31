@@ -8,13 +8,11 @@
         :class="iconStatus"
         :label="_('Time series')"
         @click="toggleTimeSeries"
-      />
-      <q-btn
-        dense
-        class="white-text"
-        :label="dateFilter"
-        @click="toggleTimeSeries"
-      />
+      >
+      <div class="timeseries-filter">
+        {{ dateFilter }}
+      </div>
+      </q-btn>
     </div>
     <div class="body">
       <div class="legend">
@@ -311,5 +309,9 @@ export default defineComponent({
     max-height: 32px;      /* fallback */
     -webkit-line-clamp: 2; /* number of lines to show */
     -webkit-box-orient: vertical;
+  }
+  .timeseries-filter{
+    margin-left:20px;
+    font-style: italic;
   }
 </style>
