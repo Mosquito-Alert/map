@@ -552,6 +552,13 @@ export default defineComponent({
   :deep(.ol-attribution) {
     color: white;
   }
+  :deep(.ol-attribution a) {
+    color: #3498DB;
+    text-decoration:none;
+    &:hover{
+      text-decoration:underline;
+    }
+  }
   .drawer-handler{
     background-color: $primary-color;
     color: white;

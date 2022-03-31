@@ -21,7 +21,7 @@ export default function () {
       ],
       DATES: { from: '2021/01/01', to: '2021/12/31' },
       // INFO_OPEN: false
-      fillLocationColor: 'rgb(255,255,3,0.4)',
+      fillLocationColor: 'rgb(239, 165, 1, 0.5)',
       strokeLocationColor: 'orange'
     },
     BACKEND: backendUrl,

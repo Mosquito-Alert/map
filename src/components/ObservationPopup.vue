@@ -6,23 +6,37 @@
       :offset="[0, -35]"
       v-if="selectedFeature">
     <template v-slot="slotProps">
-      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.1) ? 'portrait':'landscape'">
+      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.25) ? 'portrait':'landscape'">
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
             <a target="_blank" :href="selectedFeature.photo_url"><img @load="imageLoaded" :src="selectedFeature.photo_url"></a>
-            <div class="credits">Anónimo, <a href="https://creativecommons.org/license" target="_blank">CCBY</a> Mosquito Alert</div>
+            <div class="credits">Anónimo, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert</div>
           </div>
           <div class="info">
             <div>
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
-              <p class="title"></p>
-              <label>{{ _('Date') }}</label>:
-              <p class="date" v-html="formatData(selectedFeature)"></p>
-              <p
-                v-if="selectedFeature.edited_user_notes"
-                class="description"><label>{{ _('Expert note') }}</label>: {{ selectedFeature.edited_user_notes }}</p>
+              <div>
+                <div class="report-id-wrapper" v-if="selectedFeature.report_id">
+                    <div><i class="fa-solid fa-hashtag"></i></div>
+                    <div><span class="report_id">Id</span>:
+                      {{ selectedFeature.report_id }}
+                    </div>
+                </div>
+                <div class="date-wrapper">
+                    <div><i class="fa-solid fa-calendar-days"></i></div>
+                    <div><span class="date">{{ _('Date') }}</span>:
+                    {{ formatData(selectedFeature) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="selectedFeature.edited_user_notes">
+                    <div><i class="fa-solid fa-message-check"></i></div>
+                    <div><span class="description">{{ _('Expert note') }}</span>:
+                      {{ selectedFeature.edited_user_notes }}
+                    </div>
+                </div>
+              </div>
             </div>
             <div>
               <div :class="getValidationClass(selectedFeature)">
@@ -60,7 +74,7 @@ export default defineComponent({
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       console.log(ratio.value)
-      imageRatio.value = (ratio.value > 1.1) ? 'landscape' : 'portrait'
+      imageRatio.value = (ratio.value > 1.25) ? 'landscape' : 'portrait'
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
@@ -357,8 +371,34 @@ export default defineComponent({
   text-align: right;
   font-size:0.8em;
   color: white;
+  &>a {
+    color: #3498DB;
+    text-decoration: none;
+    &:hover{
+      text-decoration: underline;
+    }
+  }
 }
 .ol-overlay-container{
   padding:25px;
+}
+.report-id-wrapper,
+.date-wrapper,
+.description-wrapper{
+  display:flex;
+  flex-direction:row;
+  margin-top:10px;
+}
+.report-id-wrapper div:first-child,
+.date-wrapper div:first-child,
+.description-wrapper div:first-child{
+  margin-right:10px;
+  font-weight: bold;
+}
+
+.report-id-wrapper span,
+.date-wrapper span,
+.description-wrapper span{
+  font-weight: bold;
 }
 </style>
