@@ -33,21 +33,16 @@ export default {
     const model = ref(null)
     const $store = useStore()
     const mySelect = ref()
+    let updateFunction = null
+    let Enter = false
+    let searchValue = null
     const enterPressed = function (e) {
-      console.log(e)
-    }
-    const _ = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
-    const search = function (val, update, abort) {
-      if (val.length < 2) {
-        abort()
-        return
-      }
-      update(() => {
+      Enter = true
+      updateFunction(() => {
+        console.log('inside update function')
+        console.log(searchValue)
         loading.value = true
-        fetch(`https://nominatim.openstreetmap.org/search?q=${val}&format=json&polygon_geojson=1&addressdetails=1`)
+        fetch(`https://nominatim.openstreetmap.org/search?q=${searchValue}&format=json&polygon_geojson=1&addressdetails=1`)
           .then(res => res.json())
           .then(res => {
             // Get only polygon and multipolygons
@@ -67,8 +62,23 @@ export default {
           })
       })
     }
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
+    const search = function (val, update) {
+      if (!Enter) {
+        updateFunction = update
+        searchValue = val
+      }
+      // if (val.length < 2) {
+      //   abort()
+      //   return
+      // }
+    }
 
     const filterLocation = function (res) {
+      Enter = false
       let locationValue = null
       if (res) {
         locationValue = res.value
