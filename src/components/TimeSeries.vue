@@ -22,29 +22,36 @@
           <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
           <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i> {{ _(set.label) }}
         </div>
-        <q-btn icon="event" class="calendar-button" :label="_('Select')">
-          <q-popup-proxy
-            @before-show="updateProxy"
-            cover
-            transition-show="scale"
-            transition-hide="scale">
-            <q-date
-              navigation-min-year-month='2015/01'
-              :navigation-max-year-month="getCurrentDate"
-              mask="MM-DD-YYYY"
-              v-model="dateRange"
-              range
-              class="calendar"
-              color="orange-4"
-              text-color="black"
-            >
-              <div class="row items-center justify-end q-gutter-sm">
-                <q-btn label="Cancel" color="red" flat v-close-popup />
-                <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
-              </div>
-            </q-date>
-          </q-popup-proxy>
-        </q-btn>
+        <div>
+          <q-btn
+            icon="event_busy"
+            class="calendar-button mr-10"
+            @click="resetDateFilter"
+          />
+          <q-btn icon="event_available" class="calendar-button" :label="_('Select')">
+            <q-popup-proxy
+              @before-show="updateProxy"
+              cover
+              transition-show="scale"
+              transition-hide="scale">
+              <q-date
+                navigation-min-year-month='2015/01'
+                :navigation-max-year-month="getCurrentDate"
+                mask="MM-DD-YYYY"
+                v-model="dateRange"
+                range
+                class="calendar"
+                color="orange-4"
+                text-color="black"
+              >
+                <div class="row items-center justify-end q-gutter-sm">
+                  <q-btn label="Cancel" color="red" flat v-close-popup />
+                  <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-btn>
+        </div>
       </div>
       <LineChart :chartData="chartData" :height="150" :options="chartOptions" ref="chart" />
     </div>
@@ -81,6 +88,14 @@ export default defineComponent({
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
 
+    const resetDateFilter = function () {
+      dateRange.value = null
+      dateFilter.value = null
+      context.emit('dateSelected', {
+        type: 'date',
+        data: null
+      })
+    }
     // Timeseries properties
     const timeSeriesClass = computed(() => {
       let classes = 'text-black map-footer'
@@ -93,7 +108,9 @@ export default defineComponent({
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       dateRange.value = defaults.DATES
-      dateFilter.value = dateRange.value.from + '/' + dateRange.value.to
+      const sDate = dateRange.value.from
+      const eDate = dateRange.value.to
+      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
     })
@@ -149,7 +166,9 @@ export default defineComponent({
       return data
     })
     const datePicked = function (event) {
-      dateFilter.value = dateRange.value.from + '/' + dateRange.value.to
+      const sDate = dateRange.value.from
+      const eDate = dateRange.value.to
+      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
       // $store.dispatch(
       //   'app/setFilter',
@@ -165,6 +184,7 @@ export default defineComponent({
     }
     return {
       _,
+      resetDateFilter,
       getCurrentDate,
       dateFilter,
       chart,
@@ -190,7 +210,6 @@ export default defineComponent({
     transform: rotate(0deg);
     transition: ease all 1s;
   }
-
   .map-footer {
     flex: 1;
     width: 100%;
@@ -209,7 +228,7 @@ export default defineComponent({
     box-shadow: 7px 0 14px rgba(0,0,0,0.25), 5px 0 5px rgba(0,0,0,0.22);
   }
   .map-footer>div:not(.toggle-time) {
-    padding: 10px 50px 0px;
+    padding: 10px 15px;
     height: 100%;
   }
   .toggle-time {
@@ -230,7 +249,7 @@ export default defineComponent({
   .legend,
   .legend>div {
     display: flex;
-    margin-right: 10px;
+    // margin-right: 10px;
   }
   .legend>div .symbol {
     margin-right: 10px;
@@ -276,5 +295,8 @@ export default defineComponent({
   }
   button::before{
     box-shadow: none;
+  }
+  .mr-10{
+    margin-right: 10px;
   }
 </style>

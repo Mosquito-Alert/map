@@ -315,6 +315,7 @@ export default defineComponent({
 
 .portrait .info {
   padding-bottom:0px;
+  max-width: $popup-width-portrait-info;
   display:flex;
   flex-direction:column;
   flex-grow: 1;
