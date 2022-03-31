@@ -70,7 +70,12 @@
           <!-- BITES -->
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
-              <div class="li-item" @click="filterObservations(layer, $event)" data-type="bites" :data-code="code">
+              <div class="li-item"
+                @click="filterObservations(layer, $event)"
+                data-type="bites"
+                :data-code="code"
+                :class="initialClass(code, 'bites')"
+              >
                   <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
@@ -81,7 +86,13 @@
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
-                <div class="li-item" @click="filterObservations(layer, $event)" data-type="breeding" :data-code="code">
+                <div
+                  class="li-item"
+                  @click="filterObservations(layer, $event)"
+                  data-type="breeding"
+                  :data-code="code"
+                  :class="initialClass(code, 'breeding')"
+                >
                     <i :class="layer.faIcon"></i>
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>

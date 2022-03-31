@@ -55,6 +55,7 @@ self.onmessage = function (e) {
     // This is fired when the user navigates the map.
     const map = index.getClusters(e.data.bbox, e.data.zoom)
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
+
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
       else if (a.properties.d > b.properties.d) return 1
@@ -69,12 +70,12 @@ self.onmessage = function (e) {
       })
       series[layer.code] = []
     })
-
     const temp = {}
 
     time.forEach(feature => {
       const type = seriesMap[feature.properties.c]
       if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+
       const dateSeries = temp[feature.properties.d]
       if (!(type in dateSeries)) dateSeries[type] = 0
       dateSeries[type] += 1
@@ -82,9 +83,10 @@ self.onmessage = function (e) {
 
     const tempDates = Object.keys(temp)
     let start = new Date(tempDates[0])
-    start = new Date(start.setDate(start.getDate() - 1))  // Start on the day before the first date
+    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
     let end = new Date(tempDates[tempDates.length - 1])
-    end = new Date(end.setDate(end.getDate() + 1))  // Finish on the day after the last date
+    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
+
     while (start <= end) {
       const dateLabel = start.toISOString().split('T')[0]
       const values = temp[dateLabel]
@@ -172,7 +174,7 @@ function filterLocations (data, poly) {
       return false
     }
   })
-  console.log(simplifyTolerance)
+  console.log('Tolerance ' + simplifyTolerance)
   const options = {tolerance: simplifyTolerance, highQuality: true}
   const simplified = turf.simplify(polyMercator, options)
 

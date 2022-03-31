@@ -447,7 +447,12 @@ export default defineComponent({
 
     function filterDate (date) {
       const workerData = {}
-      mapFilters.date = [JSON.parse(JSON.stringify(date))]
+      if (date !== null) {
+        mapFilters.date = [JSON.parse(JSON.stringify(date))]
+      } else {
+        mapFilters.date = []
+      }
+
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -546,6 +551,13 @@ export default defineComponent({
   }
   :deep(.ol-attribution) {
     color: white;
+  }
+  :deep(.ol-attribution a) {
+    color: #3498DB;
+    text-decoration:none;
+    &:hover{
+      text-decoration:underline;
+    }
   }
   .drawer-handler{
     background-color: $primary-color;
