@@ -37,7 +37,6 @@
               <q-date
                 navigation-min-year-month='2015/01'
                 :navigation-max-year-month="getCurrentDate"
-                mask="MM-DD-YYYY"
                 v-model="dateRange"
                 range
                 class="calendar"
@@ -169,11 +168,9 @@ export default defineComponent({
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
       dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+      const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+      $store.commit('timeseries/updateXUnits', daysInRange)
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
-      // $store.dispatch(
-      //   'app/setFilter',
-      //   { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) }
-      // )
     }
     const chartOptions = computed(() => {
       return $store.getters['timeseries/getChartOptions']
