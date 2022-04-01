@@ -54,7 +54,7 @@ button {
   :deep(span) {
     text-align: center;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 11px;
   }
   &:first-child {
     border: none;

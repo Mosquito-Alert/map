@@ -1,4 +1,4 @@
-<template>
+f.ca<template>
   <div :class="timeSeriesClass">
     <div class="toggle-time">
       <q-btn
@@ -22,11 +22,12 @@
         </div>
         <div>
           <q-btn
-            icon="event_busy"
-            class="calendar-button mr-10"
+            icon="delete"
+            class="delete-calendar-button mr-10"
             @click="resetDateFilter"
+             :label="_('Delete')"
           />
-          <q-btn icon="event_available" class="calendar-button" :label="_('Select')">
+          <q-btn icon="event_note" class="calendar-button" :label="_('Select')">
             <q-popup-proxy
               @before-show="updateProxy"
               cover
@@ -107,7 +108,7 @@ export default defineComponent({
       dateRange.value = defaults.DATES
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
-      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+      dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
     })
@@ -312,6 +313,19 @@ export default defineComponent({
   }
   .timeseries-filter{
     margin-left:20px;
-    font-style: italic;
+    font-weight:300;
+  }
+  .legend button{
+    background: $primary-color;
+    color:white;
+    border-radius:8px;
+    border:none;
+  }
+  .legend .delete-calendar-button{
+    background: #ccc;
+    color:white;
+    border-radius:8px;
+    border:none;
+    font-size: .8em;
   }
 </style>

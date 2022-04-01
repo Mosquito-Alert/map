@@ -34,7 +34,7 @@ export default function () {
               unit: 'month',
               displayFormats: {
                 month: 'MMM YY',
-                day: 'd MMM YY'
+                day: 'DD MMM YYYY'
               }
             }
           }

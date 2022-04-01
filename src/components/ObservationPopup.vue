@@ -260,8 +260,8 @@ export default defineComponent({
     font-size: 1.2em;
   }
   .validation {
-    height: 80px;
-    width: 80px;
+    height: 50px;
+    width: 50px;
     border-radius: 50%;
     color: white;
     &.confirmed {
@@ -271,9 +271,9 @@ export default defineComponent({
       background: #8fd3b8;
     }
     i {
-      height: 80px;
-      width: 80px;
-      font-size: 3em;
+      height: 50px;
+      width: 50px;
+      font-size: 1.5em;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -361,12 +361,11 @@ export default defineComponent({
   font-style: italic;
 }
 .credits{
-  opacity: 0.5;
   position: absolute;
   bottom: 5px;
   right: 5px;
   padding:5px;
-  background: $dark-grey;
+  background: #33333342;
   border-radius: 10px;
   text-align: right;
   font-size:0.8em;

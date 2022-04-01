@@ -30,13 +30,13 @@ $primary-button-text-hover: white;
 $box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
 // POP UP
 $popup-border-radius: 25px;
-$popup-width-landscape: 40vw;
+$popup-width-landscape: 30vw;
 $popup-width-portrait: 50vw;
-$popup-width-portrait-info: 25vw;
+$popup-width-portrait-info: 15vw;
 $half-popup-width: 25vw;
 $popup-height: 50vh; // MAX height when there is no image
-$popup-height-with-image-landscape: 75vh; // MAX height when there is an image
-$popup-height-with-image-portrait: 50vh; // MAX height when there is an image
+$popup-height-with-image-landscape: 55vh; // MAX height when there is an image
+$popup-height-with-image-portrait: 35vh; // MAX height when there is an image
 $popup-vertical-offset: 25px;
 $popup-padding-info: 25px;
 

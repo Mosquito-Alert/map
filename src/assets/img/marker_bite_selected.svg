@@ -1,45 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 26.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
 <svg
-   viewBox="0 0 40 50"
    version="1.1"
-   id="svg4"
-   sodipodi:docname="marker_bite_selected.svg"
-   width="40"
-   height="50"
+   id="Capa_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 30 40"
+   xml:space="preserve"
+   sodipodi:docname="bite_selected.svg"
+   width="30"
+   height="40"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs8" />
-  <sodipodi:namedview
-     id="namedview6"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     showgrid="false"
-     inkscape:zoom="3.9719514"
-     inkscape:cx="94.537914"
-     inkscape:cy="-5.4129565"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg4" />
-  <!--! Font Awesome Pro 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
-  <circle
-     style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:0.767241"
-     id="path45"
-     cx="20.650909"
-     cy="30.923496"
-     r="17.5" />
-  <path
-     d="m 20.564195,25.41842 c 2.04694,0 3.70766,-1.52506 3.70766,-3.40478 0,-1.87973 -1.65815,-3.4048 -3.70766,-3.4048 -2.04951,0 -3.754,1.52507 -3.754,3.4048 0,1.87972 1.70964,3.40478 3.754,3.40478 z m 9.84074,-1.56998 c -0.71527,-0.81053 -2.01141,-0.93632 -2.89661,-0.27929 l -2.63913,1.96276 c -2.42851,1.80596 -6.18457,1.80596 -8.61515,0 l -2.63295,-1.96248 c -0.88314,-0.65731 -2.18185,-0.53105 -2.8966,0.27901 -0.71579,0.81336 -0.57984,2.00503 0.30433,2.66235 l 2.63604,1.96106 c 0.60404,0.44905 1.26833,0.81147 1.95579,1.13114 l -0.0463,11.70441 c 0,0.83323 0.7405,1.51324 1.64785,1.51324 h 0.77758 c 0.90734,0 1.64784,-0.68001 1.64784,-1.51324 v -5.29632 h 1.64785 v 5.29632 c 0,0.83323 0.7405,1.51324 1.64785,1.51324 h 0.77757 c 0.90735,0 1.64785,-0.68001 1.64785,-1.51324 V 29.60346 c 0.68746,-0.31948 1.35175,-0.6819 1.95527,-1.13067 l 2.63655,-1.96106 c 1.02116,-0.65826 1.11385,-1.84993 0.44441,-2.66329 z"
-     id="path2"
-     style="fill:#e2b3aa;fill-opacity:1;stroke-width:0.0493471" />
-</svg>
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs833" /><sodipodi:namedview
+   id="namedview831"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   width="30px"
+   inkscape:zoom="11.341993"
+   inkscape:cx="20.895798"
+   inkscape:cy="21.777478"
+   inkscape:window-width="1505"
+   inkscape:window-height="982"
+   inkscape:window-x="0"
+   inkscape:window-y="19"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Capa_1" />
+<style
+   type="text/css"
+   id="style824">
+	.st0{fill:#CD6576;}
+	.st1{fill:#E3B3A9;}
+</style>
+<path
+   class="st0"
+   d="m 15,39.825 v 0 C 6.7499999,39.825 -1.15e-7,33.075 -1.15e-7,24.825 v -1.65 c 0,-8.25 6.750000015,-15 15.000000115,-15 v 0 c 8.25,0 15,6.75 15,15 v 1.65 c 0,8.25 -6.75,15 -15,15 z"
+   id="path826"
+   style="fill:#ffffff;stroke-width:0.75" />
+
+<path
+   d="m 17.499597,16.5 c 0,1.38086 -1.12109,2.5 -2.5,2.5 -1.3789,0 -2.5,-1.11914 -2.5,-2.5 0,-1.38086 1.1211,-2.5 2.5,-2.5 1.37891,0 2.5,1.11914 2.5,2.5 z m -3.91796,4.14844 c 0.45312,0.11328 0.93359,0.22656 1.42578,0.22656 1.55859,0 3.01172,-0.78906 3.85937,-2.09375 l 0.71094,-1.08828 c 0.375,-0.57852 1.14844,-0.74219 1.73047,-0.36563 0.57812,0.37657 0.74219,1.14922 0.36328,1.73125 l -0.70703,1.08594 c -0.71485,1.09766 -1.69922,1.95313 -2.83985,2.51172 V 32.75 c 0,0.69141 -0.55859,1.25 -1.25,1.25 -0.6914,0 -1.25,-0.55859 -1.25,-1.25 V 29 h -1.25 v 3.75 c 0,0.69141 -0.55859,1.25 -1.25,1.25 -0.6914,0 -1.25,-0.55859 -1.25,-1.25 V 22.64844 c -1.1082,-0.54688 -2.0726496,-1.37891 -2.77851,-2.47266 l -0.76172,-1.10547 c -0.38281,-0.57812 -0.22773,-1.35234 0.34688,-1.73554 0.57421,-0.38282 1.35039,-0.22774 1.7332,0.34687 l 0.76172,1.14258 c 0.56172,0.83984 1.37031,1.46094 2.29609,1.78906 0.0391,0.008 0.0742,0.0195 0.10938,0.0352 z"
+   id="path95"
+   style="fill:#e3b3a9;fill-opacity:1;stroke-width:0.0390625" /></svg>

@@ -70,7 +70,6 @@ import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
-import moment from 'moment'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -563,7 +562,7 @@ export default defineComponent({
     bottom: 4px;
     right: 10px;
     z-index: 9;
-    background: #33333390;
+    background: #33333342;
     font-size: 10px;
     color: black;
     padding: 4px 20px;

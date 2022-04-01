@@ -35,10 +35,14 @@ button.fa-thin-button {
   :deep(span) {
     text-align: center;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 11px;
   }
   &:first-child {
     border: none;
+  }
+  &:focus {
+    border-left: 0;
+    transition: all 0.1s ease-in;
   }
   &:hover {
     border-left: 6px solid $primary-color;

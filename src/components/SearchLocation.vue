@@ -1,7 +1,6 @@
 <template>
   <div>
       <q-select
-        hint="Hint available"
         v-model="searchString"
         use-input
         input-debounce="0"
@@ -13,9 +12,11 @@
         @filter="search"
         @keyup.enter="enterPressed"
         @update:model-value="filterLocation"
-        :loading="loading"
         ref="mySelect"
+        class="search-location"
       >
+         <div></div>
+
       </q-select>
   </div>
 </template>
@@ -27,25 +28,24 @@ export default {
   props: [],
   emits: ['locationSelected'],
   setup (props, context) {
-    const searchOptions = ref(null)
+    const searchOptions = ref()
     const searchString = ref()
-    const loading = ref(null)
-    const model = ref(null)
+    const loading = ref(false)
+    const model = ref()
     const $store = useStore()
     const mySelect = ref()
     let updateFunction = null
-    let Enter = false
     let searchValue = null
+    let firstTime = true
+
     const enterPressed = function (e) {
-      Enter = true
       updateFunction(() => {
-        console.log('inside update function')
-        console.log(searchValue)
         loading.value = true
         fetch(`https://nominatim.openstreetmap.org/search?q=${searchValue}&format=json&polygon_geojson=1&addressdetails=1`)
           .then(res => res.json())
           .then(res => {
             // Get only polygon and multipolygons
+            console.log('back from nominatim')
             const polygons = res.filter(feature => {
               return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
             })
@@ -57,20 +57,24 @@ export default {
                 value: feature
               })
             })
-            loading.value = false
             searchOptions.value = results
+            loading.value = false
           })
       })
+      if (firstTime) {
+        firstTime = false
+        enterPressed()
+      }
     }
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
 
     const search = function (val, update) {
-      if (!Enter) {
-        updateFunction = update
-        searchValue = val
-      }
+      console.log('filter ' + val)
+      searchValue = val
+      updateFunction = update
+
       // if (val.length < 2) {
       //   abort()
       //   return
@@ -78,7 +82,6 @@ export default {
     }
 
     const filterLocation = function (res) {
-      Enter = false
       let locationValue = null
       if (res) {
         locationValue = res.value
@@ -103,7 +106,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 input{
   width:80%;
   border: 1px solid $grey-color;
@@ -129,5 +132,8 @@ input{
   border-radius:5px;
   margin-left: 3px;
 }
-
+.search-location .btn {
+  background:none;
+  color: #efa501;
+}
 </style>
