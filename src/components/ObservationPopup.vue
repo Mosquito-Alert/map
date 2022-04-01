@@ -13,7 +13,7 @@
             <a target="_blank" :href="selectedFeature.photo_url"><img @load="imageLoaded" :src="selectedFeature.photo_url"></a>
             <div class="credits">Anónimo, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert</div>
           </div>
-          <div class="info" :class="selectedFeature.type==='adult'?'infoinfo-validation':'info-no-validation'">
+          <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div>
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
@@ -178,7 +178,8 @@ export default defineComponent({
   text-transform: uppercase;
 }
 .overlay-content.landscape .image{
-  max-height: $popup-height-with-image-landscape / 2;
+  // toni testing
+  // max-height: $popup-height-with-image-landscape / 2;
   overflow: hidden;
   position:relative;
   border-top-left-radius: $popup-border-radius;
