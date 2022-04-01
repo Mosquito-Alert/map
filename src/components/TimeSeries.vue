@@ -22,12 +22,20 @@ f.ca<template>
         </div>
         <div>
           <q-btn
+<<<<<<< HEAD
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
              :label="_('Delete')"
           />
           <q-btn icon="event_note" class="calendar-button" :label="_('Select')">
+=======
+            icon="event_busy"
+            class="calendar-button mr-10"
+            @click="resetDateFilter"
+          />
+          <q-btn icon="event_available" class="calendar-button" :label="_('Select')">
+>>>>>>> f2c9b60ea719c45615e613243e20757707338c56
             <q-popup-proxy
               @before-show="updateProxy"
               cover
@@ -108,7 +116,11 @@ export default defineComponent({
       dateRange.value = defaults.DATES
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
+<<<<<<< HEAD
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
+=======
+      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+>>>>>>> f2c9b60ea719c45615e613243e20757707338c56
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
     })
