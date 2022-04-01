@@ -22,20 +22,12 @@ f.ca<template>
         </div>
         <div>
           <q-btn
-<<<<<<< HEAD
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
              :label="_('Delete')"
           />
           <q-btn icon="event_note" class="calendar-button" :label="_('Select')">
-=======
-            icon="event_busy"
-            class="calendar-button mr-10"
-            @click="resetDateFilter"
-          />
-          <q-btn icon="event_available" class="calendar-button" :label="_('Select')">
->>>>>>> f2c9b60ea719c45615e613243e20757707338c56
             <q-popup-proxy
               @before-show="updateProxy"
               cover
@@ -116,11 +108,7 @@ export default defineComponent({
       dateRange.value = defaults.DATES
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
-<<<<<<< HEAD
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
-=======
-      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
->>>>>>> f2c9b60ea719c45615e613243e20757707338c56
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
     })
@@ -176,10 +164,19 @@ export default defineComponent({
       return data
     })
     const datePicked = function (event) {
-      const sDate = dateRange.value.from
-      const eDate = dateRange.value.to
-      dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
-      const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+      const date = dateRange.value
+      dateFilter.value = dateFilterToString(date)
+      let daysInRange = 0
+      if (typeof event === 'string') {
+        daysInRange = 1
+        dateFilter.value = date
+      } else {
+        const sDate = dateRange.value.from
+        const eDate = dateRange.value.to
+        dateFilter.value = dateFilterToString(date)
+        daysInRange = moment(eDate).diff(moment(sDate), 'days')
+      }
+      console.log(dateFilter.value)
       $store.commit('timeseries/updateXUnits', daysInRange)
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
     }
@@ -190,6 +187,16 @@ export default defineComponent({
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+    const dateFilterToString = function (date) {
+      if (typeof date === 'object') {
+        const sDate = date.from
+        const eDate = date.to
+        return moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+      } else {
+        return date
+      }
+    }
+
     return {
       _,
       resetDateFilter,

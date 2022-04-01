@@ -22,7 +22,8 @@ export const selectFeature = (context, feature) => {
     storm_drain_dry: 'Stormdrain without water',
     storm_drain_water: 'Stormdrain with water',
     breeding_site_not_yet_filtered: 'Breeding_site_not_yet_filtered',
-    breeding_site_other: 'Breeding site other'
+    breeding_site_other: 'Breeding site other',
+    bite: 'Bites'
   }
   const latinNames = {
     mosquito_tiger_confirmed: 'Aedes albopictus',
@@ -46,8 +47,36 @@ export const selectFeature = (context, feature) => {
     if (json.private_webmap_layer in latinNames) {
       json.latinName = latinNames[json.private_webmap_layer]
     }
-    json.title = titles[json.private_webmap_layer]
-    json.validation = (json.private_webmap_layer.toLowerCase().indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
+    // format title based on observation type
+    if (json.type.toLowerCase() === 'bite') {
+      json.title = titles.bite
+    } else if (json.type.toLowerCase() === 'site') {
+      json.title = titles[json.private_webmap_layer]
+    } else if (json.type.toLowerCase() === 'adult') {
+      json.title = titles[json.private_webmap_layer]
+      json.validation = (json.private_webmap_layer.toLowerCase().indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
+    }
+
+    // Format object based on private_webmap_layer
+    if (json.private_webmap_layer.toLowerCase() === 'storm_drain_water' ||
+        json.private_webmap_layer.toLowerCase() === 'storm_drain_dry'
+    ) {
+      json.withWater = ''
+    }
+    if (json.private_webmap_layer.toLowerCase() === 'storm_drain_water') {
+      json.withLarva = json.formatedResponses.with_larva
+    }
+    if (json.private_webmap_layer.toLowerCase() === 'breeding_site_other') {
+      json.withWater = json.formatedResponses.with_water
+      json.withLarva = json.formatedResponses.with_larva
+    }
+    // if bite
+    if (json.type.toLowerCase() === 'bite') {
+      json.howMany = json.formatedResponses.howManyBites
+      json.bodyPart = json.formatedResponses.bodyPart
+      json.location = json.formatedResponses.location
+      json.biteTime = json.formatedResponses.biteTime
+    }
 
     // check img url
     const preUrl = '//webserver.mosquitoalert.com'

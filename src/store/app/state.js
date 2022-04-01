@@ -17,7 +17,6 @@ export default function () {
     lang: defaultLang,
     DEFAULTS: {
       LAYERS: [
-        // { type: 'breeding', code: 'other_water' }
         { type: 'observations', code: 'tiger' }
       ],
       // DATES: { from: '2020/01/01', to: '2020/01/31' },

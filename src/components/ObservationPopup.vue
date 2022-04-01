@@ -13,7 +13,7 @@
             <a target="_blank" :href="selectedFeature.photo_url"><img @load="imageLoaded" :src="selectedFeature.photo_url"></a>
             <div class="credits">Anónimo, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert</div>
           </div>
-          <div class="info">
+          <div class="info" :class="selectedFeature.type==='adult'?'infoinfo-validation':'info-no-validation'">
             <div>
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
@@ -30,6 +30,40 @@
                     {{ formatData(selectedFeature) }}
                     </div>
                 </div>
+                <!-- IF BITES THEN SHOW OTHER ATTRIBUTES -->
+                <div class="description-wrapper" v-if="selectedFeature.howMany">
+                    <div><i class="fa-solid fa-child-reaching"></i></div>
+                    <div><span class="how-many-bites">{{ _('how many bites') }}</span>:
+                      {{ _(selectedFeature.howMany) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="selectedFeature.location">
+                    <div><i class="fa-solid fa-location-dot"></i></div>
+                    <div><span class="bite-location">{{ _('Bite location') }}</span>:
+                      {{ _(selectedFeature.location) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="selectedFeature.biteTime">
+                    <div><i class="fa-solid fa-calendar-days"></i></div>
+                    <div><span class="bite-time">{{ _('Bite time') }}</span>:
+                      {{ _(selectedFeature.biteTime) }}
+                    </div>
+                </div>
+
+                <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
+                <div class="description-wrapper" v-if="selectedFeature.withWater">
+                    <div><i class="fa-solid fa-droplet"></i></div>
+                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>:
+                      {{ _(selectedFeature.withWater) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="selectedFeature.withLarva">
+                    <div><i class="fa-solid fa-worm"></i></div>
+                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>:
+                      {{ _(selectedFeature.withLarva) }}
+                    </div>
+                </div>
+
                 <div class="description-wrapper" v-if="selectedFeature.edited_user_notes">
                     <div><i class="fa-solid fa-message-check"></i></div>
                     <div><span class="description">{{ _('Expert note') }}</span>:
@@ -38,7 +72,8 @@
                 </div>
               </div>
             </div>
-            <div>
+            <!-- only adults have validation  -->
+            <div v-if="selectedFeature.type === 'adult'">
               <div :class="getValidationClass(selectedFeature)">
                 <i :class="getValidationIcon(selectedFeature)"></i>
               </div>
@@ -235,7 +270,7 @@ export default defineComponent({
       margin:auto;
     }
     // max-height: calc(#{$popup-height} - #{50px});
-    .info {
+    .info-validation {
       &>div:first-child {
         max-height: calc(#{$popup-height} - #{50px});
         overflow: auto;
@@ -244,6 +279,18 @@ export default defineComponent({
       }
     }
   }
+}
+.info-no-validation{
+  max-width: $popup-width-portrait-info;
+  max-height: $popup-height-with-image-portrait;
+  overflow:auto;
+  background: white;
+  position:relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: $popup-border-radius;
+  cursor: default;
+  font-size: 1em;
 }
 
 .info {
@@ -300,8 +347,8 @@ export default defineComponent({
     }
   }
 }
-.landscape .info,
-.small .info {
+.landscape .info-validation,
+.small .info-validation {
   width: 100%;
   &>div:first-child {
     text-align:left;
@@ -327,7 +374,7 @@ export default defineComponent({
   }
 }
 
-.portrait .info {
+.portrait .info-validation {
   padding-bottom:0px;
   max-width: $popup-width-portrait-info;
   display:flex;
