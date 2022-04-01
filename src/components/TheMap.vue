@@ -66,6 +66,7 @@ import ObservationPopup from './ObservationPopup.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
@@ -254,19 +255,6 @@ export default defineComponent({
           initialLayers.forEach(layerFilter => {
             filterObservations(layerFilter)
           })
-          // const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          // initial.LAYERS.forEach(layerFilter => {
-          //   filterObservations({
-          //     type: 'layer',
-          //     data: layerFilter
-          //   })
-          // })
-          // if ('DATES' in initial) {
-          //   filterObservations({
-          //     type: 'date',
-          //     data: initial.DATES
-          //   })
-          // }
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -283,6 +271,11 @@ export default defineComponent({
           return feat
         })
         features.value = data
+        const graphDates = event.data.timeseries.dates
+        const sDate = graphDates[0]
+        const eDate = graphDates[graphDates.length - 1]
+        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
@@ -457,9 +450,12 @@ export default defineComponent({
 
     function filterDate (date) {
       const workerData = {}
-      console.log(date)
-      mapFilters.date = [JSON.parse(JSON.stringify(date))]
-      console.log(mapFilters)
+      if (date !== null) {
+        mapFilters.date = [JSON.parse(JSON.stringify(date))]
+      } else {
+        mapFilters.date = []
+      }
+
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -559,6 +555,13 @@ export default defineComponent({
   }
   :deep(.ol-attribution) {
     color: white;
+  }
+  :deep(.ol-attribution a) {
+    color: #3498DB;
+    text-decoration:none;
+    &:hover{
+      text-decoration:underline;
+    }
   }
   .drawer-handler{
     background-color: $primary-color;

@@ -1,45 +1,22 @@
 <template>
   <div>
-     <q-select
-        ref="llista"
-        bottom-slots
-        :options="results"
-        :label="_('Placeholder location')"
+      <q-select
+        hint="Hint available"
+        v-model="searchString"
         use-input
-        @keyup.enter="search"
-        @input-value="setSearchWord"
-        option-label="label"
-        option-value="value"
-        v-model="model"
+        input-debounce="0"
+        :label="_('Placeholder location')"
+        :options="searchOptions"
+        style="width: 250px"
+        color="orange"
         clearable
+        @filter="search"
+        @keyup.enter="enterPressed"
         @update:model-value="filterLocation"
+        :loading="loading"
+        ref="mySelect"
       >
-        <template v-slot:append>
-          <q-icon name="search" @click.stop />
-        </template>
-
-        <template v-slot:hint>
-          Field hint
-        </template>
       </q-select>
-    <!-- <q-input @keyup.enter="search" v-model="term" :label="_('Placeholder location')" />
-    <div>
-      <ul class="result" ref="llista">
-          <li
-            v-for="result, id in results" :key="id"
-            @click="filterLocation(result)"
-          >
-            {{result.display_name}}
-           </li>
-      </ul>
-    </div>
-    <div v-if="noResults">
-        Sorry, but no results were found. I blame Apple.
-    </div>
-
-    <div v-if="searching">
-        <i>{{ _('Searching ...') }}</i>
-    </div> -->
   </div>
 </template>
 <script>
@@ -50,48 +27,58 @@ export default {
   props: [],
   emits: ['locationSelected'],
   setup (props, context) {
-    const llista = ref(null)
-    const term = ref(null)
-    const results = ref(null)
-    const noResults = ref(null)
-    const searching = ref(null)
+    const searchOptions = ref(null)
+    const searchString = ref()
+    const loading = ref(null)
     const model = ref(null)
-
-    results.value = []
-    noResults.value = false
-    searching.value = false
-
     const $store = useStore()
-
+    const mySelect = ref()
+    let updateFunction = null
+    let Enter = false
+    let searchValue = null
+    const enterPressed = function (e) {
+      Enter = true
+      updateFunction(() => {
+        console.log('inside update function')
+        console.log(searchValue)
+        loading.value = true
+        fetch(`https://nominatim.openstreetmap.org/search?q=${searchValue}&format=json&polygon_geojson=1&addressdetails=1`)
+          .then(res => res.json())
+          .then(res => {
+            // Get only polygon and multipolygons
+            const polygons = res.filter(feature => {
+              return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+            })
+            const results = []
+            polygons.forEach(function (feature) {
+              results.push({
+                label: feature.display_name,
+                labelShort: feature.display_name.substring(0, 10) + '...',
+                value: feature
+              })
+            })
+            loading.value = false
+            searchOptions.value = results
+          })
+      })
+    }
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
-    const setSearchWord = function (e) {
-      term.value = e
-    }
-    const search = function () {
-      searching.value = true
-      fetch(`https://nominatim.openstreetmap.org/search?q=${term.value}&format=json&polygon_geojson=1&addressdetails=1`)
-        .then(res => res.json())
-        .then(res => {
-          searching.value = false
-          // Get only polygon and multipolygons
-          const polygons = res.filter(feature => {
-            return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
-          })
-          results.value = []
-          polygons.forEach(function (feature) {
-            results.value.push({
-              label: feature.display_name,
-              labelShort: feature.display_name.substring(0, 10) + '...',
-              value: feature
-            })
-          })
-          noResults.value = results.value.length === 0
-        })
+
+    const search = function (val, update) {
+      if (!Enter) {
+        updateFunction = update
+        searchValue = val
+      }
+      // if (val.length < 2) {
+      //   abort()
+      //   return
+      // }
     }
 
     const filterLocation = function (res) {
+      Enter = false
       let locationValue = null
       if (res) {
         locationValue = res.value
@@ -103,13 +90,12 @@ export default {
 
     return {
       _,
-      llista,
+      mySelect,
+      enterPressed,
+      searchString,
+      searchOptions,
       model,
-      setSearchWord,
-      term,
-      results,
-      noResults,
-      searching,
+      loading,
       search,
       filterLocation
     }
