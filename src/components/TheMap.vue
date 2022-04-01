@@ -69,6 +69,7 @@ import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import moment from 'moment'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -244,24 +245,12 @@ export default defineComponent({
           const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
           const initialLayers = defaults.LAYERS
           if (defaults.DATES) {
-            mapFilters.date = [defaults.DATES]
+            const initialDate = expandDate(defaults.DATES)
+            mapFilters.date = [initialDate]
           }
           initialLayers.forEach(layerFilter => {
             filterObservations(layerFilter)
           })
-          // const initial = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          // initial.LAYERS.forEach(layerFilter => {
-          //   filterObservations({
-          //     type: 'layer',
-          //     data: layerFilter
-          //   })
-          // })
-          // if ('DATES' in initial) {
-          //   filterObservations({
-          //     type: 'date',
-          //     data: initial.DATES
-          //   })
-          // }
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -448,7 +437,8 @@ export default defineComponent({
     function filterDate (date) {
       const workerData = {}
       if (date !== null) {
-        mapFilters.date = [JSON.parse(JSON.stringify(date))]
+        const expandedDate = expandDate(date)
+        mapFilters.date = [JSON.parse(JSON.stringify(expandedDate))]
       } else {
         mapFilters.date = []
       }
@@ -456,6 +446,21 @@ export default defineComponent({
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
+    }
+
+    function expandDate (date) {
+      let expandedDate = null
+      if (!date) return
+      if (typeof date === 'string') {
+        const preDate = moment(date).subtract(1, 'd')
+        const postDate = moment(date).add(1, 'd')
+        expandedDate = { from: preDate.format('YYYY/MM/DD'), to: postDate.format('YYYY/MM/DD') }
+      } else {
+        const preDate = moment(date.from).subtract(1, 'd')
+        const postDate = moment(date.to).add(1, 'd')
+        expandedDate = { from: preDate.format('YYYY/MM/DD'), to: postDate.format('YYYY/MM/DD') }
+      }
+      return expandedDate
     }
 
     return {

@@ -17,9 +17,10 @@ export default function () {
     lang: defaultLang,
     DEFAULTS: {
       LAYERS: [
-        { type: 'observations', code: 'tiger' }
+        { type: 'breeding', code: 'other_water' }
       ],
-      DATES: { from: '2021/01/01', to: '2021/12/31' },
+      DATES: { from: '2020/01/01', to: '2020/01/31' },
+      // DATES: { from: '2020/01/01', to: '2020/02/1' },
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
       strokeLocationColor: 'orange'
@@ -27,7 +28,7 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      info: true
+      info: false
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),

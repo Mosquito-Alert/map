@@ -53,8 +53,8 @@ self.onmessage = function (e) {
     loadMapData(filteredData)
   } else if (e.data) {
     // This is fired when the user navigates the map.
-    const map = index.getClusters(e.data.bbox, e.data.zoom)
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
+    const map = index.getClusters(e.data.bbox, e.data.zoom)
 
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
