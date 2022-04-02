@@ -20,9 +20,10 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox'>
-            <ol-source-xyz
+          <ol-source-osm />
+            <!-- <ol-source-xyz
               crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' />
+              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' /> -->
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->

@@ -1,23 +1,39 @@
 <template>
   <div>
-      <q-select
+      <q-input
         v-model="searchString"
-        use-input
-        input-debounce="0"
         :label="_('Placeholder location')"
-        :options="searchOptions"
-        style="width: 250px"
         color="orange"
-        clearable
-        @filter="search"
-        @keyup.enter="enterPressed"
-        @update:model-value="filterLocation"
-        ref="mySelect"
         class="search-location"
+        clearable
+        @focus="checkResults"
+        @keyup.enter="search"
+        @keyup.down.exact.prevent="selectItem(0)"
+        @update:model-value="resetResults"
+        @clear="resetFilter"
+        :loading="loading"
+        :filled="filterIsActive"
+      />
+      <q-list
+        tabindex="0"
+        ref="locationsList"
+        v-if="isVisible"
+        bordered separator class="locations-list"
+        @keydown.esc.exact="hideResults"
       >
-         <div></div>
-
-      </q-select>
+        <q-item
+          clickable
+          v-ripple
+          :ref="setItemRef"
+          v-for="result, index in results" :key="index"
+          @click="filterLocation(result)"
+          @keyup.enter="filterLocation(result)"
+          @keydown.up.exact.prevent="selectItem(index-1)"
+          @keydown.down.exact.prevent="selectItem(index+1)"
+        >
+          {{ result.display_name}}
+        </q-item>
+      </q-list>
   </div>
 </template>
 <script>
@@ -28,79 +44,96 @@ export default {
   props: [],
   emits: ['locationSelected'],
   setup (props, context) {
+    let itemRefs = []
     const searchOptions = ref()
+    const filterIsActive = ref(false)
     const searchString = ref()
+    const isVisible = ref(false)
     const loading = ref(false)
     const model = ref()
     const $store = useStore()
-    const mySelect = ref()
-    let updateFunction = null
-    let searchValue = null
-    let firstTime = true
+    const results = ref([])
 
-    const enterPressed = function (e) {
-      updateFunction(() => {
-        loading.value = true
-        fetch(`https://nominatim.openstreetmap.org/search?q=${searchValue}&format=json&polygon_geojson=1&addressdetails=1`)
-          .then(res => res.json())
-          .then(res => {
-            // Get only polygon and multipolygons
-            console.log('back from nominatim')
-            const polygons = res.filter(feature => {
-              return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
-            })
-            const results = []
-            polygons.forEach(function (feature) {
-              results.push({
-                label: feature.display_name,
-                labelShort: feature.display_name.substring(0, 10) + '...',
-                value: feature
-              })
-            })
-            searchOptions.value = results
-            loading.value = false
-          })
-      })
-      if (firstTime) {
-        firstTime = false
-        enterPressed()
-      }
-    }
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    const search = function (val, update) {
-      console.log('filter ' + val)
-      searchValue = val
-      updateFunction = update
-
-      // if (val.length < 2) {
-      //   abort()
-      //   return
-      // }
+    const search = function () {
+      loading.value = true
+      fetch(`https://nominatim.openstreetmap.org/search?q=${searchString.value}&format=json&polygon_geojson=1&addressdetails=1`)
+        .then(res => res.json())
+        .then(res => {
+          // Get only polygon and multipolygons
+          const polygons = res.filter(feature => {
+            return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+          })
+          results.value = []
+          polygons.forEach(function (feature) {
+            results.value.push(feature)
+          })
+          loading.value = false
+          isVisible.value = true
+          itemRefs = []
+        })
     }
 
-    const filterLocation = function (res) {
-      let locationValue = null
-      if (res) {
-        locationValue = res.value
-      }
+    const filterLocation = function (location) {
+      isVisible.value = false
+      filterIsActive.value = true
       context.emit('locationSelected', {
-        location: locationValue
+        location: location
       })
+    }
+
+    const setItemRef = function (el) {
+      if (el) {
+        itemRefs.push(el)
+      }
+    }
+    const hideResults = function () {
+      isVisible.value = false
+    }
+
+    const selectItem = function (index) {
+      if (itemRefs[index]) {
+        itemRefs[index].$el.focus()
+      }
+    }
+
+    const checkResults = function () {
+      if (results.value.length) {
+        isVisible.value = true
+      }
+    }
+
+    const resetResults = function () {
+      hideResults()
+      results.value = []
+    }
+
+    const resetFilter = function () {
+      resetResults()
+      filterLocation(null)
+      filterIsActive.value = false
     }
 
     return {
       _,
-      mySelect,
-      enterPressed,
       searchString,
       searchOptions,
       model,
       loading,
       search,
-      filterLocation
+      filterLocation,
+      results,
+      setItemRef,
+      hideResults,
+      selectItem,
+      isVisible,
+      checkResults,
+      resetResults,
+      resetFilter,
+      filterIsActive
     }
   }
 }
@@ -135,5 +168,13 @@ input{
 .search-location .btn {
   background:none;
   color: #efa501;
+}
+.locations-list{
+  position: absolute;
+  background: white;
+  z-index:2000;
+}
+.q-item:focus{
+  color: $primary-color;
 }
 </style>
