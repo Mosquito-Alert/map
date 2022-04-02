@@ -1,18 +1,19 @@
 <template>
   <div>
       <q-input
+        ref="inputLocation"
         v-model="searchString"
         :label="_('Placeholder location')"
         color="orange"
         class="search-location"
         clearable
+        :loading="loading"
+        :filled="filterIsActive"
         @focus="checkResults"
         @keyup.enter="search"
         @keyup.down.exact.prevent="selectItem(0)"
         @update:model-value="resetResults"
         @clear="resetFilter"
-        :loading="loading"
-        :filled="filterIsActive"
       />
       <q-list
         tabindex="0"
@@ -20,6 +21,7 @@
         v-if="isVisible"
         bordered separator class="locations-list"
         @keydown.esc.exact="hideResults"
+        v-click-away="clickAway"
       >
         <q-item
           clickable
@@ -39,12 +41,15 @@
 <script>
 import { ref } from 'vue'
 import { useStore } from 'vuex'
+import { mixin as VueClickAway } from 'vue3-click-away'
 
 export default {
   props: [],
   emits: ['locationSelected'],
+  mixins: [VueClickAway],
   setup (props, context) {
     let itemRefs = []
+    const inputLocation = ref()
     const searchOptions = ref()
     const filterIsActive = ref(false)
     const searchString = ref()
@@ -56,6 +61,11 @@ export default {
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
+    }
+    const clickAway = function (event) {
+      if (!inputLocation.value.$el.contains(event.target)) {
+        hideResults()
+      }
     }
 
     const search = function () {
@@ -78,6 +88,7 @@ export default {
     }
 
     const filterLocation = function (location) {
+      searchString.value = location.display_name
       isVisible.value = false
       filterIsActive.value = true
       context.emit('locationSelected', {
@@ -133,7 +144,9 @@ export default {
       checkResults,
       resetResults,
       resetFilter,
-      filterIsActive
+      filterIsActive,
+      clickAway,
+      inputLocation
     }
   }
 }

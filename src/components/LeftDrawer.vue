@@ -37,7 +37,8 @@
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
           <search-location @locationSelected="locationSelected"/>
-          <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button>
+          <filter-hastags/>
+          <!-- <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button> -->
       </div>
 
       <div class="toc-category">
@@ -142,9 +143,10 @@ import SamplingEffort from 'components/SamplingEffort.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import SearchLocation from 'components/SearchLocation.vue'
 import { useQuasar } from 'quasar'
+import FilterHastags from './FilterHastags.vue'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation },
+  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation, FilterHastags },
   emits: ['filterObservations', 'filterLocations'],
   props: ['expanded'],
   setup (props, context) {
