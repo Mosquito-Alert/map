@@ -20,14 +20,14 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   props: [],
-  emits: ['locationSelected'],
+  emits: ['tagsModified'],
   setup (props, context) {
-    const tags = ref(['nota'])
+    const tags = ref([])
     const newTag = ref()
     const $store = useStore()
     const _ = function (text) {
@@ -37,12 +37,20 @@ export default {
     const deleteTag = function (tag) {
       const index = tags.value.indexOf(tag)
       tags.value.splice(index, 1)
+      context.emit('tagsModified', tags.value)
     }
 
     const addTag = function () {
+      newTag.value = newTag.value.toLowerCase()
       tags.value.push(newTag.value)
       newTag.value = ''
+      context.emit('tagsModified', tags.value)
     }
+
+    onMounted(function () {
+      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      tags.value = defaults.HASHTAGS
+    })
 
     return {
       _,

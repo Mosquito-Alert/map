@@ -36,9 +36,11 @@
     <div class="toc-layers" :class="expanded?'expanded':'collapsed'">
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
-          <search-location @locationSelected="locationSelected"/>
-          <filter-hastags/>
-          <!-- <input type="text" name="hastag" :placeholder="_('Placeholder hashtag')"/> <button>></button> -->
+          <search-location
+            @locationSelected="locationSelected"
+            @locationCleared="locationCleared"
+          />
+          <filter-hastags @tagsModified="tagsModified"/>
       </div>
 
       <div class="toc-category">
@@ -147,7 +149,7 @@ import FilterHastags from './FilterHastags.vue'
 
 export default {
   components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation, FilterHastags },
-  emits: ['filterObservations', 'filterLocations'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations'],
   props: ['expanded'],
   setup (props, context) {
     const ca = ref(null)
@@ -278,6 +280,14 @@ export default {
       context.emit('filterLocations', geojson)
     }
 
+    const locationCleared = function () {
+      context.emit('clearLocations')
+    }
+
+    const tagsModified = function (tags) {
+      context.emit('filterTags', tags)
+    }
+
     return {
       ca,
       es,
@@ -285,6 +295,7 @@ export default {
       clickLanguageSelector,
       initialClass,
       filterObservations,
+      tagsModified,
       observations,
       showInfo,
       breeding,
@@ -293,6 +304,7 @@ export default {
       mouseEnter,
       mouseOut,
       locationSelected,
+      locationCleared,
       _
     }
   }

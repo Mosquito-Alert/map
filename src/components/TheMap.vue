@@ -99,16 +99,11 @@ export default defineComponent({
     const geoJson = new format.GeoJSON()
     // const worker = $store.getters['app/getWorker']
     const worker = new Worker('TheMapWorker.js')
-    const mapFilters = { observations: [], locations: [], hastags: [], date: [] }
+    const mapFilters = { observations: [], locations: [], hashtags: [], date: [] }
 
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
-    }
-
-    const clearAdministrativeFeatures = function () {
-      console.log('clear')
-      locationFeatures.value = []
     }
 
     const fitFeature = function (location) {
@@ -250,9 +245,13 @@ export default defineComponent({
         if (!ready) {
           const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
           const initialLayers = defaults.LAYERS
+          const initialHashtags = defaults.HASHTAGS
           if (defaults.DATES) {
             const initialDate = expandDate(defaults.DATES)
             mapFilters.date = [initialDate]
+          }
+          if (defaults.HASHTAGS) {
+            mapFilters.hashtags = initialHashtags
           }
           initialLayers.forEach(layerFilter => {
             filterObservations(layerFilter)
@@ -436,6 +435,15 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    const clearAdministrativeFeatures = function () {
+      locationFeatures.value = []
+      const workerData = {}
+      mapFilters.locations = []
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
     function filterLocations (location) {
       const workerData = {}
       if (location) {
@@ -459,6 +467,14 @@ export default defineComponent({
         mapFilters.date = []
       }
 
+      workerData.filters = mapFilters
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      worker.postMessage(workerData)
+    }
+
+    function filterTags (tags) {
+      const workerData = {}
+      mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -491,6 +507,7 @@ export default defineComponent({
       filterObservations,
       filterLocations,
       filterDate,
+      filterTags,
       zoom,
       map,
       observationsSource,

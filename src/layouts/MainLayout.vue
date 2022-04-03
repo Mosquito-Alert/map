@@ -5,9 +5,11 @@
   >
     <site-header :expanded="expanded"/>
     <left-drawer
+      :expanded="expanded"
       @filterObservations='filterObservations'
       @filterLocations="filterLocations"
-      :expanded="expanded"
+      @clearLocations="clearLocations"
+      @filterTags="filterTags"
     />
 
     <q-page
@@ -81,6 +83,14 @@ export default {
       map.value.filterLocations(location)
     }
 
+    const clearLocations = function () {
+      map.value.clearAdministrativeFeatures()
+    }
+
+    const filterTags = function (tags) {
+      map.value.filterTags(tags)
+    }
+
     const filterDate = function (date) {
       map.value.filterDate(date.data)
     }
@@ -103,6 +113,8 @@ export default {
       filterObservations,
       filterDate,
       filterLocations,
+      clearLocations,
+      filterTags,
       infoModalVisible,
       map,
       resizeMap

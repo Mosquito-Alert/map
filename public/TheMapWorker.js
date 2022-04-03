@@ -43,6 +43,10 @@ self.onmessage = function (e) {
       // array with only one date
       filteredData = filterDate(filteredData, filters.date[0])
     }
+    if (filters.hashtags.length > 0) {
+      // array with only one date
+      filteredData = filterTags(filteredData, filters.hashtags)
+    }
     if (filters.locations.length > 0) {
       if (filters.tolerance) {
         simplifyTolerance = filters.tolerance
@@ -188,6 +192,26 @@ function filterLocations (data, poly) {
   return filtered
 }
 
+function filterTags (data, tags) {
+  const filteringTags = tags.map(tag => tag.toLowerCase())
+  const filteredData = data.filter(f => {
+    const t = f.properties.t
+    let containsAll = false
+    if (t.length) {
+      const featureTags = t.split(',').map(t => t.trim())
+      if (featureTags.indexOf('italy') > -1) {
+        console.log(f.properties)
+        console.log(featureTags)
+      }
+      containsAll = filteringTags.every(element => {
+        return featureTags.includes(element)
+      })
+    }
+    return containsAll
+  })
+  return filteredData
+}
+
 function filterObservations (data, layers, filters) {
   // addObservationsFilter(type, code)
   let filteredData = {}
@@ -202,7 +226,6 @@ function filterObservations (data, layers, filters) {
     // }
     return visibleCategories.includes(feature.properties.c)
   })
-
   return filteredData
 }
 

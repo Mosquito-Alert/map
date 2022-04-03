@@ -45,7 +45,7 @@ import { mixin as VueClickAway } from 'vue3-click-away'
 
 export default {
   props: [],
-  emits: ['locationSelected'],
+  emits: ['locationSelected', 'locationCleared'],
   mixins: [VueClickAway],
   setup (props, context) {
     let itemRefs = []
@@ -123,9 +123,9 @@ export default {
     }
 
     const resetFilter = function () {
-      resetResults()
-      filterLocation(null)
       filterIsActive.value = false
+      resetResults()
+      context.emit('locationCleared')
     }
 
     return {
