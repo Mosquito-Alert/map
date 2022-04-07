@@ -46,6 +46,7 @@
         </ol-vector-layer>
 
         <ol-interaction-select @select="featureSelected"
+          multi
           :condition="selectCondition"
           :filter="selectInteactionFilter">
             <ol-style>
@@ -191,6 +192,11 @@ export default defineComponent({
 
     const featureSelected = function (event) {
       if (event.selected[0]) {
+        let a = ''
+        event.selected.forEach(function (f) {
+          a += ' : ' + f.values_.geometry.flatCoordinates
+        })
+        console.log(a)
         const feature = event.selected[0]
         selectedFeat.value = feature
         // check if click on cluster

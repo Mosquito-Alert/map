@@ -143,7 +143,8 @@ export default defineComponent({
     }
 
     const formatData = function (feature) {
-      return moment(feature.observation_date).format('MM/DD/YYYY')
+      // Some locales add '.' after month, so we remove it
+      return moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
     }
 
     return {

@@ -6,7 +6,6 @@
         :label="_('Placeholder location')"
         color="orange"
         class="search-location"
-        clearable
         :loading="loading"
         :filled="filterIsActive"
         @focus="checkResults"
@@ -14,7 +13,11 @@
         @keyup.down.exact.prevent="selectItem(0)"
         @update:model-value="resetResults"
         @clear="resetFilter"
-      />
+      >
+        <template v-if="filterIsActive && !loading" v-slot:append>
+          <q-icon name="cancel" @click="resetFilter" class="cancel-pointer" />
+        </template>
+      </q-input>
       <q-list
         tabindex="0"
         ref="locationsList"
@@ -123,7 +126,9 @@ export default {
     }
 
     const resetFilter = function () {
+      inputLocation.value.$el.focus()
       filterIsActive.value = false
+      searchString.value = ''
       resetResults()
       context.emit('locationCleared')
     }
@@ -178,9 +183,9 @@ input{
   border-radius:5px;
   margin-left: 3px;
 }
-.search-location .btn {
-  background:none;
-  color: #efa501;
+.search-location button{
+  background: $primary-color;
+  color: white;
 }
 .locations-list{
   position: absolute;
@@ -189,5 +194,22 @@ input{
 }
 .q-item:focus{
   color: $primary-color;
+}
+:deep(.q-field--filled.search-location input){
+  color: white !important;
+}
+.q-field--filled.search-location{
+  background: $primary-color;
+  color: white;
+  border-radius: 4px;
+}
+.q-field--highlighted,
+.q-field--highlighted .q-field__label {
+  color: unset;
+}
+
+.cancel-pointer{
+  opacity: 1;
+  color: white;
 }
 </style>

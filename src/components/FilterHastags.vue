@@ -63,7 +63,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .hashtags-list label{
   display: flex;
   flex-direction: column;
@@ -73,11 +73,15 @@ export default {
   height:unset;
 }
 .q-chip{
-  background: #ccc;
-  color: white;
+  background: $primary-color;
   margin-left:0px;
 }
 .q-chip__icon {
   color: unset;
+}
+.hashtags-list .hashtag-chip,
+.hashtags-list .hashtag-chip .q-chip__icon--remove {
+  color: white;
+  opacity: 1;
 }
 </style>
