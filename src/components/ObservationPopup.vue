@@ -24,13 +24,7 @@
                       {{ selectedFeature.report_id }}
                     </div>
                 </div>
-                <div class="date-wrapper">
-                    <div><i class="fa-solid fa-calendar-days"></i></div>
-                    <div><span class="date">{{ _('Date') }}</span>:
-                    {{ formatData(selectedFeature) }}
-                    </div>
-                </div>
-                <!-- IF BITES THEN SHOW OTHER ATTRIBUTES -->
+                <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="selectedFeature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
                     <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
@@ -43,10 +37,20 @@
                       {{ _(selectedFeature.location) }}
                     </div>
                 </div>
-                <div class="description-wrapper" v-if="selectedFeature.biteTime">
+                <!-- <div class="description-wrapper" v-if="selectedFeature.howMany">
+                    <div><i class="fa-solid fa-location-dot"></i></div>
+                    <div><span class="body-part">{{ _('Body part') }}</span>:
+                      {{ _(selectedFeature.bodyPart) }}
+                    </div>
+                </div> -->
+                <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
-                    <div><span class="bite-time">{{ _('Bite time') }}</span>:
-                      {{ _(selectedFeature.biteTime) }}
+                    <div>
+                      <span class="date">{{ _('Date') }}</span>:
+                      {{ formatData(selectedFeature) }}
+                    <span class="bite-time" v-if="selectedFeature.biteTime">
+                      | {{ _(selectedFeature.biteTime) }}
+                    </span>
                     </div>
                 </div>
 
@@ -79,7 +83,9 @@
               </div>
               <div class="validation-string">
                 <div>{{ getValidationTypeTitle(selectedFeature) }}</div>
-                {{ _(selectedFeature.validation) }}
+                <span v-if="selectedFeature.validation_type==='human'">
+                  {{ _(selectedFeature.validation) }}
+                </span>
               </div>
             </div>
           </div>
@@ -124,6 +130,7 @@ export default defineComponent({
       else return 'fa-light fa-robot'
     }
     const getValidationClass = feature => {
+      if (feature.validation_type !== 'human') return 'validation ai'
       if (feature.validation === 'Confirmed') return 'validation confirmed'
       else return 'validation probable'
     }
@@ -318,6 +325,9 @@ export default defineComponent({
     &.probable {
       background: #8fd3b8;
     }
+    &.ai {
+      background: #9d6466;
+    }
     i {
       height: 50px;
       width: 50px;
@@ -447,5 +457,8 @@ export default defineComponent({
 .date-wrapper span,
 .description-wrapper span{
   font-weight: bold;
+}
+.date-wrapper span.bite-time{
+  font-weight:normal;
 }
 </style>

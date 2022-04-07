@@ -22,6 +22,7 @@ f.ca<template>
         </div>
         <div>
           <q-btn
+            v-if="dateFilter"
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
