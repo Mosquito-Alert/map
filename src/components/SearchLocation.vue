@@ -3,7 +3,7 @@
       <q-input
         ref="inputLocation"
         v-model="searchString"
-        :label="_('Placeholder location')"
+        :label="inputMessage"
         color="orange"
         class="search-location"
         :loading="loading"
@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { mixin as VueClickAway } from 'vue3-click-away'
 
@@ -53,6 +53,7 @@ export default {
   setup (props, context) {
     let itemRefs = []
     const inputLocation = ref()
+    const inputMessage = ref()
     const searchOptions = ref()
     const filterIsActive = ref(false)
     const searchString = ref()
@@ -62,6 +63,9 @@ export default {
     const $store = useStore()
     const results = ref([])
 
+    onMounted(function () {
+      inputMessage.value = _('Placeholder location')
+    })
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -84,6 +88,9 @@ export default {
           polygons.forEach(function (feature) {
             results.value.push(feature)
           })
+          if (!results.value.length) {
+            inputMessage.value = _('No results found')
+          }
           loading.value = false
           isVisible.value = true
           itemRefs = []
@@ -123,6 +130,7 @@ export default {
     const resetResults = function () {
       hideResults()
       results.value = []
+      inputMessage.value = _('Placeholder location')
     }
 
     const resetFilter = function () {
@@ -136,6 +144,7 @@ export default {
     return {
       _,
       searchString,
+      inputMessage,
       searchOptions,
       model,
       loading,

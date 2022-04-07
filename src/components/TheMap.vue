@@ -107,6 +107,7 @@ export default defineComponent({
     }
 
     const fitFeature = function (location) {
+      console.log('init fit')
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -159,6 +160,7 @@ export default defineComponent({
         Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
         locationFeatures.value = [Feat]
+        console.log('end fit')
       }
     }
 

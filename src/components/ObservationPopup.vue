@@ -10,8 +10,30 @@
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
-            <a target="_blank" :href="selectedFeature.photo_url"><img @load="imageLoaded" :src="selectedFeature.photo_url"></a>
-            <div class="credits">Anónimo, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert</div>
+            <a target="_blank" :href="selectedFeature.photo_url">
+              <div class="img-container">
+                    <q-circular-progress
+                      v-if="defaultImageSize"
+                      indeterminate
+                      size="50px"
+                      color="orange"
+                      class="q-ma-md m-circular-progress"
+                    />
+                <img
+                  v-if="!errorLoadingImage"
+                  :height="defaultImageSize"
+                  :src="selectedFeature.photo_url"
+                  @load="imageLoaded"
+                  @error="errorLoading"
+                >
+              </div>
+            </a>
+            <div
+              v-if="!errorLoadingImage"
+              class="credits"
+            >Anónimo,
+              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+            </div>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div>
@@ -109,6 +131,8 @@ export default defineComponent({
   setup (props, context) {
     const $store = useStore()
     const imageRatio = ref('null')
+    const errorLoadingImage = ref()
+    const defaultImageSize = ref()
     const ratio = ref('null')
     ratio.value = 0
     imageRatio.value = 0
@@ -119,6 +143,7 @@ export default defineComponent({
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       console.log(ratio.value)
       imageRatio.value = (ratio.value > 1.25) ? 'landscape' : 'portrait'
+      defaultImageSize.value = ''
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
@@ -147,9 +172,15 @@ export default defineComponent({
       return moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
     }
 
+    const errorLoading = function () {
+      errorLoadingImage.value = true
+    }
     return {
       _,
       ratio,
+      defaultImageSize,
+      errorLoadingImage,
+      errorLoading,
       imageRatio,
       imageLoaded,
       formatData,
@@ -196,7 +227,11 @@ export default defineComponent({
   border-top-left-radius: $popup-border-radius;
   border-top-right-radius: $popup-border-radius;
 }
-
+.overlay-content.landscape .image .img-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 .overlay-content.landscape .image img{
   width: 100%;
   object-fit: fill;
@@ -210,12 +245,18 @@ export default defineComponent({
   text-align: center;
 }
 
+.overlay-content.portrait .image .img-container{
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
 .overlay-content.portrait .image img{
   height: 100%;
   border-top-left-radius: $popup-border-radius;
   border-bottom-left-radius: $popup-border-radius;
 }
 
+.parentContainer,
 .overlay-content.landscape {
     max-width: $popup-width-landscape;
     border:0px;
@@ -464,5 +505,10 @@ export default defineComponent({
 }
 .date-wrapper span.bite-time{
   font-weight:normal;
+}
+.m-circular-progress{
+  position: absolute;
+  height: 100%;
+  margin: auto;
 }
 </style>
