@@ -3,7 +3,7 @@
       <q-input
         ref="inputLocation"
         v-model="searchString"
-        :label="inputMessage"
+        :label="error?_('No results found'):_('Placeholder location')"
         color="orange"
         class="search-location"
         :loading="loading"
@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { mixin as VueClickAway } from 'vue3-click-away'
 
@@ -53,7 +53,6 @@ export default {
   setup (props, context) {
     let itemRefs = []
     const inputLocation = ref()
-    const inputMessage = ref()
     const searchOptions = ref()
     const filterIsActive = ref(false)
     const searchString = ref()
@@ -62,13 +61,12 @@ export default {
     const model = ref()
     const $store = useStore()
     const results = ref([])
+    const error = ref(false)
 
-    onMounted(function () {
-      inputMessage.value = _('Placeholder location')
-    })
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
     const clickAway = function (event) {
       if (!inputLocation.value.$el.contains(event.target)) {
         hideResults()
@@ -89,7 +87,7 @@ export default {
             results.value.push(feature)
           })
           if (!results.value.length) {
-            inputMessage.value = _('No results found')
+            error.value = true
           }
           loading.value = false
           isVisible.value = true
@@ -130,7 +128,7 @@ export default {
     const resetResults = function () {
       hideResults()
       results.value = []
-      inputMessage.value = _('Placeholder location')
+      error.value = false
     }
 
     const resetFilter = function () {
@@ -143,8 +141,8 @@ export default {
 
     return {
       _,
+      error,
       searchString,
-      inputMessage,
       searchOptions,
       model,
       loading,
