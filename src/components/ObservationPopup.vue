@@ -33,7 +33,7 @@
                 <!-- IF BITES THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="selectedFeature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ _('how many bites') }}</span>:
+                    <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
                       {{ _(selectedFeature.howMany) }}
                     </div>
                 </div>
@@ -262,7 +262,7 @@ export default defineComponent({
   &.small {
     &:after {
       content: ' ';
-      border: $popup-vertical-offset solid transparent;
+      // border: $popup-vertical-offset solid transparent;
       border-top-color: white;
       width: $popup-vertical-offset * 2;
       position: relative;

@@ -43,7 +43,7 @@ f.ca<template>
                 text-color="black"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn label="Cancel" color="red" flat v-close-popup />
+                  <q-btn label="Cancel" color="red" flat v-close-popup/>
                   <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
                 </div>
               </q-date>
@@ -163,9 +163,10 @@ export default defineComponent({
       }
       return data
     })
+
     const datePicked = function (event) {
       const date = dateRange.value
-      dateFilter.value = dateFilterToString(date)
+      dateFilterToString(date)
       let daysInRange = 0
       if (typeof event === 'string') {
         daysInRange = 1
@@ -173,10 +174,9 @@ export default defineComponent({
       } else {
         const sDate = dateRange.value.from
         const eDate = dateRange.value.to
-        dateFilter.value = dateFilterToString(date)
+        dateFilterToString(date)
         daysInRange = moment(eDate).diff(moment(sDate), 'days')
       }
-      console.log(dateFilter.value)
       $store.commit('timeseries/updateXUnits', daysInRange)
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
     }
@@ -188,18 +188,24 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
     const dateFilterToString = function (date) {
+      console.log(typeof date)
       if (typeof date === 'object') {
         const sDate = date.from
         const eDate = date.to
-        return moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+        if (sDate === eDate) {
+          dateFilter.value = moment(sDate).format('DD-MM-YYYY')
+        } else {
+          dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+        }
       } else {
-        return date
+        dateFilter.value = moment(date).format('DD-MM-YYYY')
       }
     }
 
     return {
       _,
       resetDateFilter,
+      dateFilterToString,
       getCurrentDate,
       dateFilter,
       chart,

@@ -21,100 +21,6 @@ getJSON('totes.json', (geojson) => {
   postMessage({ ready: true })
 })
 
-self.onmessage = function (e) {
-  if (e.data.getClusterExpansionZoom) {
-    // This is fired when the user clicks on a cluster.
-    // Returns the zoom level to zoom in and the center.
-    postMessage({
-      expansionZoom: index.getClusterExpansionZoom(e.data.getClusterExpansionZoom),
-      center: e.data.center
-    })
-  } else if (e.data.filters) {
-    // This is fired when the map is filtered.
-    all_layers = e.data.layers
-    let filteredData = all_data
-    filters = e.data.filters
-    if (filters.observations.length > 0) {
-      filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
-    } else {
-      filteredData = []
-    }
-    if (filters.date.length > 0) {
-      // array with only one date
-      filteredData = filterDate(filteredData, filters.date[0])
-    }
-    if (filters.hashtags.length > 0) {
-      // array with only one date
-      filteredData = filterTags(filteredData, filters.hashtags)
-    }
-    if (filters.locations.length > 0) {
-      if (filters.tolerance) {
-        simplifyTolerance = filters.tolerance
-      }
-      const poly = JSON.parse(filters.locations[0]).features[0]
-      filteredData = filterLocations(filteredData, poly)
-    }
-    loadMapData(filteredData)
-  } else if (e.data) {
-    // This is fired when the user navigates the map.
-    const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-    const map = index.getClusters(e.data.bbox, e.data.zoom)
-
-    time.sort((a, b) => {
-      if (a.properties.d < b.properties.d) return -1
-      else if (a.properties.d > b.properties.d) return 1
-      else return 0
-    })
-    const dates = []
-    const series = {}
-    const seriesMap = {}
-    filters.observations.forEach(layer => {
-      all_layers[layer.type][layer.code].categories.forEach(validationType => {
-        seriesMap[validationType] = layer.code
-      })
-      series[layer.code] = []
-    })
-    const temp = {}
-
-    time.forEach(feature => {
-      const type = seriesMap[feature.properties.c]
-      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
-
-      const dateSeries = temp[feature.properties.d]
-      if (!(type in dateSeries)) dateSeries[type] = 0
-      dateSeries[type] += 1
-    })
-
-    const tempDates = Object.keys(temp)
-    let start = new Date(tempDates[0])
-    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
-    let end = new Date(tempDates[tempDates.length - 1])
-    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
-    while (start <= end) {
-      const dateLabel = start.toISOString().split('T')[0]
-      const values = temp[dateLabel]
-      dates.push(dateLabel)
-      Object.keys(series).forEach(type => {
-        if (values && type in values) {
-          const value = values[type]
-          series[type].push(value)
-        } else {
-          series[type].push(0)
-        }
-      })
-      start = new Date(start.setDate(start.getDate() + 1))
-    }
-
-    postMessage({
-      map: map,
-      timeseries: {
-        dates: dates,
-        data: series
-      }
-    })
-  }
-}
-
 function loadMapData (data) {
   index = new Supercluster({
     log: DEBUG,
@@ -240,4 +146,98 @@ function getJSON (url, callback) {
     }
   }
   xhr.send()
+}
+
+self.onmessage = function (e) {
+  if (e.data.getClusterExpansionZoom) {
+    // This is fired when the user clicks on a cluster.
+    // Returns the zoom level to zoom in and the center.
+    postMessage({
+      expansionZoom: index.getClusterExpansionZoom(e.data.getClusterExpansionZoom),
+      center: e.data.center
+    })
+  } else if (e.data.filters) {
+    // This is fired when the map is filtered.
+    all_layers = e.data.layers
+    let filteredData = all_data
+    filters = e.data.filters
+    if (filters.observations.length > 0) {
+      filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
+    } else {
+      filteredData = []
+    }
+    if (filters.date.length > 0) {
+      // array with only one date
+      filteredData = filterDate(filteredData, filters.date[0])
+    }
+    if (filters.hashtags.length > 0) {
+      // array with only one date
+      filteredData = filterTags(filteredData, filters.hashtags)
+    }
+    if (filters.locations.length > 0) {
+      if (filters.tolerance) {
+        simplifyTolerance = filters.tolerance
+      }
+      const poly = JSON.parse(filters.locations[0]).features[0]
+      filteredData = filterLocations(filteredData, poly)
+    }
+    loadMapData(filteredData)
+  } else if (e.data) {
+    // This is fired when the user navigates the map.
+    const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
+    const map = index.getClusters(e.data.bbox, e.data.zoom)
+
+    time.sort((a, b) => {
+      if (a.properties.d < b.properties.d) return -1
+      else if (a.properties.d > b.properties.d) return 1
+      else return 0
+    })
+    const dates = []
+    const series = {}
+    const seriesMap = {}
+    filters.observations.forEach(layer => {
+      all_layers[layer.type][layer.code].categories.forEach(validationType => {
+        seriesMap[validationType] = layer.code
+      })
+      series[layer.code] = []
+    })
+    const temp = {}
+
+    time.forEach(feature => {
+      const type = seriesMap[feature.properties.c]
+      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+
+      const dateSeries = temp[feature.properties.d]
+      if (!(type in dateSeries)) dateSeries[type] = 0
+      dateSeries[type] += 1
+    })
+
+    const tempDates = Object.keys(temp)
+    let start = new Date(tempDates[0])
+    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
+    let end = new Date(tempDates[tempDates.length - 1])
+    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
+    while (start <= end) {
+      const dateLabel = start.toISOString().split('T')[0]
+      const values = temp[dateLabel]
+      dates.push(dateLabel)
+      Object.keys(series).forEach(type => {
+        if (values && type in values) {
+          const value = values[type]
+          series[type].push(value)
+        } else {
+          series[type].push(0)
+        }
+      })
+      start = new Date(start.setDate(start.getDate() + 1))
+    }
+
+    postMessage({
+      map: map,
+      timeseries: {
+        dates: dates,
+        data: series
+      }
+    })
+  }
 }

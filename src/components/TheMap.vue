@@ -23,7 +23,7 @@
           <ol-source-osm />
             <!-- <ol-source-xyz
               crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2s2Y2F4YnB5MDk4ZjNvb21rcWEzMHZ4NCJ9.oVtnggRtmtUL7GBav8Kstg' /> -->
+              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wxbHRmZXliMDlkeDNrcG40dm14OWZmNiJ9.UFRSz8T_c4riZkH3CyGgBQ' /> -->
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
@@ -75,7 +75,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer'],
+  emits: ['toogleLeftDrawer', 'workerFinished'],
   props: {},
   setup (props, context) {
     const leftDrawerIcon = ref('null')
@@ -213,18 +213,26 @@ export default defineComponent({
         selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
         $store.dispatch('map/selectFeature', event.selected[0].values_)
       } else {
-        // if not selected then call worker to refresh features
-        selectedId.value = null
-        $store.commit('map/selectFeature', {})
-        const olmap = map.value.map
-        const bounds = olmap.getView().calculateExtent(olmap.getSize())
-        const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
-        const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
-        worker.postMessage({
-          bbox: southWest.concat(northEast),
-          zoom: olmap.getView().getZoom()
-        })
+        // close popup and refresh features (woker)
+        closePopup()
       }
+    }
+
+    // function resetPopup () {
+    //   $store.commit('map/selectFeature', {})
+    // }
+
+    function closePopup () {
+      selectedId.value = null
+      $store.commit('map/selectFeature', {})
+      const olmap = map.value.map
+      const bounds = olmap.getView().calculateExtent(olmap.getSize())
+      const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+      const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+      worker.postMessage({
+        bbox: southWest.concat(northEast),
+        zoom: olmap.getView().getZoom()
+      })
     }
 
     const popupContent = computed(() => {
@@ -254,8 +262,13 @@ export default defineComponent({
             mapFilters.hashtags = initialHashtags
           }
           initialLayers.forEach(layerFilter => {
-            filterObservations(layerFilter)
+            mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
           })
+          // mapFilters are ready, now call worker
+          const workerData = {}
+          workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+          workerData.filters = mapFilters
+          worker.postMessage(workerData)
         } else updateMap()
         ready = true
       } else if (event.data.expansionZoom) {
@@ -278,6 +291,7 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
+        context.emit('workerFinished', { data: event.data })
       }
     }
 
@@ -418,7 +432,7 @@ export default defineComponent({
     }
 
     function filterObservations (observation) {
-      $store.commit('map/selectFeature', {})
+      closePopup()
       // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
@@ -445,6 +459,7 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
+      closePopup()
       const workerData = {}
       if (location) {
         mapFilters.locations = [JSON.stringify(location)]
@@ -459,6 +474,7 @@ export default defineComponent({
     }
 
     function filterDate (date) {
+      closePopup()
       const workerData = {}
       if (date !== null) {
         const expandedDate = expandDate(date)
@@ -474,6 +490,7 @@ export default defineComponent({
 
     function filterTags (tags) {
       const workerData = {}
+      closePopup()
       mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))

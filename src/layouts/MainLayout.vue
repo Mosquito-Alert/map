@@ -19,8 +19,9 @@
       <the-map ref='map'
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
+        @workerFinished="workerFinished"
       />
-      <time-series
+      <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
         @dateSelected='filterDate'
       />
@@ -56,6 +57,7 @@ export default {
   components: { BaseModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
     const map = ref('null')
+    const timeseries = ref()
     const expanded = ref(true)
     const $store = useStore()
     const resizeMap = function (args) {
@@ -107,8 +109,20 @@ export default {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
     }
+
+    const workerFinished = function (obj) {
+      const data = obj.data
+      // Get date ranges for tab title. First and last date were added for X units on graph. So discard them
+      const range = {
+        from: data.timeseries.dates[1],
+        to: data.timeseries.dates[data.timeseries.dates.length - 2]
+      }
+      timeseries.value.dateFilterToString(range)
+    }
+
     return {
       expanded,
+      workerFinished,
       toogleLeftDrawer,
       filterObservations,
       filterDate,
@@ -117,6 +131,7 @@ export default {
       filterTags,
       infoModalVisible,
       map,
+      timeseries,
       resizeMap
     }
   }

@@ -29,7 +29,7 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      info: false
+      info: true
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
