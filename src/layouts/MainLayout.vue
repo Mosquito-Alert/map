@@ -19,7 +19,6 @@
       <the-map ref='map'
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
-        @workerFinished="workerFinished"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -110,19 +109,8 @@ export default {
       resizeMap({ start: 0, end: 400 })
     }
 
-    const workerFinished = function (obj) {
-      const data = obj.data
-      // Get date ranges for tab title. First and last date were added for X units on graph. So discard them
-      const range = {
-        from: data.timeseries.dates[1],
-        to: data.timeseries.dates[data.timeseries.dates.length - 2]
-      }
-      timeseries.value.dateFilterToString(range)
-    }
-
     return {
       expanded,
-      workerFinished,
       toogleLeftDrawer,
       filterObservations,
       filterDate,

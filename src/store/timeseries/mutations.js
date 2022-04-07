@@ -1,3 +1,7 @@
+export const setCompleteDatesRange = (state, payload) => {
+  state.completeDatesRange = payload
+}
+
 export const updateDates = (state, payload) => {
   state.dates = payload
 }

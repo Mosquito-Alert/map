@@ -75,7 +75,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinished'],
+  emits: ['toogleLeftDrawer'],
   props: {},
   setup (props, context) {
     const leftDrawerIcon = ref('null')
@@ -97,7 +97,6 @@ export default defineComponent({
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    // const worker = $store.getters['app/getWorker']
     const worker = new Worker('TheMapWorker.js')
     const mapFilters = { observations: [], locations: [], hashtags: [], date: [] }
 
@@ -251,6 +250,9 @@ export default defineComponent({
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
+          if (event.data.datesInterval) {
+            $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
+          }
           const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
           const initialLayers = defaults.LAYERS
           const initialHashtags = defaults.HASHTAGS
@@ -269,7 +271,9 @@ export default defineComponent({
           workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
           workerData.filters = mapFilters
           worker.postMessage(workerData)
-        } else updateMap()
+        } else {
+          updateMap()
+        }
         ready = true
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
@@ -291,7 +295,6 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
-        context.emit('workerFinished', { data: event.data })
       }
     }
 

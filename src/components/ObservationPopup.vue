@@ -83,7 +83,10 @@
               </div>
               <div class="validation-string">
                 <div>{{ getValidationTypeTitle(selectedFeature) }}</div>
-                <span v-if="selectedFeature.validation_type==='human'">
+                <span
+                  v-if="selectedFeature.validation_type==='human' &&
+                        selectedFeature.validation"
+                >
                   {{ _(selectedFeature.validation) }}
                 </span>
               </div>

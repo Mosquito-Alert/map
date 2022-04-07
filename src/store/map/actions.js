@@ -54,8 +54,10 @@ export const selectFeature = (context, feature) => {
       json.title = titles[json.private_webmap_layer]
     } else if (json.type.toLowerCase() === 'adult') {
       json.title = titles[json.private_webmap_layer]
-      if (json.private_webmap_layer !== 'unidentified') {
+      if (!['unidentified', 'other_species'].includes(json.private_webmap_layer)) {
         json.validation = (json.private_webmap_layer.toLowerCase().indexOf('confirmed') > -1) ? 'Confirmed' : 'Probable'
+      } else {
+        json.validation = ''
       }
     }
 

@@ -1,5 +1,6 @@
 export default function () {
   return {
+    completeDatesRange: {},
     dates: [],
     data: [],
     chart: {

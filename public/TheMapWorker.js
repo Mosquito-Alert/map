@@ -18,7 +18,13 @@ function log (text) {
 getJSON('totes.json', (geojson) => {
   log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
   all_data = geojson.features
-  postMessage({ ready: true })
+  postMessage({
+    ready: true,
+    datesInterval: {
+      from: all_data[0].properties.d,
+      to: all_data[all_data.length - 1].properties.d
+    }
+  })
 })
 
 function loadMapData (data) {

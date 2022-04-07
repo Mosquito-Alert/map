@@ -22,7 +22,7 @@ f.ca<template>
         </div>
         <div>
           <q-btn
-            v-if="dateFilter"
+            v-if="dateRange"
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
@@ -89,7 +89,7 @@ export default defineComponent({
 
     const resetDateFilter = function () {
       dateRange.value = null
-      dateFilter.value = null
+      dateFilterToString($store.getters['timeseries/getCompleteDatesRange'])
       context.emit('dateSelected', {
         type: 'date',
         data: null
@@ -189,7 +189,6 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
     const dateFilterToString = function (date) {
-      console.log(typeof date)
       if (typeof date === 'object') {
         const sDate = date.from
         const eDate = date.to

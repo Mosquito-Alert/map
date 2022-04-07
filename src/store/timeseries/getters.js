@@ -9,3 +9,7 @@ export const getDates = state => {
 export const getChartOptions = state => {
   return state.chart.options
 }
+
+export const getCompleteDatesRange = state => {
+  return state.completeDatesRange
+}
