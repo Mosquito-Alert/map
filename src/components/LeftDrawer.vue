@@ -37,6 +37,7 @@
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
           <search-location
+            ref="searchLocation"
             @locationSelected="locationSelected"
             @locationCleared="locationCleared"
           />
@@ -152,6 +153,7 @@ export default {
   emits: ['filterObservations', 'filterLocations', 'clearLocations'],
   props: ['expanded'],
   setup (props, context) {
+    const searchLocation = ref()
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
@@ -262,6 +264,7 @@ export default {
       let geojson = null
       if (location.location !== null) {
         const loc = location.location
+        console.log(loc.geojson.coordinates.length)
         const bb = loc.boundingbox
         const bounding = [bb[2], bb[0], bb[3], bb[1]]
         geojson = {
@@ -292,6 +295,7 @@ export default {
       ca,
       es,
       en,
+      searchLocation,
       clickLanguageSelector,
       initialClass,
       filterObservations,

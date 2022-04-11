@@ -111,7 +111,7 @@ export default defineComponent({
       const eDate = dateRange.value.to
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
       const d = new Date()
-      getCurrentDate.value = d.getFullYear() + '/' + d.getMonth()
+      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
     })
 
     const toggleTimeSeries = function () {

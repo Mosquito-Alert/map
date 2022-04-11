@@ -45,14 +45,14 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <ol-interaction-select @select="featureSelected"
-          multi
-          :condition="selectCondition"
-          :filter="selectInteactionFilter">
-            <ol-style>
-                <ol-style-icon :src="selectedIcon" :anchor="[0.5, 1]"></ol-style-icon>
+        <!-- SPIDERFIED MARKERS -->
+        <ol-vector-layer ref='spiralLayer' name="spiralLayer">
+          <ol-source-vector :format='geoJson' ref='spiralSource'>
+            <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
-        </ol-interaction-select>
+
+          </ol-source-vector>
+        </ol-vector-layer>
 
         <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
@@ -71,23 +71,24 @@ import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
+import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import spiderfyPoints from '../js/Spiral'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer'],
+  emits: ['toogleLeftDrawer', 'workerFinished'],
   props: {},
   setup (props, context) {
     const leftDrawerIcon = ref('null')
     let simplifyTolerance = null
     const fillLocationColor = ref('null')
+    const spiralSource = ref()
     const strokeLocationColor = ref('null')
     const selectedId = ref('null')
     const selectedFeat = ref('null')
     const $store = useStore()
-    const selectConditions = inject('ol-selectconditions')
-    const selectCondition = selectConditions.singleClick
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
@@ -99,7 +100,17 @@ export default defineComponent({
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheMapWorker.js')
-    const mapFilters = { observations: [], locations: [], hashtags: [], date: [] }
+    let selectedFeatures = []
+    let spiderfiedIds = []
+    let currZoom
+    const mapFilters = {
+      mode: 'resetFilter',
+      observations: [],
+      locations: [],
+      hashtags: [],
+      date: [],
+      report_id: []
+    }
 
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
@@ -107,7 +118,6 @@ export default defineComponent({
     }
 
     const fitFeature = function (location) {
-      console.log('init fit')
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -150,17 +160,12 @@ export default defineComponent({
         if (simplifyTolerance > 500) {
           simplifyTolerance = 200
         }
-        // Geometry to show bounding box
-        // Feat = new Feature({
-        //   geometry: fromExtent(extent)
-        // })
 
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
         locationFeatures.value = [Feat]
-        console.log('end fit')
       }
     }
 
@@ -169,69 +174,20 @@ export default defineComponent({
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
       setTimeout(() => {
+        // Disable map update while opening popup
         const overlay = document.querySelector('.parentContainer')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
         flyTo(coords, ol.getView().getZoom())
       }, 100)
     }
 
-    const selectInteactionFilter = (feature, layer) => {
-      if (layer.values_.name !== 'observationsLayer') {
-        return false
-      }
-      if ('cluster_id' in feature.values_.properties) {
-        worker.postMessage({
-          getClusterExpansionZoom: feature.values_.properties.cluster_id,
-          center: transform(
-            feature.values_.geometry.flatCoordinates,
-            'EPSG:3857', 'EPSG:4326'
-          )
-        })
-      } else {
-        return !('cluster_id' in feature.values_.properties)
-      }
-    }
-
-    const featureSelected = function (event) {
-      if (event.selected[0]) {
-        let a = ''
-        event.selected.forEach(function (f) {
-          a += ' : ' + f.values_.geometry.flatCoordinates
-        })
-        console.log(a)
-        const feature = event.selected[0]
-        selectedFeat.value = feature
-        // check if click on cluster
-        if (feature.values_.properties.cluster_id) {
-          worker.postMessage({
-            getClusterExpansionZoom: feature.values_.properties.cluster_id,
-            center: transform(
-              feature.values_.geometry.flatCoordinates,
-              'EPSG:3857', 'EPSG:4326'
-            )
-          })
-        }
-        autoPanPopup()
-      }
-
-      // otherwise
-      if (event.selected.length) {
-        selectedId.value = event.selected[0].values_.properties.id
-        selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
-        $store.dispatch('map/selectFeature', event.selected[0].values_)
-      } else {
-        // close popup and refresh features (woker)
-        closePopup()
-      }
-    }
-
-    // function resetPopup () {
-    //   $store.commit('map/selectFeature', {})
-    // }
-
     function closePopup () {
       selectedId.value = null
       $store.commit('map/selectFeature', {})
+      redrawMap()
+    }
+
+    function redrawMap () {
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -280,6 +236,7 @@ export default defineComponent({
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
+          context.emit('workerFinished', { mapFilters })
           updateMap()
         }
         ready = true
@@ -289,13 +246,18 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        const data = event.data.map.map(f => {
+        const data = []
+        for (let a = 0; a < event.data.map.length; a++) {
+          const f = event.data.map[a]
+          // Exclude spiral features if there are any because they appear in another layer
+          if (spiderfiedIds.includes(f.properties.id)) continue
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-            properties: f.properties
+            properties: f.properties,
+            id: a
           })
-          return feat
-        })
+          data.push(feat)
+        }
         features.value = data
         const graphDates = event.data.timeseries.dates
         const sDate = graphDates[0]
@@ -308,7 +270,17 @@ export default defineComponent({
 
     function updateMap () {
       const olmap = map.value.map
-      if (!ready) return
+      const newZoom = olmap.getView().getZoom()
+      if (currZoom !== newZoom) {
+        currZoom = newZoom
+        spiderfiedIds = []
+        spiralSource.value.source.clear()
+        closePopup()
+      }
+      if (!ready) {
+        return
+      }
+
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
@@ -338,12 +310,82 @@ export default defineComponent({
       )
     }
 
+    function removeFeature (uid) {
+      features.value = features.value.filter(function (e, i) {
+        if (e.ol_uid === uid) return false
+        else return true
+      })
+    }
+
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       fillLocationColor.value = defaults.fillLocationColor
       strokeLocationColor.value = defaults.strokeLocationColor
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
+      currZoom = ol.getView().getZoom()
+      ol.on('click', function (event) {
+        selectedFeatures = []
+        spiderfiedIds = []
+        let layerName = ''
+        map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+          // Get layer of first feature, in case there is only one
+          layerName = layer.values_.name
+          if (['spiralLayer', 'observationsLayer'].includes(layer.values_.name)) {
+            // Check if click on cluster
+            if ('cluster_id' in feature.values_.properties) {
+              worker.postMessage({
+                getClusterExpansionZoom: feature.values_.properties.cluster_id,
+                center: transform(
+                  feature.values_.geometry.flatCoordinates,
+                  'EPSG:3857', 'EPSG:4326'
+                )
+              })
+            } else {
+              feature.set('originalCoords', feature.getGeometry().getCoordinates())
+              selectedFeatures.push(feature)
+            }
+          }
+        })
+        // Deal with selected features
+        if (selectedFeatures.length > 1) {
+          // update spiderfiedIds to exclude from worker feedback
+          selectedFeatures.forEach(feature => {
+            spiderfiedIds.push(feature.values_.properties.id)
+          })
+          // In case another spiral is open
+          spiralSource.value.source.clear()
+
+          const resolution = ol.getView().getResolution()
+          const inc = resolution * 40
+          const center = selectedFeatures[0].getGeometry().getCoordinates()
+          flyTo(center, ol.getView().getZoom())
+          // Move spiral features to spiralLayer and remove them from observationsLayer
+          selectedFeatures.forEach(function (ele) {
+            removeFeature(ele.ol_uid)
+          })
+
+          const spiderfied = spiderfyPoints(center, selectedFeatures, inc, inc)
+          spiralSource.value.source.addFeatures(spiderfied.points)
+          spiralSource.value.source.addFeatures(spiderfied.lines)
+        } else {
+          // Otherwise, not cluster and not multiselection
+          // Check first for a click on spiral
+          if (layerName !== 'spiralLayer') {
+            spiralSource.value.source.clear()
+          }
+          if (selectedFeatures.length === 1) {
+            const feature = selectedFeatures[0]
+            selectedFeat.value = feature
+            selectedId.value = feature.values_.properties.id
+            selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+            $store.dispatch('map/selectFeature', feature.values_)
+          } else {
+            // close popup and refresh features (woker)
+            closePopup()
+          }
+        }
+      })
 
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -355,6 +397,16 @@ export default defineComponent({
     })
 
     const overrideStyleFunction = (feature, style) => {
+      if (feature.getGeometry().getType() === 'LineString') {
+        const stroke = new Stroke({
+          color: 'rgb(255, 0, 0, 0.5)',
+          // color: '#EFA501',
+          // lineDash: [2, 8],
+          width: 2
+        })
+        style.setStroke(stroke)
+        return true
+      }
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
         let radius = 0
@@ -443,7 +495,10 @@ export default defineComponent({
     }
 
     function filterObservations (observation) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
       closePopup()
+
       // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
@@ -451,8 +506,10 @@ export default defineComponent({
 
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
+        mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.observations.push({ type: observation.type, code: observation.code })
+        mapFilters.mode = 'resetFilter'
       }
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
@@ -465,18 +522,23 @@ export default defineComponent({
       const workerData = {}
       mapFilters.locations = []
       workerData.filters = mapFilters
+      mapFilters.mode = 'resetFilter'
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
     }
 
     function filterLocations (location) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
       closePopup()
       const workerData = {}
       if (location) {
         mapFilters.locations = [JSON.stringify(location)]
         mapFilters.tolerance = simplifyTolerance
+        mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.locations = []
+        mapFilters.mode = 'resetFilter'
       }
 
       workerData.filters = mapFilters
@@ -485,8 +547,15 @@ export default defineComponent({
     }
 
     function filterDate (date) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
       closePopup()
       const workerData = {}
+      if (!mapFilters.date.length) {
+        mapFilters.mode = 'increaseFilter'
+      } else {
+        mapFilters.mode = 'resetFilter'
+      }
       if (date !== null) {
         const expandedDate = expandDate(date)
         mapFilters.date = [JSON.parse(JSON.stringify(expandedDate))]
@@ -499,13 +568,52 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
-    function filterTags (tags) {
+    function filterTags (obj) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
+      const tags = obj.tags
+      const tag = obj.tag
       const workerData = {}
-      closePopup()
-      mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
-      workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-      worker.postMessage(workerData)
+      closePopup()
+      // Check if tags contain report_id starting with ':'
+      if (tag.startsWith(':')) {
+        mapFilters.report_id = []
+        if (obj.mode === 'addedTag') {
+          mapFilters.mode = 'increaseFilter'
+          // Fetch observation with report_id, but first remove starting :
+          $store.commit('app/setFilteringTag', { value: true })
+          const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
+          const controller = new AbortController()
+          const { signal } = controller
+          fetch(`${url}`, { signal })
+            .then(res => res.json())
+            .then(res => {
+              mapFilters.report_id = [res]
+              workerData.filters = mapFilters
+              worker.postMessage(workerData)
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+            .catch(e => {
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+        } else {
+          mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+          workerData.filters = mapFilters
+          mapFilters.mode = 'resetFilter'
+          worker.postMessage(workerData)
+        }
+      } else {
+        // Update mapFilters.tags only if tag is not a report_id (':')
+        if (obj.mode === 'addedTag') {
+          mapFilters.mode = 'increaseFilter'
+        } else {
+          mapFilters.mode = 'resetFilter'
+        }
+        mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+        workerData.filters = mapFilters
+        worker.postMessage(workerData)
+      }
     }
 
     function expandDate (date) {
@@ -544,13 +652,11 @@ export default defineComponent({
       overrideStyleFunction,
       geoJson,
       features,
+      spiralSource,
       updateMap,
       popupContent,
       attributioncontrol: true,
       view,
-      featureSelected,
-      selectCondition,
-      selectInteactionFilter,
       selectedIcon
     }
   }
@@ -579,9 +685,11 @@ export default defineComponent({
     border: none;
     width: 40px;
     height: 40px;
+    line-height: 40px;
     margin-bottom: 6px;
     border-radius: 10px;
     font-size: 2em;
+    font-weight: normal;
     cursor: pointer;
     padding: 0 0 20px 0;
     box-shadow: $box-shadow;
@@ -610,14 +718,18 @@ export default defineComponent({
     z-index: 9;
     background: #33333342;
     font-size: 10px;
-    color: black;
+    color: white;
     padding: 4px 20px;
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
   }
-  :deep(.ol-attribution) {
-    color: white;
+  // :deep(.ol-attribution) {
+  //   color: white;
+  // }
+
+  :deep(.ol-control:hover) {
+    background-color: unset;
   }
   :deep(.ol-attribution a) {
     color: #3498DB;

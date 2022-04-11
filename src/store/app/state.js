@@ -15,12 +15,13 @@ export default function () {
 
   return {
     lang: defaultLang,
+    isFilteringTag: false,
     DEFAULTS: {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
       ],
-      // DATES: { from: '2020/01/01', to: '2020/01/31' },
       DATES: { from: '2021/01/01', to: '2021/12/31' },
+      // DATES: { from: '2014/11/01', to: '2022/11/10' },
       HASHTAGS: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
@@ -29,7 +30,7 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      info: true
+      info: false
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
@@ -46,12 +47,10 @@ export default function () {
       unidentified: require('../../assets/img/marker_unidentified_selected.svg'),
       other_species: require('../../assets/img/marker_other_selected.svg'),
       japonicus_koreicus: require('../../assets/img/marker_japonicus_koreicus_selected.svg'),
-      // not_yet_validated: require('../../assets/img/marker_selected.svg'),
       trash_layer: require('../../assets/img/marker_selected.svg'),
       storm_drain_water: require('../../assets/img/storm_drain_water_selected.svg'),
       storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
       breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
-      // breeding_site_not_yet_filtered: require('../../assets/img/breeding_other_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
     worker,

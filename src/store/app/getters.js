@@ -38,3 +38,7 @@ export const getModals = state => {
 export const getWorker = state => {
   return state.worker
 }
+
+export const isFilteringTag = state => {
+  return state.isFilteringTag
+}

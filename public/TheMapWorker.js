@@ -2,7 +2,8 @@
 importScripts('supercluster.min.js')
 importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
 
-let all_data = []
+let dataset = []
+let filteredDataset = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
 const DEBUG = false
 let index, unclustered
@@ -17,12 +18,12 @@ function log (text) {
 
 getJSON('totes.json', (geojson) => {
   log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
-  all_data = geojson.features
+  dataset = geojson.features
   postMessage({
     ready: true,
     datesInterval: {
-      from: all_data[0].properties.d,
-      to: all_data[all_data.length - 1].properties.d
+      from: dataset[0].properties.d,
+      to: dataset[dataset.length - 1].properties.d
     }
   })
 })
@@ -111,10 +112,6 @@ function filterTags (data, tags) {
     let containsAll = false
     if (t.length) {
       const featureTags = t.split(',').map(t => t.trim())
-      if (featureTags.indexOf('italy') > -1) {
-        console.log(f.properties)
-        console.log(featureTags)
-      }
       containsAll = filteringTags.every(element => {
         return featureTags.includes(element)
       })
@@ -125,6 +122,7 @@ function filterTags (data, tags) {
 }
 
 function filterObservations (data, layers, filters) {
+  if (!data) return []
   // addObservationsFilter(type, code)
   let filteredData = {}
   // Get all visible layers categories from filters
@@ -134,8 +132,6 @@ function filterObservations (data, layers, filters) {
   })
   // Filter the data
   filteredData = data.filter(feature => {
-    // if (feature.properties.c.indexOf('storm') > -1) {
-    // }
     return visibleCategories.includes(feature.properties.c)
   })
   return filteredData
@@ -155,6 +151,7 @@ function getJSON (url, callback) {
 }
 
 self.onmessage = function (e) {
+  console.log(e.data)
   if (e.data.getClusterExpansionZoom) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -165,8 +162,18 @@ self.onmessage = function (e) {
   } else if (e.data.filters) {
     // This is fired when the map is filtered.
     all_layers = e.data.layers
-    let filteredData = all_data
     filters = e.data.filters
+    let filteredData = []
+    // Get the smallest dataset before start filtering
+    if (filters.report_id.length) {
+      filteredData = filters.report_id[0].features
+    } else {
+      if (filters.mode === 'increaseFilter') {
+        filteredData = filteredDataset
+      } else {
+        filteredData = dataset
+      }
+    }
     if (filters.observations.length > 0) {
       filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
     } else {
@@ -177,6 +184,7 @@ self.onmessage = function (e) {
       filteredData = filterDate(filteredData, filters.date[0])
     }
     if (filters.hashtags.length > 0) {
+      // TODO: Check for report_id filtering. That is a tag stating with :
       // array with only one date
       filteredData = filterTags(filteredData, filters.hashtags)
     }
@@ -187,6 +195,8 @@ self.onmessage = function (e) {
       const poly = JSON.parse(filters.locations[0]).features[0]
       filteredData = filterLocations(filteredData, poly)
     }
+    // Update filteredDataset
+    filteredDataset = filteredData
     loadMapData(filteredData)
   } else if (e.data) {
     // This is fired when the user navigates the map.

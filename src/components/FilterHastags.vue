@@ -2,6 +2,7 @@
   <div class = "hashtags-list">
     <q-input
       v-model="newTag"
+      :loading="isFilteringTag"
       color="orange"
       :label="_('Placeholder hashtag')"
       @keyup.enter="addTag"
@@ -10,6 +11,7 @@
       <div v-if="tags.length">
         <q-chip
           class="hashtag-chip"
+          :class="tag.startsWith(':') ? 'report-tag':''"
           square
           removable
           @remove="deleteTag(tag)"
@@ -20,7 +22,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -37,14 +39,33 @@ export default {
     const deleteTag = function (tag) {
       const index = tags.value.indexOf(tag)
       tags.value.splice(index, 1)
-      context.emit('tagsModified', tags.value)
+      context.emit('tagsModified', {
+        tags: tags.value,
+        mode: 'deletedTag',
+        tag: tag
+      })
     }
 
     const addTag = function () {
-      newTag.value = newTag.value.toLowerCase()
-      tags.value.push(newTag.value)
+      if (newTag.value.startsWith(':')) {
+        $store.commit('app/setFilteringTag', { value: true })
+        tags.value = []
+      } else {
+        // If normal tag
+        newTag.value = newTag.value.toLowerCase()
+      }
+
+      if (!tags.value.includes(newTag.value)) {
+        tags.value.push(newTag.value)
+      }
+
+      context.emit('tagsModified', {
+        tags: tags.value,
+        mode: 'addedTag',
+        tag: newTag.value
+      })
+
       newTag.value = ''
-      context.emit('tagsModified', tags.value)
     }
 
     onMounted(function () {
@@ -57,7 +78,8 @@ export default {
       newTag,
       tags,
       deleteTag,
-      addTag
+      addTag,
+      isFilteringTag: computed(() => $store.getters['app/isFilteringTag'])
     }
   }
 }
@@ -83,5 +105,8 @@ export default {
 .hashtags-list .hashtag-chip .q-chip__icon--remove {
   color: white;
   opacity: 1;
+}
+.q-chip.report-tag{
+  background-color: $filter-grey;
 }
 </style>
