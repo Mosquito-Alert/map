@@ -280,7 +280,11 @@ export default defineComponent({
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
-          updateMap()
+          if (!(mapFilters.hashtags.length === 1 && mapFilters.hashtags[0].startsWith(':'))) {
+            console.log('updating map')
+            // updateMap data only if not filtering by report_id
+            updateMap()
+          }
         }
         ready = true
       } else if (event.data.expansionZoom) {
@@ -289,20 +293,24 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        const data = event.data.map.map(f => {
-          const feat = new Feature({
-            geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-            properties: f.properties
+        // Call worker if not filtering by report_id
+        console.log(mapFilters.hashtags)
+        if (!(mapFilters.hashtags.length === 1 && mapFilters.hashtags[0].startsWith(':'))) {
+          const data = event.data.map.map(f => {
+            const feat = new Feature({
+              geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: f.properties
+            })
+            return feat
           })
-          return feat
-        })
-        features.value = data
-        const graphDates = event.data.timeseries.dates
-        const sDate = graphDates[0]
-        const eDate = graphDates[graphDates.length - 1]
-        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
-        $store.commit('timeseries/updateXUnits', daysInRange)
-        $store.dispatch('timeseries/updateData', event.data.timeseries)
+          features.value = data
+          const graphDates = event.data.timeseries.dates
+          const sDate = graphDates[0]
+          const eDate = graphDates[graphDates.length - 1]
+          const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+          $store.commit('timeseries/updateXUnits', daysInRange)
+          $store.dispatch('timeseries/updateData', event.data.timeseries)
+        }
       }
     }
 
@@ -500,12 +508,30 @@ export default defineComponent({
     }
 
     function filterTags (tags) {
-      const workerData = {}
-      closePopup()
       mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
-      workerData.filters = mapFilters
-      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-      worker.postMessage(workerData)
+      // Check if tags contain report_id starting with ':'
+      if (tags.length === 1 && tags[0].startsWith(':')) {
+        // Fetch observation with report_id, but first remove starting :
+        const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
+        fetch(`${url}`)
+          .then(res => res.json())
+          .then(res => {
+            console.log(res.features[0])
+            console.log(res.features[0].geometry)
+            console.log(res.features[0].properties)
+            const feature = new Feature({
+              geometry: new Point(transform(res.features[0].geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: res.features[0].properties
+            })
+            features.value = [feature]
+          })
+      } else {
+        const workerData = {}
+        closePopup()
+        workerData.filters = mapFilters
+        workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+        worker.postMessage(workerData)
+      }
     }
 
     function expandDate (date) {

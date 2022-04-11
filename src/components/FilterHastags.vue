@@ -41,8 +41,16 @@ export default {
     }
 
     const addTag = function () {
-      newTag.value = newTag.value.toLowerCase()
-      tags.value.push(newTag.value)
+      if (newTag.value.startsWith(':')) {
+        tags.value = []
+      } else {
+        // If normal tag
+        newTag.value = newTag.value.toLowerCase()
+      }
+
+      if (!tags.value.includes(newTag.value)) {
+        tags.value.push(newTag.value)
+      }
       newTag.value = ''
       context.emit('tagsModified', tags.value)
     }
