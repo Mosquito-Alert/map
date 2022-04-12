@@ -10,6 +10,7 @@
       <div v-if="tags.length">
         <q-chip
           class="hashtag-chip"
+          :class="tag.startsWith(':') ? 'report-tag':''"
           square
           removable
           @remove="deleteTag(tag)"
@@ -99,5 +100,8 @@ export default {
 .hashtags-list .hashtag-chip .q-chip__icon--remove {
   color: white;
   opacity: 1;
+}
+.q-chip.report-tag{
+  // background-color: $filter-grey;
 }
 </style>
