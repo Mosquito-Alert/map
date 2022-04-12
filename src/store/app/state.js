@@ -20,7 +20,7 @@ export default function () {
         { type: 'observations', code: 'tiger' }
       ],
       // DATES: { from: '2020/01/01', to: '2020/01/31' },
-      DATES: { from: '2021/01/01', to: '2021/12/31' },
+      DATES: { from: '2020/11/01', to: '2020/11/10' },
       HASHTAGS: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',

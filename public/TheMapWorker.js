@@ -165,8 +165,14 @@ self.onmessage = function (e) {
   } else if (e.data.filters) {
     // This is fired when the map is filtered.
     all_layers = e.data.layers
-    let filteredData = all_data
     filters = e.data.filters
+    let filteredData = []
+
+    if (filters.features.length) {
+      filteredData = filters.features[0].features
+    } else {
+      filteredData = all_data
+    }
     if (filters.observations.length > 0) {
       filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
     } else {
@@ -177,6 +183,7 @@ self.onmessage = function (e) {
       filteredData = filterDate(filteredData, filters.date[0])
     }
     if (filters.hashtags.length > 0) {
+      // TODO: Check for report_id filtering. That is a tag stating with :
       // array with only one date
       filteredData = filterTags(filteredData, filters.hashtags)
     }

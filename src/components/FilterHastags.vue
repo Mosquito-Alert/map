@@ -37,7 +37,11 @@ export default {
     const deleteTag = function (tag) {
       const index = tags.value.indexOf(tag)
       tags.value.splice(index, 1)
-      context.emit('tagsModified', tags.value)
+      context.emit('tagsModified', {
+        tags: tags.value,
+        mode: 'deletedTag',
+        tag: tag
+      })
     }
 
     const addTag = function () {
@@ -52,7 +56,11 @@ export default {
         tags.value.push(newTag.value)
       }
       newTag.value = ''
-      context.emit('tagsModified', tags.value)
+      context.emit('tagsModified', {
+        tags: tags.value,
+        mode: 'addedTag',
+        tag: newTag.value
+      })
     }
 
     onMounted(function () {

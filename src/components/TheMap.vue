@@ -99,7 +99,7 @@ export default defineComponent({
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheMapWorker.js')
-    const mapFilters = { observations: [], locations: [], hashtags: [], date: [] }
+    const mapFilters = { observations: [], locations: [], hashtags: [], date: [], features: [] }
 
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
@@ -107,7 +107,6 @@ export default defineComponent({
     }
 
     const fitFeature = function (location) {
-      console.log('init fit')
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -160,7 +159,6 @@ export default defineComponent({
         Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
         locationFeatures.value = [Feat]
-        console.log('end fit')
       }
     }
 
@@ -194,11 +192,6 @@ export default defineComponent({
 
     const featureSelected = function (event) {
       if (event.selected[0]) {
-        let a = ''
-        event.selected.forEach(function (f) {
-          a += ' : ' + f.values_.geometry.flatCoordinates
-        })
-        console.log(a)
         const feature = event.selected[0]
         selectedFeat.value = feature
         // check if click on cluster
@@ -280,11 +273,7 @@ export default defineComponent({
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
-          if (!(mapFilters.hashtags.length === 1 && mapFilters.hashtags[0].startsWith(':'))) {
-            console.log('updating map')
-            // updateMap data only if not filtering by report_id
-            updateMap()
-          }
+          updateMap()
         }
         ready = true
       } else if (event.data.expansionZoom) {
@@ -293,24 +282,20 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        // Call worker if not filtering by report_id
-        console.log(mapFilters.hashtags)
-        if (!(mapFilters.hashtags.length === 1 && mapFilters.hashtags[0].startsWith(':'))) {
-          const data = event.data.map.map(f => {
-            const feat = new Feature({
-              geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-              properties: f.properties
-            })
-            return feat
+        const data = event.data.map.map(f => {
+          const feat = new Feature({
+            geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+            properties: f.properties
           })
-          features.value = data
-          const graphDates = event.data.timeseries.dates
-          const sDate = graphDates[0]
-          const eDate = graphDates[graphDates.length - 1]
-          const daysInRange = moment(eDate).diff(moment(sDate), 'days')
-          $store.commit('timeseries/updateXUnits', daysInRange)
-          $store.dispatch('timeseries/updateData', event.data.timeseries)
-        }
+          return feat
+        })
+        features.value = data
+        const graphDates = event.data.timeseries.dates
+        const sDate = graphDates[0]
+        const eDate = graphDates[graphDates.length - 1]
+        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        $store.commit('timeseries/updateXUnits', daysInRange)
+        $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
 
@@ -507,29 +492,30 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
-    function filterTags (tags) {
-      mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+    function filterTags (obj) {
+      const tags = obj.tags
+      const tag = obj.tag
+      const workerData = {}
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      closePopup()
       // Check if tags contain report_id starting with ':'
-      if (tags.length === 1 && tags[0].startsWith(':')) {
+      if (tag.startsWith(':')) {
+        mapFilters.features = []
+      }
+      if (obj.mode === 'addedTag') {
         // Fetch observation with report_id, but first remove starting :
         const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
         fetch(`${url}`)
           .then(res => res.json())
           .then(res => {
-            console.log(res.features[0])
-            console.log(res.features[0].geometry)
-            console.log(res.features[0].properties)
-            const feature = new Feature({
-              geometry: new Point(transform(res.features[0].geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-              properties: res.features[0].properties
-            })
-            features.value = [feature]
+            mapFilters.features = [res]
+            workerData.filters = mapFilters
+            worker.postMessage(workerData)
           })
       } else {
-        const workerData = {}
-        closePopup()
+        // Update mapFilters.tags only if tag is not a report_id (':')
+        mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
         workerData.filters = mapFilters
-        workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
         worker.postMessage(workerData)
       }
     }
