@@ -54,17 +54,6 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <!-- <ol-interaction-select
-          multi
-          :condition="selectCondition"
-          :filter="selectInteactionFilter"
-          @select="featureSelected"
-        >
-            <ol-style>
-                <ol-style-icon :src="selectedIcon" :anchor="[0.5, 1]"></ol-style-icon>
-            </ol-style>
-        </ol-interaction-select> -->
-
         <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
     </ol-map>
@@ -100,8 +89,6 @@ export default defineComponent({
     const selectedId = ref('null')
     const selectedFeat = ref('null')
     const $store = useStore()
-    const selectConditions = inject('ol-selectconditions')
-    const selectCondition = selectConditions.singleClick
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
@@ -186,72 +173,6 @@ export default defineComponent({
         flyTo(coords, ol.getView().getZoom())
       }, 100)
     }
-
-    const selectInteactionFilter = (feature, layer) => {
-      if (layer.values_.name !== 'observationsLayer') {
-        return false
-      }
-      if ('cluster_id' in feature.values_.properties) {
-        worker.postMessage({
-          getClusterExpansionZoom: feature.values_.properties.cluster_id,
-          center: transform(
-            feature.values_.geometry.flatCoordinates,
-            'EPSG:3857', 'EPSG:4326'
-          )
-        })
-      } else {
-        return !('cluster_id' in feature.values_.properties)
-      }
-    }
-
-    const featureSelected = function (event) {
-      const feature = event.selected[0]
-      if (feature) {
-        // Check for multi selection
-        if (event.selected.length > 1) {
-          const ol = map.value.map
-          const resolution = ol.getView().getResolution()
-          const inc = resolution * 40
-          const click = feature.getGeometry().getCoordinates()
-          spiralOpened = true
-          event.selected.forEach(function (ele, ind, arr) {
-            const spiralPoint = spiderfyPoint(click[0], click[1], inc, inc, ind + 1)
-            ele.getGeometry().setCoordinates([spiralPoint[0], spiralPoint[1]])
-          })
-          selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
-          selectedId.value = null
-          // $store.commit('map/selectFeature', {})
-          return true
-        }
-
-        // Check now for click on cluster
-        if (feature.values_.properties.cluster_id) {
-          worker.postMessage({
-            getClusterExpansionZoom: feature.values_.properties.cluster_id,
-            center: transform(
-              feature.values_.geometry.flatCoordinates,
-              'EPSG:3857', 'EPSG:4326'
-            )
-          })
-          return true
-        }
-      }
-
-      // Otherwise, not cluster and not multiselection
-      if (event.selected.length) {
-        selectedFeat.value = feature
-        selectedId.value = feature.values_.properties.id
-        selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
-        $store.dispatch('map/selectFeature', feature.values_)
-      } else {
-        // close popup and refresh features (woker)
-        spiralOpened = false
-        closePopup()
-      }
-    }
-
-    // function spiderfy (features) {
-    // }
 
     function closePopup () {
       selectedId.value = null
@@ -685,9 +606,6 @@ export default defineComponent({
       popupContent,
       attributioncontrol: true,
       view,
-      featureSelected,
-      selectCondition,
-      selectInteactionFilter,
       selectedIcon
     }
   }
