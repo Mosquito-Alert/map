@@ -102,6 +102,6 @@ export default {
   opacity: 1;
 }
 .q-chip.report-tag{
-  // background-color: $filter-grey;
+  background-color: $filter-grey;
 }
 </style>

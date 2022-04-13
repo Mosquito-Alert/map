@@ -45,14 +45,25 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <ol-interaction-select @select="featureSelected"
+        <!-- SPIDERFIED MARKERS -->
+        <ol-vector-layer ref='spiralLayer' name="spiralLayer">
+          <ol-source-vector :format='geoJson' ref='spiralSource'>
+            <ol-style :overrideStyleFunction="overrideStyleFunction">
+            </ol-style>
+
+          </ol-source-vector>
+        </ol-vector-layer>
+
+        <!-- <ol-interaction-select
           multi
           :condition="selectCondition"
-          :filter="selectInteactionFilter">
+          :filter="selectInteactionFilter"
+          @select="featureSelected"
+        >
             <ol-style>
                 <ol-style-icon :src="selectedIcon" :anchor="[0.5, 1]"></ol-style-icon>
             </ol-style>
-        </ol-interaction-select>
+        </ol-interaction-select> -->
 
         <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
 
@@ -71,7 +82,9 @@ import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
+import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import spiderfyPoint from '../js/Spiral'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -82,6 +95,7 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     let simplifyTolerance = null
     const fillLocationColor = ref('null')
+    const spiralSource = ref()
     const strokeLocationColor = ref('null')
     const selectedId = ref('null')
     const selectedFeat = ref('null')
@@ -100,7 +114,7 @@ export default defineComponent({
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheMapWorker.js')
     const mapFilters = { observations: [], locations: [], hashtags: [], date: [], features: [] }
-
+    let spiralOpened = false
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -191,10 +205,26 @@ export default defineComponent({
     }
 
     const featureSelected = function (event) {
-      if (event.selected[0]) {
-        const feature = event.selected[0]
-        selectedFeat.value = feature
-        // check if click on cluster
+      const feature = event.selected[0]
+      if (feature) {
+        // Check for multi selection
+        if (event.selected.length > 1) {
+          const ol = map.value.map
+          const resolution = ol.getView().getResolution()
+          const inc = resolution * 40
+          const click = feature.getGeometry().getCoordinates()
+          spiralOpened = true
+          event.selected.forEach(function (ele, ind, arr) {
+            const spiralPoint = spiderfyPoint(click[0], click[1], inc, inc, ind + 1)
+            ele.getGeometry().setCoordinates([spiralPoint[0], spiralPoint[1]])
+          })
+          selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+          selectedId.value = null
+          // $store.commit('map/selectFeature', {})
+          return true
+        }
+
+        // Check now for click on cluster
         if (feature.values_.properties.cluster_id) {
           worker.postMessage({
             getClusterExpansionZoom: feature.values_.properties.cluster_id,
@@ -203,28 +233,33 @@ export default defineComponent({
               'EPSG:3857', 'EPSG:4326'
             )
           })
+          return true
         }
-        autoPanPopup()
       }
 
-      // otherwise
+      // Otherwise, not cluster and not multiselection
       if (event.selected.length) {
-        selectedId.value = event.selected[0].values_.properties.id
-        selectedIcon.value = $store.getters['app/selectedIcons'][event.selected[0].values_.properties.c]
-        $store.dispatch('map/selectFeature', event.selected[0].values_)
+        selectedFeat.value = feature
+        selectedId.value = feature.values_.properties.id
+        selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+        $store.dispatch('map/selectFeature', feature.values_)
       } else {
         // close popup and refresh features (woker)
+        spiralOpened = false
         closePopup()
       }
     }
 
-    // function resetPopup () {
-    //   $store.commit('map/selectFeature', {})
+    // function spiderfy (features) {
     // }
 
     function closePopup () {
       selectedId.value = null
       $store.commit('map/selectFeature', {})
+      redrawMap()
+    }
+
+    function redrawMap () {
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -282,10 +317,11 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        const data = event.data.map.map(f => {
+        const data = event.data.map.map((f, i) => {
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-            properties: f.properties
+            properties: f.properties,
+            id: i
           })
           return feat
         })
@@ -301,7 +337,7 @@ export default defineComponent({
 
     function updateMap () {
       const olmap = map.value.map
-      if (!ready) return
+      if (!ready || spiralOpened) return
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
@@ -331,12 +367,90 @@ export default defineComponent({
       )
     }
 
+    function removeFeature (uid) {
+      features.value = features.value.filter(function (e, i) {
+        if (e.ol_uid === uid) return false
+        else return true
+      })
+    }
+
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       fillLocationColor.value = defaults.fillLocationColor
       strokeLocationColor.value = defaults.strokeLocationColor
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
+
+      ol.on('click', function (event) {
+        const selectedFeatures = []
+        // const coords = event.coordinate
+
+        // const resolution = ol.getView().getResolution()
+        // const inc = resolution * 40
+        // const extend = [
+        //   coords[0] - inc, coords[1] - inc,
+        //   coords[0] + inc, coords[1] + inc
+        // ]
+        // const Features = observationsSource.value.source.getFeaturesInExtent(extend)
+        let layerName = ''
+        map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+          // Get layer of first feature, in case there is only one
+          layerName = layer.values_.name
+          if (['spiralLayer', 'observationsLayer'].includes(layer.values_.name)) {
+            // Check if click on cluster
+            if ('cluster_id' in feature.values_.properties) {
+              worker.postMessage({
+                getClusterExpansionZoom: feature.values_.properties.cluster_id,
+                center: transform(
+                  feature.values_.geometry.flatCoordinates,
+                  'EPSG:3857', 'EPSG:4326'
+                )
+              })
+            } else {
+              feature.set('originalCoords', feature.getGeometry().getCoordinates())
+              selectedFeatures.push(feature)
+            }
+          }
+        })
+        // Deal with selected features
+        if (selectedFeatures.length > 1) {
+          const resolution = ol.getView().getResolution()
+          const inc = resolution * 40
+          const click = selectedFeatures[0].getGeometry().getCoordinates()
+          spiralOpened = true
+          // Move spiral features to spiralLayer and remove them from observationsLayer
+          selectedFeatures.forEach(function (ele, ind, arr) {
+            const spiralPoint = spiderfyPoint(click[0], click[1], inc, inc, ind + 1)
+            ele.getGeometry().setCoordinates([spiralPoint[0], spiralPoint[1]])
+            // Create line connecting original position of the feature
+            const aLine = new Feature({
+              geometry: new LineString([
+                ele.get('originalCoords'),
+                ele.getGeometry().getCoordinates()
+              ])
+            })
+            spiralSource.value.source.addFeatures([ele, aLine])
+            removeFeature(ele.ol_uid)
+          })
+        } else {
+          // Otherwise, not cluster and not multiselection
+          // Check first for a click on spiral
+          if (layerName !== 'spiralLayer') {
+            spiralOpened = false
+            spiralSource.value.source.clear()
+          }
+          if (selectedFeatures.length === 1) {
+            const feature = selectedFeatures[0]
+            selectedFeat.value = feature
+            selectedId.value = feature.values_.properties.id
+            selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+            $store.dispatch('map/selectFeature', feature.values_)
+          } else {
+            // close popup and refresh features (woker)
+            closePopup()
+          }
+        }
+      })
 
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -348,6 +462,16 @@ export default defineComponent({
     })
 
     const overrideStyleFunction = (feature, style) => {
+      if (feature.getGeometry().getType() === 'LineString') {
+        const stroke = new Stroke({
+          color: 'rgb(255, 0, 0, 0.5)',
+          // color: '#EFA501',
+          // lineDash: [2, 8],
+          width: 2
+        })
+        style.setStroke(stroke)
+        return true
+      }
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
         let radius = 0
@@ -556,6 +680,7 @@ export default defineComponent({
       overrideStyleFunction,
       geoJson,
       features,
+      spiralSource,
       updateMap,
       popupContent,
       attributioncontrol: true,
@@ -591,9 +716,11 @@ export default defineComponent({
     border: none;
     width: 40px;
     height: 40px;
+    line-height: 40px;
     margin-bottom: 6px;
     border-radius: 10px;
     font-size: 2em;
+    font-weight: normal;
     cursor: pointer;
     padding: 0 0 20px 0;
     box-shadow: $box-shadow;
@@ -622,14 +749,18 @@ export default defineComponent({
     z-index: 9;
     background: #33333342;
     font-size: 10px;
-    color: black;
+    color: white;
     padding: 4px 20px;
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
   }
-  :deep(.ol-attribution) {
-    color: white;
+  // :deep(.ol-attribution) {
+  //   color: white;
+  // }
+
+  :deep(.ol-control:hover) {
+    background-color: unset;
   }
   :deep(.ol-attribution a) {
     color: #3498DB;
