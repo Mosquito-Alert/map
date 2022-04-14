@@ -367,7 +367,7 @@ export default defineComponent({
             selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
             $store.dispatch('map/selectFeature', feature.values_)
           } else {
-            // close popup and refresh features (woker)
+            // close popup and refresh features (woker)k
             closePopup()
           }
         }
@@ -481,6 +481,9 @@ export default defineComponent({
     }
 
     function filterObservations (observation) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
+      spiralOpened = false
       closePopup()
       // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
@@ -508,6 +511,9 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
+      spiralOpened = false
       closePopup()
       const workerData = {}
       if (location) {
@@ -523,6 +529,9 @@ export default defineComponent({
     }
 
     function filterDate (date) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
+      spiralOpened = false
       closePopup()
       const workerData = {}
       if (date !== null) {
@@ -538,6 +547,9 @@ export default defineComponent({
     }
 
     function filterTags (obj) {
+      // Just in case a Spiral is open
+      spiralSource.value.source.clear()
+      spiralOpened = false
       const tags = obj.tags
       const tag = obj.tag
       const workerData = {}
@@ -546,17 +558,24 @@ export default defineComponent({
       // Check if tags contain report_id starting with ':'
       if (tag.startsWith(':')) {
         mapFilters.features = []
-      }
-      if (obj.mode === 'addedTag') {
-        // Fetch observation with report_id, but first remove starting :
-        const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
-        fetch(`${url}`)
-          .then(res => res.json())
-          .then(res => {
-            mapFilters.features = [res]
-            workerData.filters = mapFilters
-            worker.postMessage(workerData)
-          })
+        if (obj.mode === 'addedTag') {
+          // Fetch observation with report_id, but first remove starting :
+          $store.commit('app/setFilteringTag', { value: true })
+          const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
+
+          fetch(`${url}`)
+            .then(res => res.json())
+            .then(res => {
+              mapFilters.features = [res]
+              workerData.filters = mapFilters
+              worker.postMessage(workerData)
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+        } else {
+          mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+          workerData.filters = mapFilters
+          worker.postMessage(workerData)
+        }
       } else {
         // Update mapFilters.tags only if tag is not a report_id (':')
         mapFilters.hashtags = JSON.parse(JSON.stringify(tags))

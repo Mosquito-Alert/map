@@ -112,7 +112,6 @@ function filterTags (data, tags) {
     if (t.length) {
       const featureTags = t.split(',').map(t => t.trim())
       if (featureTags.indexOf('italy') > -1) {
-        console.log(f.properties)
         console.log(featureTags)
       }
       containsAll = filteringTags.every(element => {
@@ -125,6 +124,7 @@ function filterTags (data, tags) {
 }
 
 function filterObservations (data, layers, filters) {
+  if (!data) return []
   // addObservationsFilter(type, code)
   let filteredData = {}
   // Get all visible layers categories from filters
@@ -134,8 +134,6 @@ function filterObservations (data, layers, filters) {
   })
   // Filter the data
   filteredData = data.filter(feature => {
-    // if (feature.properties.c.indexOf('storm') > -1) {
-    // }
     return visibleCategories.includes(feature.properties.c)
   })
   return filteredData

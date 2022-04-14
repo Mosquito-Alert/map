@@ -2,6 +2,7 @@
   <div class = "hashtags-list">
     <q-input
       v-model="newTag"
+      :loading="isFilteringTag"
       color="orange"
       :label="_('Placeholder hashtag')"
       @keyup.enter="addTag"
@@ -21,7 +22,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -47,6 +48,7 @@ export default {
 
     const addTag = function () {
       if (newTag.value.startsWith(':')) {
+        $store.commit('app/setFilteringTag', { value: true })
         tags.value = []
       } else {
         // If normal tag
@@ -56,12 +58,14 @@ export default {
       if (!tags.value.includes(newTag.value)) {
         tags.value.push(newTag.value)
       }
-      newTag.value = ''
+
       context.emit('tagsModified', {
         tags: tags.value,
         mode: 'addedTag',
         tag: newTag.value
       })
+
+      newTag.value = ''
     }
 
     onMounted(function () {
@@ -74,7 +78,8 @@ export default {
       newTag,
       tags,
       deleteTag,
-      addTag
+      addTag,
+      isFilteringTag: computed(() => $store.getters['app/isFilteringTag'])
     }
   }
 }
