@@ -1,27 +1,55 @@
-export function spiderfyPoint (x, y, dist, sep, step) {
-  let r = dist
-  const b = sep / (2 * Math.PI)
-  let phi = r / b
+import Feature from 'ol/Feature'
+import { LineString } from 'ol/geom'
 
-  for (let n = 0; n < step - 1; ++n) {
-    phi += dist / r
-    r = b * phi
+export function spiderfyPoints (center, features, dist, sep) {
+  function spiral () {
+    const b = sep / (2 * Math.PI)
+    let phi = r / b
+
+    features.forEach(function (f, ind) {
+      phi += dist / r
+      r = b * phi
+      x = center[0] + r * Math.cos(phi)
+      y = center[1] + r * Math.sin(phi)
+
+      f.getGeometry().setCoordinates([x, y])
+      sFeatures.push(f)
+      const newLine = new Feature({
+        geometry: new LineString([
+          f.get('originalCoords'),
+          f.getGeometry().getCoordinates()
+        ])
+      })
+      Lines.push(newLine)
+    })
+    return { points: sFeatures, lines: Lines }
   }
-  x = x + r * Math.cos(phi)
-  y = y + r * Math.sin(phi)
 
-  // this.print = function () {
-  //   console.log('Step ' + step + '  ' + this.x + ', ' + this.y)
-  // }
-
-  return [x, y]
+  let x, y
+  let r = dist
+  const sFeatures = []
+  const Lines = []
+  if (features.length > 6) {
+    return spiral()
+  } else {
+    const alfaInc = (2 * Math.PI) / features.length
+    let alfa = Math.PI / 2
+    features.forEach(function (f, ind) {
+      x = center[0] + r * Math.cos(alfa)
+      y = center[1] + r * Math.sin(alfa)
+      alfa += alfaInc
+      f.getGeometry().setCoordinates([x, y])
+      sFeatures.push(f)
+      const newLine = new Feature({
+        geometry: new LineString([
+          f.get('originalCoords'),
+          f.getGeometry().getCoordinates()
+        ])
+      })
+      Lines.push(newLine)
+    })
+    return { points: sFeatures, lines: Lines }
+  }
 }
 
-export default spiderfyPoint
-// const points = [
-//     [313260.8394566274,5157708.1796930125], [313260.06022019184,5157710.725337305], [313274.7543929765,5157711.923287798], [313265.06959727756,5157714.319189227], [313268.1865430197,5157714.768420818], [313271.6374472343,5157717.164322962], [313268.40918200125,5157717.463810773], [313274.9770319582,5157714.319189227], [313263.8450828788,5157700.991995147], [313267.4073065842,5157717.014579063], [313267.62994556583,5157718.661762112], [313266.5167506579,5157715.5171401715], [313259.50362273783,5157704.436099698], [313267.4073065842,5157714.918164683], [313277.7600192279,5157710.425849705], [313275.7562683937,5157709.078155622]
-//   ]
-
-//   points.forEach(function (ele, ind, arr) {
-//     new spiralPoint(20, 20, (ind + 1)).print()
-//   })
+export default spiderfyPoints

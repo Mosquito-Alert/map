@@ -75,7 +75,10 @@ export default {
 
     const search = function () {
       loading.value = true
-      fetch(`https://nominatim.openstreetmap.org/search?q=${searchString.value}&format=json&polygon_geojson=1&addressdetails=1`)
+      const controller = new AbortController()
+      const { signal } = controller
+      fetch(`https://nominatim.openstreetmap.org/search?q=${searchString.value}&format=json&polygon_geojson=1&addressdetails=1`,
+        { signal })
         .then(res => res.json())
         .then(res => {
           // Get only polygon and multipolygons
@@ -92,6 +95,10 @@ export default {
           loading.value = false
           isVisible.value = true
           itemRefs = []
+        })
+        .catch(e => {
+          loading.value = false
+          error.value = true
         })
     }
 

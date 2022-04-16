@@ -73,7 +73,7 @@ import moment from 'moment'
 // import Polygon from 'ol/geom/Polygon'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
-import spiderfyPoint from '../js/Spiral'
+import spiderfyPoints from '../js/Spiral'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -335,24 +335,19 @@ export default defineComponent({
         })
         // Deal with selected features
         if (selectedFeatures.length > 1) {
+          closePopup()
           const resolution = ol.getView().getResolution()
           const inc = resolution * 40
-          const click = selectedFeatures[0].getGeometry().getCoordinates()
+          const center = selectedFeatures[0].getGeometry().getCoordinates()
           spiralOpened = true
           // Move spiral features to spiralLayer and remove them from observationsLayer
-          selectedFeatures.forEach(function (ele, ind, arr) {
-            const spiralPoint = spiderfyPoint(click[0], click[1], inc, inc, ind + 1)
-            ele.getGeometry().setCoordinates([spiralPoint[0], spiralPoint[1]])
-            // Create line connecting original position of the feature
-            const aLine = new Feature({
-              geometry: new LineString([
-                ele.get('originalCoords'),
-                ele.getGeometry().getCoordinates()
-              ])
-            })
-            spiralSource.value.source.addFeatures([ele, aLine])
+          selectedFeatures.forEach(function (ele) {
             removeFeature(ele.ol_uid)
           })
+
+          const spiderfied = spiderfyPoints(center, selectedFeatures, inc, inc)
+          spiralSource.value.source.addFeatures(spiderfied.points)
+          spiralSource.value.source.addFeatures(spiderfied.lines)
         } else {
           // Otherwise, not cluster and not multiselection
           // Check first for a click on spiral
@@ -562,13 +557,17 @@ export default defineComponent({
           // Fetch observation with report_id, but first remove starting :
           $store.commit('app/setFilteringTag', { value: true })
           const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
-
-          fetch(`${url}`)
+          const controller = new AbortController()
+          const { signal } = controller
+          fetch(`${url}`, { signal })
             .then(res => res.json())
             .then(res => {
               mapFilters.features = [res]
               workerData.filters = mapFilters
               worker.postMessage(workerData)
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+            .catch(e => {
               $store.commit('app/setFilteringTag', { value: false })
             })
         } else {
