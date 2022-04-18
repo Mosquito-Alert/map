@@ -78,7 +78,7 @@ import spiderfyPoints from '../js/Spiral'
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer'],
+  emits: ['toogleLeftDrawer', 'workerFinished'],
   props: {},
   setup (props, context) {
     const leftDrawerIcon = ref('null')
@@ -100,8 +100,18 @@ export default defineComponent({
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheMapWorker.js')
-    const mapFilters = { observations: [], locations: [], hashtags: [], date: [], features: [] }
-    let spiralOpened = false
+    let selectedFeatures = []
+    let spiderfiedIds = []
+    let currZoom
+    const mapFilters = {
+      mode: 'resetFilter',
+      observations: [],
+      locations: [],
+      hashtags: [],
+      date: [],
+      report_id: []
+    }
+
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -150,10 +160,6 @@ export default defineComponent({
         if (simplifyTolerance > 500) {
           simplifyTolerance = 200
         }
-        // Geometry to show bounding box
-        // Feat = new Feature({
-        //   geometry: fromExtent(extent)
-        // })
 
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
@@ -168,6 +174,7 @@ export default defineComponent({
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
       setTimeout(() => {
+        // Disable map update while opening popup
         const overlay = document.querySelector('.parentContainer')
         if (overlay) coords[1] += overlay.clientHeight / 2 * resolution
         flyTo(coords, ol.getView().getZoom())
@@ -229,6 +236,7 @@ export default defineComponent({
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
+          context.emit('workerFinished', { mapFilters })
           updateMap()
         }
         ready = true
@@ -238,14 +246,18 @@ export default defineComponent({
         flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
-        const data = event.data.map.map((f, i) => {
+        const data = []
+        for (let a = 0; a < event.data.map.length; a++) {
+          const f = event.data.map[a]
+          // Exclude spiral features if there are any because they appear in another layer
+          if (spiderfiedIds.includes(f.properties.id)) continue
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
             properties: f.properties,
-            id: i
+            id: a
           })
-          return feat
-        })
+          data.push(feat)
+        }
         features.value = data
         const graphDates = event.data.timeseries.dates
         const sDate = graphDates[0]
@@ -258,7 +270,17 @@ export default defineComponent({
 
     function updateMap () {
       const olmap = map.value.map
-      if (!ready || spiralOpened) return
+      const newZoom = olmap.getView().getZoom()
+      if (currZoom !== newZoom) {
+        currZoom = newZoom
+        spiderfiedIds = []
+        spiralSource.value.source.clear()
+        closePopup()
+      }
+      if (!ready) {
+        return
+      }
+
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
@@ -301,18 +323,10 @@ export default defineComponent({
       strokeLocationColor.value = defaults.strokeLocationColor
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-
+      currZoom = ol.getView().getZoom()
       ol.on('click', function (event) {
-        const selectedFeatures = []
-        // const coords = event.coordinate
-
-        // const resolution = ol.getView().getResolution()
-        // const inc = resolution * 40
-        // const extend = [
-        //   coords[0] - inc, coords[1] - inc,
-        //   coords[0] + inc, coords[1] + inc
-        // ]
-        // const Features = observationsSource.value.source.getFeaturesInExtent(extend)
+        selectedFeatures = []
+        spiderfiedIds = []
         let layerName = ''
         map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           // Get layer of first feature, in case there is only one
@@ -335,11 +349,17 @@ export default defineComponent({
         })
         // Deal with selected features
         if (selectedFeatures.length > 1) {
-          closePopup()
+          // update spiderfiedIds to exclude from worker feedback
+          selectedFeatures.forEach(feature => {
+            spiderfiedIds.push(feature.values_.properties.id)
+          })
+          // In case another spiral is open
+          spiralSource.value.source.clear()
+
           const resolution = ol.getView().getResolution()
           const inc = resolution * 40
           const center = selectedFeatures[0].getGeometry().getCoordinates()
-          spiralOpened = true
+          flyTo(center, ol.getView().getZoom())
           // Move spiral features to spiralLayer and remove them from observationsLayer
           selectedFeatures.forEach(function (ele) {
             removeFeature(ele.ol_uid)
@@ -352,7 +372,6 @@ export default defineComponent({
           // Otherwise, not cluster and not multiselection
           // Check first for a click on spiral
           if (layerName !== 'spiralLayer') {
-            spiralOpened = false
             spiralSource.value.source.clear()
           }
           if (selectedFeatures.length === 1) {
@@ -362,7 +381,7 @@ export default defineComponent({
             selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
             $store.dispatch('map/selectFeature', feature.values_)
           } else {
-            // close popup and refresh features (woker)k
+            // close popup and refresh features (woker)
             closePopup()
           }
         }
@@ -478,8 +497,8 @@ export default defineComponent({
     function filterObservations (observation) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
-      spiralOpened = false
       closePopup()
+
       // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
@@ -487,8 +506,10 @@ export default defineComponent({
 
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
+        mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.observations.push({ type: observation.type, code: observation.code })
+        mapFilters.mode = 'resetFilter'
       }
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
@@ -501,6 +522,7 @@ export default defineComponent({
       const workerData = {}
       mapFilters.locations = []
       workerData.filters = mapFilters
+      mapFilters.mode = 'resetFilter'
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
     }
@@ -508,14 +530,15 @@ export default defineComponent({
     function filterLocations (location) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
-      spiralOpened = false
       closePopup()
       const workerData = {}
       if (location) {
         mapFilters.locations = [JSON.stringify(location)]
         mapFilters.tolerance = simplifyTolerance
+        mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.locations = []
+        mapFilters.mode = 'resetFilter'
       }
 
       workerData.filters = mapFilters
@@ -526,9 +549,13 @@ export default defineComponent({
     function filterDate (date) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
-      spiralOpened = false
       closePopup()
       const workerData = {}
+      if (!mapFilters.date.length) {
+        mapFilters.mode = 'increaseFilter'
+      } else {
+        mapFilters.mode = 'resetFilter'
+      }
       if (date !== null) {
         const expandedDate = expandDate(date)
         mapFilters.date = [JSON.parse(JSON.stringify(expandedDate))]
@@ -544,7 +571,6 @@ export default defineComponent({
     function filterTags (obj) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
-      spiralOpened = false
       const tags = obj.tags
       const tag = obj.tag
       const workerData = {}
@@ -552,8 +578,9 @@ export default defineComponent({
       closePopup()
       // Check if tags contain report_id starting with ':'
       if (tag.startsWith(':')) {
-        mapFilters.features = []
+        mapFilters.report_id = []
         if (obj.mode === 'addedTag') {
+          mapFilters.mode = 'increaseFilter'
           // Fetch observation with report_id, but first remove starting :
           $store.commit('app/setFilteringTag', { value: true })
           const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
@@ -562,7 +589,7 @@ export default defineComponent({
           fetch(`${url}`, { signal })
             .then(res => res.json())
             .then(res => {
-              mapFilters.features = [res]
+              mapFilters.report_id = [res]
               workerData.filters = mapFilters
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
@@ -573,10 +600,16 @@ export default defineComponent({
         } else {
           mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
           workerData.filters = mapFilters
+          mapFilters.mode = 'resetFilter'
           worker.postMessage(workerData)
         }
       } else {
         // Update mapFilters.tags only if tag is not a report_id (':')
+        if (obj.mode === 'addedTag') {
+          mapFilters.mode = 'increaseFilter'
+        } else {
+          mapFilters.mode = 'resetFilter'
+        }
         mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
         workerData.filters = mapFilters
         worker.postMessage(workerData)

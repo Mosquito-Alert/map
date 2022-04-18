@@ -4,7 +4,7 @@
         ref="inputLocation"
         v-model="searchString"
         :label="error?_('No results found'):_('Placeholder location')"
-        color="orange"
+        :color="(filterIsActive && loading)?'white':'orange'"
         class="search-location"
         :loading="loading"
         :filled="filterIsActive"

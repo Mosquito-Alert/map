@@ -4,7 +4,7 @@
     :class="expanded?'expanded':'collapsed'"
   >
     <site-header :expanded="expanded"/>
-    <left-drawer
+    <left-drawer ref="TOC"
       :expanded="expanded"
       @filterObservations='filterObservations'
       @filterLocations="filterLocations"
@@ -19,6 +19,7 @@
       <the-map ref='map'
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
+        @workerFinished="workerFinished"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -56,6 +57,7 @@ export default {
   components: { BaseModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
     const map = ref('null')
+    const TOC = ref()
     const timeseries = ref()
     const expanded = ref(true)
     const $store = useStore()
@@ -65,7 +67,7 @@ export default {
         setTimeout(() => {
           args.start += 1
           resizeMap(args)
-        }, 1)
+        }, 25)
       }
     }
 
@@ -77,6 +79,7 @@ export default {
 
     const filterLocations = function (location) {
       if (location !== null) {
+        TOC.value.searchLocation.loading = true
         map.value.fitFeature(location)
       } else {
         map.value.clearAdministrativeFeatures()
@@ -109,8 +112,16 @@ export default {
       resizeMap({ start: 0, end: 400 })
     }
 
+    const workerFinished = function (payload) {
+      console.log(payload)
+      if (payload.mapFilters.locations.length) {
+        TOC.value.searchLocation.loading = false
+      }
+    }
+
     return {
       expanded,
+      workerFinished,
       toogleLeftDrawer,
       filterObservations,
       filterDate,
@@ -119,6 +130,7 @@ export default {
       filterTags,
       infoModalVisible,
       map,
+      TOC,
       timeseries,
       resizeMap
     }

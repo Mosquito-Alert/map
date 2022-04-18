@@ -6,7 +6,7 @@
       :offset="[0, -35]"
       v-if="selectedFeature">
     <template v-slot="slotProps">
-      <div class="parentContainer" :class="(ratio != 0 && ratio < 1.25) ? 'portrait':'landscape'">
+      <div class="parentContainer" :class="imageRatio">
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
@@ -142,7 +142,7 @@ export default defineComponent({
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       console.log(ratio.value)
-      imageRatio.value = (ratio.value > 1.25) ? 'landscape' : 'portrait'
+      imageRatio.value = (ratio.value > 1.25) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
       defaultImageSize.value = ''
       context.emit('popupimageloaded')
     }
@@ -245,31 +245,54 @@ export default defineComponent({
   text-align: center;
 }
 
+.overlay-content.square .image{
+  height: $popup-height-with-image-square;
+  position: relative;
+  text-align: center;
+}
+
+.overlay-content.square .image .img-container,
 .overlay-content.portrait .image .img-container{
   height: 100%;
   display: flex;
   justify-content: center;
 }
+.overlay-content.square .image img,
 .overlay-content.portrait .image img{
   height: 100%;
   border-top-left-radius: $popup-border-radius;
   border-bottom-left-radius: $popup-border-radius;
 }
 
-.parentContainer,
 .overlay-content.landscape {
     max-width: $popup-width-landscape;
     border:0px;
 }
-
+.parentContainer.portrait{
+  max-width: $popup-width-portrait;
+}
 .overlay-content.portrait {
   max-width: $popup-width-portrait;
+  display:flex;
+  flex-direction: row;
+}
+.parentContainer.square{
+  max-width: $popup-width-square;
+}
+.overlay-content.square {
+  max-height: $popup-height-with-image-square;
   display:flex;
   flex-direction: row;
 }
 
 .q-page.expended .overlay-content.portrait {
   max-width: calc(#{$popup-width-portrait} - #{$left-drawer-width});
+  display:flex;
+  flex-direction: row;
+}
+
+.q-page.expended .overlay-content.square {
+  max-width: calc(#{$popup-width-square} - #{$left-drawer-width});
   display:flex;
   flex-direction: row;
 }
@@ -291,6 +314,7 @@ export default defineComponent({
   // flex-direction: column;
   text-align: center;
 }
+.parentContainer.square::after,
 .parentContainer.portrait::after{
   content: ' ';
   border: $popup-vertical-offset solid transparent;
@@ -403,6 +427,8 @@ export default defineComponent({
     }
   }
 }
+.landscape .info-validation{
+}
 .landscape .info-validation,
 .small .info-validation {
   width: 100%;
@@ -431,16 +457,32 @@ export default defineComponent({
 }
 
 .portrait .info-validation {
-  padding-bottom:0px;
   max-width: $popup-width-portrait-info;
-  display:flex;
+  max-height: $popup-height-with-image-portrait;
   flex-direction:column;
+  padding-bottom:0px;
+  &>div:first-child {
+    max-height: calc(#{$popup-height-with-image-portrait / 2});
+  }
+}
+
+.square .info-validation {
+  max-width: $popup-width-square-info;
+  max-height: $popup-height-with-image-square;
+  flex-direction:column;
+  &>div:first-child {
+    max-height: calc(#{$popup-height-with-image-square} - #{$popup-padding-info});
+  }
+}
+
+.square .info-validation,
+.portrait .info-validation {
+  display:flex;
   flex-grow: 1;
   &>div {
     padding-right:20px;
   }
   &>div:first-child {
-    max-height: calc(#{$popup-height-with-image-portrait / 2});
     overflow: auto;
     text-align:left;
   }

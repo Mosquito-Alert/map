@@ -20,8 +20,8 @@ export default function () {
       LAYERS: [
         { type: 'observations', code: 'tiger' }
       ],
-      // DATES: { from: '2020/11/01', to: '2020/11/10' },
-      DATES: { from: '2014/11/01', to: '2022/11/10' },
+      DATES: { from: '2021/01/01', to: '2021/12/31' },
+      // DATES: { from: '2014/11/01', to: '2022/11/10' },
       HASHTAGS: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
