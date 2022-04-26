@@ -250,9 +250,6 @@ export default defineComponent({
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           // Exclude spiral features if there are any because they appear in another layer
-          if (spiderfiedIds.length) {
-            console.log(spiderfiedIds)
-          }
           if (spiderfiedIds.includes(f.properties.id)) continue
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
@@ -276,7 +273,6 @@ export default defineComponent({
       const newZoom = olmap.getView().getZoom()
       if (currZoom !== newZoom) {
         currZoom = newZoom
-        console.log('resset spiderfiedIds on updateMap')
         spiderfiedIds = []
         spiralSource.value.source.clear()
         closePopup()
