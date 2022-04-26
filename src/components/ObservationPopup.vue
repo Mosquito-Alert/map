@@ -266,6 +266,7 @@ export default defineComponent({
 
 .overlay-content.landscape {
     max-width: $popup-width-landscape;
+    // max-height: $popup-height-landscape;
     border:0px;
 }
 .parentContainer.portrait{
@@ -462,7 +463,7 @@ export default defineComponent({
   flex-direction:column;
   padding-bottom:0px;
   &>div:first-child {
-    max-height: calc(#{$popup-height-with-image-portrait / 2});
+    max-height: calc(#{$popup-height-with-image-portrait} - 100px);
   }
 }
 
@@ -480,7 +481,7 @@ export default defineComponent({
   display:flex;
   flex-grow: 1;
   &>div {
-    padding-right:20px;
+    // padding-right:20px;
   }
   &>div:first-child {
     overflow: auto;
@@ -490,7 +491,9 @@ export default defineComponent({
     padding-top: 20px;
     display: flex;
     flex-direction: column;
+    flex-grow:1;
     align-items: center;
+    justify-content: center;
     .validation-string {
       padding-top: 10px;
       text-transform: uppercase;

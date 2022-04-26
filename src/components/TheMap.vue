@@ -250,6 +250,9 @@ export default defineComponent({
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           // Exclude spiral features if there are any because they appear in another layer
+          if (spiderfiedIds.length) {
+            console.log(spiderfiedIds)
+          }
           if (spiderfiedIds.includes(f.properties.id)) continue
           const feat = new Feature({
             geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
@@ -273,6 +276,7 @@ export default defineComponent({
       const newZoom = olmap.getView().getZoom()
       if (currZoom !== newZoom) {
         currZoom = newZoom
+        console.log('resset spiderfiedIds on updateMap')
         spiderfiedIds = []
         spiralSource.value.source.clear()
         closePopup()
@@ -326,11 +330,18 @@ export default defineComponent({
       currZoom = ol.getView().getZoom()
       ol.on('click', function (event) {
         selectedFeatures = []
-        spiderfiedIds = []
         let layerName = ''
+        let clickOnSpiral = false
+        let featureOnSpiral
         map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           // Get layer of first feature, in case there is only one
           layerName = layer.values_.name
+          // Check if one element is in spiral layer
+          if (layerName === 'spiralLayer') {
+            clickOnSpiral = true
+            featureOnSpiral = feature
+          }
+
           if (['spiralLayer', 'observationsLayer'].includes(layer.values_.name)) {
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
@@ -347,6 +358,9 @@ export default defineComponent({
             }
           }
         })
+        if (clickOnSpiral) {
+          selectedFeatures = [featureOnSpiral]
+        }
         // Deal with selected features
         if (selectedFeatures.length > 1) {
           // update spiderfiedIds to exclude from worker feedback
@@ -371,8 +385,9 @@ export default defineComponent({
         } else {
           // Otherwise, not cluster and not multiselection
           // Check first for a click on spiral
-          if (layerName !== 'spiralLayer') {
+          if (layerName !== 'spiralLayer' && !clickOnSpiral) {
             spiralSource.value.source.clear()
+            spiderfiedIds = []
           }
           if (selectedFeatures.length === 1) {
             const feature = selectedFeatures[0]
