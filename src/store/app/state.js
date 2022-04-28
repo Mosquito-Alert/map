@@ -30,7 +30,7 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      info: false
+      info: true
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
@@ -141,16 +141,6 @@ export default function () {
           color: '#1072ad'
         }
       },
-      // storm_drain: { // Storm drain
-      //   water: {
-      //     categories: ['storm_drain_water'],
-      //     icons: []
-      //   },
-      //   dry: {
-      //     categories: ['storm_drain_dry'],
-      //     icons: []
-      //   }
-      // },
       other: { // ??
         conflict: {
           categories: ['conflict'],

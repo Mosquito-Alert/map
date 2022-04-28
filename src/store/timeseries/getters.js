@@ -13,3 +13,7 @@ export const getChartOptions = state => {
 export const getCompleteDatesRange = state => {
   return state.completeDatesRange
 }
+
+export const getActiveLayers = state => {
+  return state.activeLayers
+}

@@ -113,7 +113,6 @@ export default {
     }
 
     const workerFinished = function (payload) {
-      console.log(payload)
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }

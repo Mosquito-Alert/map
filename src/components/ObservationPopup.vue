@@ -142,7 +142,7 @@ export default defineComponent({
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       console.log(ratio.value)
-      imageRatio.value = (ratio.value > 1.25) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
+      imageRatio.value = (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
       defaultImageSize.value = ''
       context.emit('popupimageloaded')
     }
@@ -461,7 +461,7 @@ export default defineComponent({
   max-width: $popup-width-portrait-info;
   max-height: $popup-height-with-image-portrait;
   flex-direction:column;
-  padding-bottom:0px;
+  padding-bottom:5px;
   &>div:first-child {
     max-height: calc(#{$popup-height-with-image-portrait} - 100px);
   }
@@ -470,6 +470,7 @@ export default defineComponent({
 .square .info-validation {
   max-width: $popup-width-square-info;
   max-height: $popup-height-with-image-square;
+  padding-bottom: 5px;
   flex-direction:column;
   &>div:first-child {
     max-height: calc(#{$popup-height-with-image-square} - #{$popup-padding-info});
@@ -486,6 +487,7 @@ export default defineComponent({
   &>div:first-child {
     overflow: auto;
     text-align:left;
+    padding-right:10px;
   }
   &>div:last-child {
     padding-top: 20px;

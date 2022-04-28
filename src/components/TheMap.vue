@@ -103,6 +103,8 @@ export default defineComponent({
     let selectedFeatures = []
     let spiderfiedIds = []
     let currZoom
+    let startDate
+    let endDate
     const mapFilters = {
       mode: 'resetFilter',
       observations: [],
@@ -229,6 +231,7 @@ export default defineComponent({
           }
           initialLayers.forEach(layerFilter => {
             mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
+            $store.commit('map/addActiveLayer', layerFilter.type)
           })
           // mapFilters are ready, now call worker
           const workerData = {}
@@ -237,6 +240,8 @@ export default defineComponent({
           worker.postMessage(workerData)
         } else {
           context.emit('workerFinished', { mapFilters })
+          startDate = mapFilters.date[0].from
+          endDate = mapFilters.date[0].to
           updateMap()
         }
         ready = true
@@ -280,7 +285,11 @@ export default defineComponent({
       if (!ready) {
         return
       }
-
+      // todo load sampling effor layer
+      // Get map starting and endding data dates
+      console.log('Starting date ' + startDate)
+      console.log('Ending date ' + endDate)
+      // Load observations layers
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
@@ -518,9 +527,11 @@ export default defineComponent({
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
         mapFilters.mode = 'increaseFilter'
+        $store.commit('map/removeActiveLayer', observation.type)
       } else {
         mapFilters.observations.push({ type: observation.type, code: observation.code })
         mapFilters.mode = 'resetFilter'
+        $store.commit('map/addActiveLayer', observation.type)
       }
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))

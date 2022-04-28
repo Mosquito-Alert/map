@@ -151,7 +151,7 @@ function getJSON (url, callback) {
 }
 
 self.onmessage = function (e) {
-  console.log(e.data)
+  // console.log(e.data)
   if (e.data.getClusterExpansionZoom) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
