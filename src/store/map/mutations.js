@@ -7,7 +7,6 @@ export const addActiveLayer = (state, payload) => {
   if (index === -1) {
     state.activeLayers.push(payload)
   }
-  console.log(state.activeLayers)
 }
 
 export const removeActiveLayer = (state, payload) => {
@@ -15,5 +14,4 @@ export const removeActiveLayer = (state, payload) => {
   if (index > -1) {
     state.activeLayers.splice(index, 1)
   }
-  console.log(state.activeLayers)
 }

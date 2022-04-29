@@ -18,12 +18,13 @@ import { computed, ref } from 'vue'
 
 export default {
   props: ['title', 'colors'],
+  emits: ['samplingEffort'],
   computed: {
     icon_code (props) {
       return `fa-thin fa-${props.title}`
     }
   },
-  setup () {
+  setup (props, context) {
     const $store = useStore()
     const isActive = ref(false)
     const samplingEffort = computed(() => {
@@ -32,6 +33,8 @@ export default {
 
     const toggleClass = () => {
       isActive.value = !isActive.value
+      context.emit('samplingEffort', isActive.value)
+      $store.commit('map/addActiveLayer', 'sampling-effort')
     }
 
     const _ = function (text) {

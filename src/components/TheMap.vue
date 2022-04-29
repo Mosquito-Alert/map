@@ -231,7 +231,7 @@ export default defineComponent({
           }
           initialLayers.forEach(layerFilter => {
             mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
-            $store.commit('map/addActiveLayer', layerFilter.type)
+            $store.commit('map/addActiveLayer', layerFilter.type + '-' + layerFilter.code)
           })
           // mapFilters are ready, now call worker
           const workerData = {}
@@ -527,11 +527,11 @@ export default defineComponent({
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
         mapFilters.mode = 'increaseFilter'
-        $store.commit('map/removeActiveLayer', observation.type)
+        $store.commit('map/removeActiveLayer', observation.type + '-' + observation.code)
       } else {
         mapFilters.observations.push({ type: observation.type, code: observation.code })
         mapFilters.mode = 'resetFilter'
-        $store.commit('map/addActiveLayer', observation.type)
+        $store.commit('map/addActiveLayer', observation.type + '-' + observation.code)
       }
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))

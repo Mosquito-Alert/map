@@ -132,7 +132,10 @@
           <i class="fa-thin fa-circle-info"></i>
         </div>
         <div class="category-box">
-          <sampling-effort title="fa-light fa-gauge-max"></sampling-effort>
+          <sampling-effort
+            title="fa-light fa-gauge-max"
+            @samplingEffort="toggleSamplingEffort"
+          ></sampling-effort>
         </div>
     </div>
   </q-drawer>
@@ -150,7 +153,7 @@ import FilterHastags from './FilterHastags.vue'
 
 export default {
   components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation, FilterHastags },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort'],
   props: ['expanded'],
   setup (props, context) {
     const searchLocation = ref()
@@ -282,7 +285,10 @@ export default {
       }
       context.emit('filterLocations', geojson)
     }
-
+    const toggleSamplingEffort = function (status) {
+      // context.emit('toggleSamplingEffort', status)
+      console.log(status)
+    }
     const locationCleared = function () {
       context.emit('clearLocations')
     }
@@ -309,6 +315,7 @@ export default {
       mouseOut,
       locationSelected,
       locationCleared,
+      toggleSamplingEffort,
       _
     }
   }
