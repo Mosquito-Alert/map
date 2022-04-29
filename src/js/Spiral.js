@@ -41,6 +41,7 @@ export function spiderfyPoints (center, features, dist, sep) {
       f.getGeometry().setCoordinates([x, y])
       sFeatures.push(f)
       const newLine = new Feature({
+        properties: { type: 'LineString' },
         geometry: new LineString([
           f.get('originalCoords'),
           f.getGeometry().getCoordinates()

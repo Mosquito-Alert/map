@@ -9,6 +9,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
+            maxZoom="18"
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -81,6 +82,8 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinished'],
   props: {},
   setup (props, context) {
+    let spiderfyCluster
+    let spiderfiedCluster
     const leftDrawerIcon = ref('null')
     let simplifyTolerance = null
     const fillLocationColor = ref('null')
@@ -95,7 +98,7 @@ export default defineComponent({
     const locationFeatures = ref([])
     let ready = false
     const map = ref('null')
-    const observationsSource = ref('null')
+    const observationsSource = ref()
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
@@ -190,6 +193,7 @@ export default defineComponent({
     }
 
     function redrawMap () {
+      if (spiderfyCluster) return
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -240,11 +244,15 @@ export default defineComponent({
           worker.postMessage(workerData)
         } else {
           context.emit('workerFinished', { mapFilters })
-          startDate = mapFilters.date[0].from
-          endDate = mapFilters.date[0].to
+          startDate = event.data.datesInterval.from
+          endDate = event.data.datesInterval.to
           updateMap()
         }
         ready = true
+      } else if (event.data.spiderfyCluster) {
+        const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
+        spiderfy(center, event.data.map)
+        removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
         const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
@@ -293,10 +301,53 @@ export default defineComponent({
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+
       worker.postMessage({
         bbox: southWest.concat(northEast),
-        zoom: olmap.getView().getZoom()
+        zoom: olmap.getView().getZoom(),
+        spiderfyCluster: spiderfyCluster
       })
+    }
+
+    function removeCluster (cluster) {
+      const index = features.value.findIndex(feature => {
+        if (feature.values_.properties.cluster_id) {
+          return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
+        } else {
+          return false
+        }
+      })
+      features.value.splice(index, 1)
+    }
+
+    function spiderfy (center, clusterFeatures) {
+      // update spiderfiedIds to exclude from worker feedback
+      const features = []
+      clusterFeatures.forEach((feature, index) => {
+        spiderfiedIds.push(feature.properties.id)
+        const feat = new Feature({
+          geometry: new Point(transform(feature.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+          properties: feature.properties,
+          id: index
+        })
+        feat.set('originalCoords', transform(feature.geometry.coordinates, 'EPSG:4326', 'EPSG:3857'))
+        features.push(feat)
+      })
+
+      // In case another spiral is open
+      spiralSource.value.source.clear()
+      const ol = map.value.map
+      const resolution = ol.getView().getResolution()
+      const inc = resolution * 40
+      flyTo(center, ol.getView().getZoom())
+      // Move spiral features to spiralLayer and remove them from observationsLayer
+      // features.forEach(function (ele) {
+      //   removeFeature(ele.ol_uid)
+      // })
+
+      const spiderfied = spiderfyPoints(center, features, inc, inc)
+      spiralSource.value.source.addFeatures(spiderfied.lines)
+      spiralSource.value.source.addFeatures(spiderfied.points)
     }
 
     function flyTo (location, zoom, done) {
@@ -319,12 +370,12 @@ export default defineComponent({
       )
     }
 
-    function removeFeature (uid) {
-      features.value = features.value.filter(function (e, i) {
-        if (e.ol_uid === uid) return false
-        else return true
-      })
-    }
+    // function removeFeature (uid) {
+    //   features.value = features.value.filter(function (e, i) {
+    //     if (e.ol_uid === uid) return false
+    //     else return true
+    //   })
+    // }
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
@@ -333,11 +384,19 @@ export default defineComponent({
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
+
       ol.on('click', function (event) {
+        spiderfyCluster = false
         selectedFeatures = []
         let layerName = ''
         let clickOnSpiral = false
         let featureOnSpiral
+
+        ol.getView().calculateExtent(ol.getSize())
+        const bounds = ol.getView().calculateExtent(ol.getSize())
+        const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+        const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+
         map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           // Get layer of first feature, in case there is only one
           layerName = layer.values_.name
@@ -346,20 +405,42 @@ export default defineComponent({
             clickOnSpiral = true
             featureOnSpiral = feature
           }
-
           if (['spiralLayer', 'observationsLayer'].includes(layer.values_.name)) {
             // spider lines has no properties
             if (!feature.values_.properties) return
 
             // Check if click on cluster
+            if (!feature.values_.properties) return
             if ('cluster_id' in feature.values_.properties) {
-              worker.postMessage({
-                getClusterExpansionZoom: feature.values_.properties.cluster_id,
-                center: transform(
-                  feature.values_.geometry.flatCoordinates,
-                  'EPSG:3857', 'EPSG:4326'
-                )
-              })
+              // check first for zoom level
+              if (currZoom === 18) {
+                if (spiderfiedCluster) {
+                  features.value.push(spiderfiedCluster)
+                  spiderfiedCluster = null
+                }
+
+                spiderfyCluster = true
+                worker.postMessage({
+                  bbox: southWest.concat(northEast),
+                  zoom: ol.getView().getZoom(),
+                  spiderfyCluster: spiderfyCluster,
+                  getClusterExpansionZoom: feature.values_.properties.cluster_id,
+                  center: transform(
+                    feature.values_.geometry.flatCoordinates,
+                    'EPSG:3857', 'EPSG:4326'
+                  )
+                })
+                spiderfiedCluster = feature
+                return true
+              } else {
+                worker.postMessage({
+                  getClusterExpansionZoom: feature.values_.properties.cluster_id,
+                  center: transform(
+                    feature.values_.geometry.flatCoordinates,
+                    'EPSG:3857', 'EPSG:4326'
+                  )
+                })
+              }
             } else {
               feature.set('originalCoords', feature.getGeometry().getCoordinates())
               selectedFeatures.push(feature)
@@ -370,12 +451,9 @@ export default defineComponent({
           selectedFeatures = [featureOnSpiral]
         }
         // Deal with selected features
-        if (selectedFeatures.length > 1) {
-          // update spiderfiedIds to exclude from worker feedback
-          selectedFeatures.forEach(feature => {
-            spiderfiedIds.push(feature.values_.properties.id)
-          })
-          // In case another spiral is open
+        // Not cluster and not multiselection
+        // Check first for a click on spiral
+        if (layerName !== 'spiralLayer' && !clickOnSpiral) {
           spiralSource.value.source.clear()
 
           const resolution = ol.getView().getResolution()

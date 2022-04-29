@@ -31,9 +31,9 @@ getJSON('totes.json', (geojson) => {
 function loadMapData (data) {
   index = new Supercluster({
     log: DEBUG,
-    radius: 180,
+    radius: 80,
     extent: 256,
-    maxZoom: 17
+    maxZoom: 19
   }).load(data)
 
   unclustered = new Supercluster({
@@ -43,7 +43,13 @@ function loadMapData (data) {
     maxZoom: 1
   }).load(data)
 
-  postMessage({ ready: true })
+  postMessage({
+    ready: true,
+    datesInterval: {
+      from: dataset[0].properties.d,
+      to: dataset[dataset.length - 1].properties.d
+    }
+ })
 }
 
 function filterDate (data, date) {
@@ -151,8 +157,7 @@ function getJSON (url, callback) {
 }
 
 self.onmessage = function (e) {
-  // console.log(e.data)
-  if (e.data.getClusterExpansionZoom) {
+  if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
     postMessage({
@@ -198,10 +203,25 @@ self.onmessage = function (e) {
     // Update filteredDataset
     filteredDataset = filteredData
     loadMapData(filteredData)
-  } else if (e.data) {
+  } else if (e.data.spiderfyCluster) {
+    if (e.data.getClusterExpansionZoom) {
+      const map = index.getLeaves(e.data.getClusterExpansionZoom, Infinity)
+      postMessage({
+        map: map,
+        spiderfyCluster: e.data.spiderfyCluster,
+        center: e.data.center
+      })
+    }
+  }
+  else if (e.data) {
     // This is fired when the user navigates the map.
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-    const map = index.getClusters(e.data.bbox, e.data.zoom)
+    let map
+    if (e.data.spiderfyCluster || e.data.zoom > 18) {
+      map = time
+    } else {
+      map = index.getClusters(e.data.bbox, e.data.zoom)
+    }
 
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
@@ -250,6 +270,7 @@ self.onmessage = function (e) {
 
     postMessage({
       map: map,
+      spiderfyCluster: e.data.spiderfyCluster,
       timeseries: {
         dates: dates,
         data: series
