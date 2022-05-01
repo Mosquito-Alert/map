@@ -84,6 +84,7 @@ export default defineComponent({
   setup (props, context) {
     let spiderfyCluster
     let spiderfiedCluster
+    let clickOnSpiral = false
     const leftDrawerIcon = ref('null')
     let simplifyTolerance = null
     const fillLocationColor = ref('null')
@@ -295,6 +296,7 @@ export default defineComponent({
       }
       // todo load sampling effor layer
       // Get map starting and endding data dates
+      if (clickOnSpiral) return
       console.log('Starting date ' + startDate)
       console.log('Ending date ' + endDate)
       // Load observations layers
@@ -310,6 +312,7 @@ export default defineComponent({
     }
 
     function removeCluster (cluster) {
+      console.log('remove cluster ' + cluster.values_.properties.cluster_id)
       const index = features.value.findIndex(feature => {
         if (feature.values_.properties.cluster_id) {
           return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
@@ -386,10 +389,10 @@ export default defineComponent({
       currZoom = ol.getView().getZoom()
 
       ol.on('click', function (event) {
+        clickOnSpiral = false
         spiderfyCluster = false
         selectedFeatures = []
         let layerName = ''
-        let clickOnSpiral = false
         let featureOnSpiral
 
         ol.getView().calculateExtent(ol.getSize())
@@ -410,16 +413,21 @@ export default defineComponent({
             if (!feature.values_.properties) return
 
             // Check if click on cluster
-            if (!feature.values_.properties) return
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
               if (currZoom === 18) {
                 if (spiderfiedCluster) {
-                  features.value.push(spiderfiedCluster)
-                  spiderfiedCluster = null
+                  console.log(spiderfiedCluster.values_.properties.cluster_id)
+                  console.log(feature.values_.properties.cluster_id)
+                  if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
+                    console.log('PUSH ' + spiderfiedCluster.values_.properties.cluster_id)
+                    features.value.push(spiderfiedCluster)
+                    spiderfiedCluster = null
+                  }
                 }
 
                 spiderfyCluster = true
+                spiderfiedCluster = feature
                 worker.postMessage({
                   bbox: southWest.concat(northEast),
                   zoom: ol.getView().getZoom(),
@@ -430,7 +438,6 @@ export default defineComponent({
                     'EPSG:3857', 'EPSG:4326'
                   )
                 })
-                spiderfiedCluster = feature
                 return true
               } else {
                 worker.postMessage({
@@ -447,44 +454,48 @@ export default defineComponent({
             }
           }
         })
+        if (!spiderfiedCluster) {
+          spiderfiedCluster = null
+        }
         if (clickOnSpiral) {
           selectedFeatures = [featureOnSpiral]
         }
-        // Deal with selected features
-        // Not cluster and not multiselection
         // Check first for a click on spiral
         if (layerName !== 'spiralLayer' && !clickOnSpiral) {
           spiralSource.value.source.clear()
-
-          const resolution = ol.getView().getResolution()
-          const inc = resolution * 40
+          spiderfiedIds = []
+        }
+        if (selectedFeatures.length === 1) {
+          // if feature has no properties do nothing
+          const feature = selectedFeatures[0]
+          if (!feature.values_.properties) return
           const center = selectedFeatures[0].getGeometry().getCoordinates()
           flyTo(center, ol.getView().getZoom())
-          // Move spiral features to spiralLayer and remove them from observationsLayer
-          selectedFeatures.forEach(function (ele) {
-            removeFeature(ele.ol_uid)
-          })
-
-          const spiderfied = spiderfyPoints(center, selectedFeatures, inc, inc)
-          spiralSource.value.source.addFeatures(spiderfied.lines)
-          spiralSource.value.source.addFeatures(spiderfied.points)
+          selectedFeat.value = feature
+          selectedId.value = feature.values_.properties.id
+          selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+          $store.dispatch('map/selectFeature', feature.values_)
         } else {
-          // Otherwise, not cluster and not multiselection
-          // Check first for a click on spiral
-          if (layerName !== 'spiralLayer' && !clickOnSpiral) {
+          if (selectedFeatures.length > 1) {
+            // update spiderfiedIds to exclude from worker feedback
+            selectedFeatures.forEach(feature => {
+              spiderfiedIds.push(feature.values_.properties.id)
+            })
+            // In case another spiral is open
             spiralSource.value.source.clear()
-            spiderfiedIds = []
-          }
-          if (selectedFeatures.length === 1) {
-            // if feature has no properties do nothing
-            const feature = selectedFeatures[0]
-            if (!feature.values_.properties) return
+
+            const resolution = ol.getView().getResolution()
+            const inc = resolution * 40
             const center = selectedFeatures[0].getGeometry().getCoordinates()
             flyTo(center, ol.getView().getZoom())
-            selectedFeat.value = feature
-            selectedId.value = feature.values_.properties.id
-            selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
-            $store.dispatch('map/selectFeature', feature.values_)
+            // Move spiral features to spiralLayer and remove them from observationsLayer
+            selectedFeatures.forEach(function (ele) {
+              removeFeature(ele.ol_uid)
+            })
+            spiderfyCluster = true
+            const spiderfied = spiderfyPoints(center, selectedFeatures, inc, inc)
+            spiralSource.value.source.addFeatures(spiderfied.lines)
+            spiralSource.value.source.addFeatures(spiderfied.points)
           } else {
             // close popup and refresh features (woker)
             closePopup()
@@ -500,6 +511,13 @@ export default defineComponent({
         else this.getTargetElement().style.cursor = ''
       })
     })
+
+    function removeFeature (uid) {
+      features.value = features.value.filter(function (e, i) {
+        if (e.ol_uid === uid) return false
+        else return true
+      })
+    }
 
     const overrideStyleFunction = (feature, style) => {
       if (feature.getGeometry().getType() === 'LineString') {
