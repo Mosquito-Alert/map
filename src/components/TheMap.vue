@@ -348,6 +348,9 @@ export default defineComponent({
           }
 
           if (['spiralLayer', 'observationsLayer'].includes(layer.values_.name)) {
+            // spider lines has no properties
+            if (!feature.values_.properties) return
+
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               worker.postMessage({
@@ -385,8 +388,8 @@ export default defineComponent({
           })
 
           const spiderfied = spiderfyPoints(center, selectedFeatures, inc, inc)
-          spiralSource.value.source.addFeatures(spiderfied.points)
           spiralSource.value.source.addFeatures(spiderfied.lines)
+          spiralSource.value.source.addFeatures(spiderfied.points)
         } else {
           // Otherwise, not cluster and not multiselection
           // Check first for a click on spiral
@@ -395,7 +398,11 @@ export default defineComponent({
             spiderfiedIds = []
           }
           if (selectedFeatures.length === 1) {
+            // if feature has no properties do nothing
             const feature = selectedFeatures[0]
+            if (!feature.values_.properties) return
+            const center = selectedFeatures[0].getGeometry().getCoordinates()
+            flyTo(center, ol.getView().getZoom())
             selectedFeat.value = feature
             selectedId.value = feature.values_.properties.id
             selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]

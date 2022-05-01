@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onUpdated } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
@@ -136,6 +136,11 @@ export default defineComponent({
     const ratio = ref('null')
     ratio.value = 0
     imageRatio.value = 0
+
+    onUpdated(function () {
+      imageRatio.value = ''
+    })
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -269,6 +274,9 @@ export default defineComponent({
     // max-height: $popup-height-landscape;
     border:0px;
 }
+.parentContainer{
+  max-width: $popup-width-small;
+}
 .parentContainer.portrait{
   max-width: $popup-width-portrait;
 }
@@ -315,6 +323,8 @@ export default defineComponent({
   // flex-direction: column;
   text-align: center;
 }
+
+.parentContainer::after,
 .parentContainer.square::after,
 .parentContainer.portrait::after{
   content: ' ';
