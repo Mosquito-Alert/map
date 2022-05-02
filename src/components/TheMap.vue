@@ -188,12 +188,15 @@ export default defineComponent({
     }
 
     function closePopup () {
-      selectedId.value = null
-      $store.commit('map/selectFeature', {})
-      redrawMap()
+      if (selectedId.value) {
+        selectedId.value = null
+        $store.commit('map/selectFeature', {})
+        redrawMap()
+      }
     }
 
     function redrawMap () {
+      console.log('redraw')
       // Avoid get new data from worker while spiderfy is open
       // in that case updateMap gets the data
       if (spiderfyCluster) {
@@ -437,7 +440,6 @@ export default defineComponent({
                     console.log('PUSH ' + spiderfiedCluster.values_.properties.cluster_id)
                     features.value.push(spiderfiedCluster)
                   }
-                  spiderfiedCluster = null
                 }
 
                 spiderfyCluster = true
@@ -471,12 +473,15 @@ export default defineComponent({
         })
 
         if (!spiderfyCluster) {
+          if (!clickOnSpiral && spiderfiedCluster) {
+            features.value.push(spiderfiedCluster)
+          }
           spiderfiedCluster = null
         }
         if (clickOnSpiral) {
           selectedFeatures = [featureOnSpiral]
         }
-        // Check first for a click on spiral
+        // Check first for a click outside spiralLayer
         if (layerName !== 'spiralLayer' && !clickOnSpiral) {
           spiralSource.value.source.clear()
           spiderfiedIds = []
@@ -515,7 +520,6 @@ export default defineComponent({
             spiralSource.value.source.addFeatures(spiderfied.points)
           } else {
             // close popup and refresh features (woker)
-            console.log('click map')
             closePopup()
           }
         }
