@@ -194,7 +194,11 @@ export default defineComponent({
     }
 
     function redrawMap () {
-      if (spiderfyCluster) return
+      // Avoid get new data from worker while spiderfy is open
+      // in that case updateMap gets the data
+      if (spiderfyCluster) {
+        return
+      }
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -251,8 +255,20 @@ export default defineComponent({
         }
         ready = true
       } else if (event.data.spiderfyCluster) {
-        const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
-        spiderfy(center, event.data.map)
+        if (event.data.center) {
+          const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
+          spiderfy(center, event.data.spiderfyFeatures)
+        }
+        features.value = []
+        for (let a = 0; a < event.data.map.length; a++) {
+          const f = event.data.map[a]
+          const feat = new Feature({
+            geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+            properties: f.properties,
+            id: a
+          })
+          features.value.push(feat)
+        }
         removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
@@ -303,7 +319,7 @@ export default defineComponent({
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
-
+      // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: olmap.getView().getZoom(),
@@ -311,8 +327,8 @@ export default defineComponent({
       })
     }
 
+    // removeCluster: Remove the spiderfied cluster from view
     function removeCluster (cluster) {
-      console.log('remove cluster ' + cluster.values_.properties.cluster_id)
       const index = features.value.findIndex(feature => {
         if (feature.values_.properties.cluster_id) {
           return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
@@ -417,13 +433,11 @@ export default defineComponent({
               // check first for zoom level
               if (currZoom === 18) {
                 if (spiderfiedCluster) {
-                  console.log(spiderfiedCluster.values_.properties.cluster_id)
-                  console.log(feature.values_.properties.cluster_id)
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
                     console.log('PUSH ' + spiderfiedCluster.values_.properties.cluster_id)
                     features.value.push(spiderfiedCluster)
-                    spiderfiedCluster = null
                   }
+                  spiderfiedCluster = null
                 }
 
                 spiderfyCluster = true
@@ -449,12 +463,14 @@ export default defineComponent({
                 })
               }
             } else {
+              // Click on just a feature
               feature.set('originalCoords', feature.getGeometry().getCoordinates())
               selectedFeatures.push(feature)
             }
           }
         })
-        if (!spiderfiedCluster) {
+
+        if (!spiderfyCluster) {
           spiderfiedCluster = null
         }
         if (clickOnSpiral) {
@@ -466,6 +482,7 @@ export default defineComponent({
           spiderfiedIds = []
         }
         if (selectedFeatures.length === 1) {
+          console.log('one feature selected')
           // if feature has no properties do nothing
           const feature = selectedFeatures[0]
           if (!feature.values_.properties) return
@@ -498,6 +515,7 @@ export default defineComponent({
             spiralSource.value.source.addFeatures(spiderfied.points)
           } else {
             // close popup and refresh features (woker)
+            console.log('click map')
             closePopup()
           }
         }
@@ -619,6 +637,8 @@ export default defineComponent({
 
     function filterObservations (observation) {
       // Just in case a Spiral is open
+      spiderfyCluster = false
+      spiderfiedCluster = null
       spiralSource.value.source.clear()
       closePopup()
 
@@ -644,6 +664,8 @@ export default defineComponent({
 
     const clearAdministrativeFeatures = function () {
       locationFeatures.value = []
+      spiderfyCluster = false
+      spiderfiedCluster = null
       const workerData = {}
       mapFilters.locations = []
       workerData.filters = mapFilters
@@ -655,6 +677,8 @@ export default defineComponent({
     function filterLocations (location) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
+      spiderfyCluster = false
+      spiderfiedCluster = null
       closePopup()
       const workerData = {}
       if (location) {
@@ -674,6 +698,8 @@ export default defineComponent({
     function filterDate (date) {
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
+      spiderfyCluster = false
+      spiderfiedCluster = null
       closePopup()
       const workerData = {}
       if (!mapFilters.date.length) {
@@ -695,6 +721,8 @@ export default defineComponent({
 
     function filterTags (obj) {
       // Just in case a Spiral is open
+      spiderfyCluster = false
+      spiderfiedCluster = null
       spiralSource.value.source.clear()
       const tags = obj.tags
       const tag = obj.tag

@@ -205,9 +205,15 @@ self.onmessage = function (e) {
     loadMapData(filteredData)
   } else if (e.data.spiderfyCluster) {
     if (e.data.getClusterExpansionZoom) {
-      const map = index.getLeaves(e.data.getClusterExpansionZoom, Infinity)
       postMessage({
-        map: map,
+        map: index.getClusters(e.data.bbox, e.data.zoom),
+        spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
+        spiderfyCluster: e.data.spiderfyCluster,
+        center: e.data.center
+      })
+    } else {
+      postMessage({
+        map: index.getClusters(e.data.bbox, e.data.zoom),
         spiderfyCluster: e.data.spiderfyCluster,
         center: e.data.center
       })
@@ -216,12 +222,7 @@ self.onmessage = function (e) {
   else if (e.data) {
     // This is fired when the user navigates the map.
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-    let map
-    if (e.data.spiderfyCluster || e.data.zoom > 18) {
-      map = time
-    } else {
-      map = index.getClusters(e.data.bbox, e.data.zoom)
-    }
+    const map = index.getClusters(e.data.bbox, e.data.zoom)
 
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
