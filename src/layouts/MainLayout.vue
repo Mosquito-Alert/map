@@ -6,6 +6,7 @@
     <site-header :expanded="expanded"/>
     <left-drawer ref="TOC"
       :expanded="expanded"
+      @toggleSamplingEffort='toggleSamplingEffort'
       @filterObservations='filterObservations'
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
@@ -104,6 +105,10 @@ export default {
       map.value.filterObservations(data)
     }
 
+    const toggleSamplingEffort = function (status) {
+      map.value.toggleSamplingEffort(status)
+    }
+
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info
     })
@@ -128,6 +133,7 @@ export default {
       toggleSamplingEffort,
       workerFinished,
       toogleLeftDrawer,
+      toggleSamplingEffort,
       filterObservations,
       filterDate,
       filterLocations,
