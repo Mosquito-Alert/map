@@ -368,8 +368,8 @@ export default defineComponent({
       // })
 
       const spiderfied = spiderfyPoints(center, features, inc, inc)
-      spiralSource.value.source.addFeatures(spiderfied.lines)
       spiralSource.value.source.addFeatures(spiderfied.points)
+      spiralSource.value.source.addFeatures(spiderfied.lines)
     }
 
     function flyTo (location, zoom, done) {
@@ -434,7 +434,7 @@ export default defineComponent({
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
-              if (currZoom === 18) {
+              if (currZoom >= 18) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
                     console.log('PUSH ' + spiderfiedCluster.values_.properties.cluster_id)
@@ -488,9 +488,10 @@ export default defineComponent({
         }
         if (selectedFeatures.length === 1) {
           console.log('one feature selected')
-          // if feature has no properties do nothing
+          // if feature has no properties or is LineStringdo nothing
           const feature = selectedFeatures[0]
           if (!feature.values_.properties) return
+          if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
           const center = selectedFeatures[0].getGeometry().getCoordinates()
           flyTo(center, ol.getView().getZoom())
           selectedFeat.value = feature
@@ -643,6 +644,7 @@ export default defineComponent({
       // Just in case a Spiral is open
       spiderfyCluster = false
       spiderfiedCluster = null
+      spiderfiedIds = []
       spiralSource.value.source.clear()
       closePopup()
 

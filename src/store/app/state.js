@@ -18,7 +18,9 @@ export default function () {
     isFilteringTag: false,
     DEFAULTS: {
       LAYERS: [
-        { type: 'observations', code: 'tiger' }
+        { type: 'observations', code: 'unidentified' }
+        // { type: 'observations', code: 'culex' },
+        // { type: 'bites', code: 'pending' }
       ],
       DATES: { from: '2021/01/01', to: '2021/12/31' },
       // DATES: { from: '2014/11/01', to: '2022/11/10' },
@@ -30,7 +32,7 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      // info: true
+      info: true
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),

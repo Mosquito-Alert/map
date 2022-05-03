@@ -3,8 +3,9 @@ export default function () {
     DEFAULTS: {
       // ZOOM: 5,
       // CENTER: [13.6889, 44.8409]
-      ZOOM: 18,
+      ZOOM: 17,
       CENTER: [2.813930487775805, 41.97837835421166]
+      // CENTER: [4.848618507385254, 52.380792836403685]
     },
     features: [],
     selectedFeature: null,

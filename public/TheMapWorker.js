@@ -31,9 +31,9 @@ getJSON('totes.json', (geojson) => {
 function loadMapData (data) {
   index = new Supercluster({
     log: DEBUG,
-    radius: 80,
+    radius: 180,
     extent: 256,
-    maxZoom: 19
+    maxZoom: 18
   }).load(data)
 
   unclustered = new Supercluster({
@@ -97,7 +97,7 @@ function filterLocations (data, poly) {
     }
   })
   console.log('Tolerance ' + simplifyTolerance)
-  const options = {tolerance: simplifyTolerance, highQuality: true}
+  const options = { tolerance: simplifyTolerance, highQuality: true }
   const simplified = turf.simplify(polyMercator, options)
 
   // from candidates get points inside poly
@@ -157,6 +157,7 @@ function getJSON (url, callback) {
 }
 
 self.onmessage = function (e) {
+  console.log(e.data)
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
