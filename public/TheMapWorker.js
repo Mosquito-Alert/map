@@ -33,7 +33,7 @@ function loadMapData (data) {
     log: DEBUG,
     radius: 180,
     extent: 256,
-    maxZoom: 18
+    maxZoom: 20
   }).load(data)
 
   unclustered = new Supercluster({
@@ -157,7 +157,7 @@ function getJSON (url, callback) {
 }
 
 self.onmessage = function (e) {
-  console.log(e.data)
+  // console.log(e.data)
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -207,7 +207,7 @@ self.onmessage = function (e) {
   } else if (e.data.spiderfyCluster) {
     if (e.data.getClusterExpansionZoom) {
       postMessage({
-        map: index.getClusters(e.data.bbox, e.data.zoom),
+        map: index.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
         spiderfyCluster: e.data.spiderfyCluster,
         center: e.data.center

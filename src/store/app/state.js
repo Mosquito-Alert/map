@@ -18,7 +18,7 @@ export default function () {
     isFilteringTag: false,
     DEFAULTS: {
       LAYERS: [
-        { type: 'observations', code: 'unidentified' }
+        { type: 'observations', code: 'tiger' }
         // { type: 'observations', code: 'culex' },
         // { type: 'bites', code: 'pending' }
       ],

@@ -196,7 +196,6 @@ export default defineComponent({
     }
 
     function redrawMap () {
-      console.log('redraw')
       // Avoid get new data from worker while spiderfy is open
       // in that case updateMap gets the data
       if (spiderfyCluster) {
@@ -270,9 +269,13 @@ export default defineComponent({
             properties: f.properties,
             id: a
           })
+          // Avoid adding the cluster that is being spiderfied
+          if (spiderfiedCluster && spiderfiedCluster.values_.properties.cluster_id === f.id) {
+            continue
+          }
           features.value.push(feat)
         }
-        removeCluster(spiderfiedCluster)
+        // removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
         const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
@@ -304,7 +307,7 @@ export default defineComponent({
     function updateMap () {
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
-      if (currZoom !== newZoom) {
+      if (parseInt(currZoom) !== parseInt(newZoom)) {
         currZoom = newZoom
         spiderfiedIds = []
         spiralSource.value.source.clear()
@@ -325,22 +328,27 @@ export default defineComponent({
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),
-        zoom: olmap.getView().getZoom(),
+        zoom: parseInt(olmap.getView().getZoom()),
         spiderfyCluster: spiderfyCluster
       })
     }
 
     // removeCluster: Remove the spiderfied cluster from view
-    function removeCluster (cluster) {
-      const index = features.value.findIndex(feature => {
-        if (feature.values_.properties.cluster_id) {
-          return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
-        } else {
-          return false
-        }
-      })
-      features.value.splice(index, 1)
-    }
+    // function removeCluster (cluster) {
+    //   const index = features.value.findIndex(feature => {
+    //     if (feature.values_.properties.cluster_id) {
+    //       return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
+    //     }
+    //     return -1
+    //   })
+    //   console.log('index')
+    //   console.log(index + ' ' + features.value.length)
+    //   const spiralIsOpen = spiralSource.value.source.getFeatures().length
+    //   console.log(spiralIsOpen)
+    //   if (index !== -1 && spiralIsOpen) {
+    //     features.value.splice(index, 1)
+    //   }
+    // }
 
     function spiderfy (center, clusterFeatures) {
       // update spiderfiedIds to exclude from worker feedback
@@ -361,7 +369,8 @@ export default defineComponent({
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const inc = resolution * 40
-      flyTo(center, ol.getView().getZoom())
+      // Flyto without call worker
+      // flyTo(center, ol.getView().getZoom())
       // Move spiral features to spiralLayer and remove them from observationsLayer
       // features.forEach(function (ele) {
       //   removeFeature(ele.ol_uid)
@@ -413,7 +422,6 @@ export default defineComponent({
         selectedFeatures = []
         let layerName = ''
         let featureOnSpiral
-
         ol.getView().calculateExtent(ol.getSize())
         const bounds = ol.getView().calculateExtent(ol.getSize())
         const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -437,7 +445,6 @@ export default defineComponent({
               if (currZoom >= 18) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
-                    console.log('PUSH ' + spiderfiedCluster.values_.properties.cluster_id)
                     features.value.push(spiderfiedCluster)
                   }
                 }
@@ -446,7 +453,7 @@ export default defineComponent({
                 spiderfiedCluster = feature
                 worker.postMessage({
                   bbox: southWest.concat(northEast),
-                  zoom: ol.getView().getZoom(),
+                  zoom: parseInt(ol.getView().getZoom()),
                   spiderfyCluster: spiderfyCluster,
                   getClusterExpansionZoom: feature.values_.properties.cluster_id,
                   center: transform(
@@ -487,7 +494,6 @@ export default defineComponent({
           spiderfiedIds = []
         }
         if (selectedFeatures.length === 1) {
-          console.log('one feature selected')
           // if feature has no properties or is LineStringdo nothing
           const feature = selectedFeatures[0]
           if (!feature.values_.properties) return
