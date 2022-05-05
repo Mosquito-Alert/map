@@ -33,7 +33,7 @@ function loadMapData (data) {
     log: DEBUG,
     radius: 180,
     extent: 256,
-    maxZoom: 20
+    maxZoom: 19
   }).load(data)
 
   unclustered = new Supercluster({

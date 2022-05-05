@@ -9,3 +9,7 @@ export const features = (state, payload) => {
 export const getSelectedFeature = (state) => {
   return state.selectedFeature
 }
+
+export const getMaxZoom = state => {
+  return state.maxZoom
+}

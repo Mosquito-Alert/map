@@ -9,7 +9,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            maxZoom="18"
+            maxZoom="19"
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -214,6 +214,11 @@ export default defineComponent({
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
     })
+
+    const maxZoom = computed(() => {
+      return $store.getters['map/getMaxZoom']
+    })
+
     // Map general configuration
     const zoom = computed(() => {
       return $store.getters['map/getDefault'].ZOOM
@@ -442,7 +447,7 @@ export default defineComponent({
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
-              if (currZoom >= 18) {
+              if (currZoom >= maxZoom.value) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
                     features.value.push(spiderfiedCluster)
