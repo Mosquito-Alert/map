@@ -174,7 +174,11 @@ export default defineComponent({
 
     const formatData = function (feature) {
       // Some locales add '.' after month, so we remove it
-      return moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
+      if (!feature.biteTime) {
+        return moment(feature.observation_date).format('DD/MMM/YYYY - HH:mm').replace('.', '')
+      } else {
+        return moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
+      }
     }
 
     const errorLoading = function () {
