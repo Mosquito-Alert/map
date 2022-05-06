@@ -4,8 +4,8 @@
       <div class="colors">
           <ul class="sampling-effort-categories">
               <li v-for="value, key in samplingEffort.legend" :key="key">
-                  <div class="category-label" >{{ key }}</div>
-                  <div class="category-color" :style="{ backgroundColor: value }"></div>
+                  <div class="category-label" >{{ value.from }}</div>
+                  <div class="category-color" :style="{ backgroundColor: value.color }"></div>
               </li>
           </ul>
       </div>

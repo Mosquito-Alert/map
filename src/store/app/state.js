@@ -150,13 +150,12 @@ export default function () {
         }
       },
       sampling_effort: {
-        legend: {
-          0: '#ffffb2',
-          10: '#fecc5c',
-          100: '#fd8d3c',
-          1000: '#f03b20',
-          1500: '#bd0026'
-        }
+        legend: [
+          { from: 0, to: 10, color: '#ffffb2' },
+          { from: 10, to: 100, color: '#fd8d3c' },
+          { from: 100, to: 1000, color: '#f03b20' },
+          { from: 1000, to: Infinity, color: '#bd0026' }
+        ]
       }
     }
   }

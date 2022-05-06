@@ -20,7 +20,7 @@
           | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox'>
+        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
           <ol-source-osm />
             <!-- <ol-source-xyz
               crossOrigin='anonymous'
@@ -32,7 +32,7 @@
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <ol-vector-layer ref='locationLayer' name="locationLayer">
+        <ol-vector-layer ref='locationLayer' name="locationLayer" zIndex="5">
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
             <ol-style>
               <ol-style-fill :color="fillLocationColor"></ol-style-fill>
@@ -42,7 +42,7 @@
         </ol-vector-layer>
 
         <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observationsLayer' name="observationsLayer">
+        <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -51,7 +51,7 @@
         </ol-vector-layer>
 
         <!-- SPIDERFIED MARKERS -->
-        <ol-vector-layer ref='spiralLayer' name="spiralLayer">
+        <ol-vector-layer ref='spiralLayer' name="spiralLayer" zIndex="10">
           <ol-source-vector :format='geoJson' ref='spiralSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -74,16 +74,17 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
-// import { fromExtent } from 'ol/geom/Polygon'
-// import Polygon from 'ol/geom/Polygon'
-// import GeojsonVT from '../js/geojson-vt'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { Style, Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
 import VectorTileSource from 'ol/source/VectorTile'
 import GeoJSON from 'ol/format/GeoJSON'
 import Projection from 'ol/proj/Projection'
 import geojsonvt from 'geojson-vt'
+// import { fromExtent } from 'ol/geom/Polygon'
+// import Polygon from 'ol/geom/Polygon'
+// import GeojsonVT from '../js/geojson-vt'
+import VectorTileLayer from 'ol/layer/VectorTile'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -91,10 +92,12 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinished'],
   props: {},
   setup (props, context) {
+    let samplingEffortLayer
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
     const leftDrawerIcon = ref('null')
+    const baseMap = ref('null')
     let simplifyTolerance = null
     const fillLocationColor = ref('null')
     const spiralSource = ref()
@@ -109,7 +112,6 @@ export default defineComponent({
     let ready = false
     const map = ref('null')
     const observationsSource = ref()
-    const samplingEffortLayer = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
@@ -849,9 +851,42 @@ export default defineComponent({
       }
     }
 
-    function toggleSamplingEffort (status) {
+    const samplingLegend = $store.getters['app/layers'].sampling_effort.legend
+    function getColorFromFixes (nFixes) {
+      const index = samplingLegend.findIndex(e => {
+        return (e.from <= nFixes && e.to >= nFixes)
+      })
+      return samplingLegend[index].color
+    }
+
+    function toggleSamplingEffort (visible) {
       // set the layer source
-      const url = $store.getters['app/getBackend'] + 'api/userfixes/2021-01-01/2021-12-31'
+      // samplingEffortLayer.value.tileLayer.setSource(new VectorTileSource({}))
+      if (!visible) {
+        map.value.map.removeLayer(samplingEffortLayer)
+        return
+      }
+      const sDate = mapFilters.date[0].from.replaceAll('/', '-')
+      const eDate = mapFilters.date[0].to.replaceAll('/', '-')
+
+      const url = $store.getters['app/getBackend'] + 'api/userfixes/' + sDate + '/' + eDate
+      console.log(url)
+
+      const style = new Style({
+        fill: new Fill({
+          color: '#eeeeee'
+        })
+      })
+
+      samplingEffortLayer = new VectorTileLayer({
+        // background: 'rgb(255,0,0,0.1)',
+        zIndex: parseInt(baseMap.value.tileLayer.values_.zIndex) + 1,
+        style: function (feature) {
+          const fixes = feature.get('num_fixes')
+          style.getFill().setColor(getColorFromFixes(fixes))
+          return style
+        }
+      })
       fetch(url)
         .then(function (response) {
           return response.json()
@@ -881,7 +916,6 @@ export default defineComponent({
                 tileCoord[1],
                 tileCoord[2]
               )
-
               const geojson = JSON.stringify(
                 {
                   type: 'FeatureCollection',
@@ -893,15 +927,18 @@ export default defineComponent({
                 extent: vectorSource.getTileGrid().getTileCoordExtent(tileCoord),
                 featureProjection: map.value.map.getView().getProjection()
               })
-              console.log(features)
               tile.setFeatures(features)
             }
           })
-          samplingEffortLayer.value.tileLayer.setSource(vectorSource)
+          const layerZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
+          samplingEffortLayer.setZIndex(layerZIndex)
+          samplingEffortLayer.setSource(vectorSource)
+          map.value.map.addLayer(samplingEffortLayer)
         })
     }
 
     return {
+      baseMap,
       toogleLeftDrawer,
       toggleSamplingEffort,
       leftDrawerIcon,
@@ -919,7 +956,6 @@ export default defineComponent({
       map,
       observationsSource,
       locationLayer,
-      samplingEffortLayer,
       locationFeatures,
       overrideStyleFunction,
       geoJson,
