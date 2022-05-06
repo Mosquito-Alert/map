@@ -10,7 +10,6 @@ import {
   provide,
   onUnmounted,
   onMounted,
-  watch,
   computed
 } from 'vue'
 import TileLayer from 'ol/layer/Tile'
@@ -20,12 +19,15 @@ import GeoJSON from 'ol/format/GeoJSON'
 import Projection from 'ol/proj/Projection'
 import VectorTileSource from 'ol/source/VectorTile'
 import VectorTileLayer from 'ol/layer/VectorTile'
+import { useStore } from 'vuex'
 // import {Fill, Style} from 'ol/style'
 
 export default {
   extends: TileLayer,
-  name: 'ol-tile-layer',
+  name: 'ol-geojson-vectortile-layer',
   setup (props) {
+    console.log('in')
+    const $store = useStore()
     const map = inject('map')
     const {
       properties
@@ -47,7 +49,7 @@ export default {
       removeTileLayer()
     })
 
-    provide('tileLayer', tileLayer)
+    provide('geojsonVectortileLayer', tileLayer)
 
     // Converts geojson-vt data to GeoJSON
     const replacer = function (key, value) {
@@ -89,10 +91,10 @@ export default {
     }
 
     function loadLayer () {
+      const url = $store.getters['app/getBackend'] + 'api/userfixes/2021-01-01/2021-12-31'
       const layer = new VectorTileLayer({
         background: '#1a2b39'
       })
-      const url = 'https://openlayers.org/data/vector/ecoregions.json'
       fetch(url)
         .then(function (response) {
           return response.json()
@@ -139,7 +141,12 @@ export default {
           layer.setSource(vectorSource)
         })
     }
-    return { tileLayer }
+
+    loadLayer()
+    return {
+      tileLayer,
+      loadLayer
+    }
   },
 
   props: {

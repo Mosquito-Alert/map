@@ -27,6 +27,10 @@
               url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wxbHRmZXliMDlkeDNrcG40dm14OWZmNiJ9.UFRSz8T_c4riZkH3CyGgBQ' /> -->
         </ol-tile-layer>
 
+        <!-- SAMPLING EFFORT -->
+        <ol-tile-layer ref='samplingEffortLayer' name="samplingEffortLayer">
+        </ol-tile-layer>
+
         <!-- ADMINISTRATIVE LIMITS LAYER -->
         <ol-vector-layer ref='locationLayer' name="locationLayer">
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
@@ -72,9 +76,14 @@ import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
+// import GeojsonVT from '../js/geojson-vt'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
+import VectorTileSource from 'ol/source/VectorTile'
+import GeoJSON from 'ol/format/GeoJSON'
+import Projection from 'ol/proj/Projection'
+import geojsonvt from 'geojson-vt'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -100,6 +109,7 @@ export default defineComponent({
     let ready = false
     const map = ref('null')
     const observationsSource = ref()
+    const samplingEffortLayer = ref('null')
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
@@ -801,8 +811,99 @@ export default defineComponent({
       return expandedDate
     }
 
+    const replacer = function (key, value) {
+      if (!value || !value.geometry) {
+        return value
+      }
+
+      let type
+      const rawType = value.type
+      let geometry = value.geometry
+      if (rawType === 1) {
+        type = 'MultiPoint'
+        if (geometry.length === 1) {
+          type = 'Point'
+          geometry = geometry[0]
+        }
+      } else if (rawType === 2) {
+        type = 'MultiLineString'
+        if (geometry.length === 1) {
+          type = 'LineString'
+          geometry = geometry[0]
+        }
+      } else if (rawType === 3) {
+        type = 'Polygon'
+        if (geometry.length > 1) {
+          type = 'MultiPolygon'
+          geometry = [geometry]
+        }
+      }
+
+      return {
+        type: 'Feature',
+        geometry: {
+          type: type,
+          coordinates: geometry
+        },
+        properties: value.tags
+      }
+    }
+
+    function toggleSamplingEffort (status) {
+      // set the layer source
+      const url = $store.getters['app/getBackend'] + 'api/userfixes/2021-01-01/2021-12-31'
+      fetch(url)
+        .then(function (response) {
+          return response.json()
+        })
+        .then(function (json) {
+          const tileIndex = geojsonvt(json, {
+            extent: 4096,
+            debug: 1
+          })
+          const format = new GeoJSON({
+            // Data returned from geojson-vt is in tile pixel units
+            dataProjection: new Projection({
+              code: 'TILE_PIXELS',
+              units: 'tile-pixels',
+              extent: [0, 0, 4096, 4096]
+            })
+          })
+          const vectorSource = new VectorTileSource({
+            tileUrlFunction: function (tileCoord) {
+            // Use the tile coordinate as a pseudo URL for caching purposes
+              return JSON.stringify(tileCoord)
+            },
+            tileLoadFunction: function (tile, url) {
+              const tileCoord = JSON.parse(url)
+              const data = tileIndex.getTile(
+                tileCoord[0],
+                tileCoord[1],
+                tileCoord[2]
+              )
+
+              const geojson = JSON.stringify(
+                {
+                  type: 'FeatureCollection',
+                  features: data ? data.features : []
+                },
+                replacer
+              )
+              const features = format.readFeatures(geojson, {
+                extent: vectorSource.getTileGrid().getTileCoordExtent(tileCoord),
+                featureProjection: map.value.map.getView().getProjection()
+              })
+              console.log(features)
+              tile.setFeatures(features)
+            }
+          })
+          samplingEffortLayer.value.tileLayer.setSource(vectorSource)
+        })
+    }
+
     return {
       toogleLeftDrawer,
+      toggleSamplingEffort,
       leftDrawerIcon,
       fillLocationColor,
       strokeLocationColor,
@@ -818,6 +919,7 @@ export default defineComponent({
       map,
       observationsSource,
       locationLayer,
+      samplingEffortLayer,
       locationFeatures,
       overrideStyleFunction,
       geoJson,

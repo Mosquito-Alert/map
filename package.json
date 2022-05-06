@@ -17,6 +17,7 @@
     "chart.js": "^3.7.1",
     "chartjs-adapter-moment": "^1.0.0",
     "core-js": "^3.6.5",
+    "geojson-vt": "^3.2.1",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "quasar": "^2.0.0",

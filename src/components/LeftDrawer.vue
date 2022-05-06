@@ -286,8 +286,7 @@ export default {
       context.emit('filterLocations', geojson)
     }
     const toggleSamplingEffort = function (status) {
-      // context.emit('toggleSamplingEffort', status)
-      console.log(status)
+      context.emit('toggleSamplingEffort', status)
     }
     const locationCleared = function () {
       context.emit('clearLocations')
