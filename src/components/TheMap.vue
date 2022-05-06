@@ -208,11 +208,6 @@ export default defineComponent({
     }
 
     function redrawMap () {
-      // Avoid get new data from worker while spiderfy is open
-      // in that case updateMap gets the data
-      if (spiderfyCluster) {
-        return
-      }
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
