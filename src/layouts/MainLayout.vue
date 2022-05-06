@@ -11,7 +11,6 @@
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
       @filterTags="filterTags"
-      @toggleSamplingEffort="toggleSamplingEffort"
     />
 
     <q-page
@@ -124,16 +123,11 @@ export default {
       }
     }
 
-    const toggleSamplingEffort = function (status) {
-      map.value.toggleSamplingEffort(status)
-    }
-
     return {
       expanded,
       toggleSamplingEffort,
       workerFinished,
       toogleLeftDrawer,
-      toggleSamplingEffort,
       filterObservations,
       filterDate,
       filterLocations,

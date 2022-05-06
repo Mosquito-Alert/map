@@ -798,11 +798,6 @@ export default defineComponent({
       }
     }
 
-    function toggleSamplingEffort (status) {
-      if (status) console.log('show sampling effort')
-      else console.log('hide sampling effort')
-    }
-
     function expandDate (date) {
       let expandedDate = null
       if (!date) return
