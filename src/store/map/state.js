@@ -10,6 +10,7 @@ export default function () {
     maxZoom: 19,
     features: [],
     selectedFeature: null,
-    activeLayers: []
+    activeLayers: [],
+    samplingEffortLoading: false
   }
 }

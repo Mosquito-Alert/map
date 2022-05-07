@@ -132,7 +132,7 @@
           <i class="fa-thin fa-circle-info"></i>
         </div>
         <div class="category-box">
-          <sampling-effort
+          <sampling-effort ref="samplingEffort"
             title="fa-light fa-gauge-max"
             @samplingEffort="toggleSamplingEffort"
           ></sampling-effort>
@@ -160,6 +160,7 @@ export default {
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
+    const samplingEffort = ref(null)
     const $store = useStore()
     const $q = useQuasar()
 
@@ -300,6 +301,7 @@ export default {
       ca,
       es,
       en,
+      samplingEffort,
       searchLocation,
       clickLanguageSelector,
       initialClass,

@@ -66,7 +66,7 @@ export default {
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {
-          args.start += 1
+          args.start += 5
           resizeMap(args)
         }, 25)
       }
@@ -98,6 +98,14 @@ export default {
 
     const filterDate = function (date) {
       map.value.filterDate(date.data)
+      // If samplingEffort layer is active then refresh it
+      const samplingIsActive = $store.getters['map/getActiveLayers'].includes('sampling-effort')
+      if (samplingIsActive) {
+        map.value.resetUserfixesTileIndex()
+        map.value.checkSamplingEffort(true)
+      } else {
+        map.value.resetUserfixesTileIndex()
+      }
     }
 
     const filterObservations = function (data) {
@@ -105,7 +113,7 @@ export default {
     }
 
     const toggleSamplingEffort = function (status) {
-      map.value.toggleSamplingEffort(status)
+      map.value.checkSamplingEffort(status)
     }
 
     const infoModalVisible = computed(() => {

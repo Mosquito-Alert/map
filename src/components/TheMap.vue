@@ -77,24 +77,23 @@ import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
+import UserfixesLayer from '../js/UserfixesLayer'
 // import VectorTileSource from 'ol/source/VectorTile'
-import GeoJSON from 'ol/format/GeoJSON'
-import Projection from 'ol/proj/Projection'
-import geojsonvt from 'geojson-vt'
+// import GeoJSON from 'ol/format/GeoJSON'
+// import Projection from 'ol/proj/Projection'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 // import GeojsonVT from '../js/geojson-vt'
 // import VectorTileLayer from 'ol/layer/VectorTile'
-import DataTile from 'ol/source/DataTile'
-import TileLayer from 'ol/layer/WebGLTile'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinished'],
+  emits: ['toogleLeftDrawer', 'workerFinished', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
-    let samplingEffortLayer
+    let userfixesLayer
+    let userfixesUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -352,23 +351,6 @@ export default defineComponent({
       })
     }
 
-    // removeCluster: Remove the spiderfied cluster from view
-    // function removeCluster (cluster) {
-    //   const index = features.value.findIndex(feature => {
-    //     if (feature.values_.properties.cluster_id) {
-    //       return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
-    //     }
-    //     return -1
-    //   })
-    //   console.log('index')
-    //   console.log(index + ' ' + features.value.length)
-    //   const spiralIsOpen = spiralSource.value.source.getFeatures().length
-    //   console.log(spiralIsOpen)
-    //   if (index !== -1 && spiralIsOpen) {
-    //     features.value.splice(index, 1)
-    //   }
-    // }
-
     function spiderfy (center, clusterFeatures) {
       // update spiderfiedIds to exclude from worker feedback
       const features = []
@@ -434,6 +416,10 @@ export default defineComponent({
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
+      const legend = $store.getters['app/getLayers'].sampling_effort.legend
+      const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
+      userfixesUrl = $store.getters['app/getBackend'] + 'api/userfixes/'
+      userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
 
       ol.on('click', function (event) {
         clickOnSpiral = false
@@ -815,107 +801,41 @@ export default defineComponent({
       return expandedDate
     }
 
-    const samplingLegend = $store.getters['app/getLayers'].sampling_effort.legend
-    function getUserFixesColor (nFixes) {
-      const index = samplingLegend.findIndex(e => {
-        return (e.from <= nFixes && e.to >= nFixes)
-      })
-      return samplingLegend[index].color
-    }
-
-    function toggleSamplingEffort (visible) {
-      // set the layer source
-      // samplingEffortLayer.value.tileLayer.setSource(new VectorTileSource({}))
-      if (!visible) {
-        map.value.map.removeLayer(samplingEffortLayer)
-        return
-      }
+    function refreshUserfixesUrl () {
       const sDate = mapFilters.date[0].from.replaceAll('/', '-')
       const eDate = mapFilters.date[0].to.replaceAll('/', '-')
+      userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
+    }
 
-      const url = $store.getters['app/getBackend'] + 'api/userfixes/' + sDate + '/' + eDate
-      console.log(url)
+    function resetUserfixesTileIndex () {
+      userfixesLayer.tileIndex = null
+    }
 
-      const size = 256
-      const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
+    function checkSamplingEffort (status) {
+      if (!status) {
+        map.value.map.removeLayer(userfixesLayer.layer)
+        return
+      }
+      let sDate, eDate
+      if (!mapFilters.date[0]) {
+        sDate = startDate
+        eDate = endDate
+      } else {
+        sDate = mapFilters.date[0].from.replaceAll('/', '-')
+        eDate = mapFilters.date[0].to.replaceAll('/', '-')
+      }
 
-      const context = canvas.getContext('2d')
-      context.strokeStyle = 'white'
-      context.textAlign = 'center'
-      context.font = '24px sans-serif'
-
-      fetch(url)
-        .then(function (response) {
-          return response.json()
-        })
-        .then(function (json) {
-          const tileIndex = geojsonvt(json, {
-            extent: 4096,
-            debug: 1
-          })
-          const format = new GeoJSON({
-            // Data returned from geojson-vt is in tile pixel units
-            dataProjection: new Projection({
-              code: 'TILE_PIXELS',
-              units: 'tile-pixels',
-              extent: [0, 0, 4096, 4096]
-            })
-          })
-          console.log(format)
-
-          samplingEffortLayer = new TileLayer({
-            source: new DataTile({
-              loader: function (z, x, y) {
-                const pad = 0
-                const extent = 4096
-                const tileContent = tileIndex.getTile(z, x, y)
-                if (!tileContent.features) {
-                  return
-                }
-                context.clearRect(0, 0, size, size)
-                const features = tileContent.features
-                for (let i = 0; i < features.length; i++) {
-                  const feature = features[i]
-                  const type = feature.type
-                  // Draw only polygons
-                  if (type !== 3) continue
-                  const color = getUserFixesColor(feature.tags.num_fixes)
-                  context.fillStyle = color
-                  context.strokeStyle = color
-                  context.beginPath()
-
-                  for (let j = 0; j < feature.geometry.length; j++) {
-                    const geom = feature.geometry[j]
-                    for (let k = 0; k < geom.length; k++) {
-                      const p = geom[k]
-                      const x = p[0] / extent * size
-                      const y = p[1] / extent * size
-                      if (k) context.lineTo(x + pad, y + pad)
-                      else context.moveTo(x + pad, y + pad)
-                    }
-                  }
-                  context.fill('evenodd')
-                  context.stroke()
-                }
-                const data = context.getImageData(0, 0, size, size).data
-                return new Uint8Array(data.buffer)
-              },
-              // disable opacity transition to avoid overlapping labels during tile loading
-              transition: 0
-            })
-          })
-          const layerZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
-          samplingEffortLayer.setZIndex(layerZIndex)
-          map.value.map.addLayer(samplingEffortLayer)
-        })
+      userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
+      $store.commit('map/setSamplingEffortLoading', { loading: true })
+      userfixesLayer.refreshLayer()
     }
 
     return {
       baseMap,
       toogleLeftDrawer,
-      toggleSamplingEffort,
+      checkSamplingEffort,
+      refreshUserfixesUrl,
+      resetUserfixesTileIndex,
       leftDrawerIcon,
       fillLocationColor,
       strokeLocationColor,

@@ -13,3 +13,11 @@ export const getSelectedFeature = (state) => {
 export const getMaxZoom = state => {
   return state.maxZoom
 }
+
+export const getActiveLayers = state => {
+  return state.activeLayers
+}
+
+export const getSamplingEffortLoading = state => {
+  return state.samplingEffortLoading
+}
