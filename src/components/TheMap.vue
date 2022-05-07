@@ -75,16 +75,18 @@ import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-import { Style, Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
-import VectorTileSource from 'ol/source/VectorTile'
+// import VectorTileSource from 'ol/source/VectorTile'
 import GeoJSON from 'ol/format/GeoJSON'
 import Projection from 'ol/proj/Projection'
 import geojsonvt from 'geojson-vt'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 // import GeojsonVT from '../js/geojson-vt'
-import VectorTileLayer from 'ol/layer/VectorTile'
+// import VectorTileLayer from 'ol/layer/VectorTile'
+import DataTile from 'ol/source/DataTile'
+import TileLayer from 'ol/layer/WebGLTile'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -813,46 +815,8 @@ export default defineComponent({
       return expandedDate
     }
 
-    const replacer = function (key, value) {
-      if (!value || !value.geometry) {
-        return value
-      }
-
-      let type
-      const rawType = value.type
-      let geometry = value.geometry
-      if (rawType === 1) {
-        type = 'MultiPoint'
-        if (geometry.length === 1) {
-          type = 'Point'
-          geometry = geometry[0]
-        }
-      } else if (rawType === 2) {
-        type = 'MultiLineString'
-        if (geometry.length === 1) {
-          type = 'LineString'
-          geometry = geometry[0]
-        }
-      } else if (rawType === 3) {
-        type = 'Polygon'
-        if (geometry.length > 1) {
-          type = 'MultiPolygon'
-          geometry = [geometry]
-        }
-      }
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: type,
-          coordinates: geometry
-        },
-        properties: value.tags
-      }
-    }
-
-    const samplingLegend = $store.getters['app/layers'].sampling_effort.legend
-    function getColorFromFixes (nFixes) {
+    const samplingLegend = $store.getters['app/getLayers'].sampling_effort.legend
+    function getUserFixesColor (nFixes) {
       const index = samplingLegend.findIndex(e => {
         return (e.from <= nFixes && e.to >= nFixes)
       })
@@ -872,21 +836,16 @@ export default defineComponent({
       const url = $store.getters['app/getBackend'] + 'api/userfixes/' + sDate + '/' + eDate
       console.log(url)
 
-      const style = new Style({
-        fill: new Fill({
-          color: '#eeeeee'
-        })
-      })
+      const size = 256
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
 
-      samplingEffortLayer = new VectorTileLayer({
-        // background: 'rgb(255,0,0,0.1)',
-        zIndex: parseInt(baseMap.value.tileLayer.values_.zIndex) + 1,
-        style: function (feature) {
-          const fixes = feature.get('num_fixes')
-          style.getFill().setColor(getColorFromFixes(fixes))
-          return style
-        }
-      })
+      const context = canvas.getContext('2d')
+      context.strokeStyle = 'white'
+      context.textAlign = 'center'
+      context.font = '24px sans-serif'
+
       fetch(url)
         .then(function (response) {
           return response.json()
@@ -904,35 +863,51 @@ export default defineComponent({
               extent: [0, 0, 4096, 4096]
             })
           })
-          const vectorSource = new VectorTileSource({
-            tileUrlFunction: function (tileCoord) {
-            // Use the tile coordinate as a pseudo URL for caching purposes
-              return JSON.stringify(tileCoord)
-            },
-            tileLoadFunction: function (tile, url) {
-              const tileCoord = JSON.parse(url)
-              const data = tileIndex.getTile(
-                tileCoord[0],
-                tileCoord[1],
-                tileCoord[2]
-              )
-              const geojson = JSON.stringify(
-                {
-                  type: 'FeatureCollection',
-                  features: data ? data.features : []
-                },
-                replacer
-              )
-              const features = format.readFeatures(geojson, {
-                extent: vectorSource.getTileGrid().getTileCoordExtent(tileCoord),
-                featureProjection: map.value.map.getView().getProjection()
-              })
-              tile.setFeatures(features)
-            }
+          console.log(format)
+
+          samplingEffortLayer = new TileLayer({
+            source: new DataTile({
+              loader: function (z, x, y) {
+                const pad = 0
+                const extent = 4096
+                const tileContent = tileIndex.getTile(z, x, y)
+                if (!tileContent.features) {
+                  return
+                }
+                context.clearRect(0, 0, size, size)
+                const features = tileContent.features
+                for (let i = 0; i < features.length; i++) {
+                  const feature = features[i]
+                  const type = feature.type
+                  // Draw only polygons
+                  if (type !== 3) continue
+                  const color = getUserFixesColor(feature.tags.num_fixes)
+                  context.fillStyle = color
+                  context.strokeStyle = color
+                  context.beginPath()
+
+                  for (let j = 0; j < feature.geometry.length; j++) {
+                    const geom = feature.geometry[j]
+                    for (let k = 0; k < geom.length; k++) {
+                      const p = geom[k]
+                      const x = p[0] / extent * size
+                      const y = p[1] / extent * size
+                      if (k) context.lineTo(x + pad, y + pad)
+                      else context.moveTo(x + pad, y + pad)
+                    }
+                  }
+                  context.fill('evenodd')
+                  context.stroke()
+                }
+                const data = context.getImageData(0, 0, size, size).data
+                return new Uint8Array(data.buffer)
+              },
+              // disable opacity transition to avoid overlapping labels during tile loading
+              transition: 0
+            })
           })
           const layerZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
           samplingEffortLayer.setZIndex(layerZIndex)
-          samplingEffortLayer.setSource(vectorSource)
           map.value.map.addLayer(samplingEffortLayer)
         })
     }
