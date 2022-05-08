@@ -6,11 +6,11 @@
     <site-header :expanded="expanded"/>
     <left-drawer ref="TOC"
       :expanded="expanded"
+      @toggleSamplingEffort='toggleSamplingEffort'
       @filterObservations='filterObservations'
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
       @filterTags="filterTags"
-      @toggleSamplingEffort="toggleSamplingEffort"
     />
 
     <q-page
@@ -66,7 +66,7 @@ export default {
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {
-          args.start += 1
+          args.start += 5
           resizeMap(args)
         }, 25)
       }
@@ -98,10 +98,22 @@ export default {
 
     const filterDate = function (date) {
       map.value.filterDate(date.data)
+      // If samplingEffort layer is active then refresh it
+      const samplingIsActive = $store.getters['map/getActiveLayers'].includes('sampling-effort')
+      if (samplingIsActive) {
+        map.value.resetUserfixesTileIndex()
+        map.value.checkSamplingEffort(true)
+      } else {
+        map.value.resetUserfixesTileIndex()
+      }
     }
 
     const filterObservations = function (data) {
       map.value.filterObservations(data)
+    }
+
+    const toggleSamplingEffort = function (status) {
+      map.value.checkSamplingEffort(status)
     }
 
     const infoModalVisible = computed(() => {
@@ -117,10 +129,6 @@ export default {
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }
-    }
-
-    const toggleSamplingEffort = function (status) {
-      map.value.toggleSamplingEffort(status)
     }
 
     return {

@@ -1,6 +1,15 @@
 <template>
-    <div class="sampling-effort-box" @click="toggleClass" :class="{active: isActive}">
-      <i :class="icon_code"></i>
+    <div
+      class="sampling-effort-box"
+      :class="{active: isActive}"
+      @click="toggleClass"
+      @loadingSamplingEffort="handleLoading"
+    >
+      <i v-if="!loading" :class="icon_code"></i>
+       <q-spinner v-else
+        color="orange"
+        size="2em"
+      />
       <div class="colors">
           <ul class="sampling-effort-categories">
               <li v-for="value, key in samplingEffort.legend" :key="key">
@@ -31,10 +40,18 @@ export default {
       return $store.getters['app/layers'].sampling_effort
     })
 
+    const loading = computed(() => {
+      return $store.getters['map/getSamplingEffortLoading']
+    })
+
     const toggleClass = () => {
       isActive.value = !isActive.value
       context.emit('samplingEffort', isActive.value)
-      $store.commit('map/addActiveLayer', 'sampling-effort')
+      if (isActive.value) {
+        $store.commit('map/addActiveLayer', 'sampling-effort')
+      } else {
+        $store.commit('map/removeActiveLayer', 'sampling-effort')
+      }
     }
 
     const _ = function (text) {
@@ -42,6 +59,7 @@ export default {
     }
 
     return {
+      loading,
       samplingEffort,
       toggleClass,
       isActive,

@@ -75,24 +75,25 @@ import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-import { Style, Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
-import VectorTileSource from 'ol/source/VectorTile'
-import GeoJSON from 'ol/format/GeoJSON'
-import Projection from 'ol/proj/Projection'
-import geojsonvt from 'geojson-vt'
+import UserfixesLayer from '../js/UserfixesLayer'
+// import VectorTileSource from 'ol/source/VectorTile'
+// import GeoJSON from 'ol/format/GeoJSON'
+// import Projection from 'ol/proj/Projection'
 // import { fromExtent } from 'ol/geom/Polygon'
 // import Polygon from 'ol/geom/Polygon'
 // import GeojsonVT from '../js/geojson-vt'
-import VectorTileLayer from 'ol/layer/VectorTile'
+// import VectorTileLayer from 'ol/layer/VectorTile'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinished'],
+  emits: ['toogleLeftDrawer', 'workerFinished', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
-    let samplingEffortLayer
+    let userfixesLayer
+    let userfixesUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -345,23 +346,6 @@ export default defineComponent({
       })
     }
 
-    // removeCluster: Remove the spiderfied cluster from view
-    // function removeCluster (cluster) {
-    //   const index = features.value.findIndex(feature => {
-    //     if (feature.values_.properties.cluster_id) {
-    //       return feature.values_.properties.cluster_id === cluster.values_.properties.cluster_id
-    //     }
-    //     return -1
-    //   })
-    //   console.log('index')
-    //   console.log(index + ' ' + features.value.length)
-    //   const spiralIsOpen = spiralSource.value.source.getFeatures().length
-    //   console.log(spiralIsOpen)
-    //   if (index !== -1 && spiralIsOpen) {
-    //     features.value.splice(index, 1)
-    //   }
-    // }
-
     function spiderfy (center, clusterFeatures) {
       // update spiderfiedIds to exclude from worker feedback
       const features = []
@@ -427,6 +411,10 @@ export default defineComponent({
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
+      const legend = $store.getters['app/getLayers'].sampling_effort.legend
+      const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
+      userfixesUrl = $store.getters['app/getBackend'] + 'api/userfixes/'
+      userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
 
       ol.on('click', function (event) {
         clickOnSpiral = false
@@ -808,134 +796,41 @@ export default defineComponent({
       return expandedDate
     }
 
-    const replacer = function (key, value) {
-      if (!value || !value.geometry) {
-        return value
-      }
-
-      let type
-      const rawType = value.type
-      let geometry = value.geometry
-      if (rawType === 1) {
-        type = 'MultiPoint'
-        if (geometry.length === 1) {
-          type = 'Point'
-          geometry = geometry[0]
-        }
-      } else if (rawType === 2) {
-        type = 'MultiLineString'
-        if (geometry.length === 1) {
-          type = 'LineString'
-          geometry = geometry[0]
-        }
-      } else if (rawType === 3) {
-        type = 'Polygon'
-        if (geometry.length > 1) {
-          type = 'MultiPolygon'
-          geometry = [geometry]
-        }
-      }
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: type,
-          coordinates: geometry
-        },
-        properties: value.tags
-      }
-    }
-
-    const samplingLegend = $store.getters['app/layers'].sampling_effort.legend
-    function getColorFromFixes (nFixes) {
-      const index = samplingLegend.findIndex(e => {
-        return (e.from <= nFixes && e.to >= nFixes)
-      })
-      return samplingLegend[index].color
-    }
-
-    function toggleSamplingEffort (visible) {
-      // set the layer source
-      // samplingEffortLayer.value.tileLayer.setSource(new VectorTileSource({}))
-      if (!visible) {
-        map.value.map.removeLayer(samplingEffortLayer)
-        return
-      }
+    function refreshUserfixesUrl () {
       const sDate = mapFilters.date[0].from.replaceAll('/', '-')
       const eDate = mapFilters.date[0].to.replaceAll('/', '-')
+      userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
+    }
 
-      const url = $store.getters['app/getBackend'] + 'api/userfixes/' + sDate + '/' + eDate
-      console.log(url)
+    function resetUserfixesTileIndex () {
+      userfixesLayer.tileIndex = null
+    }
 
-      const style = new Style({
-        fill: new Fill({
-          color: '#eeeeee'
-        })
-      })
+    function checkSamplingEffort (status) {
+      if (!status) {
+        map.value.map.removeLayer(userfixesLayer.layer)
+        return
+      }
+      let sDate, eDate
+      if (!mapFilters.date[0]) {
+        sDate = startDate
+        eDate = endDate
+      } else {
+        sDate = mapFilters.date[0].from.replaceAll('/', '-')
+        eDate = mapFilters.date[0].to.replaceAll('/', '-')
+      }
 
-      samplingEffortLayer = new VectorTileLayer({
-        // background: 'rgb(255,0,0,0.1)',
-        zIndex: parseInt(baseMap.value.tileLayer.values_.zIndex) + 1,
-        style: function (feature) {
-          const fixes = feature.get('num_fixes')
-          style.getFill().setColor(getColorFromFixes(fixes))
-          return style
-        }
-      })
-      fetch(url)
-        .then(function (response) {
-          return response.json()
-        })
-        .then(function (json) {
-          const tileIndex = geojsonvt(json, {
-            extent: 4096,
-            debug: 1
-          })
-          const format = new GeoJSON({
-            // Data returned from geojson-vt is in tile pixel units
-            dataProjection: new Projection({
-              code: 'TILE_PIXELS',
-              units: 'tile-pixels',
-              extent: [0, 0, 4096, 4096]
-            })
-          })
-          const vectorSource = new VectorTileSource({
-            tileUrlFunction: function (tileCoord) {
-            // Use the tile coordinate as a pseudo URL for caching purposes
-              return JSON.stringify(tileCoord)
-            },
-            tileLoadFunction: function (tile, url) {
-              const tileCoord = JSON.parse(url)
-              const data = tileIndex.getTile(
-                tileCoord[0],
-                tileCoord[1],
-                tileCoord[2]
-              )
-              const geojson = JSON.stringify(
-                {
-                  type: 'FeatureCollection',
-                  features: data ? data.features : []
-                },
-                replacer
-              )
-              const features = format.readFeatures(geojson, {
-                extent: vectorSource.getTileGrid().getTileCoordExtent(tileCoord),
-                featureProjection: map.value.map.getView().getProjection()
-              })
-              tile.setFeatures(features)
-            }
-          })
-          const layerZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
-          samplingEffortLayer.setZIndex(layerZIndex)
-          samplingEffortLayer.setSource(vectorSource)
-          map.value.map.addLayer(samplingEffortLayer)
-        })
+      userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
+      $store.commit('map/setSamplingEffortLoading', { loading: true })
+      userfixesLayer.refreshLayer()
     }
 
     return {
       baseMap,
       toogleLeftDrawer,
-      toggleSamplingEffort,
+      checkSamplingEffort,
+      refreshUserfixesUrl,
+      resetUserfixesTileIndex,
       leftDrawerIcon,
       fillLocationColor,
       strokeLocationColor,

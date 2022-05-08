@@ -15,3 +15,7 @@ export const removeActiveLayer = (state, payload) => {
     state.activeLayers.splice(index, 1)
   }
 }
+
+export const setSamplingEffortLoading = (state, payload) => {
+  state.samplingEffortLoading = payload.loading
+}
