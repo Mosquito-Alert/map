@@ -14,11 +14,17 @@ export default class UserfixesLayer {
     this.$store = useStore()
   }
 
+  addAlpha (color, opacity) {
+    // coerce values so ti is between 0 and 1.
+    const _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255)
+    return color + _opacity.toString(16).toUpperCase()
+  }
+
   getUserFixesColor (nFixes) {
     const index = this.legend.findIndex(e => {
       return (e.from <= nFixes && e.to >= nFixes)
     })
-    return this.legend[index].color
+    return this.addAlpha(this.legend[index].color, 0.3)
   }
 
   addLayer (tileIndex) {
@@ -32,6 +38,7 @@ export default class UserfixesLayer {
     context.strokeStyle = 'white'
     this.map.removeLayer(this.layer)
     this.layer = new TileLayer({
+      maxZoom: 19, // visible at zoom levels above 14
       source: new DataTile({
         loader: function (z, x, y) {
           const pad = 0
@@ -93,7 +100,7 @@ export default class UserfixesLayer {
       .then(function (json) {
         _this.tileIndex = geojsonvt(json, {
           extent: 4096,
-          debug: 1
+          maxZoom: 18
         })
         _this.addLayer(_this.tileIndex)
       })

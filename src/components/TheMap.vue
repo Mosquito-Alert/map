@@ -89,7 +89,7 @@ import UserfixesLayer from '../js/UserfixesLayer'
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinished', 'loadingSamplingEffort'],
+  emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
     let userfixesLayer
@@ -263,7 +263,7 @@ export default defineComponent({
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
-          context.emit('workerFinished', { mapFilters })
+          context.emit('workerFinishedIndexing', { mapFilters })
           startDate = event.data.datesInterval.from
           endDate = event.data.datesInterval.to
           updateMap()
@@ -827,6 +827,7 @@ export default defineComponent({
 
     return {
       baseMap,
+      mapFilters,
       toogleLeftDrawer,
       checkSamplingEffort,
       refreshUserfixesUrl,

@@ -20,7 +20,7 @@
       <the-map ref='map'
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
-        @workerFinished="workerFinished"
+        @workerFinishedIndexing="workerFinishedIndexing"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -93,10 +93,16 @@ export default {
     }
 
     const filterTags = function (tags) {
+      if (filteringLocations()) {
+        TOC.value.searchLocation.loading = true
+      }
       map.value.filterTags(tags)
     }
 
     const filterDate = function (date) {
+      if (filteringLocations()) {
+        TOC.value.searchLocation.loading = true
+      }
       map.value.filterDate(date.data)
       // If samplingEffort layer is active then refresh it
       const samplingIsActive = $store.getters['map/getActiveLayers'].includes('sampling-effort')
@@ -108,7 +114,14 @@ export default {
       }
     }
 
+    const filteringLocations = function () {
+      return map.value.mapFilters.locations.length
+    }
+
     const filterObservations = function (data) {
+      if (filteringLocations()) {
+        TOC.value.searchLocation.loading = true
+      }
       map.value.filterObservations(data)
     }
 
@@ -125,7 +138,7 @@ export default {
       resizeMap({ start: 0, end: 400 })
     }
 
-    const workerFinished = function (payload) {
+    const workerFinishedIndexing = function (payload) {
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }
@@ -134,7 +147,7 @@ export default {
     return {
       expanded,
       toggleSamplingEffort,
-      workerFinished,
+      workerFinishedIndexing,
       toogleLeftDrawer,
       filterObservations,
       filterDate,

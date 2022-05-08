@@ -268,7 +268,6 @@ export default {
       let geojson = null
       if (location.location !== null) {
         const loc = location.location
-        console.log(loc.geojson.coordinates.length)
         const bb = loc.boundingbox
         const bounding = [bb[2], bb[0], bb[3], bb[1]]
         geojson = {
