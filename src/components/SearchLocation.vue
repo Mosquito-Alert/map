@@ -136,6 +136,11 @@ export default {
       hideResults()
       results.value = []
       error.value = false
+      if (searchString.value === '') {
+        inputLocation.value.$el.focus()
+        filterIsActive.value = false
+        context.emit('locationCleared')
+      }
     }
 
     const resetFilter = function () {

@@ -161,8 +161,12 @@ self.onmessage = function (e) {
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
+    let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
+    if (z > 19) {
+      z = 19
+    }
     postMessage({
-      expansionZoom: index.getClusterExpansionZoom(e.data.getClusterExpansionZoom),
+      expansionZoom: z,
       center: e.data.center
     })
   } else if (e.data.filters) {

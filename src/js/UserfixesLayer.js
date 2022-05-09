@@ -100,7 +100,7 @@ export default class UserfixesLayer {
       .then(function (json) {
         _this.tileIndex = geojsonvt(json, {
           extent: 4096,
-          maxZoom: 18
+          maxZoom: 20
         })
         _this.addLayer(_this.tileIndex)
       })

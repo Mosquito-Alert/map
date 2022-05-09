@@ -332,8 +332,6 @@ export default defineComponent({
       // todo load sampling effor layer
       // Get map starting and endding data dates
       if (clickOnSpiral) return
-      console.log('Starting date ' + startDate)
-      console.log('Ending date ' + endDate)
       // Load observations layers
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -365,13 +363,6 @@ export default defineComponent({
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const inc = resolution * 40
-      // Flyto without call worker
-      // flyTo(center, ol.getView().getZoom())
-      // Move spiral features to spiralLayer and remove them from observationsLayer
-      // features.forEach(function (ele) {
-      //   removeFeature(ele.ol_uid)
-      // })
-
       const spiderfied = spiderfyPoints(center, features, inc, inc)
       spiralSource.value.source.addFeatures(spiderfied.points)
       spiralSource.value.source.addFeatures(spiderfied.lines)
@@ -442,7 +433,7 @@ export default defineComponent({
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
-              if (currZoom >= maxZoom.value) {
+              if (parseInt(currZoom) >= parseInt(maxZoom.value)) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
                     features.value.push(spiderfiedCluster)
@@ -470,6 +461,7 @@ export default defineComponent({
                     'EPSG:3857', 'EPSG:4326'
                   )
                 })
+                return true
               }
             } else {
               // Click on just a feature
