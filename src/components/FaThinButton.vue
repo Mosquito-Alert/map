@@ -17,6 +17,18 @@ export default {
 </script>
 
 <style lang="scss">
+
+button.fa-thin-button span{
+  text-align: center;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+button.fa-thin-button i.fa-thin{
+  padding: 0 8px;
+  font-size: 2em;
+}
+
 button.fa-thin-button {
   width: 60px;
   height: 64px;
@@ -28,15 +40,6 @@ button.fa-thin-button {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  :deep(i.fa-thin) {
-    padding: 0 8px;
-    font-size: 2em;
-  }
-  :deep(span) {
-    text-align: center;
-    white-space: nowrap;
-    font-size: 11px;
-  }
   &:first-child {
     border: none;
   }
