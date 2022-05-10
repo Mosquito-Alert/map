@@ -93,7 +93,6 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
-    let administrativeLayer
     let userfixesLayer
     let userfixesUrl
     let spiderfyCluster
@@ -102,13 +101,16 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const baseMap = ref('null')
     let simplifyTolerance = null
+    const fillLocationColor = ref('null')
     const spiralSource = ref()
+    const strokeLocationColor = ref('null')
     const selectedId = ref('null')
     const selectedFeat = ref('null')
     const $store = useStore()
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
+    const locationFeatures = ref([])
     let ready = false
     const map = ref('null')
     const observationsSource = ref()
@@ -136,7 +138,6 @@ export default defineComponent({
     }
 
     const fitFeature = function (location) {
-      console.time('FitFeature')
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -184,13 +185,7 @@ export default defineComponent({
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
-        // locationFeatures.value = [Feat]
-        const writer = new format.GeoJSON()
-        const json = JSON.parse(writer.writeFeatures([Feat], {
-          dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
-        }))
-        administrativeLayer.refreshLayer(json)
-        console.timeEnd('FitFeature')
+        locationFeatures.value = [Feat]
       }
     }
 
@@ -403,8 +398,8 @@ export default defineComponent({
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      const fillLocationColor = defaults.fillLocationColor
-      const strokeLocationColor = defaults.strokeLocationColor
+      fillLocationColor.value = defaults.fillLocationColor
+      strokeLocationColor.value = defaults.strokeLocationColor
       const ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
@@ -674,8 +669,7 @@ export default defineComponent({
     }
 
     const clearAdministrativeFeatures = function () {
-      administrativeLayer.tileIndex = null
-      map.value.map.removeLayer(administrativeLayer.layer)
+      locationFeatures.value = []
       spiderfyCluster = false
       spiderfiedCluster = null
       const workerData = {}
@@ -833,6 +827,8 @@ export default defineComponent({
       refreshUserfixesUrl,
       resetUserfixesTileIndex,
       leftDrawerIcon,
+      fillLocationColor,
+      strokeLocationColor,
       fitFeature,
       clearAdministrativeFeatures,
       autoPanPopup,
@@ -845,7 +841,7 @@ export default defineComponent({
       map,
       observationsSource,
       locationLayer,
-      // locationFeatures,
+      locationFeatures,
       overrideStyleFunction,
       geoJson,
       features,
