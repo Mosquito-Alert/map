@@ -417,10 +417,10 @@ export default defineComponent({
 
       fetch(downloadUrl, {
         method: 'POST', // or 'PUT'
-        body: JSON.stringify(data)
-        // headers: {
-        //   'Content-Type': 'application/force-download'
-        // }
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/force-download'
+        }
       })
         .then((transfer) => {
           return transfer.blob()
@@ -428,6 +428,7 @@ export default defineComponent({
         .then((bytes) => {
           const elm = document.createElement('a')
           elm.href = URL.createObjectURL(bytes)
+          elm.setAttribute('download', 'observations.zip')
           elm.click()
         }).catch((error) => {
           console.log(error)
