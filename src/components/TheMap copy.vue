@@ -93,6 +93,7 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
+    let administrativeLayer
     let userfixesLayer
     let userfixesUrl
     let spiderfyCluster
@@ -110,7 +111,6 @@ export default defineComponent({
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
-    const locationFeatures = ref([])
     let ready = false
     const map = ref('null')
     const observationsSource = ref()

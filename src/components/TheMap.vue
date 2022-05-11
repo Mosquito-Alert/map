@@ -79,13 +79,8 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
-// import VectorTileSource from 'ol/source/VectorTile'
-// import GeoJSON from 'ol/format/GeoJSON'
-// import Projection from 'ol/proj/Projection'
-// import { fromExtent } from 'ol/geom/Polygon'
-// import Polygon from 'ol/geom/Polygon'
-// import GeojsonVT from '../js/geojson-vt'
-// import VectorTileLayer from 'ol/layer/VectorTile'
+import DownloadControl from '../js/DownloadControl'
+// import { saveAs } from 'file-saver'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -93,9 +88,11 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
+    let storeLayers
     let administrativeLayer
     let userfixesLayer
     let userfixesUrl
+    let downloadUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -394,23 +391,62 @@ export default defineComponent({
       )
     }
 
-    // function removeFeature (uid) {
-    //   features.value = features.value.filter(function (e, i) {
-    //     if (e.ol_uid === uid) return false
-    //     else return true
-    //   })
-    // }
+    function handleDownload () {
+      console.log('handle download')
+      const ol = map.value.map
+      ol.getView().calculateExtent(ol.getSize())
+      const bounds = ol.getView().calculateExtent(ol.getSize())
+      const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+      const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+      const data = {
+        bbox: southWest.concat(northEast),
+        observations: [],
+        locations: [],
+        hashtags: [],
+        date: mapFilters.date,
+        report_id: []
+      }
+      const viewLayers = []
+      mapFilters.observations.forEach(o => {
+        const categories = storeLayers[o.type][o.code].categories
+        categories.forEach(c => {
+          viewLayers.push(c)
+        })
+      })
+      data.observations = viewLayers
+
+      fetch(downloadUrl, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data)
+        // headers: {
+        //   'Content-Type': 'application/force-download'
+        // }
+      })
+        .then((transfer) => {
+          return transfer.blob()
+        })
+        .then((bytes) => {
+          const elm = document.createElement('a')
+          elm.href = URL.createObjectURL(bytes)
+          elm.click()
+        }).catch((error) => {
+          console.log(error)
+        })
+    }
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       const fillLocationColor = defaults.fillLocationColor
       const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
+      ol.addControl(new DownloadControl({ callback: handleDownload }))
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
+      storeLayers = $store.getters['app/getLayers']
       const legend = $store.getters['app/getLayers'].sampling_effort.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       userfixesUrl = $store.getters['app/getBackend'] + 'api/userfixes/'
+      downloadUrl = $store.getters['app/getBackend'] + 'api/downloads/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 
@@ -861,22 +897,31 @@ export default defineComponent({
 </script>
 
 <style scoped lang='scss'>
+
   #mapa {
     flex: 1;
     position: relative;
   }
+  :deep(.ol-download){
+    bottom: 160px;
+  }
+  :deep(.ol-zoom) {
+    bottom: 15px;
+  }
+
+  :deep(.ol-download),
   :deep(.ol-zoom) {
     position: absolute;
     top: auto;
-    bottom: 2.5em;
     right: 0.5em;
     left: auto;
     display: flex;
     flex-direction: column;
     background: none;
-    right:15px;
+    // right:15px;
   }
-  :deep(.ol-zoom) button {
+  :deep(.ol-zoom) button,
+  :deep(.ol-download.ol-control) button {
     background: $primary-button-background;
     color: $primary-button-text;
     border: none;
@@ -892,6 +937,7 @@ export default defineComponent({
     box-shadow: $box-shadow;
     // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
+  :deep(.ol-download) button:hover,
   :deep(.ol-zoom) button:hover {
     background: $primary-button-background-hover;
     color: $primary-button-text-hover;
