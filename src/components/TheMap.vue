@@ -410,14 +410,17 @@ export default defineComponent({
       const data = {
         bbox: southWest.concat(northEast),
         observations: viewLayers,
-        hashtags: [],
         date: mapFilters.date,
         report_id: []
       }
+      if (mapFilters.hashtags.length) {
+        data.hashtags = JSON.stringify(mapFilters.hashtags)
+      }
+
       if (mapFilters.locations.length) {
         data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
       }
-
+      console.log(data)
       fetch(downloadUrl, {
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data),
