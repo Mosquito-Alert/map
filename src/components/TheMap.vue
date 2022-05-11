@@ -395,17 +395,10 @@ export default defineComponent({
       console.log('handle download')
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
+      // Preparing params in Backend format
       const bounds = ol.getView().calculateExtent(ol.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
-      const data = {
-        bbox: southWest.concat(northEast),
-        observations: [],
-        locations: [],
-        hashtags: [],
-        date: mapFilters.date,
-        report_id: []
-      }
       const viewLayers = []
       mapFilters.observations.forEach(o => {
         const categories = storeLayers[o.type][o.code].categories
@@ -413,7 +406,17 @@ export default defineComponent({
           viewLayers.push(c)
         })
       })
-      data.observations = viewLayers
+
+      const data = {
+        bbox: southWest.concat(northEast),
+        observations: viewLayers,
+        hashtags: [],
+        date: mapFilters.date,
+        report_id: []
+      }
+      if (mapFilters.locations.length) {
+        data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
+      }
 
       fetch(downloadUrl, {
         method: 'POST', // or 'PUT'
