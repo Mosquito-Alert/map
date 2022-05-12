@@ -15,6 +15,19 @@ export default class DownloadControl extends Control {
       element: element,
       target: options.target
     })
+    this.element = element
     button.addEventListener('click', options.callback.bind(this), false)
+  }
+
+  disable () {
+    this.element.classList.add('disabled')
+  }
+
+  enable () {
+    this.element.classList.remove('disabled')
+  }
+
+  isActive () {
+    return !this.element.classList.contains('disabled')
   }
 }

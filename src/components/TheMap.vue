@@ -88,6 +88,7 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
+    let olDownload
     let storeLayers
     let administrativeLayer
     let userfixesLayer
@@ -124,6 +125,7 @@ export default defineComponent({
       locations: [],
       hashtags: [],
       date: [],
+      reportFeatures: [],
       report_id: []
     }
 
@@ -299,6 +301,12 @@ export default defineComponent({
       } else {
         // The view has changed
         const data = []
+        // if no features on the map
+        if (!event.data.map.length) {
+          olDownload.disable()
+        } else {
+          olDownload.enable()
+        }
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           // Exclude spiral features if there are any because they appear in another layer
@@ -392,7 +400,7 @@ export default defineComponent({
     }
 
     function handleDownload () {
-      console.log('handle download')
+      if (!olDownload.isActive()) return
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
       // Preparing params in Backend format
@@ -409,10 +417,17 @@ export default defineComponent({
 
       const data = {
         bbox: southWest.concat(northEast),
-        observations: viewLayers,
-        date: mapFilters.date,
-        report_id: []
+        observations: viewLayers
       }
+
+      if (mapFilters.date.length) {
+        data.date = mapFilters.date
+      }
+
+      if (mapFilters.report_id.length) {
+        data.report_id = mapFilters.report_id
+      }
+
       if (mapFilters.hashtags.length) {
         data.hashtags = JSON.stringify(mapFilters.hashtags)
       }
@@ -420,7 +435,7 @@ export default defineComponent({
       if (mapFilters.locations.length) {
         data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
       }
-      console.log(data)
+
       fetch(downloadUrl, {
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data),
@@ -446,7 +461,8 @@ export default defineComponent({
       const fillLocationColor = defaults.fillLocationColor
       const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
-      ol.addControl(new DownloadControl({ callback: handleDownload }))
+      olDownload = new DownloadControl({ callback: handleDownload })
+      ol.addControl(olDownload)
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
       storeLayers = $store.getters['app/getLayers']
@@ -784,12 +800,13 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       closePopup()
-      // Check if tags contain report_id starting with ':'
+      // Check if tags contain reportFeatures starting with ':'
       if (tag.startsWith(':')) {
-        mapFilters.report_id = []
+        mapFilters.report_id = [tags[0].substring(1)]
+        mapFilters.reportFeatures = []
         if (obj.mode === 'addedTag') {
           mapFilters.mode = 'increaseFilter'
-          // Fetch observation with report_id, but first remove starting :
+          // Fetch observation with :hashtag, but first remove starting character ':'
           $store.commit('app/setFilteringTag', { value: true })
           const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
           const controller = new AbortController()
@@ -797,7 +814,8 @@ export default defineComponent({
           fetch(`${url}`, { signal })
             .then(res => res.json())
             .then(res => {
-              mapFilters.report_id = [res]
+              // Only one report. So no push into array
+              mapFilters.reportFeatures = [res]
               workerData.filters = mapFilters
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
@@ -812,7 +830,7 @@ export default defineComponent({
           worker.postMessage(workerData)
         }
       } else {
-        // Update mapFilters.tags only if tag is not a report_id (':')
+        // Update mapFilters.tags only if tag is not a :report_id (':')
         if (obj.mode === 'addedTag') {
           mapFilters.mode = 'increaseFilter'
         } else {
@@ -908,6 +926,12 @@ export default defineComponent({
   #mapa {
     flex: 1;
     position: relative;
+  }
+  :deep(.ol-download.ol-control.disabled) button {
+    background: #7b7272;
+  }
+  :deep(.ol-download) button i {
+    cursor:pointer;
   }
   :deep(.ol-download){
     bottom: 160px;

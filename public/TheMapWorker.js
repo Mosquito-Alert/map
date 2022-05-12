@@ -175,8 +175,8 @@ self.onmessage = function (e) {
     filters = e.data.filters
     let filteredData = []
     // Get the smallest dataset before start filtering
-    if (filters.report_id.length) {
-      filteredData = filters.report_id[0].features
+    if (filters.reportFeatures.length) {
+      filteredData = filters.reportFeatures[0].features
     } else {
       if (filters.mode === 'increaseFilter') {
         filteredData = filteredDataset
