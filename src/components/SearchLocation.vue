@@ -77,7 +77,10 @@ export default {
       loading.value = true
       const controller = new AbortController()
       const { signal } = controller
-      fetch(`https://nominatim.openstreetmap.org/search?q=${searchString.value}&format=json&polygon_geojson=1&addressdetails=1`,
+      const lang = $store.getters['app/getLang']
+      let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
+      url += `&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
+      fetch(url,
         { signal })
         .then(res => res.json())
         .then(res => {
