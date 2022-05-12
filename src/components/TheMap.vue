@@ -80,7 +80,7 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
 import DownloadControl from '../js/DownloadControl'
-// import { saveAs } from 'file-saver'
+import { extend } from 'ol/extent'
 
 export default defineComponent({
   components: { ObservationPopup },
@@ -271,7 +271,31 @@ export default defineComponent({
           context.emit('workerFinishedIndexing', { mapFilters })
           startDate = event.data.datesInterval.from
           endDate = event.data.datesInterval.to
-          updateMap()
+          if (event.data.features) {
+            const data = []
+            for (let a = 0; a < event.data.features.length; a++) {
+              const f = event.data.features[a]
+              // Exclude spiral features if there are any because they appear in another layer
+              if (spiderfiedIds.includes(f.properties.id)) continue
+              const feat = new Feature({
+                geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+                properties: f.properties,
+                id: a
+              })
+              data.push(feat)
+            }
+            features.value = data
+            // eslint-disable-next-line prefer-const
+            let extent = features.value[0].getGeometry().getExtent().slice(0)
+            features.value.forEach(function (f) {
+              extend(extent, f.getGeometry().getExtent())
+            })
+            map.value.map.getView().fit(
+              extent
+            )
+          } else {
+            updateMap()
+          }
         }
         ready = true
       } else if (event.data.spiderfyCluster) {
@@ -802,9 +826,9 @@ export default defineComponent({
       closePopup()
       // Check if tags contain reportFeatures starting with ':'
       if (tag.startsWith(':')) {
-        mapFilters.report_id = [tags[0].substring(1)]
         mapFilters.reportFeatures = []
         if (obj.mode === 'addedTag') {
+          mapFilters.report_id = [tags[0].substring(1)]
           mapFilters.mode = 'increaseFilter'
           // Fetch observation with :hashtag, but first remove starting character ':'
           $store.commit('app/setFilteringTag', { value: true })

@@ -28,7 +28,7 @@ getJSON('totes.json', (geojson) => {
   })
 })
 
-function loadMapData (data) {
+function loadMapData (data, fitFeatures) {
   index = new Supercluster({
     log: DEBUG,
     radius: 180,
@@ -43,13 +43,17 @@ function loadMapData (data) {
     maxZoom: 1
   }).load(data)
 
-  postMessage({
+  const workerParams = {
     ready: true,
     datesInterval: {
       from: dataset[0].properties.d,
       to: dataset[dataset.length - 1].properties.d
     }
- })
+  }
+  if (fitFeatures) {
+    workerParams.features = data
+  }
+  postMessage(workerParams)
 }
 
 function filterDate (data, date) {
@@ -158,6 +162,7 @@ function getJSON (url, callback) {
 
 self.onmessage = function (e) {
   // console.log(e.data)
+  let fitFeatures = false
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -174,9 +179,11 @@ self.onmessage = function (e) {
     all_layers = e.data.layers
     filters = e.data.filters
     let filteredData = []
-    // Get the smallest dataset before start filtering
+
+    // Get the smallest dataset (reportFeatures) before start filtering
     if (filters.reportFeatures.length) {
       filteredData = filters.reportFeatures[0].features
+      fitFeatures = true
     } else {
       if (filters.mode === 'increaseFilter') {
         filteredData = filteredDataset
@@ -207,7 +214,7 @@ self.onmessage = function (e) {
     }
     // Update filteredDataset
     filteredDataset = filteredData
-    loadMapData(filteredData)
+    loadMapData(filteredData, fitFeatures)
   } else if (e.data.spiderfyCluster) {
     if (e.data.getClusterExpansionZoom) {
       postMessage({
