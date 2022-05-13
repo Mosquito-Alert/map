@@ -160,6 +160,22 @@ function getJSON (url, callback) {
   xhr.send()
 }
 
+function getExtent (clusterId) {
+  const leaves = index.getLeaves(clusterId, Infinity)
+  let xmin = leaves[0].geometry.coordinates[0]
+  let ymin = leaves[0].geometry.coordinates[1]
+  let xmax = leaves[0].geometry.coordinates[0]
+  let ymax = leaves[0].geometry.coordinates[1]
+  leaves.forEach(l => {
+    if (l.geometry.coordinates[0] < xmin) xmin = l.geometry.coordinates[0]
+    else if (l.geometry.coordinates[0] > xmax) xmax = l.geometry.coordinates[0]
+
+    if (l.geometry.coordinates[1] < ymin) ymin = l.geometry.coordinates[1]
+    else if (l.geometry.coordinates[1] > ymax) ymax = l.geometry.coordinates[1]
+  })
+  return [xmin, ymin, xmax, ymax]
+}
+
 self.onmessage = function (e) {
   // console.log(e.data)
   let fitFeatures = false
@@ -167,12 +183,16 @@ self.onmessage = function (e) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
     let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
-    if (z > 19) {
+    // Calculate the extent of the cluster to speed up zooming in
+    const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
+
+    if (z >= 19) {
       z = 19
     }
     postMessage({
       expansionZoom: z,
-      center: e.data.center
+      center: e.data.center,
+      clusterExtent: clusterExtent
     })
   } else if (e.data.filters) {
     // This is fired when the map is filtered.

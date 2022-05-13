@@ -5,18 +5,18 @@
       @click="toggleClass"
       @loadingSamplingEffort="handleLoading"
     >
-      <i v-if="!loading" :class="icon_code"></i>
-       <q-spinner v-else
-        color="orange"
-        size="2em"
-      />
-      <div class="colors">
+      <i :class="icon_code"></i>
+       <div class="colors">
           <ul class="sampling-effort-categories">
               <li v-for="value, key in samplingEffort.legend" :key="key">
                   <div class="category-label" >{{ value.from }}</div>
                   <div class="category-color" :style="{ backgroundColor: value.color }"></div>
               </li>
           </ul>
+          <q-spinner v-if="loading"
+            color="orange"
+            size="2em"
+          />
       </div>
     </div>
 </template>

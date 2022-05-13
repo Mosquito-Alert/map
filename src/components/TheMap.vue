@@ -88,7 +88,6 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
-    console.log(document.location)
     let olDownload
     let storeLayers
     let administrativeLayer
@@ -323,8 +322,12 @@ export default defineComponent({
         // removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
-        const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
-        flyTo(center, event.data.expansionZoom)
+        map.value.map.getView().fit(
+          transformExtent(event.data.clusterExtent, 'EPSG:4326', 'EPSG:3857'),
+          { duration: 600, nearest: true }
+        )
+        // const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
+        // flyTo(center, event.data.expansionZoom)
       } else {
         // The view has changed
         const data = []
