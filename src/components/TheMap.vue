@@ -324,7 +324,7 @@ export default defineComponent({
         // User has clicked on a cluster
         map.value.map.getView().fit(
           transformExtent(event.data.clusterExtent, 'EPSG:4326', 'EPSG:3857'),
-          { duration: 600, nearest: true }
+          { duration: 600, nearest: false }
         )
         // const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
         // flyTo(center, event.data.expansionZoom)
@@ -650,7 +650,7 @@ export default defineComponent({
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
         let radius = 0
-        if (size < 100) radius = 10
+        if (size < 100) radius = 12
         if (size >= 100) radius = 25
         if (size >= 1000) radius = 35
         if (size >= 10000) radius = 50
@@ -957,8 +957,15 @@ export default defineComponent({
     flex: 1;
     position: relative;
   }
-  :deep(.ol-download.ol-control.disabled) button {
-    background: #7b7272;
+  :deep(.ol-download.ol-control.ol-disabled) {
+    opacity: 1;
+    cursor: not-allowed;
+  }
+
+  :deep(.ol-download.ol-control.ol-disabled) button {
+    color: #7b7272;
+    background: white;
+    cursor:inherit;
   }
   :deep(.ol-download) button i {
     cursor:pointer;

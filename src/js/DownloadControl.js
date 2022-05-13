@@ -20,14 +20,14 @@ export default class DownloadControl extends Control {
   }
 
   disable () {
-    this.element.classList.add('disabled')
+    this.element.classList.add('ol-disabled')
   }
 
   enable () {
-    this.element.classList.remove('disabled')
+    this.element.classList.remove('ol-disabled')
   }
 
   isActive () {
-    return !this.element.classList.contains('disabled')
+    return !this.element.classList.contains('ol-disabled')
   }
 }

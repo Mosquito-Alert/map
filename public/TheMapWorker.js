@@ -31,7 +31,7 @@ getJSON('totes.json', (geojson) => {
 function loadMapData (data, fitFeatures) {
   index = new Supercluster({
     log: DEBUG,
-    radius: 95,
+    radius: 45,
     extent: 256,
     maxZoom: 19
   }).load(data)
