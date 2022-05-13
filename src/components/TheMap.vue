@@ -88,6 +88,7 @@ export default defineComponent({
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
   props: {},
   setup (props, context) {
+    console.log(document.location)
     let olDownload
     let storeLayers
     let administrativeLayer
@@ -285,14 +286,16 @@ export default defineComponent({
               data.push(feat)
             }
             features.value = data
-            // eslint-disable-next-line prefer-const
-            let extent = features.value[0].getGeometry().getExtent().slice(0)
-            features.value.forEach(function (f) {
-              extend(extent, f.getGeometry().getExtent())
-            })
-            map.value.map.getView().fit(
-              extent
-            )
+            if (features.value.length) {
+              // eslint-disable-next-line prefer-const
+              let extent = features.value[0].getGeometry().getExtent().slice(0)
+              features.value.forEach(function (f) {
+                extend(extent, f.getGeometry().getExtent())
+              })
+              map.value.map.getView().fit(
+                extent
+              )
+            }
           } else {
             updateMap()
           }
