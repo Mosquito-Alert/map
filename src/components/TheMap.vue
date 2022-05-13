@@ -647,7 +647,7 @@ export default defineComponent({
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
         let radius = 0
-        if (size < 100) radius = 20
+        if (size < 100) radius = 10
         if (size >= 100) radius = 25
         if (size >= 1000) radius = 35
         if (size >= 10000) radius = 50
@@ -663,7 +663,7 @@ export default defineComponent({
           radius: radius
         })
         const text = new Text({
-          font: 'bold 14px Roboto',
+          font: 'bold 12px Roboto',
           text: size.toLocaleString(),
           fill: new Fill({
             color: 'white'
