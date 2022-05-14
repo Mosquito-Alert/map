@@ -7,7 +7,6 @@ export const setLanguage = (state, lang) => {
 }
 
 export const setModal = (state, payload) => {
-  console.log(payload)
   state.modals[payload.id] = payload.content
 }
 

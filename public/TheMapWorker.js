@@ -16,6 +16,7 @@ function log (text) {
   if (DEBUG) console.log('[TheMapWorker]', text)
 }
 
+// Download data and send message when ready including first and last date in dataset
 getJSON('totes.json', (geojson) => {
   log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
   dataset = geojson.features

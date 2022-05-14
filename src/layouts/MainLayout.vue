@@ -19,6 +19,7 @@
     >
       <the-map ref='map'
         init
+        :sharedView="viewCode"
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
@@ -66,7 +67,6 @@ export default {
   components: { BaseModal, DownloadModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
     const route = useRoute()
-    console.log(route.params)
     const map = ref('null')
     const TOC = ref()
     const timeseries = ref()
@@ -81,6 +81,8 @@ export default {
         }, 25)
       }
     }
+
+    const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
 
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
@@ -143,9 +145,6 @@ export default {
     }
 
     const infoModalVisible = computed(() => {
-      console.log($store.getters['app/getModals'])
-      console.log($store.getters['app/getModals'].info)
-      console.log($store.getters['app/getModals'].info.visibility)
       return $store.getters['app/getModals'].info.visibility
     })
 
@@ -165,6 +164,7 @@ export default {
     }
 
     return {
+      viewCode,
       expanded,
       startDownload,
       toggleSamplingEffort,

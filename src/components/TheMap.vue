@@ -86,7 +86,7 @@ export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
   emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
-  props: {},
+  props: ['sharedView'],
   setup (props, context) {
     let olDownload
     let storeLayers
@@ -128,7 +128,7 @@ export default defineComponent({
       reportFeatures: [],
       report_id: []
     }
-
+    console.log(props.sharedView)
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -248,25 +248,7 @@ export default defineComponent({
           if (event.data.datesInterval) {
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
           }
-          const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          const initialObservations = defaults.observations
-          const initialHashtags = defaults.hashtags
-          if (defaults.dates) {
-            const initialDate = expandDate(defaults.dates)
-            mapFilters.date = [initialDate]
-          }
-          if (defaults.hastags) {
-            mapFilters.hashtags = initialHashtags
-          }
-          initialObservations.forEach(layerFilter => {
-            mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
-            $store.commit('map/addActiveLayer', layerFilter.type + '-' + layerFilter.code)
-          })
-          // mapFilters are ready, now call worker
-          const workerData = {}
-          workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-          workerData.filters = mapFilters
-          worker.postMessage(workerData)
+          initMap(props.sharedView)
         } else {
           context.emit('workerFinishedIndexing', { mapFilters })
           startDate = event.data.datesInterval.from
@@ -350,6 +332,35 @@ export default defineComponent({
         $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
+    }
+
+    function initMap (viewCode) {
+      if (!viewCode) {
+        const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+        const initialObservations = defaults.observations
+        const initialHashtags = defaults.hashtags
+
+        if (defaults.dates) {
+          const initialDate = expandDate(defaults.dates)
+          mapFilters.date = [initialDate]
+        }
+        if (defaults.hastags) {
+          mapFilters.hashtags = initialHashtags
+        }
+        initialObservations.forEach(layerFilter => {
+          mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
+          $store.commit('map/addActiveLayer', layerFilter.type + '-' + layerFilter.code)
+        })
+      } else {
+        // Fetch view info from backend
+        console.log(viewCode)
+      }
+
+      // mapFilters are ready, now call worker
+      const workerData = {}
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      workerData.filters = mapFilters
+      worker.postMessage(workerData)
     }
 
     function updateMap () {
