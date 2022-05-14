@@ -12,8 +12,18 @@
       <fa-thin-button name="fa-thin fa-chart-scatter" :label="_('Models')"></fa-thin-button>
       <q-toolbar-title></q-toolbar-title>
 
-      <fa-thin-button name="fa-thin fa-share-nodes" :label="_('Share')"></fa-thin-button>
-      <fa-thin-button name="fa-thin fa-circle-info" :label="_('Help')" @click="showInfo"></fa-thin-button>
+      <fa-thin-button
+        name="fa-thin fa-share-nodes"
+        :label="_('Share')"
+        @click="showShareUrl"
+      ></fa-thin-button>
+
+      <fa-thin-button
+        name="fa-thin fa-circle-info"
+        :label="_('Help')"
+        @click="showInfo"
+      ></fa-thin-button>
+
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
@@ -260,8 +270,13 @@ export default {
       else if (lang === 'en') object = en.value
       setLanguage(lang, object)
     }
+
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
+    }
+
+    const showShareUrl = function () {
+      $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
     }
 
     const locationSelected = function (location) {
@@ -308,6 +323,7 @@ export default {
       tagsModified,
       observations,
       showInfo,
+      showShareUrl,
       breeding,
       bites,
       otherObservations,

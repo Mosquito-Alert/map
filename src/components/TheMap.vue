@@ -80,12 +80,13 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
 import DownloadControl from '../js/DownloadControl'
+import ShareMapView from '../js/ShareMapView'
 import { extend } from 'ol/extent'
 
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort'],
+  emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort', 'mapViewSaved'],
   props: ['sharedView'],
   setup (props, context) {
     let olDownload
@@ -94,6 +95,7 @@ export default defineComponent({
     let userfixesLayer
     let userfixesUrl
     let downloadUrl
+    let shareViewUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -363,6 +365,17 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    function shareView () {
+      console.log('share view in themap')
+      const ol = map.value.map
+      const newView = new ShareMapView(ol, mapFilters, shareViewUrl, handleShareView)
+      newView.save()
+    }
+
+    function handleShareView (status) {
+      context.emit('mapViewSaved', status)
+    }
+
     function updateMap () {
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
@@ -514,6 +527,7 @@ export default defineComponent({
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       userfixesUrl = $store.getters['app/getBackend'] + 'api/userfixes/'
       downloadUrl = $store.getters['app/getBackend'] + 'api/downloads/'
+      shareViewUrl = $store.getters['app/getBackend'] + 'api/share/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 
@@ -933,6 +947,7 @@ export default defineComponent({
     return {
       baseMap,
       handleDownload,
+      shareView,
       mapFilters,
       toogleLeftDrawer,
       checkSamplingEffort,

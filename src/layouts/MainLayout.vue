@@ -23,6 +23,7 @@
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
+        @mapViewSaved="mapViewSaved"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -47,6 +48,15 @@
       </template>
     </download-modal>
 
+    <share-modal
+      ref="shareModal"
+      :open="shareModalVisible"
+      @shareView="shareView"
+    >
+      <template v-slot:default>
+      </template>
+    </share-modal>
+
     <site-footer/>
   </q-layout>
 </template>
@@ -54,6 +64,7 @@
 <script>
 import BaseModal from 'components/BaseModal.vue'
 import DownloadModal from 'components/DownloadModal.vue'
+import ShareModal from 'components/ShareModal.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -64,10 +75,11 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 
 export default {
-  components: { BaseModal, DownloadModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
+  components: { BaseModal, DownloadModal, ShareModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
     const route = useRoute()
     const map = ref('null')
+    const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
     const expanded = ref(true)
@@ -93,6 +105,11 @@ export default {
     const startDownload = function () {
       map.value.handleDownload()
     }
+
+    const shareView = function () {
+      map.value.shareView()
+    }
+
     const filterLocations = function (location) {
       if (location !== null) {
         TOC.value.searchLocation.loading = true
@@ -152,6 +169,10 @@ export default {
       return $store.getters['app/getModals'].download.visibility
     })
 
+    const shareModalVisible = computed(() => {
+      return $store.getters['app/getModals'].share.visibility
+    })
+
     const toogleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
@@ -163,12 +184,19 @@ export default {
       }
     }
 
+    const mapViewSaved = function (payload) {
+      console.log(payload.status)
+      shareModal.value.success = payload.status
+    }
+
     return {
       viewCode,
+      shareView,
       expanded,
       startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
+      mapViewSaved,
       toogleLeftDrawer,
       filterObservations,
       filterDate,
@@ -177,10 +205,12 @@ export default {
       filterTags,
       infoModalVisible,
       downloadModalVisible,
+      shareModalVisible,
       map,
       TOC,
       timeseries,
-      resizeMap
+      resizeMap,
+      shareModal
     }
   }
 }

@@ -35,7 +35,7 @@ export default function () {
     modals: {
       info: { visibility: true },
       download: { visibility: false, n: 0 },
-      reports: { visibility: false }
+      share: { visibility: false }
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
