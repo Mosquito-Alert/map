@@ -185,7 +185,6 @@ export default {
     }
 
     const mapViewSaved = function (payload) {
-      console.log(payload.status)
       shareModal.value.success = payload.status
     }
 

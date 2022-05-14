@@ -373,6 +373,11 @@ export default defineComponent({
     }
 
     function handleShareView (status) {
+      if (status.status === 'error') {
+        console.log(status.msg)
+      } else {
+        console.log(status.code)
+      }
       context.emit('mapViewSaved', status)
     }
 

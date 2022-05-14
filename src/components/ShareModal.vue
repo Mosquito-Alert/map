@@ -36,6 +36,7 @@ export default {
     }
 
     const close = function () {
+      success.value = ''
       $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
     }
 
