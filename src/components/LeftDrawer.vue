@@ -261,7 +261,7 @@ export default {
       setLanguage(lang, object)
     }
     const showInfo = function () {
-      $store.commit('app/setModal', { id: 'info', visible: true })
+      $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
     }
 
     const locationSelected = function (location) {

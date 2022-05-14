@@ -249,16 +249,16 @@ export default defineComponent({
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
           }
           const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-          const initialLayers = defaults.LAYERS
-          const initialHashtags = defaults.HASHTAGS
-          if (defaults.DATES) {
-            const initialDate = expandDate(defaults.DATES)
+          const initialObservations = defaults.observations
+          const initialHashtags = defaults.hashtags
+          if (defaults.dates) {
+            const initialDate = expandDate(defaults.dates)
             mapFilters.date = [initialDate]
           }
-          if (defaults.HASHTAGS) {
+          if (defaults.hastags) {
             mapFilters.hashtags = initialHashtags
           }
-          initialLayers.forEach(layerFilter => {
+          initialObservations.forEach(layerFilter => {
             mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
             $store.commit('map/addActiveLayer', layerFilter.type + '-' + layerFilter.code)
           })
@@ -331,12 +331,6 @@ export default defineComponent({
       } else {
         // The view has changed
         const data = []
-        // if no features on the map
-        if (!event.data.map.length) {
-          olDownload.disable()
-        } else {
-          olDownload.enable()
-        }
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           // Exclude spiral features if there are any because they appear in another layer
@@ -429,8 +423,17 @@ export default defineComponent({
       )
     }
 
+    function openDownloadModal () {
+      $store.commit('app/setModal', {
+        id: 'download',
+        content: {
+          visibility: true,
+          n: features.value.length
+        }
+      })
+    }
+
     function handleDownload () {
-      if (!olDownload.isActive()) return
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
       // Preparing params in Backend format
@@ -491,7 +494,7 @@ export default defineComponent({
       const fillLocationColor = defaults.fillLocationColor
       const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
-      olDownload = new DownloadControl({ callback: handleDownload })
+      olDownload = new DownloadControl({ callback: openDownloadModal })
       ol.addControl(olDownload)
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
@@ -918,6 +921,7 @@ export default defineComponent({
 
     return {
       baseMap,
+      handleDownload,
       mapFilters,
       toogleLeftDrawer,
       checkSamplingEffort,

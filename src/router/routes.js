@@ -2,12 +2,17 @@
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue')
+    component: () => import('layouts/MainLayout.vue'),
+    props: { initView: false }
     // children: [
     //   { path: '', component: () => import('pages/DataView.vue') }
     // ]
   },
-
+  {
+    // Set the accepted characters and length of init view code
+    path: '/:code([a-zA-Z0-9]{3})*',
+    component: () => import('layouts/MainLayout.vue')
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

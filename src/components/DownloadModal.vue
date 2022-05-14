@@ -6,9 +6,16 @@
     <div class="dialog" v-if="open" @click="close">
       <dialog open>
         <slot></slot>
+          <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
+          <p>{{ _('Once verified, press the download button.') }}</p>
+        <div class="error-message" v-if="!nFeatures">
+          {{ _('No features to download') }}
+        </div>
         <div class="buttons">
-          <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="close">{{ _('Close') }}</button>
+          <div class="download-buttons">
+            <button @click="download" class="download" :class="!nFeatures?'disabled':''">{{ _('Download') }}</button>
+            <button @click="close" class="close">{{ _('Close') }}</button>
+          </div>
         </div>
       </dialog>
     </div>
@@ -21,11 +28,19 @@ import { useStore } from 'vuex'
 
 export default {
   props: ['open', 'buttons'],
-  emits: ['close'],
-  setup (props) {
+  emits: ['close', 'startDownload'],
+  setup (props, context) {
     const $store = useStore()
+    const download = function () {
+      context.emit('startDownload')
+    }
+
+    const nFeatures = computed(() => {
+      return $store.getters['app/getModals'].download.n
+    })
+
     const close = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: false } })
+      $store.commit('app/setModal', { id: 'download', content: { visibility: false } })
     }
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
@@ -34,6 +49,8 @@ export default {
       return $store.getters['app/getText'](text)
     }
     return {
+      nFeatures,
+      download,
       close,
       hasCloseButton,
       _
@@ -51,22 +68,6 @@ export default {
   height: 100vh;
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.75);
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #EFA501 #ccc;
-}
-
-.dialog div::-webkit-scrollbar {
-    height: 12px;
-    width: 4px;
-    background: #ccc;
-}
-
-.dialog div::-webkit-scrollbar-thumb {
-    background: #EFA501;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
 }
 
 .dialog {
@@ -109,6 +110,10 @@ dialog {
   opacity: 0;
   top: 5vh;
 }
+button.disabled {
+  background: #ccc;
+  pointer: not-allowed;
+}
 button {
   background: $primary-button-background;
   border: none;
@@ -117,12 +122,20 @@ button {
   padding: 15px 50px;
   cursor: pointer;
   font-weight: bold;
+  margin: 10px;
 }
 button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
-button.close {
-  float: right;
+.download-buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.error-message{
+  color: crimson;
+  text-align: center;
+  font-weight: bold;
 }
 </style>

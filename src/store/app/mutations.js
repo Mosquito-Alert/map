@@ -7,7 +7,8 @@ export const setLanguage = (state, lang) => {
 }
 
 export const setModal = (state, payload) => {
-  state.modals[payload.id] = payload.visible
+  console.log(payload)
+  state.modals[payload.id] = payload.content
 }
 
 export const setFilteringTag = (state, payload) => {

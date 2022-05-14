@@ -2,7 +2,7 @@ import DataTile from 'ol/source/DataTile'
 import TileLayer from 'ol/layer/WebGLTile'
 import geojsonvt from 'geojson-vt'
 
-export default class UserfixesLayer {
+export default class AdministrativeLayer {
   constructor (map, fillColor, strokeColor, zIndex) {
     this.map = map
     this.zIndex = zIndex

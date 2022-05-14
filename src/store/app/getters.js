@@ -11,7 +11,7 @@ export const getLayers = state => {
 }
 
 export const initialLayers = state => {
-  return state.DEFAULTS.LAYERS
+  return state.DEFAULTS.observations
 }
 
 export const getDefaults = state => {

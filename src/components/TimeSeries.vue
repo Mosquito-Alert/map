@@ -106,7 +106,7 @@ export default defineComponent({
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      dateRange.value = defaults.DATES
+      dateRange.value = defaults.dates
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')

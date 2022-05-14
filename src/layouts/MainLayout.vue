@@ -18,6 +18,7 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <the-map ref='map'
+        init
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
@@ -35,10 +36,15 @@
         <p>Lorem ipsum dolor sit amet, cons ectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.</p>
         <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tatilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. </p>
       </template>
-      <!-- <template v-slot:buttons>
-        <button >Hola</button>
-      </template> -->
     </base-modal>
+
+    <download-modal
+      :open="downloadModalVisible"
+      @startDownload="startDownload"
+    >
+      <template v-slot:default>
+      </template>
+    </download-modal>
 
     <site-footer/>
   </q-layout>
@@ -46,6 +52,7 @@
 
 <script>
 import BaseModal from 'components/BaseModal.vue'
+import DownloadModal from 'components/DownloadModal.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -53,10 +60,13 @@ import TheMap from 'components/TheMap.vue'
 import TimeSeries from 'components/TimeSeries.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 
 export default {
-  components: { BaseModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
+  components: { BaseModal, DownloadModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
+    const route = useRoute()
+    console.log(route.params)
     const map = ref('null')
     const TOC = ref()
     const timeseries = ref()
@@ -74,10 +84,13 @@ export default {
 
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
-        $store.commit('app/setModal', { id: 'info', visible: true })
+        $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
     })
 
+    const startDownload = function () {
+      map.value.handleDownload()
+    }
     const filterLocations = function (location) {
       if (location !== null) {
         TOC.value.searchLocation.loading = true
@@ -130,7 +143,14 @@ export default {
     }
 
     const infoModalVisible = computed(() => {
-      return $store.getters['app/getModals'].info
+      console.log($store.getters['app/getModals'])
+      console.log($store.getters['app/getModals'].info)
+      console.log($store.getters['app/getModals'].info.visibility)
+      return $store.getters['app/getModals'].info.visibility
+    })
+
+    const downloadModalVisible = computed(() => {
+      return $store.getters['app/getModals'].download.visibility
     })
 
     const toogleLeftDrawer = function () {
@@ -146,6 +166,7 @@ export default {
 
     return {
       expanded,
+      startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
       toogleLeftDrawer,
@@ -155,6 +176,7 @@ export default {
       clearLocations,
       filterTags,
       infoModalVisible,
+      downloadModalVisible,
       map,
       TOC,
       timeseries,

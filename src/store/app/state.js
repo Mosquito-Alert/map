@@ -17,14 +17,15 @@ export default function () {
     lang: defaultLang,
     isFilteringTag: false,
     DEFAULTS: {
-      LAYERS: [
+      sampling_effort: true,
+      observations: [
         { type: 'observations', code: 'tiger' }
         // { type: 'observations', code: 'culex' },
         // { type: 'bites', code: 'pending' }
       ],
-      DATES: { from: '2021/01/01', to: '2021/12/31' },
+      dates: { from: '2021/01/01', to: '2021/12/31' },
       // DATES: { from: '2014/11/01', to: '2022/11/10' },
-      HASHTAGS: [],
+      hashtags: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
       strokeLocationColor: 'orange'
@@ -32,7 +33,9 @@ export default function () {
     BACKEND: backendUrl,
     trans: {},
     modals: {
-      info: true
+      info: { visibility: true },
+      download: { visibility: false, n: 0 },
+      reports: { visibility: false }
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),

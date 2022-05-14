@@ -70,7 +70,7 @@ export default {
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      tags.value = defaults.HASHTAGS
+      tags.value = defaults.hashtags
     })
 
     return {

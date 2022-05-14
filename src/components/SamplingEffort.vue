@@ -1,7 +1,7 @@
 <template>
     <div
       class="sampling-effort-box"
-      :class="{active: isActive}"
+      :class="{active: (samplingIsActive || isActive)}"
       @click="toggleClass"
       @loadingSamplingEffort="handleLoading"
     >
@@ -40,6 +40,10 @@ export default {
       return $store.getters['app/layers'].sampling_effort
     })
 
+    const samplingIsActive = computed(() => {
+      return $store.getters['map/getActiveLayers'].includes('sampling_effort')
+    })
+
     const loading = computed(() => {
       return $store.getters['map/getSamplingEffortLoading']
     })
@@ -60,6 +64,7 @@ export default {
 
     return {
       loading,
+      samplingIsActive,
       samplingEffort,
       toggleClass,
       isActive,
