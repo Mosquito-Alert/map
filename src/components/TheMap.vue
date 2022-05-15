@@ -96,6 +96,7 @@ export default defineComponent({
     let userfixesUrl
     let downloadUrl
     let shareViewUrl
+    let loadViewUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -130,7 +131,7 @@ export default defineComponent({
       reportFeatures: [],
       report_id: []
     }
-    console.log(props.sharedView)
+
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -355,7 +356,11 @@ export default defineComponent({
         })
       } else {
         // Fetch view info from backend
-        console.log(viewCode)
+        const ol = map.value.map
+        const newView = new ShareMapView(ol, {
+          url: loadViewUrl + viewCode
+        })
+        newView.load(handleLoadView)
       }
 
       // mapFilters are ready, now call worker
@@ -365,10 +370,30 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    function handleLoadView (view) {
+      const v = JSON.parse(view.view[0].view)
+      mapFilters.mode = v.filters.mode
+      mapFilters.date = v.filters.date
+      mapFilters.hashtags = v.filters.hashtags
+      mapFilters.locations = v.filters.locations
+      mapFilters.observations = v.filters.observations
+      mapFilters.reportFeatures = v.filters.reportFeatures
+      mapFilters.report_id = v.filters.report_id
+      const workerData = {}
+      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      workerData.filters = mapFilters
+      worker.postMessage(workerData)
+      flyTo(v.center, v.zoom)
+    }
+
     function shareView () {
       console.log('share view in themap')
       const ol = map.value.map
-      const newView = new ShareMapView(ol, mapFilters, shareViewUrl, handleShareView)
+      const newView = new ShareMapView(ol, {
+        filters: mapFilters,
+        url: shareViewUrl,
+        callback: handleShareView
+      })
       newView.save()
     }
 
@@ -530,9 +555,11 @@ export default defineComponent({
       storeLayers = $store.getters['app/getLayers']
       const legend = $store.getters['app/getLayers'].sampling_effort.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
-      userfixesUrl = $store.getters['app/getBackend'] + 'api/userfixes/'
-      downloadUrl = $store.getters['app/getBackend'] + 'api/downloads/'
-      shareViewUrl = $store.getters['app/getBackend'] + 'api/share/'
+      const backendUrl = $store.getters['app/getBackend']
+      userfixesUrl = backendUrl + 'api/userfixes/'
+      downloadUrl = backendUrl + 'api/downloads/'
+      shareViewUrl = backendUrl + 'api/view/save/'
+      loadViewUrl = backendUrl + 'api/view/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 

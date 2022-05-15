@@ -10,7 +10,7 @@ const routes = [
   },
   {
     // Set the accepted characters and length of init view code
-    path: '/:code([a-zA-Z0-9]{3})*',
+    path: '/:code([a-zA-Z0-9]{4})*',
     component: () => import('layouts/MainLayout.vue')
   },
   // Always leave this as last one,
