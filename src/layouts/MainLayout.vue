@@ -194,7 +194,6 @@ export default {
     const mapViewSaved = function (payload) {
       shareModal.value.success = payload.status
       if (payload.status === 'ok') {
-        console.log(payload)
         shareModal.value.newUrl = frontendUrl.value + '#/' + payload.code
       }
     }

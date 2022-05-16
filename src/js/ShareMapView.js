@@ -4,7 +4,6 @@ export default class ShareMapView {
     const options = opt || {}
     this.map = map
     this.options = options
-    console.log(this.options)
   }
 
   save () {
@@ -19,6 +18,10 @@ export default class ShareMapView {
 
     if (this.options.locationName.length) {
       dataView.locationName = this.options.locationName
+    }
+
+    if (this.options.popup.toString().length) {
+      dataView.popup = this.options.popup
     }
 
     if (filters.dates.length) {

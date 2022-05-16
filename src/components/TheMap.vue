@@ -113,8 +113,8 @@ export default defineComponent({
     const baseMap = ref('null')
     let simplifyTolerance = null
     const spiralSource = ref()
-    const selectedId = ref('null')
-    const selectedFeat = ref('null')
+    const selectedId = ref(null)
+    const selectedFeat = ref(null)
     const $store = useStore()
     const selectedIcon = ref('null')
     const features = ref([])
@@ -228,7 +228,7 @@ export default defineComponent({
     }
 
     function closePopup () {
-      if (selectedId.value) {
+      if (selectedId.value && selectedFeat.value) {
         selectedId.value = null
         $store.commit('map/selectFeature', {})
         redrawMap()
@@ -422,12 +422,19 @@ export default defineComponent({
       }
       // Mode must be always 'resetFilter'
       mapFilters.mode = v.filters.mode
-      const jsonLocation = JSON.parse(v.filters.locations)
-      if ('type' in jsonLocation) {
-        // Geometry is already been simplified
-        context.emit('locationChanged', v.locationName)
-        fitFeature(jsonLocation, false)
+      if (v.filters.locations.length) {
+        const jsonLocation = JSON.parse(v.filters.locations)
+        if ('type' in jsonLocation) {
+          // Geometry is already been simplified
+          context.emit('locationChanged', v.locationName)
+          fitFeature(jsonLocation, false)
+        }
       }
+
+      if (v.popup) {
+        selectedId.value = v.popup
+      }
+
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
       mapFilters.reportFeatures = JSON.parse(JSON.stringify(v.filters.reportFeatures))
@@ -437,10 +444,10 @@ export default defineComponent({
 
     function shareView () {
       const ol = map.value.map
-      // eslint-disable-next-line no-unused-vars
       const newView = new ShareMapView(ol, {
         filters: mapFilters,
         locationName: locationName,
+        popup: (selectedId.value === null) ? '' : selectedId.value,
         url: shareViewUrl,
         callback: handleShareView
       })
@@ -787,6 +794,11 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         if (feature.values_.properties.id === selectedId.value) {
+          // When loading from shared view and popup must open, then selectedFeacture is required
+          if (!$store.getters['map/getSelectedFeature']) {
+            selectedFeat.value = feature
+            $store.dispatch('map/selectFeature', feature.values_)
+          }
           const selectedIcon = new Icon({
             src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
             anchor: [0.5, 1]
