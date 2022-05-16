@@ -13,3 +13,13 @@ export const setModal = (state, payload) => {
 export const setFilteringTag = (state, payload) => {
   state.isFilteringTag = payload.value
 }
+
+export const increaseLeftDrawerStatus = (state) => {
+  state.leftDrawerStatus += 1
+}
+
+export const setDefaults = (state, payload) => {
+  state.DEFAULTS.observations = payload.observations
+  state.DEFAULTS.dates = payload.dates
+  state.DEFAULTS.hashtags = payload.hashtags
+}

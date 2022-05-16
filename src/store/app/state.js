@@ -14,6 +14,8 @@ export default function () {
   const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
 
   return {
+    // key to make leftdrawer component re-render
+    leftDrawerStatus: 0,
     lang: defaultLang,
     isFilteringTag: false,
     DEFAULTS: {
@@ -31,6 +33,7 @@ export default function () {
       strokeLocationColor: 'orange'
     },
     BACKEND: backendUrl,
+    FRONTEND: 'http://localhost:8080/',
     trans: {},
     modals: {
       info: { visibility: true },

@@ -4,6 +4,7 @@ export default class ShareMapView {
     const options = opt || {}
     this.map = map
     this.options = options
+    console.log(this.options)
   }
 
   save () {
@@ -16,13 +17,24 @@ export default class ShareMapView {
       filters: filters
     }
 
+    if (this.options.locationName.length) {
+      dataView.locationName = this.options.locationName
+    }
+
+    if (filters.dates.length) {
+      dataView.filters.dates = filters.dates
+    }
+
     if (filters.hashtags.length) {
-      dataView.filters.hashtags = JSON.stringify(filters.hashtags)
+      dataView.filters.hashtags = filters.hashtags
     }
 
     if (filters.locations.length) {
-      dataView.filters.locations = JSON.stringify(JSON.parse(filters.locations[0]).features[0].geometry)
+      dataView.filters.locations = filters.locations
     }
+
+    // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
+    dataView.filters.mode = 'resetFilter'
 
     fetch(this.options.url, {
       method: 'POST', // or 'PUT'

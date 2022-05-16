@@ -19,3 +19,8 @@ export const removeActiveLayer = (state, payload) => {
 export const setSamplingEffortLoading = (state, payload) => {
   state.samplingEffortLoading = payload.loading
 }
+
+export const setDefaults = (state, payload) => {
+  state.DEFAULTS.ZOOM = payload.zoom
+  state.DEFAULTS.CENTER = payload.center
+}

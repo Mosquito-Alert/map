@@ -86,10 +86,19 @@ import { extend } from 'ol/extent'
 export default defineComponent({
   components: { ObservationPopup },
   name: 'TheMap',
-  emits: ['toogleLeftDrawer', 'workerFinishedIndexing', 'loadingSamplingEffort', 'mapViewSaved'],
+  emits: [
+    'toogleLeftDrawer',
+    'workerFinishedIndexing',
+    'loadingSamplingEffort',
+    'mapViewSaved',
+    'timeSeriesChanged',
+    'tagsChanged',
+    'locationChanged'
+  ],
   props: ['sharedView'],
   setup (props, context) {
     let olDownload
+    let locationName = ''
     let storeLayers
     let administrativeLayer
     let userfixesLayer
@@ -127,7 +136,7 @@ export default defineComponent({
       observations: [],
       locations: [],
       hashtags: [],
-      date: [],
+      dates: [],
       reportFeatures: [],
       report_id: []
     }
@@ -137,8 +146,9 @@ export default defineComponent({
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
-    const fitFeature = function (location) {
+    const fitFeature = function (location, simplify = true) {
       console.time('FitFeature')
+      locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
@@ -156,6 +166,15 @@ export default defineComponent({
       }
 
       if (Feat) {
+        if (!simplify) {
+          Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+          const writer = new format.GeoJSON()
+          const json = JSON.parse(writer.writeFeatures([Feat], {
+            dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
+          }))
+          administrativeLayer.refreshLayer(json)
+          return
+        }
         let lineString = null
         let maxLength = 0
         if (Feat.getGeometry().getType() === 'MultiPolygon') {
@@ -251,7 +270,8 @@ export default defineComponent({
           if (event.data.datesInterval) {
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
           }
-          initMap(props.sharedView)
+          const param = (props.sharedView) ? props.sharedView[0].toString() : null
+          initMap(param)
         } else {
           context.emit('workerFinishedIndexing', { mapFilters })
           startDate = event.data.datesInterval.from
@@ -341,14 +361,13 @@ export default defineComponent({
       if (!viewCode) {
         const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
         const initialObservations = defaults.observations
-        const initialHashtags = defaults.hashtags
 
         if (defaults.dates) {
-          const initialDate = expandDate(defaults.dates)
-          mapFilters.date = [initialDate]
+          const initialDate = expandDate(defaults.dates, 'YYYY-MM-DD')
+          mapFilters.dates = [initialDate]
         }
-        if (defaults.hastags) {
-          mapFilters.hashtags = initialHashtags
+        if (defaults.hashtags) {
+          mapFilters.hashtags = defaults.hashtags
         }
         initialObservations.forEach(layerFilter => {
           mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
@@ -372,25 +391,56 @@ export default defineComponent({
 
     function handleLoadView (view) {
       const v = JSON.parse(view.view[0].view)
+      $store.commit('map/setDefaults', {
+        zoom: v.zoom,
+        center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
+      })
+      let d
+      if (v.filters.dates.length) {
+        d = v.filters.dates[0]
+      } else {
+        d = $store.getters['timeseries/getCompleteDatesRange']
+      }
+      $store.commit('app/setDefaults', {
+        observations: v.filters.observations,
+        dates: d,
+        hashtags: v.filters.hashtags
+      })
+      context.emit('timeSeriesChanged', d)
+
+      // Hashtag filter or report_id, not both at the same time
+      if (v.filters.hashtags.length) {
+        context.emit('tagsChanged', v.filters.hashtags)
+      } else {
+        if (v.filters.report_id.length) {
+          // add 'semicolon to all report_ids'
+          const reports = v.filters.report_id.map(e => {
+            return ':' + e
+          })
+          context.emit('tagsChanged', reports)
+        }
+      }
+      // Mode must be always 'resetFilter'
       mapFilters.mode = v.filters.mode
-      mapFilters.date = v.filters.date
-      mapFilters.hashtags = v.filters.hashtags
+      const jsonLocation = JSON.parse(v.filters.locations)
+      if ('type' in jsonLocation) {
+        // Geometry is already been simplified
+        context.emit('locationChanged', v.locationName)
+        fitFeature(jsonLocation, false)
+      }
       mapFilters.locations = v.filters.locations
-      mapFilters.observations = v.filters.observations
-      mapFilters.reportFeatures = v.filters.reportFeatures
-      mapFilters.report_id = v.filters.report_id
-      const workerData = {}
-      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-      workerData.filters = mapFilters
-      worker.postMessage(workerData)
-      flyTo(v.center, v.zoom)
+      mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
+      mapFilters.reportFeatures = JSON.parse(JSON.stringify(v.filters.reportFeatures))
+
+      initMap()
     }
 
     function shareView () {
-      console.log('share view in themap')
       const ol = map.value.map
+      // eslint-disable-next-line no-unused-vars
       const newView = new ShareMapView(ol, {
         filters: mapFilters,
+        locationName: locationName,
         url: shareViewUrl,
         callback: handleShareView
       })
@@ -507,8 +557,8 @@ export default defineComponent({
         observations: viewLayers
       }
 
-      if (mapFilters.date.length) {
-        data.date = mapFilters.date
+      if (mapFilters.dates.length) {
+        data.date = mapFilters.dates
       }
 
       if (mapFilters.report_id.length) {
@@ -863,16 +913,16 @@ export default defineComponent({
       spiderfiedCluster = null
       closePopup()
       const workerData = {}
-      if (!mapFilters.date.length) {
+      if (!mapFilters.dates.length) {
         mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.mode = 'resetFilter'
       }
       if (date !== null) {
         const expandedDate = expandDate(date)
-        mapFilters.date = [JSON.parse(JSON.stringify(expandedDate))]
+        mapFilters.dates = [JSON.parse(JSON.stringify(expandedDate))]
       } else {
-        mapFilters.date = []
+        mapFilters.dates = []
       }
 
       workerData.filters = mapFilters
@@ -932,24 +982,24 @@ export default defineComponent({
       }
     }
 
-    function expandDate (date) {
+    function expandDate (date, f = 'YYYY/MM/DD') {
       let expandedDate = null
       if (!date) return
       if (typeof date === 'string') {
         const preDate = moment(date).subtract(1, 'd')
         const postDate = moment(date).add(1, 'd')
-        expandedDate = { from: preDate.format('YYYY/MM/DD'), to: postDate.format('YYYY/MM/DD') }
+        expandedDate = { from: preDate.format(f), to: postDate.format(f) }
       } else {
         const preDate = moment(date.from).subtract(1, 'd')
         const postDate = moment(date.to).add(1, 'd')
-        expandedDate = { from: preDate.format('YYYY/MM/DD'), to: postDate.format('YYYY/MM/DD') }
+        expandedDate = { from: preDate.format(f), to: postDate.format(f) }
       }
       return expandedDate
     }
 
     function refreshUserfixesUrl () {
-      const sDate = mapFilters.date[0].from.replaceAll('/', '-')
-      const eDate = mapFilters.date[0].to.replaceAll('/', '-')
+      const sDate = mapFilters.dates[0].from.replaceAll('/', '-')
+      const eDate = mapFilters.dates[0].to.replaceAll('/', '-')
       userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
     }
 
@@ -963,12 +1013,12 @@ export default defineComponent({
         return
       }
       let sDate, eDate
-      if (!mapFilters.date[0]) {
+      if (!mapFilters.dates[0]) {
         sDate = startDate
         eDate = endDate
       } else {
-        sDate = mapFilters.date[0].from.replaceAll('/', '-')
-        eDate = mapFilters.date[0].to.replaceAll('/', '-')
+        sDate = mapFilters.dates[0].from.replaceAll('/', '-')
+        eDate = mapFilters.dates[0].to.replaceAll('/', '-')
       }
 
       userfixesLayer.url = userfixesUrl + sDate + '/' + eDate

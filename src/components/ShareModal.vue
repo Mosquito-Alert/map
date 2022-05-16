@@ -8,7 +8,21 @@
         <slot></slot>
           <p v-if="success==''">{{ _('Share this map view') }}</p>
           <p v-if="success=='error'">{{ _('Share map view error') }}</p>
-          <p v-if="success=='ok'">{{ _('Map view shared successfully') }}</p>
+          <div v-if="success=='ok'">
+            <div v-if="copied">
+              <transition name="toast">
+                <p>{{ _('Url has been copied') }}</p>
+              </transition>
+            </div>
+            <p v-else>{{ _('Map view shared successfully') }}</p>
+            <p>{{ _('This is the new view url') }}</p>
+            <p><input type="text" v-model="newUrl"></p>
+            <p class="viewshare"><i
+              class="fas fa-copy"
+              :title="_('Copy url to clipboard')"
+              @click="copyToClipboard"
+            ></i></p>
+          </div>
         <div class="buttons">
           <div class="download-buttons">
             <button v-if="success==''" @click="shareView">{{ _('Share view') }}</button>
@@ -30,6 +44,8 @@ export default {
   emits: ['close', 'shareView'],
   setup (props, context) {
     const success = ref('')
+    const copied = ref(false)
+    const newUrl = ref('')
     const $store = useStore()
     const shareView = function () {
       context.emit('shareView')
@@ -43,8 +59,20 @@ export default {
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
+    const copyToClipboard = function () {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        copied.value = true
+        return navigator.clipboard.writeText(newUrl.value)
+      }
+      return Promise.reject('The Clipboard API is not available.')
+    }
+
     return {
+      copyToClipboard,
+      copied,
       success,
+      newUrl,
       shareView,
       close,
       _
@@ -131,5 +159,35 @@ button:hover {
   color: crimson;
   text-align: center;
   font-weight: bold;
+}
+.viewshare{
+  text-align: center;
+  color: $primary-color;
+}
+
+// Animation enter classes
+.toast-enter-from{
+  opacity: 0;
+  transform: translateY(-60px);
+}
+.toast-enter-to{
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast-enter-active{
+  transition: all 0.3s ease;
+}
+
+// animation leave classes
+.toast-leave-from{
+  opacity: 1;
+  transform: translateY(0px);
+}
+.toast-leave-to{
+  opacity: 0;
+  transform: translateY(-60px);
+}
+.toast-leave-active{
+  transition: all 3s ease;
 }
 </style>

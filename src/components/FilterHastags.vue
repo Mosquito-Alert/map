@@ -68,15 +68,25 @@ export default {
       newTag.value = ''
     }
 
+    function setTags (t) {
+      tags.value.push(...t)
+    }
+
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       tags.value = defaults.hashtags
     })
 
+    // const tagis = computed(() => {
+    //   return $store.getters['app/getDefaults'].hashtags
+    // })
+
     return {
       _,
+      setTags,
       newTag,
       tags,
+      // tagis,
       deleteTag,
       addTag,
       isFilteringTag: computed(() => $store.getters['app/isFilteringTag'])

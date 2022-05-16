@@ -39,7 +39,7 @@ export default class AdministrativeLayer {
             const type = feature.type
             // Draw only polygons
             if (type !== 3) continue
-            console.log(_this.fillColor)
+
             context.fillStyle = _this.fillColor
             context.strokeStyle = _this.strokeColor
             context.beginPath()

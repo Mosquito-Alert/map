@@ -24,6 +24,9 @@
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
         @mapViewSaved="mapViewSaved"
+        @timeSeriesChanged="timeSeriesChanged"
+        @tagsChanged="tagsChanged"
+        @locationChanged="locationChanged"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -173,6 +176,10 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
+    const frontendUrl = computed(() => {
+      return $store.getters['app/getFrontendUrl']
+    })
+
     const toogleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
@@ -186,6 +193,22 @@ export default {
 
     const mapViewSaved = function (payload) {
       shareModal.value.success = payload.status
+      if (payload.status === 'ok') {
+        console.log(payload)
+        shareModal.value.newUrl = frontendUrl.value + '#/' + payload.code
+      }
+    }
+
+    const timeSeriesChanged = function (date) {
+      timeseries.value.setDate(date)
+    }
+
+    const tagsChanged = function (tags) {
+      TOC.value.setTags(tags)
+    }
+
+    const locationChanged = function (name) {
+      TOC.value.setLocationName(name)
     }
 
     return {
@@ -196,6 +219,9 @@ export default {
       toggleSamplingEffort,
       workerFinishedIndexing,
       mapViewSaved,
+      timeSeriesChanged,
+      tagsChanged,
+      locationChanged,
       toogleLeftDrawer,
       filterObservations,
       filterDate,

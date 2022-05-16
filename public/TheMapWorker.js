@@ -178,8 +178,8 @@ function getExtent (clusterId) {
 }
 
 self.onmessage = function (e) {
-  // console.log(e.data)
   let fitFeatures = false
+  // console.log(e.data)
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -217,9 +217,9 @@ self.onmessage = function (e) {
     } else {
       filteredData = []
     }
-    if (filters.date.length > 0) {
+    if (filters.dates.length > 0) {
       // array with only one date
-      filteredData = filterDate(filteredData, filters.date[0])
+      filteredData = filterDate(filteredData, filters.dates[0])
     }
     if (filters.hashtags.length > 0) {
       // TODO: Check for report_id filtering. That is a tag stating with :

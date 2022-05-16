@@ -1,10 +1,10 @@
 <template>
   <q-drawer
-      show-if-above
-      side="left"
-      behavior="desktop"
-      width=""
-      :class="expanded?'expanded':'collapsed'"
+    show-if-above
+    side="left"
+    behavior="desktop"
+    width=""
+    :class="expanded?'expanded':'collapsed'"
   >
     <!-- Main menu -->
     <q-toolbar>
@@ -51,7 +51,10 @@
             @locationSelected="locationSelected"
             @locationCleared="locationCleared"
           />
-          <filter-hastags @tagsModified="tagsModified"/>
+          <filter-hastags
+            ref="hashtags"
+            @tagsModified="tagsModified"
+          />
       </div>
 
       <div class="toc-category">
@@ -170,6 +173,7 @@ export default {
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
+    const hashtags = ref()
     const samplingEffort = ref(null)
     const $store = useStore()
     const $q = useQuasar()
@@ -279,10 +283,16 @@ export default {
       $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
     }
 
+    const setTags = function (tags) {
+      console.log('lef-drawer settags')
+      hashtags.value.setTags(tags)
+    }
+
     const locationSelected = function (location) {
       let geojson = null
       if (location.location !== null) {
         const loc = location.location
+        const displayName = loc.display_name
         const bb = loc.boundingbox
         const bounding = [bb[2], bb[0], bb[3], bb[1]]
         geojson = {
@@ -291,7 +301,8 @@ export default {
             {
               type: 'Feature',
               properties: {
-                boundingBox: bounding
+                boundingBox: bounding,
+                displayName: displayName
               },
               geometry: loc.geojson
             }
@@ -311,12 +322,20 @@ export default {
       context.emit('filterTags', tags)
     }
 
+    const setLocationName = function (name) {
+      searchLocation.value.searchString = name
+      searchLocation.value.filterIsActive = true
+    }
+
     return {
       ca,
       es,
       en,
+      hashtags,
+      setTags,
       samplingEffort,
       searchLocation,
+      setLocationName,
       clickLanguageSelector,
       initialClass,
       filterObservations,

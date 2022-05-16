@@ -26,7 +26,7 @@ f.ca<template>
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
-             :label="_('Delete')"
+            :label="_('Delete')"
           />
           <q-btn icon="event_note" class="calendar-button" :label="_('Select')">
             <q-popup-proxy
@@ -103,6 +103,17 @@ export default defineComponent({
       }
       return classes
     })
+
+    function setDate (date) {
+      dateRange.value = null
+      dateRange.value = {
+        from: date.from.replaceAll('-', '/'),
+        to: date.to.replaceAll('-', '/')
+      }
+      const sDate = dateRange.value.from
+      const eDate = dateRange.value.to
+      dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
+    }
 
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
@@ -204,6 +215,7 @@ export default defineComponent({
 
     return {
       _,
+      setDate,
       resetDateFilter,
       dateFilterToString,
       getCurrentDate,

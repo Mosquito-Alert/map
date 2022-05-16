@@ -42,3 +42,7 @@ export const getWorker = state => {
 export const isFilteringTag = state => {
   return state.isFilteringTag
 }
+
+export const getFrontendUrl = state => {
+  return state.FRONTEND
+}

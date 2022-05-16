@@ -63,6 +63,10 @@ export default {
     const results = ref([])
     const error = ref(false)
 
+    const setSearchString = function (v) {
+      searchString.value = v
+    }
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -158,6 +162,7 @@ export default {
       _,
       error,
       searchString,
+      setSearchString,
       searchOptions,
       model,
       loading,
