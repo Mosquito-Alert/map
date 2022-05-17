@@ -116,6 +116,7 @@ export default defineComponent({
     const spiralSource = ref()
     const selectedId = ref(null)
     const selectedFeat = ref(null)
+    const closedPopupDisable = ref(false)
     const $store = useStore()
     const selectedIcon = ref('null')
     const features = ref([])
@@ -229,7 +230,7 @@ export default defineComponent({
     }
 
     function closePopup () {
-      if (selectedId.value && selectedFeat.value) {
+      if (selectedId.value) {
         selectedId.value = null
         $store.commit('map/selectFeature', {})
         redrawMap()
@@ -436,18 +437,17 @@ export default defineComponent({
       }
 
       if (v.popup) {
+        // Disable closepopup to prevent reseting selectedId.value
+        closedPopupDisable.value = true
         selectedId.value = v.popup
         const f = v.feature
-        // console.log(f)
-        // console.log(f.geometry)
-        // console.log(f.properties)
-        // console.log(f.id)
         const selectedInView = new Feature({
           geometry: new Point(f.geometry),
           properties: f.properties,
           id: f.id
         })
         selectedFeat.value = selectedInView
+        selectedIcon.value = $store.getters['app/selectedIcons'][selectedInView.values_.properties.c]
         $store.dispatch('map/selectFeature', selectedInView.values_)
       }
 
@@ -471,7 +471,6 @@ export default defineComponent({
       if (selectedId.value !== null) {
         // Pass selected feature as json, so when loading view will be possible to create selected feature
         const feature = selectedFeat.value.clone()
-        console.log(feature.getProperties().properties)
         obj = {
           geometry: feature.getGeometry().getCoordinates(),
           properties: feature.getProperties().properties,
@@ -508,7 +507,12 @@ export default defineComponent({
         currZoom = newZoom
         spiderfiedIds = []
         spiralSource.value.source.clear()
-        closePopup()
+        // Prevent closing popup when loading shared view
+        if (closedPopupDisable.value) {
+          closedPopupDisable.value = false
+        } else {
+          closePopup()
+        }
       }
       if (!ready) {
         return
@@ -831,6 +835,7 @@ export default defineComponent({
         style.setText(text)
       } else {
         // This is no cluster, just an Icon
+        // When loading from shared view and popup must open, then selectedFeacture is required
         if (feature.values_.properties.id === selectedId.value) {
           const selectedIcon = new Icon({
             src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
