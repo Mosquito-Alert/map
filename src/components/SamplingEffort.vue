@@ -52,9 +52,9 @@ export default {
       isActive.value = !isActive.value
       context.emit('samplingEffort', isActive.value)
       if (isActive.value) {
-        $store.commit('map/addActiveLayer', 'sampling-effort')
+        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
       } else {
-        $store.commit('map/removeActiveLayer', 'sampling-effort')
+        $store.commit('map/removeActiveLayer', { type: 'sampling-effort' })
       }
     }
 

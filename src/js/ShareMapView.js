@@ -4,6 +4,7 @@ export default class ShareMapView {
     const options = opt || {}
     this.map = map
     this.options = options
+    console.log(this.options)
   }
 
   save () {
@@ -35,6 +36,9 @@ export default class ShareMapView {
     if (filters.locations.length) {
       dataView.filters.locations = filters.locations
     }
+
+    dataView.samplingEffort = this.options.samplingEffort
+    dataView.feature = this.options.feature
 
     // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
     dataView.filters.mode = 'resetFilter'

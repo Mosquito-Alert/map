@@ -27,6 +27,7 @@
         @timeSeriesChanged="timeSeriesChanged"
         @tagsChanged="tagsChanged"
         @locationChanged="locationChanged"
+        @loadUserFixes="loadUserFixes"
       />
       <time-series ref="timeseries"
         @toggleTimeSeries='resizeMap'
@@ -210,6 +211,10 @@ export default {
       TOC.value.setLocationName(name)
     }
 
+    const loadUserFixes = function (status) {
+      TOC.value.toggleSamplingEffort(status)
+    }
+
     return {
       viewCode,
       shareView,
@@ -234,7 +239,8 @@ export default {
       TOC,
       timeseries,
       resizeMap,
-      shareModal
+      shareModal,
+      loadUserFixes
     }
   }
 }

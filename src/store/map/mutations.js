@@ -3,14 +3,20 @@ export const selectFeature = (state, payload) => {
 }
 
 export const addActiveLayer = (state, payload) => {
-  const index = state.activeLayers.indexOf(payload)
+  const index = state.activeLayers.findIndex(element => {
+    return element.type === payload.type && (('code' in payload) ? element.code === payload.code : true)
+  })
+
   if (index === -1) {
     state.activeLayers.push(payload)
   }
 }
 
 export const removeActiveLayer = (state, payload) => {
-  const index = state.activeLayers.indexOf(payload)
+  const index = state.activeLayers.findIndex(element => {
+    return element.type === payload.type && (('code' in payload) ? element.code === payload.code : true)
+  })
+
   if (index > -1) {
     state.activeLayers.splice(index, 1)
   }

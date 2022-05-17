@@ -313,6 +313,7 @@ export default {
     }
     const toggleSamplingEffort = function (status) {
       context.emit('toggleSamplingEffort', status)
+      samplingEffort.value.isActive = status
     }
     const locationCleared = function () {
       context.emit('clearLocations')

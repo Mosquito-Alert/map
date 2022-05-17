@@ -93,7 +93,8 @@ export default defineComponent({
     'mapViewSaved',
     'timeSeriesChanged',
     'tagsChanged',
-    'locationChanged'
+    'locationChanged',
+    'loadUserFixes'
   ],
   props: ['sharedView'],
   setup (props, context) {
@@ -371,7 +372,10 @@ export default defineComponent({
         }
         initialObservations.forEach(layerFilter => {
           mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
-          $store.commit('map/addActiveLayer', layerFilter.type + '-' + layerFilter.code)
+          $store.commit('map/addActiveLayer', {
+            type: layerFilter.type,
+            code: layerFilter.code
+          })
         })
       } else {
         // Fetch view info from backend
@@ -433,6 +437,22 @@ export default defineComponent({
 
       if (v.popup) {
         selectedId.value = v.popup
+        const f = v.feature
+        // console.log(f)
+        // console.log(f.geometry)
+        // console.log(f.properties)
+        // console.log(f.id)
+        const selectedInView = new Feature({
+          geometry: new Point(f.geometry),
+          properties: f.properties,
+          id: f.id
+        })
+        selectedFeat.value = selectedInView
+        $store.dispatch('map/selectFeature', selectedInView.values_)
+      }
+
+      if (v.samplingEffort) {
+        context.emit('loadUserFixes', true)
       }
 
       mapFilters.locations = v.filters.locations
@@ -443,11 +463,29 @@ export default defineComponent({
     }
 
     function shareView () {
+      const samplingEffort = $store.getters['map/getActiveLayers'].some(layer => {
+        return layer.type === 'sampling-effort'
+      })
+
+      let obj = {}
+      if (selectedId.value !== null) {
+        // Pass selected feature as json, so when loading view will be possible to create selected feature
+        const feature = selectedFeat.value.clone()
+        console.log(feature.getProperties().properties)
+        obj = {
+          geometry: feature.getGeometry().getCoordinates(),
+          properties: feature.getProperties().properties,
+          id: feature.get('id')
+        }
+      }
+
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         filters: mapFilters,
         locationName: locationName,
         popup: (selectedId.value === null) ? '' : selectedId.value,
+        feature: obj,
+        samplingEffort: samplingEffort,
         url: shareViewUrl,
         callback: handleShareView
       })
@@ -794,11 +832,6 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         if (feature.values_.properties.id === selectedId.value) {
-          // When loading from shared view and popup must open, then selectedFeacture is required
-          if (!$store.getters['map/getSelectedFeature']) {
-            selectedFeat.value = feature
-            $store.dispatch('map/selectFeature', feature.values_)
-          }
           const selectedIcon = new Icon({
             src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
             anchor: [0.5, 1]
@@ -872,11 +905,17 @@ export default defineComponent({
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
         mapFilters.mode = 'increaseFilter'
-        $store.commit('map/removeActiveLayer', observation.type + '-' + observation.code)
+        $store.commit('map/removeActiveLayer', {
+          type: observation.type,
+          code: observation.code
+        })
       } else {
         mapFilters.observations.push({ type: observation.type, code: observation.code })
         mapFilters.mode = 'resetFilter'
-        $store.commit('map/addActiveLayer', observation.type + '-' + observation.code)
+        $store.commit('map/addActiveLayer', {
+          type: observation.type,
+          code: observation.code
+        })
       }
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
