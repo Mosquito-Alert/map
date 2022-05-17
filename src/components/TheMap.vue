@@ -984,7 +984,11 @@ export default defineComponent({
       } else {
         // Update mapFilters.tags only if tag is not a :report_id (':')
         if (obj.mode === 'addedTag') {
-          mapFilters.mode = 'increaseFilter'
+          if (tags.length > 1) {
+            mapFilters.mode = 'resetFilter'
+          } else {
+            mapFilters.mode = 'increaseFilter'
+          }
         } else {
           mapFilters.mode = 'resetFilter'
         }
