@@ -544,7 +544,7 @@ export default defineComponent({
       })
     }
 
-    function handleDownload () {
+    function handleDownload (format) {
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
       // Preparing params in Backend format
@@ -579,8 +579,8 @@ export default defineComponent({
       if (mapFilters.locations.length) {
         data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
       }
-
-      fetch(downloadUrl, {
+      const url = downloadUrl + format.format + '/'
+      fetch(url, {
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data),
         headers: {

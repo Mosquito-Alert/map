@@ -13,7 +13,10 @@
         </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button @click="download" class="download" :class="!nFeatures?'disabled':''">{{ _('Download') }}</button>
+            <button @click="download('gpkg')" class="download" :class="!nFeatures?'disabled':''">{{ _('Download geopackage') }}</button>
+            <button @click="download('xlsx')" class="download" :class="!nFeatures?'disabled':''">{{ _('Download excel') }}</button>
+          </div>
+          <div class="download-buttons">
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -31,8 +34,8 @@ export default {
   emits: ['close', 'startDownload'],
   setup (props, context) {
     const $store = useStore()
-    const download = function () {
-      context.emit('startDownload')
+    const download = function (format) {
+      context.emit('startDownload', { format })
     }
 
     const nFeatures = computed(() => {

@@ -105,8 +105,9 @@ export default {
       }
     })
 
-    const startDownload = function () {
-      map.value.handleDownload()
+    const startDownload = function (format) {
+      console.log(format)
+      map.value.handleDownload(format)
     }
 
     const shareView = function () {
