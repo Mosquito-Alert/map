@@ -130,6 +130,19 @@ function filterTags (data, tags) {
   return filteredData
 }
 
+function filterRecordsId (data, reportsId) {
+  const filteredData = data.filter(f => {
+    const t = f.properties.report_id
+    let found = false
+    if (t.length) {
+      const featureTags = t.split(',').map(t => t.trim())
+      found = featureTags.some(r => reportsId.includes(r))
+    }
+    return found
+  })
+  return filteredData
+}
+
 function filterObservations (data, layers, filters) {
   if (!data) return []
   // addObservationsFilter(type, code)
@@ -202,7 +215,6 @@ self.onmessage = function (e) {
     // Get the smallest dataset (reportFeatures) before start filtering
     if (filters.reportFeatures.length) {
       filteredData = filters.reportFeatures[0].features
-      fitFeatures = true
     } else {
       if (filters.mode === 'increaseFilter') {
         filteredData = filteredDataset
@@ -223,6 +235,13 @@ self.onmessage = function (e) {
       // TODO: Check for report_id filtering. That is a tag stating with :
       // array with only one date
       filteredData = filterTags(filteredData, filters.hashtags)
+      fitFeatures = true
+    }
+    if (filters.report_id.length > 0) {
+      // TODO: Check for report_id filtering. That is a tag stating with :
+      // array with only one date
+      filteredData = filterRecordsId(filteredData, filters.report_id)
+      fitFeatures = true
     }
     if (filters.locations.length > 0) {
       if (filters.tolerance) {

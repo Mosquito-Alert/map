@@ -49,9 +49,21 @@ export default {
     const addTag = function () {
       if (newTag.value.startsWith(':')) {
         $store.commit('app/setFilteringTag', { value: true })
-        tags.value = []
+        // if all tags start with ':' then push it, otherwise empty array
+        const onlyReports = tags.value.every(t => {
+          return t.startsWith(':')
+        })
+        if (!onlyReports) {
+          tags.value = []
+        }
       } else {
-        // If normal tag
+        // If some report_it tag, then reset tags
+        const someReports = tags.value.some(t => {
+          return t.startsWith(':')
+        })
+        if (someReports) {
+          tags.value = []
+        }
         newTag.value = newTag.value.toLowerCase()
       }
 

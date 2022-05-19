@@ -45,10 +45,7 @@ export default class ShareMapView {
 
     fetch(this.options.url, {
       method: 'POST', // or 'PUT'
-      body: JSON.stringify(dataView),
-      headers: {
-        'Content-Type': 'application/force-download'
-      }
+      body: JSON.stringify(dataView)
     })
       .then(function (response) {
         return response.json()

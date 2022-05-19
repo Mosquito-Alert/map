@@ -998,16 +998,23 @@ export default defineComponent({
       closePopup()
       // Check if tags contain reportFeatures starting with ':'
       if (tag.startsWith(':')) {
-        mapFilters.reportFeatures = []
+        mapFilters.hashtags = []
         if (obj.mode === 'addedTag') {
-          mapFilters.report_id = [tags[0].substring(1)]
-          mapFilters.mode = 'increaseFilter'
+          // mapFilters.report_id = [tags[0].substring(1)]
+          mapFilters.report_id = tags.map(t => {
+            return t.substring(1)
+          })
+          mapFilters.mode = 'resetFilter'
           // Fetch observation with :hashtag, but first remove starting character ':'
           $store.commit('app/setFilteringTag', { value: true })
-          const url = $store.getters['app/getBackend'] + 'api/get_reports/' + tags[0].substring(1)
+          const url = $store.getters['app/getBackend'] + 'api/get_reports/'
           const controller = new AbortController()
           const { signal } = controller
-          fetch(`${url}`, { signal })
+          fetch(`${url}`, {
+            signal: signal,
+            method: 'POST', // or 'PUT'
+            body: JSON.stringify({ reports: mapFilters.report_id.join(',') })
+          })
             .then(res => res.json())
             .then(res => {
               // Only one report. So no push into array
@@ -1020,22 +1027,19 @@ export default defineComponent({
               $store.commit('app/setFilteringTag', { value: false })
             })
         } else {
-          mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+          mapFilters.report_id = tags.map(t => {
+            return t.substring(1)
+          })
           workerData.filters = mapFilters
-          mapFilters.mode = 'resetFilter'
+          mapFilters.mode = 'increaseFilter'
           worker.postMessage(workerData)
         }
       } else {
-        // Update mapFilters.tags only if tag is not a :report_id (':')
-        if (obj.mode === 'addedTag') {
-          if (tags.length > 1) {
-            mapFilters.mode = 'resetFilter'
-          } else {
-            mapFilters.mode = 'increaseFilter'
-          }
-        } else {
-          mapFilters.mode = 'resetFilter'
-        }
+        mapFilters.reportFeatures = []
+        mapFilters.report_id = []
+        // Todo. make increaseFilter when applies depending on previous filtering
+        mapFilters.mode = 'resetFilter'
+
         const normalizeTags = tags.map(t => {
           return t.startsWith('#') ? t.slice(1) : t
         })
