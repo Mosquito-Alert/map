@@ -190,7 +190,7 @@ function getExtent (clusterId) {
 
 self.onmessage = function (e) {
   let fitFeatures = false
-  // console.log(e.data)
+  console.log(e.data)
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.

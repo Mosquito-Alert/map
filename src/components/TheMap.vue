@@ -427,6 +427,8 @@ export default defineComponent({
       }
       // Mode must be always 'resetFilter'
       mapFilters.mode = v.filters.mode
+      mapFilters.spiderfyId = v.spiderfyId
+
       if (v.filters.locations.length) {
         const jsonLocation = JSON.parse(v.filters.locations)
         if ('type' in jsonLocation) {
@@ -478,6 +480,8 @@ export default defineComponent({
         }
       }
 
+      console.log((clickOnSpiral) ? selectedId.value : '')
+
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         filters: mapFilters,
@@ -486,7 +490,8 @@ export default defineComponent({
         feature: obj,
         samplingEffort: samplingEffort,
         url: shareViewUrl,
-        callback: handleShareView
+        callback: handleShareView,
+        spiderfyId: (clickOnSpiral) ? selectedId.value : ''
       })
       newView.save()
     }
