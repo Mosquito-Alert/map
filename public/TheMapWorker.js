@@ -120,14 +120,12 @@ function filterTags (data, tags) {
   const filteringTags = tags.map(tag => tag.toLowerCase())
   const filteredData = data.filter(f => {
     const t = f.properties.t
-    let containsAll = false
+    let found = false
     if (t.length) {
       const featureTags = t.split(',').map(t => t.trim())
-      containsAll = filteringTags.every(element => {
-        return featureTags.includes(element)
-      })
+      found = featureTags.some(r => filteringTags.includes(r))
     }
-    return containsAll
+    return found
   })
   return filteredData
 }
