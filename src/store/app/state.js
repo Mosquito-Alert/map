@@ -145,7 +145,7 @@ export default function () {
           categories: ['breeding_site_other'],
           icon: require('../../assets/img/breeding_other.svg'),
           faIcon: 'fa-light fa-dharmachakra breeding',
-          common_name: 'Breeding site others',
+          common_name: 'Breeding site other',
           color: '#1072ad'
         }
       },

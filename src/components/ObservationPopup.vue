@@ -79,7 +79,7 @@
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="selectedFeature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>:
+                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
                       {{ _(selectedFeature.withWater) }}
                     </div>
                 </div>
