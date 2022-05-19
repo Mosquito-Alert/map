@@ -1036,7 +1036,10 @@ export default defineComponent({
         } else {
           mapFilters.mode = 'resetFilter'
         }
-        mapFilters.hashtags = JSON.parse(JSON.stringify(tags))
+        const normalizeTags = tags.map(t => {
+          return t.startsWith('#') ? t.slice(1) : t
+        })
+        mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
         workerData.filters = mapFilters
         worker.postMessage(workerData)
       }

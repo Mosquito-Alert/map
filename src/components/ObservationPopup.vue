@@ -85,12 +85,13 @@
                 </div>
                 <div class="description-wrapper" v-if="selectedFeature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>:
+                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
                       {{ _(selectedFeature.withLarva) }}
                     </div>
                 </div>
 
-                <div class="description-wrapper" v-if="selectedFeature.edited_user_notes">
+                <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
+                <div class="description-wrapper" v-if="selectedFeature.edited_user_notes && selectedFeature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
                     <div><span class="description">{{ _('Expert note') }}</span>:
                       {{ selectedFeature.edited_user_notes }}
@@ -121,7 +122,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onUpdated } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
@@ -136,10 +137,6 @@ export default defineComponent({
     const ratio = ref('null')
     ratio.value = 0
     imageRatio.value = 0
-
-    onUpdated(function () {
-      imageRatio.value = ''
-    })
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -174,13 +171,13 @@ export default defineComponent({
 
     const formatData = function (feature) {
       // Some locales add '.' after month, so we remove it
-      if (!feature.biteTime) {
+      if (feature.biteTime) {
         const d = moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
         const hour = moment(feature.observation_date).format('HH')
         const minutes = moment(feature.observation_date).format('MM')
         return d + ' ' + hour + 'h:' + minutes + 'm'
       } else {
-        return moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
+        return moment(feature.observation_date).format('DD/MM/YYYY').replace('.', '')
       }
     }
 
