@@ -1,6 +1,7 @@
 <template>
   <div id='mapa' class='bg-white'>
     <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
+    <map-dates-filter :dateFrom="mapDates.from" :dateTo="mapDates.to" />
     <observation-map-counter :nPoints="nPoints" />
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
@@ -72,6 +73,7 @@ import { useStore } from 'vuex'
 import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
 import ObservationMapCounter from './ObservationMapCounter.vue'
+import MapDatesFilter from './MapDatesFilter.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
@@ -86,7 +88,7 @@ import ShareMapView from '../js/ShareMapView'
 import { extend } from 'ol/extent'
 
 export default defineComponent({
-  components: { ObservationPopup, ObservationMapCounter },
+  components: { ObservationPopup, ObservationMapCounter, MapDatesFilter },
   name: 'TheMap',
   emits: [
     'toogleLeftDrawer',
@@ -146,6 +148,10 @@ export default defineComponent({
       reportFeatures: [],
       report_id: []
     }
+
+    const mapDates = computed(() => {
+      return $store.getters['map/getMapDates']
+    })
 
     watch(features, (current, old) => {
       nPoints.value = 0
@@ -402,8 +408,10 @@ export default defineComponent({
         const initialObservations = defaults.observations
 
         if (defaults.dates) {
+          // mapDates = { from: defaults.dates.from, to: defaults.dates.to }
           const initialDate = expandDate(defaults.dates, 'YYYY-MM-DD')
           mapFilters.dates = [initialDate]
+          $store.commit('map/setMapDates', defaults.dates)
         }
         if (defaults.hashtags) {
           mapFilters.hashtags = defaults.hashtags
@@ -1176,7 +1184,8 @@ export default defineComponent({
       attributioncontrol: true,
       view,
       selectedIcon,
-      nPoints
+      nPoints,
+      mapDates
     }
   }
 })

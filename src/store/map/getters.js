@@ -1,3 +1,7 @@
+export const getMapDates = (state) => {
+  return state.mapDates
+}
+
 export const getDefault = (state, payload) => {
   return state.DEFAULTS
 }

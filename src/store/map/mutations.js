@@ -1,3 +1,10 @@
+export const setMapDates = (state, payload) => {
+  state.mapDates.from = payload.from
+  state.mapDates.to = payload.to
+  console.log(payload)
+  console.log(state.mapDates)
+}
+
 export const selectFeature = (state, payload) => {
   state.selectedFeature = payload
 }

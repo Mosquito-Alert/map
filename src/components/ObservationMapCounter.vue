@@ -34,7 +34,7 @@ export default {
 .point-counter {
   display: inline-block;
   position: absolute;
-  top: 10px;
+  top: 40px;
   right: 10px;
   padding: 3px 10px;
   background: white;

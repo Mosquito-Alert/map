@@ -110,6 +110,7 @@ export default defineComponent({
         from: date.from.replaceAll('-', '/'),
         to: date.to.replaceAll('-', '/')
       }
+      $store.commit('map/setMapDates', { dateRange })
       const sDate = dateRange.value.from
       const eDate = dateRange.value.to
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
@@ -123,6 +124,7 @@ export default defineComponent({
       dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      $store.commit('map/setMapDates', { dateRange })
     })
 
     const toggleTimeSeries = function () {

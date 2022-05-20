@@ -11,6 +11,7 @@ export default function () {
     features: [],
     selectedFeature: null,
     activeLayers: [],
-    samplingEffortLoading: false
+    samplingEffortLoading: false,
+    mapDates: { from: '', to: '' }
   }
 }

@@ -1,0 +1,72 @@
+<template>
+  <div class = "date-box">
+    <div>
+      <q-btn
+        size="0.95em"
+        padding="2px 5px 2px 3px" icon="event_note" class="calendar-button"></q-btn>
+    </div>
+    <div class="date-from" v-html="dFrom"></div>
+    <div class="date-to" v-html="dTo"></div>
+  </div>
+</template>
+<script>
+
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+import moment from 'moment'
+
+export default {
+  props: ['dateFrom', 'dateTo'],
+  setup (props, context) {
+    const $store = useStore()
+
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
+    const dFrom = computed(() => {
+      return moment(props.dateFrom).format('DD/MM/YYYY')
+    })
+
+    const dTo = computed(() => {
+      return moment(props.dateTo).format('DD/MM/YYYY')
+    })
+
+    return {
+      _,
+      dFrom,
+      dTo
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.date-box {
+  align-items:baseline;
+  display: flex;
+  flex-direction: row;
+  justify-content: bottom;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 1px 10px;
+  background: rgb(112, 101, 101);
+  color:white;
+  border-radius: 25px;
+  z-index: 10;
+  font-family: $font-family;
+  font-size: 0.85em;
+  box-shadow: $box-shadow;
+  width: auto;
+}
+
+.date-from::after{
+  content: '-';
+  margin-left:10px;
+}
+
+.date-to{
+  padding-left: 10px;
+}
+</style>
