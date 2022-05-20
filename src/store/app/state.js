@@ -1,4 +1,4 @@
-const worker = new Worker('TheMapWorker.js')
+// const worker = new Worker('TheMapWorker.js')
 
 export default function () {
   let backendUrl = ''
@@ -36,7 +36,7 @@ export default function () {
     FRONTEND: 'http://localhost:8080/',
     trans: {},
     modals: {
-      info: { visibility: true },
+      info: { visibility: false },
       download: { visibility: false, n: 0 },
       share: { visibility: false }
     },
@@ -61,7 +61,7 @@ export default function () {
       breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
-    worker,
+    // worker,
     layers: {
       observations: { // Mosquito observations
         tiger: {

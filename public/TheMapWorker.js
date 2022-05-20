@@ -188,9 +188,31 @@ function getExtent (clusterId) {
   return [xmin, ymin, xmax, ymax]
 }
 
+function getClusterByFeatureId (data) {
+  const searchId = data.spiderfyId
+  const fs = index.getClusters(data.bbox, parseInt(data.zoom))
+
+  // First get all clusters within the view
+  const clusters = fs.filter(f => {
+    return f.properties.cluster
+  })
+
+  // Now get with cluster contains de searchId feature
+  const parent = clusters.find(c => {
+    const leaves = index.getLeaves(c.properties.cluster_id, Infinity)
+    return leaves.find(l => {
+      if (l.properties.id === searchId) {
+        return c.properties.cluster_id
+      } else {
+        return false
+      }
+    })
+  })
+  return parent
+}
+
 self.onmessage = function (e) {
   let fitFeatures = false
-  console.log(e.data)
   if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
     // This is fired when the user clicks on a cluster.
     // Returns the zoom level to zoom in and the center.
@@ -254,12 +276,21 @@ self.onmessage = function (e) {
     filteredDataset = filteredData
     loadMapData(filteredData, fitFeatures)
   } else if (e.data.spiderfyCluster) {
+    let openPopupId = ''
+    if (e.data.spiderfyId) {
+      const cluster = getClusterByFeatureId(e.data)
+      e.data.getClusterExpansionZoom = cluster.id
+      e.data.center = cluster.geometry.coordinates
+      openPopupId = e.data.spiderfyId
+    }
     if (e.data.getClusterExpansionZoom) {
       postMessage({
         map: index.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
         spiderfyCluster: e.data.spiderfyCluster,
-        center: e.data.center
+        openPopupId: openPopupId,
+        center: e.data.center,
+        clusterId: e.data.getClusterExpansionZoom
       })
     } else {
       postMessage({

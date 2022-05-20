@@ -99,6 +99,7 @@ export default defineComponent({
   props: ['sharedView'],
   setup (props, context) {
     let olDownload
+    let shareviewSpideryId = ''
     let locationName = ''
     let storeLayers
     let administrativeLayer
@@ -272,7 +273,7 @@ export default defineComponent({
           if (event.data.datesInterval) {
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
           }
-          const param = (props.sharedView) ? props.sharedView[0].toString() : null
+          const param = (props.sharedView) ? props.sharedView : null
           initMap(param)
         } else {
           context.emit('workerFinishedIndexing', { mapFilters })
@@ -309,10 +310,17 @@ export default defineComponent({
         ready = true
       } else if (event.data.spiderfyCluster) {
         if (event.data.center) {
+          shareviewSpideryId = false
           const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
           spiderfy(center, event.data.spiderfyFeatures)
+          if (event.data.openPopupId) {
+            const fId = event.data.openPopupId
+            const sFeature = getSpiralFeature(fId)
+            $store.dispatch('map/selectFeature', sFeature.values_)
+          }
         }
         features.value = []
+
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           const feat = new Feature({
@@ -321,6 +329,9 @@ export default defineComponent({
             id: a
           })
           // Avoid adding the cluster that is being spiderfied
+          if (event.data.clusterId && event.data.clusterId === f.id) {
+            continue
+          }
           if (spiderfiedCluster && spiderfiedCluster.values_.properties.cluster_id === f.id) {
             continue
           }
@@ -357,6 +368,17 @@ export default defineComponent({
         $store.commit('timeseries/updateXUnits', daysInRange)
         $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
+    }
+
+    function getSpiralFeature (id) {
+      const fs = spiralSource.value.source.getFeatures()
+      const f = fs.find(f => {
+        if (f.getProperties().properties) {
+          return (f.getProperties().properties.id === id)
+        }
+        return false
+      })
+      return f
     }
 
     function initMap (viewCode) {
@@ -427,7 +449,6 @@ export default defineComponent({
       }
       // Mode must be always 'resetFilter'
       mapFilters.mode = v.filters.mode
-      mapFilters.spiderfyId = v.spiderfyId
 
       if (v.filters.locations.length) {
         const jsonLocation = JSON.parse(v.filters.locations)
@@ -443,14 +464,19 @@ export default defineComponent({
         closedPopupDisable.value = true
         selectedId.value = v.popup
         const f = v.feature
-        const selectedInView = new Feature({
+        const feature = new Feature({
           geometry: new Point(f.geometry),
           properties: f.properties,
           id: f.id
         })
-        selectedFeat.value = selectedInView
-        selectedIcon.value = $store.getters['app/selectedIcons'][selectedInView.values_.properties.c]
-        $store.dispatch('map/selectFeature', selectedInView.values_)
+        selectedFeat.value = feature
+        selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
+        if (v.spiderfyId) {
+          shareviewSpideryId = v.spiderfyId
+          spiderfyCluster = true
+        } else {
+          $store.dispatch('map/selectFeature', feature.values_)
+        }
       }
 
       if (v.samplingEffort) {
@@ -460,7 +486,6 @@ export default defineComponent({
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
       mapFilters.reportFeatures = JSON.parse(JSON.stringify(v.filters.reportFeatures))
-
       initMap()
     }
 
@@ -479,8 +504,6 @@ export default defineComponent({
           id: feature.get('id')
         }
       }
-
-      console.log((clickOnSpiral) ? selectedId.value : '')
 
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
@@ -533,7 +556,8 @@ export default defineComponent({
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: parseInt(olmap.getView().getZoom()),
-        spiderfyCluster: spiderfyCluster
+        spiderfyCluster: spiderfyCluster,
+        spiderfyId: shareviewSpideryId
       })
     }
 

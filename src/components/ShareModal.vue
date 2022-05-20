@@ -3,7 +3,7 @@
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog" v-if="open">
+    <div class="dialog" v-if="open" @click="close">
       <dialog open>
         <slot></slot>
           <p v-if="success==''">{{ _('Share this map view') }}</p>
@@ -25,7 +25,7 @@
           </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button v-if="success==''" @click="shareView">{{ _('Share view') }}</button>
+            <button v-if="success==''" @click.stop="shareView">{{ _('Share view') }}</button>
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -134,7 +134,7 @@ dialog {
 }
 button.disabled {
   background: #ccc;
-  pointer: not-allowed;
+  cursor: not-allowed;
 }
 button {
   background: $primary-button-background;

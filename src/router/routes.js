@@ -10,8 +10,16 @@ const routes = [
   },
   {
     // Set the accepted characters and length of init view code
-    path: '/:code([a-zA-Z0-9]{4})*',
+    path: '/:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/MainLayout.vue')
+  },
+  {
+    path: '/:code([-a-zA-Z0-9]{36})',
+    component: () => import('layouts/OneFeatureMap.vue')
+  },
+  {
+    path: '/:code([-a-zA-Z0-9]{36})/:anim(.*)',
+    component: () => import('layouts/OneFeatureMap.vue')
   },
   // Always leave this as last one,
   // but you can also remove it

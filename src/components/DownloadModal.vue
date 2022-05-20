@@ -13,8 +13,23 @@
         </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button @click="download('gpkg')" class="download" :class="!nFeatures?'disabled':''">{{ _('Download geopackage') }}</button>
-            <button @click="download('xlsx')" class="download" :class="!nFeatures?'disabled':''">{{ _('Download excel') }}</button>
+            <button
+              class="download"
+              :class="!nFeatures?'disabled':''"
+              @click="download('gpkg')"
+            >
+              <i class="fa-solid fa-download"></i>
+                {{ _('Download geopackage') }}
+            </button>
+
+            <button
+              class="download"
+              :class="!nFeatures?'disabled':''"
+              @click="download('xlsx')"
+            >
+                <i class="fa-solid fa-download"></i>
+                {{ _('Download excel') }}
+            </button>
           </div>
           <div class="download-buttons">
             <button @click="close" class="close">{{ _('Close') }}</button>
