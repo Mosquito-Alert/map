@@ -15,11 +15,7 @@ const routes = [
   },
   {
     path: '/:code([-a-zA-Z0-9]{36})',
-    component: () => import('layouts/OneFeatureMap.vue')
-  },
-  {
-    path: '/:code([-a-zA-Z0-9]{36})/:anim(.*)',
-    component: () => import('layouts/OneFeatureMap.vue')
+    component: () => import('src/layouts/OneFeatureLayout.vue')
   },
   // Always leave this as last one,
   // but you can also remove it

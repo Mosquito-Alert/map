@@ -89,7 +89,9 @@ export default {
           c: popupContent.value.private_webmap_layer
         }
       })
-
+      console.log(fCoords)
+      $store.commit('map/setDefaults', { zoom: 16, center: [currentValue.lon, currentValue.lat] })
+      console.log(center.value)
       observationSource.value.source.addFeature(feature)
     })
 

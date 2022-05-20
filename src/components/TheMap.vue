@@ -328,10 +328,12 @@ export default defineComponent({
             properties: f.properties,
             id: a
           })
-          // Avoid adding the cluster that is being spiderfied
+          // Skip cluster that is spiderfied in shared view
           if (event.data.clusterId && event.data.clusterId === f.id) {
+            spiderfiedCluster = feat
             continue
           }
+          // Skip cluster that is spiderfied by clicking
           if (spiderfiedCluster && spiderfiedCluster.values_.properties.cluster_id === f.id) {
             continue
           }
@@ -1059,8 +1061,15 @@ export default defineComponent({
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
           })
+          // If there are no more tags then reset filter, otherwise increse it
+          if (tags.length) {
+            mapFilters.mode = 'increaseFilter'
+          } else {
+            mapFilters.mode = 'resetFilter'
+            mapFilters.reportFeatures = []
+          }
           workerData.filters = mapFilters
-          mapFilters.mode = 'increaseFilter'
+          console.log(workerData)
           worker.postMessage(workerData)
         }
       } else {

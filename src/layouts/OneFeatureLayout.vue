@@ -6,7 +6,6 @@
       <one-feature-map ref='map'
         init
         :observationId="observationId"
-        :anim="anim"
       />
 
     </q-page>
@@ -23,12 +22,8 @@ export default {
   setup () {
     const route = useRoute()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    console.log(observationId)
-    const anim = (route.params) ? ((route.params.anim) ? route.params.anim.length > 0 : route.params.anim.length) : 0
-
     return {
-      observationId,
-      anim
+      observationId
     }
   }
 }
