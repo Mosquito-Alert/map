@@ -1,6 +1,7 @@
 <template>
   <div id='mapa' class='bg-white'>
     <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
+    <observation-map-counter :nPoints="nPoints" />
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -66,10 +67,11 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref, onMounted, inject } from 'vue'
+import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
 import { transform, transformExtent } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
+import ObservationMapCounter from './ObservationMapCounter.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon, LineString } from 'ol/geom'
@@ -84,7 +86,7 @@ import ShareMapView from '../js/ShareMapView'
 import { extend } from 'ol/extent'
 
 export default defineComponent({
-  components: { ObservationPopup },
+  components: { ObservationPopup, ObservationMapCounter },
   name: 'TheMap',
   emits: [
     'toogleLeftDrawer',
@@ -112,6 +114,7 @@ export default defineComponent({
     let spiderfiedCluster
     let clickOnSpiral = false
     const leftDrawerIcon = ref('null')
+    const nPoints = ref(0)
     const baseMap = ref('null')
     let simplifyTolerance = null
     const spiralSource = ref()
@@ -143,6 +146,16 @@ export default defineComponent({
       reportFeatures: [],
       report_id: []
     }
+
+    watch(features, (current, old) => {
+      nPoints.value = 0
+      current.forEach(f => {
+        nPoints.value += (f.values_.properties.point_count) ? f.values_.properties.point_count : 1
+      })
+      if (nPoints.value > 0) {
+        nPoints.value = nPoints.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+      }
+    })
 
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
@@ -1162,7 +1175,8 @@ export default defineComponent({
       popupContent,
       attributioncontrol: true,
       view,
-      selectedIcon
+      selectedIcon,
+      nPoints
     }
   }
 })
