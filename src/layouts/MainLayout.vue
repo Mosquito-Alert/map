@@ -28,8 +28,10 @@
         @tagsChanged="tagsChanged"
         @locationChanged="locationChanged"
         @loadUserFixes="loadUserFixes"
+        @calendarClicked="calendarClicked"
       />
-      <time-series ref="timeseries"
+      <time-series
+        ref="timeseries"
         @toggleTimeSeries='resizeMap'
         @dateSelected='filterDate'
       />
@@ -216,7 +218,12 @@ export default {
       TOC.value.toggleSamplingEffort(status)
     }
 
+    const calendarClicked = function (e) {
+      timeseries.value.showCalendar()
+    }
+
     return {
+      calendarClicked,
       viewCode,
       shareView,
       expanded,

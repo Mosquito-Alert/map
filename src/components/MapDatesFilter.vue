@@ -2,11 +2,15 @@
   <div class = "date-box">
     <div>
       <q-btn
-        size="0.95em"
-        padding="2px 5px 2px 3px" icon="event_note" class="calendar-button"></q-btn>
+        size="0.95em" padding="2px 5px 2px 3px"
+        icon="event_note"
+        class="calendar-button"
+        @click="calendarClicked"
+      >
+      </q-btn>
     </div>
-    <div class="date-from" v-html="dFrom"></div>
-    <div class="date-to" v-html="dTo"></div>
+    <div v-if="dFrom" class="date-from" v-html="dFrom"></div>
+    <div v-if="dTo" class="date-to" v-html="dTo"></div>
   </div>
 </template>
 <script>
@@ -17,6 +21,7 @@ import moment from 'moment'
 
 export default {
   props: ['dateFrom', 'dateTo'],
+  emits: ['calendarClicked'],
   setup (props, context) {
     const $store = useStore()
 
@@ -25,17 +30,22 @@ export default {
     }
 
     const dFrom = computed(() => {
-      return moment(props.dateFrom).format('DD/MM/YYYY')
+      return (props.dateFrom !== props.dateTo) ? moment(props.dateFrom).format('DD/MM/YYYY') : ''
     })
 
     const dTo = computed(() => {
-      return moment(props.dateTo).format('DD/MM/YYYY')
+      return (props.dateFrom === '' && props.dateTo === '') ? '' : moment(props.dateTo).format('DD/MM/YYYY')
     })
+
+    const calendarClicked = function () {
+      context.emit('calendarClicked', {})
+    }
 
     return {
       _,
       dFrom,
-      dTo
+      dTo,
+      calendarClicked
     }
   }
 }
@@ -68,5 +78,9 @@ export default {
 
 .date-to{
   padding-left: 10px;
+}
+
+.date-box button:hover {
+  color: $primary-color;
 }
 </style>

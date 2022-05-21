@@ -1,8 +1,17 @@
 <template>
   <div id='mapa' class='bg-white'>
     <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
-    <map-dates-filter :dateFrom="mapDates.from" :dateTo="mapDates.to" />
-    <observation-map-counter :nPoints="nPoints" />
+
+    <map-dates-filter
+      :dateFrom="mapDates.from"
+      :dateTo="mapDates.to"
+      @calendarClicked="calendarClicked"
+    />
+
+    <observation-map-counter
+      :nPoints="nPoints"
+    />
+
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -98,7 +107,8 @@ export default defineComponent({
     'timeSeriesChanged',
     'tagsChanged',
     'locationChanged',
-    'loadUserFixes'
+    'loadUserFixes',
+    'calendarClicked'
   ],
   props: ['sharedView'],
   setup (props, context) {
@@ -402,14 +412,26 @@ export default defineComponent({
       return f
     }
 
+    function getCurrentYearDates () {
+      return {
+        from: moment().startOf('year').format('YYYY-MM-DD'),
+        to: moment().format('YYYY-MM-DD')
+      }
+    }
+
     function initMap (viewCode) {
       if (!viewCode) {
         const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
         const initialObservations = defaults.observations
 
+        // Set default dates, otherwise current year data only
         if (defaults.dates) {
           // mapDates = { from: defaults.dates.from, to: defaults.dates.to }
           const initialDate = expandDate(defaults.dates, 'YYYY-MM-DD')
+          mapFilters.dates = [initialDate]
+          $store.commit('map/setMapDates', defaults.dates)
+        } else {
+          const initialDate = expandDate(getCurrentYearDates(), 'YYYY-MM-DD')
           mapFilters.dates = [initialDate]
           $store.commit('map/setMapDates', defaults.dates)
         }
@@ -1090,7 +1112,6 @@ export default defineComponent({
             mapFilters.reportFeatures = []
           }
           workerData.filters = mapFilters
-          console.log(workerData)
           worker.postMessage(workerData)
         }
       } else {
@@ -1152,7 +1173,12 @@ export default defineComponent({
       userfixesLayer.refreshLayer()
     }
 
+    const calendarClicked = function () {
+      context.emit('calendarClicked', {})
+    }
+
     return {
+      calendarClicked,
       baseMap,
       handleDownload,
       shareView,

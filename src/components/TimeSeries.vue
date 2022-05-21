@@ -1,4 +1,4 @@
-f.ca<template>
+<template>
   <div :class="timeSeriesClass">
     <div class="toggle-time">
       <q-btn
@@ -9,9 +9,9 @@ f.ca<template>
         :label="_('Time series')"
         @click="toggleTimeSeries"
       >
-      <div class="timeseries-filter">
+      <!-- <div class="timeseries-filter">
         {{ dateFilter }}
-      </div>
+      </div> -->
       </q-btn>
     </div>
     <div class="body">
@@ -28,7 +28,12 @@ f.ca<template>
             @click="resetDateFilter"
             :label="_('Delete')"
           />
-          <q-btn icon="event_note" class="calendar-button" :label="_('Select')">
+          <q-btn
+            ref="calendarBtn"
+            icon="event_note"
+            class="calendar-button"
+            :label="_('Select')"
+          >
             <q-popup-proxy
               @before-show="updateProxy"
               cover
@@ -83,6 +88,7 @@ export default defineComponent({
     const getCurrentDate = ref()
     const dateRange = ref()
     const dateFilter = ref()
+    const calendarBtn = ref()
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
@@ -94,6 +100,7 @@ export default defineComponent({
         type: 'date',
         data: null
       })
+      $store.commit('map/setMapDates', { from: '', to: '' })
     }
     // Timeseries properties
     const timeSeriesClass = computed(() => {
@@ -180,6 +187,10 @@ export default defineComponent({
 
     const datePicked = function (event) {
       const date = dateRange.value
+      $store.commit('map/setMapDates', {
+        from: dateRange.value.from,
+        to: dateRange.value.to
+      })
       dateFilterToString(date)
       let daysInRange = 0
       if (typeof event === 'string') {
@@ -194,13 +205,16 @@ export default defineComponent({
       $store.commit('timeseries/updateXUnits', daysInRange)
       context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
     }
+
     const chartOptions = computed(() => {
       return $store.getters['timeseries/getChartOptions']
     })
+
     // Language function
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
     const dateFilterToString = function (date) {
       if (typeof date === 'object') {
         const sDate = date.from
@@ -215,8 +229,14 @@ export default defineComponent({
       }
     }
 
+    const showCalendar = function () {
+      calendarBtn.value.$el.click()
+    }
+
     return {
       _,
+      showCalendar,
+      calendarBtn,
       setDate,
       resetDateFilter,
       dateFilterToString,
