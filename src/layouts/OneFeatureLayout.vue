@@ -6,8 +6,8 @@
       <one-feature-map ref='map'
         init
         :observationId="observationId"
+        popup="true"
       />
-
     </q-page>
 
   </q-layout>

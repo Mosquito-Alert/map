@@ -12,20 +12,14 @@
       :center="center"
       :zoom="zoom"
     />
-
-    <div class="ol-attribution">
-      © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-      | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
-      | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
-    </div>
-
+    <ol-attribution v-if="openPopup"/>
     <!-- BASE LAYER -->
     <ol-tile-layer>
         <ol-source-osm />
     </ol-tile-layer>
 
     <!-- OBSERVATION LAYER -->
-    <ol-vector-layer ref='observationLayer' name="observationLayer">
+    <ol-vector-layer ref='observationLayer' name="observationLayer" zIndex="20">
       <ol-source-vector ref='observationSource' :features="feature">
         <ol-style :overrideStyleFunction="styleFunction">
         </ol-style>
@@ -47,12 +41,14 @@ import { useRoute } from 'vue-router'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { transform } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
+import OlAttribution from './OlAttribution.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Icon } from 'ol/style'
 
 export default {
-  components: { ObservationPopup },
+  props: ['popup'],
+  components: { ObservationPopup, OlAttribution },
   setup (props, context) {
     const $store = useStore()
     const route = useRoute()
@@ -60,11 +56,35 @@ export default {
     const view = ref('null')
     let feature
     const observationSource = ref('null')
-
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    // const anim = (route.params) ? ((route.params.anim) ? route.params.anim.length > 0 : route.params.anim.length) : 0
 
-    $store.dispatch('map/selectOneFeatureMap', observationId)
+    const openPopup = computed(() => {
+      return (props.popup === 'true')
+    })
+
+    // Check if popup is required
+    if (openPopup.value) {
+      $store.dispatch('map/selectOneFeatureMap', observationId)
+    } else {
+      const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId
+      fetch(url)
+        .then(response => response.json())
+        .then(json => {
+          $store.commit('map/setDefaults', { zoom: 16, center: [json.lon, json.lat] })
+          const fCoords = transform(
+            [json.lon, json.lat],
+            'EPSG:4326', 'EPSG:3857'
+          )
+          // styleFunction layer uses c attribute for private_webmap_layer value
+          json.c = json.private_webmap_layer
+          feature = new Feature({
+            geometry: new Point(fCoords),
+            properties: json
+          })
+          console.log(feature.getProperties())
+          observationSource.value.source.addFeature(feature)
+        })
+    }
 
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
@@ -73,6 +93,7 @@ export default {
     const zoom = computed(() => {
       return $store.getters['map/getDefault'].ZOOM
     })
+
     const center = computed(() => {
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
@@ -89,19 +110,65 @@ export default {
           c: popupContent.value.private_webmap_layer
         }
       })
-      console.log(fCoords)
       $store.commit('map/setDefaults', { zoom: 16, center: [currentValue.lon, currentValue.lat] })
-      console.log(center.value)
       observationSource.value.source.addFeature(feature)
     })
 
     const styleFunction = (feature, style) => {
-      const selectedIcon = new Icon({
-        src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
-        anchor: [0.5, 1]
-      })
-      style.setImage(selectedIcon)
-      style.setText('')
+      if (openPopup.value) {
+        const selectedIcon = new Icon({
+          src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
+          anchor: [0.5, 1]
+        })
+        style.setImage(selectedIcon)
+        style.setText('')
+      } else {
+        let observations = $store.getters['app/layers'].observations
+        let observationsKeys = Object.keys(observations)
+        let featureKey = observationsKeys.find(function (e) {
+          return observations[e].categories.includes(feature.values_.properties.c)
+        })
+
+        // If not found check on Bites
+        if (!featureKey) {
+          observations = $store.getters['app/layers'].bites
+          observationsKeys = Object.keys(observations)
+          featureKey = observationsKeys.find(function (e) {
+            return observations[e].categories.includes(feature.values_.properties.c)
+          })
+        }
+
+        // If not found check on breeding sites
+        if (!featureKey) {
+          observations = $store.getters['app/layers'].breeding
+          observationsKeys = Object.keys(observations)
+          featureKey = observationsKeys.find(function (e) {
+            return observations[e].categories.includes(feature.values_.properties.c)
+          })
+        }
+
+        // If not found check on otherObservations
+        if (!featureKey) {
+          observations = $store.getters['app/layers'].otherObservations
+          observationsKeys = Object.keys(observations)
+          featureKey = observationsKeys.find(function (e) {
+            return observations[e].categories.includes(feature.values_.properties.c)
+          })
+        }
+        // if no layer selected then featurekey is null
+        if (featureKey) {
+          let iconUrl = observations[featureKey].icon
+          if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
+            iconUrl = observations[featureKey].iconConflict
+          }
+          const tiger = new Icon({
+            src: iconUrl,
+            anchor: [0.5, 1]
+          })
+          style.setImage(tiger)
+          style.setText('')
+        }
+      }
     }
 
     function flyTo (location, zoom, done) {
@@ -141,6 +208,7 @@ export default {
 
     return {
       map,
+      openPopup,
       view,
       center,
       zoom,
@@ -157,33 +225,5 @@ export default {
 <style slang='scss'>
   .ol-mapa {
     height: 100%;
-  }
-
-  .ol-attribution:not(.ol-collapsed){
-    background: #33333342;
-  }
-
-  .ol-attribution {
-    position: absolute;
-    top: auto;
-    left: auto;
-    bottom: 4px;
-    right: 10px;
-    z-index: 9;
-    font-size: 10px;
-    color: white;
-    padding: 4px 20px;
-    border-radius: 10px;
-    height: 20px;
-    line-height: 13px;
-  }
-
-  .ol-attribution a:hover {
-    text-decoration:underline;
-  }
-
-  .ol-attribution a {
-    color: #3498DB;
-    text-decoration:none;
   }
 </style>
