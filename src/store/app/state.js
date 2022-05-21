@@ -21,12 +21,12 @@ export default function () {
     DEFAULTS: {
       sampling_effort: true,
       observations: [
-        { type: 'observations', code: 'tiger' }
-        // { type: 'observations', code: 'culex' },
+        { type: 'observations', code: 'tiger' },
+        { type: 'observations', code: 'culex' }
         // { type: 'bites', code: 'pending' }
       ],
-      dates: { from: '2021/01/01', to: '2021/12/31' },
-      // DATES: { from: '2014/11/01', to: '2022/11/10' },
+      // dates: [{ from: '2021/01/01', to: '2021/12/31' }],
+      dates: [],
       hashtags: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
@@ -68,7 +68,7 @@ export default function () {
           categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
-          icon: require('../../assets/img/marker_tiger35_45.svg'),
+          icon: require('../../assets/img/marker_tiger.svg'),
           color: '#4d4d4d'
         },
         yellow: {

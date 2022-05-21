@@ -425,15 +425,16 @@ export default defineComponent({
         const initialObservations = defaults.observations
 
         // Set default dates, otherwise current year data only
-        if (defaults.dates) {
+        if (defaults.dates.length) {
           // mapDates = { from: defaults.dates.from, to: defaults.dates.to }
-          const initialDate = expandDate(defaults.dates, 'YYYY-MM-DD')
+          const initialDate = expandDate(defaults.dates[0], 'YYYY-MM-DD')
           mapFilters.dates = [initialDate]
-          $store.commit('map/setMapDates', defaults.dates)
+          $store.commit('map/setMapDates', defaults.dates[0])
         } else {
-          const initialDate = expandDate(getCurrentYearDates(), 'YYYY-MM-DD')
+          const currentDates = getCurrentYearDates()
+          const initialDate = expandDate(currentDates, 'YYYY-MM-DD')
           mapFilters.dates = [initialDate]
-          $store.commit('map/setMapDates', defaults.dates)
+          $store.commit('map/setMapDates', currentDates)
         }
         if (defaults.hashtags) {
           mapFilters.hashtags = defaults.hashtags
@@ -469,7 +470,7 @@ export default defineComponent({
       })
       let d
       if (v.filters.dates.length) {
-        d = v.filters.dates[0]
+        d = v.filters.dates
       } else {
         d = $store.getters['timeseries/getCompleteDatesRange']
       }

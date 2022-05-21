@@ -315,6 +315,7 @@ export default defineComponent({
   }
   .legend>div .symbol {
     margin-right: 10px;
+    vertical-align: bottom;
   }
   .calendar-button {
     background: white;

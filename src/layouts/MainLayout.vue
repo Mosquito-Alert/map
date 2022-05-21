@@ -203,7 +203,7 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
-      timeseries.value.setDate(date)
+      timeseries.value.setDate(date[0])
     }
 
     const tagsChanged = function (tags) {
