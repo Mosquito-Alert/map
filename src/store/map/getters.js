@@ -25,3 +25,12 @@ export const getActiveLayers = state => {
 export const getSamplingEffortLoading = state => {
   return state.samplingEffortLoading
 }
+
+export const getTitles = state => {
+  console.log(state.titles)
+  return state.titles
+}
+
+export const getLatinNames = state => {
+  return state.latinNames
+}
