@@ -6,6 +6,7 @@
     <div class="dialog" v-if="open" @click="close">
       <dialog open>
         <slot></slot>
+          <div class="modal-title">{{ _('Download') }}</div>
           <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
           <p>{{ _('Once verified, press the download button.') }}</p>
         <div class="error-message" v-if="!nFeatures">
@@ -156,5 +157,9 @@ button:hover {
   color: crimson;
   text-align: center;
   font-weight: bold;
+}
+.modal-title{
+  font-size: 1.5em;
+  padding-bottom: 10px;
 }
 </style>

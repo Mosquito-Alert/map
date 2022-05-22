@@ -37,40 +37,50 @@
       />
     </q-page>
 
-    <base-modal :open="infoModalVisible" buttons="close">
+    <modal-base :open="infoModalVisible" buttons="close">
       <template v-slot:default>
         <p><img src="~/assets/img/mosquitoalert_logo.png"></p>
         <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feu-giat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
         <p>Lorem ipsum dolor sit amet, cons ectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.</p>
         <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tatilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. </p>
       </template>
-    </base-modal>
+    </modal-base>
 
-    <download-modal
+    <modal-download
       :open="downloadModalVisible"
       @startDownload="startDownload"
     >
       <template v-slot:default>
       </template>
-    </download-modal>
+    </modal-download>
 
-    <share-modal
+    <modal-share
       ref="shareModal"
       :open="shareModalVisible"
       @shareView="shareView"
     >
       <template v-slot:default>
       </template>
-    </share-modal>
+    </modal-share>
+
+    <modal-reports
+      ref="reportsModal"
+      :open="reportsModalVisible"
+      @openReports="openReports"
+    >
+      <template v-slot:default>
+      </template>
+    </modal-reports>
 
     <site-footer/>
   </q-layout>
 </template>
 
 <script>
-import BaseModal from 'components/BaseModal.vue'
-import DownloadModal from 'components/DownloadModal.vue'
-import ShareModal from 'components/ShareModal.vue'
+import ModalBase from 'src/components/ModalBase.vue'
+import ModalDownload from 'components/ModalDownload.vue'
+import ModalShare from 'src/components/ModalShare.vue'
+import ModalReports from 'src/components/ModalReports.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -81,7 +91,7 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 
 export default {
-  components: { BaseModal, DownloadModal, ShareModal, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
+  components: { ModalBase, ModalDownload, ModalShare, ModalReports, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
   setup () {
     const route = useRoute()
     const map = ref('null')
@@ -115,6 +125,10 @@ export default {
 
     const shareView = function () {
       map.value.shareView()
+    }
+
+    const openReports = function () {
+      map.value.openReports()
     }
 
     const filterLocations = function (location) {
@@ -180,6 +194,10 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
+    const reportsModalVisible = computed(() => {
+      return $store.getters['app/getModals'].reports.visibility
+    })
+
     const frontendUrl = computed(() => {
       return $store.getters['app/getFrontendUrl']
     })
@@ -226,6 +244,7 @@ export default {
       calendarClicked,
       viewCode,
       shareView,
+      openReports,
       expanded,
       startDownload,
       toggleSamplingEffort,
@@ -243,6 +262,7 @@ export default {
       infoModalVisible,
       downloadModalVisible,
       shareModalVisible,
+      reportsModalVisible,
       map,
       TOC,
       timeseries,

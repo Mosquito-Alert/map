@@ -4,13 +4,12 @@ export default class DownloadControl extends Control {
   constructor (optOptions) {
     const options = optOptions || {}
     const button = document.createElement('button')
-    button.setAttribute('title', 'Download')
-    button.innerHTML = '<i class="fa-thin fa-download"></i>'
+    button.setAttribute('title', options.title)
+    button.innerHTML = options.icon
 
     const element = document.createElement('div')
-    element.className = 'ol-download ol-unselectable ol-control'
+    element.className = options.className
     element.appendChild(button)
-
     super({
       element: element,
       target: options.target

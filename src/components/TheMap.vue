@@ -92,7 +92,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
-import DownloadControl from '../js/DownloadControl'
+import CustomControl from '../js/CustomControl'
 import ShareMapView from '../js/ShareMapView'
 import { extend } from 'ol/extent'
 
@@ -113,6 +113,7 @@ export default defineComponent({
   props: ['sharedView'],
   setup (props, context) {
     let olDownload
+    let olReports
     let shareviewSpideryId = ''
     let locationName = ''
     let storeLayers
@@ -661,6 +662,16 @@ export default defineComponent({
       })
     }
 
+    function openReportsModal () {
+      $store.commit('app/setModal', {
+        id: 'reports',
+        content: {
+          visibility: true,
+          n: features.value.length
+        }
+      })
+    }
+
     function handleDownload (format) {
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
@@ -722,8 +733,22 @@ export default defineComponent({
       const fillLocationColor = defaults.fillLocationColor
       const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
-      olDownload = new DownloadControl({ callback: openDownloadModal })
+      olDownload = new CustomControl({
+        title: 'Download',
+        icon: '<i class="fa-thin fa-download"></i>',
+        className: 'ol-download ol-unselectable ol-control',
+        callback: openDownloadModal
+      })
       ol.addControl(olDownload)
+
+      olReports = new CustomControl({
+        title: 'Reports',
+        icon: '<i class="fa-solid fa-file-lines"></i>',
+        className: 'ol-reports ol-unselectable ol-control',
+        callback: openReportsModal
+      })
+      ol.addControl(olReports)
+
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
       storeLayers = $store.getters['app/getLayers']
@@ -1224,26 +1249,33 @@ export default defineComponent({
     flex: 1;
     position: relative;
   }
+  :deep(.ol-reports.ol-control.ol-disabled),
   :deep(.ol-download.ol-control.ol-disabled) {
     opacity: 1;
     cursor: not-allowed;
   }
 
+  :deep(.ol-reports.ol-control.ol-disabled) button,
   :deep(.ol-download.ol-control.ol-disabled) button {
     color: #7b7272;
     background: white;
     cursor:inherit;
   }
+  :deep(.ol-reports) button i,
   :deep(.ol-download) button i {
     cursor:pointer;
   }
+  :deep(.ol-reports){
+    bottom: 120px;
+  }
   :deep(.ol-download){
-    bottom: 160px;
+    bottom: 170px;
   }
   :deep(.ol-zoom) {
     bottom: 15px;
   }
 
+  :deep(.ol-reports),
   :deep(.ol-download),
   :deep(.ol-zoom) {
     position: absolute;
@@ -1256,6 +1288,7 @@ export default defineComponent({
     // right:15px;
   }
   :deep(.ol-zoom) button,
+  :deep(.ol-reports.ol-control) button,
   :deep(.ol-download.ol-control) button {
     background: $primary-button-background;
     color: $primary-button-text;
@@ -1272,6 +1305,7 @@ export default defineComponent({
     box-shadow: $box-shadow;
     // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
+  :deep(.ol-reports) button:hover,
   :deep(.ol-download) button:hover,
   :deep(.ol-zoom) button:hover {
     background: $primary-button-background-hover;

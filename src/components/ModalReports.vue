@@ -6,26 +6,15 @@
     <div class="dialog" v-if="open" @click="close">
       <dialog open>
         <slot></slot>
-          <p v-if="success==''">{{ _('Share this map view') }}</p>
-          <p v-if="success=='error'">{{ _('Share map view error') }}</p>
-          <div v-if="success=='ok'">
-            <div v-if="copied">
-              <transition name="toast">
-                <p>{{ _('Url has been copied') }}</p>
-              </transition>
-            </div>
-            <p v-else>{{ _('Map view shared successfully') }}</p>
-            <p>{{ _('This is the new view url') }}</p>
-            <p><input type="text" v-model="newUrl"></p>
-            <p class="viewshare"><i
-              class="fas fa-copy"
-              :title="_('Copy url to clipboard')"
-              @click="copyToClipboard"
-            ></i></p>
-          </div>
+          <div class="modal-title">{{ _('Reports modal title') }}</div>
+          <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
+          <p>{{ _('Verify this by looking at the map point counter') }}</p>
+        <div class="error-message" v-if="!nFeatures">
+          {{ _('No features to download') }}
+        </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button v-if="success==''" @click.stop="shareView">{{ _('Share view') }}</button>
+            <button>{{ _('Continue') }}</button>
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -35,46 +24,36 @@
 </template>
 
 <script>
-
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   props: ['open', 'buttons'],
-  emits: ['close', 'shareView'],
+  emits: ['close', 'startDownload'],
   setup (props, context) {
-    const success = ref('')
-    const copied = ref(false)
-    const newUrl = ref('')
     const $store = useStore()
-    const shareView = function () {
-      context.emit('shareView')
+    const download = function (format) {
+      context.emit('startDownload', { format })
     }
+
+    const nFeatures = computed(() => {
+      return $store.getters['app/getModals'].reports.n
+    })
 
     const close = function () {
-      success.value = ''
-      $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
+      $store.commit('app/setModal', { id: 'reports', content: { visibility: false } })
     }
-
+    const hasCloseButton = computed(() => {
+      return props.buttons.split(',').includes('close')
+    })
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
-
-    const copyToClipboard = function () {
-      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-        copied.value = true
-        return navigator.clipboard.writeText(newUrl.value)
-      }
-      return Promise.reject('The Clipboard API is not available.')
-    }
-
     return {
-      copyToClipboard,
-      copied,
-      success,
-      newUrl,
-      shareView,
+      nFeatures,
+      download,
       close,
+      hasCloseButton,
       _
     }
   }
@@ -89,7 +68,8 @@ export default {
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  background-color: rgba(0, 0, 0, 0.75);
+  // background-color: rgba(0, 0, 0, 0.75);
+  background: transparent
 }
 
 .dialog {
@@ -134,7 +114,7 @@ dialog {
 }
 button.disabled {
   background: #ccc;
-  cursor: not-allowed;
+  pointer: not-allowed;
 }
 button {
   background: $primary-button-background;
@@ -160,34 +140,8 @@ button:hover {
   text-align: center;
   font-weight: bold;
 }
-.viewshare{
-  text-align: center;
-  color: $primary-color;
-}
-
-// Animation enter classes
-.toast-enter-from{
-  opacity: 0;
-  transform: translateY(-60px);
-}
-.toast-enter-to{
-  opacity: 1;
-  transform: translateY(0);
-}
-.toast-enter-active{
-  transition: all 0.3s ease;
-}
-
-// animation leave classes
-.toast-leave-from{
-  opacity: 1;
-  transform: translateY(0px);
-}
-.toast-leave-to{
-  opacity: 0;
-  transform: translateY(-60px);
-}
-.toast-leave-active{
-  transition: all 3s ease;
+.modal-title{
+  font-size: 1.5em;
+  padding-bottom: 10px;
 }
 </style>
