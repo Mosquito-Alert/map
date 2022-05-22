@@ -14,6 +14,11 @@ const routes = [
     component: () => import('layouts/MainLayout.vue')
   },
   {
+    // Set the accepted characters and length of init view code
+    path: '/:report([a-zA-Z0-9]{6})',
+    component: () => import('layouts/MainLayout.vue')
+  },
+  {
     path: '/:code([-a-zA-Z0-9]{36})',
     component: () => import('src/layouts/OneFeatureLayout.vue')
   },

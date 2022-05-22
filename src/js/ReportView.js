@@ -1,4 +1,4 @@
-export default class ShareMapView {
+export default class ReportView {
   // constructor (map, filters, url, callback) {
   constructor (map, opt) {
     const options = opt || {}
@@ -20,10 +20,6 @@ export default class ShareMapView {
       dataView.locationName = this.options.locationName
     }
 
-    if (this.options.popup.toString().length) {
-      dataView.popup = this.options.popup
-    }
-
     if (filters.dates.length) {
       dataView.filters.dates = filters.dates
     }
@@ -36,11 +32,7 @@ export default class ShareMapView {
       dataView.filters.locations = filters.locations
     }
 
-    dataView.samplingEffort = this.options.samplingEffort
-    dataView.feature = this.options.feature
-    dataView.spiderfyId = this.options.spiderfyId
-
-    // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
+    // Filtering mode is always 'resetFilter'. So it applies at once when loading the view
     dataView.filters.mode = 'resetFilter'
 
     fetch(this.options.url, {

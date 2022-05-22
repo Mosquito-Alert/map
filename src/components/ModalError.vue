@@ -1,20 +1,15 @@
 <template>
   <transition name="backdrop">
-    <div class="backdrop" v-if="open"></div>
+      <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog" v-if="open" @click="close">
+    <div class="dialog" v-if="open">
       <dialog open>
         <slot></slot>
-          <div class="modal-title">{{ _('Reports modal title') }}</div>
-          <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
-          <p>{{ _('Verify this by looking at the map point counter') }}</p>
-        <div class="error-message" v-if="!nFeatures">
-          {{ _('No features to download') }}
-        </div>
+          <div class="modal-title">{{ _('Error modal title') }}</div>
+          <p v-html="_(msg)"></p>
         <div class="buttons">
           <div class="download-buttons">
-            <button @click="newReport">{{ _('Continue') }}</button>
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -28,32 +23,28 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
-  props: ['open', 'buttons'],
   emits: ['close', 'newReport'],
   setup (props, context) {
     const $store = useStore()
-    const newReport = function () {
-      context.emit('newReport')
-    }
 
-    const nFeatures = computed(() => {
-      return $store.getters['app/getModals'].reports.n
+    const open = computed(() => {
+      return $store.getters['app/getModals'].error.visibility
+    })
+
+    const msg = computed(() => {
+      return $store.getters['app/getModals'].error.msg
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'report', content: { visibility: false } })
+      $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
     }
-    const hasCloseButton = computed(() => {
-      return props.buttons.split(',').includes('close')
-    })
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
     return {
-      nFeatures,
-      newReport,
+      open,
       close,
-      hasCloseButton,
+      msg,
       _
     }
   }

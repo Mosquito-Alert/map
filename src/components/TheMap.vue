@@ -89,12 +89,13 @@ import { Polygon, MultiPolygon, LineString } from 'ol/geom'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
+import { extend } from 'ol/extent'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
 import CustomControl from '../js/CustomControl'
 import ShareMapView from '../js/ShareMapView'
-import { extend } from 'ol/extent'
+import ReportView from '../js/ReportView'
 
 export default defineComponent({
   components: { ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -122,6 +123,7 @@ export default defineComponent({
     let userfixesUrl
     let downloadUrl
     let shareViewUrl
+    let reportViewUrl
     let loadViewUrl
     let spiderfyCluster
     let spiderfiedCluster
@@ -464,6 +466,16 @@ export default defineComponent({
     }
 
     function handleLoadView (view) {
+      if (view.status === 'error') {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: view.msg
+          }
+        })
+        return
+      }
       const v = JSON.parse(view.view[0].view)
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
@@ -608,6 +620,20 @@ export default defineComponent({
       })
     }
 
+    function newReport () {
+      const ol = map.value.map
+      const newView = new ReportView(ol, {
+        filters: mapFilters,
+        locationName: locationName,
+        url: reportViewUrl,
+        callback: handleReportView
+      })
+      newView.save()
+    }
+
+    function handleReportView () {
+      console.log('handleReportView')
+    }
     function spiderfy (center, clusterFeatures) {
       // update spiderfiedIds to exclude from worker feedback
       const features = []
@@ -664,15 +690,14 @@ export default defineComponent({
 
     function openReportsModal () {
       $store.commit('app/setModal', {
-        id: 'reports',
+        id: 'report',
         content: {
-          visibility: true,
-          n: features.value.length
+          visibility: true
         }
       })
     }
 
-    function handleDownload (format) {
+    function getDataFromFilters () {
       const ol = map.value.map
       ol.getView().calculateExtent(ol.getSize())
       // Preparing params in Backend format
@@ -680,6 +705,7 @@ export default defineComponent({
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
       const viewLayers = []
+
       mapFilters.observations.forEach(o => {
         const categories = storeLayers[o.type][o.code].categories
         categories.forEach(c => {
@@ -707,6 +733,12 @@ export default defineComponent({
       if (mapFilters.locations.length) {
         data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
       }
+      return data
+    }
+
+    function handleDownload (format) {
+      const data = getDataFromFilters()
+
       const url = downloadUrl + format.format + '/'
       fetch(url, {
         method: 'POST', // or 'PUT'
@@ -758,7 +790,9 @@ export default defineComponent({
       userfixesUrl = backendUrl + 'api/userfixes/'
       downloadUrl = backendUrl + 'api/downloads/'
       shareViewUrl = backendUrl + 'api/view/save/'
+      reportViewUrl = backendUrl + 'api/report/save/'
       loadViewUrl = backendUrl + 'api/view/load/'
+      // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 
@@ -1208,6 +1242,7 @@ export default defineComponent({
       baseMap,
       handleDownload,
       shareView,
+      newReport,
       mapFilters,
       toogleLeftDrawer,
       checkSamplingEffort,

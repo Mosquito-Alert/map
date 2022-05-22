@@ -39,7 +39,8 @@ export default function () {
       info: { visibility: false },
       download: { visibility: false, n: 0 },
       share: { visibility: false },
-      reports: { visibility: false, n: 0 }
+      report: { visibility: false, n: 0 },
+      error: { visibility: false, msg: '' }
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),

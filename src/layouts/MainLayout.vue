@@ -64,13 +64,16 @@
     </modal-share>
 
     <modal-reports
-      ref="reportsModal"
-      :open="reportsModalVisible"
-      @openReports="openReports"
+      ref="reportModal"
+      :open="reportModalVisible"
+      @newReport="newReport"
     >
       <template v-slot:default>
       </template>
     </modal-reports>
+
+    <modal-error>
+    </modal-error>
 
     <site-footer/>
   </q-layout>
@@ -81,6 +84,7 @@ import ModalBase from 'src/components/ModalBase.vue'
 import ModalDownload from 'components/ModalDownload.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalReports from 'src/components/ModalReports.vue'
+import ModalError from 'src/components/ModalError.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -91,7 +95,18 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 
 export default {
-  components: { ModalBase, ModalDownload, ModalShare, ModalReports, SiteHeader, LeftDrawer, SiteFooter, TheMap, TimeSeries },
+  components: {
+    ModalBase,
+    ModalError,
+    ModalDownload,
+    ModalShare,
+    ModalReports,
+    SiteHeader,
+    LeftDrawer,
+    SiteFooter,
+    TheMap,
+    TimeSeries
+  },
   setup () {
     const route = useRoute()
     const map = ref('null')
@@ -111,6 +126,8 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+    const reportCode = (route.params) ? ((route.params.report) ? route.params.report : '') : ''
+    console.log(reportCode)
 
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
@@ -125,10 +142,6 @@ export default {
 
     const shareView = function () {
       map.value.shareView()
-    }
-
-    const openReports = function () {
-      map.value.openReports()
     }
 
     const filterLocations = function (location) {
@@ -194,8 +207,12 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
-    const reportsModalVisible = computed(() => {
-      return $store.getters['app/getModals'].reports.visibility
+    const reportModalVisible = computed(() => {
+      return $store.getters['app/getModals'].report.visibility
+    })
+
+    const errorModalVisible = computed(() => {
+      return $store.getters['app/getModals'].error.visibility
     })
 
     const frontendUrl = computed(() => {
@@ -218,6 +235,10 @@ export default {
       if (payload.status === 'ok') {
         shareModal.value.newUrl = frontendUrl.value + '#/' + payload.code
       }
+    }
+
+    const newReport = function () {
+      map.value.newReport()
     }
 
     const timeSeriesChanged = function (date) {
@@ -244,7 +265,7 @@ export default {
       calendarClicked,
       viewCode,
       shareView,
-      openReports,
+      newReport,
       expanded,
       startDownload,
       toggleSamplingEffort,
@@ -262,7 +283,8 @@ export default {
       infoModalVisible,
       downloadModalVisible,
       shareModalVisible,
-      reportsModalVisible,
+      reportModalVisible,
+      errorModalVisible,
       map,
       TOC,
       timeseries,
