@@ -3,7 +3,6 @@
       class="sampling-effort-box"
       :class="{active: (samplingIsActive || isActive)}"
       @click="toggleClass"
-      @loadingSamplingEffort="handleLoading"
     >
       <i :class="icon_code"></i>
        <div class="colors">
@@ -23,7 +22,7 @@
 
 <script>
 import { useStore } from 'vuex'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
 export default {
   props: ['title', 'colors'],
@@ -36,21 +35,41 @@ export default {
   setup (props, context) {
     const $store = useStore()
     const isActive = ref(false)
+
     const samplingEffort = computed(() => {
       return $store.getters['app/layers'].sampling_effort
     })
 
-    const samplingIsActive = computed(() => {
-      return $store.getters['map/getActiveLayers'].includes('sampling_effort')
+    onMounted(function () {
+      console.log(isActive.value)
+      console.log(samplingIsActive())
     })
+
+    const samplingIsActive = function () {
+      return $store.getters['map/getActiveLayers'].some(l => {
+        return l.type === 'sampling_effort'
+      })
+    }
 
     const loading = computed(() => {
       return $store.getters['map/getSamplingEffortLoading']
     })
 
     const toggleClass = () => {
-      isActive.value = !isActive.value
-      context.emit('samplingEffort', isActive.value)
+      if (samplingIsActive()) {
+        isActive.value = false
+      } else {
+        isActive.value = true
+      }
+      console.log(samplingIsActive())
+      console.log(isActive.value)
+      const d = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+
+      context.emit('samplingEffort', {
+        status: isActive.value,
+        dates: [d]
+      })
+
       if (isActive.value) {
         $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
       } else {

@@ -311,9 +311,9 @@ export default {
       }
       context.emit('filterLocations', geojson)
     }
-    const toggleSamplingEffort = function (status) {
-      context.emit('toggleSamplingEffort', status)
-      samplingEffort.value.isActive = status
+    const toggleSamplingEffort = function (payload) {
+      context.emit('toggleSamplingEffort', payload)
+      samplingEffort.value.isActive = payload.status
     }
     const locationCleared = function () {
       context.emit('clearLocations')

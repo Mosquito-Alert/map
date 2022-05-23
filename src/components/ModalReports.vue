@@ -37,7 +37,7 @@ export default {
     }
 
     const nFeatures = computed(() => {
-      return $store.getters['app/getModals'].reports.n
+      return $store.getters['app/getModals'].report.n
     })
 
     const close = function () {

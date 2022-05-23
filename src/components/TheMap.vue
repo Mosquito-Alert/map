@@ -132,7 +132,7 @@ export default defineComponent({
     const nPoints = ref(0)
     const baseMap = ref('null')
     let simplifyTolerance = null
-    const spiralSource = ref()
+    const spiralSource = ref(null)
     const selectedId = ref(null)
     const selectedFeat = ref(null)
     const closedPopupDisable = ref(false)
@@ -150,8 +150,6 @@ export default defineComponent({
     let selectedFeatures = []
     let spiderfiedIds = []
     let currZoom
-    let startDate
-    let endDate
     const mapFilters = {
       mode: 'resetFilter',
       observations: [],
@@ -166,11 +164,15 @@ export default defineComponent({
       return $store.getters['map/getMapDates']
     })
 
-    watch(features, (current, old) => {
+    // watch([a, b], ([newA, newB], [prevA, prevB]) => {
+    watch(features, (currentF, oldF) => {
       nPoints.value = 0
-      current.forEach(f => {
+      currentF.forEach(f => {
         nPoints.value += (f.values_.properties.point_count) ? f.values_.properties.point_count : 1
       })
+
+      nPoints.value += (spiralSource.value.source.getFeatures().length) / 2
+      // Format number
       if (nPoints.value > 0) {
         nPoints.value = nPoints.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
       }
@@ -271,6 +273,7 @@ export default defineComponent({
     }
 
     function redrawMap () {
+      console.log('redrawmap')
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -309,8 +312,10 @@ export default defineComponent({
           initMap(param)
         } else {
           context.emit('workerFinishedIndexing', { mapFilters })
-          startDate = event.data.datesInterval.from
-          endDate = event.data.datesInterval.to
+          $store.commit('map/setDatesRange', {
+            from: event.data.datesInterval.from,
+            to: event.data.datesInterval.to
+          })
           if (event.data.features) {
             const data = []
             for (let a = 0; a < event.data.features.length; a++) {
@@ -435,8 +440,8 @@ export default defineComponent({
           $store.commit('map/setMapDates', defaults.dates[0])
         } else {
           const currentDates = getCurrentYearDates()
-          const initialDate = expandDate(currentDates, 'YYYY-MM-DD')
-          mapFilters.dates = [initialDate]
+          const expandedDates = expandDate(currentDates, 'YYYY-MM-DD')
+          mapFilters.dates = [expandedDates]
           $store.commit('map/setMapDates', currentDates)
         }
         if (defaults.hashtags) {
@@ -484,9 +489,15 @@ export default defineComponent({
       let d
       if (v.filters.dates.length) {
         d = v.filters.dates
+        $store.commit('app/setDefaultDates', d[0])
+        $store.commit('map/setMapDates', { d })
+        mapFilters.dates = [v.filters.dates]
       } else {
-        d = $store.getters['timeseries/getCompleteDatesRange']
+        d = $store.getters['map/getDatesRange']
+        $store.commit('app/setDefaultDates', d)
+        $store.commit('map/setMapDates', d)
       }
+
       $store.commit('app/setDefaults', {
         observations: v.filters.observations,
         dates: d,
@@ -539,7 +550,11 @@ export default defineComponent({
       }
 
       if (v.samplingEffort) {
-        context.emit('loadUserFixes', true)
+        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
+        context.emit('loadUserFixes', {
+          status: true,
+          dates: v.filters.dates
+        })
       }
 
       mapFilters.locations = v.filters.locations
@@ -567,6 +582,7 @@ export default defineComponent({
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         filters: mapFilters,
+        datesRange: $store.getters['map/getDatesRange'],
         locationName: locationName,
         popup: (selectedId.value === null) ? '' : selectedId.value,
         feature: obj,
@@ -634,6 +650,7 @@ export default defineComponent({
     function handleReportView () {
       console.log('handleReportView')
     }
+
     function spiderfy (center, clusterFeatures) {
       // update spiderfiedIds to exclude from worker feedback
       const features = []
@@ -825,7 +842,9 @@ export default defineComponent({
               if (parseInt(currZoom) >= parseInt(maxZoom.value)) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
+                    console.log(1)
                     features.value.push(spiderfiedCluster)
+                    console.log(2)
                   }
                 }
 
@@ -862,6 +881,7 @@ export default defineComponent({
 
         if (!spiderfyCluster) {
           if (!clickOnSpiral && spiderfiedCluster) {
+            console.log('repinta cluster')
             features.value.push(spiderfiedCluster)
           }
           spiderfiedCluster = null
@@ -871,10 +891,12 @@ export default defineComponent({
         }
         // Check first for a click outside spiralLayer
         if (layerName !== 'spiralLayer' && !clickOnSpiral) {
+          console.log('tanca siral')
           spiralSource.value.source.clear()
           spiderfiedIds = []
         }
         if (selectedFeatures.length === 1) {
+          console.log('one')
           // if feature has no properties or is LineStringdo nothing
           const feature = selectedFeatures[0]
           if (!feature.values_.properties) return
@@ -887,6 +909,7 @@ export default defineComponent({
           $store.dispatch('map/selectFeature', feature.values_)
         } else {
           if (selectedFeatures.length > 1) {
+            console.log('more than one')
             // update spiderfiedIds to exclude from worker feedback
             selectedFeatures.forEach(feature => {
               spiderfiedIds.push(feature.values_.properties.id)
@@ -908,6 +931,7 @@ export default defineComponent({
             spiralSource.value.source.addFeatures(spiderfied.points)
           } else {
             // close popup and refresh features (woker)
+            console.log('just close popup')
             closePopup()
           }
         }
@@ -1214,19 +1238,15 @@ export default defineComponent({
       userfixesLayer.tileIndex = null
     }
 
-    function checkSamplingEffort (status) {
-      if (!status) {
+    function checkSamplingEffort (payload) {
+      console.log(payload)
+      if (!payload.status) {
         map.value.map.removeLayer(userfixesLayer.layer)
         return
       }
-      let sDate, eDate
-      if (!mapFilters.dates[0]) {
-        sDate = startDate
-        eDate = endDate
-      } else {
-        sDate = mapFilters.dates[0].from.replaceAll('/', '-')
-        eDate = mapFilters.dates[0].to.replaceAll('/', '-')
-      }
+
+      const sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
+      const eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
 
       userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
       $store.commit('map/setSamplingEffortLoading', { loading: true })

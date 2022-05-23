@@ -169,12 +169,18 @@ export default {
       if (filteringLocations()) {
         TOC.value.searchLocation.loading = true
       }
-      map.value.filterDate(date.data)
+      map.value.filterDate(date)
       // If samplingEffort layer is active then refresh it
-      const samplingIsActive = $store.getters['map/getActiveLayers'].includes('sampling-effort')
+      const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
+        return l.type === 'sampling-effort'
+      })
       if (samplingIsActive) {
+        console.log(date)
         map.value.resetUserfixesTileIndex()
-        map.value.checkSamplingEffort(true)
+        map.value.checkSamplingEffort({
+          status: true,
+          dates: [date]
+        })
       } else {
         map.value.resetUserfixesTileIndex()
       }
@@ -191,8 +197,8 @@ export default {
       map.value.filterObservations(data)
     }
 
-    const toggleSamplingEffort = function (status) {
-      map.value.checkSamplingEffort(status)
+    const toggleSamplingEffort = function (payload) {
+      map.value.checkSamplingEffort(payload)
     }
 
     const infoModalVisible = computed(() => {
@@ -233,7 +239,7 @@ export default {
     const mapViewSaved = function (payload) {
       shareModal.value.success = payload.status
       if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + '#/' + payload.code
+        shareModal.value.newUrl = frontendUrl.value + payload.code
       }
     }
 
@@ -242,7 +248,7 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
-      timeseries.value.setDate(date[0])
+      timeseries.value.calendarDate = date
     }
 
     const tagsChanged = function (tags) {
@@ -253,8 +259,8 @@ export default {
       TOC.value.setLocationName(name)
     }
 
-    const loadUserFixes = function (status) {
-      TOC.value.toggleSamplingEffort(status)
+    const loadUserFixes = function (payload) {
+      TOC.value.toggleSamplingEffort(payload)
     }
 
     const calendarClicked = function (e) {

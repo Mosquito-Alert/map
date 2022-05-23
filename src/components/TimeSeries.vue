@@ -22,7 +22,7 @@
         </div>
         <div>
           <q-btn
-            v-if="dateRange"
+            v-if="mapDates.from !== ''"
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
@@ -42,7 +42,7 @@
               <q-date
                 navigation-min-year-month='2015/01'
                 :navigation-max-year-month="getCurrentDate"
-                v-model="dateRange"
+                v-model="calendarDate"
                 range
                 class="calendar"
                 color="orange-4"
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, onMounted, ref } from 'vue'
+import { defineComponent, computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 // import { LineChart } from 'vue-chart-3'
 import { LineChart } from './VueChartJS.js'
@@ -86,16 +86,19 @@ export default defineComponent({
 
     const chart = ref()
     const getCurrentDate = ref()
-    const dateRange = ref()
-    const dateFilter = ref()
+    // const dateFilter = ref()
+    const calendarDate = ref()
     const calendarBtn = ref()
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
 
     const resetDateFilter = function () {
-      dateRange.value = null
-      dateFilterToString($store.getters['timeseries/getCompleteDatesRange'])
+      // $store.commit('map/setMapDates', {
+      //   from: datesRange.value.from,
+      //   to: datesRange.value.to
+      // })
+      // calendarDate.value = null
       context.emit('dateSelected', {
         type: 'date',
         data: null
@@ -103,6 +106,15 @@ export default defineComponent({
       $store.commit('map/setMapDates', { from: '', to: '' })
     }
     // Timeseries properties
+
+    const datesRange = computed(() => {
+      return $store.getters['map/getDatesRange']
+    })
+
+    const mapDates = computed(() => {
+      return $store.getters['map/getMapDates']
+    })
+
     const timeSeriesClass = computed(() => {
       let classes = 'text-black map-footer'
       if (timeIsVisible.value) {
@@ -111,27 +123,17 @@ export default defineComponent({
       return classes
     })
 
-    function setDate (date) {
-      dateRange.value = null
-      dateRange.value = {
-        from: date.from.replaceAll('-', '/'),
-        to: date.to.replaceAll('-', '/')
-      }
-      $store.commit('map/setMapDates', { dateRange })
-      const sDate = dateRange.value.from
-      const eDate = dateRange.value.to
-      dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
-    }
-
     onMounted(function () {
-      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      dateRange.value = defaults.dates
-      const sDate = dateRange.value.from
-      const eDate = dateRange.value.to
-      dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
-      const d = new Date()
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
-      $store.commit('map/setMapDates', { dateRange })
+      const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
+      defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
+      defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
+      calendarDate.value = defaultDates
+      // const sDate = dateRange.value.from
+      // const eDate = dateRange.value.to
+      // dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
+      // const d = new Date()
+      // getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      $store.commit('map/setMapDates', { defaultDates })
     })
 
     const toggleTimeSeries = function () {
@@ -186,24 +188,24 @@ export default defineComponent({
     })
 
     const datePicked = function (event) {
-      const date = dateRange.value
+      // const date = calendarDate.value
       $store.commit('map/setMapDates', {
-        from: dateRange.value.from,
-        to: dateRange.value.to
+        from: calendarDate.value.from,
+        to: calendarDate.value.to
       })
-      dateFilterToString(date)
+      // dateFilterToString(date)
       let daysInRange = 0
       if (typeof event === 'string') {
         daysInRange = 1
-        dateFilter.value = date
+        // dateFilter.value = date
       } else {
-        const sDate = dateRange.value.from
-        const eDate = dateRange.value.to
-        dateFilterToString(date)
+        const sDate = calendarDate.value.from
+        const eDate = calendarDate.value.to
+        // dateFilterToString(date)
         daysInRange = moment(eDate).diff(moment(sDate), 'days')
       }
       $store.commit('timeseries/updateXUnits', daysInRange)
-      context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(dateRange.value)) })
+      context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(calendarDate.value)) })
     }
 
     const chartOptions = computed(() => {
@@ -215,19 +217,19 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
 
-    const dateFilterToString = function (date) {
-      if (typeof date === 'object') {
-        const sDate = date.from
-        const eDate = date.to
-        if (sDate === eDate) {
-          dateFilter.value = moment(sDate).format('DD-MM-YYYY')
-        } else {
-          dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
-        }
-      } else {
-        dateFilter.value = moment(date).format('DD-MM-YYYY')
-      }
-    }
+    // const dateFilterToString = function (date) {
+    //   if (typeof date === 'object') {
+    //     const sDate = date.from
+    //     const eDate = date.to
+    //     if (sDate === eDate) {
+    //       dateFilter.value = moment(sDate).format('DD-MM-YYYY')
+    //     } else {
+    //       dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
+    //     }
+    //   } else {
+    //     dateFilter.value = moment(date).format('DD-MM-YYYY')
+    //   }
+    // }
 
     const showCalendar = function () {
       calendarBtn.value.$el.click()
@@ -236,17 +238,18 @@ export default defineComponent({
     return {
       _,
       showCalendar,
+      calendarDate,
       calendarBtn,
-      setDate,
       resetDateFilter,
-      dateFilterToString,
+      // dateFilterToString,
       getCurrentDate,
-      dateFilter,
+      // dateFilter,
       chart,
       chartOptions,
       chartData,
       datePicked,
-      dateRange,
+      mapDates,
+      datesRange,
       iconStatus,
       timeSeriesClass,
       timeIsVisible,

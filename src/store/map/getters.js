@@ -1,3 +1,7 @@
+export const getDatesRange = (state) => {
+  return state.datesRange
+}
+
 export const getMapDates = (state) => {
   return state.mapDates
 }
@@ -27,7 +31,6 @@ export const getSamplingEffortLoading = state => {
 }
 
 export const getTitles = state => {
-  console.log(state.titles)
   return state.titles
 }
 

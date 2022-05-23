@@ -23,3 +23,7 @@ export const setDefaults = (state, payload) => {
   state.DEFAULTS.dates = payload.dates
   state.DEFAULTS.hashtags = payload.hashtags
 }
+
+export const setDefaultDates = (state, payload) => {
+  state.DEFAULTS.dates = payload
+}

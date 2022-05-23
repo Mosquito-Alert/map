@@ -1,9 +1,24 @@
+import moment from 'moment'
+
 export default class ShareMapView {
   // constructor (map, filters, url, callback) {
   constructor (map, opt) {
     const options = opt || {}
     this.map = map
     this.options = options
+  }
+
+  constrictDate (date, f = 'YYYY/MM/DD') {
+    let expandedDate = null
+    if (!date) return
+    if (typeof date === 'string') {
+      expandedDate = { from: date.format(f), to: date.format(f) }
+    } else {
+      const preDate = moment(date.from).add(1, 'd')
+      const postDate = moment(date.to).subtract(1, 'd')
+      expandedDate = { from: preDate.format(f), to: postDate.format(f) }
+    }
+    return expandedDate
   }
 
   save () {
@@ -25,7 +40,9 @@ export default class ShareMapView {
     }
 
     if (filters.dates.length) {
-      dataView.filters.dates = filters.dates
+      dataView.filters.dates = [this.constrictDate(filters.dates[0])]
+    } else {
+      dataView.filters.dates = [this.options.datesRange]
     }
 
     if (filters.hashtags.length) {

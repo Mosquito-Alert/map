@@ -1,4 +1,5 @@
 // const worker = new Worker('TheMapWorker.js')
+import moment from 'moment'
 
 export default function () {
   let backendUrl = ''
@@ -13,6 +14,13 @@ export default function () {
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
   const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
 
+  function getCurrentYearDates () {
+    return {
+      from: moment().startOf('year').format('YYYY-MM-DD'),
+      to: moment().format('YYYY-MM-DD')
+    }
+  }
+
   return {
     // key to make leftdrawer component re-render
     leftDrawerStatus: 0,
@@ -26,7 +34,7 @@ export default function () {
         // { type: 'bites', code: 'pending' }
       ],
       // dates: [{ from: '2021/01/01', to: '2021/12/31' }],
-      dates: [],
+      dates: [getCurrentYearDates()],
       hashtags: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',

@@ -1,3 +1,7 @@
+export const setDatesRange = (state, payload) => {
+  state.datesRange = payload
+}
+
 export const setMapDates = (state, payload) => {
   state.mapDates.from = payload.from
   state.mapDates.to = payload.to
