@@ -12,6 +12,7 @@ export default function () {
     selectedFeature: null,
     activeLayers: [],
     samplingEffortLoading: false,
+    datesRange: { from: '', to: '' },
     mapDates: { from: '', to: '' },
     titles: {
       mosquito_tiger_confirmed: 'Tiger mosquito',
