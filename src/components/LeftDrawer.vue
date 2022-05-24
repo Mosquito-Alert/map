@@ -284,7 +284,6 @@ export default {
     }
 
     const setTags = function (tags) {
-      console.log('lef-drawer settags')
       hashtags.value.setTags(tags)
     }
 

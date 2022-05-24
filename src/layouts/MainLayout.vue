@@ -136,7 +136,6 @@ export default {
     })
 
     const startDownload = function (format) {
-      console.log(format)
       map.value.handleDownload(format)
     }
 
@@ -166,7 +165,6 @@ export default {
     }
 
     const filterDate = function (payload) {
-      console.log(payload)
       if (filteringLocations()) {
         TOC.value.searchLocation.loading = true
       }

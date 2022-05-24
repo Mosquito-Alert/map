@@ -58,6 +58,8 @@ function loadMapData (data, fitFeatures) {
 }
 
 function filterDate (data, date) {
+  // If date.from is empty, it means no date filter applies
+  if (!date.from) return data
   let filtered = {}
   filtered = data.filter(feature => {
     const feature_date = new Date(feature.properties.d)

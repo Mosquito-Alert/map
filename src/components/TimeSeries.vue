@@ -94,14 +94,17 @@ export default defineComponent({
     const iconStatus = ref('null')
 
     const resetDateFilter = function () {
-      // $store.commit('map/setMapDates', {
-      //   from: datesRange.value.from,
-      //   to: datesRange.value.to
-      // })
+      $store.commit('map/setMapDates', {
+        from: datesRange.value.from,
+        to: datesRange.value.to
+      })
       // calendarDate.value = null
       context.emit('dateSelected', {
         type: 'date',
-        data: null
+        data: {
+          from: '',
+          to: ''
+        }
       })
       $store.commit('map/setMapDates', { from: '', to: '' })
     }
@@ -131,8 +134,8 @@ export default defineComponent({
       // const sDate = dateRange.value.from
       // const eDate = dateRange.value.to
       // dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
-      // const d = new Date()
-      // getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      const d = new Date()
+      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
     })
 

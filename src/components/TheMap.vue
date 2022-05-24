@@ -273,7 +273,6 @@ export default defineComponent({
     }
 
     function redrawMap () {
-      console.log('redrawmap')
       const olmap = map.value.map
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
@@ -487,6 +486,7 @@ export default defineComponent({
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
       let d
+      console.log(v.filters.dates)
       if (v.filters.dates.length) {
         d = v.filters.dates
         $store.commit('app/setDefaultDates', d[0])

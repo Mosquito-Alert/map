@@ -22,7 +22,7 @@
 
 <script>
 import { useStore } from 'vuex'
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 
 export default {
   props: ['title', 'colors'],
@@ -38,11 +38,6 @@ export default {
 
     const samplingEffort = computed(() => {
       return $store.getters['app/layers'].sampling_effort
-    })
-
-    onMounted(function () {
-      console.log(isActive.value)
-      console.log(samplingIsActive())
     })
 
     const samplingIsActive = function () {

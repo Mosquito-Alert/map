@@ -143,7 +143,6 @@ export default defineComponent({
     }
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
-      console.log(ratio.value)
       imageRatio.value = (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
       defaultImageSize.value = ''
       context.emit('popupimageloaded')
