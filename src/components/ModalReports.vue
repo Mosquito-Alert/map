@@ -9,7 +9,7 @@
           <div class="modal-title">{{ _('Reports modal title') }}</div>
           <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
           <p>{{ _('Verify this by looking at the map point counter') }}</p>
-        <div class="error-message" v-if="!nFeatures">
+        <div class="error-message" v-if="nFeatures">
           {{ _('No features to download') }}
         </div>
         <div class="buttons">
@@ -37,7 +37,7 @@ export default {
     }
 
     const nFeatures = computed(() => {
-      return $store.getters['app/getModals'].report.n
+      return false
     })
 
     const close = function () {

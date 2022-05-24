@@ -49,7 +49,8 @@
                 text-color="black"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn label="Cancel" color="red" flat v-close-popup/>
+                  <q-btn label="Reset" color="red" flat v-close-popup/>
+                  <q-btn label="Cancel" color="grey" flat v-close-popup/>
                   <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
                 </div>
               </q-date>
@@ -82,7 +83,6 @@ export default defineComponent({
   },
   setup (props, context) {
     // $q.lang.set('es') // returns a string
-    // console.log($q.lang.getLocale()) // returns a string
 
     const chart = ref()
     const getCurrentDate = ref()

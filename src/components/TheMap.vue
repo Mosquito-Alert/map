@@ -486,7 +486,6 @@ export default defineComponent({
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
       let d
-      console.log(v.filters.dates)
       if (v.filters.dates.length) {
         d = v.filters.dates
         $store.commit('app/setDefaultDates', d[0])
@@ -808,7 +807,7 @@ export default defineComponent({
       downloadUrl = backendUrl + 'api/downloads/'
       shareViewUrl = backendUrl + 'api/view/save/'
       reportViewUrl = backendUrl + 'api/report/save/'
-      loadViewUrl = backendUrl + 'api/view/load/'
+      loadViewUrl = backendUrl + 'api/report/load/'
       // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
@@ -842,9 +841,7 @@ export default defineComponent({
               if (parseInt(currZoom) >= parseInt(maxZoom.value)) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {
-                    console.log(1)
                     features.value.push(spiderfiedCluster)
-                    console.log(2)
                   }
                 }
 
@@ -881,7 +878,6 @@ export default defineComponent({
 
         if (!spiderfyCluster) {
           if (!clickOnSpiral && spiderfiedCluster) {
-            console.log('repinta cluster')
             features.value.push(spiderfiedCluster)
           }
           spiderfiedCluster = null
@@ -891,12 +887,10 @@ export default defineComponent({
         }
         // Check first for a click outside spiralLayer
         if (layerName !== 'spiralLayer' && !clickOnSpiral) {
-          console.log('tanca siral')
           spiralSource.value.source.clear()
           spiderfiedIds = []
         }
         if (selectedFeatures.length === 1) {
-          console.log('one')
           // if feature has no properties or is LineStringdo nothing
           const feature = selectedFeatures[0]
           if (!feature.values_.properties) return
@@ -909,7 +903,6 @@ export default defineComponent({
           $store.dispatch('map/selectFeature', feature.values_)
         } else {
           if (selectedFeatures.length > 1) {
-            console.log('more than one')
             // update spiderfiedIds to exclude from worker feedback
             selectedFeatures.forEach(feature => {
               spiderfiedIds.push(feature.values_.properties.id)
@@ -931,7 +924,6 @@ export default defineComponent({
             spiralSource.value.source.addFeatures(spiderfied.points)
           } else {
             // close popup and refresh features (woker)
-            console.log('just close popup')
             closePopup()
           }
         }
@@ -1241,7 +1233,6 @@ export default defineComponent({
     }
 
     function checkSamplingEffort (payload) {
-      console.log(payload)
       if (!payload.status) {
         map.value.map.removeLayer(userfixesLayer.layer)
         return

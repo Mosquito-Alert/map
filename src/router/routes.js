@@ -16,7 +16,7 @@ const routes = [
   {
     // Set the accepted characters and length of init view code
     path: '/:report([a-zA-Z0-9]{6})',
-    component: () => import('layouts/MainLayout.vue')
+    component: () => import('layouts/ReportsLayout.vue')
   },
   {
     path: '/:code([-a-zA-Z0-9]{36})',

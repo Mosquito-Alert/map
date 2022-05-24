@@ -126,8 +126,6 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const reportCode = (route.params) ? ((route.params.report) ? route.params.report : '') : ''
-    console.log(reportCode)
 
     onMounted(() => {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
