@@ -434,14 +434,14 @@ export default defineComponent({
 
         // Set default dates, otherwise current year data only
         if (defaults.dates.length) {
-          // mapDates = { from: defaults.dates.from, to: defaults.dates.to }
-          const initialDate = expandDate(defaults.dates[0], 'YYYY-MM-DD')
-          mapFilters.dates = [initialDate]
+          // const initialDate = expandDate(defaults.dates[0], 'YYYY-MM-DD')
+          // mapFilters.dates = [initialDate]
+          mapFilters.dates = [defaults.dates[0]]
           $store.commit('map/setMapDates', defaults.dates[0])
         } else {
           const currentDates = getCurrentYearDates()
-          const expandedDates = expandDate(currentDates, 'YYYY-MM-DD')
-          mapFilters.dates = [expandedDates]
+          // const expandedDates = expandDate(currentDates, 'YYYY-MM-DD')
+          mapFilters.dates = [currentDates]
           $store.commit('map/setMapDates', currentDates)
         }
         if (defaults.hashtags) {
@@ -1133,8 +1133,9 @@ export default defineComponent({
         mapFilters.mode = 'resetFilter'
       }
       if (date !== null) {
-        const expandedDate = expandDate(date)
-        mapFilters.dates = [JSON.parse(JSON.stringify(expandedDate))]
+        // const expandedDate = expandDate(date.data, 'YYYY-MM-DD')
+        // mapFilters.dates = [JSON.parse(JSON.stringify(expandedDate))]
+        mapFilters.dates = [date.data]
       } else {
         mapFilters.dates = []
       }
@@ -1213,6 +1214,7 @@ export default defineComponent({
       }
     }
 
+    // eslint-disable-next-line no-unused-vars
     function expandDate (date, f = 'YYYY/MM/DD') {
       let expandedDate = null
       if (!date) return

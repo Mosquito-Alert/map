@@ -165,21 +165,21 @@ export default {
       map.value.filterTags(tags)
     }
 
-    const filterDate = function (date) {
+    const filterDate = function (payload) {
+      console.log(payload)
       if (filteringLocations()) {
         TOC.value.searchLocation.loading = true
       }
-      map.value.filterDate(date)
+      map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
       const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
         return l.type === 'sampling-effort'
       })
       if (samplingIsActive) {
-        console.log(date)
         map.value.resetUserfixesTileIndex()
         map.value.checkSamplingEffort({
           status: true,
-          dates: [date]
+          dates: [payload.data]
         })
       } else {
         map.value.resetUserfixesTileIndex()

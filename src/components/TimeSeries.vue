@@ -188,24 +188,40 @@ export default defineComponent({
     })
 
     const datePicked = function (event) {
-      // const date = calendarDate.value
-      $store.commit('map/setMapDates', {
-        from: calendarDate.value.from,
-        to: calendarDate.value.to
-      })
-      // dateFilterToString(date)
       let daysInRange = 0
-      if (typeof event === 'string') {
+      let sDate
+      let eDate
+      let date
+
+      // If only one day is selected
+      if (typeof calendarDate.value === 'string') {
+        const day = calendarDate.value
         daysInRange = 1
-        // dateFilter.value = date
+        date = {
+          from: moment(day).format('YYYY-MM-DD'),
+          to: moment(day).format('YYYY-MM-DD')
+        }
       } else {
-        const sDate = calendarDate.value.from
-        const eDate = calendarDate.value.to
+        sDate = calendarDate.value.from
+        eDate = calendarDate.value.to
         // dateFilterToString(date)
         daysInRange = moment(eDate).diff(moment(sDate), 'days')
+
+        // Format date must be YYYY-MM-DD
+        sDate = moment(calendarDate.value.from).format('YYYY-MM-DD')
+        eDate = moment(calendarDate.value.to).format('YYYY-MM-DD')
+        date = {
+          from: sDate,
+          to: eDate
+        }
       }
+      $store.commit('map/setMapDates', date)
+      // dateFilterToString(date)
       $store.commit('timeseries/updateXUnits', daysInRange)
-      context.emit('dateSelected', { type: 'date', data: JSON.parse(JSON.stringify(calendarDate.value)) })
+      context.emit('dateSelected', {
+        type: 'date',
+        data: date
+      })
     }
 
     const chartOptions = computed(() => {

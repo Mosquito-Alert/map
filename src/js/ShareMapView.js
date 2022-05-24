@@ -40,7 +40,8 @@ export default class ShareMapView {
     }
 
     if (filters.dates.length) {
-      dataView.filters.dates = [this.constrictDate(filters.dates[0])]
+      // dataView.filters.dates = [this.constrictDate(filters.dates[0])]
+      dataView.filters.dates = [filters.dates[0]]
     } else {
       dataView.filters.dates = [this.options.datesRange]
     }

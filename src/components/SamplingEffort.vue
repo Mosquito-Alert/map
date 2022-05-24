@@ -1,7 +1,7 @@
 <template>
     <div
       class="sampling-effort-box"
-      :class="{active: (samplingIsActive || isActive)}"
+      :class="{active: (isActive)}"
       @click="toggleClass"
     >
       <i :class="icon_code"></i>
@@ -56,12 +56,8 @@ export default {
     })
 
     const toggleClass = () => {
-      if (samplingIsActive()) {
-        isActive.value = false
-      } else {
-        isActive.value = true
-      }
-      console.log(samplingIsActive())
+      isActive.value = !isActive.value
+
       console.log(isActive.value)
       const d = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
 
