@@ -57,7 +57,6 @@
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
-
           </ol-source-vector>
         </ol-vector-layer>
 
