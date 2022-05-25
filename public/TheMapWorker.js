@@ -231,7 +231,7 @@ self.onmessage = function (e) {
       clusterExtent: clusterExtent
     })
   } else if (e.data.filters) {
-    // console.log(e.data.filters.dates)
+    // console.log(e.data.filters)
     // This is fired when the map is filtered.
     all_layers = e.data.layers
     filters = e.data.filters

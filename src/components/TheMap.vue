@@ -426,6 +426,7 @@ export default defineComponent({
     }
 
     function initMap (viewCode) {
+      const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       if (!viewCode) {
         const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
         const initialObservations = defaults.observations
@@ -446,7 +447,12 @@ export default defineComponent({
           mapFilters.hashtags = defaults.hashtags
         }
         initialObservations.forEach(layerFilter => {
-          mapFilters.observations.push({ type: layerFilter.type, code: layerFilter.code })
+          mapFilters.observations.push({
+            type: layerFilter.type,
+            code: layerFilter.code,
+            categories: appLayers[layerFilter.type][layerFilter.code].categories
+          })
+
           $store.commit('map/addActiveLayer', {
             type: layerFilter.type,
             code: layerFilter.code
@@ -463,7 +469,7 @@ export default defineComponent({
 
       // mapFilters are ready, now call worker
       const workerData = {}
-      workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      workerData.layers = appLayers
       workerData.filters = mapFilters
       worker.postMessage(workerData)
     }
@@ -806,7 +812,7 @@ export default defineComponent({
       downloadUrl = backendUrl + 'api/downloads/'
       shareViewUrl = backendUrl + 'api/view/save/'
       reportViewUrl = backendUrl + 'api/report/save/'
-      loadViewUrl = backendUrl + 'api/report/load/'
+      loadViewUrl = backendUrl + 'api/view/load/'
       // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
@@ -1064,11 +1070,16 @@ export default defineComponent({
           code: observation.code
         })
       } else {
-        mapFilters.observations.push({ type: observation.type, code: observation.code })
+        mapFilters.observations.push({
+          type: observation.type,
+          code: observation.code,
+          categories: observation.categories
+        })
         mapFilters.mode = 'resetFilter'
         $store.commit('map/addActiveLayer', {
           type: observation.type,
-          code: observation.code
+          code: observation.code,
+          categories: observation.categories
         })
       }
       const workerData = {}

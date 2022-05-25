@@ -178,6 +178,9 @@ export default {
     const $store = useStore()
     const $q = useQuasar()
 
+    // Get a copy of layers from store to get categories
+    const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+
     const filterObservations = function (layer, event) {
       let obj = event.target
       if (!event.target.dataset.type) {
@@ -186,7 +189,8 @@ export default {
 
       context.emit('filterObservations', {
         type: obj.dataset.type,
-        code: obj.dataset.code
+        code: obj.dataset.code,
+        categories: layers[obj.dataset.type][obj.dataset.code].categories
       })
 
       const classes = obj.classList
