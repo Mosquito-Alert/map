@@ -56,11 +56,12 @@
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { computed, ref, onMounted, inject } from 'vue'
 import { transform, transformExtent } from 'ol/proj.js'
+import AdministrativeLayer from '../js/AdministrativeLayer'
 // import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-// import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import { Polygon, MultiPolygon } from 'ol/geom'
 // import moment from 'moment'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
@@ -73,12 +74,14 @@ export default {
     const map = ref()
     const center = ref()
     const zoom = ref()
+    const baseMap = ref()
     const filters = ref({})
     const locationName = ref()
     const features = ref([])
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheReportWorker.js')
+    let administrativeLayer
 
     const reportId = computed(() => {
       return (props.report)
@@ -125,6 +128,32 @@ export default {
           .then(res => res.json())
           .then(featuresGeoJson => {
             const bounds = view.extent
+            // Check if administrative layer is on
+            if (view.filters.locations.length) {
+              let Feat = null
+              const f = JSON.parse(view.filters.locations[0])
+              const geomType = f.features[0].geometry.type
+              if (geomType.toLowerCase() === 'polygon') {
+                Feat = new Feature({
+                  geometry: new Polygon(f.features[0].geometry.coordinates)
+                })
+              } else if (geomType.toLowerCase() === 'multipolygon') {
+                Feat = new Feature({
+                  geometry: new MultiPolygon(f.features[0].geometry.coordinates)
+                })
+              }
+              Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+              const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+              const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
+              const fillLocationColor = defaults.fillLocationColor
+              const strokeLocationColor = defaults.strokeLocationColor
+              administrativeLayer = new AdministrativeLayer(map.value.map, fillLocationColor, strokeLocationColor, (ZIndex + 1))
+              const writer = new format.GeoJSON()
+              const json = JSON.parse(writer.writeFeatures([Feat], {
+                dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
+              }))
+              administrativeLayer.refreshLayer(json)
+            }
             const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
             const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
 
@@ -270,6 +299,7 @@ export default {
       center,
       zoom,
       features,
+      baseMap,
       geoJson,
       locationName,
       filters,
