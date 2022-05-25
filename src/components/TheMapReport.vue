@@ -3,12 +3,10 @@
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
-            style="height: 400px">
+            style="height: 400px; width: 400px">
 
         <ol-view ref='view'
             maxZoom="19"
-            :center="center"
-            :zoom="zoom"
             constrainResolution='true' />
 
         <div class="ol-attribution">
@@ -80,6 +78,7 @@ export default {
     const features = ref([])
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
+    const worker = new Worker('TheReportWorker.js')
 
     const reportId = computed(() => {
       return (props.report)
@@ -107,7 +106,7 @@ export default {
 
         locationName.value = ('locationName' in view) ? view.locationName : ''
         map.value.map.getView().fit(
-          view.extent, { nearest: false }
+          view.extent, { nearest: true }
         )
 
         // Get features as geoJson
@@ -124,21 +123,30 @@ export default {
           }
         })
           .then(res => res.json())
-          .then(res => {
-            const mapFeatures = res.map(f => {
-              return new Feature({
-                geometry: new Point(transform([f.lon, f.lat], 'EPSG:4326', 'EPSG:3857')),
-                properties: {
-                  c: f.private_webmap_layer
-                },
-                id: f.id
-              })
+          .then(featuresGeoJson => {
+            const bounds = view.extent
+            const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
+            const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+
+            worker.postMessage({
+              bbox: southWest.concat(northEast),
+              zoom: map.value.map.getView().getZoom(),
+              features: featuresGeoJson
             })
-            features.value = mapFeatures
           }).catch((error) => {
             console.log(error)
           })
       }
+    }
+    worker.onmessage = function (data) {
+      const mapFeatures = data.data.map.map(f => {
+        return new Feature({
+          geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
+          properties: f.properties,
+          id: f.id
+        })
+      })
+      features.value = mapFeatures
     }
 
     const styleFunction = (feature, style) => {
