@@ -652,8 +652,11 @@ export default defineComponent({
       newView.save()
     }
 
-    function handleReportView () {
-      console.log('handleReportView')
+    function handleReportView (report) {
+      if (report.status === 'ok') {
+        const frontend = $store.getters['app/getFrontendUrl']
+        window.open(frontend + report.code, '_bank')
+      }
     }
 
     function spiderfy (center, clusterFeatures) {
