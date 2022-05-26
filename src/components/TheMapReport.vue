@@ -150,7 +150,28 @@
                   <div v-if="feature.photo_url">
                     <img
                       :src="feature.photo_url"
+                      @load="imageLoaded"
+                      @error="errorLoading"
                     >
+                  </div>
+                  <div v-if="!errorLoadingImage" class="credits">
+                    Anónimo,
+                    <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+                  </div>
+                  <!-- only adults have validation  -->
+                  <div class="validation-box" v-if="feature.type === 'adult'">
+                    <div class="logo" :class="getValidationClass(feature)">
+                      <i :class="getValidationIcon(feature)"></i>
+                    </div>
+                    <div class="text validation-string">
+                      <div>{{ getValidationTypeTitle(feature) }}</div>
+                      <span
+                        v-if="feature.validation_type==='human' &&
+                              feature.validation"
+                      >
+                        {{ _(feature.validation) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -190,6 +211,7 @@ export default {
     const filters = ref({})
     const dateFrom = ref()
     const dateRange = ref()
+    const errorLoadingImage = ref(false)
     const locationName = ref()
     const features = ref([])
     const featuresGeoJson = ref([])
@@ -451,8 +473,32 @@ export default {
       }
     }
 
+    const errorLoading = function () {
+      errorLoadingImage.value = true
+    }
+
+    const getValidationIcon = function (feature) {
+      if (feature.validation_type === 'human') return 'fa-light fa-users'
+      else return 'fa-light fa-robot'
+    }
+
+    const getValidationClass = feature => {
+      if (feature.validation_type !== 'human') return 'validation ai'
+      if (feature.validation === 'Confirmed') return 'validation confirmed'
+      else return 'validation probable'
+    }
+
+    const getValidationTypeTitle = function (feature) {
+      if (feature.validation_type === 'human') return _('Expert validation')
+      else return _('AI validation')
+    }
+
     return {
       _,
+      errorLoading,
+      getValidationClass,
+      getValidationIcon,
+      getValidationTypeTitle,
       formatData,
       center,
       zoom,
@@ -565,9 +611,14 @@ h5, h6{
 }
 
 .col2-raw2-col2 img{
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 250px;
+  max-height: 250px;
 }
+
+.col2-raw2-col1{
+  flex-grow:1;
+}
+
 .observation-info {
   padding: 25px;
 }
@@ -616,4 +667,86 @@ h5, h6{
   padding-left: 30px;
   font-size:0.9em;
 }
+
+.credits{
+  position: relative;
+  bottom: 5px;
+  right: 5px;
+  padding:3px;
+  background: transparent;
+  border-radius: 10px;
+  text-align: right;
+  font-size:0.8em;
+  color: black;
+  &>a {
+    color: #3498DB;
+    text-decoration: none;
+    &:hover{
+      text-decoration: underline;
+    }
+  }
+}
+
+.validation {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    color: white;
+    &.confirmed {
+      background: #22a973;
+    }
+    &.probable {
+      background: #8fd3b8;
+    }
+    &.ai {
+      background: #9d6466;
+    }
+    i {
+      height: 40px;
+      width: 40px;
+      font-size: 1.5em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      .fa-check {
+        background: #f6db63;
+        color: white;
+        border-radius: 50%;
+        height: 20px;
+        width: 20px;
+        font-size: 0.3em;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        &::before {
+          position: relative;
+          top: 1px;
+        }
+      }
+    }
+}
+
+.validation-box{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.validation-string {
+  flex-grow: 1px;
+  margin-left: 10px;
+}
+.validation-string div{
+  margin-left: 10x;
+}
+
+// .map-container{
+//   display:flex;
+//   align-items: center;
+// }
 </style>
