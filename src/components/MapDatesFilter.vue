@@ -61,7 +61,7 @@ export default {
   top: 10px;
   right: 10px;
   padding: 1px 10px;
-  background: rgb(112, 101, 101);
+  background: $primary-color;
   color:white;
   border-radius: 25px;
   z-index: 10;

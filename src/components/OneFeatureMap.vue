@@ -4,7 +4,7 @@
   class="ol-map"
   :loadTilesWhileAnimating="true"
   :loadTilesWhileInteracting="true"
-  style="height:100%"
+  :style="style"
 >
 
     <ol-view
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { watch, ref, computed } from 'vue'
+import { watch, ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
@@ -47,56 +47,42 @@ import Point from 'ol/geom/Point'
 import { Icon } from 'ol/style'
 
 export default {
-  props: ['popup'],
+  props: ['popup', 'featContent', 'height', 'width'],
   components: { ObservationPopup, OlAttribution },
   setup (props, context) {
     const $store = useStore()
     const route = useRoute()
     const map = ref('null')
     const view = ref('null')
+    const center = ref(null)
+    const zoom = ref(16)
     let feature
-    const observationSource = ref('null')
+    const observationSource = ref()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+
+    const style = computed(() => {
+      if (props.height) {
+        return 'height:' + props.height + ';width:' + props.width
+      }
+      return 'height: 100%'
+    })
 
     const openPopup = computed(() => {
       return (props.popup === 'true')
     })
 
     // Check if popup is required
-    if (openPopup.value) {
-      $store.dispatch('map/selectOneFeatureMap', observationId)
-    } else {
-      const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId
-      fetch(url)
-        .then(response => response.json())
-        .then(json => {
-          $store.commit('map/setDefaults', { zoom: 16, center: [json.lon, json.lat] })
-          const fCoords = transform(
-            [json.lon, json.lat],
-            'EPSG:4326', 'EPSG:3857'
-          )
-          // styleFunction layer uses c attribute for private_webmap_layer value
-          json.c = json.private_webmap_layer
-          feature = new Feature({
-            geometry: new Point(fCoords),
-            properties: json
-          })
-          console.log(feature.getProperties())
-          observationSource.value.source.addFeature(feature)
-        })
-    }
+    onMounted(function () {
+      if (observationId) {
+        doMapById()
+      } else {
+        console.log(props.featContent)
+        doMapByFeature(props.featContent)
+      }
+    })
 
     const popupContent = computed(() => {
       return $store.getters['map/getSelectedFeature']
-    })
-
-    const zoom = computed(() => {
-      return $store.getters['map/getDefault'].ZOOM
-    })
-
-    const center = computed(() => {
-      const center = $store.getters['map/getDefault'].CENTER
-      return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
 
     watch(popupContent, (currentValue, oldValue) => {
@@ -110,7 +96,6 @@ export default {
           c: popupContent.value.private_webmap_layer
         }
       })
-      $store.commit('map/setDefaults', { zoom: 16, center: [currentValue.lon, currentValue.lat] })
       observationSource.value.source.addFeature(feature)
     })
 
@@ -206,7 +191,47 @@ export default {
       }, 100)
     }
 
+    function doMapByFeature (feat) {
+      const json = JSON.parse(JSON.stringify(feat))
+      const fCoords = transform(
+        [json.lon, json.lat],
+        'EPSG:4326', 'EPSG:3857'
+      )
+      center.value = fCoords
+      json.c = json.private_webmap_layer
+      feature = new Feature({
+        geometry: new Point(fCoords),
+        properties: json
+      })
+      observationSource.value.source.addFeature(feature)
+    }
+
+    function doMapById () {
+      if (openPopup.value) {
+        $store.dispatch('map/selectOneFeatureMap', observationId)
+      } else {
+        const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId
+        fetch(url)
+          .then(response => response.json())
+          .then(json => {
+            const fCoords = transform(
+              [json.lon, json.lat],
+              'EPSG:4326', 'EPSG:3857'
+            )
+            center.value = fCoords
+            // styleFunction layer uses c attribute for private_webmap_layer value
+            json.c = json.private_webmap_layer
+            feature = new Feature({
+              geometry: new Point(fCoords),
+              properties: json
+            })
+            observationSource.value.source.addFeature(feature)
+          })
+      }
+    }
+
     return {
+      style,
       map,
       openPopup,
       view,

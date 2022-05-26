@@ -130,7 +130,7 @@
               @click="filterObservations(layer, $event)"
               data-type="otherObservations"
               :data-code="code"
-              :class="initialClass(code, 'other')">
+              :class="initialClass(code, 'otherObservations')">
             </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -271,6 +271,7 @@ export default {
     onMounted(function () {
       initLanguage()
     })
+
     function initLanguage () {
       const lang = $store.getters['app/getLang']
       let object = ca.value
@@ -314,10 +315,12 @@ export default {
       }
       context.emit('filterLocations', geojson)
     }
+
     const toggleSamplingEffort = function (payload) {
       context.emit('toggleSamplingEffort', payload)
       samplingEffort.value.isActive = payload.status
     }
+
     const locationCleared = function () {
       context.emit('clearLocations')
     }

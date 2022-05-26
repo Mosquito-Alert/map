@@ -1,74 +1,186 @@
 <template>
-  <div id='mapa' class='bg-white'>
-    <ol-map ref='map'
-            :loadTilesWhileAnimating='true'
-            :loadTilesWhileInteracting='true'
-            style="height: 400px; width: 400px">
+  <q-layout>
+    <q-page-container>
 
-        <ol-view ref='view'
-            maxZoom="19"
-            constrainResolution='true' />
+      <!-- REFERENCE MAP -->
+      <h5 class="title"> {{ _('List of observations') }} </h5>
+      <p>
+        {{ _('Report with the observations displayed in the current map view (maximum: 300 observations).') }}
+        </p>
+      <p>
+        {{ _('Verify this by looking at the map point counter (on the down left map corner).') }}
+        </p>
 
-        <div class="ol-attribution">
-          © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-          | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
-          | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+      <div class="reference-map">
+        <div id='mapa' class='bg-white'>
+          <ol-map ref='map'
+                  :loadTilesWhileAnimating='true'
+                  :loadTilesWhileInteracting='true'
+                  style="position: relative; height: 300px; width: 600px">
+
+              <ol-view ref='view'
+                  maxZoom="19"
+                  constrainResolution='true' />
+
+              <div class="ol-attribution">
+                © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+                | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
+                | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+              </div>
+              <!-- base map -->
+              <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+                <ol-source-osm />
+              </ol-tile-layer>
+
+              <!-- CLUSTERS geojson layer -->
+              <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+                <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
+                  <ol-style :overrideStyleFunction="styleFunction">
+                  </ol-style>
+                </ol-source-vector>
+              </ol-vector-layer>
+
+          </ol-map>
         </div>
-        <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
-          <ol-source-osm />
-        </ol-tile-layer>
+        <div class="report-filters">
+          <h6> {{ _('Selected observations') }} </h6>
+          <div class="observations">
+            <ul class="ul-filters">
+              <li v-html="_(name)" v-for="name, index in observationNames" :key="index">
+              </li>
+            </ul>
+          </div>
 
-        <!-- CLUSTERS geojson layer -->
-        <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
-          <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
-            <ol-style :overrideStyleFunction="styleFunction">
-            </ol-style>
-          </ol-source-vector>
-        </ol-vector-layer>
+          <h6> {{ _('Filters applied') }} </h6>
+          <div class="filters">
+            <div>
+              <span v-if="dateFrom" v-html="dateRange"></span>
+            </div>
 
-    </ol-map>
-  </div>
-  <div class="filters">
-    <div class="observations">
-      <ul v-for="observation, code in filters.observations" :key="code" >
-        <li>
-          {{ observation.code }}
-        </li>
-      </ul>
-    </div>
+            <div class="dates" v-if="locationName">
+              <span>{{ locationName }}</span>
+            </div>
 
-    <div class="dates">
-      <span>{{ filters.dates }}</span>
-    </div>
+            <div class="hashtags" v-if="filters.hashtags">
+              <span v-html="tag" v-for="tag, index in filters.hashtags" :key="index">
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- LIST OF OBSERVATIONS -->
+        <div
+          class="observation-box"
+          v-for="feature, index in featuresGeoJson" :key="index"
+        >
+          <div class="map-container">
+            <one-feature-map
+              height="250px"
+              width="200px"
+              :featContent="feature">
+            </one-feature-map>
+          </div>
 
-    <div class="dates" v-if="locationName">
-      <span>{{ locationName }}</span>
-    </div>
+          <div class="observation-info">
+            <div class="col1">
+              <span class="counter">{{ index + 1 }}</span>
+            </div>
 
-    <div class="dates" v-if="filters.hashtags">
-      <span>{{ filters.hashtags }}</span>
-    </div>
-  </div>
+            <div class="col2">
+              <div class="col2-raw1">
+                <span class="common-name" v-html="_(feature.title)"></span>
+                <span class="latin-name" v-html="_(feature.latinName)"></span>
+              </div>
+
+              <div class="col2-raw2">
+                <div class="col2-raw2-col1">
+                  <!-- INFO DEL POPUP -->
+                    <div class="report-id-wrapper" v-if="feature.report_id">
+                        <div><i class="fa-solid fa-hashtag"></i></div>
+                        <div><span class="report_id">Id</span>:
+                          {{ feature.report_id }}
+                        </div>
+                    </div>
+                    <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
+                    <div class="description-wrapper" v-if="feature.howMany">
+                        <div><i class="fa-solid fa-child-reaching"></i></div>
+                        <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
+                          {{ _(feature.howMany) }}
+                        </div>
+                    </div>
+                    <div class="description-wrapper" v-if="feature.location">
+                        <div><i class="fa-solid fa-location-dot"></i></div>
+                        <div><span class="bite-location">{{ _('Bite location') }}</span>:
+                          {{ _(feature.location) }}
+                        </div>
+                    </div>
+                    <div class="date-wrapper">
+                        <div><i class="fa-solid fa-calendar-days"></i></div>
+                        <div>
+                          <span class="date">{{ _('Date') }}</span>:
+                          {{ formatData(feature) }}
+                        <span class="bite-time" v-if="feature.biteTime">
+                          | {{ _(feature.biteTime) }}
+                        </span>
+                        </div>
+                    </div>
+                  <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
+                  <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
+                      <div><i class="fa-solid fa-message-check"></i></div>
+                      <div><span class="description">{{ _('Expert note') }}</span>:
+                        {{ feature.edited_user_notes }}
+                      </div>
+                  </div>
+                  <div class="description-wrapper" v-if="feature.lat && feature.lon">
+                      <div><i class="fa-solid fa-location-check"></i></div>
+                      <div><span class="description">{{ _('Coordinates') }}</span>:
+                        {{ feature.lat }} - {{ feature.lon }}
+                      </div>
+                  </div>
+                  <div class="description-wrapper" v-if="feature.version_uuid">
+                      <div><i class="fa-solid fa-eye"></i></div>
+                      <div><span class="description">{{ _('Observation code') }}</span>:
+                        {{ feature.version_uuid }}
+                      </div>
+                  </div>
+
+                </div>
+                <div class="col2-raw2-col2">
+                  <!-- IMAGE AND VALIDATION LOGO -->
+                  <div v-if="feature.photo_url">
+                    <img
+                      :src="feature.photo_url"
+                    >
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+      </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
+import OneFeatureMap from 'components/OneFeatureMap.vue'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { computed, ref, onMounted, inject } from 'vue'
 import { transform, transformExtent } from 'ol/proj.js'
 import AdministrativeLayer from '../js/AdministrativeLayer'
-// import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
+import FormatObservation from '../js/FormatObservation'
 import { useStore } from 'vuex'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon } from 'ol/geom'
-// import moment from 'moment'
+import moment from 'moment'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
 
 export default {
   name: 'TheMapReport',
   props: ['report'],
+  components: { OneFeatureMap },
   setup (props, context) {
     const $store = useStore()
     const map = ref()
@@ -76,12 +188,19 @@ export default {
     const zoom = ref()
     const baseMap = ref()
     const filters = ref({})
+    const dateFrom = ref()
+    const dateRange = ref()
     const locationName = ref()
     const features = ref([])
+    const featuresGeoJson = ref([])
+    const observationNames = ref([])
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
+    const layers = $store.getters['app/getLayers']
+
+    // $store.dispatch('app/setLanguage', 'ca')
 
     const reportId = computed(() => {
       return (props.report)
@@ -107,6 +226,19 @@ export default {
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
 
+        // Get names from filter.observations
+        observationNames.value = view.filters.observations.map(o => {
+          return layers[o.type][o.code].common_name
+        })
+
+        // Format dates to display
+        if (view.filters.dates.length) {
+          const d = view.filters.dates[0]
+          dateFrom.value = moment(d.from).format('DD/MM/YYYY')
+          dateRange.value = moment(d.from).format('DD-MM-YYYY')
+          dateRange.value += ' - ' + moment(d.to).format('DD/MM/YYYY')
+        }
+
         locationName.value = ('locationName' in view) ? view.locationName : ''
         map.value.map.getView().fit(
           view.extent, { nearest: true }
@@ -126,7 +258,14 @@ export default {
           }
         })
           .then(res => res.json())
-          .then(featuresGeoJson => {
+          .then(jsonRes => {
+            const titles = $store.getters['map/getTitles']
+            const latinNames = $store.getters['map/getLatinNames']
+            const formated = jsonRes.map(e => {
+              return new FormatObservation(e, titles, latinNames).format()
+            })
+
+            featuresGeoJson.value = formated
             const bounds = view.extent
             // Check if administrative layer is on
             if (view.filters.locations.length) {
@@ -160,13 +299,14 @@ export default {
             worker.postMessage({
               bbox: southWest.concat(northEast),
               zoom: map.value.map.getView().getZoom(),
-              features: featuresGeoJson
+              features: jsonRes
             })
           }).catch((error) => {
             console.log(error)
           })
       }
     }
+
     worker.onmessage = function (data) {
       const mapFeatures = data.data.map.map(f => {
         return new Feature({
@@ -295,24 +435,50 @@ export default {
       return params
     }
 
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
+    const formatData = function (feature) {
+      // Some locales add '.' after month, so we remove it
+      if (feature.biteTime) {
+        const d = moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
+        const hour = moment(feature.observation_date).format('HH')
+        const minutes = moment(feature.observation_date).format('MM')
+        return d + ' ' + hour + 'h:' + minutes + 'm'
+      } else {
+        return moment(feature.observation_date).format('DD/MM/YYYY').replace('.', '')
+      }
+    }
+
     return {
+      _,
+      formatData,
       center,
       zoom,
       features,
+      featuresGeoJson,
       baseMap,
       geoJson,
       locationName,
       filters,
       reportId,
       styleFunction,
-      map
+      observationNames,
+      map,
+      dateFrom,
+      dateRange
     }
   }
 }
 </script>
 
-<style scoped lang="scss">
-:deep(.ol-attribution) {
+<style lang="scss">
+h5, h6{
+  margin: 5px 15px;
+}
+
+.ol-attribution{
     position: absolute;
     top: auto;
     left: auto;
@@ -326,5 +492,128 @@ export default {
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
-  }
+}
+
+.filters{
+  display: flex;
+  flex-wrap: wrap
+}
+
+.hashtags span,
+.filters div {
+  margin: 5px;
+}
+
+.ul-filters{
+    list-style: none;
+    padding: 0px;
+}
+
+.ul-filters li{
+  margin: 3px 10px;
+  display: inline-block;
+}
+
+.ul-filters li,
+.filters span {
+  padding: 2px 10px;
+  border-radius: 10px;
+  background-color: $primary-color;
+}
+
+.observation-box{
+  margin: 10px;
+  display: flex;
+  flex-grow: 1;
+  box-shadow: $box-shadow;
+}
+
+.observation-info{
+  display:flex;
+  flex-grow: 1;
+}
+
+.col2 {
+  margin-left: 15px;
+  flex-grow: 1;
+}
+
+.col2 .common-name{
+  font-weight: 600;
+}
+.col2 .common-name::after{
+  content: '|';
+  margin:0px 15px;
+}
+
+.col2 .latin-name{
+  font-style: italic;
+}
+
+.col2-raw1 {
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgb(102, 94, 94);
+}
+
+.col2-raw2 {
+  display:flex;
+  padding: 15px;
+}
+
+.col2-raw2-col2{
+  padding: 10px;
+}
+
+.col2-raw2-col2 img{
+  max-width: 150px;
+  max-height: 150px;
+}
+.observation-info {
+  padding: 25px;
+}
+
+.counter {
+  padding: 10px 15px;
+  background-color: $primary-color;
+  color: white;
+}
+
+.report-id-wrapper,
+.date-wrapper,
+.description-wrapper{
+  display:flex;
+  flex-direction:row;
+  margin-top:10px;
+}
+.report-id-wrapper div:first-child,
+.date-wrapper div:first-child,
+.description-wrapper div:first-child{
+  margin-right:10px;
+  font-weight: bold;
+}
+
+.report-id-wrapper span,
+.date-wrapper span,
+.description-wrapper span{
+  font-weight: bold;
+}
+.date-wrapper span.bite-time{
+  font-weight:normal;
+}
+
+.reference-map{
+  display: flex;
+  padding-left: 10px;
+}
+
+.q-page-container{
+  padding: 20px;
+  display:flex;
+  flex-direction: column;
+}
+
+.report-filters{
+  padding-left: 30px;
+  font-size:0.9em;
+}
 </style>

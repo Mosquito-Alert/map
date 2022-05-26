@@ -26,7 +26,7 @@
             icon="delete"
             class="delete-calendar-button mr-10"
             @click="resetDateFilter"
-            :label="_('Delete')"
+            :label="_('Delete calendar')"
           />
           <q-btn
             ref="calendarBtn"
@@ -49,9 +49,12 @@
                 text-color="black"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn label="Reset" color="red" flat v-close-popup/>
-                  <q-btn label="Cancel" color="grey" flat v-close-popup/>
-                  <q-btn label="OK" class="ok-button" flat @click="datePicked" v-close-popup />
+                  <q-btn :label="_('Delete calendar')" color="grey"
+                    flat
+                    v-close-popup
+                    @click="resetDateFilter"
+                  />
+                  <q-btn :label="_('Apply calendar')" class="ok-button" flat @click="datePicked" v-close-popup />
                 </div>
               </q-date>
             </q-popup-proxy>

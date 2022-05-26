@@ -29,7 +29,7 @@ export default function () {
       unidentified: 'Unidentified mosquito',
       other_species: 'Other species',
       conflict: 'Conflict',
-      japonicus_koreicus: 'Japonicus_koreicus',
+      japonicus_koreicus: 'Mosquito japonicus/koreicus',
       not_yet_validated: 'Not_yet_validated',
       trash_layer: 'Trash',
       storm_drain_dry: 'Stormdrain without water',
@@ -48,7 +48,8 @@ export default function () {
       culex_confirmed: 'Culex pipens',
       culex_probable: 'Culex pipens',
       koreicus_confirmed: 'Aedes koreicus',
-      koreicus_probable: 'Aedes koreicus'
+      koreicus_probable: 'Aedes koreicus',
+      japonicus_koreicus: 'Aedes japonicus/koreicus'
     }
   }
 }

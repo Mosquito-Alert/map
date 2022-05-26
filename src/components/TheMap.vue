@@ -507,6 +507,7 @@ export default defineComponent({
         dates: d,
         hashtags: v.filters.hashtags
       })
+      console.log($store.getters['app/getDefaults'].observations)
       context.emit('timeSeriesChanged', d)
 
       // Hashtag filter or report_id, not both at the same time
