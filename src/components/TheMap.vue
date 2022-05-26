@@ -1415,7 +1415,7 @@ export default defineComponent({
   .drawer-handler{
     background-color: $primary-color;
     color: white;
-    position: fixed;
+    position: absolute;
     top: $header-height;
     z-index: 1100;
     padding: 20px 5px;
