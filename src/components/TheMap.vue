@@ -757,6 +757,7 @@ export default defineComponent({
 
       if (mapFilters.locations.length) {
         data.location = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].geometry)
+        data.locationBbox = JSON.stringify(JSON.parse(mapFilters.locations[0]).features[0].properties.boundingBox)
       }
       return data
     }
