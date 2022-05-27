@@ -3,12 +3,13 @@ import moment from 'moment'
 
 export default function () {
   let backendUrl = ''
+  let frontendUrl = ''
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
-    frontenddUrl = 'http://localhost:8080/'
+    frontendUrl = 'http://localhost:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
-    frontUrl = 'https://sigserver4.udg.edu/mos/spa/'
+    frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
   }
 
   // first language is default

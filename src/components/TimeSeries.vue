@@ -133,10 +133,7 @@ export default defineComponent({
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
       defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
-      calendarDate.value = defaultDates
-      // const sDate = dateRange.value.from
-      // const eDate = dateRange.value.to
-      // dateFilter.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
+      calendarDate.value = [defaultDates]
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
@@ -208,6 +205,7 @@ export default defineComponent({
           to: moment(day).format('YYYY-MM-DD')
         }
       } else {
+        console.log(calendarDate)
         sDate = calendarDate.value.from
         eDate = calendarDate.value.to
         // dateFilterToString(date)
