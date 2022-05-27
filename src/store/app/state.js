@@ -5,8 +5,10 @@ export default function () {
   let backendUrl = ''
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
+    frontenddUrl = 'http://localhost:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
+    frontUrl = 'https://sigserver4.udg.edu/mos/spa/'
   }
 
   // first language is default
@@ -41,7 +43,7 @@ export default function () {
       strokeLocationColor: 'orange'
     },
     BACKEND: backendUrl,
-    FRONTEND: 'http://localhost:8080/',
+    FRONTEND: frontendUrl,
     trans: {},
     modals: {
       info: { visibility: false },
