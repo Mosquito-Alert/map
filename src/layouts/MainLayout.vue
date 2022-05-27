@@ -72,6 +72,9 @@
       </template>
     </modal-reports>
 
+    <modal-wait>
+    </modal-wait>
+
     <modal-error>
     </modal-error>
 
@@ -85,6 +88,7 @@ import ModalDownload from 'components/ModalDownload.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalReports from 'src/components/ModalReports.vue'
 import ModalError from 'src/components/ModalError.vue'
+import ModalWait from 'src/components/ModalWait.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawer from 'components/LeftDrawer.vue'
@@ -98,6 +102,7 @@ export default {
   components: {
     ModalBase,
     ModalError,
+    ModalWait,
     ModalDownload,
     ModalShare,
     ModalReports,
@@ -142,11 +147,10 @@ export default {
     }
 
     const filterLocations = function (location) {
+      map.value.clearAdministrativeFeatures()
       if (location !== null) {
         TOC.value.searchLocation.loading = true
         map.value.fitFeature(location)
-      } else {
-        map.value.clearAdministrativeFeatures()
       }
       map.value.filterLocations(location)
     }
@@ -227,6 +231,12 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
+      $store.commit('app/setModal', {
+        id: 'wait',
+        content: {
+          visibility: false
+        }
+      })
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }

@@ -83,4 +83,14 @@ export default {
 .date-box button:hover {
   color: $primary-color;
 }
+
+.data-box,
+.data-box::before{
+  box-shadow: none;
+}
+
+.calendar-button::before{
+  box-shadow: none;
+}
+
 </style>

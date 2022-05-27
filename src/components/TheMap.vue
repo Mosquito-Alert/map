@@ -70,12 +70,29 @@
         </ol-vector-layer>
 
         <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
-
     </ol-map>
+        <cust-control
+          ref="donwnloadControl"
+          icon="fa-thin fa-download"
+          class="ol-download ol-unselectable ol-control"
+          title="Download"
+          @clicked="openDownloadModal"
+        >
+        </cust-control>
+
+        <cust-control
+          ref="reportControl"
+          icon="fa-solid fa-file-lines"
+          class="ol-reports ol-unselectable ol-control"
+          title="Reports"
+          @clicked="openReportsModal"
+        >
+        </cust-control>
   </div>
 </template>
 
 <script>
+import CustControl from './CustControl'
 import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
 import { transform, transformExtent } from 'ol/proj.js'
@@ -92,12 +109,12 @@ import { extend } from 'ol/extent'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import AdministrativeLayer from '../js/AdministrativeLayer'
-import CustomControl from '../js/CustomControl'
+// import CustomControl from '../js/CustomControl'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
 
 export default defineComponent({
-  components: { ObservationPopup, ObservationMapCounter, MapDatesFilter },
+  components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
   name: 'TheMap',
   emits: [
     'toogleLeftDrawer',
@@ -112,18 +129,13 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
-    let olDownload
-    let olReports
+    // let olDownload
+    // let olReports
     let shareviewSpideryId = ''
     let locationName = ''
     let storeLayers
     let administrativeLayer
     let userfixesLayer
-    let userfixesUrl
-    let downloadUrl
-    let shareViewUrl
-    let reportViewUrl
-    let loadViewUrl
     let spiderfyCluster
     let spiderfiedCluster
     let clickOnSpiral = false
@@ -177,6 +189,18 @@ export default defineComponent({
       }
     })
 
+    const backendUrl = $store.getters['app/getBackend']
+    const userfixesUrl = backendUrl + 'api/userfixes/'
+    const downloadUrl = backendUrl + 'api/downloads/'
+    const shareViewUrl = backendUrl + 'api/view/save/'
+    const reportViewUrl = backendUrl + 'api/report/save/'
+    const loadViewUrl = backendUrl + 'api/view/load/'
+
+    worker.postMessage({
+      fetchUrl: backendUrl + 'api/get/data/',
+      year: moment().year()
+    })
+
     const toogleLeftDrawer = function () {
       context.emit('toogleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -184,11 +208,12 @@ export default defineComponent({
 
     const fitFeature = function (location, simplify = true) {
       console.time('FitFeature')
+      spinner()
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
-        { minResolution: 50, nearest: true }
+        { minResolution: 50, nearest: false }
       )
       let Feat = null
       if (location.features[0].geometry.type.toLowerCase() === 'polygon') {
@@ -202,6 +227,7 @@ export default defineComponent({
       }
 
       if (Feat) {
+        // When loading view no simplification is required, because it is already simplified
         if (!simplify) {
           Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
           const writer = new format.GeoJSON()
@@ -214,16 +240,29 @@ export default defineComponent({
         let lineString = null
         let maxLength = 0
         if (Feat.getGeometry().getType() === 'MultiPolygon') {
-          const polis = Feat.getGeometry().getPolygons()
-          polis.forEach(function (poli, i, a) {
-            lineString = new LineString(
-              poli.getLinearRing(0).getCoordinates()
-            )
-            const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-            if (poliLength > maxLength) {
-              maxLength = poliLength
-            }
+          // Get only the biggest polygon
+          const biggest = Feat.getGeometry().getPolygons().sort(function (polygon1, polygon2) {
+            return polygon2.getArea() - polygon1.getArea()
+          })[0]
+
+          Feat = new Feature({
+            geometry: new Polygon(biggest.getCoordinates())
           })
+
+          // const polis = Feat.getGeometry().getPolygons()
+          // polis.forEach(function (poli, i, a) {
+          //   lineString = new LineString(
+          //     poli.getLinearRing(0).getCoordinates()
+          //   )
+          //   const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
+          //   if (poliLength > maxLength) {
+          //     maxLength = poliLength
+          //   }
+          // })
+          lineString = new LineString(
+            Feat.getGeometry().getLinearRing(0).getCoordinates()
+          )
+          maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
         } else {
           lineString = new LineString(
             Feat.getGeometry().getLinearRing(0).getCoordinates()
@@ -233,13 +272,17 @@ export default defineComponent({
 
         // simplify tolerance of 5% of perimeter
         simplifyTolerance = (maxLength * 0.001)
-        if (simplifyTolerance > 500) {
-          simplifyTolerance = 200
-        }
+        // if (simplifyTolerance > 500) {
+        //   simplifyTolerance = 200
+        // }
 
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
+        console.log(Feat.getGeometry().getCoordinates())
+        console.log(Feat.getGeometry().getCoordinates()[0])
+        console.log(Feat.getGeometry().getCoordinates()[0].length)
+
         // for the moment do not add boundary feature to map
         // locationFeatures.value = [Feat]
         const writer = new format.GeoJSON()
@@ -300,6 +343,10 @@ export default defineComponent({
     })
 
     worker.onmessage = function (event) {
+      if (event.data.fetchedData) {
+        console.log(event.data.data)
+        return
+      }
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
@@ -458,20 +505,24 @@ export default defineComponent({
             code: layerFilter.code
           })
         })
+        const workerData = {}
+        workerData.layers = appLayers
+        workerData.filters = mapFilters
+        worker.postMessage(workerData)
       } else {
         // Fetch view info from backend
         const ol = map.value.map
-        const newView = new ShareMapView(ol, {
-          url: loadViewUrl + viewCode
-        })
-        newView.load(handleLoadView)
+        loadView(ol, viewCode)
       }
 
       // mapFilters are ready, now call worker
-      const workerData = {}
-      workerData.layers = appLayers
-      workerData.filters = mapFilters
-      worker.postMessage(workerData)
+    }
+
+    function loadView (ol, viewCode) {
+      const newView = new ShareMapView(ol, {
+        url: loadViewUrl + viewCode
+      })
+      newView.load(handleLoadView)
     }
 
     function handleLoadView (view) {
@@ -485,6 +536,7 @@ export default defineComponent({
         })
         return
       }
+      spinner()
       const v = JSON.parse(view.view[0].view)
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
@@ -507,7 +559,6 @@ export default defineComponent({
         dates: d,
         hashtags: v.filters.hashtags
       })
-      console.log($store.getters['app/getDefaults'].observations)
       context.emit('timeSeriesChanged', d)
 
       // Hashtag filter or report_id, not both at the same time
@@ -787,37 +838,28 @@ export default defineComponent({
     }
 
     onMounted(function () {
+      // const backendUrl = $store.getters['app/getBackend']
+      // userfixesUrl = backendUrl + 'api/userfixes/'
+      // downloadUrl = backendUrl + 'api/downloads/'
+      // shareViewUrl = backendUrl + 'api/view/save/'
+      // reportViewUrl = backendUrl + 'api/report/save/'
+      // loadViewUrl = backendUrl + 'api/view/load/'
+
+      // worker.postMessage({
+      //   fetchUrl: backendUrl + 'api/get/data/',
+      //   year: moment().year()
+      // })
+
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       const fillLocationColor = defaults.fillLocationColor
       const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
-      olDownload = new CustomControl({
-        title: 'Download',
-        icon: '<i class="fa-thin fa-download"></i>',
-        className: 'ol-download ol-unselectable ol-control',
-        callback: openDownloadModal
-      })
-      ol.addControl(olDownload)
-
-      olReports = new CustomControl({
-        title: 'Reports',
-        icon: '<i class="fa-solid fa-file-lines"></i>',
-        className: 'ol-reports ol-unselectable ol-control',
-        callback: openReportsModal
-      })
-      ol.addControl(olReports)
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
       storeLayers = $store.getters['app/getLayers']
       const legend = $store.getters['app/getLayers'].sampling_effort.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
-      const backendUrl = $store.getters['app/getBackend']
-      userfixesUrl = backendUrl + 'api/userfixes/'
-      downloadUrl = backendUrl + 'api/downloads/'
-      shareViewUrl = backendUrl + 'api/view/save/'
-      reportViewUrl = backendUrl + 'api/report/save/'
-      loadViewUrl = backendUrl + 'api/view/load/'
       // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
       administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
@@ -1056,6 +1098,7 @@ export default defineComponent({
 
     function filterObservations (observation) {
       // Just in case a Spiral is open
+      spinner()
       spiderfyCluster = false
       spiderfiedCluster = null
       spiderfiedIds = []
@@ -1129,6 +1172,8 @@ export default defineComponent({
 
     function filterDate (date) {
       // Just in case a Spiral is open
+      spinner()
+
       spiralSource.value.source.clear()
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1153,6 +1198,7 @@ export default defineComponent({
     }
 
     function filterTags (obj) {
+      spinner()
       // Just in case a Spiral is open
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1265,7 +1311,18 @@ export default defineComponent({
       context.emit('calendarClicked', {})
     }
 
+    function spinner () {
+      $store.commit('app/setModal', {
+        id: 'wait',
+        content: {
+          visibility: true
+        }
+      })
+    }
+
     return {
+      openDownloadModal,
+      openReportsModal,
       calendarClicked,
       baseMap,
       handleDownload,

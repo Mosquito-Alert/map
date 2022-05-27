@@ -11,23 +11,239 @@ const now = Date.now()
 let filters = {}
 let all_layers = null
 let simplifyTolerance = null
+let YEARS = []
+const initialYear = 2014
+const currentYear = new Date().getFullYear()
+let getdataUrl = ''
+
+for (let a = initialYear; a <= currentYear; a++) {
+  YEARS.push({ year: a, data: {} })
+}
 
 function log (text) {
   if (DEBUG) console.log('[TheMapWorker]', text)
 }
 
 // Download data and send message when ready including first and last date in dataset
-getJSON('totes.json', (geojson) => {
-  log(`loaded ${geojson.features.length} points JSON in ${(Date.now() - now) / 1000}s`)
-  dataset = geojson.features
-  postMessage({
-    ready: true,
-    datesInterval: {
-      from: dataset[0].properties.d,
-      to: dataset[dataset.length - 1].properties.d
+function getData (year, flag = false) {
+  fetch(getdataUrl + year)
+    .then(function (response) {
+      return response.json()
+    })
+    .then(function (geojson) {
+      dataset = geojson.features
+      const index = YEARS.findIndex(y => {
+        return (y.year === year)
+      })
+      YEARS[index].data = JSON.parse(JSON.stringify(geojson.features))
+
+      if (flag) {
+        loadMapData(YEARS[index].data, false)
+      }
+    })
+}
+
+function getMissingYears (date) {
+  let sYear, eYear
+  const d = date[0]
+
+  if (d.from === '') {
+    sYear = YEARS[0].year
+    eYear = YEARS[YEARS.length - 1].year
+  } else {
+    sYear = parseInt(d.from.substring(0, 4))
+    eYear = parseInt(d.to.substring(0, 4))
+  }
+
+  const missing = YEARS.filter(set => {
+    if ((set.year < sYear) || (set.year > eYear)) {
+      return false
+    } else {
+      return Object.keys(set.data).length === 0
     }
   })
-})
+  return missing
+}
+
+self.onmessage = async function (e) {
+  if (e.data.fetchUrl) {
+    const year = e.data.year
+    getdataUrl = e.data.fetchUrl
+    getData(year, getdataUrl)
+    return
+  }
+  // console.log(e.data)
+  if (e.data.filters) {
+    // Worker vars are init first time worker is called
+    filters = e.data.filters
+    all_layers = e.data.layers
+    filteredData = []
+    const missing = getMissingYears(e.data.filters.dates)
+    if (missing.length) {
+      await Promise.all(missing.map(m =>
+        fetch(getdataUrl + m.year).then(resp => resp.json())
+      )).then(jsons => {
+        // Check for errors
+        jsons.forEach(j => {
+          if ('status' in j) {
+            console.log(j.msg)
+          } else {
+            const y = j.year
+            const index = YEARS.findIndex(element => {
+              return element.year === y
+            })
+            YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+            dataset = dataset.concat(j.features)
+          }
+        })
+      })
+    }
+  }
+
+  let fitFeatures = false
+  if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
+    // This is fired when the user clicks on a cluster.
+    // Returns the zoom level to zoom in and the center.
+    let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
+    // Calculate the extent of the cluster to speed up zooming in
+    const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
+
+    if (z >= 19) {
+      z = 19
+    }
+    postMessage({
+      expansionZoom: z,
+      center: e.data.center,
+      clusterExtent: clusterExtent
+    })
+  } else if (e.data.filters) {
+    // This is fired when the map is filtered.
+    // Get the smallest dataset (reportFeatures) before start filtering
+    if (filters.reportFeatures.length) {
+      filteredData = filters.reportFeatures[0].features
+    } else {
+      if (filters.mode === 'increaseFilter') {
+        filteredData = filteredDataset
+      } else {
+        filteredData = dataset
+      }
+    }
+    if (filters.observations.length > 0) {
+      filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
+    } else {
+      filteredData = []
+    }
+    if (filters.dates.length > 0) {
+      // array with only one date
+      filteredData = filterDate(filteredData, filters.dates[0])
+    }
+    if (filters.hashtags.length > 0) {
+      // TODO: Check for report_id filtering. That is a tag stating with :
+      // array with only one date
+      filteredData = filterTags(filteredData, filters.hashtags)
+      fitFeatures = true
+    }
+    if (filters.report_id.length > 0) {
+      // TODO: Check for report_id filtering. That is a tag stating with :
+      // array with only one date
+      filteredData = filterRecordsId(filteredData, filters.report_id)
+      fitFeatures = true
+    }
+    if (filters.locations.length > 0) {
+      if (filters.tolerance) {
+        simplifyTolerance = filters.tolerance
+      }
+      const poly = JSON.parse(filters.locations[0]).features[0]
+      filteredData = filterLocations(filteredData, poly)
+    }
+    // Update filteredDataset
+    filteredDataset = filteredData
+    loadMapData(filteredData, fitFeatures)
+  } else if (e.data.spiderfyCluster) {
+    let openPopupId = ''
+    if (e.data.spiderfyId) {
+      const cluster = getClusterByFeatureId(e.data)
+      e.data.getClusterExpansionZoom = cluster.id
+      e.data.center = cluster.geometry.coordinates
+      openPopupId = e.data.spiderfyId
+    }
+    if (e.data.getClusterExpansionZoom) {
+      postMessage({
+        map: index.getClusters(e.data.bbox, parseInt(e.data.zoom)),
+        spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
+        spiderfyCluster: e.data.spiderfyCluster,
+        openPopupId: openPopupId,
+        center: e.data.center,
+        clusterId: e.data.getClusterExpansionZoom
+      })
+    } else {
+      postMessage({
+        map: index.getClusters(e.data.bbox, e.data.zoom),
+        spiderfyCluster: e.data.spiderfyCluster,
+        center: e.data.center
+      })
+    }
+  }
+  else if (e.data) {
+    // This is fired when the user navigates the map.
+    const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
+    const map = index.getClusters(e.data.bbox, e.data.zoom)
+
+    time.sort((a, b) => {
+      if (a.properties.d < b.properties.d) return -1
+      else if (a.properties.d > b.properties.d) return 1
+      else return 0
+    })
+    const dates = []
+    const series = {}
+    const seriesMap = {}
+    filters.observations.forEach(layer => {
+      all_layers[layer.type][layer.code].categories.forEach(validationType => {
+        seriesMap[validationType] = layer.code
+      })
+      series[layer.code] = []
+    })
+    const temp = {}
+
+    time.forEach(feature => {
+      const type = seriesMap[feature.properties.c]
+      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+
+      const dateSeries = temp[feature.properties.d]
+      if (!(type in dateSeries)) dateSeries[type] = 0
+      dateSeries[type] += 1
+    })
+
+    const tempDates = Object.keys(temp)
+    let start = new Date(tempDates[0])
+    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
+    let end = new Date(tempDates[tempDates.length - 1])
+    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
+    while (start <= end) {
+      const dateLabel = start.toISOString().split('T')[0]
+      const values = temp[dateLabel]
+      dates.push(dateLabel)
+      Object.keys(series).forEach(type => {
+        if (values && type in values) {
+          const value = values[type]
+          series[type].push(value)
+        } else {
+          series[type].push(0)
+        }
+      })
+      start = new Date(start.setDate(start.getDate() + 1))
+    }
+
+    postMessage({
+      map: map,
+      spiderfyCluster: e.data.spiderfyCluster,
+      timeseries: {
+        dates: dates,
+        data: series
+      }
+    })
+  }
+}
 
 function loadMapData (data, fitFeatures) {
   index = new Supercluster({
@@ -161,18 +377,18 @@ function filterObservations (data, layers, filters) {
   return filteredData
 }
 
-function getJSON (url, callback) {
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', url, true)
-  xhr.responseType = 'json'
-  xhr.setRequestHeader('Accept', 'application/json')
-  xhr.onload = function () {
-    if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300 && xhr.response) {
-      callback(xhr.response)
-    }
-  }
-  xhr.send()
-}
+// function getJSON (url, callback) {
+//   const xhr = new XMLHttpRequest()
+//   xhr.open('GET', url, true)
+//   xhr.responseType = 'json'
+//   xhr.setRequestHeader('Accept', 'application/json')
+//   xhr.onload = function () {
+//     if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300 && xhr.response) {
+//       callback(xhr.response)
+//     }
+//   }
+//   xhr.send()
+// }
 
 function getExtent (clusterId) {
   const leaves = index.getLeaves(clusterId, Infinity)
@@ -211,155 +427,4 @@ function getClusterByFeatureId (data) {
     })
   })
   return parent
-}
-
-self.onmessage = function (e) {
-  let fitFeatures = false
-  if (e.data.getClusterExpansionZoom && !e.data.spiderfyCluster) {
-    // This is fired when the user clicks on a cluster.
-    // Returns the zoom level to zoom in and the center.
-    let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
-    // Calculate the extent of the cluster to speed up zooming in
-    const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
-
-    if (z >= 19) {
-      z = 19
-    }
-    postMessage({
-      expansionZoom: z,
-      center: e.data.center,
-      clusterExtent: clusterExtent
-    })
-  } else if (e.data.filters) {
-    // console.log(e.data.filters)
-    // This is fired when the map is filtered.
-    all_layers = e.data.layers
-    filters = e.data.filters
-    let filteredData = []
-
-    // Get the smallest dataset (reportFeatures) before start filtering
-    if (filters.reportFeatures.length) {
-      filteredData = filters.reportFeatures[0].features
-    } else {
-      if (filters.mode === 'increaseFilter') {
-        filteredData = filteredDataset
-      } else {
-        filteredData = dataset
-      }
-    }
-    if (filters.observations.length > 0) {
-      filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
-    } else {
-      filteredData = []
-    }
-    if (filters.dates.length > 0) {
-      // array with only one date
-      filteredData = filterDate(filteredData, filters.dates[0])
-    }
-    if (filters.hashtags.length > 0) {
-      // TODO: Check for report_id filtering. That is a tag stating with :
-      // array with only one date
-      filteredData = filterTags(filteredData, filters.hashtags)
-      fitFeatures = true
-    }
-    if (filters.report_id.length > 0) {
-      // TODO: Check for report_id filtering. That is a tag stating with :
-      // array with only one date
-      filteredData = filterRecordsId(filteredData, filters.report_id)
-      fitFeatures = true
-    }
-    if (filters.locations.length > 0) {
-      if (filters.tolerance) {
-        simplifyTolerance = filters.tolerance
-      }
-      const poly = JSON.parse(filters.locations[0]).features[0]
-      filteredData = filterLocations(filteredData, poly)
-    }
-    // Update filteredDataset
-    filteredDataset = filteredData
-    loadMapData(filteredData, fitFeatures)
-  } else if (e.data.spiderfyCluster) {
-    let openPopupId = ''
-    if (e.data.spiderfyId) {
-      const cluster = getClusterByFeatureId(e.data)
-      e.data.getClusterExpansionZoom = cluster.id
-      e.data.center = cluster.geometry.coordinates
-      openPopupId = e.data.spiderfyId
-    }
-    if (e.data.getClusterExpansionZoom) {
-      postMessage({
-        map: index.getClusters(e.data.bbox, parseInt(e.data.zoom)),
-        spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
-        spiderfyCluster: e.data.spiderfyCluster,
-        openPopupId: openPopupId,
-        center: e.data.center,
-        clusterId: e.data.getClusterExpansionZoom
-      })
-    } else {
-      postMessage({
-        map: index.getClusters(e.data.bbox, e.data.zoom),
-        spiderfyCluster: e.data.spiderfyCluster,
-        center: e.data.center
-      })
-    }
-  }
-  else if (e.data) {
-    // This is fired when the user navigates the map.
-    const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-    const map = index.getClusters(e.data.bbox, e.data.zoom)
-
-    time.sort((a, b) => {
-      if (a.properties.d < b.properties.d) return -1
-      else if (a.properties.d > b.properties.d) return 1
-      else return 0
-    })
-    const dates = []
-    const series = {}
-    const seriesMap = {}
-    filters.observations.forEach(layer => {
-      all_layers[layer.type][layer.code].categories.forEach(validationType => {
-        seriesMap[validationType] = layer.code
-      })
-      series[layer.code] = []
-    })
-    const temp = {}
-
-    time.forEach(feature => {
-      const type = seriesMap[feature.properties.c]
-      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
-
-      const dateSeries = temp[feature.properties.d]
-      if (!(type in dateSeries)) dateSeries[type] = 0
-      dateSeries[type] += 1
-    })
-
-    const tempDates = Object.keys(temp)
-    let start = new Date(tempDates[0])
-    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
-    let end = new Date(tempDates[tempDates.length - 1])
-    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
-    while (start <= end) {
-      const dateLabel = start.toISOString().split('T')[0]
-      const values = temp[dateLabel]
-      dates.push(dateLabel)
-      Object.keys(series).forEach(type => {
-        if (values && type in values) {
-          const value = values[type]
-          series[type].push(value)
-        } else {
-          series[type].push(0)
-        }
-      })
-      start = new Date(start.setDate(start.getDate() + 1))
-    }
-
-    postMessage({
-      map: map,
-      spiderfyCluster: e.data.spiderfyCluster,
-      timeseries: {
-        dates: dates,
-        data: series
-      }
-    })
-  }
 }
