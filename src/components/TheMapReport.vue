@@ -75,7 +75,7 @@
         >
           <div class="map-container">
             <one-feature-map
-              height="250px"
+              height="100%"
               width="200px"
               :featContent="feature">
             </one-feature-map>
@@ -154,7 +154,7 @@
                       @error="errorLoading"
                     >
                   </div>
-                  <div v-if="!errorLoadingImage" class="credits">
+                  <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
                     Anónimo,
                     <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
                   </div>
