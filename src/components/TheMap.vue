@@ -1134,6 +1134,7 @@ export default defineComponent({
     }
 
     const clearAdministrativeFeatures = function () {
+      spinner()
       administrativeLayer.tileIndex = null
       map.value.map.removeLayer(administrativeLayer.layer)
       spiderfyCluster = false
