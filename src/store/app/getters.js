@@ -46,3 +46,7 @@ export const isFilteringTag = state => {
 export const getFrontendUrl = state => {
   return state.FRONTEND
 }
+
+export const getReportsLimit = state => {
+  return state.reportsLimit
+}

@@ -9,12 +9,12 @@
           <div class="modal-title">{{ _('Reports modal title') }}</div>
           <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
           <p>{{ _('Verify this by looking at the map point counter') }}</p>
-        <div class="error-message" v-if="nFeatures">
-          {{ _('No features to download') }}
+        <div class="error-message" v-if="tooManyFeatures">
+          {{ _('Reports limit exceeded') }}
         </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button @click="newReport">{{ _('Continue') }}</button>
+            <button v-if="!tooManyFeatures" @click="newReport">{{ _('Continue') }}</button>
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -35,9 +35,9 @@ export default {
     const newReport = function () {
       context.emit('newReport')
     }
-
-    const nFeatures = computed(() => {
-      return false
+    const maxReports = $store.getters['app/getReportsLimit']
+    const tooManyFeatures = computed(() => {
+      return ($store.getters['app/getModals'].report.n > maxReports)
     })
 
     const close = function () {
@@ -50,7 +50,7 @@ export default {
       return $store.getters['app/getText'](text)
     }
     return {
-      nFeatures,
+      tooManyFeatures,
       newReport,
       close,
       hasCloseButton,

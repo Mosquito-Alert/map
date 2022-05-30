@@ -19,7 +19,11 @@ export default {
     }
 
     const npoints = computed(() => {
-      return props.nPoints
+      // Format number
+      if (parseInt(props.nPoints) > 0) {
+        return props.nPoints.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+      }
+      return 0
     })
 
     return {

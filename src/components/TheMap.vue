@@ -183,10 +183,6 @@ export default defineComponent({
       })
 
       nPoints.value += (spiralSource.value.source.getFeatures().length) / 2
-      // Format number
-      if (nPoints.value > 0) {
-        nPoints.value = nPoints.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-      }
     })
 
     const backendUrl = $store.getters['app/getBackend']
@@ -768,7 +764,8 @@ export default defineComponent({
       $store.commit('app/setModal', {
         id: 'report',
         content: {
-          visibility: true
+          visibility: true,
+          n: nPoints.value
         }
       })
     }
@@ -1386,13 +1383,13 @@ export default defineComponent({
     cursor:pointer;
   }
   :deep(.ol-reports){
-    bottom: 120px;
+    bottom: 130px;
   }
   :deep(.ol-download){
-    bottom: 170px;
+    bottom: 180px;
   }
   :deep(.ol-zoom) {
-    bottom: 15px;
+    bottom: 25px;
   }
 
   :deep(.ol-reports),

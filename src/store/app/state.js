@@ -27,6 +27,7 @@ export default function () {
   return {
     // key to make leftdrawer component re-render
     leftDrawerStatus: 0,
+    reportsLimit: 300,
     lang: defaultLang,
     isFilteringTag: false,
     DEFAULTS: {
