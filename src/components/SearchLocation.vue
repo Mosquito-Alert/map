@@ -83,7 +83,7 @@ export default {
       const { signal } = controller
       const lang = $store.getters['app/getLang']
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
-      url += `&polygon_threshold=0.001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
+      url += `&polygon_threshold=0.0001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
       fetch(url,
         { signal })
         .then(res => res.json())

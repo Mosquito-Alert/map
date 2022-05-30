@@ -101,7 +101,7 @@ import ObservationMapCounter from './ObservationMapCounter.vue'
 import MapDatesFilter from './MapDatesFilter.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Polygon, MultiPolygon, LineString } from 'ol/geom'
+import { Polygon, MultiPolygon } from 'ol/geom'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
@@ -142,7 +142,6 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const nPoints = ref(0)
     const baseMap = ref('null')
-    let simplifyTolerance = null
     const spiralSource = ref(null)
     const selectedId = ref(null)
     const selectedFeat = ref(null)
@@ -233,48 +232,40 @@ export default defineComponent({
           administrativeLayer.refreshLayer(json)
           return
         }
-        let lineString = null
-        let maxLength = 0
-        if (Feat.getGeometry().getType() === 'MultiPolygon') {
-          // Get only the biggest polygon
-          const biggest = Feat.getGeometry().getPolygons().sort(function (polygon1, polygon2) {
-            return polygon2.getArea() - polygon1.getArea()
-          })[0]
+        // let lineString = null
+        // let maxLength = 0
+        // if (Feat.getGeometry().getType() === 'MultiPolygon') {
+        //   const polis = Feat.getGeometry().getPolygons()
+        //   polis.forEach(function (poli, i, a) {
+        //     lineString = new LineString(
+        //       poli.getLinearRing(0).getCoordinates()
+        //     )
+        //     const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
+        //     if (poliLength > maxLength) {
+        //       maxLength = poliLength
+        //     }
+        //   })
 
-          Feat = new Feature({
-            geometry: new Polygon(biggest.getCoordinates())
-          })
-
-          // const polis = Feat.getGeometry().getPolygons()
-          // polis.forEach(function (poli, i, a) {
-          //   lineString = new LineString(
-          //     poli.getLinearRing(0).getCoordinates()
-          //   )
-          //   const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-          //   if (poliLength > maxLength) {
-          //     maxLength = poliLength
-          //   }
-          // })
-          lineString = new LineString(
-            Feat.getGeometry().getLinearRing(0).getCoordinates()
-          )
-          maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-        } else {
-          lineString = new LineString(
-            Feat.getGeometry().getLinearRing(0).getCoordinates()
-          )
-          maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-        }
+        //   lineString = new LineString(
+        //     Feat.getGeometry().getLinearRing(0).getCoordinates()
+        //   )
+        //   maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
+        // } else {
+        //   lineString = new LineString(
+        //     Feat.getGeometry().getLinearRing(0).getCoordinates()
+        //   )
+        //   maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
+        // }
 
         // simplify tolerance of 5% of perimeter
-        simplifyTolerance = (maxLength * 0.001)
+        // simplifyTolerance = (maxLength * 0.001)
         // if (simplifyTolerance > 500) {
         //   simplifyTolerance = 200
         // }
 
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
-        Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
+        // Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         console.log(Feat.getGeometry().getCoordinates())
         console.log(Feat.getGeometry().getCoordinates()[0])
         console.log(Feat.getGeometry().getCoordinates()[0].length)
@@ -1156,7 +1147,7 @@ export default defineComponent({
       const workerData = {}
       if (location) {
         mapFilters.locations = [JSON.stringify(location)]
-        mapFilters.tolerance = simplifyTolerance
+        // mapFilters.tolerance = simplifyTolerance
         mapFilters.mode = 'increaseFilter'
       } else {
         mapFilters.locations = []

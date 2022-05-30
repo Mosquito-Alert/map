@@ -49,8 +49,8 @@ module.exports = configure(function (ctx) {
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
       // transpile: false,
-      // publicPath: 'https://sigserver4.udg.edu/mos/spa/',
-      publicPath: '/',
+      publicPath: 'https://sigserver4.udg.edu/mos/spa/',
+      // publicPath: '/',
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
