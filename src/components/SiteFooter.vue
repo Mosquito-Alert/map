@@ -3,8 +3,13 @@
   <q-footer class="text-white">
     <q-toolbar>
       <q-toolbar-title>
-        <div class="attribution"></div>
-        <ul class="logos">
+        <div v-if="!mobile" class="attribution"></div>
+        <ul class="logos" :class="mobile?'mobile':''">
+          <li v-if="mobile">
+            <a href="https://www.ceab.csic.es/" target="_blank">
+              <img src="~assets/img/mosquito_alert_mobile.png">
+            </a>
+          </li>
           <li>
             <a href="https://www.ceab.csic.es/" target="_blank">
               <img src="~assets/img/CSIC-CEAB.png">
@@ -32,6 +37,25 @@
 
 </template>
 
+<script>
+import { useStore } from 'vuex'
+import { defineComponent, computed } from 'vue'
+
+export default defineComponent({
+  setup (props, context) {
+    const $store = useStore()
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    return {
+      mobile
+    }
+  }
+})
+</script>
+
 <style scoped lang="scss">
 .q-footer {
   background-color: $footer-background;
@@ -40,6 +64,11 @@
 .q-footer .q-toolbar__title {
   display: flex;
   justify-content: space-between;
+}
+.logos.mobile {
+  display:flex;
+  // transform: scale(0.5);
+  // transform-origin: 0 0;
 }
 .logos {
   list-style: none;
@@ -52,8 +81,17 @@
   display: flex;
   align-items: center;
 }
+.logos.mobile li {
+  width:20%;
+  margin:0;
+  padding:0;
+}
 .logos li img {
   max-height: 35px;
   margin-left: 30px;
+}
+.logos.mobile li img {
+  max-width: 95%;
+  margin-left: 0px;
 }
 </style>
