@@ -1139,6 +1139,7 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
+      spinner()
       // Just in case a Spiral is open
       spiralSource.value.source.clear()
       spiderfyCluster = false
