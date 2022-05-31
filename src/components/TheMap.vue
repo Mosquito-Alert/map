@@ -80,7 +80,11 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
+        <observation-popup
+          @closePopupButton="closePopup"
+          @popupimageloaded="autoPanPopup"
+          :selectedFeature="popupContent"
+        ></observation-popup>
     </ol-map>
         <cust-control
           ref="donwnloadControl"
@@ -1363,7 +1367,8 @@ export default defineComponent({
       view,
       selectedIcon,
       nPoints,
-      mapDates
+      mapDates,
+      closePopup
     }
   }
 })

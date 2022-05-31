@@ -116,6 +116,11 @@
               </div>
             </div>
           </div>
+            <div v-if="mobile">
+              <button class="q-btn ma-btn" @click="closePopup">
+                {{ _('Close') }}
+              </button>
+            </div>
         </div>
       </div>
     </template>
@@ -129,7 +134,7 @@ import moment from 'moment'
 
 export default defineComponent({
   props: ['selectedFeature'],
-  emits: ['popupimageloaded'],
+  emits: ['popupimageloaded', 'closePopupButton'],
   setup (props, context) {
     const $store = useStore()
     const imageRatio = ref('null')
@@ -142,6 +147,11 @@ export default defineComponent({
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
+
+    const closePopup = function () {
+      // $store.commit('map/selectFeature', {})
+      context.emit('closePopupButton')
+    }
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -199,6 +209,7 @@ export default defineComponent({
       _,
       ratio,
       mobile,
+      closePopup,
       defaultImageSize,
       errorLoadingImage,
       errorLoading,
@@ -596,6 +607,7 @@ export default defineComponent({
   height: 100vh;
   max-width: 100vw;
   border-radius:none;
+  flex-direction: column;
 }
 
 .parentContainer.mobile,
@@ -613,6 +625,37 @@ export default defineComponent({
   margin: auto;
   max-width: 100%;
   max-height: 100%;
+}
+
+.mobile .info{
+  flex-direction: row;
+}
+
+.mobile .info-validation{
+  max-width: 100vw;
+  max-height: 45vh;
+}
+
+.overlay-content.portrait .image{
+  height: 40vh;
+}
+
+.overlay-content.square .image img,
+.overlay-content.portrait .image img{
+  border-radius: 0px;
+}
+
+.parentContainer.mobile .info-validation > div:first-child{
+  max-height: 100%;
+}
+
+.ma-btn{
+  background: $primary-color;
+  color: white;
+  border: none;
+}
+.mobile.portrait .info-validation{
+  padding: 20px;
 }
 
 @media (max-width: 640px) {
