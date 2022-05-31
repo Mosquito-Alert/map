@@ -50,3 +50,7 @@ export const getFrontendUrl = state => {
 export const getReportsLimit = state => {
   return state.reportsLimit
 }
+
+export const getIsMobile = state => {
+  return state.isMobile
+}
