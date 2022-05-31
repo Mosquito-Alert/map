@@ -301,6 +301,10 @@ export default defineComponent({
     }
 
     const autoPanPopup = function () {
+      // When popup is on mobile, don't autopan
+      if (mobile.value) {
+        return
+      }
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
@@ -955,7 +959,10 @@ export default defineComponent({
           if (!feature.values_.properties) return
           if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
           const center = selectedFeatures[0].getGeometry().getCoordinates()
-          flyTo(center, ol.getView().getZoom())
+          // Only move map if is not a mobile
+          if (!mobile.value) {
+            flyTo(center, ol.getView().getZoom())
+          }
           selectedFeat.value = feature
           selectedId.value = feature.values_.properties.id
           selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
