@@ -222,7 +222,6 @@ export default defineComponent({
 
     const fitFeature = function (location, simplify = true) {
       console.time('FitFeature')
-      spinner()
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       map.value.map.getView().fit(
@@ -1167,6 +1166,7 @@ export default defineComponent({
     function filterLocations (location) {
       spinner()
       // Just in case a Spiral is open
+      spinner()
       spiralSource.value.source.clear()
       spiderfyCluster = false
       spiderfiedCluster = null
