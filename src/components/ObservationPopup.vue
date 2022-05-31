@@ -156,6 +156,7 @@ export default defineComponent({
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+    imageRatio.value = mobile.value ? 'mobile ' : ''
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       // Set poup class based on mobile device and image ratio
@@ -165,7 +166,7 @@ export default defineComponent({
         imageRatio.value = ''
       }
       imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
-      console.log(imageRatio.value)
+
       defaultImageSize.value = ''
       context.emit('popupimageloaded')
     }
@@ -289,6 +290,7 @@ export default defineComponent({
   display: flex;
   justify-content: center;
 }
+
 .overlay-content.square .image img,
 .overlay-content.portrait .image img{
   height: 100%;
@@ -600,6 +602,7 @@ export default defineComponent({
 .parentContainer.mobile::after{
   content: none;
 }
+.parentContainer.mobile .overlay-content.small,
 .overlay-content.mobile.landscape,
 .overlay-content.mobile.portrait,
 .overlay-content.mobile.square{
@@ -617,6 +620,10 @@ export default defineComponent({
   height: 100vh;
 }
 
+.parentContainer.mobile .overlay-content.small{
+  width: 100vw;
+}
+
 .image.mobile .img-container{
   display: inline;
 }
@@ -631,9 +638,11 @@ export default defineComponent({
   flex-direction: row;
 }
 
-.mobile .info-validation{
+.mobile .info-validation,
+.mobile .info-no-validation{
   max-width: 100vw;
   max-height: 45vh;
+  border-radius: 0px;
 }
 
 .overlay-content.portrait .image{
@@ -665,6 +674,7 @@ export default defineComponent({
     padding: 0px;
     width: 100%;
     height: 100%;
+    transform: none !important;
   }
 }
 </style>
