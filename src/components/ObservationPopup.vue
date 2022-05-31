@@ -4,7 +4,8 @@
       :position="selectedFeature.coordinates"
       positioning='bottom-center'
       :offset="[0, -35]"
-      v-if="selectedFeature">
+      v-if="selectedFeature"
+    >
     <template v-slot="slotProps">
       <div class="parentContainer" :class="imageRatio">
         <div :class="getPopupClass(selectedFeature)">
@@ -122,7 +123,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
@@ -138,12 +139,23 @@ export default defineComponent({
     ratio.value = 0
     imageRatio.value = 0
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
-      imageRatio.value = (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
+      // Set poup class based on mobile device and image ratio
+      if (mobile.value) {
+        imageRatio.value = mobile.value ? 'mobile ' : ''
+      } else {
+        imageRatio.value = ''
+      }
+      imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
+      console.log(imageRatio.value)
       defaultImageSize.value = ''
       context.emit('popupimageloaded')
     }
@@ -186,6 +198,7 @@ export default defineComponent({
     return {
       _,
       ratio,
+      mobile,
       defaultImageSize,
       errorLoadingImage,
       errorLoading,
@@ -201,7 +214,7 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang='scss'>
+<style lang='scss'>
 * {
   scrollbar-width: thin;
   scrollbar-color: #EFA501 #ccc;
@@ -570,5 +583,45 @@ export default defineComponent({
   position: absolute;
   height: 100%;
   margin: auto;
+}
+
+// MOBILE
+.parentContainer.mobile::after{
+  content: none;
+}
+.overlay-content.mobile.landscape,
+.overlay-content.mobile.portrait,
+.overlay-content.mobile.square{
+  // width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  border-radius:none;
+}
+
+.parentContainer.mobile,
+.overlay-content.mobile{
+  border-radius: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+
+.image.mobile .img-container{
+  display: inline;
+}
+
+.image.mobile .img-container img {
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+@media (max-width: 640px) {
+  .ol-viewport .ol-overlaycontainer-stopevent,
+  .ol-viewport .ol-overlay-container{
+    z-index:5000 !important;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

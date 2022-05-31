@@ -1,6 +1,12 @@
 <template>
   <div id='mapa' class='bg-white'>
-    <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
+    <q-btn v-if="mobile"
+      class="drawer-handler-mobile"
+      @click="toogleLeftDrawer"
+    >
+      <q-icon name="menu" />
+    </q-btn>
+    <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
 
     <map-dates-filter
       :dateFrom="mapDates.from"
@@ -25,10 +31,15 @@
             :zoom='zoom'
             :constrainResolution='true' />
 
-        <div class="ol-attribution">
-          © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-          | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
-          | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+        <div class="ol-attribution" :class="mobile?'collapsed':''">
+          <div v-if="!mobile">
+            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
+            | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+          </div>
+          <div v-else>
+            ©
+          </div>
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
@@ -172,6 +183,10 @@ export default defineComponent({
 
     const mapDates = computed(() => {
       return $store.getters['map/getMapDates']
+    })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
     })
 
     // watch([a, b], ([newA, newB], [prevA, prevB]) => {
@@ -1311,6 +1326,7 @@ export default defineComponent({
     }
 
     return {
+      mobile,
       openDownloadModal,
       openReportsModal,
       calendarClicked,
@@ -1395,7 +1411,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background: none;
-    // right:15px;
+    z-index:200;
   }
   :deep(.ol-zoom) button,
   :deep(.ol-reports.ol-control) button,
@@ -1469,5 +1485,16 @@ export default defineComponent({
     padding: 20px 5px;
     cursor: pointer;
     border-radius: 0 10px 10px 0;
+  }
+  .drawer-handler-mobile{
+    background-color: $primary-color;
+    color: white;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
   }
 </style>

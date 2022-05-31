@@ -23,9 +23,17 @@ export default function () {
       to: moment().format('YYYY-MM-DD')
     }
   }
+  const mobile = () => {
+    if (screen.width <= 760) {
+      return true
+    } else {
+      return false
+    }
+  }
 
   return {
     // key to make leftdrawer component re-render
+    isMobile: mobile(),
     leftDrawerStatus: 0,
     reportsLimit: 300,
     lang: defaultLang,

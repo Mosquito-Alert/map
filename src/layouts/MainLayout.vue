@@ -1,9 +1,9 @@
 <template>
   <q-layout
     view='hHh lpR fFf'
-    :class="expanded?'expanded':'collapsed'"
+    :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
   >
-    <site-header :expanded="expanded"/>
+    <site-header v-if="!mobile" :expanded="expanded"/>
     <left-drawer ref="TOC"
       :expanded="expanded"
       @toggleSamplingEffort='toggleSamplingEffort'
@@ -11,15 +11,17 @@
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
       @filterTags="filterTags"
+      @toogleLeftDrawer="toogleLeftDrawer"
     />
 
     <q-page
       class='flex'
-      :class="expanded?'expanded':'collapsed'"
+      :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
     >
       <the-map ref='map'
         init
         :sharedView="viewCode"
+        class="fit"
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
@@ -118,7 +120,6 @@ export default {
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
-    const expanded = ref(true)
     const $store = useStore()
     const resizeMap = function (args) {
       if (args.start < args.end) {
@@ -137,6 +138,11 @@ export default {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
     })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+    const expanded = ref(!mobile.value)
 
     const startDownload = function (format) {
       map.value.handleDownload(format)
@@ -274,6 +280,7 @@ export default {
     }
 
     return {
+      mobile,
       calendarClicked,
       viewCode,
       shareView,
@@ -367,4 +374,29 @@ export default {
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;
   }
+
+  // MOBILE
+  .q-page.mobile.collapsed{
+    margin-left:0;
+    transition: margin-left ease 1s;
+  }
+  .q-page.mobile.expanded{
+    margin-left:$left-drawer-width;
+    transition: margin-left ease 1s;
+  }
+  .q-layout.mobile.collapsed aside{
+      width: 0;
+      box-shadow: none;
+      transition:width ease 1s;
+    }
+  .q-layout.mobile.expanded aside{
+    width: $left-drawer-width;
+    box-shadow: none;
+    transition:width ease 1s;
+  }
+
+  .q-layout.mobile.expanded aside{
+    width: 100%;
+  }
+
 </style>
