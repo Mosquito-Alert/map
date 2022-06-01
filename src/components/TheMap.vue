@@ -31,14 +31,20 @@
             :zoom='zoom'
             :constrainResolution='true' />
 
-        <div class="ol-attribution" :class="mobile?'collapsed':''">
-          <div v-if="!mobile">
+        <div
+          class="ol-attribution"
+          :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
+        >
+          <div v-if="!mobile || attrVisible">
             © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-            | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
+            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
-          <div v-else>
-            ©
+          <div v-if="mobile"
+            class="attr-folder"
+            v-html="foldingIcon"
+            @click="unfoldAttribution"
+          >
           </div>
         </div>
         <!-- base map -->
@@ -175,6 +181,18 @@ export default defineComponent({
     let selectedFeatures = []
     let spiderfiedIds = []
     let currZoom
+    const attrVisible = ref(false)
+    const foldingIcon = ref('<')
+
+    function unfoldAttribution () {
+      attrVisible.value = !attrVisible.value
+      if (attrVisible.value) {
+        foldingIcon.value = '>'
+      } else {
+        foldingIcon.value = '<'
+      }
+    }
+
     const mapFilters = {
       mode: 'resetFilter',
       observations: [],
@@ -284,10 +302,6 @@ export default defineComponent({
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         // Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
-        console.log(Feat.getGeometry().getCoordinates())
-        console.log(Feat.getGeometry().getCoordinates()[0])
-        console.log(Feat.getGeometry().getCoordinates()[0].length)
-
         // for the moment do not add boundary feature to map
         // locationFeatures.value = [Feat]
         const writer = new format.GeoJSON()
@@ -1164,9 +1178,9 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
-      spinner()
       // Just in case a Spiral is open
       spinner()
+      console.log('filter location')
       spiralSource.value.source.clear()
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1375,7 +1389,10 @@ export default defineComponent({
       selectedIcon,
       nPoints,
       mapDates,
-      closePopup
+      closePopup,
+      foldingIcon,
+      attrVisible,
+      unfoldAttribution
     }
   }
 })
@@ -1423,7 +1440,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background: none;
-    z-index:200;
+    z-index:20;
   }
   :deep(.ol-zoom) button,
   :deep(.ol-reports.ol-control) button,
@@ -1469,14 +1486,37 @@ export default defineComponent({
     background: #33333342;
     font-size: 10px;
     color: white;
-    padding: 4px 20px;
+    padding: 4px 10px;
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
+    display:inline-block;
   }
-  // :deep(.ol-attribution) {
-  //   color: white;
-  // }
+
+  :deep(.ol-attribution div){
+    display:inline;
+  }
+
+  :deep(.ol-attribution.mobile.collapsed) .attr-folder{
+    padding: 2px 4px;
+  }
+
+  :deep(.ol-attribution.mobile) .attr-folder{
+    padding: 2px 4px 2px 10px;
+  }
+
+  :deep(.ol-attribution.mobile){
+    background: #333333aa;
+    z-index:950;
+  }
+
+  :deep(.ol-attribution.mobile.collapsed){
+    padding: 4px 6px;
+  }
+
+  .unfold-attribution{
+    cursor: pointer;
+  }
 
   :deep(.ol-control:hover) {
     background-color: unset;
@@ -1493,7 +1533,7 @@ export default defineComponent({
     color: white;
     position: absolute;
     top: $header-height;
-    z-index: 1100;
+    z-index: 100;
     padding: 20px 5px;
     cursor: pointer;
     border-radius: 0 10px 10px 0;
@@ -1504,7 +1544,7 @@ export default defineComponent({
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 1100;
+    z-index: 100;
     padding: 10px;
     cursor: pointer;
     border-radius: 50%;

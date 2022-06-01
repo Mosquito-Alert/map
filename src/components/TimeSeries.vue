@@ -107,6 +107,7 @@ export default defineComponent({
     console.log(graphicHeight.value)
 
     const resetDateFilter = function () {
+      calendarDate.value = null
       $store.commit('map/setMapDates', {
         from: datesRange.value.from,
         to: datesRange.value.to
@@ -215,7 +216,6 @@ export default defineComponent({
           to: moment(day).format('YYYY-MM-DD')
         }
       } else {
-        console.log(calendarDate)
         sDate = calendarDate.value.from
         eDate = calendarDate.value.to
         // dateFilterToString(date)
@@ -400,7 +400,7 @@ export default defineComponent({
   .legend div{
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
+    display: inline;
     line-height: 16px;     /* fallback */
     max-height: 32px;      /* fallback */
     -webkit-line-clamp: 2; /* number of lines to show */

@@ -4,7 +4,7 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open" @click="close">
-      <dialog open>
+      <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title">{{ _('Reports modal title') }}</div>
           <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
@@ -43,13 +43,21 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'report', content: { visibility: false } })
     }
+
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     return {
+      mobile,
       tooManyFeatures,
       newReport,
       close,
@@ -143,5 +151,17 @@ button:hover {
 .modal-title{
   font-size: 1.5em;
   padding-bottom: 10px;
+}
+
+// MOBILE
+dialog.mobile {
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+dialog.mobile button{
+  padding: 5px 10px;
 }
 </style>

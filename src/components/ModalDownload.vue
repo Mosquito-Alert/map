@@ -4,7 +4,7 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open" @click="close">
-      <dialog open>
+      <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title">{{ _('Download') }}</div>
           <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
@@ -54,6 +54,10 @@ export default {
       context.emit('startDownload', { format })
     }
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     const nFeatures = computed(() => {
       return $store.getters['app/getModals'].download.n
     })
@@ -69,6 +73,7 @@ export default {
     }
     return {
       nFeatures,
+      mobile,
       download,
       close,
       hasCloseButton,
@@ -161,5 +166,17 @@ button:hover {
 .modal-title{
   font-size: 1.5em;
   padding-bottom: 10px;
+}
+
+// MOBILE
+dialog.mobile {
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+dialog.mobile button{
+  padding: 5px 10px;
 }
 </style>

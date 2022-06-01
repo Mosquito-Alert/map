@@ -569,6 +569,7 @@ export default defineComponent({
 }
 .ol-overlay-container{
   padding:25px;
+  padding-bottom: 5px;
 }
 .report-id-wrapper,
 .date-wrapper,
@@ -613,6 +614,10 @@ export default defineComponent({
   flex-direction: column;
 }
 
+.overlay-content.small{
+  padding-bottom: 10px;
+}
+
 .parentContainer.mobile,
 .overlay-content.mobile{
   border-radius: 0px;
@@ -649,8 +654,8 @@ export default defineComponent({
   height: 40vh;
 }
 
-.overlay-content.square .image img,
-.overlay-content.portrait .image img{
+.parentContainer.mobile .overlay-content.square .image img,
+.parentContainer.mobile .overlay-content.portrait .image img{
   border-radius: 0px;
 }
 
@@ -670,7 +675,7 @@ export default defineComponent({
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
   .ol-viewport .ol-overlay-container{
-    z-index:5000 !important;
+    z-index:1000 !important;
     padding: 0px;
     width: 100%;
     height: 100%;
