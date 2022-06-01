@@ -207,6 +207,10 @@ export default defineComponent({
       return $store.getters['map/getMapDates']
     })
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     // watch([a, b], ([newA, newB], [prevA, prevB]) => {
     watch(features, (currentF, oldF) => {
       nPoints.value = 0
