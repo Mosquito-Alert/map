@@ -785,5 +785,6 @@ input{
   background: $primary-color;
   border-radius: 50%;
   color:white;
+  cursor:pointer;
 }
 </style>
