@@ -368,10 +368,6 @@ export default defineComponent({
       return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
     })
 
-    const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
-    })
-
     const center = computed(() => {
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')

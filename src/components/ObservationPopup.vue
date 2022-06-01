@@ -614,13 +614,10 @@ export default defineComponent({
   flex-direction: column;
 }
 
-<<<<<<< HEAD
 .overlay-content.small{
   padding-bottom: 10px;
 }
 
-=======
->>>>>>> d6c9d73d4f4c611cd7fb62e7d5797867f7f5f5d0
 .parentContainer.mobile,
 .overlay-content.mobile{
   border-radius: 0px;
