@@ -54,3 +54,7 @@ export const getReportsLimit = state => {
 export const getIsMobile = state => {
   return state.isMobile
 }
+
+export const getPendingView = state => {
+  return state.pendingView
+}

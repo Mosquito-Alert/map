@@ -121,13 +121,19 @@ export default {
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+
     const resizeMap = function (args) {
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {
-          args.start += 5
+          args.start += 15
           resizeMap(args)
-        }, 25)
+        }, 5)
+      } else {
+        // Ending resizing
+        if (pendingView.value.extent !== null) {
+          map.value.setPendingView(pendingView.value.extent)
+        }
       }
     }
 
@@ -137,6 +143,10 @@ export default {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
+    })
+
+    const pendingView = computed(() => {
+      return $store.getters['app/getPendingView']
     })
 
     const mobile = computed(() => {

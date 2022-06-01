@@ -207,10 +207,6 @@ export default defineComponent({
       return $store.getters['map/getMapDates']
     })
 
-    const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
-    })
-
     // watch([a, b], ([newA, newB], [prevA, prevB]) => {
     watch(features, (currentF, oldF) => {
       nPoints.value = 0
@@ -238,10 +234,17 @@ export default defineComponent({
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
+    const setPendingView = function (extent) {
+      map.value.map.getView().fit(extent, { minResolution: 50, nearest: false })
+    }
+
     const fitFeature = function (location, simplify = true) {
       console.time('FitFeature')
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
+      if (mobile.value) {
+        $store.commit('app/setPendingView', { extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857') })
+      }
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
         { minResolution: 50, nearest: false }
@@ -358,8 +361,13 @@ export default defineComponent({
 
     // Map general configuration
     const zoom = computed(() => {
-      return $store.getters['map/getDefault'].ZOOM
+      return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
     })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     const center = computed(() => {
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
@@ -399,11 +407,13 @@ export default defineComponent({
             }
             features.value = data
             if (features.value.length) {
-              // eslint-disable-next-line prefer-const
-              let extent = features.value[0].getGeometry().getExtent().slice(0)
+              const extent = features.value[0].getGeometry().getExtent().slice(0)
               features.value.forEach(function (f) {
                 extend(extent, f.getGeometry().getExtent())
               })
+              if (mobile.value) {
+                $store.commit('app/setPendingView', { extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857') })
+              }
               map.value.map.getView().fit(
                 extent
               )
@@ -1180,7 +1190,6 @@ export default defineComponent({
     function filterLocations (location) {
       // Just in case a Spiral is open
       spinner()
-      console.log('filter location')
       spiralSource.value.source.clear()
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1392,7 +1401,8 @@ export default defineComponent({
       closePopup,
       foldingIcon,
       attrVisible,
-      unfoldAttribution
+      unfoldAttribution,
+      setPendingView
     }
   }
 })

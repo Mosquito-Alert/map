@@ -27,3 +27,8 @@ export const setDefaults = (state, payload) => {
 export const setDefaultDates = (state, payload) => {
   state.DEFAULTS.dates = payload
 }
+
+export const setPendingView = (state, payload) => {
+  console.log(payload)
+  state.pendingView = payload
+}

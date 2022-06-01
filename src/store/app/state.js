@@ -34,6 +34,7 @@ export default function () {
   return {
     // key to make leftdrawer component re-render
     isMobile: mobile(),
+    pendingView: { extent: null },
     leftDrawerStatus: 0,
     reportsLimit: 300,
     lang: defaultLang,
