@@ -7,7 +7,6 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>
-          <p v-if="success==''">{{ _('Share this map view') }}</p>
           <p v-if="success=='error'">{{ _('Share map view error') }}</p>
           <div v-if="success=='ok'">
             <div v-if="copied">
@@ -15,14 +14,16 @@
                 <p>{{ _('Url has been copied') }}</p>
               </transition>
             </div>
-            <p v-else>{{ _('Map view shared successfully') }}</p>
-            <p>{{ _('This is the new view url') }}</p>
-            <p><input type="text" v-model="newUrl"></p>
-            <p class="viewshare"><i
-              class="fas fa-copy"
-              :title="_('Copy url to clipboard')"
-              @click="copyToClipboard"
-            ></i></p>
+            <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
+            <div class="new-url-wrapper">
+              <div>{{ _('This is the new view url') }}</div>
+              <input class="url-text" type="text" v-model="newUrl" @click.stop>
+              <span class="viewshare"><i
+                class="fas fa-copy"
+                :title="_('Copy url to clipboard')"
+                @click.stop="copyToClipboard"
+              ></i></span>
+            </div>
           </div>
         <div class="buttons">
           <div class="download-buttons">
@@ -58,6 +59,7 @@ export default {
 
     const close = function () {
       success.value = ''
+      copied.value = false
       $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
     }
 
@@ -109,8 +111,8 @@ export default {
   z-index: 2001;
 }
 dialog {
-  max-width: 50vw;
-  max-height: 80vh;
+  // max-width: 50vw;
+  // max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
   background-color: white;
@@ -211,5 +213,16 @@ dialog.mobile {
 
 dialog.mobile button{
   padding: 5px 10px;
+}
+
+.url-text{
+  border:0px;
+  border-bottom: 1px solid $primary-color;
+  margin: 0 10px;
+  padding: 0 10px;
+}
+
+.new-url-wrapper{
+  display: flex;
 }
 </style>
