@@ -17,7 +17,11 @@
             <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
             <div class="new-url-wrapper">
               <div>{{ _('This is the new view url') }}</div>
-              <input class="url-text" type="text" v-model="newUrl" @click.stop>
+              <span
+                class="url-text"
+                v-html="newUrl"
+                @click.stop
+              />
               <span class="viewshare"><i
                 class="fas fa-copy"
                 :title="_('Copy url to clipboard')"
