@@ -1,4 +1,5 @@
 <template>
+<div v-if="doCanvas">Hello World</div>
 <ol-map
   ref='map'
   class="ol-map"
@@ -47,7 +48,7 @@ import Point from 'ol/geom/Point'
 import { Icon } from 'ol/style'
 
 export default {
-  props: ['popup', 'featContent', 'height', 'width'],
+  props: ['popup', 'featContent', 'height', 'width', 'toCanvas'],
   components: { ObservationPopup, OlAttribution },
   setup (props, context) {
     const $store = useStore()
@@ -59,6 +60,11 @@ export default {
     let feature
     const observationSource = ref()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+
+    const doCanvas = computed(() => {
+      console.log(props.toCanvas)
+      return (props.toCanvas === 'true')
+    })
 
     const style = computed(() => {
       if (props.height) {
@@ -231,6 +237,7 @@ export default {
 
     return {
       style,
+      doCanvas,
       map,
       openPopup,
       view,
