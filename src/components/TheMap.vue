@@ -731,7 +731,8 @@ export default defineComponent({
         filters: mapFilters,
         locationName: locationName,
         url: reportViewUrl,
-        callback: handleReportView
+        callback: handleReportView,
+        lang: $store.getters['app/getLang']
       })
       newView.save()
     }

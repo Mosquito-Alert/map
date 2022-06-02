@@ -24,23 +24,16 @@
         </div>
         <div>
           <q-btn
-            v-if="mapDates.from !== ''"
-            icon="delete"
-            class="delete-calendar-button mr-10"
-            @click="resetDateFilter"
-            :label="!mobile?_('Delete calendar'):''"
-          />
-          <q-btn
             ref="calendarBtn"
             icon="event_note"
             class="calendar-button"
-            :label="!mobile?_('Select'):''"
           >
             <q-popup-proxy
               @before-show="updateProxy"
               cover
               transition-show="scale"
-              transition-hide="scale">
+              transition-hide="scale"
+            >
               <q-date
                 navigation-min-year-month='2015/01'
                 :navigation-max-year-month="getCurrentDate"
@@ -359,6 +352,7 @@ export default defineComponent({
     text-transform: none;
     border-radius: 0px;
     font-size: .8em;
+    opacity: 0;
   }
   .calendar :deep(.q-date__header) {
     background: $primary-color;

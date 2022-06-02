@@ -6,6 +6,7 @@
       <the-map-report
         ref='map'
         :report="reportId"
+        :reportLang="lang"
       />
   </q-layout>
 </template>
@@ -20,8 +21,10 @@ export default {
   setup () {
     const route = useRoute()
     const reportId = (route.params) ? ((route.params.report) ? route.params.report : '') : ''
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
     return {
-      reportId
+      reportId,
+      lang
     }
   }
 }

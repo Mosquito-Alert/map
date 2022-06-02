@@ -50,7 +50,9 @@ module.exports = configure(function (ctx) {
 
       // transpile: false,
       // publicPath: 'https://sigserver4.udg.edu/mos/spa/',
-      publicPath: '/',
+      // publicPath: process.env.DEV ? '/' : 'https://sigserver4.udg.edu/mos/spa/',
+      // publicPath: '/',
+      publicPath: process.env.NODE_ENV === 'development' ? '/' : '/https://sigserver4.udg.edu/mos/spa/',
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).

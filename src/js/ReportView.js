@@ -14,7 +14,8 @@ export default class ReportView {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),
       extent: ol.getView().calculateExtent(ol.getSize()),
-      filters: filters
+      filters: filters,
+      lang: this.options.lang
     }
 
     if (this.options.locationName.length) {

@@ -122,6 +122,12 @@ export default {
     const timeseries = ref()
     const $store = useStore()
 
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        // Hide the address bar:
+        window.scrollTo(0, 1)
+      }, 0)
+    })
     const resizeMap = function (args) {
       if (args.start < args.end) {
         map.value.map.updateSize()
@@ -152,6 +158,7 @@ export default {
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
+
     const expanded = ref(!mobile.value)
 
     const startDownload = function (format) {

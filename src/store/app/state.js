@@ -129,7 +129,7 @@ export default function () {
         unidentified: {
           categories: ['unidentified'],
           common_name: 'Unidentified mosquito',
-          icon: require('../../assets/img/marker_unidentified35_45.svg'),
+          icon: require('../../assets/img/marker_unidentified.svg'),
           color: '#c0c0c0'
         }
       },

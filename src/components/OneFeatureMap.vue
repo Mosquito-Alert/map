@@ -76,7 +76,6 @@ export default {
       if (observationId) {
         doMapById()
       } else {
-        console.log(props.featContent)
         doMapByFeature(props.featContent)
       }
     })

@@ -32,7 +32,7 @@
             <div
               v-if="!errorLoadingImage"
               class="credits"
-            >Anónimo,
+            >{{ _('Anonymous')}},
               <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
             </div>
           </div>

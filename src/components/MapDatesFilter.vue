@@ -1,11 +1,13 @@
 <template>
-  <div class = "date-box">
+  <div
+    class = "date-box"
+    @click="calendarClicked"
+  >
     <div>
       <q-btn
         size="0.95em" padding="2px 5px 2px 3px"
         icon="event_note"
         class="calendar-button"
-        @click="calendarClicked"
       >
       </q-btn>
     </div>
@@ -69,6 +71,7 @@ export default {
   font-size: 0.85em;
   box-shadow: $box-shadow;
   width: auto;
+  cursor:pointer;
 }
 
 .date-from::after{
@@ -80,9 +83,9 @@ export default {
   padding-left: 10px;
 }
 
-.date-box button:hover {
-  color: $primary-color;
-}
+// .date-box button:hover {
+//   color: $primary-color;
+// }
 
 .data-box,
 .data-box::before{

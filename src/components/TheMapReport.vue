@@ -124,6 +124,19 @@
                         </span>
                         </div>
                     </div>
+                <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
+                <div class="description-wrapper" v-if="feature.withWater">
+                    <div><i class="fa-solid fa-droplet"></i></div>
+                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
+                      {{ _(feature.withWater) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.withLarva">
+                    <div><i class="fa-solid fa-worm"></i></div>
+                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
+                      {{ _(feature.withLarva) }}
+                    </div>
+                </div>
                   <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                   <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                       <div><i class="fa-solid fa-message-check"></i></div>
@@ -133,8 +146,8 @@
                   </div>
                   <div class="description-wrapper" v-if="feature.lat && feature.lon">
                       <div><i class="fa-solid fa-location-check"></i></div>
-                      <div><span class="description">{{ _('Coordinates') }}</span>:
-                        {{ feature.lat }} - {{ feature.lon }}
+                      <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                        {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
                       </div>
                   </div>
                   <div class="description-wrapper" v-if="feature.version_uuid">
@@ -197,10 +210,11 @@ import { Polygon, MultiPolygon } from 'ol/geom'
 import moment from 'moment'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'TheMapReport',
-  props: ['report'],
+  props: ['report', 'reportLang'],
   components: { OneFeatureMap },
   setup (props, context) {
     const $store = useStore()
@@ -221,12 +235,30 @@ export default {
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
     const layers = $store.getters['app/getLayers']
+    const $q = useQuasar()
 
     // $store.dispatch('app/setLanguage', 'ca')
 
     const reportId = computed(() => {
       return (props.report)
     })
+
+    const reportLang = computed(() => {
+      return (props.reportLang)
+    })
+
+    const setLanguage = (lang) => {
+      $store.dispatch('app/setLanguage', lang)
+      // NASTY
+      if (lang === 'en') lang = 'en-US'
+      import('quasar/lang/' + lang).then(({ default: messages }) => {
+        $q.lang.set(messages)
+      })
+    }
+
+    function initLanguage (lang) {
+      setLanguage(lang)
+    }
 
     onMounted(function () {
       // Fetch report view data
@@ -244,6 +276,14 @@ export default {
     function handleReportView (report) {
       if (report.status === 'ok') {
         const view = JSON.parse(report.view[0].view)
+        let lang
+        if (reportLang.value) {
+          lang = reportLang.value.toLowerCase()
+        } else {
+          lang = view.lang ? view.lang : $store.getters['app/getLang']
+        }
+        initLanguage(lang)
+
         center.value = view.center
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))

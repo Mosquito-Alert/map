@@ -6,7 +6,7 @@
     <div class="dialog" v-if="open">
       <dialog class="modal-box" :class="mobile?'mobile':''" open>
         <slot></slot>
-          <q-spinner-cube
+          <q-spinner-oval
             color="orange"
             size="5.5em"
           />
