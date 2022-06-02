@@ -4,12 +4,6 @@
 
       <!-- REFERENCE MAP -->
       <h5 class="title"> {{ _('List of observations') }} </h5>
-      <p>
-        {{ _('Report with the observations displayed in the current map view (maximum: 300 observations).') }}
-        </p>
-      <p>
-        {{ _('Verify this by looking at the map point counter (on the down left map corner).') }}
-        </p>
 
       <div class="reference-map">
         <div id='mapa' class='bg-white'>
@@ -168,7 +162,7 @@
                     >
                   </div>
                   <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                    Anónimo,
+                    {{ _('Anonymous')}},
                     <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
                   </div>
                   <!-- only adults have validation  -->

@@ -172,7 +172,7 @@ export default {
     const filterLocations = function (location) {
       map.value.clearAdministrativeFeatures()
       if (location !== null) {
-        TOC.value.searchLocation.loading = true
+        // TOC.value.searchLocation.loading = true
         map.value.fitFeature(location)
       }
       map.value.filterLocations(location)
@@ -183,16 +183,16 @@ export default {
     }
 
     const filterTags = function (tags) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterTags(tags)
     }
 
     const filterDate = function (payload) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
       const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
@@ -209,14 +209,14 @@ export default {
       }
     }
 
-    const filteringLocations = function () {
-      return map.value.mapFilters.locations.length
-    }
+    // const filteringLocations = function () {
+    //   return map.value.mapFilters.locations.length
+    // }
 
     const filterObservations = function (data) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterObservations(data)
     }
 

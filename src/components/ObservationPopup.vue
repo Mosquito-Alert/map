@@ -651,7 +651,7 @@ export default defineComponent({
 }
 
 .overlay-content.portrait .image{
-  height: 40vh;
+  height: $popup-height-with-image-portrait;
 }
 
 .parentContainer.mobile .overlay-content.square .image img,
