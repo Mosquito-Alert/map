@@ -1,38 +1,58 @@
 <template>
-<div v-if="doCanvas">Hello World</div>
-<ol-map
-  ref='map'
-  class="ol-map"
-  :loadTilesWhileAnimating="true"
-  :loadTilesWhileInteracting="true"
-  :style="style"
->
+  <div class="ma-logo" :title="_('Mosquito Alert')">
+    <a href="//webserver.mosquitoalert.com/">
+      <img src="~assets/img/logo_mosquito_alert.png">
+    </a>
+  </div>
+    <ol-map
+      ref='map'
+      class="ol-map"
+      :loadTilesWhileAnimating="true"
+      :loadTilesWhileInteracting="true"
+      :style="style"
+    >
 
-    <ol-view
-      ref="view"
-      :center="center"
-      :zoom="zoom"
-    />
-    <ol-attribution v-if="openPopup"/>
-    <!-- BASE LAYER -->
-    <ol-tile-layer>
-        <ol-source-osm />
-    </ol-tile-layer>
+        <ol-view
+          ref="view"
+          :center="center"
+          :zoom="zoom"
+        />
+        <div
+          class="ol-attribution"
+          :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
+        >
+          <div v-if="!mobile || attrVisible">
+            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
+            | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+          </div>
+          <div v-if="mobile"
+            class="attr-folder"
+            v-html="foldingIcon"
+            @click="unfoldAttribution"
+          >
+          </div>
+        </div>
+        <!-- BASE LAYER -->
+        <ol-tile-layer>
+            <ol-source-osm />
+        </ol-tile-layer>
 
-    <!-- OBSERVATION LAYER -->
-    <ol-vector-layer ref='observationLayer' name="observationLayer" zIndex="20">
-      <ol-source-vector ref='observationSource' :features="feature">
-        <ol-style :overrideStyleFunction="styleFunction">
-        </ol-style>
-      </ol-source-vector>
-    </ol-vector-layer>
+        <!-- OBSERVATION LAYER -->
+        <ol-vector-layer ref='observationLayer' name="observationLayer" zIndex="20">
+          <ol-source-vector ref='observationSource' :features="feature">
+            <ol-style :overrideStyleFunction="styleFunction">
+            </ol-style>
+          </ol-source-vector>
+        </ol-vector-layer>
 
-    <observation-popup
-      @popupimageloaded="autoPanPopup"
-      :selectedFeature="popupContent"
-    ></observation-popup>
+        <observation-popup
+          @popupimageloaded="autoPanPopup"
+          :selectedFeature="popupContent"
+          @closePopupButton="closePopup"
+        ></observation-popup>
 
-</ol-map>
+    </ol-map>
 </template>
 
 <script>
@@ -42,14 +62,14 @@ import { useRoute } from 'vue-router'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { transform } from 'ol/proj.js'
 import ObservationPopup from './ObservationPopup.vue'
-import OlAttribution from './OlAttribution.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import MapToCanvas from '../js/MapToCanvas'
 import { Icon } from 'ol/style'
 
 export default {
-  props: ['popup', 'featContent', 'height', 'width', 'toCanvas'],
-  components: { ObservationPopup, OlAttribution },
+  props: ['popup', 'featContent', 'height', 'width', 'toCanvas', 'mapId', 'clickable'],
+  components: { ObservationPopup },
   setup (props, context) {
     const $store = useStore()
     const route = useRoute()
@@ -58,11 +78,28 @@ export default {
     const center = ref(null)
     const zoom = ref(16)
     let feature
+    let selectedFeatures = []
     const observationSource = ref()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+    const identifier = (props.mapId) ? props.mapId : 'map'
+
+    const attrVisible = ref(true)
+    const foldingIcon = ref('<')
+
+    function unfoldAttribution () {
+      attrVisible.value = !attrVisible.value
+      if (attrVisible.value) {
+        foldingIcon.value = '>'
+      } else {
+        foldingIcon.value = '<'
+      }
+    }
+
+    const listenClick = computed(() => {
+      return props.clickable
+    })
 
     const doCanvas = computed(() => {
-      console.log(props.toCanvas)
       return (props.toCanvas === 'true')
     })
 
@@ -77,12 +114,63 @@ export default {
       return (props.popup === 'true')
     })
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    const closePopup = function () {
+      $store.commit('map/selectFeature', {})
+    }
+
     // Check if popup is required
     onMounted(function () {
+      if (listenClick.value) {
+        map.value.map.on('pointermove', function (event) {
+          const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+            return true
+          }, { hitTolerance: 10 })
+          if (hit) this.getTargetElement().style.cursor = 'pointer'
+          else this.getTargetElement().style.cursor = ''
+        })
+
+        map.value.map.on('click', function (event) {
+          selectedFeatures = []
+          map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+            selectedFeatures.push(feature)
+          })
+
+          if (selectedFeatures.length === 1) {
+            // if feature has no properties or is LineStringdo nothing
+            const feature = selectedFeatures[0]
+            if (!feature.values_.properties) return
+            if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
+            const center = selectedFeatures[0].getGeometry().getCoordinates()
+            // Only move map if is not a mobile
+            if (!mobile.value) {
+              flyTo(center, map.value.map.getView().getZoom())
+            }
+            $store.dispatch('map/selectFeature', feature.values_)
+          } else {
+            // Close popup if any
+            selectedFeatures = []
+            $store.commit('map/selectFeature', {})
+          }
+        })
+      }
       if (observationId) {
         doMapById()
       } else {
+        // Here doing list of observations (reports)
         doMapByFeature(props.featContent)
+        if (doCanvas.value) {
+          const mCanvas = new MapToCanvas({ map: map.value.map })
+          map.value.map.on('rendercomplete', function (e) {
+            document.querySelector('img#' + identifier).src = mCanvas.doCanvas()
+            if (document.querySelector('div#' + identifier)) {
+              document.querySelector('div#' + identifier).style.display = 'none'
+            }
+          })
+        }
       }
     })
 
@@ -101,7 +189,10 @@ export default {
           c: popupContent.value.private_webmap_layer
         }
       })
-      observationSource.value.source.addFeature(feature)
+      // Only one feature allowed
+      if (!observationSource.value.source.getFeatures().length) {
+        observationSource.value.source.addFeature(feature)
+      }
     })
 
     const styleFunction = (feature, style) => {
@@ -235,8 +326,19 @@ export default {
       }
     }
 
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
     return {
+      _,
+      mobile,
+      attrVisible,
+      foldingIcon,
+      unfoldAttribution,
       style,
+      closePopup,
+      identifier,
       doCanvas,
       map,
       openPopup,
@@ -254,7 +356,58 @@ export default {
 </script>
 
 <style slang='scss'>
-  .ol-mapa {
+  .ol-mapa{
     height: 100%;
+  }
+  img{
+    height: auto;
+  }
+  .ma-logo{
+    position: absolute;
+    top:5px;
+    left: 5px;
+    z-index:100;
+    transform: scale(0.8);
+  }
+.ol-attribution {
+    position: absolute;
+    top: auto;
+    left: auto;
+    bottom: 4px;
+    right: 10px;
+    z-index: 9;
+    background: #33333342;
+    font-size: 10px;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 10px;
+    height: 20px;
+    line-height: 13px;
+    display:inline-block;
+  }
+
+  .ol-attribution div{
+    display:inline;
+  }
+
+  .ol-attribution.mobile.collapsed .attr-folder{
+    padding: 2px 4px;
+  }
+
+  .ol-attribution.mobile .attr-folder{
+    padding: 2px 4px 2px 10px;
+  }
+
+  .ol-attribution.mobile{
+    background: #333333aa;
+    z-index:950;
+  }
+
+  .ol-attribution.mobile.collapsed{
+    padding: 4px 6px;
+  }
+
+  .unfold-attribution{
+    cursor: pointer;
   }
 </style>

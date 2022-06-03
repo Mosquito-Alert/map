@@ -6,7 +6,8 @@
       <one-feature-map ref='map'
         init
         :observationId="observationId"
-        popup="true"
+        popup="false"
+        clickable="true"
       />
     </q-page>
 
@@ -22,6 +23,7 @@ export default {
   setup () {
     const route = useRoute()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+
     return {
       observationId
     }

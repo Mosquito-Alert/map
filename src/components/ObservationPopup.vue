@@ -149,7 +149,6 @@ export default defineComponent({
     })
 
     const closePopup = function () {
-      // $store.commit('map/selectFeature', {})
       context.emit('closePopupButton')
     }
 
@@ -204,6 +203,7 @@ export default defineComponent({
     }
 
     const errorLoading = function () {
+      console.log('error...loading image')
       errorLoadingImage.value = true
     }
     return {
@@ -667,6 +667,8 @@ export default defineComponent({
   background: $primary-color;
   color: white;
   border: none;
+  position: absolute;
+  bottom: 10px;
 }
 .mobile.portrait .info-validation{
   padding: 20px;
