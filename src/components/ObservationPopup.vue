@@ -116,11 +116,11 @@
               </div>
             </div>
           </div>
-            <div v-if="mobile">
-              <button class="q-btn ma-btn" @click="closePopup">
-                {{ _('Close') }}
-              </button>
-            </div>
+          <div class="btn-close" v-if="mobile">
+            <button class="q-btn ma-btn" @click="closePopup">
+              {{ _('Close') }}
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -667,13 +667,14 @@ export default defineComponent({
   background: $primary-color;
   color: white;
   border: none;
-  position: absolute;
-  bottom: 10px;
+  margin:auto;
 }
 .mobile.portrait .info-validation{
   padding: 20px;
 }
-
+.btn-close{
+  display:flex;
+}
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
   .ol-viewport .ol-overlay-container{

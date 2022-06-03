@@ -124,6 +124,7 @@ export default {
 
     // Check if popup is required
     onMounted(function () {
+      // This hides the address bar:
       if (listenClick.value) {
         map.value.map.on('pointermove', function (event) {
           const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
