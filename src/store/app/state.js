@@ -57,7 +57,7 @@ export default function () {
     FRONTEND: frontendUrl,
     trans: {},
     modals: {
-      info: { visibility: true },
+      info: { visibility: false },
       download: { visibility: false, n: 0 },
       share: { visibility: false },
       report: { visibility: false, n: 0 },

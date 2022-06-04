@@ -873,17 +873,10 @@ export default defineComponent({
     }
 
     onMounted(function () {
-      // const backendUrl = $store.getters['app/getBackend']
-      // userfixesUrl = backendUrl + 'api/userfixes/'
-      // downloadUrl = backendUrl + 'api/downloads/'
-      // shareViewUrl = backendUrl + 'api/view/save/'
-      // reportViewUrl = backendUrl + 'api/report/save/'
-      // loadViewUrl = backendUrl + 'api/view/load/'
-
-      // worker.postMessage({
-      //   fetchUrl: backendUrl + 'api/get/data/',
-      //   year: moment().year()
-      // })
+      const vh = window.innerHeight * 0.01
+      // Then we set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
+      console.log(document.documentElement.style.getPropertyValue('--vh'))
 
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       const fillLocationColor = defaults.fillLocationColor

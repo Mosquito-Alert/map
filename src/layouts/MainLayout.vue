@@ -1,6 +1,5 @@
 <template>
   <q-layout
-    view='hHh lpR fFf'
     :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
   >
     <site-header v-if="!mobile" :expanded="expanded"/>

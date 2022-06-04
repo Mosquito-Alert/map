@@ -38,4 +38,5 @@ export const setSamplingEffortLoading = (state, payload) => {
 export const setDefaults = (state, payload) => {
   state.DEFAULTS.ZOOM = payload.zoom
   state.DEFAULTS.CENTER = payload.center
+  state.DEFAULTS.MOBILEZOOM = payload.zoom
 }

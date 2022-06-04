@@ -1,7 +1,11 @@
 <template>
-  <q-layout view='hHh lpR fFf'>
+  <q-layout
+    class="mobile expanded"
+  >
 
-    <q-page class='flex' >
+    <q-page
+      class="flex mobile expanded"
+    >
 
       <one-feature-map ref='map'
         init
@@ -34,8 +38,8 @@ export default {
 <style lang="scss">
   .q-page {
     flex-direction: column;
-    height: 100%;
-    height: calc(100vh - 50px);
+    // height: 100%;
+    // height: calc(100vh - 50px);
     overflow: hidden;
   }
 

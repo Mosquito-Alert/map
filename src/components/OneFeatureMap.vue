@@ -1,16 +1,17 @@
 <template>
-  <div class="ma-logo" :title="_('Mosquito Alert')">
-    <a href="//webserver.mosquitoalert.com/">
-      <img src="~assets/img/logo_mosquito_alert.png">
-    </a>
-  </div>
-    <ol-map
-      ref='map'
-      class="ol-map"
-      :loadTilesWhileAnimating="true"
-      :loadTilesWhileInteracting="true"
-      :style="style"
-    >
+  <div id="mapa">
+    <div class="ma-logo" :title="_('Mosquito Alert')">
+      <a href="//webserver.mosquitoalert.com/">
+        <img src="~assets/img/logo_mosquito_alert.png">
+      </a>
+    </div>
+      <ol-map
+        ref='map'
+        class="fit"
+        :loadTilesWhileAnimating="true"
+        :loadTilesWhileInteracting="true"
+        :style="style"
+      >
 
         <ol-view
           ref="view"
@@ -53,6 +54,7 @@
         ></observation-popup>
 
     </ol-map>
+  </div>
 </template>
 
 <script>
@@ -125,6 +127,11 @@ export default {
     // Check if popup is required
     onMounted(function () {
       // This hides the address bar:
+      const vh = window.innerHeight * 0.01
+      // Then we set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
+      console.log(document.documentElement.style.getPropertyValue('--vh'))
+
       if (listenClick.value) {
         map.value.map.on('pointermove', function (event) {
           const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -274,6 +281,9 @@ export default {
     }
 
     const autoPanPopup = function () {
+      if (mobile.value) {
+        return
+      }
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const coords = feature.values_.geometry.flatCoordinates

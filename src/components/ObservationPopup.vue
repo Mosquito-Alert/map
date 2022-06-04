@@ -14,7 +14,7 @@
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
                     <q-circular-progress
-                      v-if="defaultImageSize"
+                      v-if="loading"
                       indeterminate
                       size="50px"
                       color="orange"
@@ -22,7 +22,7 @@
                     />
                 <img
                   v-if="!errorLoadingImage"
-                  :height="defaultImageSize"
+                  :height="loading"
                   :src="selectedFeature.photo_url"
                   @load="imageLoaded"
                   @error="errorLoading"
@@ -117,7 +117,7 @@
             </div>
           </div>
           <div class="btn-close" v-if="mobile">
-            <button class="q-btn ma-btn" @click="closePopup">
+            <button class="q-btn ma-btn" @click.stop="closePopup">
               {{ _('Close') }}
             </button>
           </div>
@@ -128,7 +128,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue'
+import { onUpdated, defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
@@ -139,11 +139,15 @@ export default defineComponent({
     const $store = useStore()
     const imageRatio = ref('null')
     const errorLoadingImage = ref()
-    const defaultImageSize = ref()
+    const loading = ref()
     const ratio = ref('null')
     ratio.value = 0
     imageRatio.value = 0
 
+    onUpdated(() => {
+      loading.value = props.selectedFeature.photo_url
+      console.log(props.selectedFeature)
+    })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -166,7 +170,7 @@ export default defineComponent({
       }
       imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
 
-      defaultImageSize.value = ''
+      loading.value = false
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
@@ -211,7 +215,7 @@ export default defineComponent({
       ratio,
       mobile,
       closePopup,
-      defaultImageSize,
+      loading,
       errorLoadingImage,
       errorLoading,
       imageRatio,
@@ -254,7 +258,8 @@ export default defineComponent({
 }
 .overlay-content.landscape .image{
   // toni testing
-  // max-height: $popup-height-with-image-landscape / 2;
+  max-height: $popup-height-with-image-landscape;
+  width: 100%;
   overflow: hidden;
   position:relative;
   border-top-left-radius: $popup-border-radius;
@@ -267,6 +272,7 @@ export default defineComponent({
 }
 .overlay-content.landscape .image img{
   width: 100%;
+  height: auto;
   object-fit: fill;
   border-top-left-radius: $popup-border-radius;
   border-top-right-radius: $popup-border-radius;
@@ -284,6 +290,11 @@ export default defineComponent({
   text-align: center;
 }
 
+// .overlay-content.mobile.landscape .image .img-container{
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+// }
 .overlay-content.square .image .img-container,
 .overlay-content.portrait .image .img-container{
   height: 100%;
@@ -607,9 +618,10 @@ export default defineComponent({
 .overlay-content.mobile.landscape,
 .overlay-content.mobile.portrait,
 .overlay-content.mobile.square{
-  // width: 100vw;
+  width: 100vw;
   height: 100vh;
   max-width: 100vw;
+  max-height: unset;
   border-radius:none;
   flex-direction: column;
 }
@@ -631,6 +643,7 @@ export default defineComponent({
 
 .image.mobile .img-container{
   display: inline;
+  margin:auto;
 }
 
 .image.mobile .img-container img {
@@ -650,12 +663,14 @@ export default defineComponent({
   border-radius: 0px;
 }
 
-.overlay-content.portrait .image{
-  height: $popup-height-with-image-portrait;
+.overlay-content.mobile.landscape .image,
+.overlay-content.mobile.portrait .image{
+  height: 40%;
+  margin: 0px auto;
+  border-radius: 0px;
 }
 
-.parentContainer.mobile .overlay-content.square .image img,
-.parentContainer.mobile .overlay-content.portrait .image img{
+.parentContainer.mobile .overlay-content .image img{
   border-radius: 0px;
 }
 
