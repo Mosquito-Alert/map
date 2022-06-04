@@ -1,60 +1,58 @@
 <template>
-  <div id="mapa">
-    <div class="ma-logo" :title="_('Mosquito Alert')">
-      <a href="//webserver.mosquitoalert.com/">
-        <img src="~assets/img/logo_mosquito_alert.png">
-      </a>
-    </div>
-      <ol-map
-        ref='map'
-        class="fit"
-        :loadTilesWhileAnimating="true"
-        :loadTilesWhileInteracting="true"
-        :style="style"
-      >
-
-        <ol-view
-          ref="view"
-          :center="center"
-          :zoom="zoom"
-        />
-        <div
-          class="ol-attribution"
-          :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
-        >
-          <div v-if="!mobile || attrVisible">
-            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
-            | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
-          </div>
-          <div v-if="mobile"
-            class="attr-folder"
-            v-html="foldingIcon"
-            @click="unfoldAttribution"
-          >
-          </div>
-        </div>
-        <!-- BASE LAYER -->
-        <ol-tile-layer>
-            <ol-source-osm />
-        </ol-tile-layer>
-
-        <!-- OBSERVATION LAYER -->
-        <ol-vector-layer ref='observationLayer' name="observationLayer" zIndex="20">
-          <ol-source-vector ref='observationSource' :features="feature">
-            <ol-style :overrideStyleFunction="styleFunction">
-            </ol-style>
-          </ol-source-vector>
-        </ol-vector-layer>
-
-        <observation-popup
-          @popupimageloaded="autoPanPopup"
-          :selectedFeature="popupContent"
-          @closePopupButton="closePopup"
-        ></observation-popup>
-
-    </ol-map>
+  <div class="ma-logo" :title="_('Mosquito Alert')">
+    <a href="//webserver.mosquitoalert.com/">
+      <img src="~assets/img/logo_mosquito_alert.png">
+    </a>
   </div>
+    <ol-map
+      ref='map'
+      class="fit"
+      :loadTilesWhileAnimating="true"
+      :loadTilesWhileInteracting="true"
+      :style="style"
+    >
+
+      <ol-view
+        ref="view"
+        :center="center"
+        :zoom="zoom"
+      />
+      <div
+        class="ol-attribution"
+        :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
+      >
+        <div v-if="!mobile || attrVisible">
+          © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+          <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
+          | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+        </div>
+        <div v-if="mobile"
+          class="attr-folder"
+          v-html="foldingIcon"
+          @click="unfoldAttribution"
+        >
+        </div>
+      </div>
+      <!-- BASE LAYER -->
+      <ol-tile-layer>
+          <ol-source-osm />
+      </ol-tile-layer>
+
+      <!-- OBSERVATION LAYER -->
+      <ol-vector-layer ref='observationLayer' name="observationLayer" zIndex="20">
+        <ol-source-vector ref='observationSource' :features="feature">
+          <ol-style :overrideStyleFunction="styleFunction">
+          </ol-style>
+        </ol-source-vector>
+      </ol-vector-layer>
+
+      <observation-popup
+        @popupimageloaded="autoPanPopup"
+        :selectedFeature="popupContent"
+        @closePopupButton="closePopup"
+      ></observation-popup>
+
+  </ol-map>
 </template>
 
 <script>

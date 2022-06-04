@@ -38,8 +38,8 @@ export default {
 <style lang="scss">
   .q-page {
     flex-direction: column;
-    // height: 100%;
-    // height: calc(100vh - 50px);
+    height: 100%;
+    height: calc(100vh - 50px);
     overflow: hidden;
   }
 
