@@ -4,6 +4,7 @@
     side="left"
     behavior="desktop"
     width=""
+    v-touch-swipe.mouse.right.left="toogleLeftDrawer"
   >
     <!-- Main menu -->
     <q-toolbar>
