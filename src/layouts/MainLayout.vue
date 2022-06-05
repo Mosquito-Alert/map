@@ -20,7 +20,6 @@
       <the-map ref='map'
         init
         :sharedView="viewCode"
-        class="fit"
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toogleLeftDrawer="toogleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
@@ -131,7 +130,7 @@ export default {
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {
-          args.start += 15
+          args.start += 5
           resizeMap(args)
         }, 5)
       } else {
@@ -341,9 +340,13 @@ export default {
     transition: margin-left ease 1s;
   }
   .q-page {
+    position:absolute;
     flex-direction: column;
     height: 100%;
-    height: calc(100vh - 50px);
+    height: calc(100% - 50px);
+    // width: 100%;
+    right:0px;
+    left:0px;
     margin-left: $left-drawer-width;
     overflow: hidden;
   }
