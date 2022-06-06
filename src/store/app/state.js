@@ -7,6 +7,8 @@ export default function () {
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
+    // backendUrl = 'http://192.168.1.47:8080/django/'
+    // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'

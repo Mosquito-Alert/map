@@ -97,6 +97,7 @@ import TimeSeries from 'components/TimeSeries.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import moment from 'moment'
 
 export default {
   components: {
@@ -275,7 +276,10 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
-      timeseries.value.calendarDate = date
+      timeseries.value.calendarDate = [{
+        from: moment(date[0].from).format('YYYY/MM/DD'),
+        to: moment(date[0].to).format('YYYY/MM/DD')
+      }]
     }
 
     const tagsChanged = function (tags) {

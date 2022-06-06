@@ -80,7 +80,17 @@ module.exports = configure(function (ctx) {
     devServer: {
       https: false,
       port: 8080,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      // proxy: {
+      //   // proxy all requests starting with /api to jsonplaceholder
+      //   '/django': {
+      //     target: 'http://192.168.1.47:8000/',
+      //     changeOrigin: true,
+      //     pathRewrite: {
+      //       '^/django': ''
+      //     }
+      //   }
+      // }
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework

@@ -876,7 +876,6 @@ export default defineComponent({
       const vh = window.innerHeight * 0.01
       // Then we set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty('--vh', `${vh}px`)
-      console.log(document.documentElement.style.getPropertyValue('--vh'))
 
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       const fillLocationColor = defaults.fillLocationColor

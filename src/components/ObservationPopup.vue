@@ -614,12 +614,17 @@ export default defineComponent({
 .parentContainer.mobile::after{
   content: none;
 }
+
+.parentContainer.mobile{
+  max-width:100vw;
+}
+
 .parentContainer.mobile .overlay-content.small,
 .overlay-content.mobile.landscape,
 .overlay-content.mobile.portrait,
 .overlay-content.mobile.square{
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   max-width: 100vw;
   max-height: unset;
   border-radius:none;
@@ -656,10 +661,13 @@ export default defineComponent({
   flex-direction: row;
 }
 
+.mobile.portrait .info-validation{
+  max-height: 40%;
+}
 .mobile .info-validation,
 .mobile .info-no-validation{
   max-width: 100vw;
-  max-height: 45vh;
+  max-height: 40%;
   border-radius: 0px;
 }
 
