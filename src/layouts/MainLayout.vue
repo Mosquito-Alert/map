@@ -198,10 +198,17 @@ export default {
         return l.type === 'sampling-effort'
       })
       if (samplingIsActive) {
+        let mapDate = {}
+        if (payload.data.from === '') {
+          mapDate.from = '2014-01-01'
+          mapDate.to = moment().format('YYYY-MM-DD')
+        } else {
+          mapDate = payload.data
+        }
         map.value.resetUserfixesTileIndex()
         map.value.checkSamplingEffort({
           status: true,
-          dates: [payload.data]
+          dates: [mapDate]
         })
       } else {
         map.value.resetUserfixesTileIndex()

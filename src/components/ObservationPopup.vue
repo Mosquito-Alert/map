@@ -664,8 +664,9 @@ export default defineComponent({
 .mobile.portrait .info-validation{
   max-height: 40%;
 }
-.mobile .info-validation,
-.mobile .info-no-validation{
+
+.overlay-content.mobile .info-validation,
+.overlay-content.mobile .info-no-validation{
   max-width: 100vw;
   max-height: 40%;
   border-radius: 0px;

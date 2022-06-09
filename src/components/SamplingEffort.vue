@@ -53,9 +53,7 @@ export default {
     const toggleClass = () => {
       isActive.value = !isActive.value
 
-      console.log(isActive.value)
       const d = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-
       context.emit('samplingEffort', {
         status: isActive.value,
         dates: [d]

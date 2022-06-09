@@ -949,6 +949,7 @@ export default defineComponent({
               }
             } else {
               // Click on just a feature
+              event.stopPropagation()
               feature.set('originalCoords', feature.getGeometry().getCoordinates())
               selectedFeatures.push(feature)
             }
