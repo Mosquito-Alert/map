@@ -544,7 +544,7 @@ export default defineComponent({
     flex-direction: column;
     flex-grow:1;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     .validation-string {
       padding-top: 10px;
       text-transform: uppercase;
@@ -656,7 +656,7 @@ export default defineComponent({
   max-height: 100%;
 }
 
-.mobile .info{
+.parentContainer.mobile .info{
   flex-direction: row;
 }
 
@@ -664,8 +664,8 @@ export default defineComponent({
   max-height: 40%;
 }
 
-.overlay-content.mobile .info-validation,
-.overlay-content.mobile .info-no-validation{
+.parentContainer.mobile .info-validation,
+.parentContainer.mobile .info-no-validation{
   max-width: 100vw;
   max-height: 40%;
   border-radius: 0px;
