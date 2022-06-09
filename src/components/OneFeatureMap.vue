@@ -159,6 +159,7 @@ export default {
           } else {
             // Close popup if any
             selectedFeatures = []
+            console.log('close popup')
             $store.commit('map/selectFeature', {})
           }
         })

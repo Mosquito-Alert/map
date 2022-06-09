@@ -27,14 +27,14 @@
                   @load="imageLoaded"
                   @error="errorLoading"
                 >
+                <div
+                  v-if="!errorLoadingImage"
+                  class="credits"
+                >{{ _('Anonymous')}},
+                  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+                </div>
               </div>
             </a>
-            <div
-              v-if="!errorLoadingImage"
-              class="credits"
-            >{{ _('Anonymous')}},
-              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
-            </div>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div>
@@ -146,7 +146,6 @@ export default defineComponent({
 
     onUpdated(() => {
       loading.value = props.selectedFeature.photo_url
-      console.log(props.selectedFeature)
     })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -563,7 +562,7 @@ export default defineComponent({
 .credits{
   position: absolute;
   bottom: 5px;
-  right: 5px;
+  margin:auto;
   padding:5px;
   background: #33333342;
   border-radius: 10px;
