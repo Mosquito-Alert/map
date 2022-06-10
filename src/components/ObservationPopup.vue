@@ -236,7 +236,7 @@ export default defineComponent({
 }
 
 .info div::-webkit-scrollbar {
-    height: 12px;
+    height: 4px;
     width: 4px;
     background: #ccc;
 }

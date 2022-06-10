@@ -64,11 +64,12 @@
         </div>
       </div>
     <!-- LIST OF OBSERVATIONS -->
-        <div
-          class="observation-box"
-          v-for="feature, index in featuresGeoJson" :key="index"
-        >
-          <div class="map-column"><img :id="'mapa_' + index" /></div>
+    <div class="box-container">
+      <div
+        class="observation-box"
+        v-for="feature, index in featuresGeoJson" :key="index"
+      >
+        <div class="map-column"><img :id="'mapa_' + index" /></div>
           <div :id="'mapa_' + index" class="map-container">
             <one-feature-map
               :mapId="'mapa_' + index"
@@ -80,12 +81,13 @@
           </div>
 
           <div class="observation-info">
-            <div class="col1">
+            <!-- <div class="col1">
               <span class="counter">{{ index + 1 }}</span>
-            </div>
+            </div> -->
 
             <div class="col2">
               <div class="col2-raw1">
+                <span class="counter">{{ index + 1 }}</span>
                 <span class="common-name" v-html="_(feature.title)"></span>
                 <span class="latin-name" v-html="_(feature.latinName)"></span>
               </div>
@@ -190,6 +192,7 @@
             </div>
           </div>
       </div>
+    </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -617,17 +620,25 @@ h5, h6{
   margin: 10px;
   display: flex;
   flex-grow: 1;
+  // flex-wrap: wrap;
   box-shadow: $box-shadow;
 }
 
 .observation-info{
   display:flex;
+  // flex-wrap: wrap;
   flex-grow: 1;
 }
 
+.col1{
+  margin-bottom:10px;
+  margin-right:10px;
+}
+
 .col2 {
-  margin-left: 15px;
+  // margin-left: 15px;
   flex-grow: 1;
+  max-width:70vw;
 }
 
 .col2 .common-name{
@@ -671,6 +682,7 @@ h5, h6{
 
 .counter {
   padding: 10px 15px;
+  margin-right: 10px;
   background-color: $primary-color;
   color: white;
 }
@@ -793,5 +805,16 @@ h5, h6{
 
 .map-column{
   align-self: center;
+  min-height:200px;
+}
+
+.col2-raw2 {
+  // flex-wrap: wrap;
+}
+.col2-raw2-col1 {
+  max-width: 45vw;
+}
+.col2-raw2-col2 {
+  max-width: 20vw;
 }
 </style>

@@ -148,11 +148,8 @@ export default {
             const feature = selectedFeatures[0]
             if (!feature.values_.properties) return
             if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
-            const center = selectedFeatures[0].getGeometry().getCoordinates()
+
             // Only move map if is not a mobile
-            if (!mobile.value) {
-              flyTo(center, map.value.map.getView().getZoom())
-            }
             $store.dispatch('map/selectFeature', feature.values_)
           } else {
             // Close popup if any
@@ -263,7 +260,7 @@ export default {
     }
 
     function flyTo (location, zoom, done) {
-      const duration = 2000
+      const duration = 500
       let parts = 2
       let called = false
       function callback (complete) {
@@ -271,6 +268,7 @@ export default {
         if (called) return
         if ((parts === 0 || !complete) && done) {
           called = true
+          center.value = location
           done(complete)
         }
       }
