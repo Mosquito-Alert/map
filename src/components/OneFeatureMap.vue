@@ -143,7 +143,6 @@ export default {
           map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
             selectedFeatures.push(feature)
           })
-          console.log(selectedFeatures)
           if (selectedFeatures.length === 1) {
             // if feature has no properties or is LineStringdo nothing
             const feature = selectedFeatures[0]
@@ -189,77 +188,78 @@ export default {
         [currentValue.lon, currentValue.lat],
         'EPSG:4326', 'EPSG:3857'
       )
+      const json = JSON.parse(JSON.stringify(popupContent.value))
+      json.c = json.private_webmap_layer
       feature = new Feature({
         geometry: new Point(fCoords),
-        properties: {
-          c: popupContent.value.private_webmap_layer
-        }
+        properties: json
       })
       // Only one feature allowed
       if (!observationSource.value.source.getFeatures().length) {
         observationSource.value.source.addFeature(feature)
+        autoPanPopup()
       }
     })
 
     const styleFunction = (feature, style) => {
-      if (openPopup.value) {
-        const selectedIcon = new Icon({
-          src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
-          anchor: [0.5, 1]
-        })
-        style.setImage(selectedIcon)
-        style.setText('')
-      } else {
-        let observations = $store.getters['app/layers'].observations
-        let observationsKeys = Object.keys(observations)
-        let featureKey = observationsKeys.find(function (e) {
+      // if (openPopup.value) {
+      //   const selectedIcon = new Icon({
+      //     src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
+      //     anchor: [0.5, 1]
+      //   })
+      //   style.setImage(selectedIcon)
+      //   style.setText('')
+      // } else {
+      let observations = $store.getters['app/layers'].observations
+      let observationsKeys = Object.keys(observations)
+      let featureKey = observationsKeys.find(function (e) {
+        return observations[e].categories.includes(feature.values_.properties.c)
+      })
+
+      // If not found check on Bites
+      if (!featureKey) {
+        observations = $store.getters['app/layers'].bites
+        observationsKeys = Object.keys(observations)
+        featureKey = observationsKeys.find(function (e) {
           return observations[e].categories.includes(feature.values_.properties.c)
         })
-
-        // If not found check on Bites
-        if (!featureKey) {
-          observations = $store.getters['app/layers'].bites
-          observationsKeys = Object.keys(observations)
-          featureKey = observationsKeys.find(function (e) {
-            return observations[e].categories.includes(feature.values_.properties.c)
-          })
-        }
-
-        // If not found check on breeding sites
-        if (!featureKey) {
-          observations = $store.getters['app/layers'].breeding
-          observationsKeys = Object.keys(observations)
-          featureKey = observationsKeys.find(function (e) {
-            return observations[e].categories.includes(feature.values_.properties.c)
-          })
-        }
-
-        // If not found check on otherObservations
-        if (!featureKey) {
-          observations = $store.getters['app/layers'].otherObservations
-          observationsKeys = Object.keys(observations)
-          featureKey = observationsKeys.find(function (e) {
-            return observations[e].categories.includes(feature.values_.properties.c)
-          })
-        }
-        // if no layer selected then featurekey is null
-        let iconUrl
-        if (featureKey) {
-          iconUrl = observations[featureKey].icon
-          if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
-            iconUrl = observations[featureKey].iconConflict
-          }
-        } else {
-          observations = $store.getters['app/layers'].other
-          iconUrl = observations.conflict.icon
-        }
-        const icon = new Icon({
-          src: iconUrl,
-          anchor: [0.5, 1]
-        })
-        style.setImage(icon)
-        style.setText('')
       }
+
+      // If not found check on breeding sites
+      if (!featureKey) {
+        observations = $store.getters['app/layers'].breeding
+        observationsKeys = Object.keys(observations)
+        featureKey = observationsKeys.find(function (e) {
+          return observations[e].categories.includes(feature.values_.properties.c)
+        })
+      }
+
+      // If not found check on otherObservations
+      if (!featureKey) {
+        observations = $store.getters['app/layers'].otherObservations
+        observationsKeys = Object.keys(observations)
+        featureKey = observationsKeys.find(function (e) {
+          return observations[e].categories.includes(feature.values_.properties.c)
+        })
+      }
+      // if no layer selected then featurekey is null
+      let iconUrl
+      if (featureKey) {
+        iconUrl = observations[featureKey].icon
+        if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
+          iconUrl = observations[featureKey].iconConflict
+        }
+      } else {
+        observations = $store.getters['app/layers'].other
+        iconUrl = observations.conflict.icon
+      }
+      const icon = new Icon({
+        src: iconUrl,
+        anchor: [0.5, 1]
+      })
+      style.setImage(icon)
+      style.setText('')
+      // }
     }
 
     function flyTo (location, zoom, done) {

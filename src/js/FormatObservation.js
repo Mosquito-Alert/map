@@ -7,7 +7,6 @@ export default class FormatObservation {
   }
 
   format () {
-    console.log(this.o)
     if (!('validation_type' in this.o)) {
       this.o.validation_type = 'human'
     }
