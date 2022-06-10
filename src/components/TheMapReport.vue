@@ -73,7 +73,7 @@
             <one-feature-map
               :mapId="'mapa_' + index"
               toCanvas='true'
-              height="300px"
+              height="100%"
               width="200px"
               :featContent="feature">
             </one-feature-map>

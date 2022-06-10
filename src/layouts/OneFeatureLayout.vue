@@ -1,17 +1,22 @@
 <template>
   <q-layout
-    class="mobile expanded"
+    class="expanded"
+    :class="mobile?'mobile':''"
   >
-
     <q-page
-      class="flex mobile expanded"
+      class="flex expanded"
+      :class="mobile?'mobile':''"
     >
-
+      <div class="ma-logo" :title="_('Mosquito Alert')">
+        <a href="//webserver.mosquitoalert.com/">
+          <img src="~assets/img/logo_mosquito_alert.png">
+        </a>
+      </div>
       <one-feature-map ref='map'
         init
         :observationId="observationId"
-        popup="false"
-        clickable="true"
+        :popup="mobile?'false':'true'"
+        :clickable="mobile?'true':'false'"
       />
     </q-page>
 
@@ -21,14 +26,27 @@
 <script>
 import OneFeatureMap from 'components/OneFeatureMap.vue'
 import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
   components: { OneFeatureMap },
   setup () {
     const route = useRoute()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+    const $store = useStore()
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
 
     return {
+      _,
+      mobile,
       observationId
     }
   }
@@ -57,5 +75,12 @@ export default {
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
+  }
+  .ma-logo{
+    position: absolute;
+    top:5px;
+    left: 5px;
+    z-index:100;
+    transform: scale(0.8);
   }
 </style>

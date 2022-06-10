@@ -1,12 +1,12 @@
 <template>
-  <div class="ma-logo" :title="_('Mosquito Alert')">
+  <div v-if="observationId" class="ma-logo" :title="_('Mosquito Alert')">
     <a href="//webserver.mosquitoalert.com/">
       <img src="~assets/img/logo_mosquito_alert.png">
     </a>
   </div>
     <ol-map
       ref='map'
-      class="fit"
+      class="report-fit"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
       :style="style"
@@ -128,7 +128,6 @@ export default {
       const vh = window.innerHeight * 0.01
       // Then we set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty('--vh', `${vh}px`)
-      console.log(document.documentElement.style.getPropertyValue('--vh'))
 
       if (listenClick.value) {
         map.value.map.on('pointermove', function (event) {
@@ -144,7 +143,7 @@ export default {
           map.value.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
             selectedFeatures.push(feature)
           })
-
+          console.log(selectedFeatures)
           if (selectedFeatures.length === 1) {
             // if feature has no properties or is LineStringdo nothing
             const feature = selectedFeatures[0]
@@ -159,7 +158,6 @@ export default {
           } else {
             // Close popup if any
             selectedFeatures = []
-            console.log('close popup')
             $store.commit('map/selectFeature', {})
           }
         })
@@ -171,6 +169,7 @@ export default {
         doMapByFeature(props.featContent)
         if (doCanvas.value) {
           const mCanvas = new MapToCanvas({ map: map.value.map })
+          console.log(map.value.map)
           map.value.map.on('rendercomplete', function (e) {
             document.querySelector('img#' + identifier).src = mCanvas.doCanvas()
             if (document.querySelector('div#' + identifier)) {
@@ -244,18 +243,22 @@ export default {
           })
         }
         // if no layer selected then featurekey is null
+        let iconUrl
         if (featureKey) {
-          let iconUrl = observations[featureKey].icon
+          iconUrl = observations[featureKey].icon
           if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
             iconUrl = observations[featureKey].iconConflict
           }
-          const tiger = new Icon({
-            src: iconUrl,
-            anchor: [0.5, 1]
-          })
-          style.setImage(tiger)
-          style.setText('')
+        } else {
+          observations = $store.getters['app/layers'].other
+          iconUrl = observations.conflict.icon
         }
+        const icon = new Icon({
+          src: iconUrl,
+          anchor: [0.5, 1]
+        })
+        style.setImage(icon)
+        style.setText('')
       }
     }
 
@@ -342,6 +345,7 @@ export default {
 
     return {
       _,
+      observationId,
       mobile,
       attrVisible,
       foldingIcon,
@@ -419,5 +423,9 @@ export default {
 
   .unfold-attribution{
     cursor: pointer;
+  }
+
+  .report-fit{
+    height: 100%;
   }
 </style>

@@ -177,8 +177,8 @@ export default function () {
       },
       other: { // ??
         conflict: {
-          categories: ['conflict'],
-          icons: []
+          // categories: ['conflict'],
+          icon: require('../../assets/img/marker_other.svg')
         }
       },
       sampling_effort: {

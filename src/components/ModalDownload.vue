@@ -9,7 +9,12 @@
           <div class="modal-title">{{ _('Download') }}</div>
           <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
           <p>{{ _('Once verified, press the download button.') }}</p>
-          <p>{{ _('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal: http://www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal/') }}</p>
+          <p>
+            {{ _('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
+            <a :href="_('Mosquito portal URL')" target="_blank">
+            {{ _('Mosquito portal URL') }}
+            </a>
+          </p>
         <div class="error-message" v-if="!nFeatures">
           {{ _('No features to download') }}
         </div>
