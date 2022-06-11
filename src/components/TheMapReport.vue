@@ -4,14 +4,9 @@
 
       <!-- REFERENCE MAP -->
       <h5 class="title"> {{ _('List of observations') }} </h5>
-      <p>
-        {{ _('Report with the observations displayed in the current map view (maximum: 300 observations).') }}
-        </p>
-      <p>
-        {{ _('Verify this by looking at the map point counter (on the down left map corner).') }}
-        </p>
 
       <div class="reference-map">
+        <img id="c-mapa" />
         <div id='mapa' class='bg-white'>
           <ol-map ref='map'
                   :loadTilesWhileAnimating='true'
@@ -69,12 +64,16 @@
         </div>
       </div>
     <!-- LIST OF OBSERVATIONS -->
-        <div
-          class="observation-box"
-          v-for="feature, index in featuresGeoJson" :key="index"
-        >
-          <div class="map-container">
+    <div class="box-container">
+      <div
+        class="observation-box"
+        v-for="feature, index in featuresGeoJson" :key="index"
+      >
+        <div class="map-column"><img :id="'mapa_' + index" /></div>
+          <div :id="'mapa_' + index" class="map-container">
             <one-feature-map
+              :mapId="'mapa_' + index"
+              toCanvas='true'
               height="100%"
               width="200px"
               :featContent="feature">
@@ -82,12 +81,13 @@
           </div>
 
           <div class="observation-info">
-            <div class="col1">
+            <!-- <div class="col1">
               <span class="counter">{{ index + 1 }}</span>
-            </div>
+            </div> -->
 
             <div class="col2">
               <div class="col2-raw1">
+                <span class="counter">{{ index + 1 }}</span>
                 <span class="common-name" v-html="_(feature.title)"></span>
                 <span class="latin-name" v-html="_(feature.latinName)"></span>
               </div>
@@ -124,6 +124,19 @@
                         </span>
                         </div>
                     </div>
+                <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
+                <div class="description-wrapper" v-if="feature.withWater">
+                    <div><i class="fa-solid fa-droplet"></i></div>
+                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
+                      {{ _(feature.withWater) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.withLarva">
+                    <div><i class="fa-solid fa-worm"></i></div>
+                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
+                      {{ _(feature.withLarva) }}
+                    </div>
+                </div>
                   <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                   <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                       <div><i class="fa-solid fa-message-check"></i></div>
@@ -133,8 +146,8 @@
                   </div>
                   <div class="description-wrapper" v-if="feature.lat && feature.lon">
                       <div><i class="fa-solid fa-location-check"></i></div>
-                      <div><span class="description">{{ _('Coordinates') }}</span>:
-                        {{ feature.lat }} - {{ feature.lon }}
+                      <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                        {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
                       </div>
                   </div>
                   <div class="description-wrapper" v-if="feature.version_uuid">
@@ -155,7 +168,7 @@
                     >
                   </div>
                   <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                    Anónimo,
+                    {{ _('Anonymous')}},
                     <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
                   </div>
                   <!-- only adults have validation  -->
@@ -179,6 +192,7 @@
             </div>
           </div>
       </div>
+    </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -197,10 +211,12 @@ import { Polygon, MultiPolygon } from 'ol/geom'
 import moment from 'moment'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
+import MapToCanvas from '../js/MapToCanvas'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'TheMapReport',
-  props: ['report'],
+  props: ['report', 'reportLang'],
   components: { OneFeatureMap },
   setup (props, context) {
     const $store = useStore()
@@ -221,6 +237,7 @@ export default {
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
     const layers = $store.getters['app/getLayers']
+    const $q = useQuasar()
 
     // $store.dispatch('app/setLanguage', 'ca')
 
@@ -228,9 +245,33 @@ export default {
       return (props.report)
     })
 
+    const reportLang = computed(() => {
+      return (props.reportLang)
+    })
+
+    const setLanguage = (lang) => {
+      $store.dispatch('app/setLanguage', lang)
+      // NASTY
+      if (lang === 'en') lang = 'en-US'
+      import('quasar/lang/' + lang).then(({ default: messages }) => {
+        $q.lang.set(messages)
+      })
+    }
+
+    function initLanguage (lang) {
+      setLanguage(lang)
+    }
+
     onMounted(function () {
       // Fetch report view data
       const ol = map.value.map
+      const mCanvas = new MapToCanvas({ map: map.value.map })
+      map.value.map.on('rendercomplete', function (e) {
+        document.getElementById('c-mapa').src = mCanvas.doCanvas()
+        if (document.getElementById('mapa')) {
+          document.getElementById('mapa').remove()
+        }
+      })
       const backendUrl = $store.getters['app/getBackend']
       const loadViewUrl = backendUrl + 'api/report/load/'
 
@@ -244,6 +285,14 @@ export default {
     function handleReportView (report) {
       if (report.status === 'ok') {
         const view = JSON.parse(report.view[0].view)
+        let lang
+        if (reportLang.value) {
+          lang = reportLang.value.toLowerCase()
+        } else {
+          lang = view.lang ? view.lang : $store.getters['app/getLang']
+        }
+        initLanguage(lang)
+
         center.value = view.center
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
@@ -571,17 +620,25 @@ h5, h6{
   margin: 10px;
   display: flex;
   flex-grow: 1;
+  // flex-wrap: wrap;
   box-shadow: $box-shadow;
 }
 
 .observation-info{
   display:flex;
+  // flex-wrap: wrap;
   flex-grow: 1;
 }
 
+.col1{
+  margin-bottom:10px;
+  margin-right:10px;
+}
+
 .col2 {
-  margin-left: 15px;
+  // margin-left: 15px;
   flex-grow: 1;
+  max-width:70vw;
 }
 
 .col2 .common-name{
@@ -625,6 +682,7 @@ h5, h6{
 
 .counter {
   padding: 10px 15px;
+  margin-right: 10px;
   background-color: $primary-color;
   color: white;
 }
@@ -745,8 +803,18 @@ h5, h6{
   margin-left: 10x;
 }
 
-// .map-container{
-//   display:flex;
-//   align-items: center;
-// }
+.map-column{
+  align-self: center;
+  min-height:200px;
+}
+
+.col2-raw2 {
+  // flex-wrap: wrap;
+}
+.col2-raw2-col1 {
+  max-width: 45vw;
+}
+.col2-raw2-col2 {
+  max-width: 20vw;
+}
 </style>

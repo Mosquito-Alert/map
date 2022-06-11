@@ -91,7 +91,6 @@ export function geojsonVT (map, layer, url) {
           tile.setFeatures(features)
         }
       })
-      console.log(layer)
       layer.value.setSource(vectorSource)
     })
 }

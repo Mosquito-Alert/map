@@ -15,30 +15,25 @@
       </q-btn>
     </div>
     <div class="body">
-      <div class="legend">
+      <div class="legend" :class="mobile?'mobile':''">
         <div v-for="set in chartData.datasets" :key="set.label">
           <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
-          <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i> {{ _(set.label) }}
+          <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i>
+            <div v-if="!mobile">{{ _(set.label) }}
+            </div>
         </div>
         <div>
-          <q-btn
-            v-if="mapDates.from !== ''"
-            icon="delete"
-            class="delete-calendar-button mr-10"
-            @click="resetDateFilter"
-            :label="_('Delete calendar')"
-          />
           <q-btn
             ref="calendarBtn"
             icon="event_note"
             class="calendar-button"
-            :label="_('Select')"
           >
             <q-popup-proxy
               @before-show="updateProxy"
               cover
               transition-show="scale"
-              transition-hide="scale">
+              transition-hide="scale"
+            >
               <q-date
                 navigation-min-year-month='2015/01'
                 :navigation-max-year-month="getCurrentDate"
@@ -61,7 +56,7 @@
           </q-btn>
         </div>
       </div>
-      <LineChart class="graph-canvas" :chartData="chartData" :height="230" :options="chartOptions" ref="chart" />
+      <LineChart class="graph-canvas" :chartData="chartData" :height="graphicHeight" :options="chartOptions" ref="chart" />
     </div>
   </div>
 </template>
@@ -91,12 +86,21 @@ export default defineComponent({
     const getCurrentDate = ref()
     // const dateFilter = ref()
     const calendarDate = ref()
+    const graphicHeight = ref()
     const calendarBtn = ref()
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    graphicHeight.value = mobile.value ? '280' : '230'
+    console.log(graphicHeight.value)
+
     const resetDateFilter = function () {
+      calendarDate.value = null
       $store.commit('map/setMapDates', {
         from: datesRange.value.from,
         to: datesRange.value.to
@@ -205,7 +209,6 @@ export default defineComponent({
           to: moment(day).format('YYYY-MM-DD')
         }
       } else {
-        console.log(calendarDate)
         sDate = calendarDate.value.from
         eDate = calendarDate.value.to
         // dateFilterToString(date)
@@ -257,6 +260,8 @@ export default defineComponent({
 
     return {
       _,
+      mobile,
+      graphicHeight,
       showCalendar,
       calendarDate,
       calendarBtn,
@@ -347,9 +352,13 @@ export default defineComponent({
     text-transform: none;
     border-radius: 0px;
     font-size: .8em;
+    opacity: 0;
   }
   .calendar :deep(.q-date__header) {
     background: $primary-color;
+  }
+  .calendar :deep(.q-date__main) {
+    flex-direction: row-reverse;
   }
   .ok-button {
     background: $primary-color;
@@ -388,7 +397,7 @@ export default defineComponent({
   .legend div{
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
+    display: inline;
     line-height: 16px;     /* fallback */
     max-height: 32px;      /* fallback */
     -webkit-line-clamp: 2; /* number of lines to show */
@@ -410,5 +419,8 @@ export default defineComponent({
     border-radius:8px;
     border:none;
     font-size: .8em;
+  }
+  .graph-canvas{
+    flex-grow:1
   }
 </style>

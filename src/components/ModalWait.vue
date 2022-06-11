@@ -4,9 +4,9 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open">
-      <dialog class="modal-box" open>
+      <dialog class="modal-box" :class="mobile?'mobile':''" open>
         <slot></slot>
-          <q-spinner-cube
+          <q-spinner-oval
             color="orange"
             size="5.5em"
           />
@@ -30,7 +30,13 @@ export default {
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     return {
+      mobile,
       open,
       _
     }
@@ -126,5 +132,8 @@ button:hover {
   background: transparent;
   box-shadow: none;
   padding: 0;
+}
+// MOBILE
+dialog.mobile {
 }
 </style>

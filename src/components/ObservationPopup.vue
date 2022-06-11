@@ -4,7 +4,8 @@
       :position="selectedFeature.coordinates"
       positioning='bottom-center'
       :offset="[0, -35]"
-      v-if="selectedFeature">
+      v-if="selectedFeature"
+    >
     <template v-slot="slotProps">
       <div class="parentContainer" :class="imageRatio">
         <div :class="getPopupClass(selectedFeature)">
@@ -13,7 +14,7 @@
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
                     <q-circular-progress
-                      v-if="defaultImageSize"
+                      v-if="loading"
                       indeterminate
                       size="50px"
                       color="orange"
@@ -21,19 +22,19 @@
                     />
                 <img
                   v-if="!errorLoadingImage"
-                  :height="defaultImageSize"
+                  :height="loading"
                   :src="selectedFeature.photo_url"
                   @load="imageLoaded"
                   @error="errorLoading"
                 >
+                <div
+                  v-if="!errorLoadingImage"
+                  class="credits"
+                >{{ _('Anonymous')}},
+                  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+                </div>
               </div>
             </a>
-            <div
-              v-if="!errorLoadingImage"
-              class="credits"
-            >Anónimo,
-              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
-            </div>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div>
@@ -115,6 +116,11 @@
               </div>
             </div>
           </div>
+          <div class="btn-close" v-if="mobile">
+            <button class="q-btn ma-btn" @click.stop="closePopup">
+              {{ _('Close') }}
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -122,29 +128,48 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { onUpdated, defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
 export default defineComponent({
   props: ['selectedFeature'],
-  emits: ['popupimageloaded'],
+  emits: ['popupimageloaded', 'closePopupButton'],
   setup (props, context) {
     const $store = useStore()
     const imageRatio = ref('null')
     const errorLoadingImage = ref()
-    const defaultImageSize = ref()
+    const loading = ref()
     const ratio = ref('null')
     ratio.value = 0
     imageRatio.value = 0
 
+    onUpdated(() => {
+      loading.value = props.selectedFeature.photo_url
+    })
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    const closePopup = function () {
+      context.emit('closePopupButton')
+    }
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+    imageRatio.value = mobile.value ? 'mobile ' : ''
     const imageLoaded = function (e) {
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
-      imageRatio.value = (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
-      defaultImageSize.value = ''
+      // Set poup class based on mobile device and image ratio
+      if (mobile.value) {
+        imageRatio.value = mobile.value ? 'mobile ' : ''
+      } else {
+        imageRatio.value = ''
+      }
+      imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
+
+      loading.value = false
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
@@ -181,12 +206,15 @@ export default defineComponent({
     }
 
     const errorLoading = function () {
+      console.log('error...loading image')
       errorLoadingImage.value = true
     }
     return {
       _,
       ratio,
-      defaultImageSize,
+      mobile,
+      closePopup,
+      loading,
       errorLoadingImage,
       errorLoading,
       imageRatio,
@@ -201,14 +229,14 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang='scss'>
+<style lang='scss'>
 * {
   scrollbar-width: thin;
   scrollbar-color: #EFA501 #ccc;
 }
 
 .info div::-webkit-scrollbar {
-    height: 12px;
+    height: 4px;
     width: 4px;
     background: #ccc;
 }
@@ -229,7 +257,8 @@ export default defineComponent({
 }
 .overlay-content.landscape .image{
   // toni testing
-  // max-height: $popup-height-with-image-landscape / 2;
+  max-height: $popup-height-with-image-landscape;
+  width: 100%;
   overflow: hidden;
   position:relative;
   border-top-left-radius: $popup-border-radius;
@@ -242,6 +271,7 @@ export default defineComponent({
 }
 .overlay-content.landscape .image img{
   width: 100%;
+  height: auto;
   object-fit: fill;
   border-top-left-radius: $popup-border-radius;
   border-top-right-radius: $popup-border-radius;
@@ -259,12 +289,18 @@ export default defineComponent({
   text-align: center;
 }
 
+// .overlay-content.mobile.landscape .image .img-container{
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+// }
 .overlay-content.square .image .img-container,
 .overlay-content.portrait .image .img-container{
   height: 100%;
   display: flex;
   justify-content: center;
 }
+
 .overlay-content.square .image img,
 .overlay-content.portrait .image img{
   height: 100%;
@@ -508,7 +544,7 @@ export default defineComponent({
     flex-direction: column;
     flex-grow:1;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     .validation-string {
       padding-top: 10px;
       text-transform: uppercase;
@@ -526,7 +562,7 @@ export default defineComponent({
 .credits{
   position: absolute;
   bottom: 5px;
-  right: 5px;
+  margin:auto;
   padding:5px;
   background: #33333342;
   border-radius: 10px;
@@ -543,6 +579,7 @@ export default defineComponent({
 }
 .ol-overlay-container{
   padding:25px;
+  padding-bottom: 5px;
 }
 .report-id-wrapper,
 .date-wrapper,
@@ -570,5 +607,105 @@ export default defineComponent({
   position: absolute;
   height: 100%;
   margin: auto;
+}
+
+// MOBILE
+.parentContainer.mobile::after{
+  content: none;
+}
+
+.parentContainer.mobile{
+  max-width:100vw;
+}
+
+.parentContainer.mobile .overlay-content.small,
+.overlay-content.mobile.landscape,
+.overlay-content.mobile.portrait,
+.overlay-content.mobile.square{
+  width: 100vw;
+  height: 100%;
+  max-width: 100vw;
+  max-height: unset;
+  border-radius:none;
+  flex-direction: column;
+}
+
+.overlay-content.small{
+  padding-bottom: 10px;
+}
+
+.parentContainer.mobile,
+.overlay-content.mobile{
+  border-radius: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+
+.parentContainer.mobile .overlay-content.small{
+  width: 100vw;
+}
+
+.image.mobile .img-container{
+  display: inline;
+  margin:auto;
+}
+
+.image.mobile .img-container img {
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.parentContainer.mobile .info{
+  flex-direction: row;
+}
+
+.mobile.portrait .info-validation{
+  max-height: 40%;
+}
+
+.parentContainer.mobile .info-validation,
+.parentContainer.mobile .info-no-validation{
+  max-width: 100vw;
+  max-height: 40%;
+  border-radius: 0px;
+}
+
+.overlay-content.mobile.landscape .image,
+.overlay-content.mobile.portrait .image{
+  height: 40%;
+  margin: 0px auto;
+  border-radius: 0px;
+}
+
+.parentContainer.mobile .overlay-content .image img{
+  border-radius: 0px;
+}
+
+.parentContainer.mobile .info-validation > div:first-child{
+  max-height: 100%;
+}
+
+.ma-btn{
+  background: $primary-color;
+  color: white;
+  border: none;
+  margin:auto;
+}
+.mobile.portrait .info-validation{
+  padding: 20px;
+}
+.btn-close{
+  display:flex;
+}
+@media (max-width: 640px) {
+  .ol-viewport .ol-overlaycontainer-stopevent,
+  .ol-viewport .ol-overlay-container{
+    z-index:1000 !important;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    transform: none !important;
+  }
 }
 </style>

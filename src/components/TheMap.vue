@@ -1,6 +1,12 @@
 <template>
   <div id='mapa' class='bg-white'>
-    <q-btn :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
+    <q-btn v-if="mobile"
+      class="drawer-handler-mobile"
+      @click="toogleLeftDrawer"
+    >
+      <q-icon name="menu" />
+    </q-btn>
+    <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
 
     <map-dates-filter
       :dateFrom="mapDates.from"
@@ -25,10 +31,21 @@
             :zoom='zoom'
             :constrainResolution='true' />
 
-        <div class="ol-attribution">
-          © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-          | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
-          | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+        <div
+          class="ol-attribution"
+          :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
+        >
+          <div v-if="!mobile || attrVisible">
+            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
+            | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+          </div>
+          <div v-if="mobile"
+            class="attr-folder"
+            v-html="foldingIcon"
+            @click="unfoldAttribution"
+          >
+          </div>
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
@@ -69,7 +86,11 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <observation-popup @popupimageloaded="autoPanPopup" :selectedFeature="popupContent"></observation-popup>
+        <observation-popup
+          @closePopupButton="closePopup"
+          @popupimageloaded="autoPanPopup"
+          :selectedFeature="popupContent"
+        ></observation-popup>
     </ol-map>
         <cust-control
           ref="donwnloadControl"
@@ -160,6 +181,18 @@ export default defineComponent({
     let selectedFeatures = []
     let spiderfiedIds = []
     let currZoom
+    const attrVisible = ref(false)
+    const foldingIcon = ref('<')
+
+    function unfoldAttribution () {
+      attrVisible.value = !attrVisible.value
+      if (attrVisible.value) {
+        foldingIcon.value = '>'
+      } else {
+        foldingIcon.value = '<'
+      }
+    }
+
     const mapFilters = {
       mode: 'resetFilter',
       observations: [],
@@ -172,6 +205,10 @@ export default defineComponent({
 
     const mapDates = computed(() => {
       return $store.getters['map/getMapDates']
+    })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
     })
 
     // watch([a, b], ([newA, newB], [prevA, prevB]) => {
@@ -201,11 +238,17 @@ export default defineComponent({
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
+    const setPendingView = function (extent) {
+      map.value.map.getView().fit(extent, { minResolution: 50, nearest: false })
+    }
+
     const fitFeature = function (location, simplify = true) {
       console.time('FitFeature')
-      spinner()
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
+      if (mobile.value) {
+        $store.commit('app/setPendingView', { extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857') })
+      }
       map.value.map.getView().fit(
         transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
         { minResolution: 50, nearest: false }
@@ -266,10 +309,6 @@ export default defineComponent({
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         // Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
-        console.log(Feat.getGeometry().getCoordinates())
-        console.log(Feat.getGeometry().getCoordinates()[0])
-        console.log(Feat.getGeometry().getCoordinates()[0].length)
-
         // for the moment do not add boundary feature to map
         // locationFeatures.value = [Feat]
         const writer = new format.GeoJSON()
@@ -282,6 +321,10 @@ export default defineComponent({
     }
 
     const autoPanPopup = function () {
+      // When popup is on mobile, don't autopan
+      if (mobile.value) {
+        return
+      }
       const ol = map.value.map
       const resolution = ol.getView().getResolution()
       const coords = [...selectedFeat.value.values_.geometry.flatCoordinates]
@@ -322,8 +365,9 @@ export default defineComponent({
 
     // Map general configuration
     const zoom = computed(() => {
-      return $store.getters['map/getDefault'].ZOOM
+      return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
     })
+
     const center = computed(() => {
       const center = $store.getters['map/getDefault'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
@@ -363,11 +407,13 @@ export default defineComponent({
             }
             features.value = data
             if (features.value.length) {
-              // eslint-disable-next-line prefer-const
-              let extent = features.value[0].getGeometry().getExtent().slice(0)
+              const extent = features.value[0].getGeometry().getExtent().slice(0)
               features.value.forEach(function (f) {
                 extend(extent, f.getGeometry().getExtent())
               })
+              if (mobile.value) {
+                $store.commit('app/setPendingView', { extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857') })
+              }
               map.value.map.getView().fit(
                 extent
               )
@@ -685,7 +731,8 @@ export default defineComponent({
         filters: mapFilters,
         locationName: locationName,
         url: reportViewUrl,
-        callback: handleReportView
+        callback: handleReportView,
+        lang: $store.getters['app/getLang']
       })
       newView.save()
     }
@@ -826,17 +873,9 @@ export default defineComponent({
     }
 
     onMounted(function () {
-      // const backendUrl = $store.getters['app/getBackend']
-      // userfixesUrl = backendUrl + 'api/userfixes/'
-      // downloadUrl = backendUrl + 'api/downloads/'
-      // shareViewUrl = backendUrl + 'api/view/save/'
-      // reportViewUrl = backendUrl + 'api/report/save/'
-      // loadViewUrl = backendUrl + 'api/view/load/'
-
-      // worker.postMessage({
-      //   fetchUrl: backendUrl + 'api/get/data/',
-      //   year: moment().year()
-      // })
+      const vh = window.innerHeight * 0.01
+      // Then we set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
 
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       const fillLocationColor = defaults.fillLocationColor
@@ -910,6 +949,7 @@ export default defineComponent({
               }
             } else {
               // Click on just a feature
+              event.stopPropagation()
               feature.set('originalCoords', feature.getGeometry().getCoordinates())
               selectedFeatures.push(feature)
             }
@@ -936,7 +976,10 @@ export default defineComponent({
           if (!feature.values_.properties) return
           if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
           const center = selectedFeatures[0].getGeometry().getCoordinates()
-          flyTo(center, ol.getView().getZoom())
+          // Only move map if is not a mobile
+          if (!mobile.value) {
+            flyTo(center, ol.getView().getZoom())
+          }
           selectedFeat.value = feature
           selectedId.value = feature.values_.properties.id
           selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
@@ -1139,8 +1182,8 @@ export default defineComponent({
     }
 
     function filterLocations (location) {
-      spinner()
       // Just in case a Spiral is open
+      spinner()
       spiralSource.value.source.clear()
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1311,6 +1354,7 @@ export default defineComponent({
     }
 
     return {
+      mobile,
       openDownloadModal,
       openReportsModal,
       calendarClicked,
@@ -1347,7 +1391,12 @@ export default defineComponent({
       view,
       selectedIcon,
       nPoints,
-      mapDates
+      mapDates,
+      closePopup,
+      foldingIcon,
+      attrVisible,
+      unfoldAttribution,
+      setPendingView
     }
   }
 })
@@ -1395,7 +1444,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background: none;
-    // right:15px;
+    z-index:20;
   }
   :deep(.ol-zoom) button,
   :deep(.ol-reports.ol-control) button,
@@ -1441,14 +1490,37 @@ export default defineComponent({
     background: #33333342;
     font-size: 10px;
     color: white;
-    padding: 4px 20px;
+    padding: 4px 10px;
     border-radius: 10px;
     height: 20px;
     line-height: 13px;
+    display:inline-block;
   }
-  // :deep(.ol-attribution) {
-  //   color: white;
-  // }
+
+  :deep(.ol-attribution div){
+    display:inline;
+  }
+
+  :deep(.ol-attribution.mobile.collapsed) .attr-folder{
+    padding: 2px 4px;
+  }
+
+  :deep(.ol-attribution.mobile) .attr-folder{
+    padding: 2px 4px 2px 10px;
+  }
+
+  :deep(.ol-attribution.mobile){
+    background: #333333aa;
+    z-index:950;
+  }
+
+  :deep(.ol-attribution.mobile.collapsed){
+    padding: 4px 6px;
+  }
+
+  .unfold-attribution{
+    cursor: pointer;
+  }
 
   :deep(.ol-control:hover) {
     background-color: unset;
@@ -1465,9 +1537,20 @@ export default defineComponent({
     color: white;
     position: absolute;
     top: $header-height;
-    z-index: 1100;
+    z-index: 100;
     padding: 20px 5px;
     cursor: pointer;
     border-radius: 0 10px 10px 0;
+  }
+  .drawer-handler-mobile{
+    background-color: $primary-color;
+    color: white;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
   }
 </style>

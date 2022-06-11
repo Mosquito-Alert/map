@@ -4,7 +4,7 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open" @click="close">
-      <dialog open>
+      <dialog open :class="mobile?'mobile':''">
         <slot></slot>
         <div class="buttons">
           <slot name="buttons"></slot>
@@ -27,6 +27,9 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: false } })
     }
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
@@ -36,6 +39,7 @@ export default {
     return {
       close,
       hasCloseButton,
+      mobile,
       _
     }
   }
@@ -79,6 +83,7 @@ export default {
   align-items: center;
   z-index: 2001;
 }
+
 dialog {
   max-width: 50vw;
   max-height: 80vh;
@@ -89,6 +94,18 @@ dialog {
   border: none;
   overflow:auto;
 }
+
+dialog.mobile {
+  max-width: 80vw;
+  max-height: 80vh;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 5rem 5rem 3rem 5rem;
+  background-color: white;
+  z-index: 2001;
+  border: none;
+  overflow:auto;
+}
+
 .backdrop-enter-from,
 .backdrop-leave-to {
   opacity: 0;
@@ -124,5 +141,17 @@ button:hover {
 }
 button.close {
   float: right;
+}
+
+// MOBILE
+dialog.mobile {
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+dialog.mobile button{
+  padding: 5px 10px;
 }
 </style>

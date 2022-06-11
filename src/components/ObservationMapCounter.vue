@@ -1,18 +1,32 @@
 <template>
   <div class = "point-counter">
-    <div class="counter" v-html="npoints"></div>
-    <div class="counter-label" v-html="_('Shown points')"></div>
+    <div v-if="!mobile || visible" class="counter" v-html="npoints"></div>
+    <div v-if="!mobile || visible"
+      class="counter-label"
+      :class="mobile?'mobile':''"
+      v-html="_('Shown points')">
+      </div>
+    <div v-if="mobile"
+      class="unfold"
+      v-html="foldingIcon"
+      @click="unfold"
+    ></div>
   </div>
 </template>
 <script>
 
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   props: ['nPoints'],
   setup (props, context) {
     const $store = useStore()
+    const visible = ref(false)
+    const foldingIcon = ref('<')
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -26,9 +40,21 @@ export default {
       return 0
     })
 
+    function unfold () {
+      visible.value = !visible.value
+      if (visible.value) {
+        foldingIcon.value = '>'
+      } else {
+        foldingIcon.value = '<'
+      }
+    }
     return {
       _,
-      npoints
+      visible,
+      unfold,
+      foldingIcon,
+      npoints,
+      mobile
     }
   }
 }
@@ -54,5 +80,14 @@ export default {
 .counter,
 .counter-label{
   display: inline;
+}
+
+.counter-label.mobile{
+  margin-right: 5px;
+}
+
+.unfold{
+  display:inline;
+  cursor:pointer;
 }
 </style>

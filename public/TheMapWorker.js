@@ -74,6 +74,7 @@ self.onmessage = async function (e) {
   }
   // console.log(e.data)
   if (e.data.filters) {
+    // console.log(e.data.filters)
     // Worker vars are init first time worker is called
     filters = e.data.filters
     all_layers = e.data.layers

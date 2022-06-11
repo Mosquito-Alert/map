@@ -1,9 +1,8 @@
 <template>
   <q-layout
-    view='hHh lpR fFf'
-    :class="expanded?'expanded':'collapsed'"
+    :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
   >
-    <site-header :expanded="expanded"/>
+    <site-header v-if="!mobile" :expanded="expanded"/>
     <left-drawer ref="TOC"
       :expanded="expanded"
       @toggleSamplingEffort='toggleSamplingEffort'
@@ -11,11 +10,12 @@
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
       @filterTags="filterTags"
+      @toogleLeftDrawer="toogleLeftDrawer"
     />
 
     <q-page
       class='flex'
-      :class="expanded?'expanded':'collapsed'"
+      :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
     >
       <the-map ref='map'
         init
@@ -97,6 +97,7 @@ import TimeSeries from 'components/TimeSeries.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import moment from 'moment'
 
 export default {
   components: {
@@ -118,15 +119,26 @@ export default {
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
-    const expanded = ref(true)
     const $store = useStore()
+
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        // Hide the address bar:
+        window.scrollTo(0, 1)
+      }, 0)
+    })
     const resizeMap = function (args) {
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {
           args.start += 5
           resizeMap(args)
-        }, 25)
+        }, 5)
+      } else {
+        // Ending resizing
+        if (pendingView.value.extent !== null) {
+          map.value.setPendingView(pendingView.value.extent)
+        }
       }
     }
 
@@ -137,6 +149,16 @@ export default {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
     })
+
+    const pendingView = computed(() => {
+      return $store.getters['app/getPendingView']
+    })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    const expanded = ref(!mobile.value)
 
     const startDownload = function (format) {
       map.value.handleDownload(format)
@@ -149,7 +171,7 @@ export default {
     const filterLocations = function (location) {
       map.value.clearAdministrativeFeatures()
       if (location !== null) {
-        TOC.value.searchLocation.loading = true
+        // TOC.value.searchLocation.loading = true
         map.value.fitFeature(location)
       }
       map.value.filterLocations(location)
@@ -160,40 +182,47 @@ export default {
     }
 
     const filterTags = function (tags) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterTags(tags)
     }
 
     const filterDate = function (payload) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
       const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
         return l.type === 'sampling-effort'
       })
       if (samplingIsActive) {
+        let mapDate = {}
+        if (payload.data.from === '') {
+          mapDate.from = '2014-01-01'
+          mapDate.to = moment().format('YYYY-MM-DD')
+        } else {
+          mapDate = payload.data
+        }
         map.value.resetUserfixesTileIndex()
         map.value.checkSamplingEffort({
           status: true,
-          dates: [payload.data]
+          dates: [mapDate]
         })
       } else {
         map.value.resetUserfixesTileIndex()
       }
     }
 
-    const filteringLocations = function () {
-      return map.value.mapFilters.locations.length
-    }
+    // const filteringLocations = function () {
+    //   return map.value.mapFilters.locations.length
+    // }
 
     const filterObservations = function (data) {
-      if (filteringLocations()) {
-        TOC.value.searchLocation.loading = true
-      }
+      // if (filteringLocations()) {
+      //   TOC.value.searchLocation.loading = true
+      // }
       map.value.filterObservations(data)
     }
 
@@ -254,7 +283,10 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
-      timeseries.value.calendarDate = date
+      timeseries.value.calendarDate = [{
+        from: moment(date[0].from).format('YYYY/MM/DD'),
+        to: moment(date[0].to).format('YYYY/MM/DD')
+      }]
     }
 
     const tagsChanged = function (tags) {
@@ -274,6 +306,7 @@ export default {
     }
 
     return {
+      mobile,
       calendarClicked,
       viewCode,
       shareView,
@@ -318,9 +351,13 @@ export default {
     transition: margin-left ease 1s;
   }
   .q-page {
+    position:absolute;
     flex-direction: column;
     height: 100%;
-    height: calc(100vh - 50px);
+    height: calc(100% - 50px);
+    // width: 100%;
+    right:0px;
+    left:0px;
     margin-left: $left-drawer-width;
     overflow: hidden;
   }
@@ -367,4 +404,29 @@ export default {
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;
   }
+
+  // MOBILE
+  .q-page.mobile.collapsed{
+    margin-left:0;
+    transition: margin-left ease 1s;
+  }
+  .q-page.mobile.expanded{
+    margin-left:$left-drawer-width;
+    transition: margin-left ease 1s;
+  }
+  .q-layout.mobile.collapsed aside{
+      width: 0;
+      box-shadow: none;
+      transition:width ease 1s;
+    }
+  .q-layout.mobile.expanded aside{
+    width: $left-drawer-width;
+    box-shadow: none;
+    transition:width ease 1s;
+  }
+
+  .q-layout.mobile.expanded aside{
+    width: 100%;
+  }
+
 </style>

@@ -50,7 +50,9 @@ export default class FormatObservation {
 
     const preUrl = '//webserver.mosquitoalert.com'
     if (this.o.photo_url !== '') {
-      this.o.photo_url = preUrl + this.o.photo_url
+      if (!this.o.photo_url.startsWith(preUrl)) {
+        this.o.photo_url = preUrl + this.o.photo_url
+      }
     }
     return this.o
   }

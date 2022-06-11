@@ -26,6 +26,14 @@ export const selectFeature = (context, feature) => {
   const titles = context.rootGetters['map/getTitles']
   const latinNames = context.rootGetters['map/getLatinNames']
 
+  // If there is no id then all info is already in feature
+  if (!feature.properties.id) {
+    const formated = new FormatObservation(feature.properties, titles, latinNames).format()
+    formated.coordinates = feature.geometry.flatCoordinates
+    context.commit('selectFeature', formated)
+    return
+  }
+
   fetch(url).then(response => response.json()).then(json => {
     json.coordinates = feature.geometry.flatCoordinates
     const formated = new FormatObservation(json, titles, latinNames).format()

@@ -4,10 +4,9 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open" @click="close">
-      <dialog open>
+      <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>
-          <p v-if="success==''">{{ _('Share this map view') }}</p>
           <p v-if="success=='error'">{{ _('Share map view error') }}</p>
           <div v-if="success=='ok'">
             <div v-if="copied">
@@ -15,14 +14,20 @@
                 <p>{{ _('Url has been copied') }}</p>
               </transition>
             </div>
-            <p v-else>{{ _('Map view shared successfully') }}</p>
-            <p>{{ _('This is the new view url') }}</p>
-            <p><input type="text" v-model="newUrl"></p>
-            <p class="viewshare"><i
-              class="fas fa-copy"
-              :title="_('Copy url to clipboard')"
-              @click="copyToClipboard"
-            ></i></p>
+            <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
+            <div class="new-url-wrapper">
+              <div>{{ _('This is the new view url') }}</div>
+              <span
+                class="url-text"
+                v-html="newUrl"
+                @click.stop
+              />
+              <span class="viewshare"><i
+                class="fas fa-copy"
+                :title="_('Copy url to clipboard')"
+                @click.stop="copyToClipboard"
+              ></i></span>
+            </div>
           </div>
         <div class="buttons">
           <div class="download-buttons">
@@ -37,7 +42,7 @@
 
 <script>
 
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -52,8 +57,13 @@ export default {
       context.emit('shareView')
     }
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     const close = function () {
       success.value = ''
+      copied.value = false
       $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
     }
 
@@ -70,6 +80,7 @@ export default {
     }
 
     return {
+      mobile,
       copyToClipboard,
       copied,
       success,
@@ -104,8 +115,8 @@ export default {
   z-index: 2001;
 }
 dialog {
-  max-width: 50vw;
-  max-height: 80vh;
+  // max-width: 50vw;
+  // max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
   background-color: white;
@@ -194,5 +205,28 @@ button:hover {
 .modal-title{
   font-size: 1.5em;
   padding-bottom: 10px;
+}
+
+// MOBILE
+dialog.mobile {
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+dialog.mobile button{
+  padding: 5px 10px;
+}
+
+.url-text{
+  border:0px;
+  border-bottom: 1px solid $primary-color;
+  margin: 0 10px;
+  padding: 0 10px;
+}
+
+.new-url-wrapper{
+  display: flex;
 }
 </style>

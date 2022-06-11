@@ -4,7 +4,7 @@
     side="left"
     behavior="desktop"
     width=""
-    :class="expanded?'expanded':'collapsed'"
+    v-touch-swipe.mouse.right.left="toogleLeftDrawer"
   >
     <!-- Main menu -->
     <q-toolbar>
@@ -43,7 +43,16 @@
     </q-toolbar>
 
     <!-- Drawer content -->
-    <div class="toc-layers" :class="expanded?'expanded':'collapsed'">
+    <div class="toc-layers"
+      :class="expanded?'expanded':'collapsed'"
+    >
+      <div v-if="mobile">
+        <q-icon
+          name="close"
+          class="close-menu"
+          @click="toogleLeftDrawer"
+        />
+      </div>
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
           <search-location
@@ -207,6 +216,10 @@ export default {
       }
     }
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     const mouseEnter = function (layer, event) {
       const obj = event.target
       obj.querySelector('img').src = layer.icon
@@ -334,10 +347,16 @@ export default {
       searchLocation.value.filterIsActive = true
     }
 
+    const toogleLeftDrawer = function () {
+      context.emit('toogleLeftDrawer', {})
+    }
+
     return {
       ca,
       es,
       en,
+      mobile,
+      toogleLeftDrawer,
       hashtags,
       setTags,
       samplingEffort,
@@ -748,5 +767,25 @@ input{
 }
 .lang-wrapper{
   position: relative;
+}
+
+@media (max-width: 640px) {
+  .aside button {
+    scale: 0.9;
+  }
+  .toc-card{
+    font-size: 12px;
+  }
+}
+
+.close-menu{
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  padding: 10px;
+  background: $primary-color;
+  border-radius: 50%;
+  color:white;
+  cursor:pointer;
 }
 </style>

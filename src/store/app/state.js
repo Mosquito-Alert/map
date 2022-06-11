@@ -7,6 +7,8 @@ export default function () {
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
+    // backendUrl = 'http://192.168.1.47:8080/django/'
+    // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
@@ -23,9 +25,18 @@ export default function () {
       to: moment().format('YYYY-MM-DD')
     }
   }
+  const mobile = () => {
+    if (screen.width <= 760) {
+      return true
+    } else {
+      return false
+    }
+  }
 
   return {
     // key to make leftdrawer component re-render
+    isMobile: mobile(),
+    pendingView: { extent: null },
     leftDrawerStatus: 0,
     reportsLimit: 300,
     lang: defaultLang,
@@ -120,7 +131,7 @@ export default function () {
         unidentified: {
           categories: ['unidentified'],
           common_name: 'Unidentified mosquito',
-          icon: require('../../assets/img/marker_unidentified35_45.svg'),
+          icon: require('../../assets/img/marker_unidentified.svg'),
           color: '#c0c0c0'
         }
       },
@@ -166,8 +177,8 @@ export default function () {
       },
       other: { // ??
         conflict: {
-          categories: ['conflict'],
-          icons: []
+          // categories: ['conflict'],
+          icon: require('../../assets/img/marker_other.svg')
         }
       },
       sampling_effort: {

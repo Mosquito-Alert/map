@@ -51,6 +51,7 @@ module.exports = configure(function (ctx) {
       // transpile: false,
       publicPath: process.env.NODE_ENV === 'development' ? '/' : 'https://sigserver4.udg.edu/mos/spa/',
       // publicPath: '/',
+      publicPath: process.env.NODE_ENV === 'development' ? '/' : 'https://sigserver4.udg.edu/mos/spa/',
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
@@ -79,6 +80,16 @@ module.exports = configure(function (ctx) {
       https: false,
       port: 8080,
       open: true // opens browser window automatically
+      // proxy: {
+      //   // proxy all requests starting with /api to jsonplaceholder
+      //   '/django': {
+      //     target: 'http://192.168.1.47:8000/',
+      //     changeOrigin: true,
+      //     pathRewrite: {
+      //       '^/django': ''
+      //     }
+      //   }
+      // }
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
