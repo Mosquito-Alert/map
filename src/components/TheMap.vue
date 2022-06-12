@@ -2,11 +2,11 @@
   <div id='mapa' class='bg-white'>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
-      @click="toogleLeftDrawer"
+      @click="toggleLeftDrawer"
     >
       <q-icon name="menu" />
     </q-btn>
-    <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toogleLeftDrawer" />
+    <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toggleLeftDrawer" />
 
     <map-dates-filter
       :dateFrom="mapDates.from"
@@ -138,7 +138,7 @@ export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
   name: 'TheMap',
   emits: [
-    'toogleLeftDrawer',
+    'toggleLeftDrawer',
     'workerFinishedIndexing',
     'loadingSamplingEffort',
     'mapViewSaved',
@@ -233,8 +233,8 @@ export default defineComponent({
       year: moment().year()
     })
 
-    const toogleLeftDrawer = function () {
-      context.emit('toogleLeftDrawer', {})
+    const toggleLeftDrawer = function () {
+      context.emit('toggleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
@@ -1363,7 +1363,7 @@ export default defineComponent({
       shareView,
       newReport,
       mapFilters,
-      toogleLeftDrawer,
+      toggleLeftDrawer,
       checkSamplingEffort,
       refreshUserfixesUrl,
       resetUserfixesTileIndex,

@@ -58,3 +58,7 @@ export const getIsMobile = state => {
 export const getPendingView = state => {
   return state.pendingView
 }
+
+export const getModelsServerPath = state => {
+  return state.modelsServerPath
+}

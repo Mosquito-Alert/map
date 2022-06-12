@@ -4,43 +4,10 @@
     side="left"
     behavior="desktop"
     width=""
-    v-touch-swipe.mouse.right.left="toogleLeftDrawer"
+    v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <q-toolbar>
-      <fa-thin-button name="fa-thin fa-layer-group" :label="_('Layers')" class="active"></fa-thin-button>
-      <fa-thin-button name="fa-thin fa-chart-scatter" :label="_('Models')"></fa-thin-button>
-      <q-toolbar-title></q-toolbar-title>
-
-      <fa-thin-button
-        name="fa-thin fa-share-nodes"
-        :label="_('Share')"
-        @click="showShareUrl"
-      ></fa-thin-button>
-
-      <fa-thin-button
-        name="fa-thin fa-circle-info"
-        :label="_('Help')"
-        @click="showInfo"
-      ></fa-thin-button>
-
-      <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
-        <div class="lang-wrapper">
-          <div class="lang-container">
-            <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
-              <span>Català</span>
-            </div>
-            <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
-              <span>Castellano</span>
-            </div>
-            <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
-              <span>English</span>
-            </div>
-          </div>
-        </div>
-      </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
-    </q-toolbar>
+    <left-menu item="layers" />
 
     <!-- Drawer content -->
     <div class="toc-layers"
@@ -50,7 +17,7 @@
         <q-icon
           name="close"
           class="close-menu"
-          @click="toogleLeftDrawer"
+          @click="toggleLeftDrawer"
         />
       </div>
       <div class="toc-card filters">
@@ -164,28 +131,22 @@
 </template>
 
 <script>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import FaThinButton from 'components/FaThinButton.vue'
+import LeftMenu from 'components/LeftMenu.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
-import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import SearchLocation from 'components/SearchLocation.vue'
-import { useQuasar } from 'quasar'
 import FilterHastags from './FilterHastags.vue'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu, SamplingEffort, SearchLocation, FilterHastags },
+  components: { LeftMenu, SamplingEffort, SearchLocation, FilterHastags },
   emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort'],
   props: ['expanded'],
   setup (props, context) {
     const searchLocation = ref()
-    const ca = ref(null)
-    const es = ref(null)
-    const en = ref(null)
     const hashtags = ref()
     const samplingEffort = ref(null)
     const $store = useStore()
-    const $q = useQuasar()
 
     // Get a copy of layers from store to get categories
     const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
@@ -262,45 +223,6 @@ export default {
       return $store.getters['app/getText'](text)
     }
 
-    const clickLanguageSelector = (lang, event) => {
-      let object = event.target
-      if (!object.classList.contains('menuItem')) object = object.parentNode
-      setLanguage(lang, object)
-    }
-
-    const setLanguage = (lang, object) => {
-      $store.dispatch('app/setLanguage', lang)
-      object.parentNode.querySelectorAll('.menuItem').forEach(item => {
-        item.classList.remove('active')
-      })
-      object.classList.add('active')
-      // NASTY
-      if (lang === 'en') lang = 'en-US'
-      import('quasar/lang/' + lang).then(({ default: messages }) => {
-        $q.lang.set(messages)
-      })
-    }
-
-    onMounted(function () {
-      initLanguage()
-    })
-
-    function initLanguage () {
-      const lang = $store.getters['app/getLang']
-      let object = ca.value
-      if (lang === 'es') object = es.value
-      else if (lang === 'en') object = en.value
-      setLanguage(lang, object)
-    }
-
-    const showInfo = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
-    }
-
-    const showShareUrl = function () {
-      $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
-    }
-
     const setTags = function (tags) {
       hashtags.value.setTags(tags)
     }
@@ -347,28 +269,22 @@ export default {
       searchLocation.value.filterIsActive = true
     }
 
-    const toogleLeftDrawer = function () {
-      context.emit('toogleLeftDrawer', {})
+    const toggleLeftDrawer = function () {
+      context.emit('toggleLeftDrawer', {})
     }
 
     return {
-      ca,
-      es,
-      en,
       mobile,
-      toogleLeftDrawer,
+      toggleLeftDrawer,
       hashtags,
       setTags,
       samplingEffort,
       searchLocation,
       setLocationName,
-      clickLanguageSelector,
       initialClass,
       filterObservations,
       tagsModified,
       observations,
-      showInfo,
-      showShareUrl,
       breeding,
       bites,
       otherObservations,
@@ -384,38 +300,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
-button.fa-thin-button, button.fa-thin-button-menu {
-  color: $toolbar-icons-color;
-}
-button.fa-thin-button.active, button.fa-thin-button-menu.active {
-  color: $primary-color;
-}
 .q-header,
 .q-drawer{
   width: $left-drawer-width;
-}
-.menuItem {
-  z-index: 100;
-  border: 1px solid $grey-color;
-  border-left: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 84px;
-  background: #efefef;
-  box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
-}
-.menuItem.active {
-  background: white;
-  transition: all 0.3s ease-in;
-  font-weight: bold;
-  color: $primary-color;
-}
-.menuItem:not(.active):hover {
-  background: $grey-color;
-  transition: all 0.3s ease-in;
-  box-shadow: 6px 0 12px rgba(0,0,0,0.25), 4px 0 4px rgba(0,0,0,0.22);
 }
 .q-drawer {
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);

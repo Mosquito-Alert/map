@@ -56,13 +56,15 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .q-footer {
+  height:50px;
   background-color: $footer-background;
   display: flex;
 }
 .q-footer .q-toolbar__title {
   display: flex;
+  height:50px;
   justify-content: space-between;
 }
 .logos.mobile {

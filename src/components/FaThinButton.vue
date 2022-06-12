@@ -1,23 +1,30 @@
 <template>
-  <button class="fa-thin-button">
-    <i :class="icon_code"></i>
-    <span>{{ label }}</span>
-  </button>
+  <a class="main-menu-item" :href="link_url">
+    <button class="fa-thin-button" :class="class_prop">
+      <i :class="icon_code"></i>
+      <span>{{ label }}</span>
+    </button>
+  </a>
 </template>
 
 <script>
 export default {
-  props: ['name', 'label'],
+  props: ['name', 'label', 'link', 'class'],
   computed: {
     icon_code (props) {
       return `${props.name}`
+    },
+    link_url (props) {
+      return props.link
+    },
+    class_prop (props) {
+      return props.class
     }
   }
 }
 </script>
 
 <style lang="scss">
-
 button.fa-thin-button span{
   text-align: center;
   white-space: nowrap;
@@ -29,12 +36,11 @@ button.fa-thin-button i.fa-thin{
   font-size: 2em;
 }
 
-button.fa-thin-button {
+a button.fa-thin-button {
   width: 60px;
   height: 64px;
   background: white;
   border: none;
-  border-top: 1px solid $grey-color;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -64,5 +70,8 @@ button.fa-thin-button {
     color: #efa501;
     font-weight: bold;
   }
+}
+.main-menu-item{
+  border-top: 1px solid $grey-color;
 }
 </style>

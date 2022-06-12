@@ -4,9 +4,11 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     props: { initView: false }
-    // children: [
-    //   { path: '', component: () => import('pages/DataView.vue') }
-    // ]
+  },
+  {
+    // MODELS MAP
+    path: '/models',
+    component: () => import('layouts/ModelsLayout.vue')
   },
   {
     // Set the accepted characters and length of init view code
@@ -14,16 +16,17 @@ const routes = [
     component: () => import('layouts/MainLayout.vue')
   },
   {
-    // Set the accepted characters and length of init view code
+    // Set the accepted characters and length of reports view
     path: '/:report([a-zA-Z0-9]{6})',
     component: () => import('layouts/ReportsLayout.vue')
   },
   {
-    // Set the accepted characters and length of init view code
+    // Set the accepted characters and length of reports view with lang
     path: '/:report([a-zA-Z0-9]{6})/:lang([a-zA-Z]{2})',
     component: () => import('layouts/ReportsLayout.vue')
   },
   {
+    // Only one feature map (by observation long id)
     path: '/:code([-a-zA-Z0-9]{36})',
     component: () => import('src/layouts/OneFeatureLayout.vue')
   },

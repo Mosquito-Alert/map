@@ -10,7 +10,7 @@
       @filterLocations="filterLocations"
       @clearLocations="clearLocations"
       @filterTags="filterTags"
-      @toogleLeftDrawer="toogleLeftDrawer"
+      @toggleLeftDrawer="toggleLeftDrawer"
     />
 
     <q-page
@@ -21,7 +21,7 @@
         init
         :sharedView="viewCode"
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
-        @toogleLeftDrawer="toogleLeftDrawer"
+        @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
         @mapViewSaved="mapViewSaved"
         @timeSeriesChanged="timeSeriesChanged"
@@ -121,12 +121,6 @@ export default {
     const timeseries = ref()
     const $store = useStore()
 
-    window.addEventListener('load', function () {
-      setTimeout(function () {
-        // Hide the address bar:
-        window.scrollTo(0, 1)
-      }, 0)
-    })
     const resizeMap = function (args) {
       if (args.start < args.end) {
         map.value.map.updateSize()
@@ -254,7 +248,7 @@ export default {
       return $store.getters['app/getFrontendUrl']
     })
 
-    const toogleLeftDrawer = function () {
+    const toggleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
     }
@@ -319,7 +313,7 @@ export default {
       timeSeriesChanged,
       tagsChanged,
       locationChanged,
-      toogleLeftDrawer,
+      toggleLeftDrawer,
       filterObservations,
       filterDate,
       filterLocations,
