@@ -23,8 +23,20 @@
       </div>
 
       <div>
-        <button @click="applyfilter">
-          Aplica
+        <button @click="applyfilter('europe')">
+          Europa
+        </button>
+        <button @click="applyfilter('america')">
+          América
+        </button>
+        <button @click="applyfilter('africa')">
+          Africa
+        </button>
+        <button @click="applyfilter('asia')">
+          Asia
+        </button>
+        <button @click="applyfilter('oceania')">
+          Oceanía
         </button>
       </div>
     </div>
@@ -50,16 +62,23 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const applyfilter = function () {
+    const applyfilter = function (continent) {
       const dataUrl = $store.getters['app/getModelsServerPath']
       const backendUrl = $store.getters['app/getBackend']
+      let layer
+      if (continent === 'europe') {
+        layer = 'api/tiles/nuts3/{z}/{x}/{y}/'
+      } else {
+        layer = 'api/tiles/gadm/' + continent + '/{z}/{x}/{y}/'
+      }
+
       context.emit('loadModel', {
         esp: 'tig',
         region: 'europe',
         year: 2022,
         month: 8,
-        modelUrl: dataUrl + 'model.csv',
-        nutsUrl: backendUrl + 'api/tiles/nuts3/{z}/{x}/{y}/'
+        modelUrl: dataUrl + continent + '.csv',
+        nutsUrl: backendUrl + layer
       })
     }
 

@@ -35,7 +35,7 @@ export default function () {
 
   return {
     // Models related
-    modelsServerPath: backendUrl + 'media/models/csv/',
+    modelsServerPath: backendUrl + 'media/',
     // key to make leftdrawer component re-render
     isMobile: mobile(),
     pendingView: { extent: null },

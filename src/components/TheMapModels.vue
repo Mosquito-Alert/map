@@ -121,7 +121,7 @@ export default defineComponent({
       const dict = {}
 
       const headers = lines[0].split(',')
-      const indexId = headers.indexOf('nuts_id')
+      const indexId = headers.indexOf('id')
       const indexProb = headers.indexOf('prob')
       for (let i = 1; i < lines.length; i++) {
         const currentLine = lines[i].split(',')
@@ -143,6 +143,7 @@ export default defineComponent({
     }
 
     const loadModel = function (data) {
+      map.value.map.removeLayer(modelLayer)
       spinner(true)
       fetch(data.modelUrl, {
         method: 'GET'
@@ -152,9 +153,9 @@ export default defineComponent({
         })
         .then((text) => {
           modelData = csvJSON(text)
-          map.value.map.removeLayer(modelLayer)
           modelLayer = new VectorTileLayer({
             declutter: true,
+            renderMode: 'hybrid',
             source: new VectorTileSource({
               maxZoom: 15,
               format: new MVT(),
@@ -171,8 +172,12 @@ export default defineComponent({
 
     const styles = {}
     const colorizeNuts = (feature, style) => {
-      const id = feature.properties_.nuts_id
+      const id = feature.properties_.id
       const value = modelData[id]
+      console.log(value === undefined)
+      if (value === undefined) {
+        return null
+      }
       if (value < 0.25) {
         if (!('1' in styles)) {
           styles['1'] = new Fill({
