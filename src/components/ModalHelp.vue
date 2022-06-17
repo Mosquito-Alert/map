@@ -29,11 +29,11 @@
               </q-carousel-slide>
               <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
                 <div class="scroll q-pr-md">
-                  <div class="row wrap q-mt-md q-pr-md text-center scroll">
-                    <div class="col self-center q-px-md">
+                  <div class="row q-mt-md q-pr-md text-center scroll">
+                    <div class="col-12 col-md self-center q-px-md">
                       <img src="~/assets/img/help/mosquito.png">
                     </div>
-                    <div class="col text-justify scroll">
+                    <div class="col-12 col-md text-justify scroll">
                       <p>Filtra tu selección de distintas maneras:</p>
                       <p><b>POR LOCALIZAICIÓN</b>: Escribe y selecciona del desplegable tu lugar de interés</p>
                       <p><b>POR HASHTAG</b>: puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.</p>
@@ -106,7 +106,7 @@ export default {
       hasCloseButton,
       mobile,
       _,
-      slide: ref('pag_1'),
+      slide: ref('pag_2'),
       lorem: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque voluptatem totam, architecto cupiditate officia rerum, error dignissimos praesentium libero ab nemo provident incidunt ducimus iusto perferendis porro earum. Totam, numquam?'
     }
   }
@@ -222,6 +222,9 @@ dialog.mobile button{
 .q-carousel__slide img{
   width: 100%;
   height: auto;
+}
+dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
+  padding: 4px 4px 60px 4px;
 }
 hr{
   border: 1px solid #cccccc88;

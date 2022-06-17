@@ -303,6 +303,7 @@ export default {
 .q-header,
 .q-drawer{
   width: $left-drawer-width;
+  z-index:1200;
 }
 .q-drawer {
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
@@ -335,6 +336,7 @@ export default {
   overflow-y:auto;
   display:flex;
   flex-direction: column;
+  z-index: 1200;
 }
 
 .toc-layers::-webkit-scrollbar {
@@ -659,7 +661,7 @@ input{
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;
-  }
+}
   .toc-card{
     font-size: 12px;
   }

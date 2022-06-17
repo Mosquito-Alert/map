@@ -98,6 +98,7 @@ export default {
 }
 .toc-models{
   padding: 20px;
+  z-index: 1200;
 }
 .q-drawer {
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);

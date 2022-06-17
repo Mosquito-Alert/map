@@ -5,23 +5,17 @@
   <transition name="modal">
     <div class="dialog help" v-if="open">
     <!-- <div class="dialog" v-if="open" @click="close"> -->
-      <dialog open class="q-pa-xl" :class="mobile?'mobile':''">
+      <dialog open class="q-pa-xl" :class="mobile?'mobile q-pa-xs':''">
         <slot></slot>
           <q-carousel
            v-model="slide"
-            transition-prev="slide-right"
-            transition-next="slide-left"
             height="100%"
-            swipeable
-            animated
-            prev-icon="arrow_left"
-            next-icon="arrow_right"
-            navigation
-            control-color="orange"
             padding
-            arrows
             class="scroll bg-grey-1 rounded-borders">
-              <q-carousel-slide name="pag_6" class="column no-wrap flex-center">
+              <q-carousel-slide
+                name="pag_1"
+                class="column no-wrap flex-center"
+              >
                 <div class="q-mt-md q-pr-md text-justify scroll">
                   <p>El mapa contiene información de 5 especies de mosquitos vectores de enfermedades: el mosquito tigre (Aedes albopictus), el mosquito de la fiebre amarilla (Aedes aegypti), el mosquito del Japón (Aedes japonicus), el mosquito de Corea (Aedes koreicus) y el mosquito común (Culex pipiens).</p>
                   <p>Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.</p>
@@ -182,7 +176,7 @@ export default {
       hasCloseButton,
       mobile,
       _,
-      slide: ref('pag_6'),
+      slide: ref('pag_1'),
       lorem: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque voluptatem totam, architecto cupiditate officia rerum, error dignissimos praesentium libero ab nemo provident incidunt ducimus iusto perferendis porro earum. Totam, numquam?'
     }
   }
@@ -238,7 +232,7 @@ dialog {
 }
 
 dialog.mobile {
-  max-width: 80vw;
+  max-width: 90vw;
   max-height: 90vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
@@ -292,6 +286,9 @@ dialog.mobile {
   padding: 1rem 1rem 1rem 1rem;
 }
 
+dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
+  padding: 4px 4px 60px 4px;
+}
 dialog.mobile button{
   padding: 5px 10px;
 }

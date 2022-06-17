@@ -304,6 +304,7 @@ export default {
         center.value = view.center
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
+        console.log(view.filters)
 
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {

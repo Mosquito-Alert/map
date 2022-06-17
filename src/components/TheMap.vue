@@ -1512,7 +1512,7 @@ export default defineComponent({
 
   :deep(.ol-attribution.mobile){
     background: #333333aa;
-    z-index:950;
+    z-index:900;
   }
 
   :deep(.ol-attribution.mobile.collapsed){

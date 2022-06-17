@@ -58,7 +58,7 @@ export default defineComponent({
 
 <style lang="scss">
 .q-footer {
-  height:50px;
+  // height:50px;
   background-color: $footer-background;
   display: flex;
 }

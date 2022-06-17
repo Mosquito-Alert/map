@@ -13,15 +13,15 @@
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
-                    <q-circular-progress
-                      v-if="loading"
-                      indeterminate
-                      size="50px"
-                      color="orange"
-                      class="q-ma-md m-circular-progress"
-                    />
+                <q-circular-progress
+                  v-if="loading"
+                  indeterminate
+                  size="50px"
+                  color="orange"
+                  class="q-ma-md m-circular-progress text-center"
+                />
+                <img v-if="!mosquitoImageLoaded" src="~/assets/img/help/mosquito.png">
                 <img
-                  v-if="!errorLoadingImage"
                   :height="loading"
                   :src="selectedFeature.photo_url"
                   @load="imageLoaded"
@@ -37,7 +37,7 @@
             </a>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
-            <div>
+            <div class="scroll">
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -116,7 +116,7 @@
               </div>
             </div>
           </div>
-          <div class="btn-close" v-if="mobile">
+          <div class="btn-close text-center" v-if="mobile">
             <button class="q-btn ma-btn" @click.stop="closePopup">
               {{ _('Close') }}
             </button>
@@ -137,12 +137,12 @@ export default defineComponent({
   emits: ['popupimageloaded', 'closePopupButton'],
   setup (props, context) {
     const $store = useStore()
+    const mosquitoImageLoaded = ref(false)
     const imageRatio = ref('null')
     const errorLoadingImage = ref()
-    const loading = ref()
+    const loading = ref(true)
     const ratio = ref('null')
     ratio.value = 0
-    imageRatio.value = 0
 
     onUpdated(() => {
       loading.value = props.selectedFeature.photo_url
@@ -158,8 +158,16 @@ export default defineComponent({
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
-    imageRatio.value = mobile.value ? 'mobile ' : ''
+
+    if (mobile.value) {
+      imageRatio.value = mobile.value ? 'mobile landscape' : ''
+    } else {
+      imageRatio.value = mobile.value ? 'landscape' : ''
+    }
+
     const imageLoaded = function (e) {
+      console.log('looooooaded')
+      mosquitoImageLoaded.value = true
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       // Set poup class based on mobile device and image ratio
       if (mobile.value) {
@@ -173,12 +181,18 @@ export default defineComponent({
       context.emit('popupimageloaded')
     }
     const getPopupClass = function (feature) {
-      if (feature.photo_url) return 'overlay-content ' + imageRatio.value
-      else {
+      let css
+      if (ratio.value === 0) {
+        css = 'overlay-content landscape'
+      } else if (feature.photo_url) {
+        css = 'overlay-content ' + imageRatio.value
+      } else {
         ratio.value = 0
-        return 'overlay-content small'
+        css = 'overlay-content small'
       }
+      return mobile.value ? css + ' mobile ' : css
     }
+
     const getValidationIcon = function (feature) {
       if (feature.validation_type === 'human') return 'fa-light fa-users'
       else return 'fa-light fa-robot'
@@ -211,6 +225,7 @@ export default defineComponent({
     }
     return {
       _,
+      mosquitoImageLoaded,
       ratio,
       mobile,
       closePopup,
@@ -269,8 +284,13 @@ export default defineComponent({
   display: flex;
   justify-content: center;
 }
+
+.overlay-content.mobile.landscape .image .img-container{
+  height: 100%;
+}
+
 .overlay-content.landscape .image img{
-  width: 100%;
+  max-width: 100%;
   height: auto;
   object-fit: fill;
   border-top-left-radius: $popup-border-radius;
@@ -299,6 +319,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 .overlay-content.square .image img,
@@ -646,8 +667,11 @@ export default defineComponent({
 }
 
 .image.mobile .img-container{
-  display: inline;
+  display: flex;
+  justify-content: center;
   margin:auto;
+  position: absolute;
+  left: 0;
 }
 
 .image.mobile .img-container img {
@@ -671,6 +695,7 @@ export default defineComponent({
   border-radius: 0px;
 }
 
+.overlay-content.mobile .image,
 .overlay-content.mobile.landscape .image,
 .overlay-content.mobile.portrait .image{
   height: 40%;
@@ -697,14 +722,21 @@ export default defineComponent({
 }
 .btn-close{
   display:flex;
+  align-self: center;
 }
+.parentContainer.mobile .btn-close{
+  // display:flex;
+  // position: absolute;
+  // bottom: 60px
+}
+
 .ul-filters li, .filters .report-tag span{
   background-color: #ccc;
 }
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
   .ol-viewport .ol-overlay-container{
-    z-index:1000 !important;
+    z-index:900 !important;
     padding: 0px;
     width: 100%;
     height: 100%;
