@@ -26,8 +26,14 @@
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
-        :label="_('Help')"
+        :label="_('Info')"
         @click="showInfo"
+      ></fa-thin-button>
+
+      <fa-thin-button
+        name="fa-thin fa-square-question"
+        :label="_('Help')"
+        @click="showHelp"
       ></fa-thin-button>
 
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
@@ -80,6 +86,10 @@ export default {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
     }
 
+    const showHelp = function () {
+      $store.commit('app/setModal', { id: 'help', content: { visibility: true } })
+    }
+
     const showShareUrl = function () {
       $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
     }
@@ -121,6 +131,7 @@ export default {
       es,
       en,
       showInfo,
+      showHelp,
       showShareUrl,
       clickLanguageSelector
     }

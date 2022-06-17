@@ -46,7 +46,7 @@
             </ul>
           </div>
 
-          <h6> {{ _('Filters applied') }} </h6>
+          <h6 v-if="anyFilters"> {{ _('Filters applied') }} </h6>
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
@@ -58,6 +58,11 @@
 
             <div class="hashtags" v-if="filters.hashtags">
               <span v-html="tag" v-for="tag, index in filters.hashtags" :key="index">
+              </span>
+            </div>
+
+            <div class="report-tag" v-if="filters.report_id">
+              <span v-html="tag" v-for="tag, index in filters.report_id" :key="index">
               </span>
             </div>
           </div>
@@ -95,10 +100,10 @@
               <div class="col2-raw2">
                 <div class="col2-raw2-col1">
                   <!-- INFO DEL POPUP -->
-                    <div class="report-id-wrapper" v-if="feature.report_id">
+                    <div class="report-id-wrapper" v-if="feature.reportId">
                         <div><i class="fa-solid fa-hashtag"></i></div>
-                        <div><span class="report_id">Id</span>:
-                          {{ feature.report_id }}
+                        <div><span class="reportId">Id</span>:
+                          {{ feature.reportId }}
                         </div>
                     </div>
                     <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
@@ -229,6 +234,8 @@ export default {
     const dateRange = ref()
     const errorLoadingImage = ref(false)
     const locationName = ref()
+    const hashtags = ref()
+    const filterId = ref()
     const features = ref([])
     const featuresGeoJson = ref([])
     const observationNames = ref([])
@@ -237,6 +244,7 @@ export default {
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
     const layers = $store.getters['app/getLayers']
+    const anyFilters = ref(false)
     const $q = useQuasar()
 
     // $store.dispatch('app/setLanguage', 'ca')
@@ -284,6 +292,7 @@ export default {
 
     function handleReportView (report) {
       if (report.status === 'ok') {
+        anyFilters.value = false
         const view = JSON.parse(report.view[0].view)
         let lang
         if (reportLang.value) {
@@ -292,10 +301,10 @@ export default {
           lang = view.lang ? view.lang : $store.getters['app/getLang']
         }
         initLanguage(lang)
-
         center.value = view.center
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
+        console.log(view.filters)
 
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
@@ -305,12 +314,26 @@ export default {
         // Format dates to display
         if (view.filters.dates.length) {
           const d = view.filters.dates[0]
-          dateFrom.value = moment(d.from).format('DD/MM/YYYY')
-          dateRange.value = moment(d.from).format('DD-MM-YYYY')
-          dateRange.value += ' - ' + moment(d.to).format('DD/MM/YYYY')
+          if (d.from === '') {
+            dateRange.value = ''
+          } else {
+            anyFilters.value = true
+            dateFrom.value = moment(d.from).format('DD/MM/YYYY')
+            dateRange.value = moment(d.from).format('DD-MM-YYYY')
+            dateRange.value += ' - ' + moment(d.to).format('DD/MM/YYYY')
+          }
         }
 
-        locationName.value = ('locationName' in view) ? view.locationName : ''
+        if ('locationName' in view) {
+          anyFilters.value = true
+          locationName.value = ('locationName' in view) ? view.locationName : ''
+        }
+        if (view.filters.hashtags.length) {
+          hashtags.value = view.filters.hastags
+        }
+        if (view.filters.report_id.length) {
+          filterId.value = view.filters.filter_id
+        }
         map.value.map.getView().fit(
           view.extent, { nearest: true }
         )
@@ -492,7 +515,7 @@ export default {
       }
 
       if (view.filters.report_id.length) {
-        params.report_id = view.filters.report_id
+        params.reportId = view.filters.report_id
       }
 
       if (view.filters.hashtags.length) {
@@ -557,12 +580,15 @@ export default {
       geoJson,
       locationName,
       filters,
-      reportId,
       styleFunction,
       observationNames,
       map,
       dateFrom,
-      dateRange
+      dateRange,
+      anyFilters,
+      hashtags,
+      filterId,
+      reportId
     }
   }
 }

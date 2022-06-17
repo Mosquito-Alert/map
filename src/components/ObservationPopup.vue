@@ -698,6 +698,9 @@ export default defineComponent({
 .btn-close{
   display:flex;
 }
+.ul-filters li, .filters .report-tag span{
+  background-color: #ccc;
+}
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
   .ol-viewport .ol-overlay-container{

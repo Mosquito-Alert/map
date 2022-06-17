@@ -62,6 +62,7 @@ export default function () {
     trans: {},
     modals: {
       info: { visibility: false },
+      help: { visibility: false },
       download: { visibility: false, n: 0 },
       share: { visibility: false },
       report: { visibility: false, n: 0 },

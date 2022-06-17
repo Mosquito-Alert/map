@@ -165,7 +165,6 @@ export default {
         doMapByFeature(props.featContent)
         if (doCanvas.value) {
           const mCanvas = new MapToCanvas({ map: map.value.map })
-          console.log(map.value.map)
           map.value.map.on('rendercomplete', function (e) {
             document.querySelector('img#' + identifier).src = mCanvas.doCanvas()
             if (document.querySelector('div#' + identifier)) {
