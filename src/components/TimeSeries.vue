@@ -26,7 +26,7 @@
           <q-btn
             ref="calendarBtn"
             icon="event_note"
-            class="calendar-button"
+            class="no-pointer-events calendar-button"
           >
             <q-popup-proxy
               @before-show="updateProxy"
@@ -49,7 +49,7 @@
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="_('Apply calendar')" class="ok-button" flat @click="datePicked" v-close-popup />
+                  <q-btn :label="_('Apply calendar')" class="ok-button" flat v-close-popup />
                 </div>
               </q-date>
             </q-popup-proxy>

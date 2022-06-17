@@ -21,14 +21,11 @@
       />
     </q-page>
 
-    <modal-base :open="infoModalVisible" buttons="close">
-      <template v-slot:default>
-        <p><img src="~/assets/img/mosquitoalert_logo.png"></p>
-        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feu-giat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
-        <p>Lorem ipsum dolor sit amet, cons ectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.</p>
-        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tinci-dunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tatilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. </p>
-      </template>
-    </modal-base>
+    <modal-info :open="infoModalVisible" buttons="close">
+    </modal-info>
+
+    <modal-help :open="helpModalVisible" buttons="close">
+    </modal-help>
 
     <modal-wait>
     </modal-wait>
@@ -41,7 +38,8 @@
 </template>
 
 <script>
-import ModalBase from 'src/components/ModalBase.vue'
+import ModalInfo from 'src/components/ModalInfo.vue'
+import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalError from 'src/components/ModalError.vue'
 import ModalWait from 'src/components/ModalWait.vue'
 import SiteHeader from 'components/SiteHeader.vue'
@@ -55,7 +53,8 @@ import { useStore } from 'vuex'
 
 export default {
   components: {
-    ModalBase,
+    ModalInfo,
+    ModalHelp,
     ModalError,
     ModalWait,
     SiteHeader,
@@ -78,6 +77,10 @@ export default {
 
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info.visibility
+    })
+
+    const helpModalVisible = computed(() => {
+      return $store.getters['app/getModals'].help.visibility
     })
 
     const errorModalVisible = computed(() => {
@@ -136,6 +139,7 @@ export default {
       workerFinishedIndexing,
       toggleLeftDrawer,
       infoModalVisible,
+      helpModalVisible,
       errorModalVisible,
       map,
       TOC,
