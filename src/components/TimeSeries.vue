@@ -195,6 +195,7 @@ export default defineComponent({
     })
 
     const datePicked = function (event) {
+      console.log('picked')
       let daysInRange = 0
       let sDate
       let eDate
@@ -359,7 +360,7 @@ export default defineComponent({
     background: $primary-color;
   }
   .calendar :deep(.q-date__main) {
-    flex-direction: row-reverse;
+    // flex-direction: row-reverse;
   }
   .ok-button {
     background: $primary-color;
