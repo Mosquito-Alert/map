@@ -62,6 +62,9 @@ export default defineComponent({
   background-color: $footer-background;
   display: flex;
 }
+.q-toolbar{
+  // height: 50px;
+}
 .q-footer .q-toolbar__title {
   display: flex;
   height:50px;

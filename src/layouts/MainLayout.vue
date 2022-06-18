@@ -352,7 +352,7 @@ export default {
     position:absolute;
     flex-direction: column;
     height: 100%;
-    height: calc(100% - 50px);
+    height: calc(100% - 49px);
     // width: 100%;
     right:0px;
     left:0px;

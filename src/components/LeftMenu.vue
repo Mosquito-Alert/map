@@ -141,8 +141,8 @@ export default {
 
 <style lang="scss">
   .q-toolbar__title {
-    padding: 28px;
-    border-top: 1px solid $grey-color;
+    // padding: 28px;
+    // border-top: 1px solid $grey-color;
   }
   a{
     text-decoration: none;

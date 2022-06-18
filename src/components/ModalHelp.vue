@@ -20,7 +20,7 @@
             control-color="orange"
             padding
             arrows
-            class="scroll bg-grey-1 rounded-borders">
+            class="scroll rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
                 <div class="q-mt-md text-center">

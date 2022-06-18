@@ -94,7 +94,7 @@
     </ol-map>
         <cust-control
           ref="donwnloadControl"
-          icon="fa-thin fa-download"
+          icon="fa-solid fa-download"
           class="ol-download ol-unselectable ol-control"
           title="Download"
           @clicked="openDownloadModal"
@@ -1447,11 +1447,13 @@ export default defineComponent({
     background: none;
     z-index:20;
   }
+
   :deep(.ol-zoom) button,
   :deep(.ol-reports.ol-control) button,
   :deep(.ol-download.ol-control) button {
+    font-weight: bold;
     background: $primary-button-background;
-    color: $primary-button-text;
+    color: white;
     border: none;
     width: 40px;
     height: 40px;

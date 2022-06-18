@@ -315,6 +315,7 @@ export default defineComponent({
     height: 100%;
   }
   .toggle-time {
+    box-sizing: content-box;
     position: absolute;
     top: -35px;
     padding: 0 10px 0 5px;

@@ -11,7 +11,7 @@
            v-model="slide"
             height="100%"
             padding
-            class="scroll bg-grey-1 rounded-borders">
+            class="scroll rounded-borders">
               <q-carousel-slide
                 name="pag_1"
                 class="column no-wrap flex-center"
@@ -139,7 +139,7 @@
               </q-carousel-slide>
             </q-carousel>
 
-        <div class="close-modal text-center">
+        <div class="close-modal">
           <slot name="buttons"></slot>
           <button @click="close" v-if="hasCloseButton" class="close">{{ _('Close') }}</button>
         </div>
