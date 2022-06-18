@@ -49,7 +49,7 @@
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="_('Apply calendar')" class="ok-button" flat v-close-popup />
+                  <q-btn :label="_('Apply calendar')" class="ok-button" flat v-close-popup @click="datePicked"/>
                 </div>
               </q-date>
             </q-popup-proxy>
@@ -310,6 +310,9 @@ export default defineComponent({
       transition: max-height .3s ease-in;
     }
     box-shadow: 7px 0 14px rgba(0,0,0,0.25), 5px 0 5px rgba(0,0,0,0.22);
+  }
+  .map-footer.visible .toggle-time{
+    box-sizing: inherit;
   }
   .map-footer>div:not(.toggle-time) {
     padding: 10px 15px;

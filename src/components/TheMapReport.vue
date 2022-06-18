@@ -1,43 +1,45 @@
 <template>
   <q-layout>
     <q-page-container>
-
       <!-- REFERENCE MAP -->
-      <h5 class="title"> {{ _('List of observations') }} </h5>
+      <div class="reference-map row">
+        <div class="col-2 col-sm-1 col-md-1"></div>
+        <div class="col-5 col-xs-12 col-sm-5 col-md-6">
+          <h5 class="title"> {{ _('List of observations') }} </h5>
+          <img id="c-mapa" />
+          <div id='mapa' class='bg-white'>
+            <ol-map ref='map'
+                    :loadTilesWhileAnimating='true'
+                    :loadTilesWhileInteracting='true'
+                    style="position: relative; height: 300px; display: width:100%">
 
-      <div class="reference-map">
-        <img id="c-mapa" />
-        <div id='mapa' class='bg-white'>
-          <ol-map ref='map'
-                  :loadTilesWhileAnimating='true'
-                  :loadTilesWhileInteracting='true'
-                  style="position: relative; height: 300px; width: 600px">
+                <ol-view ref='view'
+                    maxZoom="19"
+                    constrainResolution='true' />
 
-              <ol-view ref='view'
-                  maxZoom="19"
-                  constrainResolution='true' />
+                <div class="ol-attribution">
+                  © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+                  | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
+                  | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
+                </div>
+                <!-- base map -->
+                <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+                  <ol-source-osm />
+                </ol-tile-layer>
 
-              <div class="ol-attribution">
-                © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-                | © <a href="https://mapbox.com" target="_blank">Mapbox</a>
-                | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
-              </div>
-              <!-- base map -->
-              <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
-                <ol-source-osm />
-              </ol-tile-layer>
+                <!-- CLUSTERS geojson layer -->
+                <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+                  <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
+                    <ol-style :overrideStyleFunction="styleFunction">
+                    </ol-style>
+                  </ol-source-vector>
+                </ol-vector-layer>
 
-              <!-- CLUSTERS geojson layer -->
-              <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
-                <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
-                  <ol-style :overrideStyleFunction="styleFunction">
-                  </ol-style>
-                </ol-source-vector>
-              </ol-vector-layer>
-
-          </ol-map>
+            </ol-map>
+          </div>
         </div>
-        <div class="report-filters">
+
+        <div class="report-filters col-3 col-md-4 col-xs-12 col-sm-5">
           <h6> {{ _('Selected observations') }} </h6>
           <div class="observations">
             <ul class="ul-filters">
@@ -67,6 +69,7 @@
             </div>
           </div>
         </div>
+        <div class="col-2 col-sm-1 col-md-1"></div>
       </div>
     <!-- LIST OF OBSERVATIONS -->
     <div class="box-container">
@@ -75,127 +78,128 @@
         v-for="feature, index in featuresGeoJson" :key="index"
       >
         <div class="map-column"><img :id="'mapa_' + index" /></div>
-          <div :id="'mapa_' + index" class="map-container">
-            <one-feature-map
-              :mapId="'mapa_' + index"
-              toCanvas='true'
-              height="100%"
-              width="200px"
-              :featContent="feature">
-            </one-feature-map>
-          </div>
+        <div :id="'mapa_' + index" class="map-container">
+          <one-feature-map
+            :mapId="'mapa_' + index"
+            toCanvas='true'
+            height="100%"
+            width="200px"
+            :featContent="feature">
+          </one-feature-map>
+        </div>
 
-          <div class="observation-info">
-            <!-- <div class="col1">
+        <div class="observation-info">
+          <!-- <div class="col1">
+            <span class="counter">{{ index + 1 }}</span>
+          </div> -->
+
+          <div class="col2">
+            <div class="col2-raw1">
               <span class="counter">{{ index + 1 }}</span>
-            </div> -->
-
-            <div class="col2">
-              <div class="col2-raw1">
-                <span class="counter">{{ index + 1 }}</span>
-                <span class="common-name" v-html="_(feature.title)"></span>
-                <span class="latin-name" v-html="_(feature.latinName)"></span>
-              </div>
-
-              <div class="col2-raw2">
-                <div class="col2-raw2-col1">
-                  <!-- INFO DEL POPUP -->
-                    <div class="report-id-wrapper" v-if="feature.reportId">
-                        <div><i class="fa-solid fa-hashtag"></i></div>
-                        <div><span class="reportId">Id</span>:
-                          {{ feature.reportId }}
-                        </div>
-                    </div>
-                    <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
-                    <div class="description-wrapper" v-if="feature.howMany">
-                        <div><i class="fa-solid fa-child-reaching"></i></div>
-                        <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
-                          {{ _(feature.howMany) }}
-                        </div>
-                    </div>
-                    <div class="description-wrapper" v-if="feature.location">
-                        <div><i class="fa-solid fa-location-dot"></i></div>
-                        <div><span class="bite-location">{{ _('Bite location') }}</span>:
-                          {{ _(feature.location) }}
-                        </div>
-                    </div>
-                    <div class="date-wrapper">
-                        <div><i class="fa-solid fa-calendar-days"></i></div>
-                        <div>
-                          <span class="date">{{ _('Date') }}</span>:
-                          {{ formatData(feature) }}
-                        <span class="bite-time" v-if="feature.biteTime">
-                          | {{ _(feature.biteTime) }}
-                        </span>
-                        </div>
-                    </div>
-                <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
-                <div class="description-wrapper" v-if="feature.withWater">
-                    <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
-                      {{ _(feature.withWater) }}
-                    </div>
-                </div>
-                <div class="description-wrapper" v-if="feature.withLarva">
-                    <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
-                      {{ _(feature.withLarva) }}
-                    </div>
-                </div>
-                  <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
-                  <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
-                      <div><i class="fa-solid fa-message-check"></i></div>
-                      <div><span class="description">{{ _('Expert note') }}</span>:
-                        {{ feature.edited_user_notes }}
-                      </div>
-                  </div>
-                  <div class="description-wrapper" v-if="feature.lat && feature.lon">
-                      <div><i class="fa-solid fa-location-check"></i></div>
-                      <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
-                        {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
-                      </div>
-                  </div>
-                  <div class="description-wrapper" v-if="feature.version_uuid">
-                      <div><i class="fa-solid fa-eye"></i></div>
-                      <div><span class="description">{{ _('Observation code') }}</span>:
-                        {{ feature.version_uuid }}
-                      </div>
-                  </div>
-
-                </div>
-                <div class="col2-raw2-col2">
-                  <!-- IMAGE AND VALIDATION LOGO -->
-                  <div v-if="feature.photo_url">
-                    <img
-                      :src="feature.photo_url"
-                      @load="imageLoaded"
-                      @error="errorLoading"
-                    >
-                  </div>
-                  <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                    {{ _('Anonymous')}},
-                    <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
-                  </div>
-                  <!-- only adults have validation  -->
-                  <div class="validation-box" v-if="feature.type === 'adult'">
-                    <div class="logo" :class="getValidationClass(feature)">
-                      <i :class="getValidationIcon(feature)"></i>
-                    </div>
-                    <div class="text validation-string">
-                      <div>{{ getValidationTypeTitle(feature) }}</div>
-                      <span
-                        v-if="feature.validation_type==='human' &&
-                              feature.validation"
-                      >
-                        {{ _(feature.validation) }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+              <span class="common-name" v-html="_(feature.title)"></span>
+              <span class="latin-name" v-html="_(feature.latinName)"></span>
             </div>
+
+            <div class="col2-raw2">
+              <div class="col2-raw2-col1">
+                <!-- INFO DEL POPUP -->
+                  <div class="report-id-wrapper" v-if="feature.reportId">
+                      <div><i class="fa-solid fa-hashtag"></i></div>
+                      <div><span class="reportId">Id</span>:
+                        {{ feature.reportId }}
+                      </div>
+                  </div>
+                  <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
+                  <div class="description-wrapper" v-if="feature.howMany">
+                      <div><i class="fa-solid fa-child-reaching"></i></div>
+                      <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
+                        {{ _(feature.howMany) }}
+                      </div>
+                  </div>
+                  <div class="description-wrapper" v-if="feature.location">
+                      <div><i class="fa-solid fa-location-dot"></i></div>
+                      <div><span class="bite-location">{{ _('Bite location') }}</span>:
+                        {{ _(feature.location) }}
+                      </div>
+                  </div>
+                  <div class="date-wrapper">
+                      <div><i class="fa-solid fa-calendar-days"></i></div>
+                      <div>
+                        <span class="date">{{ _('Date') }}</span>:
+                        {{ formatData(feature) }}
+                      <span class="bite-time" v-if="feature.biteTime">
+                        | {{ _(feature.biteTime) }}
+                      </span>
+                      </div>
+                  </div>
+              <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
+              <div class="description-wrapper" v-if="feature.withWater">
+                  <div><i class="fa-solid fa-droplet"></i></div>
+                  <div><span class="water-status">{{ _('Breeding site with water') }}</span>
+                    {{ _(feature.withWater) }}
+                  </div>
+              </div>
+              <div class="description-wrapper" v-if="feature.withLarva">
+                  <div><i class="fa-solid fa-worm"></i></div>
+                  <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
+                    {{ _(feature.withLarva) }}
+                  </div>
+              </div>
+                <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
+                <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
+                    <div><i class="fa-solid fa-message-check"></i></div>
+                    <div><span class="description">{{ _('Expert note') }}</span>:
+                      {{ feature.edited_user_notes }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.lat && feature.lon">
+                    <div><i class="fa-solid fa-location-check"></i></div>
+                    <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                      {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.version_uuid">
+                    <div><i class="fa-solid fa-eye"></i></div>
+                    <div><span class="description">{{ _('Observation code') }}</span>:
+                      {{ feature.version_uuid }}
+                    </div>
+                </div>
+
+              </div>
+              <div class="col2-raw2-col2">
+                <!-- IMAGE AND VALIDATION LOGO -->
+                <div v-if="feature.photo_url">
+                  <img
+                    :src="feature.photo_url"
+                    @load="imageLoaded"
+                    @error="errorLoading"
+                  >
+                </div>
+                <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
+                  {{ _('Anonymous')}},
+                  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+                </div>
+                <!-- only adults have validation  -->
+                <div class="validation-box" v-if="feature.type === 'adult'">
+                  <div class="logo" :class="getValidationClass(feature)">
+                    <i :class="getValidationIcon(feature)"></i>
+                  </div>
+                  <div class="text validation-string">
+                    <div>{{ getValidationTypeTitle(feature) }}</div>
+                    <span
+                      v-if="feature.validation_type==='human' &&
+                            feature.validation"
+                    >
+                      {{ _(feature.validation) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
+
       </div>
     </div>
     </q-page-container>
@@ -738,7 +742,7 @@ h5, h6{
 }
 
 .reference-map{
-  display: flex;
+  // display: flex;
   padding-left: 10px;
 }
 
