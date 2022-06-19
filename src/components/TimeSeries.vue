@@ -329,6 +329,12 @@ export default defineComponent({
     border-right: 1px solid $line-color;
     border-top-right-radius: 10px;
   }
+  .toggle-time:hover{
+    background: $primary-button-background-hover;
+    color: $primary-button-text-hover;
+    box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
+    transition: all .6s cubic-bezier(.25,.8,.25,1);
+  }
   .body{
     overflow-x: auto;
     display:flex;

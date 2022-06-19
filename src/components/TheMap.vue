@@ -1556,4 +1556,11 @@ export default defineComponent({
     cursor: pointer;
     border-radius: 50%;
   }
+  .drawer-handler:hover,
+  .drawer-handler-mobile:hover{
+    background: $primary-button-background-hover;
+    color: $primary-button-text-hover;
+    box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
+    transition: all .6s cubic-bezier(.25,.8,.25,1);
+  }
 </style>

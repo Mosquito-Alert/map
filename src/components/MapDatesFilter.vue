@@ -62,18 +62,26 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 1px 10px;
   background: $primary-color;
   color:white;
-  border-radius: 25px;
-  z-index: 10;
+  border-radius: 10px;
+  z-index: 30;
+  height: 35px;
+  line-height: 35px;
   font-family: $font-family;
-  font-size: 0.85em;
-  box-shadow: $box-shadow;
+  font-size: 1em;
+  font-weight: bold;
   width: auto;
-  cursor:pointer;
+  cursor: pointer;
+  padding: 0 10px 0 5px;
+  box-shadow: $box-shadow;
 }
-
+.date-box:hover{
+  background: $primary-button-background-hover;
+  color: $primary-button-text-hover;
+  box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
+  transition: all .6s cubic-bezier(.25,.8,.25,1);
+}
 .date-from::after{
   content: '-';
   margin-left:10px;
@@ -96,4 +104,8 @@ export default {
   box-shadow: none;
 }
 
+.calendar-button span.q-btn__content i.q-icon{
+  font-size: 2em;
+  font-weight: bold;
+}
 </style>
