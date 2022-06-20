@@ -62,3 +62,7 @@ export const getPendingView = state => {
 export const getModelsServerPath = state => {
   return state.modelsServerPath
 }
+
+export const getLeftDrawerStatus = state => {
+  return state.leftDrawerStatus
+}

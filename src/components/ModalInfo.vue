@@ -17,6 +17,7 @@
                 class="column no-wrap flex-center"
               >
                 <div class="q-mt-md q-pr-md text-justify scroll">
+                  <h5>Información de los datos</h5>
                   <p>El mapa contiene información de 5 especies de mosquitos vectores de enfermedades: el mosquito tigre (Aedes albopictus), el mosquito de la fiebre amarilla (Aedes aegypti), el mosquito del Japón (Aedes japonicus), el mosquito de Corea (Aedes koreicus) y el mosquito común (Culex pipiens).</p>
                   <p>Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.</p>
                   <HR/>
@@ -222,8 +223,8 @@ export default {
 }
 
 dialog {
-  max-width: 80vw;
-  height: 90vh;
+  max-width: 60vw;
+  height: 70vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
   z-index: 2001;

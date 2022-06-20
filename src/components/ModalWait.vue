@@ -4,7 +4,11 @@
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open">
-      <dialog class="modal-box" :class="mobile?'mobile':''" open>
+      <dialog
+        class="modal-box"
+        :class="leftDrawerStatus?(mobile?'expanded mobile':'expanded'):(mobile?'collapsed mobile':'collapsed')"
+        open
+      >
         <slot></slot>
           <q-spinner-oval
             color="orange"
@@ -35,7 +39,12 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
+    const leftDrawerStatus = computed(() => {
+      return $store.getters['app/getLeftDrawerStatus']
+    })
+
     return {
+      leftDrawerStatus,
       mobile,
       open,
       _
@@ -132,6 +141,9 @@ button:hover {
   background: transparent;
   box-shadow: none;
   padding: 0;
+}
+.modal-box.expanded{
+  padding-left: $left-drawer-width;
 }
 // MOBILE
 dialog.mobile {

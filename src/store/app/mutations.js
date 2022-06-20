@@ -14,8 +14,9 @@ export const setFilteringTag = (state, payload) => {
   state.isFilteringTag = payload.value
 }
 
-export const increaseLeftDrawerStatus = (state) => {
-  state.leftDrawerStatus += 1
+export const toggleLeftDrawerStatus = (state) => {
+  state.leftDrawerStatus = !state.leftDrawerStatus
+  console.log('new status ' + state.leftDrawerStatus)
 }
 
 export const setDefaults = (state, payload) => {

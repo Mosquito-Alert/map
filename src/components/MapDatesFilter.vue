@@ -73,7 +73,7 @@ export default {
   font-weight: bold;
   width: auto;
   cursor: pointer;
-  padding: 0 10px 0 5px;
+  padding: 0 5px 0 5px;
   box-shadow: $box-shadow;
 }
 .date-box:hover{

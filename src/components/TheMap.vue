@@ -1467,6 +1467,12 @@ export default defineComponent({
     box-shadow: $box-shadow;
     // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
+
+  :deep(.ol-reports.ol-control) button i,
+  :deep(.ol-download.ol-control) button i{
+    font-size: 0.8em;
+  }
+
   :deep(.ol-reports) button:hover,
   :deep(.ol-download) button:hover,
   :deep(.ol-zoom) button:hover {

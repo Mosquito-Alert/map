@@ -152,8 +152,8 @@ export default {
 }
 
 dialog {
-  max-width: 80vw;
-  height: 90vh;
+  max-width: 60vw;
+  height: 70vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
   z-index: 2001;

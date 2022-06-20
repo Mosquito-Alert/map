@@ -252,6 +252,7 @@ export default {
     })
 
     const toggleLeftDrawer = function () {
+      $store.commit('app/toggleLeftDrawerStatus')
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
     }
