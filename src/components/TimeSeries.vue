@@ -414,6 +414,7 @@ export default defineComponent({
     -webkit-line-clamp: 2; /* number of lines to show */
     -webkit-box-orient: vertical;
   }
+
   .timeseries-filter{
     margin-left:20px;
     font-weight:300;
