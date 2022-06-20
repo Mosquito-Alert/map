@@ -414,7 +414,9 @@ export default defineComponent({
     -webkit-line-clamp: 2; /* number of lines to show */
     -webkit-box-orient: vertical;
   }
-
+  .legend div img{
+    height: 20px;
+  }
   .timeseries-filter{
     margin-left:20px;
     font-weight:300;
