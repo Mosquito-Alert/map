@@ -62,7 +62,7 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: $primary-color;
+  background:#efa501;
   color:white;
   border-radius: 10px;
   z-index: 30;

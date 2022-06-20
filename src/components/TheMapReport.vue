@@ -520,7 +520,7 @@ export default {
       }
 
       if (view.filters.report_id.length) {
-        params.reportId = view.filters.report_id
+        params.report_id = view.filters.report_id
       }
 
       if (view.filters.hashtags.length) {
