@@ -5,7 +5,7 @@
   <transition name="modal">
     <div class="dialog help" v-if="open">
     <!-- <div class="dialog" v-if="open" @click="close"> -->
-      <dialog open class="q-pa-xl" :class="mobile?'mobile':''">
+      <dialog open class="modal-help q-pa-xl" :class="mobile?'mobile':''">
         <slot></slot>
           <q-carousel
            v-model="slide"
@@ -20,7 +20,7 @@
             control-color="orange"
             padding
             arrows
-            class="scroll rounded-borders">
+            class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
                 <div class="q-mt-md text-center">
@@ -243,6 +243,12 @@ hr{
 .close-modal {
   position: absolute;
   bottom: 10px;
-  right: 10px;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
 }
+
 </style>

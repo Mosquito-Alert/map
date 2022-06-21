@@ -140,9 +140,8 @@ export default {
 </script>
 
 <style lang="scss">
-  .q-toolbar__title {
-    // padding: 28px;
-    // border-top: 1px solid $grey-color;
+  .border-bottom{
+    border-bottom: 1px solid $grey-color;
   }
   a{
     text-decoration: none;

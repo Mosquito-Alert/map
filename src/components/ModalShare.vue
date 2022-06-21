@@ -3,36 +3,38 @@
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog" v-if="open" @click="close">
+    <div class="dialog-share" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>
           <p v-if="success=='error'">{{ _('Share map view error') }}</p>
-          <div v-if="success=='ok'">
-            <div v-if="copied">
-              <transition name="toast">
-                <p>{{ _('Url has been copied') }}</p>
-              </transition>
-            </div>
+          <div class="modal-content" v-if="success=='ok'">
+            <transition name="toast">
+              <div v-if="copied" class="toast-msg">
+                {{ _('Url has been copied') }}
+              </div>
+            </transition>
             <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
-            <div class="new-url-wrapper">
-              <div>{{ _('This is the new view url') }}</div>
-              <span
-                class="url-text"
-                v-html="newUrl"
-                @click.stop
-              />
-              <span class="viewshare"><i
-                class="fas fa-copy"
-                :title="_('Copy url to clipboard')"
-                @click.stop="copyToClipboard"
-              ></i></span>
+            <div class="row new-url-wrapper">
+              <div class="col text-center">
+                <span
+                  class="url-text"
+                  v-html="newUrl"
+                  @click.stop
+                />
+                <span class="viewshare cursor-pointer"><i
+                  class="q-ml-md fas fa-copy"
+                  :title="_('Copy url to clipboard')"
+                  @click.stop="copyToClipboard"
+                ></i></span>
+              </div>
+
             </div>
           </div>
-        <div class="buttons">
+        <div class="buttons close-modal">
           <div class="download-buttons">
             <button v-if="success==''" @click.stop="shareView">{{ _('Share view') }}</button>
-            <button @click="close" class="close">{{ _('Close') }}</button>
+            <button @click="close">{{ _('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -42,7 +44,7 @@
 
 <script>
 
-import { ref, computed } from 'vue'
+import { ref, computed, onUpdated } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -57,6 +59,9 @@ export default {
       context.emit('shareView')
     }
 
+    onUpdated(() => {
+      shareView()
+    })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -74,9 +79,14 @@ export default {
     const copyToClipboard = function () {
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
         copied.value = true
+        setTimeout(hide, 3000)
         return navigator.clipboard.writeText(newUrl.value)
       }
       return Promise.reject('The Clipboard API is not available.')
+    }
+
+    function hide () {
+      copied.value = false
     }
 
     return {
@@ -93,7 +103,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .backdrop {
   position: fixed;
   top: 0;
@@ -104,7 +114,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.75);
 }
 
-.dialog {
+.dialog-share {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -144,11 +154,12 @@ dialog {
   opacity: 0;
   top: 5vh;
 }
-button.disabled {
+
+.download-buttons button.disabled {
   background: #ccc;
   cursor: not-allowed;
 }
-button {
+.download-buttons button {
   background: $primary-button-background;
   border: none;
   color: white;
@@ -158,7 +169,7 @@ button {
   font-weight: bold;
   margin: 10px;
 }
-button:hover {
+.download-buttons button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
@@ -178,6 +189,19 @@ button:hover {
 }
 
 // Animation enter classes
+.toast-msg{
+  color: white;
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  display:flex;
+  justify-content:center;
+  background: green;
+  padding: 5px;
+  margin: 0 15px;
+  border-radius: 5px;
+}
 .toast-enter-from{
   opacity: 0;
   transform: translateY(-60px);
@@ -187,7 +211,7 @@ button:hover {
   transform: translateY(0);
 }
 .toast-enter-active{
-  transition: all 0.3s ease;
+  transition: all 1s ease;
 }
 
 // animation leave classes
@@ -228,5 +252,18 @@ dialog.mobile button{
 
 .new-url-wrapper{
   display: flex;
+}
+.close-modal{
+  position: absolute;
+  bottom: 10px;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
+}
+.modal-content{
+  padding-bottom: 80px;
 }
 </style>

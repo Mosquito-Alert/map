@@ -3,7 +3,7 @@
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog" v-if="open" @click="close">
+    <div class="dialog modal-download" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title">{{ _('Download') }}</div>
@@ -19,14 +19,14 @@
           {{ _('No features to download') }}
         </div>
         <div class="buttons">
-          <div class="download-buttons">
+          <div class="modal-content download-buttons">
             <button
               class="download"
               :class="!nFeatures?'disabled':''"
               @click="download('gpkg')"
             >
               <i class="fa-solid fa-download"></i>
-                {{ _('Download geopackage') }}
+                <div class="q-pl-sm">{{ _('Download geopackage') }}</div>
             </button>
 
             <button
@@ -35,10 +35,10 @@
               @click="download('xlsx')"
             >
                 <i class="fa-solid fa-download"></i>
-                {{ _('Download excel') }}
+                <div class="q-pl-sm">{{ _('Download excel') }}</div>
             </button>
           </div>
-          <div class="download-buttons">
+          <div class="close-modal download-buttons">
             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .backdrop {
   position: fixed;
   top: 0;
@@ -101,7 +101,7 @@ export default {
   background: transparent
 }
 
-.dialog {
+.dialog.modal-download {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -111,7 +111,7 @@ export default {
   align-items: center;
   z-index: 2001;
 }
-dialog {
+.modal-download dialog {
   max-width: 50vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
@@ -141,11 +141,14 @@ dialog {
   opacity: 0;
   top: 5vh;
 }
-button.disabled {
+.modal-download button.disabled {
   background: #ccc;
   pointer: not-allowed;
 }
-button {
+.modal-download button.download {
+  display:flex;
+}
+.modal-download button {
   background: $primary-button-background;
   border: none;
   color: white;
@@ -155,7 +158,7 @@ button {
   font-weight: bold;
   margin: 10px;
 }
-button:hover {
+.modal-download button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
@@ -184,5 +187,18 @@ dialog.mobile {
 
 dialog.mobile button{
   padding: 5px 10px;
+}
+.close-modal {
+  position: absolute;
+  bottom: 10px;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
+}
+.modal-download .modal-content{
+  padding-bottom:40px;
 }
 </style>

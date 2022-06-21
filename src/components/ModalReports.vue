@@ -3,7 +3,7 @@
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog" v-if="open" @click="close">
+    <div class="dialog modal-reports" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title">{{ _('Reports modal title') }}</div>
@@ -12,7 +12,7 @@
         <div class="error-message" v-if="tooManyFeatures">
           {{ _('Reports limit exceeded') }}
         </div>
-        <div class="buttons">
+        <div class="modal-close buttons">
           <div class="download-buttons">
             <button v-if="!tooManyFeatures" @click="newReport">{{ _('Continue') }}</button>
             <button @click="close" class="close">{{ _('Close') }}</button>
@@ -68,7 +68,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .backdrop {
   position: fixed;
   top: 0;
@@ -80,7 +80,7 @@ export default {
   background: transparent
 }
 
-.dialog {
+.dialog.modal-reports {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -90,7 +90,7 @@ export default {
   align-items: center;
   z-index: 2001;
 }
-dialog {
+.modal-reports dialog {
   max-width: 50vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
@@ -120,11 +120,11 @@ dialog {
   opacity: 0;
   top: 5vh;
 }
-button.disabled {
+.modal-reports button.disabled {
   background: #ccc;
   pointer: not-allowed;
 }
-button {
+.modal-reports button {
   background: $primary-button-background;
   border: none;
   color: white;
@@ -134,7 +134,7 @@ button {
   font-weight: bold;
   margin: 10px;
 }
-button:hover {
+.modal-reports button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }

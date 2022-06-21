@@ -54,6 +54,7 @@ export default class FormatObservation {
         this.o.photo_url = preUrl + this.o.photo_url
       }
     }
+    this.o.photo_url = '//www.evolo.us/wp-content/uploads/2019/04/0516-0-600x878.jpg'
     return this.o
   }
 }

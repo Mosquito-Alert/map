@@ -74,4 +74,7 @@ a button.fa-thin-button {
 .main-menu-item{
   border-top: 1px solid $grey-color;
 }
+.q-toolbar a.main-menu-item:nth-child(2){
+  border-bottom: 1px solid $grey-color;
+}
 </style>

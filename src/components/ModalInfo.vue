@@ -5,7 +5,7 @@
   <transition name="modal">
     <div class="dialog help" v-if="open">
     <!-- <div class="dialog" v-if="open" @click="close"> -->
-      <dialog open class="q-pa-xl" :class="mobile?'mobile q-pa-xs':''">
+      <dialog open class="modal-info q-pa-xl" :class="mobile?'mobile q-pa-xs':''">
         <slot></slot>
           <q-carousel
            v-model="slide"
@@ -314,6 +314,14 @@ hr{
 .close-modal {
   position: absolute;
   bottom: 10px;
-  right: 10px;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
+}
+.modal-info{
+  padding-bottom: 80px;
 }
 </style>
