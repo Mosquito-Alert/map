@@ -230,6 +230,7 @@ dialog {
   z-index: 2001;
   border: none;
   overflow:auto;
+  position:relative;
 }
 
 dialog.mobile {

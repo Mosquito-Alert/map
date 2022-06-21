@@ -3,7 +3,7 @@
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog help" v-if="open">
+    <div class="dialog modal-help" v-if="open">
     <!-- <div class="dialog" v-if="open" @click="close"> -->
       <dialog open class="modal-help q-pa-xl" :class="mobile?'mobile':''">
         <slot></slot>
@@ -140,7 +140,7 @@ export default {
     -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
 }
 
-.dialog {
+.dialog.modal-help {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -152,6 +152,7 @@ export default {
 }
 
 dialog {
+  position:relative;
   max-width: 60vw;
   height: 70vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);

@@ -120,6 +120,7 @@ export default {
   z-index: 2001;
   border: none;
   overflow:auto;
+  position: relative;
 }
 .backdrop-enter-from,
 .backdrop-leave-to {
