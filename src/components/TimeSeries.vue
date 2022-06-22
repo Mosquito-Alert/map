@@ -1,6 +1,9 @@
 <template>
   <div :class="timeSeriesClass">
-    <div class="toggle-time">
+    <div
+      class="toggle-time"
+      :class="mobile?'mobile':''"
+    >
       <q-btn
         flat dense
         icon="expand_less"
@@ -15,13 +18,19 @@
       </q-btn>
     </div>
     <div class="body">
+      <div v-if="mobile" class="text-right">
+        <q-btn :label="_('Close')" class="q-ma-md btn" @click="toggleTimeSeries"/>
+      </div>
       <div class="legend" :class="mobile?'mobile':''">
-        <div v-for="set in chartData.datasets" :key="set.label">
-          <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
-          <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i>
-            <div v-if="!mobile">{{ _(set.label) }}
-            </div>
+        <div :class="mobile?'row':'no-row'">
+          <div :class="mobile?'col-5 q-py-xs':''" v-for="set in chartData.datasets" :key="set.label">
+            <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
+            <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i>
+              <div>{{ _(set.label) }}
+              </div>
+          </div>
         </div>
+
         <div>
           <q-btn
             ref="calendarBtn"
@@ -96,8 +105,7 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
-    graphicHeight.value = mobile.value ? '280' : '230'
-    console.log(graphicHeight.value)
+    graphicHeight.value = mobile.value ? '100%' : '230'
 
     const resetDateFilter = function () {
       calendarDate.value = null
@@ -241,20 +249,6 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
 
-    // const dateFilterToString = function (date) {
-    //   if (typeof date === 'object') {
-    //     const sDate = date.from
-    //     const eDate = date.to
-    //     if (sDate === eDate) {
-    //       dateFilter.value = moment(sDate).format('DD-MM-YYYY')
-    //     } else {
-    //       dateFilter.value = moment(sDate).format('DD-MM-YYYY') + ' - ' + moment(eDate).format('DD-MM-YYYY')
-    //     }
-    //   } else {
-    //     dateFilter.value = moment(date).format('DD-MM-YYYY')
-    //   }
-    // }
-
     const showCalendar = function () {
       calendarBtn.value.$el.click()
     }
@@ -343,17 +337,21 @@ export default defineComponent({
   .legend {
     margin-left: 30px;
     display: flex;
-    justify-content: space-between;
+    // justify-content: space-between;
   }
   .legend,
-  .legend>div {
+  .legend .no-row,
+  .legend .no-row .no-row{
     display: flex;
     // margin-right: 10px;
     margin-right: 10px;
     white-space:nowrap;
   }
-  .legend>div .symbol {
+  .legend div{
     margin-right: 10px;
+    margin-left: 3px;
+  }
+  .legend>div .symbol {
     vertical-align: bottom;
   }
   .calendar-button {
@@ -405,14 +403,15 @@ export default defineComponent({
   .mr-10{
     margin-right: 10px;
   }
+  .legend .no-row div,
   .legend div{
     overflow: hidden;
-    text-overflow: ellipsis;
+    // text-overflow: ellipsis;
     display: inline;
     line-height: 16px;     /* fallback */
     max-height: 32px;      /* fallback */
-    -webkit-line-clamp: 2; /* number of lines to show */
-    -webkit-box-orient: vertical;
+    // -webkit-line-clamp: 2; /* number of lines to show */
+    // -webkit-box-orient: vertical;
   }
   .legend div img{
     height: 20px;
@@ -434,7 +433,35 @@ export default defineComponent({
     border:none;
     font-size: .8em;
   }
+
+  .mobile .graph-canvas{
+    bottom: 50px;
+    display: flex;
+    align-items: center;
+  }
   .graph-canvas{
     flex-grow:1
+  }
+  .mobile .map-footer{
+    &.visible{
+      min-height: 100vh;
+      max-height: 100%;
+      z-index: 2200;
+      position: absolute !important;
+      bottom: 0px;
+      top: 0;
+    }
+  }
+  .mobile.legend{
+    display: flex;
+    // margin-right: 10px;
+    margin-right: 10px;
+    flex-wrap:wrap;
+  }
+  .legend.mobile .row{
+    overflow: hidden;
+    display: flex;
+    line-height: 16px;
+    max-height: unset;
   }
 </style>
