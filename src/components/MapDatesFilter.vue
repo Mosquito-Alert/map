@@ -58,7 +58,8 @@ export default {
   align-items:baseline;
   display: flex;
   flex-direction: row;
-  justify-content: bottom;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: 10px;
   right: 10px;
@@ -66,14 +67,15 @@ export default {
   color:white;
   border-radius: 10px;
   z-index: 30;
-  height: 35px;
-  line-height: 35px;
+  height: 40px;
+  line-height: 40px;
   font-family: $font-family;
   font-size: 1em;
   font-weight: bold;
   width: auto;
+  min-width: 40px;
   cursor: pointer;
-  padding: 0 5px 0 5px;
+  // padding: 0 7px 0 3px;
   box-shadow: $box-shadow;
 }
 .date-box:hover{
@@ -89,6 +91,7 @@ export default {
 
 .date-to{
   padding-left: 10px;
+  padding-right: 7px;
 }
 
 // .date-box button:hover {
@@ -106,6 +109,5 @@ export default {
 
 .calendar-button span.q-btn__content i.q-icon{
   font-size: 2em;
-  font-weight: bold;
 }
 </style>

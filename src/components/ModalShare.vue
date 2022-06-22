@@ -197,7 +197,7 @@ dialog {
   right: 0;
   display:flex;
   justify-content:center;
-  background: green;
+  background-color: $filter-grey;
   padding: 5px;
   margin: 0 15px;
   border-radius: 5px;

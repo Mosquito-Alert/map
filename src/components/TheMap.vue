@@ -49,10 +49,13 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
-          <ol-source-osm />
-            <!-- <ol-source-xyz
+          <!-- <ol-source-osm /> -->
+          <ol-source-xyz
               crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wxbHRmZXliMDlkeDNrcG40dm14OWZmNiJ9.UFRSz8T_c4riZkH3CyGgBQ' /> -->
+              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' />
+          <!-- <ol-source-xyz
+            crossOrigin='anonymous'
+            url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wzb2Y4OHdqMGc3bzNqbGc5czh1eTRxdSJ9.aELTac_0JttmyIMk7Xpk2Q' /> -->
         </ol-tile-layer>
 
         <!-- SAMPLING EFFORT -->

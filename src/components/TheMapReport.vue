@@ -74,128 +74,136 @@
 
       <!-- MAQUETING -->
       <div class="row" v-for="feature, index in featuresGeoJson" :key="index">
-        <div class="col-xl-1 col-lg-1 col-md-1 col-sm-12 col-xs-12"></div>
-        <div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 col-xs-12">
-         <div class="row observation-box">
-          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <div style="height:100%">
-              <img :id="'mapa_' + index" />
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-xs-12"></div>
+        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-xs-12">
+         <div
+          class="row observation-box"
+          :class="mobile?'mobile':''"
+         >
+            <!-- FIRST ROW. IMAGES -->
+            <div class="q-px-lg q-col-xl-2 col-lg-2 col-md-2 col-sm-1 col-xm-12"></div>
+            <div class="q-mb-md col-xl-4 col-lg-4 col-md-4 col-sm-5 col-xs-12">
+              <div class="observation-map">
+                <img :id="'mapa_' + index" />
+              </div>
+              <div :id="'mapa_' + index" class="map-container">
+                <one-feature-map
+                  :mapId="'mapa_' + index"
+                  toCanvas='true'
+                  height="250px"
+                  width="90%"
+                  :featContent="feature">
+                </one-feature-map>
+              </div>
             </div>
-            <div style="height:100%" :id="'mapa_' + index" class="map-container">
-              <one-feature-map
-                :mapId="'mapa_' + index"
-                toCanvas='true'
-                height="100%"
-                width="100%"
-                :featContent="feature">
-              </one-feature-map>
-            </div>
-          </div>
 
-          <div class="q-pa-lg col-xl-6 col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <div class="q-pb-lg flex">
-                <span class="counter">{{ index + 1 }}</span>
-                <div class="report-names q-pt-sm">
-                  <span class="common-name" v-html="_(feature.title)"></span>
-                  <span class="latin-name" v-html="_(feature.latinName)"></span>
-                </div>
+            <div class="observation-img q-col-xl-4 col-lg-4 col-md-4 col-sm-5 col-xm-12">
+              <div v-if="feature.photo_url">
+                <img
+                  class="photo"
+                  :src="feature.photo_url"
+                  @load="imageLoaded"
+                  @error="errorLoading"
+                >
+              </div>
+              <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
+                {{ _('Anonymous')}},
+                <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
+              </div>
             </div>
-            <div class="q-ml-xl">
-              <div class="report-id-wrapper" v-if="feature.reportId">
-                  <div><i class="fa-solid fa-hashtag"></i></div>
-                  <div><span class="reportId">Id</span>:
-                    {{ feature.reportId }}
+            <div class="q-col-xl-2 col-lg-2 col-md-2 col-sm-1 col-xm-12"></div>
+
+            <!-- SECOND ROW -->
+            <div class="q-px-xl col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <div class="q-pb-lg flex">
+                  <span class="counter">{{ index + 1 }}</span>
+                  <div class="report-names q-pt-sm">
+                    <span class="common-name" v-html="_(feature.title)"></span>
+                    <span class="latin-name" v-html="_(feature.latinName)"></span>
                   </div>
               </div>
-              <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
-              <div class="description-wrapper" v-if="feature.howMany">
-                  <div><i class="fa-solid fa-child-reaching"></i></div>
-                  <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
-                    {{ _(feature.howMany) }}
+              <div class="q-ml-xl">
+                <div class="report-id-wrapper" v-if="feature.reportId">
+                    <div><i class="fa-solid fa-hashtag"></i></div>
+                    <div><span class="reportId">Id</span>:
+                      {{ feature.reportId }}
+                    </div>
+                </div>
+                <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
+                <div class="description-wrapper" v-if="feature.howMany">
+                    <div><i class="fa-solid fa-child-reaching"></i></div>
+                    <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
+                      {{ _(feature.howMany) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.location">
+                    <div><i class="fa-solid fa-location-dot"></i></div>
+                    <div><span class="bite-location">{{ _('Bite location') }}</span>:
+                      {{ _(feature.location) }}
+                    </div>
+                </div>
+                <div class="date-wrapper">
+                    <div><i class="fa-solid fa-calendar-days"></i></div>
+                    <div>
+                        <span class="date">{{ _('Date') }}</span>:
+                        {{ formatData(feature) }}
+                      <span class="bite-time" v-if="feature.biteTime">
+                        | {{ _(feature.biteTime) }}
+                      </span>
+                    </div>
+                </div>
+                <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
+                <div class="description-wrapper" v-if="feature.withWater">
+                    <div><i class="fa-solid fa-droplet"></i></div>
+                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
+                      {{ _(feature.withWater) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.withLarva">
+                    <div><i class="fa-solid fa-worm"></i></div>
+                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
+                      {{ _(feature.withLarva) }}
+                    </div>
+                </div>
+                <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
+                <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
+                    <div><i class="fa-solid fa-message-check"></i></div>
+                    <div><span class="description">{{ _('Expert note') }}</span>:
+                      {{ feature.edited_user_notes }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.lat && feature.lon">
+                    <div><i class="fa-solid fa-location-check"></i></div>
+                    <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                      {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
+                    </div>
+                </div>
+                <div class="description-wrapper" v-if="feature.version_uuid">
+                    <div><i class="fa-solid fa-eye"></i></div>
+                    <div><span class="description">{{ _('Observation code') }}</span>:
+                      {{ feature.version_uuid }}
+                    </div>
+                </div>
+                <!-- only adults have validation  -->
+                <div class="q-py-xl validation-box" v-if="feature.type === 'adult'">
+                  <div class="logo" :class="getValidationClass(feature)">
+                    <i :class="getValidationIcon(feature)"></i>
                   </div>
-              </div>
-              <div class="description-wrapper" v-if="feature.location">
-                  <div><i class="fa-solid fa-location-dot"></i></div>
-                  <div><span class="bite-location">{{ _('Bite location') }}</span>:
-                    {{ _(feature.location) }}
-                  </div>
-              </div>
-              <div class="date-wrapper">
-                  <div><i class="fa-solid fa-calendar-days"></i></div>
-                  <div>
-                      <span class="date">{{ _('Date') }}</span>:
-                      {{ formatData(feature) }}
-                    <span class="bite-time" v-if="feature.biteTime">
-                      | {{ _(feature.biteTime) }}
+                  <div class="text validation-string">
+                    <div>{{ getValidationTypeTitle(feature) }}</div>
+                    <span
+                      v-if="feature.validation_type==='human' &&
+                            feature.validation"
+                    >
+                      {{ _(feature.validation) }}
                     </span>
                   </div>
-              </div>
-              <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
-              <div class="description-wrapper" v-if="feature.withWater">
-                  <div><i class="fa-solid fa-droplet"></i></div>
-                  <div><span class="water-status">{{ _('Breeding site with water') }}</span>
-                    {{ _(feature.withWater) }}
-                  </div>
-              </div>
-              <div class="description-wrapper" v-if="feature.withLarva">
-                  <div><i class="fa-solid fa-worm"></i></div>
-                  <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
-                    {{ _(feature.withLarva) }}
-                  </div>
-              </div>
-              <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
-              <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
-                  <div><i class="fa-solid fa-message-check"></i></div>
-                  <div><span class="description">{{ _('Expert note') }}</span>:
-                    {{ feature.edited_user_notes }}
-                  </div>
-              </div>
-              <div class="description-wrapper" v-if="feature.lat && feature.lon">
-                  <div><i class="fa-solid fa-location-check"></i></div>
-                  <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
-                    {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
-                  </div>
-              </div>
-              <div class="description-wrapper" v-if="feature.version_uuid">
-                  <div><i class="fa-solid fa-eye"></i></div>
-                  <div><span class="description">{{ _('Observation code') }}</span>:
-                    {{ feature.version_uuid }}
-                  </div>
-              </div>
-            </div>
-          </div>
-          <!-- IMAGE AND VALIDATION LOGO -->
-          <div class="observation-img q-px-lg q-col-xl-3 col-lg-3 col-md-3 col-sm-12 col-xm-12">
-            <div v-if="feature.photo_url">
-              <img
-                :src="feature.photo_url"
-                @load="imageLoaded"
-                @error="errorLoading"
-              >
-            </div>
-            <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-              {{ _('Anonymous')}},
-              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
-            </div>
-            <!-- only adults have validation  -->
-            <div class="validation-box" v-if="feature.type === 'adult'">
-              <div class="logo" :class="getValidationClass(feature)">
-                <i :class="getValidationIcon(feature)"></i>
-              </div>
-              <div class="text validation-string">
-                <div>{{ getValidationTypeTitle(feature) }}</div>
-                <span
-                  v-if="feature.validation_type==='human' &&
-                        feature.validation"
-                >
-                  {{ _(feature.validation) }}
-                </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        </div>
-        <div class="col-xl-1 col-lg-1 col-md-1 col-sm-12 col-xs-12"></div>
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-xs-12"></div>
       </div>
     </q-page-container>
   </q-layout>
@@ -565,8 +573,13 @@ export default {
       else return _('AI validation')
     }
 
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
     return {
       _,
+      mobile,
       errorLoading,
       getValidationClass,
       getValidationIcon,
@@ -656,7 +669,7 @@ h5, h6{
   flex-grow: 1;
 }
 
-.observation-box img{
+.observation-box img.photo{
   max-width: 250px;
   max-height: 250px;
 }
@@ -718,7 +731,7 @@ h5, h6{
   padding:3px;
   background: transparent;
   border-radius: 10px;
-  text-align: right;
+  text-align: center;
   font-size:0.8em;
   color: black;
   &>a {
@@ -776,8 +789,8 @@ h5, h6{
 
 .validation-box{
   display:flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: raw;
+  padding-top: 20px;
 }
 
 .validation-string {
@@ -786,6 +799,7 @@ h5, h6{
 }
 .validation-string div{
   margin-left: 10x;
+  font-weight: 600;
 }
 .report-names{
   flex-grow: 1;
@@ -794,9 +808,13 @@ h5, h6{
 
 .observation-img img{
   width: 100%;
+  max-width: 250px;
+  max-height: 250px;
+  text-align:center;
 }
+.observation-map,
 .observation-img{
-  align-self: center;
+  padding-top: 40px;
 }
 .common-name{
   font-weight: bold;
@@ -804,5 +822,8 @@ h5, h6{
 .common-name::after{
   content: '|';
   margin:0px 5px;
+}
+@media print {
+  /* Contenido del fichero print.css */
 }
 </style>
