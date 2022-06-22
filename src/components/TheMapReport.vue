@@ -82,7 +82,7 @@
          >
             <!-- FIRST ROW. IMAGES -->
             <div class="q-px-lg q-col-xl-2 col-lg-2 col-md-2 col-sm-1 col-xm-12"></div>
-            <div class="q-mb-md col-xl-4 col-lg-4 col-md-4 col-sm-5 col-xs-12">
+            <div class="observation-map-container q-mb-md col-xl-4 col-lg-4 col-md-4 col-sm-5 col-xs-12">
               <div class="observation-map">
                 <img :id="'mapa_' + index" />
               </div>
@@ -114,7 +114,7 @@
             <div class="q-col-xl-2 col-lg-2 col-md-2 col-sm-1 col-xm-12"></div>
 
             <!-- SECOND ROW -->
-            <div class="q-px-xl col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="second-row q-px-xl col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <div class="q-pb-lg flex">
                   <span class="counter">{{ index + 1 }}</span>
                   <div class="report-names q-pt-sm">
@@ -122,7 +122,7 @@
                     <span class="latin-name" v-html="_(feature.latinName)"></span>
                   </div>
               </div>
-              <div class="q-ml-xl">
+              <div :class="mobile?'q-mx-lg':'q-ml-xl'">
                 <div class="report-id-wrapper" v-if="feature.reportId">
                     <div><i class="fa-solid fa-hashtag"></i></div>
                     <div><span class="reportId">Id</span>:
@@ -815,6 +815,15 @@ h5, h6{
 .observation-map,
 .observation-img{
   padding-top: 40px;
+}
+.observation-box.mobile .observation-map-container{
+  text-align: center;
+}
+.observation-box.mobile .second-row{
+  padding: 0px 5px;
+}
+.observation-box.mobile .observation-img{
+  margin:auto;
 }
 .common-name{
   font-weight: bold;
