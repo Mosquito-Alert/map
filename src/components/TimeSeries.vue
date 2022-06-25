@@ -23,7 +23,7 @@
       </div>
       <div class="legend" :class="mobile?'mobile':''">
         <div :class="mobile?'row':'no-row'">
-          <div :class="mobile?'col-5 q-py-xs':''" v-for="set in chartData.datasets" :key="set.label">
+          <div :class="mobile?'col-6 q-py-xs':''" v-for="set in chartData.datasets" :key="set.label">
             <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
             <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i>
               <div>{{ _(set.label) }}
@@ -105,7 +105,7 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
-    graphicHeight.value = mobile.value ? '100%' : '230'
+    graphicHeight.value = mobile.value ? '400' : '230'
 
     const resetDateFilter = function () {
       calendarDate.value = null
@@ -135,6 +135,9 @@ export default defineComponent({
 
     const timeSeriesClass = computed(() => {
       let classes = 'text-black map-footer'
+      if (mobile.value) {
+        classes += ' mobile'
+      }
       if (timeIsVisible.value) {
         classes += ' visible'
       }
@@ -296,11 +299,16 @@ export default defineComponent({
     position: relative;
     background-color: $color-pestanya;
     color: $color-pestanya-text;
-    transition: max-height .3s ease-out;
+    transition: max-height 1s ease-out;
     border-top: 1px solid $line-color;
-    &.visible {
+    &.visible:not(.mobile) {
       max-height: $timeseries-height;
       height: $timeseries-height;
+      // transition: height .3s ease-in;
+    }
+    &.visible.mobile {
+      max-height: 100%;
+      height: 100%;
       transition: max-height .3s ease-in;
     }
     box-shadow: 7px 0 14px rgba(0,0,0,0.25), 5px 0 5px rgba(0,0,0,0.22);
@@ -347,9 +355,13 @@ export default defineComponent({
     margin-right: 10px;
     white-space:nowrap;
   }
-  .legend div{
+  .legend div:not{
     margin-right: 10px;
     margin-left: 3px;
+  }
+  .legend.mobile .row div{
+    padding-right: 10px;
+    padding-left: 3px;
   }
   .legend>div .symbol {
     vertical-align: bottom;
@@ -434,27 +446,34 @@ export default defineComponent({
     font-size: .8em;
   }
 
+  // MOBILE
+  .map-footer.mobile.visible .toggle-time.mobile{
+    display:none;
+  }
   .mobile .graph-canvas{
-    bottom: 50px;
     display: flex;
     align-items: center;
   }
   .graph-canvas{
     flex-grow:1
   }
-  .mobile .map-footer{
-    &.visible{
-      min-height: 100vh;
-      max-height: 100%;
-      z-index: 2200;
-      position: absolute !important;
-      bottom: 0px;
-      top: 0;
-    }
+  .map-footer.mobile:not(.visible){
+    transition: max-height 1s ease;
+    max-height: 0px;
+    height:0px;
+    // position: relative;
+  }
+  .map-footer.mobile.visible{
+    transition: max-height 1s ease-out;
+    max-height: 100%;
+    height: 100%;
+    z-index: 2000;
+    position: absolute;
+    bottom: 0px;
   }
   .mobile.legend{
     display: flex;
-    // margin-right: 10px;
+    margin-left: 10px;
     margin-right: 10px;
     flex-wrap:wrap;
   }

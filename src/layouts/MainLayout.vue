@@ -121,6 +121,7 @@ export default {
     const $store = useStore()
 
     const resizeMap = function (args) {
+      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {
         map.value.map.updateSize()
         setTimeout(() => {

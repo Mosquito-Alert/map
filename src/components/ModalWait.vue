@@ -142,7 +142,7 @@ button:hover {
   box-shadow: none;
   padding: 0;
 }
-.modal-box.expanded{
+.modal-box.expanded:not(.mobile){
   padding-left: $left-drawer-width;
 }
 // MOBILE

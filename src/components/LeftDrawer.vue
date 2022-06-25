@@ -13,12 +13,8 @@
     <div class="toc-layers"
       :class="expanded?'expanded':'collapsed'"
     >
-      <div v-if="mobile">
-        <q-icon
-          name="close"
-          class="close-menu"
-          @click="toggleLeftDrawer"
-        />
+      <div v-if="mobile" class="text-right">
+        <q-btn :label="_('Close')" class="q-ma-md btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
@@ -667,14 +663,4 @@ input{
   }
 }
 
-.close-menu{
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  padding: 10px;
-  background: $primary-color;
-  border-radius: 50%;
-  color:white;
-  cursor:pointer;
-}
 </style>

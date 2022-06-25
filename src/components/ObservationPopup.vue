@@ -37,7 +37,7 @@
             </a>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
-            <div class="scroll">
+            <div class="scroll" :class="mobile?'q-pl-md':''">
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -101,7 +101,7 @@
               </div>
             </div>
             <!-- only adults have validation  -->
-            <div v-if="selectedFeature.type === 'adult'">
+            <div v-if="selectedFeature.type === 'adult'" :class="mobile?'q-px-md':''">
               <div :class="getValidationClass(selectedFeature)">
                 <i :class="getValidationIcon(selectedFeature)"></i>
               </div>
@@ -666,6 +666,10 @@ export default defineComponent({
   width: 100vw;
 }
 
+.image.mobile.portrait,
+.image.mobile.square{
+  padding-top:20px;
+}
 .image.mobile .img-container{
   display: flex;
   justify-content: center;
@@ -682,6 +686,10 @@ export default defineComponent({
 
 .parentContainer.mobile .info{
   flex-direction: row;
+}
+
+.parentContainer.mobile .info:nth-child(2){
+
 }
 
 .mobile.portrait .info-validation{

@@ -1,5 +1,6 @@
 export default function () {
   return {
+    graphIsVisible: false,
     completeDatesRange: {},
     dates: [],
     data: [],

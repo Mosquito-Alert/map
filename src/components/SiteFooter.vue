@@ -1,6 +1,6 @@
 <template>
 
-  <q-footer class="text-white">
+  <q-footer v-if="!mobile || (!popupContent || !Object.keys(popupContent).length)" class="text-white">
     <q-toolbar>
       <q-toolbar-title>
         <div v-if="!mobile" class="attribution"></div>
@@ -49,8 +49,19 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
+    const popupContent = computed(() => {
+      return $store.getters['map/getSelectedFeature']
+    })
+
+    const showFooter = computed(() => {
+      console.log(Object.keys(popupContent).length)
+      return (!mobile.value || Object.keys(popupContent).length !== 0)
+    })
+
     return {
-      mobile
+      mobile,
+      popupContent,
+      showFooter
     }
   }
 })

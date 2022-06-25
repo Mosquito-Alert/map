@@ -1,5 +1,8 @@
 <template>
-  <div id='mapa' class='bg-white'>
+  <div id='mapa'
+    class='bg-white'
+    :class="mobile && graphVisible?'mobile small-size':'full-size'"
+  >
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -49,13 +52,10 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
-          <!-- <ol-source-osm /> -->
-          <ol-source-xyz
-              crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' />
+          <ol-source-osm />
           <!-- <ol-source-xyz
-            crossOrigin='anonymous'
-            url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wzb2Y4OHdqMGc3bzNqbGc5czh1eTRxdSJ9.aELTac_0JttmyIMk7Xpk2Q' /> -->
+              crossOrigin='anonymous'
+              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' /> -->
         </ol-tile-layer>
 
         <!-- SAMPLING EFFORT -->
@@ -205,6 +205,10 @@ export default defineComponent({
       reportFeatures: [],
       report_id: []
     }
+
+    const graphVisible = computed(() => {
+      return $store.getters['timeseries/getGraphIsVisible']
+    })
 
     const mapDates = computed(() => {
       return $store.getters['map/getMapDates']
@@ -1400,7 +1404,8 @@ export default defineComponent({
       foldingIcon,
       attrVisible,
       unfoldAttribution,
-      setPendingView
+      setPendingView,
+      graphVisible
     }
   }
 })
@@ -1410,7 +1415,15 @@ export default defineComponent({
 
   #mapa {
     flex: 1;
+    flex-shrink:1;
+    flex-grow: 1;
     position: relative;
+  }
+
+  #mapa.mobile.small-size{
+    // flex-grow:0;
+    // flex:unset;
+    // transition: all 1s;
   }
   :deep(.ol-reports.ol-control.ol-disabled),
   :deep(.ol-download.ol-control.ol-disabled) {

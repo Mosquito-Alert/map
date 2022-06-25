@@ -17,3 +17,7 @@ export const updateXUnits = (state, days) => {
     state.chart.options.scales.x.time.unit = 'month'
   }
 }
+
+export const setGraphIsVisible = (state, visibility) => {
+  state.graphIsVisible = visibility
+}

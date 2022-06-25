@@ -17,3 +17,7 @@ export const getCompleteDatesRange = state => {
 export const getActiveLayers = state => {
   return state.activeLayers
 }
+
+export const getGraphIsVisible = state => {
+  return state.graphIsVisible
+}
