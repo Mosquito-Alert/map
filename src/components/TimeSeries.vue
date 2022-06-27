@@ -53,12 +53,12 @@
                 text-color="black"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="_('Delete calendar')" color="grey"
+                  <q-btn :label="_('Delete calendar')" class="ma-btn"
                     flat
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="_('Apply calendar')" class="ok-button" flat v-close-popup @click="datePicked"/>
+                  <q-btn :label="_('Apply calendar')" class="ma-btn" flat v-close-popup @click="datePicked"/>
                 </div>
               </q-date>
             </q-popup-proxy>
@@ -140,6 +140,8 @@ export default defineComponent({
       }
       if (timeIsVisible.value) {
         classes += ' visible'
+      } else {
+        classes += ' no-visible'
       }
       return classes
     })
@@ -291,25 +293,38 @@ export default defineComponent({
     transform: rotate(0deg);
     transition: ease all 1s;
   }
+  .map-footer:not(.mobile) {
+    transition: max-height .5s ease-out;
+    position: relative;
+  }
+
+  .map-footer.mobile {
+    transition: max-height .7s ease-out;
+    position:absolute;
+    bottom: 0px;
+  }
   .map-footer {
     flex: 1;
     width: 100%;
     max-height: 0px;
     height: 0px;
-    position: relative;
     background-color: $color-pestanya;
     color: $color-pestanya-text;
-    transition: max-height 1s ease-out;
     border-top: 1px solid $line-color;
     &.visible:not(.mobile) {
       max-height: $timeseries-height;
       height: $timeseries-height;
-      // transition: height .3s ease-in;
     }
-    &.visible.mobile {
+    &.mobile.visible {
       max-height: 100%;
       height: 100%;
-      transition: max-height .3s ease-in;
+    }
+    &.mobile.no-visible{
+      height:0px;
+      z-index: 300;
+      position: absolute;
+      bottom: 0px;
+      transition: all .7s ease;
     }
     box-shadow: 7px 0 14px rgba(0,0,0,0.25), 5px 0 5px rgba(0,0,0,0.22);
   }
@@ -357,6 +372,12 @@ export default defineComponent({
   }
   .legend div:not{
     margin-right: 10px;
+    margin-left: 3px;
+  }
+  .legend .no-row div{
+    margin-right: 8px;
+  }
+  .legend .no-row div div{
     margin-left: 3px;
   }
   .legend.mobile .row div{
@@ -458,13 +479,13 @@ export default defineComponent({
     flex-grow:1
   }
   .map-footer.mobile:not(.visible){
-    transition: max-height 1s ease;
+    // transition: max-height 1s ease;
     max-height: 0px;
     height:0px;
     // position: relative;
   }
   .map-footer.mobile.visible{
-    transition: max-height 1s ease-out;
+    // transition: max-height 1s ease-out;
     max-height: 100%;
     height: 100%;
     z-index: 2000;
@@ -482,5 +503,8 @@ export default defineComponent({
     display: flex;
     line-height: 16px;
     max-height: unset;
+  }
+  .ma-btn{
+    margin: 0 5px;;
   }
 </style>

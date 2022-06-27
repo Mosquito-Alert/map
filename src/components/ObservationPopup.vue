@@ -37,7 +37,7 @@
             </a>
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
-            <div class="scroll" :class="mobile?'q-pl-md':''">
+            <div class="scroll" :class="mobile?'q-px-md':''">
               <label class="popup-title">{{ _(selectedFeature.title) }}</label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>

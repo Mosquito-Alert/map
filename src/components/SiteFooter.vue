@@ -7,7 +7,8 @@
         <ul class="logos" :class="mobile?'mobile':''">
           <li v-if="mobile">
             <a href="https://www.ceab.csic.es/" target="_blank">
-              <img src="~assets/img/mosquito_alert_mobile.png">
+              <!-- <img src="~assets/img/mosquito_alert_mobile.png"> -->
+              <img src="~assets/img/mosquito_logo_mobile.png">
             </a>
           </li>
           <li>

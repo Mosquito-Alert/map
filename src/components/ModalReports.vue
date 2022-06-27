@@ -13,9 +13,9 @@
           {{ _('Reports limit exceeded') }}
         </div>
         <div class="modal-close buttons">
-          <div class="download-buttons">
-            <button v-if="!tooManyFeatures" @click="newReport">{{ _('Continue') }}</button>
-            <button @click="close" class="close">{{ _('Close') }}</button>
+          <div class="report-buttons flex">
+            <div><button v-if="!tooManyFeatures" class="ma-btn" @click="newReport">{{ _('Continue') }}</button></div>
+            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
           </div>
         </div>
       </dialog>
@@ -94,7 +94,7 @@ export default {
   max-width: 50vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 5rem 5rem 3rem 5rem;
+  padding: 5rem 5rem 2rem 5rem;
   background-color: white;
   z-index: 2001;
   border: none;
@@ -138,7 +138,7 @@ export default {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
-.download-buttons{
+.report-buttons{
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -163,5 +163,28 @@ dialog.mobile {
 
 dialog.mobile button{
   padding: 5px 10px;
+}
+
+.ma-btn::before,
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-btn{
+  display: flex;
+}
+button.ma-btn,
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-btn:hover,
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
 }
 </style>

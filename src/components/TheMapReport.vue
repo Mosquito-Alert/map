@@ -832,6 +832,9 @@ h5, h6{
   content: '|';
   margin:0px 5px;
 }
+.q-btn.ma-btn span{
+  line-height: unset;
+}
 @media print {
   /* Contenido del fichero print.css */
 }

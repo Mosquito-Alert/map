@@ -16,9 +16,9 @@
                 name="pag_1"
                 class="column no-wrap flex-center"
               >
-                <div class="q-mt-md q-pr-md text-justify scroll">
+                <div class="pr-30 q-mt-md q-pr-md text-justify scroll">
                   <h5>Información de los datos</h5>
-                  <p>El mapa contiene información de 5 especies de mosquitos vectores de enfermedades: el mosquito tigre (Aedes albopictus), el mosquito de la fiebre amarilla (Aedes aegypti), el mosquito del Japón (Aedes japonicus), el mosquito de Corea (Aedes koreicus) y el mosquito común (Culex pipiens).</p>
+                  <p>{{_("El mapa contiene información de 5 especies de mosquitos vectores de enfermedades:")}} {{_("el mosquito tigre")}} (<i>{{_("Aedes albopictus")}}</i>), {{_("el mosquito de la fiebre amarilla")}} (<i>{{_("Aedes aegypti")}})</i>, {{_("el mosquito del Japón")}} (<i>{{_("Aedes japonicus")}}</i>), {{_("el mosquito de Corea")}} (<i>{{_("Aedes koreicus")}}</i>) {{_("y el mosquito común")}} (<i>{{_("Culex pipiens")}}</i>).</p>
                   <p>Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.</p>
                   <HR/>
                   <div class="text-subtitle1 q-my-md">
@@ -128,7 +128,7 @@
                     <div class="text-subtitle2 text-left q-mb-md">
                       ESFUERZO DE MUESTREO
                     </div>
-                    <div class="text-justify q-mb-md row no-wrap">
+                    <div class="flex text-justify q-mb-md row no-wrap">
                         <div class="q-pr-md sampling-effort">
                           <i class="fa-light fa-gauge-max"></i>
                         </div>
@@ -142,7 +142,7 @@
 
         <div class="close-modal">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="close">{{ _('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
         </div>
       </dialog>
     </div>
@@ -276,9 +276,6 @@ button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
-button.close {
-  float: right;
-}
 
 // MOBILE
 dialog.mobile {
@@ -302,8 +299,8 @@ hr{
   border: 1px solid #cccccc88;
 }
 .help-icon img{
-  height: 30px;
-  width: auto;
+  // height: 30px;
+  width: 30px;
 }
 .sampling-effort i {
   background-color: #e3d6a2;
@@ -312,17 +309,30 @@ hr{
   font-size: 30px;
   border-radius: 50%;
 }
-.close-modal {
-  position: absolute;
-  bottom: 10px;
-  right: 0;
-  left: 0;
-  margin-left: auto;
-  margin-right: auto;
-  display: flex;
-  justify-content: center;
-}
 .modal-info{
   padding-bottom: 80px;
 }
+.modal-info .text-subtitle1{
+  font-weight: 600;
+}
+.modal-info .pr-30{
+  padding-right: 30px;
+}
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
+
 </style>
