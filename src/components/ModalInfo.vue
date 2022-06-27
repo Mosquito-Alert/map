@@ -128,7 +128,7 @@
                     <div class="text-subtitle2 text-left q-mb-md">
                       ESFUERZO DE MUESTREO
                     </div>
-                    <div class="text-justify q-mb-md row no-wrap">
+                    <div class="flex text-justify q-mb-md row no-wrap">
                         <div class="q-pr-md sampling-effort">
                           <i class="fa-light fa-gauge-max"></i>
                         </div>
@@ -142,7 +142,7 @@
 
         <div class="close-modal">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="close">{{ _('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
         </div>
       </dialog>
     </div>
@@ -276,9 +276,6 @@ button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
-button.close {
-  float: right;
-}
 
 // MOBILE
 dialog.mobile {
@@ -302,8 +299,8 @@ hr{
   border: 1px solid #cccccc88;
 }
 .help-icon img{
-  height: 30px;
-  width: auto;
+  // height: 30px;
+  width: 30px;
 }
 .sampling-effort i {
   background-color: #e3d6a2;
@@ -311,16 +308,6 @@ hr{
   opacity: 1;
   font-size: 30px;
   border-radius: 50%;
-}
-.close-modal {
-  position: absolute;
-  bottom: 10px;
-  right: 0;
-  left: 0;
-  margin-left: auto;
-  margin-right: auto;
-  display: flex;
-  justify-content: center;
 }
 .modal-info{
   padding-bottom: 80px;
@@ -331,4 +318,21 @@ hr{
 .modal-info .pr-30{
   padding-right: 30px;
 }
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
+
 </style>

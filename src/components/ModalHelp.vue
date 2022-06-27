@@ -46,7 +46,7 @@
                       vaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.</p>
                     </div>
                   </div>
-                  <div class="row text-center">
+                  <div class="row q-px-lg text-center">
                       <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
                   </div>
                 </div>
@@ -72,7 +72,7 @@
             </q-carousel>
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="close">{{ _('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
         </div>
       </dialog>
     </div>
@@ -251,4 +251,22 @@ hr{
   display: flex;
   justify-content: center;
 }
+
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
+
 </style>

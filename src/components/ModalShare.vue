@@ -15,7 +15,7 @@
               </div>
             </transition>
             <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
-            <div class="row new-url-wrapper">
+            <div class="row q-my-lg new-url-wrapper">
               <div class="col text-center">
                 <span
                   class="url-text"
@@ -34,7 +34,7 @@
         <div class="buttons close-modal">
           <div class="download-buttons">
             <button v-if="success==''" @click.stop="shareView">{{ _('Share view') }}</button>
-            <button @click="close">{{ _('Close') }}</button>
+            <button class="q-btn ma-share-btn" @click="close">{{ _('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -155,29 +155,29 @@ dialog {
   top: 5vh;
 }
 
-.download-buttons button.disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-.download-buttons button {
-  background: $primary-button-background;
-  border: none;
-  color: white;
-  text-transform: uppercase;
-  padding: 15px 50px;
-  cursor: pointer;
-  font-weight: bold;
-  margin: 10px;
-}
-.download-buttons button:hover {
-  background: $primary-button-background-hover;
-  color: #644a0f;
-}
-.download-buttons{
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
+// .download-buttons button.disabled {
+//   background: #ccc;
+//   cursor: not-allowed;
+// }
+// .download-buttons button {
+//   background: $primary-button-background;
+//   border: none;
+//   color: white;
+//   text-transform: uppercase;
+//   padding: 15px 50px;
+//   cursor: pointer;
+//   font-weight: bold;
+//   margin: 10px;
+// }
+// .download-buttons button:hover {
+//   background: $primary-button-background-hover;
+//   color: #644a0f;
+// }
+// .download-buttons{
+//   display: flex;
+//   flex-direction: row;
+//   justify-content: center;
+// }
 .error-message{
   color: crimson;
   text-align: center;
@@ -264,6 +264,32 @@ dialog.mobile button{
   justify-content: center;
 }
 .modal-content{
-  padding-bottom: 80px;
+  padding-bottom: 60px;
+}
+
+.ma-share-btn::before,
+.ma-close-btn::before{
+  box-shadow: none;
+}
+.ma-share-btn{
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+  margin-bottom: 10px;
+}
+.ma-share-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
 }
 </style>

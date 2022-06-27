@@ -14,7 +14,7 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right">
-        <q-btn :label="_('Close')" class="q-ma-md btn" @click="toggleLeftDrawer"/>
+        <q-btn :label="_('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
         <div class="toc-title" v-html="_('Select')"></div>
@@ -654,6 +654,22 @@ input{
   position: relative;
 }
 
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;

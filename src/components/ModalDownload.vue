@@ -19,28 +19,27 @@
           {{ _('No features to download') }}
         </div>
         <div class="buttons">
-          <div class="modal-content download-buttons">
-            <button
-              class="download"
+          <div class="modal-content download-buttons flex">
+            <div><button
+              class="ma-btn"
               :class="!nFeatures?'disabled':''"
               @click="download('gpkg')"
             >
               <i class="fa-solid fa-download"></i>
                 <div class="q-pl-sm">{{ _('Download geopackage') }}</div>
-            </button>
+            </button></div>
 
-            <button
-              class="download"
+            <div><button
+              class="ma-btn"
               :class="!nFeatures?'disabled':''"
               @click="download('xlsx')"
             >
                 <i class="fa-solid fa-download"></i>
                 <div class="q-pl-sm">{{ _('Download excel') }}</div>
-            </button>
+            </button></div>
+            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
           </div>
-          <div class="close-modal download-buttons">
-            <button @click="close" class="close">{{ _('Close') }}</button>
-          </div>
+
         </div>
       </dialog>
     </div>
@@ -149,6 +148,10 @@ export default {
 .modal-download button.download {
   display:flex;
 }
+
+.mobile .modal-download button {
+  margin: 5px;
+}
 .modal-download button {
   background: $primary-button-background;
   border: none;
@@ -163,11 +166,7 @@ export default {
   background: $primary-button-background-hover;
   color: #644a0f;
 }
-.download-buttons{
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
+
 .error-message{
   color: crimson;
   text-align: center;
@@ -186,7 +185,7 @@ dialog.mobile {
   padding: 1rem 1rem 1rem 1rem;
 }
 
-dialog.mobile button{
+dialog.mobile .buttons{
   padding: 5px 10px;
 }
 .close-modal {
@@ -200,6 +199,33 @@ dialog.mobile button{
   justify-content: center;
 }
 .modal-download .modal-content{
-  padding-bottom:40px;
+  padding-bottom:0px;
+}
+
+.ma-btn::before,
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-btn{
+  display: flex;
+}
+button.ma-btn,
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-btn:hover,
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
+.download-buttons{
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 </style>

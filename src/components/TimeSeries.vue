@@ -53,12 +53,12 @@
                 text-color="black"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="_('Delete calendar')" color="grey"
+                  <q-btn :label="_('Delete calendar')" class="ma-btn"
                     flat
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="_('Apply calendar')" class="ok-button" flat v-close-popup @click="datePicked"/>
+                  <q-btn :label="_('Apply calendar')" class="ma-btn" flat v-close-popup @click="datePicked"/>
                 </div>
               </q-date>
             </q-popup-proxy>
@@ -503,5 +503,8 @@ export default defineComponent({
     display: flex;
     line-height: 16px;
     max-height: unset;
+  }
+  .ma-btn{
+    margin: 0 5px;;
   }
 </style>
