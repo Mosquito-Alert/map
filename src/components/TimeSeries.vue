@@ -19,7 +19,7 @@
     </div>
     <div class="body">
       <div v-if="mobile" class="text-right">
-        <q-btn :label="_('Close')" class="q-ma-md btn" @click="toggleTimeSeries"/>
+        <q-btn :label="_('Close')" class="q-ma-md ma-btn btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'mobile':''">
         <div :class="mobile?'row':'no-row'">
