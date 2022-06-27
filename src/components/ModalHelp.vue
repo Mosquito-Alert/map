@@ -11,7 +11,8 @@
            v-model="slide"
             transition-prev="slide-right"
             transition-next="slide-left"
-            height="100%"
+            navigation-position="bottom"
+            height="95%"
             swipeable
             animated
             prev-icon="arrow_left"
@@ -23,13 +24,13 @@
             class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
-                <div class="q-mt-md text-center">
+                <div class="q-mt-md q-px-xl text-center">
                   <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
                 <div class="scroll q-pr-md">
-                  <div class="row q-mt-md q-pr-md text-center scroll">
+                  <div class="row q-mt-md q-px-xl q-pr-md text-center scroll">
                     <div class="col-12 col-md self-center q-px-md">
                       <img src="~/assets/img/help/mosquito.png">
                     </div>
@@ -52,19 +53,19 @@
               </q-carousel-slide>
               <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
-                <div class="q-mt-md text-center">
+                <div class="q-mt-md q-px-xl text-center">
                   <p>Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_4" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
-                <div class="q-mt-md text-center">
+                <div class="q-mt-md q-px-xl  text-center">
                   <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_5" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/mosquito.png">
-                <div class="q-mt-md text-center">
+                <div class="q-mt-md q-px-xl  text-center">
                   <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
                 </div>
               </q-carousel-slide>
@@ -106,8 +107,7 @@ export default {
       hasCloseButton,
       mobile,
       _,
-      slide: ref('pag_2'),
-      lorem: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque voluptatem totam, architecto cupiditate officia rerum, error dignissimos praesentium libero ab nemo provident incidunt ducimus iusto perferendis porro earum. Totam, numquam?'
+      slide: ref('pag_1')
     }
   }
 }
@@ -251,5 +251,4 @@ hr{
   display: flex;
   justify-content: center;
 }
-
 </style>
