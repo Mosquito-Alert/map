@@ -20,21 +20,22 @@
             navigation
             control-color="orange"
             padding
-            arrows
+            :arrows="!mobile"
             class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/help1.gif">
-                <div class="q-mt-md q-px-xl text-center">
+                <img src="~/assets/img/help/help1.gif" />
+                <div class="q-mb-0 q-mt-md q-px-xl text-center scroll">
                   <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
                 <div class="scroll q-pr-md">
-                  <div class="row q-mt-md q-pr-md text-center scroll">
-                    <div class="col-xl-10 col-lg-10 col-md-10 self-center">
+                  <div class="row q-mt-md q-pr-md text-left scroll">
+                    <div>
+                    <!-- <div class="column-img col-xl-7 col-lg-7 col-md-7 q-px-md self-center"> -->
                       <img src="~/assets/img/help/help2.gif">
-                    </div>
-                    <div class="col-xl-2 col-lg-2 col-md-2 text-justify scroll">
+                    <!-- </div> -->
+                    <!-- <div class="col-xl-5 col-lg-5 col-md-5 text-justify scroll"> -->
                       <p>Filtra tu selección de distintas maneras:</p>
                       <p><b>POR LOCALIZACIÓN</b>: Escribe y selecciona del desplegable tu lugar de interés</p>
                       <p><b>POR HASHTAG</b>: puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.</p>
@@ -53,19 +54,19 @@
               </q-carousel-slide>
               <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/help3.gif">
-                <div class="q-mt-md q-px-xl text-center">
+                <div class="q-mt-md q-px-xl text-center scroll">
                   <p>Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_4" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/help4.gif">
-                <div class="q-mt-md q-px-xl  text-center">
+                <div class="q-mt-md q-px-xl  text-center scroll">
                   <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_5" class="column no-wrap flex-center">
                 <img src="~/assets/img/help/help5.gif">
-                <div class="q-mt-md q-px-xl  text-center">
+                <div class="q-mt-md q-px-xl text-center scroll">
                   <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
                 </div>
               </q-carousel-slide>
@@ -164,7 +165,7 @@ dialog {
 
 dialog.mobile {
   max-width: 80vw;
-  max-height: 90vh;
+  height: 90vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
   z-index: 2001;
@@ -220,9 +221,16 @@ dialog.mobile {
 dialog.mobile button{
   padding: 5px 10px;
 }
+.mobile .q-carousel__slide img{
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
 .q-carousel__slide img{
-  max-width: 70%;
+  max-width: 50%;
   height: auto;
+  float:left;
+  margin-right: 20px;
 }
 dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
   padding: 4px 4px 60px 4px;
@@ -268,5 +276,10 @@ button.ma-close-btn:hover,
 .ma-close-btn:hover{
   opacity:0.7;
 }
-
+.column-img{
+  align-self:auto;
+}
+.q-mb-0{
+  margin-bottom: 0px;
+}
 </style>

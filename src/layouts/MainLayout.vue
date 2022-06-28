@@ -37,6 +37,9 @@
       />
     </q-page>
 
+    <modal-first :open="firstModalVisible" buttons="close">
+    </modal-first>
+
     <modal-info :open="infoModalVisible" buttons="close">
     </modal-info>
 
@@ -80,6 +83,7 @@
 </template>
 
 <script>
+import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalDownload from 'components/ModalDownload.vue'
@@ -105,6 +109,7 @@ export default {
     ModalWait,
     ModalDownload,
     ModalShare,
+    ModalFirst,
     ModalReports,
     SiteHeader,
     LeftDrawer,
@@ -224,6 +229,10 @@ export default {
       map.value.checkSamplingEffort(payload)
     }
 
+    const firstModalVisible = computed(() => {
+      return $store.getters['app/getModals'].first.visibility
+    })
+
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info.visibility
     })
@@ -324,6 +333,7 @@ export default {
       filterLocations,
       clearLocations,
       filterTags,
+      firstModalVisible,
       infoModalVisible,
       helpModalVisible,
       downloadModalVisible,

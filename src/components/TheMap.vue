@@ -382,7 +382,6 @@ export default defineComponent({
 
     worker.onmessage = function (event) {
       if (event.data.fetchedData) {
-        console.log(event.data.data)
         return
       }
       if (event.data.ready) {

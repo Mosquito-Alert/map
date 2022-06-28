@@ -1,5 +1,6 @@
 // const worker = new Worker('TheMapWorker.js')
 import moment from 'moment'
+import { useCookies } from 'vue3-cookies'
 
 export default function () {
   let backendUrl = ''
@@ -17,7 +18,8 @@ export default function () {
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
-  const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+  // const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+  const defaultLang = (allowedLangs.includes(browserLang)) ? 'ca' : allowedLangs[0]
 
   function getCurrentYearDates () {
     return {
@@ -32,6 +34,8 @@ export default function () {
       return false
     }
   }
+
+  const { cookies } = useCookies()
 
   return {
     // Models related
@@ -61,6 +65,7 @@ export default function () {
     FRONTEND: frontendUrl,
     trans: {},
     modals: {
+      first: { visibility: !cookies.get('maCoockie') },
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },

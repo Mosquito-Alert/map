@@ -148,14 +148,24 @@ export default defineComponent({
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelLayer)
       spinner(true)
-      // await Promise.all(data.models.map(m =>
-      // fetch(backendUrl + 'media/' + m).then(resp => resp.text())
-      // )).then(csvs => {
-      //   // Check for errors
-      //   csvs.forEach(j => {
-      //     console.log(j)
-      //   })
-      // })
+
+      const urls = [
+        'http://localhost:8000/media/model_gadm0.csv',
+        'http://localhost:8000/media/model_gadm1.csv',
+        'http://localhost:8000/media/model_gadm2.csv'
+      ]
+
+      // "mapear" cada url a la promesa de su fetch
+      // const requests = urls.map(url => fetch(url))
+
+      await Promise.all(urls.map(m =>
+        fetch(m).then(resp => resp.text())
+      )).then(texts => {
+        // Check for errors
+        texts.forEach(j => {
+          console.log(j)
+        })
+      })
 
       fetch(data.modelUrl, {
         method: 'GET'
@@ -186,7 +196,6 @@ export default defineComponent({
     const colorizeNuts = (feature, style) => {
       const id = feature.properties_.id
       const value = modelData[id]
-      console.log(value === undefined)
       if (value === undefined) {
         return null
       }
