@@ -18,16 +18,19 @@
       </q-btn>
     </div>
     <div class="body">
-      <div v-if="mobile" class="text-right">
+      <div v-if="mobile" class="flex-right">
         <q-btn :label="_('Close')" class="q-ma-md ma-btn btn" @click="toggleTimeSeries"/>
       </div>
-      <div class="legend" :class="mobile?'mobile':''">
-        <div :class="mobile?'row':'no-row'">
-          <div :class="mobile?'col-6 q-py-xs':''" v-for="set in chartData.datasets" :key="set.label">
-            <img class="symbol" :src="set.icon" height="20" v-if="set.icon">
-            <i class="symbol" :class="set.faIcon" v-if="set.faIcon"></i>
-              <div>{{ _(set.label) }}
+      <div class="legend" :class="mobile?'row mobile':'no-row'">
+        <div :class="mobile?'col-12':''">
+          <div :class="mobile?'row':''">
+            <template v-for="set in chartData.datasets" :key="set.label">
+              <div class="col-1" :class="mobile?'q-py-xs':''">
+                <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
+                <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
               </div>
+              <div class="col-5">{{ _(set.label) }}</div>
+            </template>
           </div>
         </div>
 
@@ -380,10 +383,6 @@ export default defineComponent({
   .legend .no-row div div{
     margin-left: 3px;
   }
-  .legend.mobile .row div{
-    padding-right: 10px;
-    padding-left: 3px;
-  }
   .legend>div .symbol {
     vertical-align: bottom;
   }
@@ -446,6 +445,10 @@ export default defineComponent({
     // -webkit-line-clamp: 2; /* number of lines to show */
     // -webkit-box-orient: vertical;
   }
+  .legend.mobile div{
+    max-height:unset;
+    white-space: break-spaces;
+  }
   .legend div img{
     height: 20px;
   }
@@ -492,6 +495,10 @@ export default defineComponent({
     position: absolute;
     bottom: 0px;
   }
+  .legend.mobile .row div{
+    padding: 0 10px 7px 3px;
+  }
+
   .mobile.legend{
     display: flex;
     margin-left: 10px;
@@ -502,9 +509,13 @@ export default defineComponent({
     overflow: hidden;
     display: flex;
     line-height: 16px;
-    max-height: unset;
+    align-items: center;
   }
   .ma-btn{
     margin: 0 5px;;
+  }
+  .flex-right{
+    display:flex;
+    justify-content: right;
   }
 </style>

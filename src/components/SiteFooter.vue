@@ -8,7 +8,7 @@
           <li v-if="mobile">
             <a href="https://www.ceab.csic.es/" target="_blank">
               <!-- <img src="~assets/img/mosquito_alert_mobile.png"> -->
-              <img src="~assets/img/mosquito_logo_mobile.png">
+              <img src="~assets/img/MA-mobile.png">
             </a>
           </li>
           <li>
@@ -96,7 +96,7 @@ export default defineComponent({
 }
 .logos li a {
   display: flex;
-  align-items: center;
+  justify-content: center;
 }
 .logos.mobile li {
   width:20%;

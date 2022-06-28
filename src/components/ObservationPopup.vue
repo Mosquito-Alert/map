@@ -146,6 +146,7 @@ export default defineComponent({
 
     onUpdated(() => {
       loading.value = props.selectedFeature.photo_url
+      imageRatio.value = null
     })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -649,6 +650,7 @@ export default defineComponent({
   max-height: unset;
   border-radius:none;
   flex-direction: column;
+  // justify-content: center;
 }
 
 .overlay-content.small{
