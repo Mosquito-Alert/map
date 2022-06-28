@@ -23,26 +23,26 @@
             arrows
             class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/mosquito.png">
+                <img src="~/assets/img/help/help1.gif">
                 <div class="q-mt-md q-px-xl text-center">
                   <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
                 <div class="scroll q-pr-md">
-                  <div class="row q-mt-md q-px-xl q-pr-md text-center scroll">
-                    <div class="col-12 col-md self-center q-px-md">
-                      <img src="~/assets/img/help/mosquito.png">
+                  <div class="row q-mt-md q-pr-md text-center scroll">
+                    <div class="col-xl-10 col-lg-10 col-md-10 self-center">
+                      <img src="~/assets/img/help/help2.gif">
                     </div>
-                    <div class="col-12 col-md text-justify scroll">
+                    <div class="col-xl-2 col-lg-2 col-md-2 text-justify scroll">
                       <p>Filtra tu selección de distintas maneras:</p>
-                      <p><b>POR LOCALIZAICIÓN</b>: Escribe y selecciona del desplegable tu lugar de interés</p>
+                      <p><b>POR LOCALIZACIÓN</b>: Escribe y selecciona del desplegable tu lugar de interés</p>
                       <p><b>POR HASHTAG</b>: puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.</p>
                       <p><b>POR IDENTIFICADOR</b>: escribe el identificador corto de un informe en el buscador de hashtag precedido
                       por el símbolo “:”</p>
                       <p>Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo
                       uno de los identificadores utilizados.</p>
-                      <p><b>POR FECHA O RANGO DE FECHAS</b>Los filtros aplican a todas las capas de información de las obser-
+                      <p><b>POR FECHA O RANGO DE FECHAS</b>. Los filtros aplican a todas las capas de información de las obser-
                       vaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.</p>
                     </div>
                   </div>
@@ -52,19 +52,19 @@
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/mosquito.png">
+                <img src="~/assets/img/help/help3.gif">
                 <div class="q-mt-md q-px-xl text-center">
                   <p>Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_4" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/mosquito.png">
+                <img src="~/assets/img/help/help4.gif">
                 <div class="q-mt-md q-px-xl  text-center">
                   <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
                 </div>
               </q-carousel-slide>
               <q-carousel-slide name="pag_5" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/mosquito.png">
+                <img src="~/assets/img/help/help5.gif">
                 <div class="q-mt-md q-px-xl  text-center">
                   <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
                 </div>
@@ -221,7 +221,7 @@ dialog.mobile button{
   padding: 5px 10px;
 }
 .q-carousel__slide img{
-  width: 100%;
+  max-width: 70%;
   height: auto;
 }
 dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{

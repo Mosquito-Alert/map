@@ -57,6 +57,7 @@ import MVT from 'ol/format/MVT'
 import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill } from 'ol/style'
+import { Group as LayerGroup } from 'ol/layer'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -71,6 +72,8 @@ export default defineComponent({
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
+
+    const backendUrl = $store.getters['app/getBackend']
 
     // Map general configuration
     const zoom = computed(() => {
@@ -142,9 +145,18 @@ export default defineComponent({
       })
     }
 
-    const loadModel = function (data) {
+    const loadModel = async function (data) {
       map.value.map.removeLayer(modelLayer)
       spinner(true)
+      // await Promise.all(data.models.map(m =>
+      // fetch(backendUrl + 'media/' + m).then(resp => resp.text())
+      // )).then(csvs => {
+      //   // Check for errors
+      //   csvs.forEach(j => {
+      //     console.log(j)
+      //   })
+      // })
+
       fetch(data.modelUrl, {
         method: 'GET'
       })
@@ -163,7 +175,7 @@ export default defineComponent({
             }),
             style: colorizeNuts
           })
-          map.value.map.addLayer(modelLayer)
+          map.value.map.addLayer(modelsLayer)
           spinner(false)
         }).catch((error) => {
           console.log(error)
@@ -220,6 +232,44 @@ export default defineComponent({
         fill: style
       })
     }
+
+    const modelsLayer = new LayerGroup({
+      layers: [
+        new VectorTileLayer({
+          minZoom: 0,
+          maxZoom: 3,
+          declutter: true,
+          renderMode: 'hybrid',
+          source: new VectorTileSource({
+            format: new MVT(),
+            url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}/'
+          }),
+          style: colorizeNuts
+        }),
+        new VectorTileLayer({
+          minZoom: 4,
+          maxZoom: 10,
+          declutter: true,
+          renderMode: 'hybrid',
+          source: new VectorTileSource({
+            format: new MVT(),
+            url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}/'
+          }),
+          style: colorizeNuts
+        }),
+        new VectorTileLayer({
+          minZoom: 11,
+          maxZoom: 17,
+          declutter: true,
+          renderMode: 'hybrid',
+          source: new VectorTileSource({
+            format: new MVT(),
+            url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}/'
+          }),
+          style: colorizeNuts
+        })
+      ]
+    })
 
     return {
       _,

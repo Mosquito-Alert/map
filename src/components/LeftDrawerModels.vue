@@ -64,21 +64,14 @@ export default {
 
     const applyfilter = function (continent) {
       const dataUrl = $store.getters['app/getModelsServerPath']
-      const backendUrl = $store.getters['app/getBackend']
-      let layer
-      if (continent === 'europe') {
-        layer = 'api/tiles/nuts3/{z}/{x}/{y}/'
-      } else {
-        layer = 'api/tiles/gadm/' + continent + '/{z}/{x}/{y}/'
-      }
 
       context.emit('loadModel', {
         esp: 'tig',
         region: 'europe',
         year: 2022,
         month: 8,
-        modelUrl: dataUrl + continent + '.csv',
-        nutsUrl: backendUrl + layer
+        models: ['model_gadm0.csv', 'model_gadm1.csv', 'model_gadm2.csv'],
+        modelUrl: dataUrl + 'model_gadm1.csv'
       })
     }
 

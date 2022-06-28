@@ -146,7 +146,7 @@ export default defineComponent({
 
     onUpdated(() => {
       loading.value = props.selectedFeature.photo_url
-      imageRatio.value = null
+      imageRatio.value = mobile.value ? 'mobile' : null
     })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']

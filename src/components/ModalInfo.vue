@@ -127,11 +127,12 @@
                     <HR/>
                     <div class="text-subtitle2 text-left q-mb-md">
                       ESFUERZO DE MUESTREO
+
                     </div>
                     <div class="flex text-justify q-mb-md row no-wrap">
-                        <div class="q-pr-md sampling-effort">
-                          <i class="fa-light fa-gauge-max"></i>
-                        </div>
+                      <div class="help-icon q-pr-md">
+                        <img src="~/assets/img/sampling_effort.png" />
+                      </div>
                         <div class="q-pr-md">
                           La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.
                         </div>
