@@ -23,20 +23,8 @@
       </div>
 
       <div>
-        <button @click="applyfilter('europe')">
-          Europa
-        </button>
-        <button @click="applyfilter('america')">
-          América
-        </button>
-        <button @click="applyfilter('africa')">
-          Africa
-        </button>
-        <button @click="applyfilter('asia')">
-          Asia
-        </button>
-        <button @click="applyfilter('oceania')">
-          Oceanía
+        <button @click="applyfilter">
+          Load Model
         </button>
       </div>
     </div>
@@ -62,16 +50,18 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const applyfilter = function (continent) {
+    const applyfilter = function () {
       const dataUrl = $store.getters['app/getModelsServerPath']
-
+      const urls = [
+        dataUrl + 'model_gadm0.csv',
+        dataUrl + 'model_gadm1.csv',
+        dataUrl + 'model_gadm2.csv'
+      ]
       context.emit('loadModel', {
         esp: 'tig',
-        region: 'europe',
         year: 2022,
         month: 8,
-        models: ['model_gadm0.csv', 'model_gadm1.csv', 'model_gadm2.csv'],
-        modelUrl: dataUrl + 'model_gadm1.csv'
+        modelsCsv: urls
       })
     }
 

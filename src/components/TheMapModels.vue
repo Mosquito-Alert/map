@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 <template>
   <div id='mapa' class='bg-white'>
     <q-btn v-if="mobile"
@@ -65,13 +66,12 @@ export default defineComponent({
     'toggleLeftDrawer'
   ],
   setup (props, context) {
-    let modelData = {}
-    let modelLayer = {}
     const map = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
+    const CSVS = {}
 
     const backendUrl = $store.getters['app/getBackend']
 
@@ -132,7 +132,6 @@ export default defineComponent({
         const prob = currentLine[indexProb]
         dict[nutsId] = prob
       }
-
       return dict
     }
 
@@ -146,56 +145,59 @@ export default defineComponent({
     }
 
     const loadModel = async function (data) {
-      map.value.map.removeLayer(modelLayer)
-      spinner(true)
+      map.value.map.removeLayer(modelsLayer)
+      spinner(false)
 
-      const urls = [
-        'http://localhost:8000/media/model_gadm0.csv',
-        'http://localhost:8000/media/model_gadm1.csv',
-        'http://localhost:8000/media/model_gadm2.csv'
-      ]
-
-      // "mapear" cada url a la promesa de su fetch
-      // const requests = urls.map(url => fetch(url))
+      const urls = data.modelsCsv
 
       await Promise.all(urls.map(m =>
         fetch(m).then(resp => resp.text())
       )).then(texts => {
         // Check for errors
         texts.forEach(j => {
-          console.log(j)
+          if (!('0' in CSVS)) {
+            CSVS['0'] = csvJSON(j)
+          } else if (!('1' in CSVS)) {
+            CSVS['1'] = csvJSON(j)
+          } else if (!('2' in CSVS)) {
+            CSVS['2'] = csvJSON(j)
+          }
         })
-      })
+        map.value.map.addLayer(modelsLayer)
+        gadm0.on('prerender', function () {
+          spinner(true)
+        })
+        gadm1.on('prerender', function () {
+          spinner(true)
+        })
+        gadm2.on('prerender', function () {
+          spinner(true)
+        })
 
-      fetch(data.modelUrl, {
-        method: 'GET'
-      })
-        .then((response) => {
-          return response.text()
-        })
-        .then((text) => {
-          modelData = csvJSON(text)
-          modelLayer = new VectorTileLayer({
-            declutter: true,
-            renderMode: 'hybrid',
-            source: new VectorTileSource({
-              maxZoom: 15,
-              format: new MVT(),
-              url: data.nutsUrl
-            }),
-            style: colorizeNuts
-          })
-          map.value.map.addLayer(modelsLayer)
+        map.value.map.on('rendercomplete', function () {
+          console.log('postrender')
           spinner(false)
-        }).catch((error) => {
-          console.log(error)
         })
+      }).catch((error) => {
+        console.log(error)
+      })
     }
 
     const styles = {}
-    const colorizeNuts = (feature, style) => {
+    const colorizeGadm0 = (feature, style) => {
+      return colorizeGadm(feature, style, CSVS['0'])
+    }
+
+    const colorizeGadm1 = (feature, style) => {
+      return colorizeGadm(feature, style, CSVS['1'])
+    }
+    const colorizeGadm2 = (feature, style) => {
+      return colorizeGadm(feature, style, CSVS['2'])
+    }
+
+    const colorizeGadm = (feature, style, CSV) => {
       const id = feature.properties_.id
-      const value = modelData[id]
+      const value = CSV[id]
       if (value === undefined) {
         return null
       }
@@ -242,42 +244,44 @@ export default defineComponent({
       })
     }
 
+    const gadm0 = new VectorTileLayer({
+      minZoom: 0,
+      maxZoom: 3,
+      declutter: true,
+      renderMode: 'hybrid',
+      source: new VectorTileSource({
+        format: new MVT(),
+        url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}/'
+      }),
+      style: colorizeGadm0
+    })
+
+    const gadm1 = new VectorTileLayer({
+      minZoom: 3,
+      maxZoom: 5,
+      declutter: true,
+      renderMode: 'hybrid',
+      source: new VectorTileSource({
+        format: new MVT(),
+        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}/'
+      }),
+      style: colorizeGadm1
+    })
+
+    const gadm2 = new VectorTileLayer({
+      minZoom: 5,
+      maxZoom: 17,
+      declutter: true,
+      renderMode: 'hybrid',
+      source: new VectorTileSource({
+        format: new MVT(),
+        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}/'
+      }),
+      style: colorizeGadm2
+    })
+
     const modelsLayer = new LayerGroup({
-      layers: [
-        new VectorTileLayer({
-          minZoom: 0,
-          maxZoom: 3,
-          declutter: true,
-          renderMode: 'hybrid',
-          source: new VectorTileSource({
-            format: new MVT(),
-            url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}/'
-          }),
-          style: colorizeNuts
-        }),
-        new VectorTileLayer({
-          minZoom: 4,
-          maxZoom: 10,
-          declutter: true,
-          renderMode: 'hybrid',
-          source: new VectorTileSource({
-            format: new MVT(),
-            url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}/'
-          }),
-          style: colorizeNuts
-        }),
-        new VectorTileLayer({
-          minZoom: 11,
-          maxZoom: 17,
-          declutter: true,
-          renderMode: 'hybrid',
-          source: new VectorTileSource({
-            format: new MVT(),
-            url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}/'
-          }),
-          style: colorizeNuts
-        })
-      ]
+      layers: [gadm0, gadm1, gadm2]
     })
 
     return {
