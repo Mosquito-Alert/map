@@ -81,13 +81,14 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, ref, onUpdated } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
+    const slide = ref('pag_1')
     const $store = useStore()
     const close = function () {
       $store.commit('app/setModal', { id: 'help', content: { visibility: false } })
@@ -102,13 +103,18 @@ export default {
       return $store.getters['app/getText'](text)
     }
     const layers = $store.getters['app/getLayers']
+
+    onUpdated(() => {
+      slide.value = 'pag_1'
+    })
+
     return {
       layers,
       close,
       hasCloseButton,
       mobile,
       _,
-      slide: ref('pag_1')
+      slide
     }
   }
 }

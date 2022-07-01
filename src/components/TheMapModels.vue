@@ -251,7 +251,7 @@ export default defineComponent({
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}/'
+        url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm0
     })
@@ -263,7 +263,7 @@ export default defineComponent({
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}/'
+        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm1
     })
@@ -275,7 +275,7 @@ export default defineComponent({
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}/'
+        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm2
     })

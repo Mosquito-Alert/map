@@ -12,7 +12,7 @@
         name="fa-thin fa-chart-scatter"
         :label="_('Models')"
         :class="active_item=='models'?'active':''"
-        link="/models"
+        :link="linkModels"
       >
       </fa-thin-button>
 
@@ -58,7 +58,7 @@
 <script>
 import { useStore } from 'vuex'
 import { useQuasar } from 'quasar'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 
@@ -130,6 +130,7 @@ export default {
       ca,
       es,
       en,
+      linkModels: computed(() => $store.getters['app/getFrontendUrl'] + 'models'),
       showInfo,
       showHelp,
       showShareUrl,
