@@ -23,6 +23,33 @@
       </div>
 
       <div>
+      <q-input
+        readonly
+        input-class="cursor-pointer"
+        label="Inicio"
+        value=""
+        v-model="modelDate"
+        mask="##/####"
+        fill-mask="##/####"
+      >
+        <template v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
+              <q-date
+                navigation-min-year-month='2015/01'
+                :navigation-max-year-month="getCurrentDate"
+                minimal
+                mask="MM/YYYY"
+                years-in-month-view="true"
+                emit-immediately
+                default-view="Years"
+                v-model="modelDate"
+                @update:model-value="checkValue"
+              />
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+      </q-input>
         <button @click="applyfilter">
           Load Model
         </button>
@@ -32,7 +59,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 
@@ -40,7 +67,15 @@ export default {
   components: { LeftMenu },
   props: ['expanded'],
   setup (props, context) {
+    const modelDate = ref(null)
+    const getCurrentDate = ref()
+    const monthPicker = ref()
     const $store = useStore()
+
+    onMounted(function () {
+      const d = new Date()
+      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+    })
 
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -49,6 +84,12 @@ export default {
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
+
+    const checkValue = function (val, reason, details) {
+      if (reason === 'month') {
+        monthPicker.value.hide()
+      }
+    }
 
     const applyfilter = function () {
       const dataUrl = $store.getters['app/getModelsServerPath']
@@ -67,6 +108,10 @@ export default {
 
     return {
       mobile,
+      getCurrentDate,
+      modelDate,
+      monthPicker,
+      checkValue,
       toggleLeftDrawer,
       applyfilter
     }

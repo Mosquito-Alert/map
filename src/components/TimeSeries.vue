@@ -29,7 +29,7 @@
                 <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
                 <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
               </div>
-              <div class="col-5">{{ _(set.label) }}</div>
+              <div class="col-5 q-ml-xs q-mr-md">{{ _(set.label) }}</div>
             </template>
           </div>
         </div>
@@ -51,6 +51,8 @@
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
                 range
+                years-in-month-view="true"
+                mask="MM/YYYY"
                 class="calendar"
                 color="orange-4"
                 text-color="black"

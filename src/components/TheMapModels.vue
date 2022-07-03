@@ -246,24 +246,24 @@ export default defineComponent({
 
     const gadm0 = new VectorTileLayer({
       minZoom: 0,
-      maxZoom: 3,
+      maxZoom: 2,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}.pbf'
+        url: backendUrl + 'api/tiles/gadm0/{z}/{x}/{y}'
       }),
       style: colorizeGadm0
     })
 
     const gadm1 = new VectorTileLayer({
       minZoom: 3,
-      maxZoom: 5,
+      maxZoom: 4,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}.pbf'
+        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}'
       }),
       style: colorizeGadm1
     })
@@ -275,7 +275,7 @@ export default defineComponent({
       renderMode: 'hybrid',
       source: new VectorTileSource({
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}.pbf'
+        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
       }),
       style: colorizeGadm2
     })
