@@ -676,6 +676,7 @@ export default defineComponent({
 
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
+        viewType: 'layers',
         filters: mapFilters,
         datesRange: $store.getters['map/getDatesRange'],
         locationName: locationName,
@@ -690,6 +691,7 @@ export default defineComponent({
     }
 
     function handleShareView (status) {
+      console.log(status)
       if (status.status === 'error') {
         console.log(status.msg)
       } else {

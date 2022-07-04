@@ -10,9 +10,9 @@
     <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toggleLeftDrawer" />
 
     <ol-map ref='map'
-            :loadTilesWhileAnimating='true'
-            :loadTilesWhileInteracting='true'
-            style='height:100%'>
+      :loadTilesWhileAnimating='true'
+      :loadTilesWhileInteracting='true'
+      style='height:100%'>
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
@@ -59,12 +59,17 @@ import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
+import ShareMapView from '../js/ShareMapView'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'TheMapModels',
   emits: [
-    'toggleLeftDrawer'
+    'toggleLeftDrawer',
+    'mapViewSaved',
+    'setModelDate'
   ],
+  props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
     const attrVisible = ref(false)
@@ -112,10 +117,57 @@ export default defineComponent({
         if (hit) this.getTargetElement().style.cursor = 'pointer'
         else this.getTargetElement().style.cursor = ''
       })
+
+      const paramViewCode = (props.viewCode) ? props.viewCode : null
+      if (paramViewCode) {
+        // Add model prefix to code
+        loadView(map.value.map, 'M-' + paramViewCode)
+      }
     })
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
+    }
+
+    const shareViewUrl = backendUrl + 'api/view/save/'
+    const loadViewUrl = backendUrl + 'api/view/load/'
+
+    function shareModelView () {
+      const modelDate = $store.getters['map/getModelDate']
+      console.log(modelDate)
+      if (!modelDate) {
+        context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
+        return
+      }
+      const ol = map.value.map
+      const newView = new ShareMapView(ol, {
+        viewType: 'models',
+        modelDate,
+        url: shareViewUrl,
+        callback: handleShareView
+      })
+      newView.save()
+    }
+
+    function handleShareView (status) {
+      if (status.status === 'error') {
+        console.log(status.msg)
+      } else {
+        console.log(status.code)
+      }
+      context.emit('mapViewSaved', status)
+    }
+
+    function loadView (ol, viewCode) {
+      const newView = new ShareMapView(ol, {
+        url: loadViewUrl + viewCode
+      })
+      newView.load(handleLoadView)
+    }
+
+    function handleLoadView (view) {
+      const d = view.view[0].date
+      context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
     }
 
     function csvJSON (csv) {
@@ -258,7 +310,7 @@ export default defineComponent({
 
     const gadm1 = new VectorTileLayer({
       minZoom: 3,
-      maxZoom: 4,
+      maxZoom: 5,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
@@ -274,6 +326,7 @@ export default defineComponent({
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
+        maxZoom: 7,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
       }),
@@ -289,6 +342,8 @@ export default defineComponent({
       center,
       zoom,
       mobile,
+      loadView,
+      shareModelView,
       toggleLeftDrawer,
       attrVisible,
       foldingIcon,

@@ -1,19 +1,25 @@
 
 const routes = [
+  // DEFAULT PAGE
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     props: { initView: false }
   },
+  // MODELS MAP
   {
-    // MODELS MAP
     path: '/models',
     component: () => import('layouts/ModelsLayout.vue')
   },
+  // SHARE OBSERVATIONS VIEW
   {
-    // Set the accepted characters and length of init view code
     path: '/:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/MainLayout.vue')
+  },
+  // SHARE MODELS VIEW
+  {
+    path: '/M-:code([a-zA-Z0-9]{4})',
+    component: () => import('layouts/ModelsLayout.vue')
   },
   {
     // Set the accepted characters and length of reports view

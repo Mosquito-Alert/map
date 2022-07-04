@@ -1,6 +1,5 @@
 <template>
   <q-drawer
-    class="content-models-drawer"
     show-if-above
     side="left"
     behavior="desktop"
@@ -25,32 +24,38 @@
       <div>
       <q-input
         readonly
+        class="calendar-input"
         input-class="cursor-pointer"
-        label="Inicio"
+        :label="_('Year / Month')"
         value=""
-        v-model="modelDate"
+        v-model="inputDate"
         mask="##/####"
         fill-mask="##/####"
+        :label-color="dateSelected?'rgba(0, 0, 0, 0.6)':'orange'"
+        :filled="dateSelected"
+        ref="refInput"
       >
         <template v-slot:append>
-          <q-icon name="event" class="cursor-pointer">
+          <q-icon name="event_note" class="models-calendar cursor-pointer" color="orange">
             <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
               <q-date
+                :title="_('Select model date')"
+                :subtitle="_('Click on year and month')"
                 navigation-min-year-month='2015/01'
                 :navigation-max-year-month="getCurrentDate"
-                minimal
                 mask="MM/YYYY"
                 years-in-month-view="true"
                 emit-immediately
                 default-view="Years"
                 v-model="modelDate"
+                color="orange-4"
                 @update:model-value="checkValue"
               />
             </q-popup-proxy>
           </q-icon>
         </template>
       </q-input>
-        <button @click="applyfilter">
+        <button @click="applyfilter" class="q-mt-xl">
           Load Model
         </button>
       </div>
@@ -67,6 +72,8 @@ export default {
   components: { LeftMenu },
   props: ['expanded'],
   setup (props, context) {
+    const refInput = ref(null)
+    const inputDate = ref(null)
     const modelDate = ref(null)
     const getCurrentDate = ref()
     const monthPicker = ref()
@@ -77,6 +84,10 @@ export default {
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
     })
 
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
     }
@@ -85,9 +96,16 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
+    const dateSelected = computed(() => {
+      return modelDate.value !== null
+    })
+
     const checkValue = function (val, reason, details) {
       if (reason === 'month') {
+        modelDate.value = val
+        inputDate.value = val
         monthPicker.value.hide()
+        $store.commit('map/setModelDate', inputDate.value)
       }
     }
 
@@ -107,26 +125,56 @@ export default {
     }
 
     return {
+      _,
       mobile,
+      dateSelected,
       getCurrentDate,
       modelDate,
+      inputDate,
       monthPicker,
       checkValue,
       toggleLeftDrawer,
-      applyfilter
+      applyfilter,
+      refInput
     }
   }
 }
 </script>
 
-<style lang="scss">
-.content-models-drawer{
-  display:flex;
-  flex-direction: raw;
-}
+<style scoped lang="scss">
 .toc-models{
   padding: 20px;
-  z-index: 1200;
+  width: 100%;
+}
+
+.toc-models::-webkit-scrollbar {
+    height: 12px;
+    width: 4px;
+    background: #ccc;
+}
+
+.toc-models::-webkit-scrollbar-thumb {
+    background: #EFA501;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+.models-calendar{
+  font-weight: 600;
+}
+
+.q-field--filled.calendar-input{
+  background: $primary-color;
+  border-radius: 4px;
+}
+
+.q-field--filled.calendar-input input,
+.q-field--filled.calendar-input div i{
+  color: white !important;
+}
+.q-header,
+.q-drawer{
+  width: $left-drawer-width;
+  z-index:1200;
 }
 .q-drawer {
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
@@ -144,17 +192,48 @@ export default {
     }
   }
 }
-
-.toc-models::-webkit-scrollbar {
-    height: 12px;
-    width: 4px;
-    background: #ccc;
+:deep(.q-drawer__content) {
+  display: flex;
+  flex-direction: row;
+  box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
+  width: $left-drawer-width;
 }
 
-.toc-models::-webkit-scrollbar-thumb {
-    background: #EFA501;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+.collapsed :deep(.q-drawer__content.fit){
+  width: 60px !important;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #EFA501 #ccc;
+}
+
+.q-drawer__content.fit.scroll.expanded{
+  width: 250px !important;
+}
+.lang-wrapper{
+  position: relative;
+}
+
+.ma-close-btn::before{
+  box-shadow: none;
+}
+
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
+}
+@media (max-width: 640px) {
+  .aside button {
+    scale: 0.9;
+  }
+}
 </style>

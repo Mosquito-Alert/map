@@ -28,38 +28,42 @@ export default class ShareMapView {
     const dataView = {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),
-      filters: filters
+      filters: filters,
+      viewType: _this.options.viewType
     }
 
-    if (this.options.locationName.length) {
-      dataView.locationName = this.options.locationName
+    if (this.options.viewType === 'layers') {
+      // If share is not type models then  check for other filters
+      if (this.options.locationName.length) {
+        dataView.locationName = this.options.locationName
+      }
+
+      if (this.options.popup.toString().length) {
+        dataView.popup = this.options.popup
+      }
+
+      if (filters.dates.length) {
+        // dataView.filters.dates = [this.constrictDate(filters.dates[0])]
+        dataView.filters.dates = [filters.dates[0]]
+      } else {
+        dataView.filters.dates = [this.options.datesRange]
+      }
+
+      if (filters.hashtags.length) {
+        dataView.filters.hashtags = filters.hashtags
+      }
+
+      if (filters.locations.length) {
+        dataView.filters.locations = filters.locations
+      }
+
+      dataView.samplingEffort = this.options.samplingEffort
+      dataView.feature = this.options.feature
+      dataView.spiderfyId = this.options.spiderfyId
+
+      // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
+      dataView.filters.mode = 'resetFilter'
     }
-
-    if (this.options.popup.toString().length) {
-      dataView.popup = this.options.popup
-    }
-
-    if (filters.dates.length) {
-      // dataView.filters.dates = [this.constrictDate(filters.dates[0])]
-      dataView.filters.dates = [filters.dates[0]]
-    } else {
-      dataView.filters.dates = [this.options.datesRange]
-    }
-
-    if (filters.hashtags.length) {
-      dataView.filters.hashtags = filters.hashtags
-    }
-
-    if (filters.locations.length) {
-      dataView.filters.locations = filters.locations
-    }
-
-    dataView.samplingEffort = this.options.samplingEffort
-    dataView.feature = this.options.feature
-    dataView.spiderfyId = this.options.spiderfyId
-
-    // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
-    dataView.filters.mode = 'resetFilter'
 
     fetch(this.options.url, {
       method: 'POST', // or 'PUT'

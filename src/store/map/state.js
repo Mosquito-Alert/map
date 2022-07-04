@@ -13,6 +13,7 @@ export default function () {
     features: [],
     selectedFeature: null,
     activeLayers: [],
+    modelDate: null,
     samplingEffortLoading: false,
     datesRange: { from: '', to: '' },
     mapDates: { from: '', to: '' },

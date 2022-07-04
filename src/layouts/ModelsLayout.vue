@@ -7,6 +7,7 @@
       :expanded="expanded"
       @loadModel="loadModel"
       @toggleLeftDrawer="toggleLeftDrawer"
+      @showShareUrl="showShareUrl"
     />
 
     <q-page
@@ -15,11 +16,23 @@
     >
       <the-map-models ref='map'
         init
+        :viewCode="viewCode"
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
+        @mapViewSaved="mapViewSaved"
+        @setModelDate="setModelDate"
       />
     </q-page>
+
+    <modal-share
+      ref="shareModal"
+      :open="shareModalVisible"
+      @shareView="shareView"
+    >
+      <template v-slot:default>
+      </template>
+    </modal-share>
 
     <modal-info :open="infoModalVisible" buttons="close">
     </modal-info>
@@ -39,6 +52,7 @@
 
 <script>
 import ModalInfo from 'src/components/ModalInfo.vue'
+import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalError from 'src/components/ModalError.vue'
 import ModalWait from 'src/components/ModalWait.vue'
@@ -48,12 +62,13 @@ import LeftDrawerModels from 'components/LeftDrawerModels.vue'
 import TheMapModels from 'components/TheMapModels.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
-// import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 // import moment from 'moment'
 
 export default {
   components: {
     ModalInfo,
+    ModalShare,
     ModalHelp,
     ModalError,
     ModalWait,
@@ -65,9 +80,17 @@ export default {
   setup () {
     // const route = useRoute()
     const map = ref('null')
+    const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+
+    const route = useRoute()
+    const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
+
+    const frontendUrl = computed(() => {
+      return $store.getters['app/getFrontendUrl']
+    })
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -87,6 +110,14 @@ export default {
       return $store.getters['app/getModals'].error.visibility
     })
 
+    const shareModalVisible = computed(() => {
+      return $store.getters['app/getModals'].share.visibility
+    })
+
+    const shareView = function () {
+      map.value.shareModelView()
+    }
+
     const toggleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
@@ -99,6 +130,14 @@ export default {
           args.start += 5
           resizeMap(args)
         }, 5)
+      }
+    }
+
+    const mapViewSaved = function (payload) {
+      shareModal.value.status = payload
+      if (payload.status === 'ok') {
+        console.log(frontendUrl.value + payload.code)
+        shareModal.value.newUrl = frontendUrl.value + payload.code
       }
     }
 
@@ -133,11 +172,21 @@ export default {
         })
     })
 
+    const setModelDate = function (payload) {
+      console.log(payload)
+      TOC.value.inputDate = payload
+    }
+
     return {
+      viewCode,
       mobile,
       expanded,
       workerFinishedIndexing,
       toggleLeftDrawer,
+      shareView,
+      shareModal,
+      mapViewSaved,
+      shareModalVisible,
       infoModalVisible,
       helpModalVisible,
       errorModalVisible,
@@ -145,7 +194,8 @@ export default {
       TOC,
       timeseries,
       resizeMap,
-      loadModel
+      loadModel,
+      setModelDate
     }
   }
 }

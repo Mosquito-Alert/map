@@ -16,7 +16,6 @@ export const setFilteringTag = (state, payload) => {
 
 export const toggleLeftDrawerStatus = (state) => {
   state.leftDrawerStatus = !state.leftDrawerStatus
-  console.log('new status ' + state.leftDrawerStatus)
 }
 
 export const setDefaults = (state, payload) => {
@@ -30,6 +29,5 @@ export const setDefaultDates = (state, payload) => {
 }
 
 export const setPendingView = (state, payload) => {
-  console.log(payload)
   state.pendingView = payload
 }

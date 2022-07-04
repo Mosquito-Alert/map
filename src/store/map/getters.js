@@ -37,3 +37,7 @@ export const getTitles = state => {
 export const getLatinNames = state => {
   return state.latinNames
 }
+
+export const getModelDate = state => {
+  return state.modelDate
+}

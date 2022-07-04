@@ -7,8 +7,8 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>
-          <p v-if="success=='error'">{{ _('Share map view error') }}</p>
-          <div class="modal-content" v-if="success=='ok'">
+          <p v-if="status.status=='error'">{{ status.msg }}</p>
+          <div class="modal-content" v-if="status.status=='ok'">
             <transition name="toast">
               <div v-if="copied" class="toast-msg">
                 {{ _('Url has been copied') }}
@@ -33,7 +33,6 @@
           </div>
         <div class="buttons close-modal">
           <div class="download-buttons">
-            <button v-if="success==''" @click.stop="shareView">{{ _('Share view') }}</button>
             <button class="q-btn ma-share-btn" @click="close">{{ _('Close') }}</button>
           </div>
         </div>
@@ -51,23 +50,28 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close', 'shareView'],
   setup (props, context) {
-    const success = ref('')
+    const status = ref('')
     const copied = ref(false)
     const newUrl = ref('')
     const $store = useStore()
+
     const shareView = function () {
+      // Check if model is loaded
       context.emit('shareView')
     }
 
     onUpdated(() => {
-      shareView()
+      if ($store.getters['app/getModals'].share.visibility) {
+        shareView()
+      }
     })
+
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
 
     const close = function () {
-      success.value = ''
+      status.value = ''
       copied.value = false
       $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
     }
@@ -93,7 +97,7 @@ export default {
       mobile,
       copyToClipboard,
       copied,
-      success,
+      status,
       newUrl,
       shareView,
       close,

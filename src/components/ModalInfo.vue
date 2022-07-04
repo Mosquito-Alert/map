@@ -141,7 +141,7 @@
               </q-carousel-slide>
             </q-carousel>
 
-        <div class="close-modal">
+        <div class="close-info">
           <slot name="buttons"></slot>
           <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
         </div>
@@ -330,10 +330,22 @@ button.ma-close-btn,
   background: $primary-color;
   box-shadow: none;
   color: white;
+  margin-bottom: 10px;
 }
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
   opacity:0.7;
+}
+
+.close-info{
+  position: absolute;
+  bottom: 10px;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
 }
 
 </style>
