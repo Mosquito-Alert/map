@@ -78,11 +78,15 @@
     <modal-error>
     </modal-error>
 
+    <coockies-compliance>
+    </coockies-compliance>
+
     <site-footer/>
   </q-layout>
 </template>
 
 <script>
+import CoockiesCompliance from 'components/CoockiesCompliance.vue'
 import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
@@ -115,7 +119,8 @@ export default {
     LeftDrawer,
     SiteFooter,
     TheMap,
-    TimeSeries
+    TimeSeries,
+    CoockiesCompliance
   },
   setup () {
     const route = useRoute()
@@ -341,6 +346,7 @@ export default {
       shareModalVisible,
       reportModalVisible,
       errorModalVisible,
+      CoockiesCompliance,
       map,
       TOC,
       timeseries,
