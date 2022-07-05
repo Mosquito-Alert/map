@@ -78,10 +78,8 @@
     <modal-error>
     </modal-error>
 
-    <coockies-compliance>
-    </coockies-compliance>
-
     <site-footer/>
+    <coockies-compliance/>
   </q-layout>
 </template>
 
@@ -402,7 +400,7 @@ export default {
  .q-drawer-left{
     width: $left-drawer-width;
   }
-  aside {
+  .q-drawer-container aside {
     width: 350px;
   }
   .q-layout.collapsed aside{
@@ -411,7 +409,7 @@ export default {
     transition:width ease 1s;
   }
   .q-layout.expanded aside{
-    width: $left-drawer-width;
+    // width: $left-drawer-width;
     box-shadow: none;
     transition:width ease 1s;
   }
