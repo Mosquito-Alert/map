@@ -10,6 +10,10 @@ export const getLayers = state => {
   return state.layers
 }
 
+export const getModels = state => {
+  return state.models
+}
+
 export const initialLayers = state => {
   return state.DEFAULTS.observations
 }

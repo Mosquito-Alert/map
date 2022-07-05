@@ -19,7 +19,7 @@
             maxZoom="19"
             :center='center'
             :zoom='zoom'
-            :constrainResolution='true' />
+            :constrainResolution='false' />
 
         <div
           class="ol-attribution"
@@ -165,9 +165,15 @@ export default defineComponent({
       newView.load(handleLoadView)
     }
 
-    function handleLoadView (view) {
-      const d = view.view[0].date
+    function handleLoadView (response) {
+      const d = response.view[0].date
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
+      const jsonView = JSON.parse(response.view[0].view)
+      $store.commit('map/setDefaults', {
+        zoom: jsonView.zoom,
+        center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
+        mobilezoom: jsonView.zoom
+      })
     }
 
     function csvJSON (csv) {
@@ -197,6 +203,7 @@ export default defineComponent({
     }
 
     const loadModel = async function (data) {
+      console.log(data)
       map.value.map.removeLayer(modelsLayer)
       spinner(false)
 
@@ -253,7 +260,7 @@ export default defineComponent({
       if (value === undefined) {
         return null
       }
-      if (value < 0.25) {
+      if (value < 0.0000025) {
         if (!('1' in styles)) {
           styles['1'] = new Fill({
             color: 'rgb(254,235,226, 1)'
@@ -262,7 +269,7 @@ export default defineComponent({
         } else {
           style = styles['1']
         }
-      } else if (value < 0.5) {
+      } else if (value < 0.00012) {
         if (!('2' in styles)) {
           styles['2'] = new Fill({
             color: 'rgb(251,180,185, 1)'
@@ -271,7 +278,7 @@ export default defineComponent({
         } else {
           style = styles['2']
         }
-      } else if (value < 0.75) {
+      } else if (value < 0.00015) {
         if (!('3' in styles)) {
           styles['3'] = new Fill({
             color: 'rgb(247,104,161, 1)'
@@ -298,7 +305,7 @@ export default defineComponent({
 
     const gadm0 = new VectorTileLayer({
       minZoom: 0,
-      maxZoom: 2,
+      maxZoom: 3,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({

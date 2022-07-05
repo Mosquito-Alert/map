@@ -39,7 +39,7 @@ export default function () {
 
   return {
     // Models related
-    modelsServerPath: backendUrl + 'media/',
+    modelsServerPath: backendUrl + 'media/models',
     // key to make leftdrawer component re-render
     isMobile: mobile(),
     pendingView: { extent: null },
@@ -196,6 +196,53 @@ export default function () {
           { from: 100, to: 1000, color: '#f03b2066' },
           { from: 1000, to: Infinity, color: '#bd002666' }
         ]
+      }
+    },
+    models: {
+      tiger: {
+        categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
+        common_name: 'Tiger mosquito',
+        scientific_name: 'Aedes albopictus',
+        icon: require('../../assets/img/marker_tiger.svg'),
+        color: '#4d4d4d'
+      },
+      yellow: {
+        categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
+        common_name: 'Yellow fever mosquito',
+        scientific_name: 'Aedes aegypti',
+        icon: require('../../assets/img/marker_yellow.svg'),
+        color: '#ffdd19'
+      },
+      japonicus: {
+        categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
+        common_name: 'Japonicus mosquito',
+        scientific_name: 'Aedes japonicus',
+        icon: require('../../assets/img/marker_japonicus.svg'),
+        iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+        color: '#49a999'
+      },
+      koreicus: {
+        categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
+        common_name: 'Koreicus mosquito',
+        scientific_name: 'Aedes koreicus',
+        icon: require('../../assets/img/marker_koreicus.svg'),
+        iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+        color: '#499fff'
+      },
+      culex: {
+        categories: ['culex_probable', 'culex_confirmed'],
+        common_name: 'Culex mosquito',
+        scientific_name: 'Culex pipens',
+        icon: require('../../assets/img/marker_culex.svg'),
+        color: '#aa4499',
+        separator: true
+      },
+      bites: { // Bites
+        categories: ['bite'],
+        icon: require('../../assets/img/marker_bite.svg'),
+        faIcon: 'fa-solid fa-child-reaching bites',
+        common_name: 'Bites',
+        color: '#cc6677'
       }
     }
   }

@@ -24,7 +24,7 @@
       <div>
       <q-input
         readonly
-        class="calendar-input"
+        class="q-pl-md calendar-input"
         input-class="cursor-pointer"
         :label="_('Year / Month')"
         value=""
@@ -55,6 +55,19 @@
           </q-icon>
         </template>
       </q-input>
+
+      <div class="category-box q-my-md">
+        <div v-for="layer, code in models" :key="code"
+          class="li-item li-models q-pl-md q-py-md"
+          data-type="observations"
+          :data-code="code"
+          @click="filterModels(layer, $event)"
+          v-text="_(layer.common_name)">
+        </div>
+        <!-- <div v-text="_(layer.common_name)" class="toc-item-name"></div> -->
+        <div class="separator"></div>
+      </div>
+
         <button @click="applyfilter" class="q-mt-xl">
           Load Model
         </button>
@@ -78,10 +91,16 @@ export default {
     const getCurrentDate = ref()
     const monthPicker = ref()
     const $store = useStore()
+    let onModelIsSelected = false
+    let selectedModel = null
 
     onMounted(function () {
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+    })
+
+    const models = computed(() => {
+      return $store.getters['app/getModels']
     })
 
     const _ = function (text) {
@@ -109,23 +128,59 @@ export default {
       }
     }
 
-    const applyfilter = function () {
-      const dataUrl = $store.getters['app/getModelsServerPath']
-      const urls = [
-        dataUrl + 'model_gadm0.csv',
-        dataUrl + 'model_gadm1.csv',
-        dataUrl + 'model_gadm2.csv'
-      ]
-      context.emit('loadModel', {
-        esp: 'tig',
-        year: 2022,
-        month: 8,
-        modelsCsv: urls
+    const filterModels = function (layer, event) {
+      const obj = event.target
+      onModelIsSelected = true
+      // First Disable all active items
+      const activ = obj.parentNode.querySelector('.active')
+      if (activ) {
+        activ.classList.remove('active')
+      }
+
+      selectedModel = obj.dataset.code
+      context.emit('filterObservations', {
+        type: obj.dataset.type,
+        code: obj.dataset.code
       })
+
+      const classes = obj.classList
+      if (classes.contains('active')) {
+        obj.classList.remove('active')
+        if (obj.querySelector('img')) {
+          obj.querySelector('img').src = layer.icon_disabled
+        }
+      } else {
+        obj.classList.add('active')
+        if (obj.querySelector('img')) {
+          obj.querySelector('img').src = layer.icon
+        }
+      }
+    }
+
+    const applyfilter = function () {
+      if (inputDate.value === null || !onModelIsSelected) {
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
+      } else {
+        const parts = inputDate.value.split('/')
+        const serverModels = $store.getters['app/getModelsServerPath']
+        const dataUrl = `${serverModels}/${selectedModel}/${parts[1]}/${parts[0]}/`
+        const urls = [
+          dataUrl + 'model_gadm0.csv',
+          dataUrl + 'model_gadm1.csv',
+          dataUrl + 'model_gadm2.csv'
+        ]
+        context.emit('loadModel', {
+          esp: 'tig',
+          year: 2022,
+          month: 8,
+          modelsCsv: urls
+        })
+      }
     }
 
     return {
       _,
+      models,
       mobile,
       dateSelected,
       getCurrentDate,
@@ -135,6 +190,7 @@ export default {
       checkValue,
       toggleLeftDrawer,
       applyfilter,
+      filterModels,
       refInput
     }
   }
@@ -158,18 +214,20 @@ export default {
     -webkit-border-radius: 1ex;
     -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
 }
-.models-calendar{
-  font-weight: 600;
-}
-
-.q-field--filled.calendar-input{
+.toc-models .q-field--filled {
   background: $primary-color;
   border-radius: 4px;
 }
 
-.q-field--filled.calendar-input input,
-.q-field--filled.calendar-input div i{
+.toc-models .q-field--filled .q-field__inner .q-field__control{
+  background: $primary-color;
+}
+
+.toc-models .q-field--filled .q-field__control i {
   color: white !important;
+}
+.models-calendar{
+  font-weight: 600;
 }
 .q-header,
 .q-drawer{
@@ -186,10 +244,6 @@ export default {
     top: 0px;
     bottom: 0px;
     flex-direction: column;
-    .q-toolbar__title {
-      padding: 28px;
-      border-top: 1px solid $grey-color;
-    }
   }
 }
 :deep(.q-drawer__content) {
@@ -199,37 +253,14 @@ export default {
   width: $left-drawer-width;
 }
 
-.collapsed :deep(.q-drawer__content.fit){
-  width: 60px !important;
-}
-
 * {
   scrollbar-width: thin;
   scrollbar-color: #EFA501 #ccc;
 }
 
-.q-drawer__content.fit.scroll.expanded{
-  width: 250px !important;
-}
-.lang-wrapper{
-  position: relative;
-}
-
-.ma-close-btn::before{
-  box-shadow: none;
-}
-
-button.ma-close-btn,
-.ma-close-btn{
-  padding: 8px 10px;
-  border-radius: 3px;
+.li-item.active{
   background: $primary-color;
-  box-shadow: none;
   color: white;
-}
-button.ma-close-btn:hover,
-.ma-close-btn:hover{
-  opacity:0.7;
 }
 @media (max-width: 640px) {
   .aside button {

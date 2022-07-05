@@ -21,13 +21,11 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 export default {
   emits: ['close', 'newReport'],
   setup (props, context) {
     const $store = useStore()
-    const router = useRouter()
 
     const open = computed(() => {
       return $store.getters['app/getModals'].error.visibility
@@ -38,13 +36,7 @@ export default {
     })
 
     const close = function () {
-      document.locaton = 'http://localhost:8080/#/toni'
       $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
-      // document.location = '//localhost:8080/toni'
-      router.push('/JEjG')
-      router.replace('/JEjG')
-      router.go('/JEjG')
-      // router.push({ path: '/about', hash: '#team' })
     }
     const _ = function (text) {
       return $store.getters['app/getText'](text)

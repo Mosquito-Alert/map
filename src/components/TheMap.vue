@@ -52,10 +52,10 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
-          <!-- <ol-source-osm /> -->
-          <ol-source-xyz
+          <ol-source-osm />
+          <!-- <ol-source-xyz
               crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' />
+              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' /> -->
         </ol-tile-layer>
 
         <!-- SAMPLING EFFORT -->
