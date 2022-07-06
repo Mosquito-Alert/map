@@ -1,25 +1,75 @@
 <template>
-    <div class="coockie-comply-container">
+<!-- G-ZLD12V4W3V -->
+    <div class="cookie-comply-container" v-if="complyVisible">
       <vue-cookie-comply
         class="compliance-box"
-        :headerTitle="_('Coockie settings')"
-        :headerDescription="_('We use cookies and similar technologies to help personalize content and offer a better experience. You can opt to customize them by clicking the preferences button.')"
+        :headerTitle="_('Cookie settings')"
         :preferences="preferences"
         @on-accept-all-cookies="onAccept"
-        @on-save-cookie-preferences="onSavePreferences"
-      />
-    </div>
+      >
+        <template v-slot:header>
+          <header v-html="_('Cookies comply title')"></header>
+          <div>
+            {{ _('We use cookies and similar technologies to help personalize content and offer a better experience. You can opt to customize them by clicking the preferences button') }}
+          </div>
+        </template>
+
+        <template v-slot:modal-body="{ preference }">
+          <div v-if="preference.items[0].isRequired">
+            <div>
+              <h2>{{ _('Tecnical cookies') }}</h2>
+              <p> {{ _('Tecnical cookies description') }}</p>
+              <div class="cookie-comply__modal-switches">
+                <h3>Active</h3><label class="cookie-comply-switch" title="is required">
+                  <input id="performance" type="checkbox" disabled="" value="performance">
+                  <span class="cookie-comply-slider cookie-comply-round cookie-comply-required"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div>
+              <h2>{{ _('Analytics cookie title') }}</h2>
+              <p>{{ _('Analytics cookie description') }}</p>
+              <div class="cookie-comply__modal-switches">
+                <h3>GoogleAnalytics</h3>
+                <label class="cookie-comply-switch" title="ga">
+                  <input id="ga" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
+                  <span class="cookie-comply-slider cookie-comply-round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template v-slot:modal-footer>
+          <footer class="cookie-comply__modal-footer text-center">
+            <button class="cookie-comply__button" @click="savePreferences"> {{ _('Save cookie preferences') }} </button>
+          </footer>
+        </template>
+
+    </vue-cookie-comply>
+  </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import { useStore } from 'vuex'
+// import VueAnalytics from 'vue3-analytics'
 
 export default {
   setup () {
+    const complyVisible = ref(true)
+    const analyticsActivated = ref(false)
     const $store = useStore()
+
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
     const preferences = [
       {
-        title: 'Performance',
+        title: 'Title',
         description:
           'Bla bla serviços que podemos oferecer erviços que podemos oferecer erviços que podemos oferecer erviços que podemos oferecer serviços que podemos oferecer.',
         items: [{ label: 'Active', value: 'performance', isRequired: true }]
@@ -38,23 +88,31 @@ export default {
       }
     ]
 
-    const _ = function (text) {
-      return $store.getters['app/getText'](text)
+    // Get all accepted cookies and save them in store
+    const savePreferences = function (val) {
+      // Prevent cookie message appearing next time
+      const complied = (val === 'all') ? val : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
+      localStorage['cookie-comply'] = complied
+      // ga.enable()
+      // if (analyticsActivated.value) {
+      //   Vue.$ga.enable()
+      // } else {
+      //   app.$ga.disable()
+      // }
+      complyVisible.value = false
     }
 
     const onAccept = function () {
-      console.log('accepted')
-    }
-
-    const onSavePreferences = function () {
-      console.log('accepted')
+      savePreferences('all')
     }
 
     return {
       _,
+      complyVisible,
+      analyticsActivated,
       preferences,
-      onAccept,
-      onSavePreferences
+      savePreferences,
+      onAccept
     }
   }
 }
@@ -67,7 +125,7 @@ export default {
   z-index: 1010;
   background-color: #ccc;
 }
-.compliance-box h3{
+.cookie-comply-container header{
   font-size: 2em;
 }
 

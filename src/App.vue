@@ -6,8 +6,6 @@
 import { defineComponent } from 'vue'
 import 'vue-cookie-comply/dist/style.css'
 
-// import 'vue3-openlayers/dist/vue3-openlayers.css'
-
 export default defineComponent({
   name: 'App'
 })
