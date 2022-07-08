@@ -78,13 +78,21 @@
     <modal-error>
     </modal-error>
 
+    <modal-cookie-settings>
+    </modal-cookie-settings>
+
+    <modal-cookie-policy>
+    </modal-cookie-policy>
+
     <site-footer/>
-    <coockies-compliance/>
+    <cookies-compliance/>
   </q-layout>
 </template>
 
 <script>
-import CoockiesCompliance from 'src/components/CoockiesCompliance.vue'
+import CookiesCompliance from 'src/components/CookiesCompliance.vue'
+import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
+import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
@@ -109,6 +117,8 @@ export default {
     ModalHelp,
     ModalError,
     ModalWait,
+    ModalCookieSettings,
+    ModalCookiePolicy,
     ModalDownload,
     ModalShare,
     ModalFirst,
@@ -118,7 +128,7 @@ export default {
     SiteFooter,
     TheMap,
     TimeSeries,
-    CoockiesCompliance
+    CookiesCompliance
   },
   setup () {
     const route = useRoute()
@@ -344,7 +354,7 @@ export default {
       shareModalVisible,
       reportModalVisible,
       errorModalVisible,
-      CoockiesCompliance,
+      CookiesCompliance,
       map,
       TOC,
       timeseries,

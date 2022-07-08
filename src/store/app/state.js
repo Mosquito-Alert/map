@@ -65,6 +65,8 @@ export default function () {
     FRONTEND: frontendUrl,
     trans: {},
     modals: {
+      cookieSettings: { visibility: false },
+      cookiePolicy: { visibility: false },
       first: { visibility: !cookies.get('maCoockie') },
       info: { visibility: false },
       help: { visibility: false },

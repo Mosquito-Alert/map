@@ -1,7 +1,7 @@
 // id: 'G-ZLD12V4W3V',
 import { boot } from 'quasar/wrappers'
-// import VueGtag from 'vue-gtag'
-// import { VueCookieNext } from 'vue-cookie-next'
+import VueGtag from 'vue-gtag'
+import { VueCookieNext } from 'vue-cookie-next'
 // import { VueAnalytics } from 'vue3-analytics'
 // import { provide } from 'vue'
 
@@ -18,14 +18,14 @@ export default boot(async ({ app }) => {
       state = false
     }
   }
-  // app.use(VueCookieNext)
-  // app.use(VueGtag, {
-  //   config: { id: 'G-ZLD12V4W3V' },
-  //   enabled: state
-  // })
-  // // Will be used later
-  // app.provide('gtag', app.config.globalProperties.$gtag)
+  app.use(VueCookieNext)
+  app.use(VueGtag, {
+    config: { id: 'G-ZLD12V4W3V' },
+    enabled: state
+  })
+  // Will be used later
+  app.provide('gtag', app.config.globalProperties.$gtag)
   console.log(state)
-  window['ga-disable-G-ZLD12V4W3V'] = state
-  app.provide('gtag', window['ga-disable-G-ZLD12V4W3V'])
+  // window['ga-disable-G-ZLD12V4W3V'] = state
+  // app.provide('gtag', window['ga-disable-G-ZLD12V4W3V'])
 })

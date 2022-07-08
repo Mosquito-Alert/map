@@ -8,6 +8,13 @@
         :report="reportId"
         :reportLang="lang"
       />
+
+  <modal-cookie-settings>
+  </modal-cookie-settings>
+
+  <modal-cookie-policy>
+  </modal-cookie-policy>
+  <cookies-compliance/>
   </q-layout>
 </template>
 
@@ -15,9 +22,17 @@
 
 import { useRoute } from 'vue-router'
 import TheMapReport from 'components/TheMapReport.vue'
+import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
+import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
+import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 
 export default {
-  components: { TheMapReport },
+  components: {
+    TheMapReport,
+    ModalCookieSettings,
+    ModalCookiePolicy,
+    CookiesCompliance
+  },
   setup () {
     const route = useRoute()
     const reportId = (route.params) ? ((route.params.report) ? route.params.report : '') : ''

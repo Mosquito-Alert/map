@@ -46,11 +46,21 @@
     <modal-error>
     </modal-error>
 
+    <modal-cookie-settings>
+    </modal-cookie-settings>
+
+    <modal-cookie-policy>
+    </modal-cookie-policy>
+
     <site-footer/>
+    <cookies-compliance/>
   </q-layout>
 </template>
 
 <script>
+import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
+import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
+import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
@@ -63,6 +73,7 @@ import TheMapModels from 'components/TheMapModels.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+
 // import moment from 'moment'
 
 export default {
@@ -75,7 +86,10 @@ export default {
     SiteHeader,
     LeftDrawerModels,
     SiteFooter,
-    TheMapModels
+    TheMapModels,
+    ModalCookieSettings,
+    ModalCookiePolicy,
+    CookiesCompliance
   },
   setup () {
     // const route = useRoute()
@@ -195,7 +209,8 @@ export default {
       timeseries,
       resizeMap,
       loadModel,
-      setModelDate
+      setModelDate,
+      CookiesCompliance
     }
   }
 }
