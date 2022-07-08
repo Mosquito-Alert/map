@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import CoockiesCompliance from 'components/CoockiesCompliance.vue'
+import CoockiesCompliance from 'src/components/CoockiesCompliance.vue'
 import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'

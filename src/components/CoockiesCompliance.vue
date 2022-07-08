@@ -47,22 +47,23 @@
             <button class="cookie-comply__button" @click="savePreferences"> {{ _('Save cookie preferences') }} </button>
           </footer>
         </template>
-
     </vue-cookie-comply>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 import { useStore } from 'vuex'
 // import VueAnalytics from 'vue3-analytics'
 
 export default {
-  setup () {
+  setup (props, context) {
     const complyVisible = ref(true)
     const analyticsActivated = ref(false)
     const $store = useStore()
-
+    // eslint-disable-next-line
+    let gtag = inject('gtag')
+    console.log(gtag)
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -93,12 +94,16 @@ export default {
       // Prevent cookie message appearing next time
       const complied = (val === 'all') ? val : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
       localStorage['cookie-comply'] = complied
-      // ga.enable()
-      // if (analyticsActivated.value) {
-      //   Vue.$ga.enable()
-      // } else {
-      //   app.$ga.disable()
-      // }
+      if (analyticsActivated.value) {
+        console.log('opt in')
+        gtag = false
+        // gtag.optIn()
+      } else {
+        console.log('opt out')
+        gtag = true
+        // gtag.optOut()
+      }
+      console.log(gtag)
       complyVisible.value = false
     }
 
@@ -125,6 +130,7 @@ export default {
   z-index: 1010;
   background-color: #ccc;
 }
+
 .cookie-comply-container header{
   font-size: 2em;
 }
@@ -139,4 +145,27 @@ export default {
 .cookie-comply__modal-middle .cookie-comply__modal-inner{
   z-index:1020;
 }
+
+/* MOBILE */
+
+.q-layout.mobile aside.cookie-comply.compliance-box{
+  z-index: 1010;
+  width: auto;
+  background-color: #ccc;
+}
+
+.cookie-comply__modal-middle .cookie-comply__modal-inner{
+  z-index: 2020;
+}
+
+.cookie-comply__modal-innerl header{
+  max-height: 20vh;
+}
+.cookie-comply__modal-innerl body{
+  max-height: 50vh;
+}
+.cookie-comply__modal-innerl footer{
+  max-height: 20vh;
+}
+
 </style>
