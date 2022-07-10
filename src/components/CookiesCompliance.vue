@@ -9,10 +9,10 @@
           </div>
           <div>
             <p>
-              {{ _('La web de Universidad de Girona utiliza cookies propias y de terceros con finalidades técnicas y analíticas. Para administrarlas utilice el gestor. Si desea más información acceda a la Política de cookies') }}
+              {{ _('La web de Mosquito Alert utiliza cookies propias y de terceros con finalidades técnicas y analíticas. Para administrarlas utilice el gestor. Si desea más información acceda a la Política de cookies') }}
             </p>
             <p>
-              {{ _('Escoge qué tipos de galletas aceptas que la web de la Universidad de Girona pueda guardar en tu navegador.') }}
+              {{ _('Escoge qué tipos de galletas aceptas que Mosquito Alert pueda guardar en tu navegador.') }}
             </p>
             <p>{{ _('More info')}}
               <a href="#" @click.stop="openPolicy">Política de cookies</a>

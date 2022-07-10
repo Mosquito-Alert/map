@@ -7,27 +7,37 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
         <div class="scroll">
-            <p>Las galletas o cookies son pequeños archivos de texto que se instalan en los equipos desde los cuales se accede a nuestro sitio web. Entre otras finalidades, las cookies registran las preferencias y los hábitos de navegación de un usuario. Se asocian al usuario y a su equipo, pero no proporcionan datos directamente identificativos. Algunas cookies, por ejemplo las que permiten elaborar estadísticas o anuncios, necesitan el consentimiento del usuario de nuestro sitio web. En cambio otras cookies, las de carácter técnico o las necesarias para ofrecer un servicio solicitado por el usuario, son imprescindibles para el funcionamiento del sitio. Las cookies se pueden clasificar según su vigencia, quien las gestiona o su finalidad.</p>
-            <p>Según la vigencia</p>
+            <h4>Política de cookies</h4>
+            <p>Las galletas o cookies son pequeños archivos de texto que se instalan en los equipos desde los cuales se accede a nuestro sitio web. Entre otras finalidades, las cookies registran las preferencias y los hábitos de navegación de un usuario.</p>
+            <p>Se asocian al usuario y a su equipo, pero no proporcionan datos directamente identificativos. Algunas cookies, por ejemplo las que permiten elaborar estadísticas o anuncios, necesitan el consentimiento del usuario de nuestro sitio web. En cambio otras cookies, las de carácter técnico o las necesarias para ofrecer un servicio solicitado por el usuario, son imprescindibles para el funcionamiento del sitio.</p>
+            <p>Las cookies se pueden clasificar según su vigencia, quien las gestiona o su finalidad.</p>
+            <h5>Según la vigencia</h5>
               <ul>
                 <li>De sesión: son temporales y quedan en el archivo de galletas de vuestro navegador hasta el momento que abandonáis el sitio web</li>
                 <li>Persistentes: quedan almacenadas y el sitio web les lee cada vez que hacéis una visita.</li>
               </ul>
 
-            <p>Según quién las gestione</p>
+            <h5>Según quién las gestione</h5>
             <ul>
               <li>Propias: son las propias del titular del sitio web desde lo que se prestan los servicios al usuario.</li>
               <li>De terceros: se envían al usuario por parte de uno tercero, diferente al titular del lugar.</li>
             </ul>
 
-            <p>Según la finalidad</p>
+            <h5>Según la finalidad</h5>
             <ul>
               <li>Necesarias: las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web.</li>
               <li>Técnicas: las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros.</li>
               <li>Analíticas: proporcionan información estadística y permiten mejorar los servicios.</li>
             </ul>
 
-          <p>Listado de cookies utilizadas</p>
+          <h5>Listado de cookies utilizadas</h5>
+          <p>En la web de Mosquito Alert utilizamos una única cookie de tipo técnico y las cookies de Google Analytics</p>
+          <p>Las cookies de Google Analytics, permiten analizar estadísticamente la información a que acceden los usuarios de nuestro lugar. Los datos recopilados pueden incluir la actividad del navegador del usuario cuando nos visita, la ruta que siguen los usuarios en nuestro lugar, información del proveedor de servicios de Internet del visitante, el número a veces que los usuarios acceden al lugar y el comportamiento de los usuarios en nuestro lugar (páginas que ha visitado, formularios que se han completado y similares).</p>
+
+          <p>Puedes obtener más información sobre Google Analytics a <a href="//www.google.com/analytics/">www.google.com/analytics/</a>. Para controlar la recopilación de datos con finalidades analíticas por parte de Google Analytics, puedes ir a <a href="//tools.google.com/dlpage/gaoptout?hl=en">https://tools.google.com/dlpage/gaoptout?hl=en
+          </a></p>
+
+          <p>A continuación mostramos una tabla con las cookies utilizadas. Para cada cookie incluimos los siguientes atributos: finalidad, proveedor, nombre de la cookie, gestión, vigencia y función.</p>
           <table class="cookies-list">
             <tr>
               <th>Finalidad</th>
