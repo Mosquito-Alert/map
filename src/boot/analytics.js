@@ -1,7 +1,7 @@
 // id: 'G-ZLD12V4W3V',
 import { boot } from 'quasar/wrappers'
 import VueGtag from 'vue-gtag'
-import { VueCookieNext } from 'vue-cookie-next'
+// import { VueCookieNext } from 'vue-cookie-next'
 // import { VueAnalytics } from 'vue3-analytics'
 // import { provide } from 'vue'
 
@@ -11,14 +11,15 @@ export default boot(async ({ app }) => {
   //   disabled: true
   // })
   // app.provide('ma-analytics', VueAnalytics)
-  let state = true
+  let state = false
   if (localStorage['cookie-comply']) {
     const cookies = localStorage['cookie-comply'].split(',')
     if (cookies.indexOf('ga') > -1) {
-      state = false
+      state = true
     }
   }
-  app.use(VueCookieNext)
+  // window['ga-disable-G-ZLD12V4W3V'] = true
+  // app.use(VueCookieNext)
   app.use(VueGtag, {
     config: { id: 'G-ZLD12V4W3V' },
     enabled: state
