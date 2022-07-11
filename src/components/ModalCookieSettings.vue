@@ -7,35 +7,45 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div>
-            <div>
-              <h6>Necesarias</h6>
-              <p>Las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web.</p>
-              <div class="cookie-comply__modal-switches">
-                <h5>Active</h5><label class="cookie-comply-switch" title="is required">
-                  <input id="performance" type="checkbox" disabled="" value="performance">
-                  <span class="cookie-comply-slider cookie-comply-round cookie-comply-required"></span>
-                </label>
-              </div>
+            <div class="close-modal-window">
+              <i @click="closeModal" class="fa fa-window-close" aria-hidden="true"></i>
             </div>
-          </div>
-          <hr/>
-          <div>
             <div>
-              <h6>Analytics</h6>
-              <p>Proporcionan información estadística y permiten mejorar los servicios. Utilizamos cookies de Google Analytics que podéis desactivar instalándoos este plugin.</p>
-              <div class="cookie-comply__modal-switches">
-                <h5>GoogleAnalytics</h5>
-                <label class="cookie-comply-switch" title="ga">
-                  <input id="ga" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
-                  <span class="cookie-comply-slider cookie-comply-round"></span>
-                </label>
+              <div class="row cookies-selector">
+                  <div class="col-10"><h5>Necesarias</h5></div>
+                  <div class="col-2">
+                    <label class="cookie-comply-switch" title="is required">
+                      <input id="performance" type="checkbox" disabled="" value="performance">
+                      <span class="cookie-comply-slider cookie-comply-round cookie-comply-required"></span>
+                    </label>
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <p>Las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web.</p>
+                </div>
+              </div>
+
+              <div class="row cookies-selector">
+                  <div class="col-10"><h5>Analytics</h5></div>
+                  <div class="col-2">
+                    <label class="cookie-comply-switch" title="ga">
+                      <input id="ga" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
+                      <span class="cookie-comply-slider cookie-comply-round"></span>
+                    </label>
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <p>Proporcionan información estadística y permiten mejorar los servicios. Utilizamos cookies de Google Analytics que podéis desactivar instalándoos este plugin.</p>
+                </div>
               </div>
             </div>
           </div>
 
           <footer class="modal-buttons text-center flex">
-            <button class="col-6 col-xs-12 cookie-comply__button ma-btn" @click="savePreferences"> {{ _('Save cookie preferences') }} </button>
-            <button @click="close" class="col-6 col-xs-12 ma-btn close">{{ _('Cancel') }}</button>
+            <button class="col-6 col-xs-12 cookie-comply__button ma-btn" @click="savePreferences"> {{ _('Accept all') }} </button>
+            <button @click="close" class="col-6 col-xs-12 ma-btn close">{{ _('Save and close') }}</button>
           </footer>
 
       </dialog>
@@ -89,7 +99,11 @@ export default {
       savePreferences('all')
     }
 
+    const closeModal = function () {
+      return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
+    }
     return {
+      closeModal,
       mobile,
       open,
       close,
@@ -233,5 +247,24 @@ button.ma-close-btn:hover,
 .download-buttons{
   justify-content: center;
   flex-wrap: nowrap;
+}
+.cookies-selector {
+  align-items: center;
+}
+.fa-window-close{
+  font-size: 3em;
+  color: $primary-color;
+}
+.close-modal-window{
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.mobile .close-modal-window{
+  top: 5px;
+  right: 5px;
+  font-size: 0.8em;
 }
 </style>

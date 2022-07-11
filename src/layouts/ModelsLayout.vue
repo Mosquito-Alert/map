@@ -279,6 +279,29 @@ export default {
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;
   }
+  .ma-btn::before,
+  .ma-close-btn::before{
+    box-shadow: none;
+  }
+
+  button.ma-btn{
+    display: flex;
+  }
+  button.ma-btn,
+  button.ma-close-btn,
+  .ma-close-btn{
+    padding: 8px 10px;
+    border-radius: 3px;
+    background: $primary-color;
+    box-shadow: none;
+    color: white;
+    border: none;
+  }
+  button.ma-btn:hover,
+  button.ma-close-btn:hover,
+  .ma-close-btn:hover{
+    opacity:0.7;
+  }
 
   // MOBILE
   .q-page.mobile.collapsed{
