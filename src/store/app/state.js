@@ -35,9 +35,18 @@ export default function () {
     }
   }
 
+  const compliance = () => {
+    if (localStorage['cookie-comply']) {
+      return true
+    } else {
+      return false
+    }
+  }
+  console.log(compliance)
   const { cookies } = useCookies()
 
   return {
+    cookiesComply: compliance(),
     // Models related
     modelsServerPath: backendUrl + 'media/models',
     // key to make leftdrawer component re-render
@@ -67,7 +76,7 @@ export default function () {
     modals: {
       cookieSettings: { visibility: false },
       cookiePolicy: { visibility: false },
-      first: { visibility: !cookies.get('maCoockie') },
+      first: { visibility: !cookies.get('maCookie') },
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },

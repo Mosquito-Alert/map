@@ -1,6 +1,6 @@
 <template>
   <transition name="backdrop">
-      <div class="backdrop" v-if="open"></div>
+      <div class="backdrop-modal-wait" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog" v-if="open">
@@ -54,7 +54,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.backdrop {
+.backdrop-modal-wait {
   position: fixed;
   top: 0;
   left: 0;

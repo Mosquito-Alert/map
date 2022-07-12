@@ -70,3 +70,7 @@ export const getModelsServerPath = state => {
 export const getLeftDrawerStatus = state => {
   return state.leftDrawerStatus
 }
+
+export const getCookiesComply = state => {
+  return state.cookiesComply
+}

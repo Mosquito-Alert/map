@@ -1,6 +1,6 @@
 <template>
   <transition name="backdrop">
-    <div class="backdrop" v-if="open"></div>
+    <div class="backdrop-modal-share" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog-share" v-if="open" @click="close">
@@ -108,14 +108,14 @@ export default {
 </script>
 
 <style lang="scss">
-.backdrop {
+.backdrop-modal-share {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: transparent;
 }
 
 .dialog-share {

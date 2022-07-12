@@ -1,6 +1,6 @@
 <template>
   <transition name="backdrop">
-    <div class="backdrop" v-if="open"></div>
+    <div class="backdrop-modal-info" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog help" v-if="open">
@@ -178,15 +178,14 @@ export default {
       hasCloseButton,
       mobile,
       _,
-      slide: ref('pag_1'),
-      lorem: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque voluptatem totam, architecto cupiditate officia rerum, error dignissimos praesentium libero ab nemo provident incidunt ducimus iusto perferendis porro earum. Totam, numquam?'
+      slide: ref('pag_1')
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-.backdrop {
+.backdrop-modal-info {
   position: fixed;
   top: 0;
   left: 0;

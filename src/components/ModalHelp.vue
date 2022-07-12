@@ -1,6 +1,6 @@
 <template>
   <transition name="backdrop">
-    <div class="backdrop" v-if="open"></div>
+    <div class="backdrop-modal-help" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog modal-help" v-if="open">
@@ -121,7 +121,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.backdrop {
+.backdrop-modal-help {
   position: fixed;
   top: 0;
   left: 0;

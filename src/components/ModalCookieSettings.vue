@@ -1,6 +1,6 @@
 <template>
   <transition name="backdrop">
-      <div class="backdrop" v-if="open"></div>
+      <div class="backdrop-cookie-settings" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog cookie-settings" v-if="open">
@@ -43,11 +43,26 @@
             </div>
           </div>
 
-          <footer class="modal-buttons text-center flex">
-            <button class="col-6 col-xs-12 cookie-comply__button ma-btn" @click="savePreferences"> {{ _('Accept all') }} </button>
-            <button @click="close" class="col-6 col-xs-12 ma-btn close">{{ _('Save and close') }}</button>
+          <footer class="modal-buttons">
+            <div class="flex">
+              <div class="">
+                <button
+                  class="ma-btn"
+                  @click="onAccept"
+                >
+                  {{ _('Accept all') }}
+                </button>
+              </div>
+              <div class="">
+                <button
+                  @click="savePreferences"
+                  class="ma-btn close"
+                >
+                  {{ _('Save and close') }}
+                </button>
+              </div>
+            </div>
           </footer>
-
       </dialog>
     </div>
   </transition>
@@ -80,19 +95,21 @@ export default {
     })
 
     const savePreferences = function (val) {
+      console.log('save preferences ' + val)
       // Prevent cookie message appearing next time
       const complied = (val === 'all') ? val : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
       localStorage['cookie-comply'] = complied
-      if (analyticsActivated.value) {
+      $store.commit('app/setCookiesComply', true)
+
+      if (analyticsActivated.value || complied === 'all') {
         console.log('opt in')
-        // gtag = false
         gtag.optIn()
       } else {
         console.log('opt out')
-        // gtag = true
         gtag.optOut()
       }
-      console.log(gtag)
+      // console.log(gtag)
+      closeModal()
     }
 
     const onAccept = function () {
@@ -116,15 +133,14 @@ export default {
 </script>
 
 <style lang="scss">
-.backdrop {
+.backdrop-cookie-settings {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  // background-color: rgba(0, 0, 0, 0.75);
-  background: transparent
+  background-color: rgba(0, 0, 0, 0.75);
 }
 
 .dialog.cookie-settings {
@@ -208,6 +224,10 @@ dialog.mobile .buttons{
 .dialog.cookie-settings .modal-buttons{
   justify-content: center;
 }
+.modal-buttons .flex{
+  justify-content: center;
+}
+
 .close-modal {
   position: absolute;
   bottom: 10px;

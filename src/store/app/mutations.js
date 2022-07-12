@@ -7,7 +7,6 @@ export const setLanguage = (state, lang) => {
 }
 
 export const setModal = (state, payload) => {
-  console.log(payload)
   state.modals[payload.id] = payload.content
 }
 
@@ -31,4 +30,8 @@ export const setDefaultDates = (state, payload) => {
 
 export const setPendingView = (state, payload) => {
   state.pendingView = payload
+}
+
+export const setCookiesComply = (state, payload) => {
+  state.cookiesComply = payload
 }

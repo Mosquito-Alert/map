@@ -25,11 +25,11 @@
         <div :class="mobile?'col-12':''">
           <div :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
-              <div class="col-1" :class="mobile?'q-py-xs':''">
+              <div class="col-6" :class="mobile?'q-py-xs':''">
                 <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
                 <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
+                {{ _(set.label) }}
               </div>
-              <div class="col-5 q-ml-xs q-mr-md">{{ _(set.label) }}</div>
             </template>
           </div>
         </div>
@@ -47,15 +47,16 @@
               transition-hide="scale"
             >
               <q-date
-                navigation-min-year-month='2015/01'
+                navigation-min-year-month='2014/06'
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
                 range
                 years-in-month-view="true"
-                mask="MM/YYYY"
                 class="calendar"
                 color="orange-4"
                 text-color="black"
+                :title="_('Years')"
+                :subtitle="_('Months')"
               >
                 <div class="row items-center justify-end q-gutter-sm">
                   <q-btn :label="_('Delete calendar')" class="ma-btn"
@@ -373,7 +374,7 @@ export default defineComponent({
     display: flex;
     // margin-right: 10px;
     margin-right: 10px;
-    white-space:nowrap;
+    white-space:wrap;
   }
   .legend div:not{
     margin-right: 10px;
@@ -443,7 +444,7 @@ export default defineComponent({
     // text-overflow: ellipsis;
     display: inline;
     line-height: 16px;     /* fallback */
-    max-height: 32px;      /* fallback */
+    max-height: 42px;      /* fallback */
     // -webkit-line-clamp: 2; /* number of lines to show */
     // -webkit-box-orient: vertical;
   }
@@ -453,6 +454,9 @@ export default defineComponent({
   }
   .legend div img{
     height: 20px;
+  }
+  .legend div .symbol{
+    margin: 0px 5px;
   }
   .timeseries-filter{
     margin-left:20px;

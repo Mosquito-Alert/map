@@ -29,31 +29,29 @@
     </div>
   </transition>
 
-  <modal-cookie-settings>
+  <modal-cookie-settings ref="cookiesSettings">
   </modal-cookie-settings>
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { computed, ref, inject } from 'vue'
 import { useStore } from 'vuex'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 
 export default {
   components: ['ModalCookieSettings'],
   setup (props, context) {
-    const complyVisible = ref(null)
+    const cookiesSettings = ref('null')
     const analyticsActivated = ref(false)
     const $store = useStore()
+    const gtag = inject('gtag')
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    onMounted(function () {
-      complyVisible.value = true
-      if (localStorage['cookie-comply']) {
-        complyVisible.value = false
-      }
+    const complyVisible = computed(() => {
+      return !$store.getters['app/getCookiesComply']
     })
 
     const openSettings = function () {
@@ -62,17 +60,18 @@ export default {
     }
 
     const openPolicy = function () {
-      console.log('open')
       $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
     }
 
     const acceptAll = function () {
       localStorage['cookie-comply'] = 'all'
-      complyVisible.value = false
+      $store.commit('app/setCookiesComply', true)
+      gtag.optIn()
     }
 
     return {
       _,
+      cookiesSettings,
       acceptAll,
       openSettings,
       openPolicy,

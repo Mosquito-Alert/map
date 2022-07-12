@@ -4,7 +4,7 @@
         name="fa-thin fa-layer-group"
         :label="_('Layers')"
         :class="active_item=='layers'?'active':''"
-        link="/"
+        :link="frontendUrl"
       >
       </fa-thin-button>
 
@@ -130,6 +130,7 @@ export default {
       ca,
       es,
       en,
+      frontendUrl: computed(() => $store.getters['app/getFrontendUrl']),
       linkModels: computed(() => $store.getters['app/getFrontendUrl'] + 'models'),
       showInfo,
       showHelp,

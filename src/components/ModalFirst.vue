@@ -38,7 +38,7 @@ export default {
     const { cookies } = useCookies()
 
     const close = function () {
-      cookies.set('maCoockie', 'yes')
+      cookies.set('maCookie', 'yes')
       $store.commit('app/setModal', { id: 'first', content: { visibility: false } })
     }
     const mobile = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <a class="main-menu-item" :href="link_url">
+  <a class="main-menu-item" href="#">
     <button class="fa-thin-button" :class="class_prop">
       <i :class="icon_code"></i>
       <span>{{ label }}</span>
