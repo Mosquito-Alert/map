@@ -42,7 +42,6 @@ export default function () {
       return false
     }
   }
-  console.log(compliance)
   const { cookies } = useCookies()
 
   return {

@@ -52,6 +52,7 @@
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
+              <span v-else v-html="_('All years and all months')"></span>
             </div>
 
             <div class="dates" v-if="locationName">
@@ -311,7 +312,6 @@ export default {
         center.value = view.center
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
-        console.log(view.filters)
 
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
@@ -320,11 +320,11 @@ export default {
 
         // Format dates to display
         if (view.filters.dates.length) {
+          anyFilters.value = true
           const d = view.filters.dates[0]
           if (d.from === '') {
             dateRange.value = ''
           } else {
-            anyFilters.value = true
             dateFrom.value = moment(d.from).format('DD/MM/YYYY')
             dateRange.value = moment(d.from).format('DD-MM-YYYY')
             dateRange.value += ' - ' + moment(d.to).format('DD/MM/YYYY')

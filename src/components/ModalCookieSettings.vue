@@ -30,7 +30,7 @@
                   <div class="col-10"><h5>Analytics</h5></div>
                   <div class="col-2">
                     <label class="cookie-comply-switch" title="ga">
-                      <input id="ga" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
+                      <input id="ga" :checked="cookieCheckbox" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
                       <span class="cookie-comply-slider cookie-comply-round"></span>
                     </label>
                   </div>
@@ -78,6 +78,7 @@ export default {
     const $store = useStore()
     const analyticsActivated = ref(false)
     const gtag = inject('gtag')
+    const cookieCheckbox = ref(false)
 
     const open = computed(() => {
       return $store.getters['app/getModals'].cookieSettings.visibility
@@ -116,13 +117,15 @@ export default {
 
     const onAccept = function () {
       localStorage['cookie-comply'] = 'all'
-      savePreferences()
+      cookieCheckbox.value = true
+      setTimeout(savePreferences, 500)
     }
 
     const closeModal = function () {
       return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
     return {
+      cookieCheckbox,
       analyticsActivated,
       closeModal,
       mobile,

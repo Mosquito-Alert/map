@@ -19,16 +19,18 @@
     </div>
     <div class="body">
       <div v-if="mobile" class="flex-right">
-        <q-btn :label="_('Close')" class="q-ma-md ma-btn btn" @click="toggleTimeSeries"/>
+        <q-btn :label="_('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'row mobile':'no-row'">
         <div :class="mobile?'col-12':''">
-          <div :class="mobile?'row':''">
+          <div class="flex" :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
               <div class="col-6" :class="mobile?'q-py-xs':''">
-                <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
-                <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
-                {{ _(set.label) }}
+                <div class="no-wrap">
+                  <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
+                  <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
+                  {{ _(set.label) }}
+                </div>
               </div>
             </template>
           </div>
@@ -50,13 +52,14 @@
                 navigation-min-year-month='2014/06'
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
+                :subtitle="_(calendarSubtitle)"
                 range
                 years-in-month-view="true"
                 class="calendar"
                 color="orange-4"
                 text-color="black"
-                :title="_('Years')"
-                :subtitle="_('Months')"
+                @range-start="rangeStart"
+                @range-end="rangeEnd"
               >
                 <div class="row items-center justify-end q-gutter-sm">
                   <q-btn :label="_('Delete calendar')" class="ma-btn"
@@ -95,7 +98,8 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, context) {
-    // $q.lang.set('es') // returns a string
+    // const calendarTitle = ref()
+    const calendarSubtitle = ref()
 
     const chart = ref()
     const getCurrentDate = ref()
@@ -127,6 +131,7 @@ export default defineComponent({
           to: ''
         }
       })
+      calendarSubtitle.value = 'All years and all months'
       $store.commit('map/setMapDates', { from: '', to: '' })
     }
     // Timeseries properties
@@ -157,6 +162,10 @@ export default defineComponent({
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
       defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
+
+      calendarSubtitle.value = moment(defaultDates.from).format('DD/MM/YYYY')
+      calendarSubtitle.value += ' - ' + moment(defaultDates.to).format('DD/MM/YYYY')
+
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
@@ -213,6 +222,16 @@ export default defineComponent({
       return data
     })
 
+    const rangeStart = function (range) {
+      const sDate = moment(range.year + '/' + range.month + '/' + range.day)
+      calendarSubtitle.value = moment(sDate).format('DD/MM/YYYY')
+    }
+
+    const rangeEnd = function (range) {
+      const eDate = moment(range.to.year + '/' + range.to.month + '/' + range.to.day)
+      calendarSubtitle.value += ' - ' + moment(eDate).format('DD/MM/YYYY')
+    }
+
     const datePicked = function (event) {
       console.log('picked')
       let daysInRange = 0
@@ -266,6 +285,10 @@ export default defineComponent({
 
     return {
       _,
+      rangeStart,
+      rangeEnd,
+      // calendarTitle,
+      calendarSubtitle,
       mobile,
       graphicHeight,
       showCalendar,
@@ -366,13 +389,11 @@ export default defineComponent({
   .legend {
     margin-left: 30px;
     display: flex;
-    // justify-content: space-between;
   }
   .legend,
   .legend .no-row,
   .legend .no-row .no-row{
     display: flex;
-    // margin-right: 10px;
     margin-right: 10px;
     white-space:wrap;
   }
@@ -440,13 +461,19 @@ export default defineComponent({
   }
   .legend .no-row div,
   .legend div{
-    overflow: hidden;
     // text-overflow: ellipsis;
-    display: inline;
+    display: flex;
+    flex-wrap: wrap;
     line-height: 16px;     /* fallback */
     max-height: 42px;      /* fallback */
     // -webkit-line-clamp: 2; /* number of lines to show */
     // -webkit-box-orient: vertical;
+  }
+  .legend div{
+    overflow: hidden;
+  }
+  .legend.no-row div{
+    overflow-y: auto;
   }
   .legend.mobile div{
     max-height:unset;
@@ -507,13 +534,14 @@ export default defineComponent({
 
   .mobile.legend{
     display: flex;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
     flex-wrap:wrap;
   }
   .legend.mobile .row{
     overflow: hidden;
     display: flex;
+    flex-grow: 1;
     line-height: 16px;
     align-items: center;
   }
@@ -523,5 +551,12 @@ export default defineComponent({
   .flex-right{
     display:flex;
     justify-content: right;
+  }
+  div:not(-mobile) .no-wrap{
+    white-space: nowrap;
+    display: inline;
+  }
+  .timeseries-close{
+    margin: 10px 0px;
   }
 </style>
