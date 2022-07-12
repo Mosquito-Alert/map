@@ -11,22 +11,24 @@ export default boot(async ({ app }) => {
   //   disabled: true
   // })
   // app.provide('ma-analytics', VueAnalytics)
-  let state = false
+  let enableCookies = false
   if (localStorage['cookie-comply']) {
     const cookies = localStorage['cookie-comply'].split(',')
-    if (cookies.indexOf('ga') > -1) {
-      state = true
+    if (cookies.indexOf('ga') > -1 || cookies.indexOf('all') > -1) {
+      enableCookies = true
     }
   }
-  // window['ga-disable-G-ZLD12V4W3V'] = true
+  // window['ga-disable-G-ZLD12V4W3V'] = !state
+  window['ga-disable-G-RT6ZXWX8PS'] = !enableCookies
   // app.use(VueCookieNext)
   app.use(VueGtag, {
-    config: { id: 'G-ZLD12V4W3V' },
-    enabled: state
+    // config: { id: 'G-ZLD12V4W3V' },
+    config: { id: 'G-RT6ZXWX8PS' },
+    enabled: enableCookies
   })
   // Will be used later
   app.provide('gtag', app.config.globalProperties.$gtag)
-  console.log(state)
+  console.log(enableCookies)
   // window['ga-disable-G-ZLD12V4W3V'] = state
   // app.provide('gtag', window['ga-disable-G-ZLD12V4W3V'])
 })

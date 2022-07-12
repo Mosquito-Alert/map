@@ -94,18 +94,20 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const savePreferences = function (val) {
-      console.log('save preferences ' + val)
+    const savePreferences = function () {
       // Prevent cookie message appearing next time
-      const complied = (val === 'all') ? val : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
-      localStorage['cookie-comply'] = complied
+      const complied = (localStorage['cookie-comply'] === 'all') ? 'all' : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
       $store.commit('app/setCookiesComply', true)
 
       if (analyticsActivated.value || complied === 'all') {
         console.log('opt in')
+        localStorage['cookie-comply'] = 'all'
+        window['ga-disable-G-RT6ZXWX8PS'] = false
         gtag.optIn()
       } else {
         console.log('opt out')
+        localStorage['cookie-comply'] = 'performance'
+        window['ga-disable-G-RT6ZXWX8PS'] = true
         gtag.optOut()
       }
       // console.log(gtag)
@@ -113,13 +115,15 @@ export default {
     }
 
     const onAccept = function () {
-      savePreferences('all')
+      localStorage['cookie-comply'] = 'all'
+      savePreferences()
     }
 
     const closeModal = function () {
       return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
     return {
+      analyticsActivated,
       closeModal,
       mobile,
       open,
