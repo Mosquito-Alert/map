@@ -18,12 +18,12 @@ export default boot(async ({ app }) => {
       enableCookies = true
     }
   }
-  // window['ga-disable-G-ZLD12V4W3V'] = !state
-  window['ga-disable-G-RT6ZXWX8PS'] = !enableCookies
+  window['ga-disable-G-ZLD12V4W3V'] = !enableCookies
+  // window['ga-disable-G-RT6ZXWX8PS'] = !enableCookies
   // app.use(VueCookieNext)
   app.use(VueGtag, {
-    // config: { id: 'G-ZLD12V4W3V' },
-    config: { id: 'G-RT6ZXWX8PS' },
+    config: { id: 'G-ZLD12V4W3V' },
+    // config: { id: 'G-RT6ZXWX8PS' },
     enabled: enableCookies
   })
   // Will be used later

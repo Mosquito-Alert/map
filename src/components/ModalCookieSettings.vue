@@ -14,9 +14,9 @@
               <div class="row cookies-selector">
                   <div class="col-10"><h5>Necesarias</h5></div>
                   <div class="col-2">
-                    <label class="cookie-comply-switch" title="is required">
-                      <input id="performance" type="checkbox" disabled="" value="performance">
-                      <span class="cookie-comply-slider cookie-comply-round cookie-comply-required"></span>
+                    <label class="cookie-comply-switch" :title="_('Is required')">
+                      <input id="performance" checked type="checkbox" disabled="" value="performance">
+                      <span class="cookie-comply-slider cookie-comply-round cookie-comply-is-required"></span>
                     </label>
                   </div>
               </div>
@@ -29,7 +29,7 @@
               <div class="row cookies-selector">
                   <div class="col-10"><h5>Analytics</h5></div>
                   <div class="col-2">
-                    <label class="cookie-comply-switch" title="ga">
+                    <label class="cookie-comply-switch" title="Analytics">
                       <input id="ga" :checked="cookieCheckbox" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
                       <span class="cookie-comply-slider cookie-comply-round"></span>
                     </label>
@@ -37,7 +37,7 @@
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>Proporcionan información estadística y permiten mejorar los servicios. Utilizamos cookies de Google Analytics que podéis desactivar instalándoos este plugin.</p>
+                  <p>Proporcionan información estadística y permiten mejorar los servicios.</p>
                 </div>
               </div>
             </div>
@@ -293,5 +293,8 @@ button.ma-close-btn:hover,
   top: 5px;
   right: 5px;
   font-size: 0.8em;
+}
+.cookie-comply-is-required{
+  cursor: not-allowed;
 }
 </style>
