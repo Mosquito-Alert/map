@@ -198,11 +198,12 @@ export default defineComponent({
 
     const mapFilters = {
       mode: 'resetFilter',
+      lastFilterApplied: '',
       observations: [],
       locations: [],
       hashtags: [],
       dates: [],
-      reportFeatures: [],
+      featuresSet: [],
       report_id: []
     }
 
@@ -250,7 +251,6 @@ export default defineComponent({
     }
 
     const fitFeature = function (location, simplify = true) {
-      console.time('FitFeature')
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
       if (mobile.value) {
@@ -384,6 +384,24 @@ export default defineComponent({
       if (event.data.fetchedData) {
         return
       }
+
+      if (event.data.minMaxDates) {
+        if (event.data.getAllDates) {
+          $store.commit('map/setMinMaxDates', {
+            min: event.data.minMaxDates.min,
+            max: event.data.minMaxDates.max
+          })
+          $store.commit('app/setCalendarSubtitle', (
+            moment(event.data.minMaxDates.min).format('DD/MM/YYYY') +
+            ' - ' + moment(event.data.minMaxDates.max).format('DD/MM/YYYY')
+          ))
+          $store.commit('map/setMapDates', {
+            from: event.data.minMaxDates.min,
+            to: event.data.minMaxDates.max
+          })
+        }
+      }
+
       if (event.data.ready) {
         // Map data initialization
         if (!ready) {
@@ -394,10 +412,6 @@ export default defineComponent({
           initMap(param)
         } else {
           context.emit('workerFinishedIndexing', { mapFilters })
-          $store.commit('map/setDatesRange', {
-            from: event.data.datesInterval.from,
-            to: event.data.datesInterval.to
-          })
           if (event.data.features) {
             const data = []
             for (let a = 0; a < event.data.features.length; a++) {
@@ -519,13 +533,10 @@ export default defineComponent({
 
         // Set default dates, otherwise current year data only
         if (defaults.dates.length) {
-          // const initialDate = expandDate(defaults.dates[0], 'YYYY-MM-DD')
-          // mapFilters.dates = [initialDate]
           mapFilters.dates = [defaults.dates[0]]
           $store.commit('map/setMapDates', defaults.dates[0])
         } else {
           const currentDates = getCurrentYearDates()
-          // const expandedDates = expandDate(currentDates, 'YYYY-MM-DD')
           mapFilters.dates = [currentDates]
           $store.commit('map/setMapDates', currentDates)
         }
@@ -654,7 +665,7 @@ export default defineComponent({
 
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
-      mapFilters.reportFeatures = JSON.parse(JSON.stringify(v.filters.reportFeatures))
+      mapFilters.featuresSet = JSON.parse(JSON.stringify(v.filters.featuresSet))
       initMap()
     }
 
@@ -678,7 +689,7 @@ export default defineComponent({
       const newView = new ShareMapView(ol, {
         viewType: 'layers',
         filters: mapFilters,
-        datesRange: $store.getters['map/getDatesRange'],
+        dates: $store.getters['map/getDatesRange'],
         locationName: locationName,
         popup: (selectedId.value === null) ? '' : selectedId.value,
         feature: obj,
@@ -691,7 +702,6 @@ export default defineComponent({
     }
 
     function handleShareView (status) {
-      console.log(status)
       if (status.status === 'error') {
         console.log(status.msg)
       } else {
@@ -735,6 +745,9 @@ export default defineComponent({
 
     function newReport () {
       const ol = map.value.map
+      if (mapFilters.dates[0].from === '') {
+        mapFilters.dates[0] = $store.getters['map/getMapDates']
+      }
       const newView = new ReportView(ol, {
         filters: mapFilters,
         locationName: locationName,
@@ -1163,6 +1176,7 @@ export default defineComponent({
           categories: observation.categories
         })
         mapFilters.mode = 'resetFilter'
+        mapFilters.lastFilterApplied = 'observations'
         $store.commit('map/addActiveLayer', {
           type: observation.type,
           code: observation.code,
@@ -1200,6 +1214,7 @@ export default defineComponent({
       const workerData = {}
       if (location) {
         mapFilters.locations = [JSON.stringify(location)]
+        mapFilters.lastFilterApplied = 'location'
         // mapFilters.tolerance = simplifyTolerance
         mapFilters.mode = 'increaseFilter'
       } else {
@@ -1226,6 +1241,7 @@ export default defineComponent({
       } else {
         mapFilters.mode = 'resetFilter'
       }
+      mapFilters.lastFilterApplied = 'dates'
       if (date !== null) {
         // const expandedDate = expandDate(date.data, 'YYYY-MM-DD')
         // mapFilters.dates = [JSON.parse(JSON.stringify(expandedDate))]
@@ -1250,17 +1266,17 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       closePopup()
-      // Check if tags contain reportFeatures starting with ':'
+      // Check if tags contain featuresSet starting with ':'
       if (tag.startsWith(':')) {
+        mapFilters.lastFilterApplied = 'reports'
         mapFilters.hashtags = []
         if (obj.mode === 'addedTag') {
-          // mapFilters.report_id = [tags[0].substring(1)]
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
           })
           mapFilters.mode = 'resetFilter'
-          // Fetch observation with :hashtag, but first remove starting character ':'
           $store.commit('app/setFilteringTag', { value: true })
+
           const url = $store.getters['app/getBackend'] + 'api/get_reports/'
           const controller = new AbortController()
           const { signal } = controller
@@ -1272,7 +1288,7 @@ export default defineComponent({
             .then(res => res.json())
             .then(res => {
               // Only one report. So no push into array
-              mapFilters.reportFeatures = [res]
+              mapFilters.featuresSet = [res]
               workerData.filters = mapFilters
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
@@ -1289,23 +1305,56 @@ export default defineComponent({
             mapFilters.mode = 'increaseFilter'
           } else {
             mapFilters.mode = 'resetFilter'
-            mapFilters.reportFeatures = []
+            mapFilters.featuresSet = []
           }
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         }
       } else {
-        mapFilters.reportFeatures = []
-        mapFilters.report_id = []
-        // Todo. make increaseFilter when applies depending on previous filtering
-        mapFilters.mode = 'resetFilter'
+        // IF NO TAGS SELECTED RESET SOME FILTERS
+        if (!tags.length) {
+          mapFilters.mode = 'resetFilter'
+          mapFilters.featuresSet = []
+          mapFilters.hashtags = []
+          workerData.filters = mapFilters
+          worker.postMessage(workerData)
+        } else {
+          $store.commit('app/setFilteringTag', { value: true })
 
-        const normalizeTags = tags.map(t => {
-          return t.startsWith('#') ? t.slice(1) : t
-        })
-        mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
-        workerData.filters = mapFilters
-        worker.postMessage(workerData)
+          const url = $store.getters['app/getBackend'] + 'api/get_hashtags/'
+          const controller = new AbortController()
+          const { signal } = controller
+          const normalizeTags = tags.map(t => {
+            return t.startsWith('#') ? t.slice(1) : t
+          })
+          mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
+          mapFilters.report_id = []
+          mapFilters.lastFilterApplied = 'hashtags'
+          fetch(`${url}`, {
+            signal: signal,
+            method: 'POST', // or 'PUT'
+            body: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
+          })
+            .then(res => res.json())
+            .then(res => {
+              // Only one report. So no push into array
+              mapFilters.featuresSet = [res]
+              mapFilters.mode = 'resetFilter'
+              workerData.filters = mapFilters
+              worker.postMessage(workerData)
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+            .catch(e => {
+              $store.commit('app/setFilteringTag', { value: false })
+            })
+        }
+
+        // mapFilters.featuresSet = []
+        // mapFilters.report_id = []
+        // mapFilters.mode = 'resetFilter'
+
+        // workerData.filters = mapFilters
+        // worker.postMessage(workerData)
       }
     }
 

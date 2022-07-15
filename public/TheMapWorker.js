@@ -15,6 +15,11 @@ let YEARS = []
 const initialYear = 2014
 const currentYear = new Date().getFullYear()
 let getdataUrl = ''
+let getAllDates = false
+let firstDate = new Date()
+let lastDate = new Date()
+firstDate = firstDate.toISOString().split('T')[0]
+lastDate = lastDate.toISOString().split('T')[0]
 
 for (let a = initialYear; a <= currentYear; a++) {
   YEARS.push({ year: a, data: {} })
@@ -48,6 +53,7 @@ function getMissingYears (date) {
   const d = date[0]
 
   if (d.from === '') {
+    getAllDates = true
     sYear = YEARS[0].year
     eYear = YEARS[YEARS.length - 1].year
   } else {
@@ -74,11 +80,11 @@ self.onmessage = async function (e) {
   }
   // console.log(e.data)
   if (e.data.filters) {
-    // console.log(e.data.filters)
-    // Worker vars are init first time worker is called
+    // Worker vars are init before time worker is called
     filters = e.data.filters
     all_layers = e.data.layers
     filteredData = []
+    getAllDates = false
     const missing = getMissingYears(e.data.filters.dates)
     if (missing.length) {
       await Promise.all(missing.map(m =>
@@ -93,6 +99,14 @@ self.onmessage = async function (e) {
             const index = YEARS.findIndex(element => {
               return element.year === y
             })
+            // Get first feature date
+            if (j.features[0].properties.d < firstDate) {
+              firstDate = j.features[0].properties.d
+            }
+            // Get last feature date
+            if (j.features[j.features.length - 1].properties.d > lastDate) {
+              lastDate = j.features[j.features.length - 1].properties.d
+            }            
             YEARS[index].data = JSON.parse(JSON.stringify(j.features))
             dataset = dataset.concat(j.features)
           }
@@ -119,9 +133,9 @@ self.onmessage = async function (e) {
     })
   } else if (e.data.filters) {
     // This is fired when the map is filtered.
-    // Get the smallest dataset (reportFeatures) before start filtering
-    if (filters.reportFeatures.length) {
-      filteredData = filters.reportFeatures[0].features
+    // Get the smallest dataset (featuresSet) before start filtering
+    if (filters.featuresSet.length) {
+      filteredData = filters.featuresSet[0].features
     } else {
       if (filters.mode === 'increaseFilter') {
         filteredData = filteredDataset
@@ -129,6 +143,7 @@ self.onmessage = async function (e) {
         filteredData = dataset
       }
     }
+
     if (filters.observations.length > 0) {
       filteredData = filterObservations(filteredData, e.data.layers, filters.observations)
     } else {
@@ -139,16 +154,15 @@ self.onmessage = async function (e) {
       filteredData = filterDate(filteredData, filters.dates[0])
     }
     if (filters.hashtags.length > 0) {
-      // TODO: Check for report_id filtering. That is a tag stating with :
-      // array with only one date
-      filteredData = filterTags(filteredData, filters.hashtags)
-      fitFeatures = true
+      if (filters.lastFilterApplied === 'hashtags') {
+        fitFeatures = true
+      }      
     }
     if (filters.report_id.length > 0) {
-      // TODO: Check for report_id filtering. That is a tag stating with :
-      // array with only one date
       filteredData = filterRecordsId(filteredData, filters.report_id)
-      fitFeatures = true
+      if (filters.lastFilterApplied === 'reports') {
+        fitFeatures = true
+      }      
     }
     if (filters.locations.length > 0) {
       // if (filters.tolerance) {
@@ -195,6 +209,7 @@ self.onmessage = async function (e) {
       else if (a.properties.d > b.properties.d) return 1
       else return 0
     })
+
     const dates = []
     const series = {}
     const seriesMap = {}
@@ -263,11 +278,16 @@ function loadMapData (data, fitFeatures) {
 
   const workerParams = {
     ready: true,
+    minMaxDates: { min: firstDate, max: lastDate },
     datesInterval: {
       from: dataset[0].properties.d,
-      to: dataset[dataset.length - 1].properties.d
-    }
+      to: dataset[dataset.length - 1].properties.d,  
+    },
   }
+  if (getAllDates) {
+    workerParams.getAllDates = true
+  }
+  
   if (fitFeatures) {
     workerParams.features = data
   }
@@ -321,10 +341,7 @@ function filterLocations (data, poly) {
       return false
     }
   })
-  // console.log('Tolerance ' + simplifyTolerance)
-  // const options = { tolerance: simplifyTolerance, highQuality: true }
-  // const simplified = turf.simplify(polyMercator, options)
-
+  
   // from candidates get points inside poly
   filtered = candidates.filter(point => {
     const pt = turf.toMercator(point)
@@ -333,20 +350,6 @@ function filterLocations (data, poly) {
   })
 
   return filtered
-}
-
-function filterTags (data, tags) {
-  const filteringTags = tags.map(tag => tag.toLowerCase())
-  const filteredData = data.filter(f => {
-    const t = f.properties.t
-    let found = false
-    if (t.length) {
-      const featureTags = t.split(',').map(t => t.trim())
-      found = featureTags.some(r => filteringTags.includes(r))
-    }
-    return found
-  })
-  return filteredData
 }
 
 function filterRecordsId (data, reportsId) {

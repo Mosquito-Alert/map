@@ -24,7 +24,6 @@
                 />
                 <span class="viewshare cursor-pointer"><i
                   class="q-ml-md fas fa-copy"
-                  :title="_('Copy url to clipboard')"
                   @click.stop="copyToClipboard"
                 ></i></span>
               </div>

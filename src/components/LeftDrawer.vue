@@ -114,7 +114,6 @@
       <!-- SAMPLIING EFFORT -->
         <div class="toc-category last">
           <div class="toc-title" v-html="_('Sampling effort')"></div>
-          <i class="fa-thin fa-circle-info"></i>
         </div>
         <div class="category-box">
           <sampling-effort ref="samplingEffort"

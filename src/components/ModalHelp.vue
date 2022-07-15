@@ -23,14 +23,21 @@
             :arrows="!mobile"
             class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/help1.gif" />
-                <div class="q-mb-0 q-mt-md q-px-xl text-center scroll">
-                  <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
+                <div class="pag_1 scroll q-pr-md">
+                  <h5>{{ _('Layers selector help') }}</h5>
+                  <div class="row q-mt-md q-pr-md text-left">
+                    <div>
+                      <img src="~/assets/img/help/help1.gif" />
+                      <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
+                    </div>
+                  </div>
                 </div>
               </q-carousel-slide>
+
               <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
-                <div class="scroll q-pr-md">
-                  <div class="row q-mt-md q-pr-md text-left scroll">
+                <div class="pag_2 scroll q-pr-md">
+                  <h5>{{ _('Filters help') }}</h5>
+                  <div class="row q-mt-md q-pr-md text-left">
                     <div>
                     <!-- <div class="column-img col-xl-7 col-lg-7 col-md-7 q-px-md self-center"> -->
                       <img src="~/assets/img/help/help2.gif">
@@ -45,32 +52,51 @@
                       uno de los identificadores utilizados.</p>
                       <p><b>POR FECHA O RANGO DE FECHAS</b>. Los filtros aplican a todas las capas de información de las obser-
                       vaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.</p>
+                      <hr/>
+                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
                     </div>
                   </div>
-                  <div class="row q-px-lg text-center">
-                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
+                </div>
+              </q-carousel-slide>
+
+              <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
+                <div class="pag_3 scroll q-pr-md">
+                  <h5>{{ _('Download and reports help') }}</h5>
+                  <div class="row q-mt-md q-pr-md text-left">
+                    <div>
+                      <img src="~/assets/img/help/help3.gif">
+                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados.</p>
+                      <p>Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
+                    </div>
                   </div>
                 </div>
               </q-carousel-slide>
-              <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/help3.gif">
-                <div class="q-mt-md q-px-xl text-center scroll">
-                  <p>Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.</p>
-                </div>
-              </q-carousel-slide>
+
               <q-carousel-slide name="pag_4" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/help4.gif">
-                <div class="q-mt-md q-px-xl  text-center scroll">
-                  <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
+                <div class="pag_4 scroll q-pr-md">
+                  <h5>{{ _('Graph help') }}</h5>
+                  <div class="row q-mt-md q-pr-md text-left">
+                    <div>
+                      <img src="~/assets/img/help/help4.gif">
+                      <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
+                    </div>
+                  </div>
                 </div>
               </q-carousel-slide>
+
               <q-carousel-slide name="pag_5" class="column no-wrap flex-center">
-                <img src="~/assets/img/help/help5.gif">
-                <div class="q-mt-md q-px-xl text-center scroll">
-                  <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
+                <div class="pag_5 scroll q-pr-md">
+                  <h5>{{ _('Shareview help') }}</h5>
+                  <div class="row q-mt-md q-pr-md text-left">
+                    <div>
+                      <img src="~/assets/img/help/help5.gif">
+                      <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
+                    </div>
+                  </div>
                 </div>
               </q-carousel-slide>
             </q-carousel>
+
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
           <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
@@ -160,8 +186,9 @@ export default {
 
 dialog {
   position:relative;
-  max-width: 60vw;
-  height: 70vh;
+  max-width: 80vw;
+  width: 80vw;
+  height: 85vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
   z-index: 2001;
@@ -287,5 +314,16 @@ button.ma-close-btn:hover,
 }
 .q-mb-0{
   margin-bottom: 0px;
+}
+.q-carousel__slide div.scroll{
+  height: 100%;
+}
+
+div.pag_1 img,
+div.pag_2 img,
+div.pag_3 img,
+div.pag_4 img,
+div.pag_5 img{
+  max-width: 60%;
 }
 </style>

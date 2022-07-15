@@ -1,5 +1,5 @@
-export const getDatesRange = (state) => {
-  return state.datesRange
+export const getMinMaxDates = (state) => {
+  return state.minMaxDates
 }
 
 export const getMapDates = (state) => {

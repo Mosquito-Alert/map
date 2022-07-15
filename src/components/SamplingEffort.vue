@@ -100,8 +100,10 @@ export default {
       background-color: #e3d6a2;
       color: #6a6b59;
       opacity: 1;
+}
+    .sampling-effort-box.active:hover{
+      opacity: 0.7;
     }
-
     .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;

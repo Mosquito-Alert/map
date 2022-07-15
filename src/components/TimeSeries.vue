@@ -52,7 +52,7 @@
                 navigation-min-year-month='2014/06'
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
-                :subtitle="_(calendarSubtitle)"
+                :subtitle="rangeEndValue?rangeEndValue:(rangeStartValue?rangeStartValue:calendarSubtitle)"
                 range
                 years-in-month-view="true"
                 class="calendar"
@@ -98,15 +98,13 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, context) {
-    // const calendarTitle = ref()
-    const calendarSubtitle = ref()
-
     const chart = ref()
     const getCurrentDate = ref()
-    // const dateFilter = ref()
     const calendarDate = ref()
     const graphicHeight = ref()
     const calendarBtn = ref()
+    const rangeStartValue = ref(false)
+    const rangeEndValue = ref(false)
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
@@ -118,12 +116,10 @@ export default defineComponent({
     graphicHeight.value = mobile.value ? '400' : '230'
 
     const resetDateFilter = function () {
+      rangeStartValue.value = false
+      rangeEndValue.value = false
       calendarDate.value = null
-      $store.commit('map/setMapDates', {
-        from: datesRange.value.from,
-        to: datesRange.value.to
-      })
-      // calendarDate.value = null
+
       context.emit('dateSelected', {
         type: 'date',
         data: {
@@ -131,14 +127,7 @@ export default defineComponent({
           to: ''
         }
       })
-      calendarSubtitle.value = 'All years and all months'
-      $store.commit('map/setMapDates', { from: '', to: '' })
     }
-    // Timeseries properties
-
-    const datesRange = computed(() => {
-      return $store.getters['map/getDatesRange']
-    })
 
     const mapDates = computed(() => {
       return $store.getters['map/getMapDates']
@@ -163,12 +152,17 @@ export default defineComponent({
       defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
 
-      calendarSubtitle.value = moment(defaultDates.from).format('DD/MM/YYYY')
-      calendarSubtitle.value += ' - ' + moment(defaultDates.to).format('DD/MM/YYYY')
+      let subtitle = moment(defaultDates.from).format('DD/MM/YYYY')
+      subtitle += ' - ' + moment(defaultDates.to).format('DD/MM/YYYY')
+      $store.commit('app/setCalendarSubtitle', subtitle)
 
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
+    })
+
+    const calendarSubtitle = computed(() => {
+      return $store.getters['app/getCalendarSubtitle']
     })
 
     const toggleTimeSeries = function () {
@@ -224,20 +218,31 @@ export default defineComponent({
 
     const rangeStart = function (range) {
       const sDate = moment(range.year + '/' + range.month + '/' + range.day)
-      calendarSubtitle.value = moment(sDate).format('DD/MM/YYYY')
+      rangeStartValue.value = moment(sDate).format('DD/MM/YYYY')
     }
 
     const rangeEnd = function (range) {
-      const eDate = moment(range.to.year + '/' + range.to.month + '/' + range.to.day)
-      calendarSubtitle.value += ' - ' + moment(eDate).format('DD/MM/YYYY')
+      const start = range.from.year + '/' + range.from.month + '/' + range.from.day
+      const end = range.to.year + '/' + range.to.month + '/' + range.to.day
+
+      const sDate = moment(start)
+      const eDate = moment(end)
+
+      if (start === end) {
+        rangeEndValue.value = moment(sDate).format('DD/MM/YYYY')
+      } else {
+        rangeEndValue.value = moment(sDate).format('DD/MM/YYYY') + ' - ' + moment(eDate).format('DD/MM/YYYY')
+      }
     }
 
     const datePicked = function (event) {
-      console.log('picked')
       let daysInRange = 0
       let sDate
       let eDate
       let date
+
+      rangeStartValue.value = false
+      rangeEndValue.value = false
 
       // If only one day is selected
       if (typeof calendarDate.value === 'string') {
@@ -247,6 +252,7 @@ export default defineComponent({
           from: moment(day).format('YYYY-MM-DD'),
           to: moment(day).format('YYYY-MM-DD')
         }
+        $store.commit('app/setCalendarSubtitle', moment(day).format('DD/MM/YYYY'))
       } else {
         sDate = calendarDate.value.from
         eDate = calendarDate.value.to
@@ -260,9 +266,14 @@ export default defineComponent({
           from: sDate,
           to: eDate
         }
+        // Set calendar subtitle
+        let subtitle = moment(calendarDate.value.from).format('DD/MM/YYYY')
+        subtitle += ' - ' + moment(calendarDate.value.to).format('DD/MM/YYYY')
+        console.log(subtitle)
+        $store.commit('app/setCalendarSubtitle', subtitle)
       }
+
       $store.commit('map/setMapDates', date)
-      // dateFilterToString(date)
       $store.commit('timeseries/updateXUnits', daysInRange)
       context.emit('dateSelected', {
         type: 'date',
@@ -285,9 +296,10 @@ export default defineComponent({
 
     return {
       _,
+      rangeStartValue,
+      rangeEndValue,
       rangeStart,
       rangeEnd,
-      // calendarTitle,
       calendarSubtitle,
       mobile,
       graphicHeight,
@@ -303,7 +315,6 @@ export default defineComponent({
       chartData,
       datePicked,
       mapDates,
-      datesRange,
       iconStatus,
       timeSeriesClass,
       timeIsVisible,

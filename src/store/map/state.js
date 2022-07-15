@@ -15,7 +15,7 @@ export default function () {
     activeLayers: [],
     modelDate: null,
     samplingEffortLoading: false,
-    datesRange: { from: '', to: '' },
+    minMaxDates: { min: '', max: '' },
     mapDates: { from: '', to: '' },
     titles: {
       mosquito_tiger_confirmed: 'Tiger mosquito',

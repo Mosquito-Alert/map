@@ -74,3 +74,7 @@ export const getLeftDrawerStatus = state => {
 export const getCookiesComply = state => {
   return state.cookiesComply
 }
+
+export const getCalendarSubtitle = state => {
+  return state.calendarSubtitle
+}

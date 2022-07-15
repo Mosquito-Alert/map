@@ -49,6 +49,7 @@ export default function () {
     // Models related
     modelsServerPath: backendUrl + 'media/models',
     // key to make leftdrawer component re-render
+    calendarSubtitle: '',
     isMobile: mobile(),
     pendingView: { extent: null },
     leftDrawerStatus: !mobile(),

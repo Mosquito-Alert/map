@@ -1,5 +1,6 @@
-export const setDatesRange = (state, payload) => {
-  state.datesRange = payload
+export const setMinMaxDates = (state, payload) => {
+  state.minMaxDates.min = payload.min
+  state.minMaxDates.max = payload.max
 }
 
 export const setMapDates = (state, payload) => {

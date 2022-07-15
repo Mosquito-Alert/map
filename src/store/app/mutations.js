@@ -35,3 +35,7 @@ export const setPendingView = (state, payload) => {
 export const setCookiesComply = (state, payload) => {
   state.cookiesComply = payload
 }
+
+export const setCalendarSubtitle = (state, payload) => {
+  state.calendarSubtitle = payload
+}
