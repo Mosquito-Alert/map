@@ -9,7 +9,7 @@
         :loading="loading"
         :filled="filterIsActive"
         @focus="checkResults"
-        @keyup.enter="search"
+        @keyup="throttle"
         @keyup.down.exact.prevent="selectItem(0)"
         @update:model-value="resetResults"
         @clear="resetFilter"
@@ -62,6 +62,8 @@ export default {
     const $store = useStore()
     const results = ref([])
     const error = ref(false)
+    let keyUpTimer = null
+    const keyUpDelay = 500
 
     const setSearchString = function (v) {
       searchString.value = v
@@ -77,13 +79,23 @@ export default {
       }
     }
 
+    function throttle (f, delay) {
+      console.log('throttle')
+      if (keyUpTimer) {
+        clearTimeout(keyUpTimer)
+        keyUpTimer = null
+      }
+      keyUpTimer = setTimeout(search, keyUpDelay)
+    }
+
     const search = function () {
+      console.log('go search')
       loading.value = true
       const controller = new AbortController()
       const { signal } = controller
       const lang = $store.getters['app/getLang']
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
-      url += `&polygon_threshold=0.0001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
+      url += `&polygon_threshold=0.001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
       fetch(url,
         { signal })
         .then(res => res.json())
@@ -102,6 +114,7 @@ export default {
           loading.value = false
           isVisible.value = true
           itemRefs = []
+          clearTimeout(keyUpTimer)
         })
         .catch(e => {
           loading.value = false
@@ -160,6 +173,7 @@ export default {
 
     return {
       _,
+      throttle,
       error,
       searchString,
       setSearchString,
