@@ -21,3 +21,7 @@ export const getActiveLayers = state => {
 export const getGraphIsVisible = state => {
   return state.graphIsVisible
 }
+
+export const getYTickSuggestedMax = state => {
+  return state.chart.options.scales.y.suggestedMax
+}

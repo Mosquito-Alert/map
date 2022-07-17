@@ -8,7 +8,21 @@ export default function () {
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          zoom: {
+            pan: {
+              modifierKey: 'shift',
+              enabled: true,
+              mode: 'x'
+            },
+            zoom: {
+              mode: 'x',
+              drag: {
+                enabled: true,
+                backgroundColor: 'rgba(239, 165, 1, 0.3)'
+              }
+            }
+          }
         },
         elements: {
           point: {

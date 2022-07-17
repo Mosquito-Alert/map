@@ -22,6 +22,7 @@
         <q-btn :label="_('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'row mobile':'no-row'">
+        <i v-if="zoomed" :title="_('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
         <div :class="mobile?'col-12':''">
           <div class="flex" :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
@@ -87,8 +88,10 @@ import { LineChart } from './VueChartJS.js'
 import { Chart, registerables } from 'chart.js'
 import 'chartjs-adapter-moment'
 import moment from 'moment'
+import zoomPlugin from 'chartjs-plugin-zoom'
 
 Chart.register(...registerables)
+Chart.register(zoomPlugin)
 
 export default defineComponent({
   name: 'TimeSeries',
@@ -98,7 +101,11 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, context) {
+    let initialOptions = null
     const chart = ref()
+    const zoomed = ref(false)
+    const panned = ref(false)
+    let currentYTickMax = null
     const getCurrentDate = ref()
     const calendarDate = ref()
     const graphicHeight = ref()
@@ -108,6 +115,7 @@ export default defineComponent({
     const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
+    let mapDatesBeforeZoom = null
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -148,6 +156,7 @@ export default defineComponent({
 
     onMounted(function () {
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
+      initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
       defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
@@ -159,7 +168,63 @@ export default defineComponent({
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
+      $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
+        $store.commit('timeseries/setYTickMax', null)
+        if (!zoomed.value) {
+          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
+          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+        }
+      })
+
+      $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
+        if (!panned.value) {
+          panned.value = true
+          const labels = chart.scales.y._labelItems
+          currentYTickMax = parseInt(labels[labels.length - 1].label)
+          $store.commit('timeseries/setYTickSuggetedMax', currentYTickMax)
+        }
+      })
+
+      $store.commit('timeseries/setChartOnPanComplete', function ({ chart }) {
+        if (!zoomed.value) {
+          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
+          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+        }
+        zoomed.value = true
+        const start = new Date(chart.boxes[4].min)
+        const end = new Date(chart.boxes[4].max)
+        const draggedFormatted = {
+          from: moment(start).format('YYYY/MM/DD'),
+          to: moment(end).format('YYYY/MM/DD')
+        }
+        calendarDate.value = draggedFormatted
+        datePicked()
+      })
+
+      $store.commit('timeseries/setChartOnZoomComplete', function ({ chart }) {
+        zoomed.value = true
+        const start = new Date(chart.boxes[4].min)
+        const end = new Date(chart.boxes[4].max)
+        const draggedFormatted = {
+          from: moment(start).format('YYYY/MM/DD'),
+          to: moment(end).format('YYYY/MM/DD')
+        }
+        // $store.commit('map/setMapDates', dragged)
+        calendarDate.value = draggedFormatted
+        datePicked()
+      })
     })
+
+    const resetGraph = function () {
+      zoomed.value = false
+      calendarDate.value = mapDatesBeforeZoom
+      $store.commit('timeseries/setChartOptions', initialOptions)
+      $store.commit('timeseries/setYTickMax', null)
+      datePicked()
+      // chart.value.chartInstance.update()
+    }
 
     const calendarSubtitle = computed(() => {
       return $store.getters['app/getCalendarSubtitle']
@@ -240,10 +305,8 @@ export default defineComponent({
       let sDate
       let eDate
       let date
-
       rangeStartValue.value = false
       rangeEndValue.value = false
-
       // If only one day is selected
       if (typeof calendarDate.value === 'string') {
         const day = calendarDate.value
@@ -254,23 +317,25 @@ export default defineComponent({
         }
         $store.commit('app/setCalendarSubtitle', moment(day).format('DD/MM/YYYY'))
       } else {
-        sDate = calendarDate.value.from
-        eDate = calendarDate.value.to
-        // dateFilterToString(date)
-        daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        // In some extreme cases calendarDate.value.from is null after pan on graph
+        if (calendarDate.value) {
+          sDate = calendarDate.value.from
+          eDate = calendarDate.value.to
+          // dateFilterToString(date)
+          daysInRange = moment(eDate).diff(moment(sDate), 'days')
 
-        // Format date must be YYYY-MM-DD
-        sDate = moment(calendarDate.value.from).format('YYYY-MM-DD')
-        eDate = moment(calendarDate.value.to).format('YYYY-MM-DD')
-        date = {
-          from: sDate,
-          to: eDate
+          // Format date must be YYYY-MM-DD
+          sDate = moment(calendarDate.value.from).format('YYYY-MM-DD')
+          eDate = moment(calendarDate.value.to).format('YYYY-MM-DD')
+          date = {
+            from: sDate,
+            to: eDate
+          }
+          // Set calendar subtitle
+          let subtitle = moment(calendarDate.value.from).format('DD/MM/YYYY')
+          subtitle += ' - ' + moment(calendarDate.value.to).format('DD/MM/YYYY')
+          $store.commit('app/setCalendarSubtitle', subtitle)
         }
-        // Set calendar subtitle
-        let subtitle = moment(calendarDate.value.from).format('DD/MM/YYYY')
-        subtitle += ' - ' + moment(calendarDate.value.to).format('DD/MM/YYYY')
-        console.log(subtitle)
-        $store.commit('app/setCalendarSubtitle', subtitle)
       }
 
       $store.commit('map/setMapDates', date)
@@ -296,6 +361,8 @@ export default defineComponent({
 
     return {
       _,
+      zoomed,
+      resetGraph,
       rangeStartValue,
       rangeEndValue,
       rangeStart,
@@ -398,7 +465,6 @@ export default defineComponent({
     flex-direction: column;
   }
   .legend {
-    margin-left: 30px;
     display: flex;
   }
   .legend,
@@ -569,5 +635,11 @@ export default defineComponent({
   }
   .timeseries-close{
     margin: 10px 0px;
+  }
+  .reset-zoom{
+    color: $primary-color;
+  }
+  .reset-zoom:hover{
+    opacity: 0.7;
   }
 </style>

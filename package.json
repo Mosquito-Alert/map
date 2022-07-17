@@ -16,6 +16,7 @@
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "chart.js": "^3.7.1",
     "chartjs-adapter-moment": "^1.0.0",
+    "chartjs-plugin-zoom": "^1.2.1",
     "core-js": "^3.6.5",
     "geojson-vt": "^3.2.1",
     "lodash-es": "^4.17.21",

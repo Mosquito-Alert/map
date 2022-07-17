@@ -18,6 +18,30 @@ export const updateXUnits = (state, days) => {
   }
 }
 
+export const setChartOptions = (state, options) => {
+  state.chart.options = options
+}
+
 export const setGraphIsVisible = (state, visibility) => {
   state.graphIsVisible = visibility
+}
+
+export const setChartOnZoomComplete = (state, options) => {
+  state.chart.options.plugins.zoom.zoom.onZoomComplete = options
+}
+
+export const setChartOnZoomStart = (state, options) => {
+  state.chart.options.plugins.zoom.zoom.onZoomStart = options
+}
+
+export const setChartOnPanStart = (state, options) => {
+  state.chart.options.plugins.zoom.pan.onPanStart = options
+}
+
+export const setChartOnPanComplete = (state, options) => {
+  state.chart.options.plugins.zoom.pan.onPanComplete = options
+}
+
+export const setYTickSuggetedMax = (state, max) => {
+  state.chart.options.scales.y.suggestedMax = max
 }
