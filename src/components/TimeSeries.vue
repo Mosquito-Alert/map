@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref, onMounted } from 'vue'
+import { defineComponent, computed, ref, onUpdated, onMounted } from 'vue'
 import { useStore } from 'vuex'
 // import { LineChart } from 'vue-chart-3'
 import { LineChart } from './VueChartJS.js'
@@ -175,16 +175,16 @@ export default defineComponent({
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
-      $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
-        $store.commit('timeseries/setYTickSuggetedMax', null)
-        if (!zoomed.value) {
+    })
+
+    onUpdated(function () {
+      $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
+        if (!zoomed.value && !panned.value) {
           mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
           mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
           mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
         }
-      })
 
-      $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
         if (!panned.value) {
           panned.value = true
           const labels = chart.scales.y._labelItems
@@ -210,6 +210,15 @@ export default defineComponent({
         datePicked()
       })
 
+      $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
+        $store.commit('timeseries/setYTickSuggetedMax', null)
+        if (!zoomed.value && !panned.value) {
+          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
+          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+        }
+      })
+
       $store.commit('timeseries/setChartOnZoomComplete', function ({ chart }) {
         zoomed.value = true
         const start = new Date(chart.boxes[4].min)
@@ -226,6 +235,7 @@ export default defineComponent({
 
     const resetGraph = function () {
       zoomed.value = false
+      panned.value = false
       calendarDate.value = mapDatesBeforeZoom
       $store.commit('timeseries/setChartOptions', initialOptions)
       $store.commit('timeseries/setYTickSuggetedMax', null)
@@ -656,9 +666,7 @@ export default defineComponent({
   .reset-zoom:hover{
     opacity: 0.7;
   }
-
-  .calendar button.disabled{
+  :deep(button.q-btn.disabled) {
     opacity: 0.3 !important;
-    color: blue;
   }
 </style>
