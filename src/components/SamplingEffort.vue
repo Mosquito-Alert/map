@@ -5,7 +5,7 @@
       @click="toggleClass"
     >
       <i :class="icon_code"></i>
-       <div class="colors">
+      <div class="colors">
           <ul class="sampling-effort-categories">
               <li v-for="value, key in samplingEffort.legend" :key="key">
                   <div class="category-label" >{{ value.from }}</div>
@@ -94,27 +94,29 @@ export default {
         align-items: center;
         border: 1px solid #b4aeae;
     }
-
-    .sampling-effort-box:hover i,
+     .sampling-effort-box:hover i,
     .sampling-effort-box.active i{
       background-color: #e3d6a2;
       color: #6a6b59;
       opacity: 1;
-}
+    }
     .sampling-effort-box.active:hover{
-      opacity: 0.7;
+      opacity: 0.6;
     }
     .sampling-effort-box:hover div.colors,
     .sampling-effort-box.active div.colors{
       filter: none;
       opacity:1;
     }
-
+    .sampling-effort-box:not(.active):hover{
+      filter: grayscale(100%);
+      opacity:0.4;
+    }
     div.colors{
         display: flex;
         align-items: center;
         filter: grayscale(100%);
-        opacity:0.4;
+        opacity:0.6;
     }
 
     .sampling-effort-categories{

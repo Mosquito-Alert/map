@@ -27,9 +27,9 @@
               </div>
 
               <div class="row cookies-selector">
-                  <div class="col-10"><h5>Analytics</h5></div>
+                  <div class="col-10"><h5>{{ _("Analytics title") }}</h5></div>
                   <div class="col-2">
-                    <label class="cookie-comply-switch" title="Analytics">
+                    <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
                       <input id="ga" :checked="cookieCheckbox" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
                       <span class="cookie-comply-slider cookie-comply-round"></span>
                     </label>
@@ -296,5 +296,6 @@ button.ma-close-btn:hover,
 }
 .cookie-comply-is-required{
   cursor: not-allowed;
+  opacity: 0.3;
 }
 </style>

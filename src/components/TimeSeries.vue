@@ -75,7 +75,14 @@
           </q-btn>
         </div>
       </div>
-      <LineChart class="graph-canvas" :chartData="chartData" :height="graphicHeight" :options="chartOptions" ref="chart" />
+      <LineChart
+        ref="chart"
+        class="graph-canvas"
+        :chartData="chartData"
+        :height="graphicHeight"
+        :options="chartOptions"
+        @wheel="handleWheel"
+        />
     </div>
   </div>
 </template>
@@ -169,7 +176,7 @@ export default defineComponent({
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
       $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
-        $store.commit('timeseries/setYTickMax', null)
+        $store.commit('timeseries/setYTickSuggetedMax', null)
         if (!zoomed.value) {
           mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
           mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
@@ -221,7 +228,7 @@ export default defineComponent({
       zoomed.value = false
       calendarDate.value = mapDatesBeforeZoom
       $store.commit('timeseries/setChartOptions', initialOptions)
-      $store.commit('timeseries/setYTickMax', null)
+      $store.commit('timeseries/setYTickSuggetedMax', null)
       datePicked()
       // chart.value.chartInstance.update()
     }
@@ -359,8 +366,15 @@ export default defineComponent({
       calendarBtn.value.$el.click()
     }
 
+    const handleWheel = function (e) {
+      if ((zoomed.value || panned.value) && (e.deltaY < 0)) {
+        resetGraph()
+      }
+    }
+
     return {
       _,
+      handleWheel,
       zoomed,
       resetGraph,
       rangeStartValue,
@@ -641,5 +655,10 @@ export default defineComponent({
   }
   .reset-zoom:hover{
     opacity: 0.7;
+  }
+
+  .calendar button.disabled{
+    opacity: 0.3 !important;
+    color: blue;
   }
 </style>

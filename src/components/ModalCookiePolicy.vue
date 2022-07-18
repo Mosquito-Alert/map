@@ -73,6 +73,9 @@
               <td></td>
             </tr>
           </table>
+          <p>
+            <a href="">{{ _('Manage cookies') }}</a>
+          </p>
         </div>
         <div class="buttons">
           <div class="download-buttons">

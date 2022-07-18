@@ -14,13 +14,13 @@
             <p>
               {{ _('Escoge qué tipos de galletas aceptas que Mosquito Alert pueda guardar en tu navegador.') }}
             </p>
-            <p>{{ _('More info')}}
+            <p>
               <a href="#" @click.stop="openPolicy">Política de cookies</a>
             </p>
           </div>
         </div>
         <div class="col-2 col-sm-6 col-xs-12 q-mr-md">
-          <button class="ma-btn" @click="openSettings">{{ _('Cookie preferences') }}</button>
+          <button class="ma-btn" @click="openSettings">{{ _('Manage cookies') }}</button>
         </div>
         <div class="col-2 col-sm-6 col-xs-12">
           <button class="ma-btn" @click="acceptAll">{{ _('Accept all') }}</button>

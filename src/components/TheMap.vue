@@ -1,4 +1,4 @@
-<template>
+-<template>
   <div id='mapa'
     class='bg-white'
     :class="mobile && graphVisible?'mobile small-size':'full-size'"
