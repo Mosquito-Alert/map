@@ -73,13 +73,13 @@
               <td></td>
             </tr>
           </table>
-          <p>
-            <a href="">{{ _('Manage cookies') }}</a>
-          </p>
         </div>
         <div class="buttons">
           <div class="download-buttons">
-            <button @click="close" class="close">{{ _('Close') }}</button>
+            <button @click="showModalCookieSettings" class="ma-btn">
+              {{ _('Manage cookies') }}
+            </button>
+            <button @click="close" class="ma-btn">{{ _('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -111,10 +111,16 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
+    const showModalCookieSettings = function () {
+      close()
+      $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: true } })
+    }
+
     return {
       mobile,
       open,
       close,
+      showModalCookieSettings,
       _
     }
   }
