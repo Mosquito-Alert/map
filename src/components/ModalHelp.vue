@@ -65,8 +65,7 @@
                   <div class="row q-mt-md q-pr-md text-left">
                     <div>
                       <img src="~/assets/img/help/help3.gif">
-                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados.</p>
-                      <p>Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
+                      <p>Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.</p>
                     </div>
                   </div>
                 </div>
@@ -320,10 +319,9 @@ button.ma-close-btn:hover,
 }
 
 div.pag_1 img,
-div.pag_2 img,
 div.pag_3 img,
 div.pag_4 img,
 div.pag_5 img{
-  max-width: 60%;
+  max-width: 70%;
 }
 </style>
