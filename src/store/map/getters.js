@@ -41,3 +41,7 @@ export const getLatinNames = state => {
 export const getModelDate = state => {
   return state.modelDate
 }
+
+export const getViewbox = state => {
+  return state.viewbox
+}

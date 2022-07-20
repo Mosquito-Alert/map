@@ -156,13 +156,13 @@ self.onmessage = async function (e) {
     if (filters.hashtags.length > 0) {
       if (filters.lastFilterApplied === 'hashtags') {
         fitFeatures = true
-      }      
+      }
     }
     if (filters.report_id.length > 0) {
       filteredData = filterRecordsId(filteredData, filters.report_id)
       if (filters.lastFilterApplied === 'reports') {
         fitFeatures = true
-      }      
+      }
     }
     if (filters.locations.length > 0) {
       // if (filters.tolerance) {
@@ -267,6 +267,7 @@ function loadMapData (data, fitFeatures) {
     radius: 45,
     extent: 256,
     maxZoom: 19
+    // minPoints: 5
   }).load(data)
 
   unclustered = new Supercluster({
@@ -277,17 +278,18 @@ function loadMapData (data, fitFeatures) {
   }).load(data)
 
   const workerParams = {
+    indexing: filters.lastFilterApplied,
     ready: true,
     minMaxDates: { min: firstDate, max: lastDate },
     datesInterval: {
       from: dataset[0].properties.d,
-      to: dataset[dataset.length - 1].properties.d,  
+      to: dataset[dataset.length - 1].properties.d
     },
   }
   if (getAllDates) {
     workerParams.getAllDates = true
   }
-  
+
   if (fitFeatures) {
     workerParams.features = data
   }

@@ -14,6 +14,7 @@ export default function () {
     selectedFeature: null,
     activeLayers: [],
     modelDate: null,
+    viewbox: [],
     samplingEffortLoading: false,
     minMaxDates: { min: '', max: '' },
     mapDates: { from: '', to: '' },

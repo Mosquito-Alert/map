@@ -45,3 +45,7 @@ export const setDefaults = (state, payload) => {
 export const setModelDate = (state, payload) => {
   state.modelDate = payload
 }
+
+export const setViewbox = (state, payload) => {
+  state.viewbox = payload
+}
