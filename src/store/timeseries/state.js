@@ -20,6 +20,9 @@ export default function () {
               drag: {
                 enabled: true,
                 backgroundColor: 'rgba(239, 165, 1, 0.3)'
+              },
+              pinch: {
+                enabled: true
               }
             }
           }

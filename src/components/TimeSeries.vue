@@ -96,6 +96,8 @@ import { Chart, registerables } from 'chart.js'
 import 'chartjs-adapter-moment'
 import moment from 'moment'
 import zoomPlugin from 'chartjs-plugin-zoom'
+import * as Hammer from 'hammerjs'
+window.Hammer = Hammer.default
 
 Chart.register(...registerables)
 Chart.register(zoomPlugin)
