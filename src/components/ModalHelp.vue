@@ -28,7 +28,7 @@
                   <div class="row q-mt-md q-pr-md text-left">
                     <div>
                       <img src="~/assets/img/help/help1.gif" />
-                      <p>Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.</p>
+                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -43,17 +43,14 @@
                       <img src="~/assets/img/help/help2.gif">
                     <!-- </div> -->
                     <!-- <div class="col-xl-5 col-lg-5 col-md-5 text-justify scroll"> -->
-                      <p>Filtra tu selección de distintas maneras:</p>
-                      <p><b>POR LOCALIZACIÓN</b>: Escribe y selecciona del desplegable tu lugar de interés</p>
-                      <p><b>POR HASHTAG</b>: puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.</p>
-                      <p><b>POR IDENTIFICADOR</b>: escribe el identificador corto de un informe en el buscador de hashtag precedido
-                      por el símbolo “:”</p>
-                      <p>Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo
-                      uno de los identificadores utilizados.</p>
-                      <p><b>POR FECHA O RANGO DE FECHAS</b>. Los filtros aplican a todas las capas de información de las obser-
-                      vaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.</p>
+                      <p>{{ _('Filtra tu selección de distintas maneras:') }}</p>
+                      <p><b>{{ _('POR LOCALIZACIÓN') }}</b>: {{ _('Escribe y selecciona del desplegable tu lugar de interés') }}</p>
+                      <p><b>{{ _('POR HASHTAG') }}</b>: {{ _('puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.') }}</p>
+                      <p><b>{{ _('POR IDENTIFICADOR') }}</b>{{ _(': escribe el identificador corto de un informe en el buscador de hashtag precedido por el símbolo :') }}</p>
+                      <p>{{ _('Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo uno de los identificadores utilizados.') }}</p>
+                      <p><b>{{ _('POR FECHA O RANGO DE FECHAS') }}</b>{{ _('Los filtros aplican a todas las capas de información de las observaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.') }}</p>
                       <hr/>
-                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
+                      <p>{{ _('Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -65,8 +62,7 @@
                   <div class="row q-mt-md q-pr-md text-left">
                     <div>
                       <img src="~/assets/img/help/help3.gif">
-                      <p>Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados.</p>
-                      <p>Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.</p>
+                      <p>{{ _('Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -78,7 +74,7 @@
                   <div class="row q-mt-md q-pr-md text-left">
                     <div>
                       <img src="~/assets/img/help/help4.gif">
-                      <p>Consulta la información de la vista del mapa en formato de gráfico temporal</p>
+                      <p>{{ _('Consulta la información de la vista del mapa en formato de gráfico temporal') }}</p>
                     </div>
                   </div>
                 </div>
@@ -90,7 +86,7 @@
                   <div class="row q-mt-md q-pr-md text-left">
                     <div>
                       <img src="~/assets/img/help/help5.gif">
-                      <p>Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa</p>
+                      <p>{{ _('Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa') }}</p>
                     </div>
                   </div>
                 </div>
@@ -320,10 +316,9 @@ button.ma-close-btn:hover,
 }
 
 div.pag_1 img,
-div.pag_2 img,
 div.pag_3 img,
 div.pag_4 img,
 div.pag_5 img{
-  max-width: 60%;
+  max-width: 70%;
 }
 </style>

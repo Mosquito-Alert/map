@@ -37,13 +37,13 @@
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
             <div class="li-item"
-                  @click="filterObservations(layer, $event)"
-                  data-type="observations"
-                  :data-code="code"
-                  :class="initialClass(code, 'observations')">
+              @click="filterObservations(layer, $event)"
+              data-type="observations"
+              :data-code="code"
+              :class="initialClass(code, 'observations')"
+            ></div>
+            <div v-text="_(layer.common_name)" class="toc-item-name">
             </div>
-            <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            <!-- <div v-text="_(layer.scientific_name)" class="toc-item-latin-name"></div> -->
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
@@ -104,10 +104,10 @@
               :data-code="code"
               :class="initialClass(code, 'otherObservations')">
             </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            </div>
+            <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+          </div>
+          <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
-        <div class="separator"></div>
       </div>
 
       <div class="fill-space"></div>
@@ -571,7 +571,7 @@ input{
 .li-item{
   // background-size:30px;
 }
-
+.li-item.other,
 .li-item.tiger,
 .li-item.yellow,
 .li-item.koreicus,

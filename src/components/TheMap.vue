@@ -235,7 +235,6 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
-
     worker.postMessage({
       fetchUrl: backendUrl + 'api/get/data/',
       year: moment().year()
@@ -411,7 +410,10 @@ export default defineComponent({
           const param = (props.sharedView) ? props.sharedView : null
           initMap(param)
         } else {
-          context.emit('workerFinishedIndexing', { mapFilters })
+          if (mapFilters.lastFilterApplied === event.data.indexing) {
+            context.emit('workerFinishedIndexing', { mapFilters })
+          }
+
           if (event.data.features) {
             const data = []
             for (let a = 0; a < event.data.features.length; a++) {
@@ -734,6 +736,11 @@ export default defineComponent({
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+      const viewBox = southWest.concat(northEast).map((e) => {
+        return e.toFixed(4)
+      })
+      $store.commit('map/setViewbox', viewBox)
+
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),

@@ -17,21 +17,26 @@
                 class="column no-wrap flex-center"
               >
                 <div class="pr-30 q-mt-md q-pr-md text-justify scroll">
+                  <h5>
+                    <a href="#" @click.stop="showModalCookiePolicy">
+                      {{ _('Cookies policy') }}
+                    </a>
+                    </h5>
                   <h5>Información de los datos</h5>
                   <p>{{_("El mapa contiene información de 5 especies de mosquitos vectores de enfermedades:")}} {{_("el mosquito tigre")}} (<i>{{_("Aedes albopictus")}}</i>), {{_("el mosquito de la fiebre amarilla")}} (<i>{{_("Aedes aegypti")}})</i>, {{_("el mosquito del Japón")}} (<i>{{_("Aedes japonicus")}}</i>), {{_("el mosquito de Corea")}} (<i>{{_("Aedes koreicus")}}</i>) {{_("y el mosquito común")}} (<i>{{_("Culex pipiens")}}</i>).</p>
-                  <p>Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.</p>
+                  <p>{{ _('Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.') }}</p>
                   <HR/>
                   <div class="text-subtitle1 q-my-md">
-                    DATOS NO MODELADOS
+                    {{ _('DATOS NO MODELADOS') }}
                   </div>
                   <div class="text-subtitle2 text-left q-mb-md">
-                    MOSQUITOS
+                    {{ _("Mosquitos") }}
                   </div>
                   <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.tiger.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Mosquito tigre</b>: según los expertos o los algoritmos de Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre (Aedes albopictus). También incluye observaciones que podrían ser o de Aedes albopictus o de Aedes cretinus; en estos casos, no es posible determinar con seguridad de qué especie se trata.
+                      <div class="q-pr-md"><b>{{ _('Tiger mosquito') }}</b>: {{ _('según los expertos o los algoritmos de Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre (Aedes albopictus). También incluye observaciones que podrían ser o de Aedes albopictus o de Aedes cretinus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                     </div>
 
@@ -39,7 +44,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.yellow.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Mosquito de la fiebre amarilla</b>: egún los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de la fiebre amarilla (Aedes aegypti)
+                      <div class="q-pr-md"><b>{{ _('Mosquito de la fiebre amarilla') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de la fiebre amarilla') }} (<i>Aedes aegypti</i>)
                       </div>
                     </div>
 
@@ -47,7 +52,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.japonicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Mosquito del Japón</b>: según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito del Japón (Aedes japonicus). También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.
+                      <div class="q-pr-md"><b>{{ _('Mosquito del Japón') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito del Japón') }} (<i>Aedes japonicus</i>). {{ _('También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                   </div>
 
@@ -55,7 +60,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.koreicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Mosquito del Corea</b>: según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de Corea (Aedes koreicus). También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.
+                      <div class="q-pr-md"><b>{{ _('Mosquito del Corea') }}</b>: {{ _('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de Corea') }} (<i>Aedes koreicus</i>){{ _('. También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                   </div>
 
@@ -63,7 +68,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.culex.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Mosquito Común</b>: según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito común (Culex pipiens).
+                      <div class="q-pr-md"><b>{{ _('Mosquito Común') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito común') }} (<i>Culex pipiens</i>).
                       </div>
                   </div>
 
@@ -71,37 +76,37 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.unidentified.icon" />
                       </div>
-                      <div class="q-pr-md"><b>Otras categorías. Mosquito no identificable:</b>: según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.
+                      <div class="q-pr-md"><b>{{ _('Otras categorías. Mosquito no identificable:') }}</b>: {{ _('según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.') }}
                       </div>
                   </div>
                   <HR/>
                   <div class="text-subtitle2 text-left q-mb-md">
-                      PICADURAS
+                      {{ _('Bites') }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.bites.pending.icon" />
                       </div>
                         <div class="q-pr-md">
-                          Observaciones ciudadanas de picaduras de mosquito, de cualquier especie y sin ningún tipo de validación por parte de expertos o de algoritmos de IA.
+                         {{ _(' Observaciones ciudadanas de picaduras de mosquito, de cualquier especie y sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
                         </div>
                     </div>
                   <HR/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      LUGARES DE CRÍA
+                      {{ _("Breeding sites") }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.with_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>Imbornal con agua</b>: observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales con agua”) en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.
+                        <div class="q-pr-md"><b>{{ _('Storm_drain_water') }}</b>{{ (': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como imbornales con agua) en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.without_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>Imbornal sin agua</b>: observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales sin agua”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.
+                        <div class="q-pr-md"><b>{{ _("Storm_drain_dry") }}</b>: {{ _('observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales sin agua”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.')}}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
@@ -109,24 +114,24 @@
                         <img :src="layers.breeding.other_water.icon" />
                       </div>
                         <div class="q-pr-md">
-                          <b>Otras categorías</b>: observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “otros tipos de lugares de cría”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.
+                          <b> {{ _("Unidentified mosquito") }}</b>{{ _(': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “otros tipos de lugares de cría”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
                         </div>
                     </div>
                     <HR/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      OTRAS ESPECIES
+                      {{ _("Other species") }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.other.conflict.icon" />
                       </div>
                         <div class="q-pr-md">
-                          Según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser de otras especies de mosquito
+                          {{ _('Según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser de otras especies de mosquito') }}
                         </div>
                     </div>
                     <HR/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      ESFUERZO DE MUESTREO
+                      {{ _("Sampling effort") }}
 
                     </div>
                     <div class="flex text-justify q-mb-md row no-wrap">
@@ -134,7 +139,7 @@
                         <img src="~/assets/img/sampling_effort.png" />
                       </div>
                         <div class="q-pr-md">
-                          La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.
+                          {{ _('La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.') }}
                         </div>
                     </div>
                 </div>
@@ -171,9 +176,14 @@ export default {
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
+    const showModalCookiePolicy = function () {
+      close()
+      $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
+    }
     const layers = $store.getters['app/getLayers']
     return {
       layers,
+      showModalCookiePolicy,
       close,
       hasCloseButton,
       mobile,

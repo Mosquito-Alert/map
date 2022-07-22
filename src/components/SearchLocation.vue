@@ -80,7 +80,6 @@ export default {
     }
 
     function throttle (f, delay) {
-      console.log('throttle')
       if (keyUpTimer) {
         clearTimeout(keyUpTimer)
         keyUpTimer = null
@@ -89,13 +88,21 @@ export default {
     }
 
     const search = function () {
-      console.log('go search')
       loading.value = true
       const controller = new AbortController()
       const { signal } = controller
       const lang = $store.getters['app/getLang']
+
+      // viewbox=<x1>,<y1>,<x2>,<y2>
+      // bounded=[0|1]
+
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
       url += `&polygon_threshold=0.001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
+      // Check for viewBox parameter in store
+      const viewBox = $store.getters['map/getViewbox']
+      if (viewBox.length) {
+        url += '&viewbox=' + viewBox.join(',')
+      }
       fetch(url,
         { signal })
         .then(res => res.json())
