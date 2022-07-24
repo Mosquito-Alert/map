@@ -213,6 +213,7 @@ export default defineComponent({
         fetch(m).then(resp => resp.text())
       )).then(texts => {
         // Check for errors
+        console.log(texts)
         texts.forEach(j => {
           if (!('0' in CSVS)) {
             CSVS['0'] = csvJSON(j)

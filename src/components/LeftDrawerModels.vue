@@ -59,8 +59,8 @@
       <div class="category-box q-my-md">
         <div v-for="layer, code in models" :key="code"
           class="li-item li-models q-pl-md q-py-md"
-          data-type="observations"
           :data-code="code"
+          :data-type="layer.modelName"
           @click="filterModels(layer, $event)"
           v-text="_(layer.common_name)">
         </div>
@@ -137,7 +137,7 @@ export default {
         activ.classList.remove('active')
       }
 
-      selectedModel = obj.dataset.code
+      selectedModel = obj.dataset.type
       context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code
@@ -162,17 +162,17 @@ export default {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
-        const serverModels = $store.getters['app/getModelsServerPath']
-        const dataUrl = `${serverModels}/${selectedModel}/${parts[1]}/${parts[0]}/`
+        // const serverModels = $store.getters['app/getModelsServerPath']
+        const serverModels = '//github.com/Mosquito-Alert/global_minimal_model_estimates/raw/main/'
         const urls = [
-          dataUrl + 'model_gadm0.csv',
-          dataUrl + 'model_gadm1.csv',
-          dataUrl + 'model_gadm2.csv'
+          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz',
+          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz',
+          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz'
         ]
         context.emit('loadModel', {
-          esp: 'tig',
-          year: 2022,
-          month: 8,
+          esp: selectedModel,
+          year: parts[1],
+          month: parts[0],
           modelsCsv: urls
         })
       }
@@ -262,6 +262,11 @@ export default {
   background: $primary-color;
   color: white;
 }
+
+:deep(button.q-btn.disabled) {
+  opacity: 0.3 !important;
+}
+
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;

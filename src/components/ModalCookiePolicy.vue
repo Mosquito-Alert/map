@@ -46,7 +46,6 @@
               <th>{{ _('Vigencia') }}</th>
               <th>{{ _('Función')}} </th>
             </tr>
-
             <tr>
               <td>{{ _('Necesarias') }}</td>
               <td>{{ _('MOSQQUITO ALERT') }}</td>
@@ -54,6 +53,14 @@
               <td>{{ _('Propia') }}</td>
               <td>{{ _('Persistente') }}</td>
               <td>{{ _('Mostrar la ventana informativa solo en la primera visita') }}</td>
+            </tr>
+            <tr>
+              <td>{{ _('Necesarias') }}</td>
+              <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>cookie-comply</td>
+              <td>{{ _('Propia') }}</td>
+              <td>{{ _('Persistente') }}</td>
+              <td>{{ _('Permite recordar las cookies aceptadas con anterioridad') }}</td>
             </tr>
             <tr>
               <td>{{ _('Analíticas') }}</td>
@@ -149,7 +156,7 @@ export default {
   z-index: 2001;
 }
 dialog {
-  max-width: 50vw;
+  max-width: 60vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;

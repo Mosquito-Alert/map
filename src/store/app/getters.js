@@ -78,3 +78,7 @@ export const getCookiesComply = state => {
 export const getCalendarSubtitle = state => {
   return state.calendarSubtitle
 }
+
+export const getAnalyticsId = state => {
+  return state.analyticsId
+}

@@ -30,7 +30,7 @@
                   <div class="col-10"><h5>{{ _("Analytics title") }}</h5></div>
                   <div class="col-2">
                     <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
-                      <input id="ga" :checked="cookieCheckbox" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
+                      <input id="ga" :checked="analyticsActivated" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
                       <span class="cookie-comply-slider cookie-comply-round"></span>
                     </label>
                   </div>
@@ -48,14 +48,14 @@
               <div class="">
                 <button
                   class="ma-btn"
-                  @click="onAccept"
+                  @click="savePreferences('all')"
                 >
                   {{ _('Accept all') }}
                 </button>
               </div>
               <div class="">
                 <button
-                  @click="savePreferences"
+                  @click="savePreferences('custom')"
                   class="ma-btn close"
                 >
                   {{ _('Save and close') }}
@@ -69,8 +69,10 @@
 </template>
 
 <script>
-import { computed, inject, ref } from 'vue'
+import { computed, onMounted, inject, ref } from 'vue'
 import { useStore } from 'vuex'
+import { useCookies } from 'vue3-cookies'
+import { event } from 'vue-gtag'
 
 export default {
   emits: ['close'],
@@ -78,7 +80,14 @@ export default {
     const $store = useStore()
     const analyticsActivated = ref(false)
     const gtag = inject('gtag')
-    const cookieCheckbox = ref(false)
+    const { cookies } = useCookies()
+
+    onMounted(() => {
+      if (cookies.get('cookie-comply')) {
+        analyticsActivated.value = (cookies.get('cookie-comply').indexOf('all') !== -1 ||
+                                cookies.get('cookie-comply').indexOf('ga') !== -1)
+      }
+    })
 
     const open = computed(() => {
       return $store.getters['app/getModals'].cookieSettings.visibility
@@ -95,20 +104,29 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const savePreferences = function () {
+    const savePreferences = function (preferences) {
       // Prevent cookie message appearing next time
-      const complied = (localStorage['cookie-comply'] === 'all') ? 'all' : ((analyticsActivated.value) ? ['performance', 'ga'] : ['performance'])
+      let complied
+      if (preferences === 'all') {
+        complied = 'all'
+        analyticsActivated.value = true
+      } else if (analyticsActivated.value) {
+        complied = 'ga'
+      } else {
+        complied = 'performance'
+      }
+
+      cookies.set('cookie-comply', complied)
       $store.commit('app/setCookiesComply', true)
 
-      if (analyticsActivated.value || complied === 'all') {
+      if (['all', 'ga'].indexOf(complied) > -1) {
         console.log('opt in')
-        localStorage['cookie-comply'] = 'all'
-        window['ga-disable-G-RT6ZXWX8PS'] = false
+        // window['ga-disable-G-RT6ZXWX8PS'] = false
         gtag.optIn()
+        event('login', { method: 'Google' })
       } else {
         console.log('opt out')
-        localStorage['cookie-comply'] = 'performance'
-        window['ga-disable-G-RT6ZXWX8PS'] = true
+        // window['ga-disable-G-RT6ZXWX8PS'] = true
         gtag.optOut()
       }
       // console.log(gtag)
@@ -116,16 +134,13 @@ export default {
     }
 
     const onAccept = function () {
-      localStorage['cookie-comply'] = 'all'
-      cookieCheckbox.value = true
-      setTimeout(savePreferences, 500)
+      savePreferences(true)
     }
 
     const closeModal = function () {
       return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
     return {
-      cookieCheckbox,
       analyticsActivated,
       closeModal,
       mobile,
@@ -161,8 +176,8 @@ export default {
   z-index: 2100;
 }
 .cookie-settings dialog {
-  max-width: 50vw;
-  max-height: 80vh;
+  max-width: 60vw;
+  max-height: 70vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
   background-color: white;

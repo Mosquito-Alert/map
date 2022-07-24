@@ -37,6 +37,7 @@
 import { computed, ref, inject } from 'vue'
 import { useStore } from 'vuex'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
+import { useCookies } from 'vue3-cookies'
 
 export default {
   components: ['ModalCookieSettings'],
@@ -45,6 +46,7 @@ export default {
     const analyticsActivated = ref(false)
     const $store = useStore()
     const gtag = inject('gtag')
+    const { cookies } = useCookies()
 
     const _ = function (text) {
       return $store.getters['app/getText'](text)
@@ -64,7 +66,7 @@ export default {
     }
 
     const acceptAll = function () {
-      localStorage['cookie-comply'] = 'all'
+      cookies.set('cookie-comply', 'all')
       $store.commit('app/setCookiesComply', true)
       gtag.optIn()
     }
@@ -92,7 +94,7 @@ export default {
   width: auto;
   padding: 10px;
   margin: 0 10px;
-  background: #ccc;
+  background: #EAEDED;
 }
 
 .cookie-comply-container .flex{
