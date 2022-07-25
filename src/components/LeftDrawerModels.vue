@@ -163,11 +163,11 @@ export default {
       } else {
         const parts = inputDate.value.split('/')
         // const serverModels = $store.getters['app/getModelsServerPath']
-        const serverModels = '//github.com/Mosquito-Alert/global_minimal_model_estimates/raw/main/'
+        const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents'
         const urls = [
-          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz',
-          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz',
-          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv.gz'
+          serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
+          serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
+          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv'
         ]
         context.emit('loadModel', {
           esp: selectedModel,

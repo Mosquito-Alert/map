@@ -61,6 +61,10 @@ import { Style, Fill } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
+// import { Base64 } from 'js-base64'
+// import { RawDeflate, RawInflate, Deflate, Inflate, Gzip, Gunzip, Zip, Unzip } from 'zlibt2'
+import { Buffer } from 'buffer'
+import { ungzip } from 'pako'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -210,10 +214,20 @@ export default defineComponent({
       const urls = data.modelsCsv
 
       await Promise.all(urls.map(m =>
-        fetch(m).then(resp => resp.text())
+        // fetch(m).then(resp => resp.text())
+        fetch(m).then(resp => resp.json())
       )).then(texts => {
         // Check for errors
-        console.log(texts)
+        const c = texts[0].content
+        const buf = Buffer.from(c, 'base64')
+        const l = buf.toString('utf-8')
+        console.log(l)
+        // const b = Base64.decode(c)
+        const plain = ungzip(buf)
+
+        // const plain = rawInflate.decompress()
+        console.log(plain)
+
         texts.forEach(j => {
           if (!('0' in CSVS)) {
             CSVS['0'] = csvJSON(j)
