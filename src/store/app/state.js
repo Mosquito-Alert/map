@@ -5,16 +5,20 @@ import { useCookies } from 'vue3-cookies'
 export default function () {
   let backendUrl = ''
   let frontendUrl = ''
+  let analyticsCode
+
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
+    analyticsCode = 'G-RT6ZXWX8PS'
     // backendUrl = 'http://192.168.1.47:8080/django/'
     // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
+    analyticsCode = 'G-ZLD12V4W3V'
   }
-
+  console.log(analyticsCode)
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
@@ -46,7 +50,7 @@ export default function () {
 
   return {
     // SIGSERVER4: G-ZLD12V4W3V
-    analyticsId: 'G-RT6ZXWX8PS',
+    analyticsId: analyticsCode,
     cookiesComply: compliance(),
     // Models related
     modelsServerPath: backendUrl + 'media/models',

@@ -24,7 +24,6 @@ export default ({ app, router, store }) => {
   // window['ga-disable-G-ZLD12V4W3V'] = !enableCookies
   // window['ga-disable-G-RT6ZXWX8PS'] = !enableCookies
   // app.use(VueCookieNext)
-  console.log(store.getters['app/getAnalyticsId'])
   app.use(VueGtag, {
     // config: { id: 'G-ZLD12V4W3V' },
     config: { id: store.getters['app/getAnalyticsId'] },
