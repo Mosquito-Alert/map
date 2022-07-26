@@ -36,7 +36,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.tiger.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Tiger mosquito') }}</b>: {{ _('según los expertos o los algoritmos de  Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre') }} (<i>Aedes albopictus</i>). {{ _('También incluye observaciones que podrían ser o de') }} <i>Aedes albopictus</i> {{ _('o de') }} <i>Aedes cretinus</i>; {{ _('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ _('Tiger mosquito') }}</b>: {{ _('según los expertos o los algoritmos de  Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre')  }}(<i>Aedes albopictus</i>). {{ _('También incluye observaciones que podrían ser o de') }} <i>Aedes albopictus</i> {{ _('o de') }} <i>Aedes cretinus</i>; {{ _('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                     </div>
 
