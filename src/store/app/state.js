@@ -22,8 +22,9 @@ export default function () {
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
-  // const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
-  const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
+  const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+  // FORCE SPANISH
+  // const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
   const { cookies } = useCookies()
 
   function getCurrentYearDates () {
