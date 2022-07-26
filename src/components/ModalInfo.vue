@@ -36,7 +36,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.tiger.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Tiger mosquito') }}</b>: {{ _('según los expertos o los algoritmos de Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre (Aedes albopictus). También incluye observaciones que podrían ser o de Aedes albopictus o de Aedes cretinus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ _('Tiger mosquito') }}</b>: {{ _('según los expertos o los algoritmos de  Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre') }} (<i>Aedes albopictus</i>). {{ _('También incluye observaciones que podrían ser o de') }} <i>Aedes albopictus</i> {{ _('o de') }} <i>Aedes cretinus</i>; {{ _('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                     </div>
 
@@ -52,7 +52,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.japonicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Mosquito del Japón') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito del Japón') }} (<i>Aedes japonicus</i>). {{ _('También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ _('Mosquito del Japón') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito del Japón') }} (<i>Aedes japonicus</i>). {{ _('También incluye observaciones que podrían ser o de') }} <i>Aedes japonicus</i> {{ _('o de') }} <i>Aedes koreicus</i>; {{ _('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                   </div>
 
@@ -60,7 +60,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.koreicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Mosquito del Corea') }}</b>: {{ _('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de Corea') }} (<i>Aedes koreicus</i>){{ _('. También incluye observaciones que podrían ser o de Aedes japonicus o de Aedes koreicus; en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ _('Mosquito del Corea') }}</b>: {{ _('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de Corea') }} (<i>Aedes koreicus</i>){{ _('También incluye observaciones que podrían ser o de') }} <i>Aedes japonicus</i> {{ _('o de') }} <i>Aedes koreicus</i>; {{ _('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
                       </div>
                   </div>
 
@@ -76,7 +76,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.unidentified.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Otras categorías. Mosquito no identificable:') }}</b>: {{ _('según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.') }}
+                      <div class="q-pr-md"><b>{{ _('Otras categorías. Mosquito no identificable:') }}</b> {{ _('según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.') }}
                       </div>
                   </div>
                   <HR/>

@@ -167,7 +167,8 @@ export default {
         const urls = [
           serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
-          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv'
+          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
+          serverModels + `sampling_cells_05/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv'
         ]
         context.emit('loadModel', {
           esp: selectedModel,

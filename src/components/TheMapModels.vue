@@ -84,6 +84,7 @@ export default defineComponent({
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
+    const GRID = 'grid'
     const backendUrl = $store.getters['app/getBackend']
 
     // Map general configuration
@@ -186,7 +187,6 @@ export default defineComponent({
       // const lines = csv.split('\n')
       const lines = csv.split(/\r?\n/)
       const dict = {}
-      console.log(model)
       const fields = $store.getters['app/getModelsFieldNames']
       const jsonFields = JSON.parse(JSON.stringify(fields))
       const headers = lines[0].split(',')
@@ -217,6 +217,10 @@ export default defineComponent({
       })
     }
 
+    const doGRID = function () {
+      console.log(GRID)
+    }
+
     const loadModel = async function (data) {
       console.log(data)
       map.value.map.removeLayer(modelsLayer)
@@ -239,9 +243,11 @@ export default defineComponent({
             CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
             CSVS['2'] = csvJSON(decoded, GADM2)
+          } else if (!('3' in CSVS)) {
+            doGRID(decoded)
           }
         })
-        console.log(CSVS)
+
         map.value.map.addLayer(modelsLayer)
         gadm0.on('prerender', function () {
           spinner(true)
