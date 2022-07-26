@@ -64,7 +64,7 @@ import moment from 'moment'
 // import { Base64 } from 'js-base64'
 // import { RawDeflate, RawInflate, Deflate, Inflate, Gzip, Gunzip, Zip, Unzip } from 'zlibt2'
 import { Buffer } from 'buffer'
-import { ungzip } from 'pako'
+// import { ungzip } from 'pako'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -81,7 +81,9 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const $store = useStore()
     const CSVS = {}
-
+    const GADM0 = 'gadm0'
+    const GADM1 = 'gadm1'
+    const GADM2 = 'gadm2'
     const backendUrl = $store.getters['app/getBackend']
 
     // Map general configuration
@@ -180,18 +182,27 @@ export default defineComponent({
       })
     }
 
-    function csvJSON (csv) {
+    function csvJSON (csv, model) {
       // const lines = csv.split('\n')
       const lines = csv.split(/\r?\n/)
       const dict = {}
-
+      console.log(model)
+      const fields = $store.getters['app/getModelsFieldNames']
+      const jsonFields = JSON.parse(JSON.stringify(fields))
       const headers = lines[0].split(',')
-      const indexId = headers.indexOf('id')
-      const indexProb = headers.indexOf('prob')
+      const indexId = headers.indexOf(jsonFields[model].id)
+      const indexEst = headers.indexOf(jsonFields[model].est)
+      if (model === GADM2) {
+        console.log(headers)
+        console.log(indexId)
+        console.log(indexEst)
+      }
+      // const indexSe = headers.indexOf('prob')
       for (let i = 1; i < lines.length; i++) {
         const currentLine = lines[i].split(',')
         const nutsId = currentLine[indexId]
-        const prob = currentLine[indexProb]
+        const prob = currentLine[indexEst]
+        // const se = currentLine[indexSe]
         dict[nutsId] = prob
       }
       return dict
@@ -218,25 +229,19 @@ export default defineComponent({
         fetch(m).then(resp => resp.json())
       )).then(texts => {
         // Check for errors
-        const c = texts[0].content
-        const buf = Buffer.from(c, 'base64')
-        const l = buf.toString('utf-8')
-        console.log(l)
-        // const b = Base64.decode(c)
-        const plain = ungzip(buf)
-
-        // const plain = rawInflate.decompress()
-        console.log(plain)
-
-        texts.forEach(j => {
+        texts.forEach(text => {
+          const encoded = text.content
+          const buf = Buffer.from(encoded, 'base64')
+          const decoded = buf.toString('utf-8')
           if (!('0' in CSVS)) {
-            CSVS['0'] = csvJSON(j)
+            CSVS['0'] = csvJSON(decoded, GADM0)
           } else if (!('1' in CSVS)) {
-            CSVS['1'] = csvJSON(j)
+            CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
-            CSVS['2'] = csvJSON(j)
+            CSVS['2'] = csvJSON(decoded, GADM2)
           }
         })
+        console.log(CSVS)
         map.value.map.addLayer(modelsLayer)
         gadm0.on('prerender', function () {
           spinner(true)

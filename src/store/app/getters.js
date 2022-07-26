@@ -82,3 +82,7 @@ export const getCalendarSubtitle = state => {
 export const getAnalyticsId = state => {
   return state.analyticsId
 }
+
+export const getModelsFieldNames = state => {
+  return state.modelsFieldNames
+}
