@@ -193,10 +193,8 @@ export default defineComponent({
       const headers = lines[0].split(',')
       const indexId = headers.indexOf(jsonFields[model].id)
       const indexEst = headers.indexOf(jsonFields[model].est)
-      if (model === GADM2) {
-        console.log(headers)
-        console.log(indexId)
-        console.log(indexEst)
+      if (model === GADM1) {
+        console.log(jsonFields[model].id)
       }
       // const indexSe = headers.indexOf('prob')
       for (let i = 1; i < lines.length; i++) {
@@ -365,8 +363,10 @@ export default defineComponent({
       //     style = styles['4']
       //   }
       // }
+      const c = colorInRange('rgb(229,245,249)', 'rgb(65,171,93)', value)
+      console.log(c)
       style = new Fill({
-        color: colorInRange('rgb(229,245,249)', 'rgb(65,171,93)', value)
+        color: c
       })
       return new Style({
         fill: style

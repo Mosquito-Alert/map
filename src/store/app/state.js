@@ -57,7 +57,7 @@ export default function () {
     modelsServerPath: backendUrl + 'media/models',
     modelsFieldNames: {
       gadm0: { id: 'ID_0', est: 'est', se: 'se' },
-      gadm1: { id: 'NAME _1', est: 'est', se: 'se' },
+      gadm1: { id: 'ID_1', est: 'est', se: 'se' },
       gadm2: { id: 'ID_2', est: 'est', se: 'se' },
       grid: { lon: 'masked_lon', lat: 'masked_lat', est: 'est', se: 'se' }
     },
