@@ -60,7 +60,9 @@ import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
+import colorInRange from '../js/ColorRange'
 import moment from 'moment'
+
 // import { Base64 } from 'js-base64'
 // import { RawDeflate, RawInflate, Deflate, Inflate, Gzip, Gunzip, Zip, Unzip } from 'zlibt2'
 import { Buffer } from 'buffer'
@@ -268,7 +270,7 @@ export default defineComponent({
       })
     }
 
-    const styles = {}
+    // const styles = {}
     const colorizeGadm0 = (feature, style) => {
       return colorizeGadm(feature, style, CSVS['0'])
     }
@@ -286,44 +288,46 @@ export default defineComponent({
       if (value === undefined) {
         return null
       }
-      if (value < 0.0000025) {
-        if (!('1' in styles)) {
-          styles['1'] = new Fill({
-            color: 'rgb(254,235,226, 1)'
-          })
-          style = styles['1']
-        } else {
-          style = styles['1']
-        }
-      } else if (value < 0.00012) {
-        if (!('2' in styles)) {
-          styles['2'] = new Fill({
-            color: 'rgb(251,180,185, 1)'
-          })
-          style = styles['2']
-        } else {
-          style = styles['2']
-        }
-      } else if (value < 0.00015) {
-        if (!('3' in styles)) {
-          styles['3'] = new Fill({
-            color: 'rgb(247,104,161, 1)'
-          })
-          style = styles['3']
-        } else {
-          style = styles['3']
-        }
-      } else {
-        if (!('4' in styles)) {
-          styles['4'] = new Fill({
-            color: 'rgb(174,1,126, 1)'
-          })
-          style = styles['4']
-        } else {
-          style = styles['4']
-        }
-      }
-
+      // if (value < 0.0000025) {
+      //   if (!('1' in styles)) {
+      //     styles['1'] = new Fill({
+      //       color: 'rgb(254,235,226, 1)'
+      //     })
+      //     style = styles['1']
+      //   } else {
+      //     style = styles['1']
+      //   }
+      // } else if (value < 0.00012) {
+      //   if (!('2' in styles)) {
+      //     styles['2'] = new Fill({
+      //       color: 'rgb(251,180,185, 1)'
+      //     })
+      //     style = styles['2']
+      //   } else {
+      //     style = styles['2']
+      //   }
+      // } else if (value < 0.00015) {
+      //   if (!('3' in styles)) {
+      //     styles['3'] = new Fill({
+      //       color: 'rgb(247,104,161, 1)'
+      //     })
+      //     style = styles['3']
+      //   } else {
+      //     style = styles['3']
+      //   }
+      // } else {
+      //   if (!('4' in styles)) {
+      //     styles['4'] = new Fill({
+      //       color: 'rgb(174,1,126, 1)'
+      //     })
+      //     style = styles['4']
+      //   } else {
+      //     style = styles['4']
+      //   }
+      // }
+      style = new Fill({
+        color: colorInRange('rgb(93,93,81)', 'rgb(95,1,1)', value)
+      })
       return new Style({
         fill: style
       })
