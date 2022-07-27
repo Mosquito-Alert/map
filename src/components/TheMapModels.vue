@@ -60,7 +60,6 @@ import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
-import colorInRange from '../js/ColorRange'
 import moment from 'moment'
 
 // import { Base64 } from 'js-base64'
@@ -282,6 +281,47 @@ export default defineComponent({
       return colorizeGadm(feature, style, CSVS['2'])
     }
 
+    // extract numeric r, g, b values from `rgb(nn, nn, nn)` string
+    function getRgb (color) {
+      const [r, g, b] = color.replace('rgb(', '')
+        .replace(')', '')
+        .split(',')
+        .map(str => Number(str))
+
+      return {
+        r,
+        g,
+        b
+      }
+    }
+
+    function colorInterpolate (colorA, colorB, intval) {
+      const rgbA = getRgb(colorA), rgbB = getRgb(colorB)
+
+      const colorVal = (prop) =>
+        Math.round(rgbA[prop] * (1 - intval) + rgbB[prop] * intval)
+
+      return {
+        r: colorVal('r'),
+        g: colorVal('g'),
+        b: colorVal('b')
+      }
+    }
+
+    function colorInRange (color1, color2, progression) {
+      // const div1 = document.getElementById('color1')
+      // const color1 = div1.style.backgroundColor
+      // const div2 = document.getElementById('color2')
+      // const color2 = div2.style.backgroundColor
+
+      const rgbNew = colorInterpolate(
+        color1,
+        color2, progression
+      )
+
+      return `rgb( ${rgbNew.r}, ${rgbNew.g}, ${rgbNew.b})`
+    }
+
     const colorizeGadm = (feature, style, CSV) => {
       const id = feature.properties_.id
       const value = CSV[id]
@@ -326,7 +366,7 @@ export default defineComponent({
       //   }
       // }
       style = new Fill({
-        color: colorInRange('rgb(93,93,81)', 'rgb(95,1,1)', value)
+        color: colorInRange('rgb(229,245,249)', 'rgb(65,171,93)', value)
       })
       return new Style({
         fill: style
