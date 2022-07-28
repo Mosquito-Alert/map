@@ -8,6 +8,8 @@
       @loadModel="loadModel"
       @toggleLeftDrawer="toggleLeftDrawer"
       @showShareUrl="showShareUrl"
+      @checkModelEstimation="checkModelEstimation"
+      @checkModelUncertainty="checkModelUncertainty"
     />
 
     <q-page
@@ -189,7 +191,17 @@ export default {
       TOC.value.inputDate = payload
     }
 
+    const checkModelEstimation = function (payload) {
+      map.value.estimationVisibility(payload.status)
+    }
+
+    const checkModelUncertainty = function (payload) {
+      map.value.uncertaintyVisibility(payload.status)
+    }
+
     return {
+      checkModelEstimation,
+      checkModelUncertainty,
       viewCode,
       mobile,
       expanded,

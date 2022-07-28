@@ -82,7 +82,7 @@ export default defineComponent({
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
-    const CSVS = {}
+    let CSVS = {}
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
@@ -234,7 +234,7 @@ export default defineComponent({
       spinner(false)
 
       const urls = data.modelsCsv
-
+      CSVS = {}
       await Promise.all(urls.map(m =>
         // fetch(m).then(resp => resp.text())
         fetch(m).then(resp => resp.json())
@@ -254,6 +254,10 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
+
+        gadm0.getSource().refresh()
+        gadm1.getSource().refresh()
+        gadm2.getSource().refresh()
 
         map.value.map.addLayer(modelsLayer)
         gadm0.on('prerender', function () {
@@ -298,8 +302,6 @@ export default defineComponent({
       }
       return colorizeGadm(feature, style, CSVS['2'], colors)
     }
-
-    // extract numeric r, g, b values from `rgb(nn, nn, nn)` string
 
     const colorizeGadm = (feature, style, CSV, colors) => {
       const id = feature.properties_.id
@@ -399,8 +401,20 @@ export default defineComponent({
       console.log(z)
     }
 
+    const estimationVisibility = function (state) {
+      gadm0.setVisible(state)
+      gadm1.setVisible(state)
+      gadm2.setVisible(state)
+    }
+
+    const uncertaintyVisibility = function (state) {
+      console.log(state)
+    }
+
     return {
       _,
+      estimationVisibility,
+      uncertaintyVisibility,
       baseMap,
       showZoom,
       center,

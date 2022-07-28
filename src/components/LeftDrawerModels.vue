@@ -22,55 +22,92 @@
       </div>
 
       <div>
-      <q-input
-        readonly
-        class="q-pl-md calendar-input"
-        input-class="cursor-pointer"
-        :label="_('Year / Month')"
-        value=""
-        v-model="inputDate"
-        mask="##/####"
-        fill-mask="##/####"
-        :label-color="dateSelected?'rgba(0, 0, 0, 0.6)':'orange'"
-        :filled="dateSelected"
-        ref="refInput"
-      >
-        <template v-slot:append>
-          <q-icon name="event_note" class="models-calendar cursor-pointer" color="orange">
-            <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
-              <q-date
-                :title="_('Select model date')"
-                :subtitle="_('Click on year and month')"
-                navigation-min-year-month='2015/01'
-                :navigation-max-year-month="getCurrentDate"
-                mask="MM/YYYY"
-                years-in-month-view="true"
-                emit-immediately
-                default-view="Years"
-                v-model="modelDate"
-                color="orange-4"
-                @update:model-value="checkValue"
-              />
-            </q-popup-proxy>
-          </q-icon>
-        </template>
-      </q-input>
+        <div class="category-box q-my-md">
+          <q-select
+            :label="_('Models')"
+            v-model="model"
+            color="orange"
+            :label-color="model?'orange':'rgba(0, 0, 0, 0.6)'"
+            :options="options"
+            :option-value="'code'"
+            :option-label="'type'"
+            @update:model-value="filterModels"
+          />
 
-      <div class="category-box q-my-md">
-        <div v-for="layer, code in models" :key="code"
-          class="li-item li-models q-pl-md q-py-md"
-          :data-code="code"
-          :data-type="layer.modelName"
-          @click="filterModels(layer, $event)"
-          v-text="_(layer.common_name)">
         </div>
-        <!-- <div v-text="_(layer.common_name)" class="toc-item-name"></div> -->
-        <div class="separator"></div>
-      </div>
 
-        <button @click="applyfilter" class="q-mt-xl">
-          Load Model
-        </button>
+        <q-input
+          readonly
+          class="calendar-input"
+          input-class="cursor-pointer"
+          :label="_('Year / Month')"
+          value=""
+          v-model="inputDate"
+          mask="##/####"
+          :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
+          ref="refInput"
+          @click="showCalendar"
+        >
+          <template v-slot:append>
+            <q-icon ref="modelsCalendar" name="event_note" class="models-calendar cursor-pointer" color="orange">
+              <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
+                <q-date
+                  :title="_('Select model date')"
+                  :subtitle="_('Click on year and month')"
+                  navigation-min-year-month='2015/01'
+                  :navigation-max-year-month="getCurrentDate"
+                  mask="MM/YYYY"
+                  years-in-month-view="true"
+                  emit-immediately
+                  default-view="Years"
+                  v-model="modelDate"
+                  color="orange-4"
+                  @update:model-value="checkValue"
+                />
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
+
+        <div class="flex-right">
+          <button
+            class="q-mt-xl ma-btn"
+            :class="(inputDate === null || !model)?'disabled':''"
+            @click="applyfilter">
+              {{ _('Apply') }}
+          </button>
+        </div>
+        <hr class="q-my-xl">
+        <!-- LEGEND -->
+        <div class="flex spaceBetween">
+          <div class="uppercase">{{ _('Probability') }}</div>
+          <div>
+            <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
+              <input
+                v-model="estimation"
+                :checked="estimationChecked"
+                type="checkbox"
+                @change="checkEstimation">
+
+              <span class="cookie-comply-slider cookie-comply-round"></span>
+            </label>
+          </div>
+        </div>
+        <div class="flex spaceBetween q-mt-xl">
+          <div class="uppercase">{{ _('Uncertainty') }}</div>
+          <div>
+            <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
+              <input
+                v-model="uncertainty"
+                :checked="uncertaintyChecked"
+                type="checkbox"
+                @change="checkUncertainty">
+
+              <span class="cookie-comply-slider cookie-comply-round"></span>
+            </label>
+          </div>
+        </div>
+
       </div>
     </div>
   </q-drawer>
@@ -84,6 +121,7 @@ import LeftMenu from 'components/LeftMenu.vue'
 export default {
   components: { LeftMenu },
   props: ['expanded'],
+  emits: ['checkModelEstimation', 'checkModelUncertainty'],
   setup (props, context) {
     const refInput = ref(null)
     const inputDate = ref(null)
@@ -91,8 +129,12 @@ export default {
     const getCurrentDate = ref()
     const monthPicker = ref()
     const $store = useStore()
-    let onModelIsSelected = false
-    let selectedModel = null
+    const model = ref()
+    const estimation = ref()
+    const uncertainty = ref()
+    const estimationChecked = ref()
+    const uncertaintyChecked = ref()
+    const modelsCalendar = ref()
 
     onMounted(function () {
       const d = new Date()
@@ -101,6 +143,17 @@ export default {
 
     const models = computed(() => {
       return $store.getters['app/getModels']
+    })
+
+    const options = computed(() => {
+      return [
+        { code: 'albopictus', type: _('Tiger mosquito') },
+        { code: 'aegypti', type: _('Yellow fever mosquito') },
+        { code: 'japonicus', type: _('Japonicus mosquito') },
+        { code: 'koreicus', type: _('Koreicus mosquito') },
+        { code: 'culex', type: _('Culex mosquito') },
+        { code: 'biting', type: _('Bites') }
+      ]
     })
 
     const _ = function (text) {
@@ -128,42 +181,21 @@ export default {
       }
     }
 
-    const filterModels = function (layer, event) {
-      const obj = event.target
-      onModelIsSelected = true
-      // First Disable all active items
-      const activ = obj.parentNode.querySelector('.active')
-      if (activ) {
-        activ.classList.remove('active')
-      }
-
-      selectedModel = obj.dataset.type
+    const filterModels = function () {
       context.emit('filterObservations', {
-        type: obj.dataset.type,
-        code: obj.dataset.code
+        type: model.value.type,
+        code: model.value.code
       })
-
-      const classes = obj.classList
-      if (classes.contains('active')) {
-        obj.classList.remove('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon_disabled
-        }
-      } else {
-        obj.classList.add('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon
-        }
-      }
     }
 
     const applyfilter = function () {
-      if (inputDate.value === null || !onModelIsSelected) {
+      if (inputDate.value === null || !model.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
         // const serverModels = $store.getters['app/getModelsServerPath']
         const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
+        const selectedModel = model.value.code
         const urls = [
           serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
@@ -176,12 +208,35 @@ export default {
           month: parts[0],
           modelsCsv: urls
         })
+        estimation.value = true
       }
+    }
+
+    const showCalendar = function () {
+      modelsCalendar.value.$el.click()
+    }
+
+    const checkEstimation = function () {
+      context.emit('checkModelEstimation', { status: estimation.value })
+    }
+
+    const checkUncertainty = function () {
+      context.emit('checkModelUncertainty', { status: estimation.value })
     }
 
     return {
       _,
+      checkEstimation,
+      checkUncertainty,
+      uncertainty,
+      estimation,
+      estimationChecked,
+      uncertaintyChecked,
+      showCalendar,
+      modelsCalendar,
+      model,
       models,
+      options,
       mobile,
       dateSelected,
       getCurrentDate,
@@ -268,7 +323,33 @@ export default {
 :deep(button.q-btn.disabled) {
   opacity: 0.3 !important;
 }
-
+div.flex-right{
+  display:flex;
+  justify-content: right;
+}
+.flex{
+  display:flex;
+}
+.spaceBetween{
+  justify-content: space-between;
+  align-items: center;
+}
+button.ma-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-btn.disabled{
+  background: $grey-color;
+}
+.uppercase{
+  text-transform: uppercase;
+}
+input:checked + .cookie-comply-slider{
+  background: orange;
+}
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;
