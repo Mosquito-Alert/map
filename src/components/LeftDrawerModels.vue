@@ -82,10 +82,9 @@
         <div class="flex spaceBetween">
           <div class="uppercase">{{ _('Probability') }}</div>
           <div>
-            <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
+            <label class="cookie-comply-switch">
               <input
                 v-model="estimation"
-                :checked="estimationChecked"
                 type="checkbox"
                 @change="checkEstimation">
 
@@ -93,13 +92,19 @@
             </label>
           </div>
         </div>
+        <!-- GRADIENT -->
+        <div v-if="estimation" class="flex">
+            <div
+              class="q-mt-lg gradient"
+              :style="{ backgroundImage: gradientString }">
+            </div>
+        </div>
         <div class="flex spaceBetween q-mt-xl">
           <div class="uppercase">{{ _('Uncertainty') }}</div>
           <div>
-            <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
+            <label class="cookie-comply-switch">
               <input
                 v-model="uncertainty"
-                :checked="uncertaintyChecked"
                 type="checkbox"
                 @change="checkUncertainty">
 
@@ -125,6 +130,7 @@ export default {
   setup (props, context) {
     const refInput = ref(null)
     const inputDate = ref(null)
+    const legendCanvas = ref(null)
     const modelDate = ref(null)
     const getCurrentDate = ref()
     const monthPicker = ref()
@@ -132,13 +138,15 @@ export default {
     const model = ref()
     const estimation = ref()
     const uncertainty = ref()
-    const estimationChecked = ref()
-    const uncertaintyChecked = ref()
     const modelsCalendar = ref()
+    const gradientString = ref()
 
     onMounted(function () {
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      const json = JSON.parse(JSON.stringify($store.getters['app/getModelsProperties']))
+      gradientString.value = `linear-gradient(90deg, ${json.gadm0.colorFrom}, ${json.gadm0.colorTo})`
+      console.log(gradientString.value)
     })
 
     const models = computed(() => {
@@ -226,12 +234,12 @@ export default {
 
     return {
       _,
+      gradientString,
+      legendCanvas,
       checkEstimation,
       checkUncertainty,
       uncertainty,
       estimation,
-      estimationChecked,
-      uncertaintyChecked,
       showCalendar,
       modelsCalendar,
       model,
@@ -349,6 +357,14 @@ button.ma-btn.disabled{
 }
 input:checked + .cookie-comply-slider{
   background: orange;
+}
+.estimation-legend{
+  height: 80px;
+  width: 100%;
+}
+.gradient{
+  height: 40px;
+  width: 100%;
 }
 @media (max-width: 640px) {
   .aside button {

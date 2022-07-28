@@ -405,6 +405,7 @@ export default defineComponent({
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
+      gridmodelLayer.layer.setVisible(state)
     }
 
     const uncertaintyVisibility = function (state) {
