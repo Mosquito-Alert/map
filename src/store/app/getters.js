@@ -83,6 +83,10 @@ export const getAnalyticsId = state => {
   return state.analyticsId
 }
 
-export const getModelsFieldNames = state => {
-  return state.modelsFieldNames
+export const getModelsProperties = state => {
+  return state.modelsProperties
+}
+
+export const getGridSize = state => {
+  return state.gridsize
 }

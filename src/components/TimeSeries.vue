@@ -18,11 +18,14 @@
       </q-btn>
     </div>
     <div class="body">
-      <div v-if="mobile" class="flex-right">
+      <div v-if="mobile" class="flex-right" :class="zoomed?'spaceBetween':'flexRight'">
+        <q-btn v-if="zoomed" class="timeseries-close ma-btn" @click="resetGraph">
+          <i class="mobile reset-zoom fa-solid fa-backward q-mr-md"></i>
+        </q-btn>
         <q-btn :label="_('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'row mobile':'no-row'">
-        <i v-if="zoomed" :title="_('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
+        <i v-if="zoomed && !mobile" :title="_('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
         <div :class="mobile?'col-12':''">
           <div class="flex" :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
@@ -653,7 +656,13 @@ export default defineComponent({
   }
   .flex-right{
     display:flex;
+    justify-content: space-between;
+  }
+  .flexRight{
     justify-content: right;
+  }
+  .spaceBetween{
+    justify-content: space-between;
   }
   div:not(-mobile) .no-wrap{
     white-space: nowrap;
@@ -664,6 +673,9 @@ export default defineComponent({
   }
   .reset-zoom{
     color: $primary-color;
+  }
+  .mobile.reset-zoom{
+    color: white;
   }
   .reset-zoom:hover{
     opacity: 0.7;

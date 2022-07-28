@@ -150,7 +150,6 @@ export default {
     const mapViewSaved = function (payload) {
       shareModal.value.status = payload
       if (payload.status === 'ok') {
-        console.log(frontendUrl.value + payload.code)
         shareModal.value.newUrl = frontendUrl.value + payload.code
       }
     }
@@ -187,7 +186,6 @@ export default {
     })
 
     const setModelDate = function (payload) {
-      console.log(payload)
       TOC.value.inputDate = payload
     }
 

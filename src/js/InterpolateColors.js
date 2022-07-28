@@ -25,7 +25,7 @@ function colorInterpolate (colorA, colorB, intval) {
   }
 }
 
-function colorInRange (color1, color2, progression) {
+function getInterpolatedColor (color1, color2, progression) {
   // const div1 = document.getElementById('color1')
   // const color1 = div1.style.backgroundColor
   // const div2 = document.getElementById('color2')
@@ -40,5 +40,7 @@ function colorInRange (color1, color2, progression) {
 }
 
 module.exports = {
-  colorInRange: colorInRange
+  getInterpolatedColor,
+  colorInterpolate,
+  getRgb
 }

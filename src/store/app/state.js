@@ -50,16 +50,17 @@ export default function () {
   }
 
   return {
+    gridsize: 0.05,
     // SIGSERVER4: G-ZLD12V4W3V
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
     // Models related
     modelsServerPath: backendUrl + 'media/models',
-    modelsFieldNames: {
-      gadm0: { id: 'ID_0', est: 'est', se: 'se' },
-      gadm1: { id: 'ID_1', est: 'est', se: 'se' },
-      gadm2: { id: 'ID_2', est: 'est', se: 'se' },
-      grid: { lon: 'masked_lon', lat: 'masked_lat', est: 'est', se: 'se' }
+    modelsProperties: {
+      gadm0: { id: 'ID_0', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239)', colorTo: 'rgb(145,0,63)' },
+      gadm1: { id: 'ID_1', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239)', colorTo: 'rgb(145,0,63)' },
+      gadm2: { id: 'ID_2', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239)', colorTo: 'rgb(145,0,63)' },
+      grid: { lon: 'masked_lon', lat: 'masked_lat', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239)', colorTo: 'rgb(145,0,63)' }
     },
     // key to make leftdrawer component re-render
     calendarSubtitle: '',

@@ -12,6 +12,7 @@
     <ol-map ref='map'
       :loadTilesWhileAnimating='true'
       :loadTilesWhileInteracting='true'
+      @moveend='showZoom'
       style='height:100%'>
 
         <ol-zoom-control :duration='600' />
@@ -61,11 +62,10 @@ import { Style, Fill } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
-
-// import { Base64 } from 'js-base64'
-// import { RawDeflate, RawInflate, Deflate, Inflate, Gzip, Gunzip, Zip, Unzip } from 'zlibt2'
+import { getInterpolatedColor } from '../js/InterpolateColors.js'
+import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import { Buffer } from 'buffer'
-// import { ungzip } from 'pako'
+import GridModelLayer from '../js/GridModelLayer'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -77,6 +77,7 @@ export default defineComponent({
   props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
+    const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
@@ -85,8 +86,10 @@ export default defineComponent({
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
-    const GRID = 'grid'
     const backendUrl = $store.getters['app/getBackend']
+    let jsonProperties
+    let gridmodelLayer
+    let ol
 
     // Map general configuration
     const zoom = computed(() => {
@@ -117,6 +120,11 @@ export default defineComponent({
     }
 
     onMounted(function () {
+      ol = map.value.map
+      // Setup field names from models
+      const properties = $store.getters['app/getModelsProperties']
+      jsonProperties = JSON.parse(JSON.stringify(properties))
+
       leftDrawerIcon.value = 'keyboard_arrow_left'
       map.value.map.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -142,12 +150,10 @@ export default defineComponent({
 
     function shareModelView () {
       const modelDate = $store.getters['map/getModelDate']
-      console.log(modelDate)
       if (!modelDate) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
-      const ol = map.value.map
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         modelDate,
@@ -188,14 +194,9 @@ export default defineComponent({
       // const lines = csv.split('\n')
       const lines = csv.split(/\r?\n/)
       const dict = {}
-      const fields = $store.getters['app/getModelsFieldNames']
-      const jsonFields = JSON.parse(JSON.stringify(fields))
       const headers = lines[0].split(',')
-      const indexId = headers.indexOf(jsonFields[model].id)
-      const indexEst = headers.indexOf(jsonFields[model].est)
-      if (model === GADM1) {
-        console.log(jsonFields[model].id)
-      }
+      const indexId = headers.indexOf(jsonProperties[model].id)
+      const indexEst = headers.indexOf(jsonProperties[model].est)
       // const indexSe = headers.indexOf('prob')
       for (let i = 1; i < lines.length; i++) {
         const currentLine = lines[i].split(',')
@@ -216,12 +217,19 @@ export default defineComponent({
       })
     }
 
-    const doGRID = function () {
-      console.log(GRID)
+    const doGRID = function (data) {
+      const gridSize = $store.getters['app/getGridSize']
+      const noSd = true
+      const dataGeojson = GeojsonFromCsv(data, jsonProperties.grid, noSd, gridSize)
+      const colors = {
+        from: jsonProperties.grid.colorFrom,
+        to: jsonProperties.grid.colorTo
+      }
+      gridmodelLayer = new GridModelLayer(ol, dataGeojson, colors)
+      gridmodelLayer.addLayer()
     }
 
     const loadModel = async function (data) {
-      console.log(data)
       map.value.map.removeLayer(modelsLayer)
       spinner(false)
 
@@ -269,58 +277,31 @@ export default defineComponent({
 
     // const styles = {}
     const colorizeGadm0 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['0'])
+      const colors = {
+        from: jsonProperties.gadm0.colorFrom,
+        to: jsonProperties.gadm0.colorTo
+      }
+      return colorizeGadm(feature, style, CSVS['0'], colors)
     }
 
     const colorizeGadm1 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['1'])
+      const colors = {
+        from: jsonProperties.gadm1.colorFrom,
+        to: jsonProperties.gadm1.colorTo
+      }
+      return colorizeGadm(feature, style, CSVS['1'], colors)
     }
     const colorizeGadm2 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['2'])
+      const colors = {
+        from: jsonProperties.gadm2.colorFrom,
+        to: jsonProperties.gadm2.colorTo
+      }
+      return colorizeGadm(feature, style, CSVS['2'], colors)
     }
 
     // extract numeric r, g, b values from `rgb(nn, nn, nn)` string
-    function getRgb (color) {
-      const [r, g, b] = color.replace('rgb(', '')
-        .replace(')', '')
-        .split(',')
-        .map(str => Number(str))
 
-      return {
-        r,
-        g,
-        b
-      }
-    }
-
-    function colorInterpolate (colorA, colorB, intval) {
-      const rgbA = getRgb(colorA), rgbB = getRgb(colorB)
-
-      const colorVal = (prop) =>
-        Math.round(rgbA[prop] * (1 - intval) + rgbB[prop] * intval)
-
-      return {
-        r: colorVal('r'),
-        g: colorVal('g'),
-        b: colorVal('b')
-      }
-    }
-
-    function colorInRange (color1, color2, progression) {
-      // const div1 = document.getElementById('color1')
-      // const color1 = div1.style.backgroundColor
-      // const div2 = document.getElementById('color2')
-      // const color2 = div2.style.backgroundColor
-
-      const rgbNew = colorInterpolate(
-        color1,
-        color2, progression
-      )
-
-      return `rgb( ${rgbNew.r}, ${rgbNew.g}, ${rgbNew.b})`
-    }
-
-    const colorizeGadm = (feature, style, CSV) => {
+    const colorizeGadm = (feature, style, CSV, colors) => {
       const id = feature.properties_.id
       const value = CSV[id]
       if (value === undefined) {
@@ -363,8 +344,7 @@ export default defineComponent({
       //     style = styles['4']
       //   }
       // }
-      const c = colorInRange('rgb(229,245,249)', 'rgb(65,171,93)', value)
-      console.log(c)
+      const c = getInterpolatedColor(colors.from, colors.to, value)
       style = new Fill({
         color: c
       })
@@ -387,7 +367,7 @@ export default defineComponent({
 
     const gadm1 = new VectorTileLayer({
       minZoom: 3,
-      maxZoom: 5,
+      maxZoom: 4,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
@@ -398,8 +378,8 @@ export default defineComponent({
     })
 
     const gadm2 = new VectorTileLayer({
-      minZoom: 5,
-      maxZoom: 17,
+      minZoom: 4,
+      maxZoom: 6,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
@@ -414,8 +394,15 @@ export default defineComponent({
       layers: [gadm0, gadm1, gadm2]
     })
 
+    function showZoom () {
+      const z = map.value.map.getView().getZoom()
+      console.log(z)
+    }
+
     return {
       _,
+      baseMap,
+      showZoom,
       center,
       zoom,
       mobile,
