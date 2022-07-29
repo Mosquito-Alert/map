@@ -1,19 +1,15 @@
-function GeojsonFromCsv (data, fields, sdFlag, gridSize) {
+function GeojsonFromCsv (data, fields, gridSize) {
   const raws = data.split(/\r?\n/)
   const headers = raws.shift().split(',')
   const lonPos = headers.indexOf(fields.lon)
   const latPos = headers.indexOf(fields.lat)
   const probPos = headers.indexOf(fields.est)
-  let sdPos
-  let sdGeojson
+  const sePos = headers.indexOf(fields.se)
   let sdPoint
 
-  if (sdFlag) {
-    sdPos = headers.indexOf('sd')
-    sdGeojson = {
-      type: 'FeatureCollection',
-      features: []
-    }
+  const sdGeojson = {
+    type: 'FeatureCollection',
+    features: []
   }
 
   const polygonGeojson = {
@@ -28,7 +24,7 @@ function GeojsonFromCsv (data, fields, sdFlag, gridSize) {
     if (isNaN(minLon) || isNaN(minLat)) {
       continue
     }
-    const maxLon = minLon + 0.25
+    const maxLon = minLon + gridSize // 0.25
     const maxLat = minLat + gridSize
 
     // Get color for each cell grid
@@ -51,44 +47,35 @@ function GeojsonFromCsv (data, fields, sdFlag, gridSize) {
         ]]
       },
       properties: {
-        v: probValue,
+        v: probValue
         // color: color_prob,
-        sd: parseFloat(raw[sdPos])
-      }
-    }
-    if (sdFlag) {
-      const sdValue = parseFloat(raw[probPos])
-      // const sdColor = ''
-      // if (sdValue <= ranges_sd[0].maxValue) sdColor = ranges_sd[0].color
-      // else if (sdValue<=ranges_sd[1].maxValue) sdColor = ranges_sd[1].color
-      // else if (sdValue<=ranges_sd[2].maxValue) sdColor = ranges_sd[2].color
-      // else sdColor = ranges_sd[3].color
-
-      sdPoint = {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [minLon + (gridSize / 2), minLat + (gridSize / 2)]
-        },
-        properties: {
-          v: sdValue,
-          // color: sdColor,
-          sd: parseFloat(raw[sdPos])
-        }
+        // sd: parseFloat(raw[sdPos])
       }
     }
 
+    // const sdColor = ''
+    // if (sdValue <= ranges_sd[0].maxValue) sdColor = ranges_sd[0].color
+    // else if (sdValue<=ranges_sd[1].maxValue) sdColor = ranges_sd[1].color
+    // else if (sdValue<=ranges_sd[2].maxValue) sdColor = ranges_sd[2].color
+    // else sdColor = ranges_sd[3].color
+
+    sdPoint = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [minLon + (gridSize / 2), minLat + (gridSize / 2)]
+      },
+      properties: {
+        // v: sdValue,
+        // color: sdColor,
+        sd: parseFloat(raw[sePos])
+      }
+    }
     polygonGeojson.features.push(polygon)
-    if (sdFlag) {
-      sdGeojson.features.push(sdPoint)
-    }
+    sdGeojson.features.push(sdPoint)
   }
 
-  if (sdFlag) {
-    return { est: polygonGeojson, sd: sdGeojson }
-  } else {
-    return { est: polygonGeojson }
-  }
+  return { est: polygonGeojson, se: sdGeojson }
 }
 
 export { GeojsonFromCsv }

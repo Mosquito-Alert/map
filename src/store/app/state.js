@@ -78,7 +78,7 @@ export default function () {
       },
       gadm2: {
         minZoom: 6,
-        maxZoom: 8,
+        maxZoom: 9,
         id: 'ID_2',
         est: 'est',
         se: 'se',
@@ -86,8 +86,8 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       grid: {
-        minZoom: 8,
-        maxZoom: 16,
+        minZoom: 9,
+        maxZoom: 19,
         lon: 'masked_lon',
         lat: 'masked_lat',
         est: 'est',

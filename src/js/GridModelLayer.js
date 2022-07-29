@@ -8,10 +8,10 @@ export default class GridModelLayer {
     this.map = map
     // this.legend = legend
     // this.zIndex = zIndex
-
     this.tileIndex = geojsonvt(geoJson, {
       extent: 4096,
-      maxZoom: 20
+      maxZoom: 20,
+      buffer: 256
     })
     this.layer = null
     this.options = options
@@ -84,6 +84,7 @@ export default class GridModelLayer {
 
   drawPoint (context, feature, extent, size) {
     let radius = 6
+    const pad = 0
     const value = feature.tags.se
     if (value < 0.25) {
       radius = radius * 1
@@ -99,7 +100,7 @@ export default class GridModelLayer {
     context.lineWidth = 1
     const d = feature.geometry[0]
     context.beginPath()
-    context.arc(d[0] / extent * size, d[1] / extent * size, radius, 0, Math.PI * 2)
+    context.arc((d[0] / extent * size) + pad, (d[1] / extent * size) + pad, radius, 0, Math.PI * 2)
     context.fill()
     context.stroke()
   }

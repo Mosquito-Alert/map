@@ -90,6 +90,7 @@ export default defineComponent({
     const GADM2 = 'gadm2'
     const backendUrl = $store.getters['app/getBackend']
     let estModelLayer
+    let seModelLayer = null
     let seModelLayer0
     let seModelLayer1
     let seModelLayer2
@@ -223,19 +224,29 @@ export default defineComponent({
 
     const doGRID = function (data) {
       const gridSize = $store.getters['app/getGridSize']
-      const noSd = true
-      const dataGeojson = GeojsonFromCsv(data, jsonProperties.grid, noSd, gridSize)
+      const dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
       const colors = {
         from: jsonProperties.grid.colorFrom,
         to: jsonProperties.grid.colorTo
       }
-      estModelLayer = new GridModelLayer(ol, dataGeojson.est, {
+      estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
         colors,
         zIndex: 15,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
       })
       estModelLayer.addLayer()
+
+      // Grid SE layer
+      if (seModelLayer) {
+        map.value.map.removeLayer(seModelLayer.layer)
+      }
+      seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
+        zIndex: 15,
+        minZoom: jsonProperties.grid.minZoom,
+        maxZoom: jsonProperties.grid.maxZoom
+      })
+      seModelLayer.addLayer()
     }
 
     const loadModel = async function (data) {
@@ -450,6 +461,7 @@ export default defineComponent({
       seModelLayer0.layer.setVisible(state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)
+      seModelLayer.layer.setVisible(state)
     }
 
     return {
