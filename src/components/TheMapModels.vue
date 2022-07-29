@@ -300,6 +300,15 @@ export default defineComponent({
             CENTROIDS['2'] = putDataOnCentroids(json, CSVS['2'], 2)
           }
         })
+        if (seModelLayer0) {
+          map.value.map.removeLayer(seModelLayer0.layer)
+        }
+        if (seModelLayer1) {
+          map.value.map.removeLayer(seModelLayer1.layer)
+        }
+        if (seModelLayer2) {
+          map.value.map.removeLayer(seModelLayer2.layer)
+        }
         seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
           zIndex: 15,
           minZoom: 0,

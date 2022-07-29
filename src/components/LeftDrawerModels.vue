@@ -69,9 +69,9 @@
           </template>
         </q-input>
 
-        <div class="flex-right">
+        <div class="q-mt-xl flex-right">
           <button
-            class="q-mt-xl ma-btn"
+            class="ma-btn no-margin"
             :class="(inputDate === null || !model)?'disabled':''"
             @click="applyfilter">
               {{ _('Apply') }}
@@ -356,6 +356,9 @@ button.ma-btn{
   background: $primary-color;
   box-shadow: none;
   color: white;
+}
+.no-margin{
+  margin: 0px;
 }
 button.ma-btn.disabled{
   background: $grey-color;
