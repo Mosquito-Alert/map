@@ -372,6 +372,7 @@ button.ma-btn{
 }
 button.ma-btn.disabled{
   background: $grey-color;
+  pointer-events: none;
 }
 .uppercase{
   text-transform: uppercase;

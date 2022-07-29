@@ -53,9 +53,9 @@ export default class GridModelLayer {
             } else if (type === 3) {
               const color = _this.getColor(feature.tags.v)
               context.fillStyle = color
-              context.strokeStyle = color
               context.beginPath()
-
+              // context.lineWidth = 1
+              // context.strokeStyle = 'blue'
               for (let j = 0; j < feature.geometry.length; j++) {
                 const geom = feature.geometry[j]
                 for (let k = 0; k < geom.length; k++) {
@@ -83,18 +83,20 @@ export default class GridModelLayer {
   }
 
   drawPoint (context, feature, extent, size) {
-    let radius = 5 * 2 // Maximum radius
+    let radius = 6
     const value = feature.tags.se
     if (value < 0.25) {
-      radius = 5
+      radius = radius * 1
     } else if (value < 0.5) {
-      radius = 5 * 1.25
+      radius = radius * 2
     } else if (value < 0.75) {
-      radius = 5 * 1.5
+      radius = radius * 3
+    } else {
+      radius = radius * 4
     }
     context.strokeStyle = 'rgba(0,0,0,1)'
-    context.fillStyle = 'rgba(0,0,0,1)'
-    context.lineWidth = 3
+    context.fillStyle = 'rgba(0,0,0,0.6)'
+    context.lineWidth = 1
     const d = feature.geometry[0]
     context.beginPath()
     context.arc(d[0] / extent * size, d[1] / extent * size, radius, 0, Math.PI * 2)

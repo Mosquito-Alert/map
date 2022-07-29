@@ -59,7 +59,7 @@ import { transform } from 'ol/proj.js'
 import MVT from 'ol/format/MVT'
 import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
-import { Style, Fill } from 'ol/style'
+import { Style, Fill, Stroke } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
@@ -89,7 +89,6 @@ export default defineComponent({
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const backendUrl = $store.getters['app/getBackend']
-    let jsonProperties
     let estModelLayer
     let seModelLayer0
     let seModelLayer1
@@ -110,6 +109,9 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
+    const properties = $store.getters['app/getModelsProperties']
+    const jsonProperties = JSON.parse(JSON.stringify(properties))
+
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
@@ -127,8 +129,6 @@ export default defineComponent({
     onMounted(function () {
       ol = map.value.map
       // Setup field names from models
-      const properties = $store.getters['app/getModelsProperties']
-      jsonProperties = JSON.parse(JSON.stringify(properties))
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       map.value.map.on('pointermove', function (event) {
@@ -231,9 +231,9 @@ export default defineComponent({
       }
       estModelLayer = new GridModelLayer(ol, dataGeojson.est, {
         colors,
-        zIndex: 10,
-        minZoom: 6,
-        maxZoom: 19
+        zIndex: 15,
+        minZoom: jsonProperties.grid.minZoom,
+        maxZoom: jsonProperties.grid.maxZoom
       })
       estModelLayer.addLayer()
     }
@@ -311,22 +311,22 @@ export default defineComponent({
         }
         seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
           zIndex: 15,
-          minZoom: 0,
-          maxZoom: 3
+          minZoom: jsonProperties.gadm0.minZoom,
+          maxZoom: jsonProperties.gadm0.maxZoom
         })
         seModelLayer0.addLayer()
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
           zIndex: 15,
-          minZoom: 3,
-          maxZoom: 4
+          minZoom: jsonProperties.gadm1.minZoom,
+          maxZoom: jsonProperties.gadm1.maxZoom
         })
         seModelLayer1.addLayer()
 
         seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
           zIndex: 15,
-          minZoom: 4,
-          maxZoom: 6
+          minZoom: jsonProperties.gadm2.minZoom,
+          maxZoom: jsonProperties.gadm2.maxZoom
         })
         seModelLayer2.addLayer()
       }).catch((error) => {
@@ -381,55 +381,21 @@ export default defineComponent({
         return null
       }
       const value = CSV[id].prob
-      // if (value < 0.0000025) {
-      //   if (!('1' in styles)) {
-      //     styles['1'] = new Fill({
-      //       color: 'rgb(254,235,226, 1)'
-      //     })
-      //     style = styles['1']
-      //   } else {
-      //     style = styles['1']
-      //   }
-      // } else if (value < 0.00012) {
-      //   if (!('2' in styles)) {
-      //     styles['2'] = new Fill({
-      //       color: 'rgb(251,180,185, 1)'
-      //     })
-      //     style = styles['2']
-      //   } else {
-      //     style = styles['2']
-      //   }
-      // } else if (value < 0.00015) {
-      //   if (!('3' in styles)) {
-      //     styles['3'] = new Fill({
-      //       color: 'rgb(247,104,161, 1)'
-      //     })
-      //     style = styles['3']
-      //   } else {
-      //     style = styles['3']
-      //   }
-      // } else {
-      //   if (!('4' in styles)) {
-      //     styles['4'] = new Fill({
-      //       color: 'rgb(174,1,126, 1)'
-      //     })
-      //     style = styles['4']
-      //   } else {
-      //     style = styles['4']
-      //   }
-      // }
       const c = getInterpolatedColor(colors.from, colors.to, value)
       style = new Fill({
         color: c
       })
       return new Style({
-        fill: style
+        fill: style,
+        stroke: new Stroke({
+          color: 'rgb(145,0,63,1)'
+        })
       })
     }
 
     const gadm0 = new VectorTileLayer({
-      minZoom: 0,
-      maxZoom: 3,
+      minZoom: jsonProperties.gadm0.minZoom,
+      maxZoom: jsonProperties.gadm0.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
@@ -440,8 +406,8 @@ export default defineComponent({
     })
 
     const gadm1 = new VectorTileLayer({
-      minZoom: 3,
-      maxZoom: 4,
+      minZoom: jsonProperties.gadm1.minZoom,
+      maxZoom: jsonProperties.gadm1.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
@@ -452,8 +418,8 @@ export default defineComponent({
     })
 
     const gadm2 = new VectorTileLayer({
-      minZoom: 4,
-      maxZoom: 6,
+      minZoom: jsonProperties.gadm2.minZoom,
+      maxZoom: jsonProperties.gadm2.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({

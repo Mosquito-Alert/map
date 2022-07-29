@@ -57,10 +57,44 @@ export default function () {
     // Models related
     modelsServerPath: backendUrl + 'media/models',
     modelsProperties: {
-      gadm0: { id: 'ID_0', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239,1)', colorTo: 'rgb(145,0,63,1)' },
-      gadm1: { id: 'ID_1', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239,1)', colorTo: 'rgb(145,0,63,1)' },
-      gadm2: { id: 'ID_2', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239,1)', colorTo: 'rgb(145,0,63,1)' },
-      grid: { lon: 'masked_lon', lat: 'masked_lat', est: 'est', se: 'se', colorFrom: 'rgb(231,225,239,1)', colorTo: 'rgb(145,0,63,1)' }
+      gadm0: {
+        minZoom: 0,
+        maxZoom: 4,
+        id: 'ID_0',
+        est: 'est',
+        se: 'se',
+        colorFrom:
+        'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
+      gadm1: {
+        minZoom: 4,
+        maxZoom: 6,
+        id: 'ID_1',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
+      gadm2: {
+        minZoom: 6,
+        maxZoom: 8,
+        id: 'ID_2',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
+      grid: {
+        minZoom: 8,
+        maxZoom: 16,
+        lon: 'masked_lon',
+        lat: 'masked_lat',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      }
     },
     // key to make leftdrawer component re-render
     calendarSubtitle: '',
