@@ -29,10 +29,10 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
+            multiWorld="true"
             maxZoom="19"
             :center='center'
-            :zoom='zoom'
-            :constrainResolution='true' />
+            :zoom='zoom' />
 
         <div
           class="ol-attribution"

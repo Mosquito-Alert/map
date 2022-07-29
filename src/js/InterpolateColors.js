@@ -1,6 +1,6 @@
 // extract numeric r, g, b values from `rgb(nn, nn, nn)` string
 function getRgb (color) {
-  const [r, g, b] = color.replace('rgb(', '')
+  const [r, g, b, a] = color.replace('rgb(', '')
     .replace(')', '')
     .split(',')
     .map(str => Number(str))
@@ -8,20 +8,21 @@ function getRgb (color) {
   return {
     r,
     g,
-    b
+    b,
+    a
   }
 }
 
 function colorInterpolate (colorA, colorB, intval) {
   const rgbA = getRgb(colorA), rgbB = getRgb(colorB)
-
   const colorVal = (prop) =>
     Math.round(rgbA[prop] * (1 - intval) + rgbB[prop] * intval)
 
   return {
     r: colorVal('r'),
     g: colorVal('g'),
-    b: colorVal('b')
+    b: colorVal('b'),
+    a: rgbB.a
   }
 }
 
@@ -35,8 +36,7 @@ function getInterpolatedColor (color1, color2, progression) {
     color1,
     color2, progression
   )
-
-  return `rgb( ${rgbNew.r}, ${rgbNew.g}, ${rgbNew.b})`
+  return `rgb( ${rgbNew.r}, ${rgbNew.g}, ${rgbNew.b}, ${rgbNew.a})`
 }
 
 module.exports = {

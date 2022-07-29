@@ -17,6 +17,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
+            multiWorld="true"
             maxZoom="19"
             :center='center'
             :zoom='zoom'
@@ -239,7 +240,7 @@ export default defineComponent({
 
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
-      spinner(false)
+      spinner(true)
       CSVS = {}
       const urls = data.modelsCsv
       await Promise.all(urls.map(m =>
@@ -278,7 +279,6 @@ export default defineComponent({
         })
 
         map.value.map.on('rendercomplete', function () {
-          console.log('postrender')
           spinner(false)
         })
       }).catch((error) => {

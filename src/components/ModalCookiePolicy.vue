@@ -141,8 +141,7 @@ export default {
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  // background-color: rgba(0, 0, 0, 0.75);
-  background: transparent
+  background-color: rgba(0, 0, 0, 0.75);
 }
 
 .dialog {

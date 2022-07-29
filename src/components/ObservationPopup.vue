@@ -20,7 +20,7 @@
                   color="orange"
                   class="q-ma-md m-circular-progress text-center"
                 />
-                <img v-if="!mosquitoImageLoaded" src="~/assets/img/help/mosquito.png">
+                <img v-if="!mosquitoImageLoaded" src="~/assets/img/notavailable.png">
                 <img
                   :height="loading"
                   :src="selectedFeature.photo_url"

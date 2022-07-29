@@ -41,7 +41,6 @@
           class="calendar-input"
           input-class="cursor-pointer"
           :label="_('Year / Month')"
-          value=""
           v-model="inputDate"
           mask="##/####"
           :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -72,47 +71,48 @@
         <div class="q-mt-xl flex-right">
           <button
             class="ma-btn no-margin"
-            :class="(inputDate === null || !model)?'disabled':''"
+            :class="(disabled)?'disabled':''"
             @click="applyfilter">
               {{ _('Apply') }}
           </button>
         </div>
-        <hr class="q-my-xl">
         <!-- LEGEND -->
-        <div class="flex spaceBetween">
-          <div class="uppercase">{{ _('Probability') }}</div>
-          <div>
-            <label class="cookie-comply-switch">
-              <input
-                v-model="estimation"
-                type="checkbox"
-                @change="checkEstimation">
+        <div v-if="showLegend">
+          <hr class="q-my-xl">
+          <div class="flex spaceBetween">
+            <div class="uppercase">{{ _('Probability') }}</div>
+            <div>
+              <label class="cookie-comply-switch">
+                <input
+                  v-model="estimation"
+                  type="checkbox"
+                  @change="checkEstimation">
 
-              <span class="cookie-comply-slider cookie-comply-round"></span>
-            </label>
-          </div>
-        </div>
-        <!-- GRADIENT -->
-        <div v-if="estimation" class="flex">
-            <div
-              class="q-mt-lg gradient"
-              :style="{ backgroundImage: gradientString }">
+                <span class="cookie-comply-slider cookie-comply-round"></span>
+              </label>
             </div>
-        </div>
-        <div class="flex spaceBetween q-mt-xl">
-          <div class="uppercase">{{ _('Uncertainty') }}</div>
-          <div>
-            <label class="cookie-comply-switch">
-              <input
-                v-model="uncertainty"
-                type="checkbox"
-                @change="checkUncertainty">
+          </div>
+          <!-- GRADIENT -->
+          <div v-if="estimation" class="flex">
+              <div
+                class="q-mt-lg gradient"
+                :style="{ backgroundImage: gradientString }">
+              </div>
+          </div>
+          <div class="flex spaceBetween q-mt-xl">
+            <div class="uppercase">{{ _('Uncertainty') }}</div>
+            <div>
+              <label class="cookie-comply-switch">
+                <input
+                  v-model="uncertainty"
+                  type="checkbox"
+                  @change="checkUncertainty">
 
-              <span class="cookie-comply-slider cookie-comply-round"></span>
-            </label>
+                <span class="cookie-comply-slider cookie-comply-round"></span>
+              </label>
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   </q-drawer>
@@ -135,6 +135,8 @@ export default {
     const getCurrentDate = ref()
     const monthPicker = ref()
     const $store = useStore()
+    const showLegend = ref(false)
+    const disabled = ref(true)
     const model = ref()
     const estimation = ref()
     const uncertainty = ref()
@@ -188,6 +190,7 @@ export default {
         monthPicker.value.hide()
         $store.commit('map/setModelDate', inputDate.value)
       }
+      disabled.value = (!model.value || !inputDate.value)
     }
 
     const filterModels = function () {
@@ -195,6 +198,9 @@ export default {
         type: model.value.type,
         code: model.value.code
       })
+      if (model.value && inputDate.value) {
+        disabled.value = false
+      }
     }
 
     const applyfilter = function () {
@@ -225,6 +231,8 @@ export default {
         })
         estimation.value = true
         uncertainty.value = true
+        disabled.value = true
+        showLegend.value = true
       }
     }
 
@@ -242,6 +250,8 @@ export default {
 
     return {
       _,
+      disabled,
+      showLegend,
       gradientString,
       legendCanvas,
       checkEstimation,
@@ -365,6 +375,9 @@ button.ma-btn.disabled{
 }
 .uppercase{
   text-transform: uppercase;
+}
+.cookie-comply-slider:focus{
+  outline: none;
 }
 input:checked + .cookie-comply-slider{
   background: orange;

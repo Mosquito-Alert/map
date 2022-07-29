@@ -266,8 +266,8 @@ function loadMapData (data, fitFeatures) {
     log: DEBUG,
     radius: 45,
     extent: 256,
-    maxZoom: 19
-    // minPoints: 5
+    maxZoom: 19,
+    minPoints: 5
   }).load(data)
 
   unclustered = new Supercluster({
