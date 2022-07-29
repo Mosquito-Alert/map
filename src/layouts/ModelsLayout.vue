@@ -72,7 +72,7 @@ import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawerModels from 'components/LeftDrawerModels.vue'
 import TheMapModels from 'components/TheMapModels.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 
@@ -172,20 +172,20 @@ export default {
       map.value.loadModel(payload)
     }
 
-    onMounted(() => {
-      const dataUrl = $store.getters['app/getBackend']
-      fetch(dataUrl + 'api/models/available/', {
-        method: 'GET'
-      })
-        .then((response) => {
-          return response.json()
-        })
-        .then(json => {
-          console.log(json)
-        }).catch((error) => {
-          console.log(error)
-        })
-    })
+    // onMounted(() => {
+    //   const dataUrl = $store.getters['app/getBackend']
+    //   fetch(dataUrl + 'api/models/available/', {
+    //     method: 'GET'
+    //   })
+    //     .then((response) => {
+    //       return response.json()
+    //     })
+    //     .then(json => {
+    //       console.log(json)
+    //     }).catch((error) => {
+    //       console.log(error)
+    //     })
+    // })
 
     const setModelDate = function (payload) {
       TOC.value.inputDate = payload

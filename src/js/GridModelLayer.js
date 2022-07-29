@@ -2,24 +2,23 @@ import { getInterpolatedColor } from '../js/InterpolateColors.js'
 import DataTile from 'ol/source/DataTile'
 import TileLayer from 'ol/layer/WebGLTile'
 import geojsonvt from 'geojson-vt'
-import { useStore } from 'vuex'
 
 export default class GridModelLayer {
-  constructor (map, geoJson, colors) {
+  constructor (map, geoJson, options) {
     this.map = map
     // this.legend = legend
     // this.zIndex = zIndex
-    this.tileIndex = geojsonvt(geoJson.est, {
+
+    this.tileIndex = geojsonvt(geoJson, {
       extent: 4096,
       maxZoom: 20
     })
     this.layer = null
-    this.$store = useStore()
-    this.colors = colors
+    this.options = options
   }
 
   getColor (value) {
-    return getInterpolatedColor(this.colors.from, this.colors.to, value)
+    return getInterpolatedColor(this.options.colors.from, this.options.colors.to, value)
   }
 
   addLayer () {
@@ -32,9 +31,9 @@ export default class GridModelLayer {
     context.strokeStyle = 'white'
     this.map.removeLayer(this.layer)
     this.layer = new TileLayer({
-      zIndex: 10,
-      minZoom: 6,
-      maxZoom: 19, // visible at zoom levels above 14
+      zIndex: _this.options.zIndex,
+      minZoom: _this.options.minZoom,
+      maxZoom: _this.options.maxZoom,
       source: new DataTile({
         loader: function (z, x, y) {
           const pad = 0
@@ -49,24 +48,27 @@ export default class GridModelLayer {
             const feature = features[i]
             const type = feature.type
             // Draw only polygons
-            if (type !== 3) continue
-            const color = _this.getColor(feature.tags.v)
-            context.fillStyle = color
-            context.strokeStyle = color
-            context.beginPath()
+            if (type === 1) {
+              _this.drawPoint(context, feature, extent, size)
+            } else if (type === 3) {
+              const color = _this.getColor(feature.tags.v)
+              context.fillStyle = color
+              context.strokeStyle = color
+              context.beginPath()
 
-            for (let j = 0; j < feature.geometry.length; j++) {
-              const geom = feature.geometry[j]
-              for (let k = 0; k < geom.length; k++) {
-                const p = geom[k]
-                const x = p[0] / extent * size
-                const y = p[1] / extent * size
-                if (k) context.lineTo(x + pad, y + pad)
-                else context.moveTo(x + pad, y + pad)
+              for (let j = 0; j < feature.geometry.length; j++) {
+                const geom = feature.geometry[j]
+                for (let k = 0; k < geom.length; k++) {
+                  const p = geom[k]
+                  const x = p[0] / extent * size
+                  const y = p[1] / extent * size
+                  if (k) context.lineTo(x + pad, y + pad)
+                  else context.moveTo(x + pad, y + pad)
+                }
               }
+              context.fill('evenodd')
+              context.stroke()
             }
-            context.fill('evenodd')
-            context.stroke()
           }
           const data = context.getImageData(0, 0, size, size).data
           return new Uint8Array(data.buffer)
@@ -78,27 +80,25 @@ export default class GridModelLayer {
 
     // this.layer.setZIndex(this.zIndex)
     this.map.addLayer(this.layer)
-    // this.$store.commit('map/setSamplingEffortLoading', { loading: false })
   }
 
-  // refreshLayer () {
-  //   const _this = this
-  //   // Check if needs reloading
-  //   if (this.tileIndex) {
-  //     this.addLayer(this.tileIndex)
-  //     return
-  //   }
-
-  //   fetch(this.url)
-  //     .then(function (response) {
-  //       return response.json()
-  //     })
-  //     .then(function (json) {
-  //       _this.tileIndex = geojsonvt(json, {
-  //         extent: 4096,
-  //         maxZoom: 20
-  //       })
-  //       _this.addLayer(_this.tileIndex)
-  //     })
-  // }
+  drawPoint (context, feature, extent, size) {
+    let radius = 5 * 2 // Maximum radius
+    const value = feature.tags.se
+    if (value < 0.25) {
+      radius = 5
+    } else if (value < 0.5) {
+      radius = 5 * 1.25
+    } else if (value < 0.75) {
+      radius = 5 * 1.5
+    }
+    context.strokeStyle = 'rgba(0,0,0,1)'
+    context.fillStyle = 'rgba(0,0,0,1)'
+    context.lineWidth = 3
+    const d = feature.geometry[0]
+    context.beginPath()
+    context.arc(d[0] / extent * size, d[1] / extent * size, radius, 0, Math.PI * 2)
+    context.fill()
+    context.stroke()
+  }
 }

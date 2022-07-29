@@ -140,6 +140,7 @@ export default {
     const uncertainty = ref()
     const modelsCalendar = ref()
     const gradientString = ref()
+    const backendUrl = $store.getters['app/getBackend']
 
     onMounted(function () {
       const d = new Date()
@@ -210,13 +211,20 @@ export default {
           serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
           serverModels + `sampling_cells_05/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_05_monthly.csv'
         ]
+        const centroidsUrls = [
+          backendUrl + 'media/centroids/gadm0_centroid.json',
+          backendUrl + 'media/centroids/gadm1_centroid.json',
+          backendUrl + 'media/centroids/gadm2_centroid.json'
+        ]
         context.emit('loadModel', {
           esp: selectedModel,
           year: parts[1],
           month: parts[0],
-          modelsCsv: urls
+          modelsCsv: urls,
+          centroidsUrls: centroidsUrls
         })
         estimation.value = true
+        uncertainty.value = true
       }
     }
 
@@ -229,7 +237,7 @@ export default {
     }
 
     const checkUncertainty = function () {
-      context.emit('checkModelUncertainty', { status: estimation.value })
+      context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
     return {

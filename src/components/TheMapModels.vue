@@ -83,12 +83,16 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const $store = useStore()
     let CSVS = {}
+    let CENTROIDS = {}
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const backendUrl = $store.getters['app/getBackend']
     let jsonProperties
-    let gridmodelLayer
+    let estModelLayer
+    let seModelLayer0
+    let seModelLayer1
+    let seModelLayer2
     let ol
 
     // Map general configuration
@@ -191,19 +195,18 @@ export default defineComponent({
     }
 
     function csvJSON (csv, model) {
-      // const lines = csv.split('\n')
       const lines = csv.split(/\r?\n/)
       const dict = {}
       const headers = lines[0].split(',')
       const indexId = headers.indexOf(jsonProperties[model].id)
       const indexEst = headers.indexOf(jsonProperties[model].est)
-      // const indexSe = headers.indexOf('prob')
+      const indexSe = headers.indexOf(jsonProperties[model].se)
       for (let i = 1; i < lines.length; i++) {
         const currentLine = lines[i].split(',')
         const nutsId = currentLine[indexId]
         const prob = currentLine[indexEst]
-        // const se = currentLine[indexSe]
-        dict[nutsId] = prob
+        const se = currentLine[indexSe]
+        dict[nutsId] = { prob, se }
       }
       return dict
     }
@@ -225,16 +228,20 @@ export default defineComponent({
         from: jsonProperties.grid.colorFrom,
         to: jsonProperties.grid.colorTo
       }
-      gridmodelLayer = new GridModelLayer(ol, dataGeojson, colors)
-      gridmodelLayer.addLayer()
+      estModelLayer = new GridModelLayer(ol, dataGeojson.est, {
+        colors,
+        zIndex: 10,
+        minZoom: 6,
+        maxZoom: 19
+      })
+      estModelLayer.addLayer()
     }
 
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
       spinner(false)
-
-      const urls = data.modelsCsv
       CSVS = {}
+      const urls = data.modelsCsv
       await Promise.all(urls.map(m =>
         // fetch(m).then(resp => resp.text())
         fetch(m).then(resp => resp.json())
@@ -250,7 +257,7 @@ export default defineComponent({
             CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
             CSVS['2'] = csvJSON(decoded, GADM2)
-          } else if (!('3' in CSVS)) {
+          } else if (!estModelLayer) {
             doGRID(decoded)
           }
         })
@@ -277,6 +284,62 @@ export default defineComponent({
       }).catch((error) => {
         console.log(error)
       })
+
+      CENTROIDS = {}
+      const centroids = data.centroidsUrls
+      await Promise.all(centroids.map(m =>
+        fetch(m).then(resp => resp.json())
+      )).then(jsons => {
+        // Check for errors
+        jsons.forEach(json => {
+          if (!('0' in CENTROIDS)) {
+            CENTROIDS['0'] = putDataOnCentroids(json, CSVS['0'], 0)
+          } else if (!('1' in CENTROIDS)) {
+            CENTROIDS['1'] = putDataOnCentroids(json, CSVS['1'], 1)
+          } else if (!('2' in CENTROIDS)) {
+            CENTROIDS['2'] = putDataOnCentroids(json, CSVS['2'], 2)
+          }
+        })
+        seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
+          zIndex: 15,
+          minZoom: 0,
+          maxZoom: 3
+        })
+        seModelLayer0.addLayer()
+
+        seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
+          zIndex: 15,
+          minZoom: 3,
+          maxZoom: 4
+        })
+        seModelLayer1.addLayer()
+
+        seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
+          zIndex: 15,
+          minZoom: 4,
+          maxZoom: 6
+        })
+        seModelLayer2.addLayer()
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+
+    const putDataOnCentroids = function (json, csv, flag) {
+      // Filter centroids with data and add SE value from csv
+      const filtered = json.features.filter(f => {
+        if (f.properties.id in csv) {
+          f.properties.se = csv[f.properties.id].se
+          return f.properties.id in csv
+        } else {
+          return false
+        }
+      })
+      return {
+        type: 'FeatureCollection',
+        model: json.model,
+        features: filtered
+      }
     }
 
     // const styles = {}
@@ -305,10 +368,10 @@ export default defineComponent({
 
     const colorizeGadm = (feature, style, CSV, colors) => {
       const id = feature.properties_.id
-      const value = CSV[id]
-      if (value === undefined) {
+      if (CSV[id] === undefined) {
         return null
       }
+      const value = CSV[id].prob
       // if (value < 0.0000025) {
       //   if (!('1' in styles)) {
       //     styles['1'] = new Fill({
@@ -405,11 +468,13 @@ export default defineComponent({
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
-      gridmodelLayer.layer.setVisible(state)
+      estModelLayer.layer.setVisible(state)
     }
 
     const uncertaintyVisibility = function (state) {
-      console.log(state)
+      seModelLayer0.layer.setVisible(state)
+      seModelLayer1.layer.setVisible(state)
+      seModelLayer2.layer.setVisible(state)
     }
 
     return {
