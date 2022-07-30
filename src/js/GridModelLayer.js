@@ -83,7 +83,7 @@ export default class GridModelLayer {
   }
 
   drawPoint (context, feature, extent, size) {
-    let radius = 6
+    let radius = 4
     const pad = 0
     const value = feature.tags.se
     if (value < 0.25) {

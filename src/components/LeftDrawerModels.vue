@@ -82,14 +82,7 @@
           <div class="flex spaceBetween">
             <div class="uppercase">{{ _('Probability') }}</div>
             <div>
-              <label class="cookie-comply-switch">
-                <input
-                  v-model="estimation"
-                  type="checkbox"
-                  @change="checkEstimation">
-
-                <span class="cookie-comply-slider cookie-comply-round"></span>
-              </label>
+              <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
           <!-- GRADIENT -->
@@ -102,14 +95,7 @@
           <div class="flex spaceBetween q-mt-xl">
             <div class="uppercase">{{ _('Uncertainty') }}</div>
             <div>
-              <label class="cookie-comply-switch">
-                <input
-                  v-model="uncertainty"
-                  type="checkbox"
-                  @change="checkUncertainty">
-
-                <span class="cookie-comply-slider cookie-comply-round"></span>
-              </label>
+              <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
         </div>

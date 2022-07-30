@@ -14,10 +14,17 @@
               <div class="row cookies-selector">
                   <div class="col-10"><h5>Necesarias</h5></div>
                   <div class="col-2">
-                    <label class="cookie-comply-switch" :title="_('Is required')">
+                    <q-toggle
+                      disable
+                      v-model="onValue"
+                      :title="_('Is required')"
+                      size="lg"
+                      checked-icon="check"
+                      color="orange"/>
+                    <!-- <label class="cookie-comply-switch" :title="_('Is required')">
                       <input id="performance" checked type="checkbox" disabled="" value="performance">
                       <span class="cookie-comply-slider cookie-comply-round cookie-comply-is-required"></span>
-                    </label>
+                    </label> -->
                   </div>
               </div>
               <div class="row">
@@ -29,10 +36,17 @@
               <div class="row cookies-selector">
                   <div class="col-10"><h5>{{ _("Analytics title") }}</h5></div>
                   <div class="col-2">
-                    <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
+                    <q-toggle
+                      :title="_('Analytics tooltip')"
+                      v-model="analyticsActivated"
+                      size="lg"
+                      checked-icon="check"
+                      color="orange"/>
+
+                    <!-- <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
                       <input id="ga" :checked="analyticsActivated" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
                       <span class="cookie-comply-slider cookie-comply-round"></span>
-                    </label>
+                    </label> -->
                   </div>
               </div>
               <div class="row">
@@ -140,7 +154,9 @@ export default {
     const closeModal = function () {
       return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
+
     return {
+      onValue: true,
       analyticsActivated,
       closeModal,
       mobile,

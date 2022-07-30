@@ -260,6 +260,19 @@ export default defineComponent({
       )).then(texts => {
         // Check for errors
         texts.forEach(text => {
+          if (text.message) {
+            $store.commit('app/setModal', {
+              id: 'error',
+              content: {
+                visibility: true,
+                msg: text.message,
+                link: text.documentation_url
+              }
+            })
+            context.emit('errorDownloadingModels')
+            return true
+          }
+
           const encoded = text.content
           const buf = Buffer.from(encoded, 'base64')
           const decoded = buf.toString('utf-8')

@@ -130,7 +130,7 @@ export default function () {
       download: { visibility: false, n: 0 },
       share: { visibility: false },
       report: { visibility: false, n: 0 },
-      error: { visibility: false, msg: '' },
+      error: { visibility: false, msg: '', link: '' },
       wait: { visibility: false }
     },
     selectedIcons: {

@@ -8,6 +8,10 @@
         <slot></slot>
           <div class="modal-title">{{ _('Error modal title') }}</div>
           <p v-html="_(msg)"></p>
+          <div v-if="link">
+            <p>{{ _('More info') }}</p>
+            <a :href="link">{{ link }} </a>
+          </div>
         <div class="buttons">
           <div class="download-buttons">
             <button @click="close" class="close">{{ _('Close') }}</button>
@@ -35,6 +39,10 @@ export default {
       return $store.getters['app/getModals'].error.msg
     })
 
+    const link = computed(() => {
+      return $store.getters['app/getModals'].error.link
+    })
+
     const close = function () {
       $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
     }
@@ -51,6 +59,7 @@ export default {
       open,
       close,
       msg,
+      link,
       _
     }
   }
