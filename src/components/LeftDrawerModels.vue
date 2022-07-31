@@ -104,6 +104,26 @@
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
+          <div v-if="uncertainty" class="row q-mt-md">
+            <div class="col-3 text-center">{{ _('Very low') }}</div>
+            <div class="col-3 text-center">{{ _('Low') }}</div>
+            <div class="col-3 text-center">{{ _('Medium') }}</div>
+            <div class="col-3 text-center">{{ _('High') }}</div>
+          </div>
+          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered">
+              <div class="col-3 text-center">
+                <div class="circle very-low"></div>
+              </div>
+              <div class="col-3 text-center">
+                <div class="circle low"></div>
+              </div>
+              <div class="col-3 text-center">
+                <div class="circle medium"></div>
+              </div>
+              <div class="col-3 text-center">
+                <div class="circle high"></div>
+              </div>
+          </div>
         </div>
       </div>
     </div>
@@ -393,6 +413,35 @@ input:checked + .cookie-comply-slider{
 .gradient{
   height: 40px;
   width: 100%;
+}
+
+.circle {
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  margin: auto;
+}
+
+.circle.very-low{
+  width: 8px;
+  height: 8px;
+}
+
+.circle.low{
+  width: 16px;
+  height: 16px;
+}
+
+.circle.medium{
+  width: 24px;
+  height: 24px;
+}
+
+.circle.high{
+  width: 32px;
+  height: 32px;
+}
+.alignt-items-centered{
+  align-items: center;
 }
 @media (max-width: 640px) {
   .aside button {
