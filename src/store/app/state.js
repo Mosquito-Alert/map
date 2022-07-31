@@ -116,7 +116,14 @@ export default function () {
       hashtags: [],
       // INFO_OPEN: false
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
-      strokeLocationColor: 'orange'
+      strokeLocationColor: 'orange',
+      model: {
+        esp: '',
+        year: '',
+        month: '',
+        est: true,
+        se: true
+      }
     },
     BACKEND: backendUrl,
     FRONTEND: frontendUrl,
@@ -294,7 +301,7 @@ export default function () {
       },
       culex: {
         categories: ['culex_probable', 'culex_confirmed'],
-        common_name: 'Culex mosquito',
+        common_name: 'Common mosquito',
         scientific_name: 'Culex pipens',
         icon: require('../../assets/img/marker_culex.svg'),
         color: '#aa4499',

@@ -90,3 +90,7 @@ export const getModelsProperties = state => {
 export const getGridSize = state => {
   return state.gridsize
 }
+
+export const getModelDefaults = state => {
+  return state.DEFAULTS.model
+}

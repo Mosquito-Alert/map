@@ -39,3 +39,15 @@ export const setCookiesComply = (state, payload) => {
 export const setCalendarSubtitle = (state, payload) => {
   state.calendarSubtitle = payload
 }
+
+export const setModelDefaults = (state, payload) => {
+  state.DEFAULTS.model = payload
+}
+
+export const setModelEst = (state, payload) => {
+  state.DEFAULTS.model.est = payload
+}
+
+export const setModelSe = (state, payload) => {
+  state.DEFAULTS.model.se = payload
+}

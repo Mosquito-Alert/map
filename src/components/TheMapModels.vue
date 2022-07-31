@@ -73,7 +73,8 @@ export default defineComponent({
   emits: [
     'toggleLeftDrawer',
     'mapViewSaved',
-    'setModelDate'
+    'setModelDate',
+    'loadSharedModel'
   ],
   props: ['viewCode'],
   setup (props, context) {
@@ -111,6 +112,7 @@ export default defineComponent({
     })
 
     const properties = $store.getters['app/getModelsProperties']
+    const models = JSON.parse(JSON.stringify($store.getters['app/getModels']))
     const jsonProperties = JSON.parse(JSON.stringify(properties))
 
     const toggleLeftDrawer = function () {
@@ -155,14 +157,21 @@ export default defineComponent({
     const loadViewUrl = backendUrl + 'api/view/load/'
 
     function shareModelView () {
-      const modelDate = $store.getters['map/getModelDate']
-      if (!modelDate) {
+      const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+      console.log(modelData)
+      if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
       const newView = new ShareMapView(ol, {
         viewType: 'models',
-        modelDate,
+        filters: {
+          esp: modelData.esp,
+          year: modelData.year,
+          month: modelData.month,
+          est: modelData.est,
+          se: modelData.se
+        },
         url: shareViewUrl,
         callback: handleShareView
       })
@@ -193,6 +202,17 @@ export default defineComponent({
         zoom: jsonView.zoom,
         center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
         mobilezoom: jsonView.zoom
+      })
+      // Search type from code
+      const type = Object.keys(models).find((key, index) => {
+        return (models[key].modelName === jsonView.filters.esp)
+      })
+      context.emit('loadSharedModel', {
+        esp: { code: jsonView.filters.esp, type: _(models[type].common_name) },
+        year: jsonView.filters.year,
+        month: jsonView.filters.month,
+        est: jsonView.filters.est,
+        se: jsonView.filters.se
       })
     }
 
@@ -252,6 +272,13 @@ export default defineComponent({
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
       spinner(true)
+      $store.commit('app/setModelDefaults', {
+        esp: data.esp,
+        year: data.year,
+        month: data.month,
+        est: data.est,
+        se: data.se
+      })
       CSVS = {}
       const urls = data.modelsCsv
       await Promise.all(urls.map(m =>
@@ -287,6 +314,7 @@ export default defineComponent({
           }
         })
 
+        estimationVisibility(data.est)
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
@@ -338,21 +366,23 @@ export default defineComponent({
           minZoom: jsonProperties.gadm0.minZoom,
           maxZoom: jsonProperties.gadm0.maxZoom
         })
-        seModelLayer0.addLayer()
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
           zIndex: 15,
           minZoom: jsonProperties.gadm1.minZoom,
           maxZoom: jsonProperties.gadm1.maxZoom
         })
-        seModelLayer1.addLayer()
 
         seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
           zIndex: 15,
           minZoom: jsonProperties.gadm2.minZoom,
           maxZoom: jsonProperties.gadm2.maxZoom
         })
+
+        seModelLayer0.addLayer()
+        seModelLayer1.addLayer()
         seModelLayer2.addLayer()
+        uncertaintyVisibility(data.se)
       }).catch((error) => {
         console.log(error)
       })
@@ -464,6 +494,7 @@ export default defineComponent({
     }
 
     const estimationVisibility = function (state) {
+      $store.commit('app/setModelEst', state)
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
@@ -471,6 +502,7 @@ export default defineComponent({
     }
 
     const uncertaintyVisibility = function (state) {
+      $store.commit('app/setModelSe', state)
       seModelLayer0.layer.setVisible(state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)

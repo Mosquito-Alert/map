@@ -40,7 +40,7 @@
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
-          :label="_('Year / Month')"
+          :label="_('Month / Year')"
           v-model="inputDate"
           mask="##/####"
           :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -86,9 +86,15 @@
             </div>
           </div>
           <!-- GRADIENT -->
-          <div v-if="estimation" class="flex">
+          <!-- <div v-if="estimation" class="flex"> -->
+          <div v-if="estimation" class="row">
+            <div class="col-4 text-left">{{ _('Low') }}</div>
+            <div class="col-4 text-center">{{ _('Medium') }}</div>
+            <div class="col-4 text-right">{{ _('High') }}</div>
+          </div>
+          <div v-if="estimation" class="row">
               <div
-                class="q-mt-lg gradient"
+                class="gradient"
                 :style="{ backgroundImage: gradientString }">
               </div>
           </div>
@@ -124,8 +130,8 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const model = ref()
-    const estimation = ref()
-    const uncertainty = ref()
+    const estimation = ref(true)
+    const uncertainty = ref(true)
     const modelsCalendar = ref()
     const gradientString = ref()
     const backendUrl = $store.getters['app/getBackend']
@@ -212,11 +218,12 @@ export default {
           esp: selectedModel,
           year: parts[1],
           month: parts[0],
+          est: estimation.value,
+          se: uncertainty.value,
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         })
-        estimation.value = true
-        uncertainty.value = true
+
         disabled.value = true
         showLegend.value = true
       }
@@ -234,8 +241,18 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
+    const loadSharedModel = function (payload) {
+      model.value = payload.esp
+      inputDate.value = payload.month + '/' + payload.year
+      modelDate.value = inputDate.value
+      estimation.value = payload.est
+      uncertainty.value = payload.se
+      applyfilter()
+    }
+
     return {
       _,
+      loadSharedModel,
       disabled,
       showLegend,
       gradientString,

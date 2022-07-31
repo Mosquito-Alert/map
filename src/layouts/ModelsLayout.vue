@@ -24,6 +24,7 @@
         @workerFinishedIndexing="workerFinishedIndexing"
         @mapViewSaved="mapViewSaved"
         @setModelDate="setModelDate"
+        @loadSharedModel="loadSharedModel"
       />
     </q-page>
 
@@ -199,7 +200,12 @@ export default {
       map.value.uncertaintyVisibility(payload.status)
     }
 
+    const loadSharedModel = function (payload) {
+      TOC.value.loadSharedModel(payload)
+    }
+
     return {
+      loadSharedModel,
       checkModelEstimation,
       checkModelUncertainty,
       viewCode,
