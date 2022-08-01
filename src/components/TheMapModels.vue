@@ -84,6 +84,7 @@ export default defineComponent({
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
+    let gitHubError = 0
     let CSVS = {}
     let CENTROIDS = {}
     const GADM0 = 'gadm0'
@@ -233,14 +234,14 @@ export default defineComponent({
       return dict
     }
 
-    function spinner (status) {
-      $store.commit('app/setModal', {
-        id: 'wait',
-        content: {
-          visibility: status
-        }
-      })
-    }
+    // function spinner (status) {
+    //   $store.commit('app/setModal', {
+    //     id: 'wait',
+    //     content: {
+    //       visibility: status
+    //     }
+    //   })
+    // }
 
     const doGRID = function (data) {
       const gridSize = $store.getters['app/getGridSize']
@@ -271,7 +272,7 @@ export default defineComponent({
 
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
-      spinner(true)
+      // spinner(true)
       $store.commit('app/setModelDefaults', {
         esp: data.esp,
         year: data.year,
@@ -288,6 +289,7 @@ export default defineComponent({
         // Check for errors
         texts.forEach(text => {
           if (text.message) {
+            gitHubError = 1
             $store.commit('app/setModal', {
               id: 'error',
               content: {
@@ -313,29 +315,33 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
-
         estimationVisibility(data.est)
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
 
         map.value.map.addLayer(modelsLayer)
-        gadm0.on('prerender', function () {
-          spinner(true)
-        })
-        gadm1.on('prerender', function () {
-          spinner(true)
-        })
-        gadm2.on('prerender', function () {
-          spinner(true)
-        })
+        // gadm0.on('prerender', function () {
+        //   spinner(true)
+        // })
+        // gadm1.on('prerender', function () {
+        //   spinner(true)
+        // })
+        // gadm2.on('prerender', function () {
+        //   spinner(true)
+        // })
 
-        map.value.map.on('rendercomplete', function () {
-          spinner(false)
-        })
+        // map.value.map.on('rendercomplete', function () {
+        //   spinner(false)
+        // })
       }).catch((error) => {
         console.log(error)
       })
+
+      if (gitHubError) {
+        // spinner(false)
+        return true
+      }
 
       CENTROIDS = {}
       const centroids = data.centroidsUrls
@@ -498,7 +504,9 @@ export default defineComponent({
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
-      estModelLayer.layer.setVisible(state)
+      if (estModelLayer) {
+        estModelLayer.layer.setVisible(state)
+      }
     }
 
     const uncertaintyVisibility = function (state) {
@@ -509,10 +517,30 @@ export default defineComponent({
       seModelLayer.layer.setVisible(state)
     }
 
+    const estimationTransparency = function (opacity) {
+      gadm0.setOpacity(opacity)
+      gadm1.setOpacity(opacity)
+      gadm2.setOpacity(opacity)
+      if (estModelLayer.layer) {
+        estModelLayer.layer.setOpacity(opacity)
+      }
+    }
+
+    const uncertaintyTransparency = function (opacity) {
+      seModelLayer0.layer.setOpacity(opacity)
+      seModelLayer1.layer.setOpacity(opacity)
+      seModelLayer2.layer.setOpacity(opacity)
+      if (seModelLayer.layer) {
+        seModelLayer.layer.setOpacity(opacity)
+      }
+    }
+
     return {
       _,
       estimationVisibility,
       uncertaintyVisibility,
+      estimationTransparency,
+      uncertaintyTransparency,
       baseMap,
       showZoom,
       center,

@@ -80,30 +80,44 @@
         <div v-if="showLegend">
           <hr class="q-my-xl">
           <div class="flex spaceBetween">
-            <div class="uppercase">{{ _('Probability') }}</div>
+            <div class="uppercase text-bold">{{ _('Probability') }}</div>
             <div>
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
-          <!-- GRADIENT -->
-          <!-- <div v-if="estimation" class="flex"> -->
+          <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
             <div class="col-4 text-left">{{ _('Low') }}</div>
             <div class="col-4 text-center">{{ _('Medium') }}</div>
             <div class="col-4 text-right">{{ _('High') }}</div>
           </div>
+          <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row">
               <div
                 class="gradient"
                 :style="{ backgroundImage: gradientString }">
               </div>
           </div>
+          <!-- ESTIMATION TRANSPARENCY -->
+          <div class="row q-mt-lg">
+            <div v-if="estimation" class="col text-center">{{ _('Transparency') }}</div>
+          </div>
+          <div v-if="estimation" class="row">
+            <q-slider
+              :min="0"
+              :max="100"
+              v-model="estimationTransparency"
+              color="orange"
+              @update:model-value="setEstTransparency"/>
+          </div>
+          <!-- UNCERTAINTY -->
           <div class="flex spaceBetween q-mt-xl">
-            <div class="uppercase">{{ _('Uncertainty') }}</div>
+            <div class="uppercase text-bold">{{ _('Uncertainty') }}</div>
             <div>
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
+          <!-- UNCERTAINTY LEGEND -->
           <div v-if="uncertainty" class="row q-mt-md">
             <div class="col-3 text-center">{{ _('Very low') }}</div>
             <div class="col-3 text-center">{{ _('Low') }}</div>
@@ -124,6 +138,18 @@
                 <div class="circle high"></div>
               </div>
           </div>
+          <!-- UNCERTAINTY TRANSPARENCY -->
+          <div class="row q-mt-lg">
+            <div v-if="uncertainty" class="col text-center">{{ _('Transparency') }}</div>
+          </div>
+          <div v-if="uncertainty" class="row">
+            <q-slider
+              :min="0"
+              :max="100"
+              v-model="uncertaintyTransparency"
+              color="orange"
+              @update:model-value="setUncertaintyTransparency"/>
+          </div>
         </div>
       </div>
     </div>
@@ -138,7 +164,12 @@ import LeftMenu from 'components/LeftMenu.vue'
 export default {
   components: { LeftMenu },
   props: ['expanded'],
-  emits: ['checkModelEstimation', 'checkModelUncertainty'],
+  emits: [
+    'checkModelEstimation',
+    'checkModelUncertainty',
+    'estimationTransparency',
+    'uncertaintyTransparency'
+  ],
   setup (props, context) {
     const refInput = ref(null)
     const inputDate = ref(null)
@@ -150,6 +181,8 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const model = ref()
+    const estimationTransparency = ref(0)
+    const uncertaintyTransparency = ref(0)
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
@@ -161,7 +194,6 @@ export default {
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       const json = JSON.parse(JSON.stringify($store.getters['app/getModelsProperties']))
       gradientString.value = `linear-gradient(90deg, ${json.gadm0.colorFrom}, ${json.gadm0.colorTo})`
-      console.log(gradientString.value)
     })
 
     const models = computed(() => {
@@ -270,8 +302,20 @@ export default {
       applyfilter()
     }
 
+    const setEstTransparency = function () {
+      context.emit('estimationTransparency', { transparency: estimationTransparency.value })
+    }
+
+    const setUncertaintyTransparency = function () {
+      context.emit('uncertaintyTransparency', { transparency: uncertaintyTransparency.value })
+    }
+
     return {
       _,
+      setEstTransparency,
+      setUncertaintyTransparency,
+      estimationTransparency,
+      uncertaintyTransparency,
       loadSharedModel,
       disabled,
       showLegend,
@@ -411,7 +455,7 @@ input:checked + .cookie-comply-slider{
   width: 100%;
 }
 .gradient{
-  height: 40px;
+  height: 20px;
   width: 100%;
 }
 

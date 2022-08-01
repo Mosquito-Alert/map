@@ -10,6 +10,8 @@
       @showShareUrl="showShareUrl"
       @checkModelEstimation="checkModelEstimation"
       @checkModelUncertainty="checkModelUncertainty"
+      @estimationTransparency="estimationTransparency"
+      @uncertaintyTransparency="uncertaintyTransparency"
     />
 
     <q-page
@@ -200,6 +202,16 @@ export default {
       map.value.uncertaintyVisibility(payload.status)
     }
 
+    const estimationTransparency = function (payload) {
+      // Normalize transparency
+      map.value.estimationTransparency(1 - (payload.transparency / 100))
+    }
+
+    const uncertaintyTransparency = function (payload) {
+      // Normalize transparency
+      map.value.uncertaintyTransparency(1 - (payload.transparency / 100))
+    }
+
     const loadSharedModel = function (payload) {
       TOC.value.loadSharedModel(payload)
     }
@@ -208,6 +220,8 @@ export default {
       loadSharedModel,
       checkModelEstimation,
       checkModelUncertainty,
+      estimationTransparency,
+      uncertaintyTransparency,
       viewCode,
       mobile,
       expanded,

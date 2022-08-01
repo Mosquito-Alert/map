@@ -124,7 +124,7 @@ export default {
     onMounted(function () {
       initLanguage()
     })
-    console.log($store.getters['app/getFrontendUrl'] + 'models')
+
     return {
       _,
       ca,
