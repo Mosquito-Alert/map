@@ -159,7 +159,6 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      console.log(modelData)
       if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
@@ -171,7 +170,9 @@ export default defineComponent({
           year: modelData.year,
           month: modelData.month,
           est: modelData.est,
-          se: modelData.se
+          se: modelData.se,
+          estTransparency: modelData.estTransparency,
+          seTransparency: modelData.seTransparency
         },
         url: shareViewUrl,
         callback: handleShareView
@@ -213,7 +214,9 @@ export default defineComponent({
         year: jsonView.filters.year,
         month: jsonView.filters.month,
         est: jsonView.filters.est,
-        se: jsonView.filters.se
+        se: jsonView.filters.se,
+        estTransparency: jsonView.filters.estTransparency,
+        seTransparency: jsonView.filters.seTransparency
       })
     }
 
@@ -278,7 +281,9 @@ export default defineComponent({
         year: data.year,
         month: data.month,
         est: data.est,
-        se: data.se
+        se: data.se,
+        estTransparency: data.estTransparency,
+        seTransparency: data.seTransparency
       })
       CSVS = {}
       const urls = data.modelsCsv
@@ -316,6 +321,7 @@ export default defineComponent({
           }
         })
         estimationVisibility(data.est)
+        estimationTransparency(data.estTransparency)
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
@@ -389,6 +395,7 @@ export default defineComponent({
         seModelLayer1.addLayer()
         seModelLayer2.addLayer()
         uncertaintyVisibility(data.se)
+        uncertaintyTransparency(data.seTransparency)
       }).catch((error) => {
         console.log(error)
       })
@@ -518,18 +525,26 @@ export default defineComponent({
     }
 
     const estimationTransparency = function (opacity) {
-      gadm0.setOpacity(opacity)
-      gadm1.setOpacity(opacity)
-      gadm2.setOpacity(opacity)
+      console.log(opacity)
+      $store.commit('app/setEstTransparency', opacity)
+      gadm0.setOpacity(0.5)
+      gadm1.setOpacity(0.5)
+      gadm2.setOpacity(0.5)
       if (estModelLayer.layer) {
         estModelLayer.layer.setOpacity(opacity)
       }
     }
 
     const uncertaintyTransparency = function (opacity) {
-      seModelLayer0.layer.setOpacity(opacity)
-      seModelLayer1.layer.setOpacity(opacity)
-      seModelLayer2.layer.setOpacity(opacity)
+      if (seModelLayer0) {
+        seModelLayer0.layer.setOpacity(opacity)
+      }
+      if (seModelLayer1) {
+        seModelLayer1.layer.setOpacity(opacity)
+      }
+      if (seModelLayer2) {
+        seModelLayer2.layer.setOpacity(opacity)
+      }
       if (seModelLayer.layer) {
         seModelLayer.layer.setOpacity(opacity)
       }

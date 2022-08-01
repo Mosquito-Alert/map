@@ -78,7 +78,7 @@ export default class GridModelLayer {
       })
     })
 
-    // this.layer.setZIndex(this.zIndex)
+    // this.layer.setOpacity(this.options.opacity)
     this.map.addLayer(this.layer)
   }
 

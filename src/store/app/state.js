@@ -122,7 +122,9 @@ export default function () {
         year: '',
         month: '',
         est: true,
-        se: true
+        se: true,
+        estTransparency: 0,
+        seTransparency: 0
       }
     },
     BACKEND: backendUrl,

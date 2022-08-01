@@ -69,6 +69,8 @@ export default class ShareMapView {
       dataView.month = this.options.month
       dataView.est = this.options.est
       dataView.se = this.options.se
+      dataView.estTransparency = this.options.estTransparency
+      dataView.seTransparency = this.options.seTransparency
     }
 
     fetch(this.options.url, {

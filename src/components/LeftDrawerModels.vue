@@ -181,8 +181,8 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const model = ref()
-    const estimationTransparency = ref(0)
-    const uncertaintyTransparency = ref(0)
+    const estimationTransparency = ref(1)
+    const uncertaintyTransparency = ref(1)
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
@@ -271,6 +271,8 @@ export default {
           year: parts[1],
           month: parts[0],
           est: estimation.value,
+          estTransparency: estimationTransparency.value,
+          seTransparency: uncertaintyTransparency.value,
           se: uncertainty.value,
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
@@ -299,6 +301,8 @@ export default {
       modelDate.value = inputDate.value
       estimation.value = payload.est
       uncertainty.value = payload.se
+      estimationTransparency.value = 100 * (1 - payload.estTransparency)
+      uncertaintyTransparency.value = 100 * (1 - payload.seTransparency)
       applyfilter()
     }
 

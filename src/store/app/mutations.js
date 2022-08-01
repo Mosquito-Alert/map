@@ -51,3 +51,11 @@ export const setModelEst = (state, payload) => {
 export const setModelSe = (state, payload) => {
   state.DEFAULTS.model.se = payload
 }
+
+export const setEstTransparency = (state, payload) => {
+  state.DEFAULTS.model.estTransparency = payload
+}
+
+export const setSeTransparency = (state, payload) => {
+  state.DEFAULTS.model.seTransparency = payload
+}

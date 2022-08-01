@@ -204,12 +204,16 @@ export default {
 
     const estimationTransparency = function (payload) {
       // Normalize transparency
-      map.value.estimationTransparency(1 - (payload.transparency / 100))
+      $store.commit('app/setEstTransparency', payload.transparency)
+      const t = 1 - (payload.transparency / 100)
+      map.value.estimationTransparency(t)
     }
 
     const uncertaintyTransparency = function (payload) {
       // Normalize transparency
-      map.value.uncertaintyTransparency(1 - (payload.transparency / 100))
+      $store.commit('app/setSeTransparency', payload.transparency)
+      const t = 1 - (payload.transparency / 100)
+      map.value.uncertaintyTransparency(t)
     }
 
     const loadSharedModel = function (payload) {
