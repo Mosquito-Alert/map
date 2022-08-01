@@ -181,8 +181,8 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const model = ref()
-    const estimationTransparency = ref(1)
-    const uncertaintyTransparency = ref(1)
+    const estimationTransparency = ref(0)
+    const uncertaintyTransparency = ref(0)
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
@@ -252,8 +252,8 @@ export default {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
-        // const serverModels = $store.getters['app/getModelsServerPath']
-        const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
+        const serverModels = $store.getters['app/getModelsServerPath']
+        // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
         const selectedModel = model.value.code
         const urls = [
           serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
@@ -266,6 +266,7 @@ export default {
           backendUrl + 'media/centroids/gadm1_centroid.json',
           backendUrl + 'media/centroids/gadm2_centroid.json'
         ]
+        console.log(estimation.value)
         context.emit('loadModel', {
           esp: selectedModel,
           year: parts[1],

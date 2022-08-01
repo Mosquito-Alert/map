@@ -18,7 +18,7 @@
               >
                 <div class="pr-30 q-mt-md q-pr-md text-justify scroll">
                   <h5>
-                    <a href="#" @click.stop="showModalCookiePolicy">
+                    <a href="#" @click.prevent="showModalCookiePolicy">
                       {{ _('Cookies policy') }}
                     </a>
                     </h5>

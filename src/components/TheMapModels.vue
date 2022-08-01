@@ -65,7 +65,7 @@ import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
 import { getInterpolatedColor } from '../js/InterpolateColors.js'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
-import { Buffer } from 'buffer'
+// import { Buffer } from 'buffer'
 import GridModelLayer from '../js/GridModelLayer'
 
 export default defineComponent({
@@ -159,6 +159,7 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+      console.log(modelData)
       if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
@@ -200,6 +201,7 @@ export default defineComponent({
       const d = response.view[0].date
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
+
       $store.commit('map/setDefaults', {
         zoom: jsonView.zoom,
         center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
@@ -288,8 +290,8 @@ export default defineComponent({
       CSVS = {}
       const urls = data.modelsCsv
       await Promise.all(urls.map(m =>
-        // fetch(m).then(resp => resp.text())
-        fetch(m).then(resp => resp.json())
+        // fetch(m).then(resp => resp.json())
+        fetch(m).then(resp => resp.text())
       )).then(texts => {
         // Check for errors
         texts.forEach(text => {
@@ -307,9 +309,10 @@ export default defineComponent({
             return true
           }
 
-          const encoded = text.content
-          const buf = Buffer.from(encoded, 'base64')
-          const decoded = buf.toString('utf-8')
+          // const encoded = text.content
+          // const buf = Buffer.from(encoded, 'base64')
+          // let decoded = buf.toString('utf-8')
+          const decoded = text
           if (!('0' in CSVS)) {
             CSVS['0'] = csvJSON(decoded, GADM0)
           } else if (!('1' in CSVS)) {
@@ -321,7 +324,7 @@ export default defineComponent({
           }
         })
         estimationVisibility(data.est)
-        estimationTransparency(data.estTransparency)
+        estimationOpacity(1 - (data.estTransparency / 100))
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
@@ -395,7 +398,7 @@ export default defineComponent({
         seModelLayer1.addLayer()
         seModelLayer2.addLayer()
         uncertaintyVisibility(data.se)
-        uncertaintyTransparency(data.seTransparency)
+        uncertaintyOpacity(1 - (data.seTransparency / 100))
       }).catch((error) => {
         console.log(error)
       })
@@ -524,18 +527,18 @@ export default defineComponent({
       seModelLayer.layer.setVisible(state)
     }
 
-    const estimationTransparency = function (opacity) {
-      console.log(opacity)
+    const estimationOpacity = function (opacity) {
       $store.commit('app/setEstTransparency', opacity)
-      gadm0.setOpacity(0.5)
-      gadm1.setOpacity(0.5)
-      gadm2.setOpacity(0.5)
+      gadm0.setOpacity(opacity)
+      gadm1.setOpacity(opacity)
+      gadm2.setOpacity(opacity)
       if (estModelLayer.layer) {
         estModelLayer.layer.setOpacity(opacity)
       }
     }
 
-    const uncertaintyTransparency = function (opacity) {
+    const uncertaintyOpacity = function (opacity) {
+      $store.commit('app/setSeTransparency', opacity)
       if (seModelLayer0) {
         seModelLayer0.layer.setOpacity(opacity)
       }
@@ -554,8 +557,8 @@ export default defineComponent({
       _,
       estimationVisibility,
       uncertaintyVisibility,
-      estimationTransparency,
-      uncertaintyTransparency,
+      estimationOpacity,
+      uncertaintyOpacity,
       baseMap,
       showZoom,
       center,

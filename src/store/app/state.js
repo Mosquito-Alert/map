@@ -55,7 +55,7 @@ export default function () {
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
     // Models related
-    modelsServerPath: backendUrl + 'media/models',
+    modelsServerPath: backendUrl + 'media/models/',
     modelsProperties: {
       gadm0: {
         minZoom: 0,
