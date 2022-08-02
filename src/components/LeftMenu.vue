@@ -51,7 +51,7 @@
           </div>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')" @click="showLogin"></fa-thin-button>
     </q-toolbar>
 </template>
 
@@ -88,6 +88,10 @@ export default {
 
     const showHelp = function () {
       $store.commit('app/setModal', { id: 'help', content: { visibility: true } })
+    }
+
+    const showLogin = function () {
+      $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
     }
 
     const showShareUrl = function () {
@@ -135,6 +139,7 @@ export default {
       showInfo,
       showHelp,
       showShareUrl,
+      showLogin,
       clickLanguageSelector
     }
   }

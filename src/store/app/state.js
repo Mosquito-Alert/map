@@ -140,7 +140,8 @@ export default function () {
       share: { visibility: false },
       report: { visibility: false, n: 0 },
       error: { visibility: false, msg: '', link: '' },
-      wait: { visibility: false, seamless: false }
+      wait: { visibility: false, seamless: false },
+      login: { visibility: false }
     },
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),

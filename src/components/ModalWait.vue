@@ -116,7 +116,7 @@ button.disabled {
 button {
   background: $primary-button-background;
   border: none;
-  color: white;
+  // color: white;
   // text-transform: uppercase;
   // padding: 15px 50px;
   cursor: pointer;
