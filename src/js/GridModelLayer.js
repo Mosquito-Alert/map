@@ -11,7 +11,7 @@ export default class GridModelLayer {
     this.tileIndex = geojsonvt(geoJson, {
       extent: 4096,
       maxZoom: 20,
-      buffer: 256
+      buffer: 512
     })
     this.layer = null
     this.options = options

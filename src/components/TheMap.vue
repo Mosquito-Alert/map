@@ -24,6 +24,7 @@
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
+            :constrainResolution='true'
             @moveend='updateMap'
             style='height:100%'>
 
@@ -1413,7 +1414,8 @@ export default defineComponent({
       $store.commit('app/setModal', {
         id: 'wait',
         content: {
-          visibility: true
+          visibility: true,
+          seamless: false
         }
       })
     }

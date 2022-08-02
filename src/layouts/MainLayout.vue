@@ -284,7 +284,8 @@ export default {
       $store.commit('app/setModal', {
         id: 'wait',
         content: {
-          visibility: false
+          visibility: false,
+          seamless: false
         }
       })
       if (payload.mapFilters.locations.length) {

@@ -1,21 +1,20 @@
 <template>
-  <transition name="backdrop">
+  <!-- <transition name="backdrop">
       <div class="backdrop-modal-wait" v-if="open"></div>
-  </transition>
+  </transition> -->
   <transition name="modal">
-    <div class="dialog" v-if="open">
-      <dialog
-        class="modal-box"
-        :class="leftDrawerStatus?(mobile?'expanded mobile':'expanded'):(mobile?'collapsed mobile':'collapsed')"
-        open
-      >
-        <slot></slot>
+    <!-- <div class="dialog toni" v-if="open"> -->
+      <q-dialog
+        v-model="open"
+        class="wait"
+        :seamless="seamless">
+        <!-- <slot></slot> -->
           <q-spinner-oval
             color="orange"
             size="5.5em"
           />
-      </dialog>
-    </div>
+      </q-dialog>
+    <!-- </div> -->
   </transition>
 </template>
 
@@ -31,6 +30,10 @@ export default {
       return $store.getters['app/getModals'].wait.visibility
     })
 
+    const seamless = computed(() => {
+      return $store.getters['app/getModals'].wait.seamless
+    })
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -44,6 +47,7 @@ export default {
     })
 
     return {
+      seamless,
       leftDrawerStatus,
       mobile,
       open,
@@ -53,7 +57,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .backdrop-modal-wait {
   position: fixed;
   top: 0;
@@ -113,12 +117,13 @@ button {
   background: $primary-button-background;
   border: none;
   color: white;
-  text-transform: uppercase;
-  padding: 15px 50px;
+  // text-transform: uppercase;
+  // padding: 15px 50px;
   cursor: pointer;
-  font-weight: bold;
-  margin: 10px;
+  // font-weight: bold;
+  // margin: 10px;
 }
+
 button:hover {
   background: $primary-button-background-hover;
   color: #644a0f;
@@ -147,5 +152,14 @@ button:hover {
 }
 // MOBILE
 dialog.mobile {
+}
+.q-dialog.wait .q-dialog__backdrop{
+  background: transparent;
+}
+.q-date__today{
+  box-shadow: none;
+}
+button.disabled{
+  background: none
 }
 </style>

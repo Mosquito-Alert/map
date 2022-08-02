@@ -78,4 +78,23 @@ function GeojsonFromCsv (data, fields, gridSize) {
   return { est: polygonGeojson, se: sdGeojson }
 }
 
+// function Star (cx, cy) {
+//   const r = 75
+//   const lados = 5
+//   const paso = 2
+
+//   function points (cx, cy, r, lados, paso) {
+//     const a = 360 / lados
+//     let points = (cx + r) + ',' + cy + ' '
+//     for (let i = 1; i <= lados; i++) {
+//       const aRad = ((Math.PI / 180) * (a * i)) * paso
+//       const Xp = cx + r * Math.cos(aRad)
+//       const Yp = cy + r * Math.sin(aRad)
+//       points += Xp + ',' + Yp + ' '
+//     }
+//     return points
+//   }
+//   var estrella = document.getElementById("estrella")
+//   estrella.setAttribute("points", Star(cx, cy, r, lados, paso))
+// }
 export { GeojsonFromCsv }

@@ -21,7 +21,7 @@
             maxZoom="19"
             :center='center'
             :zoom='zoom'
-            :constrainResolution='false' />
+            :constrainResolution='true' />
 
         <div
           class="ol-attribution"
@@ -239,14 +239,15 @@ export default defineComponent({
       return dict
     }
 
-    // function spinner (status) {
-    //   $store.commit('app/setModal', {
-    //     id: 'wait',
-    //     content: {
-    //       visibility: status
-    //     }
-    //   })
-    // }
+    function spinner (status) {
+      $store.commit('app/setModal', {
+        id: 'wait',
+        content: {
+          visibility: status,
+          seamless: true
+        }
+      })
+    }
 
     const doGRID = function (data) {
       const gridSize = $store.getters['app/getGridSize']
@@ -277,7 +278,7 @@ export default defineComponent({
 
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
-      // spinner(true)
+      spinner(true)
       $store.commit('app/setModelDefaults', {
         esp: data.esp,
         year: data.year,
@@ -330,25 +331,25 @@ export default defineComponent({
         gadm2.getSource().refresh()
 
         map.value.map.addLayer(modelsLayer)
-        // gadm0.on('prerender', function () {
-        //   spinner(true)
-        // })
-        // gadm1.on('prerender', function () {
-        //   spinner(true)
-        // })
-        // gadm2.on('prerender', function () {
-        //   spinner(true)
-        // })
+        gadm0.on('prerender', function () {
+          spinner(true)
+        })
+        gadm1.on('prerender', function () {
+          spinner(true)
+        })
+        gadm2.on('prerender', function () {
+          spinner(true)
+        })
 
-        // map.value.map.on('rendercomplete', function () {
-        //   spinner(false)
-        // })
+        map.value.map.on('rendercomplete', function () {
+          spinner(false)
+        })
       }).catch((error) => {
         console.log(error)
       })
 
       if (gitHubError) {
-        // spinner(false)
+        spinner(false)
         return true
       }
 
