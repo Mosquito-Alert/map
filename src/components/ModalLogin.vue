@@ -14,18 +14,20 @@
           </div>
           <q-input
             filled
+            color="orange"
             name="username"
             v-model="username"
-            label="Username *"
+            :label="_('Username *')"
             lazy-rules
             :rules="[ val => val && val.length > 0 || _('Field required') ]"
           ></q-input>
 
           <q-input
             class="q-mt-md"
+            color="orange"
             v-model="password"
             name="password"
-            label="Password *"
+            :label="_('Password *')"
             filled :type="isPwd ? 'password' : 'text'"
             lazy-rules
             :rules="[ val => val && val.length > 0 || _('Field required')]"
@@ -79,14 +81,14 @@ export default {
       if (username.value && password.value) {
         const controller = new AbortController()
         const { signal } = controller
-        // const bEnd = $store.getters['app/getBackend']
-        const url = '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/'
-        // const data = { username: username.value, password: password.value }
+        const authenticateUrl = $store.getters['app/getAuthenticateUrl']
+        const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+
         const formData = new FormData()
         formData.append('username', username.value)
         formData.append('password', password.value)
 
-        fetch(`${url}`, {
+        fetch(`${authenticateUrl}`, {
           signal: signal,
           method: 'POST', // or 'PUT'
           body: formData
@@ -95,8 +97,7 @@ export default {
           .then(res => {
             console.log(res)
             if (res.success) {
-              const url = 'https://sigserver4.udg.edu/mosquito/'
-              document.location = url
+              document.location = registeredWeb
               // document.location.reload()
             } else {
               console.log('Not authenticated')

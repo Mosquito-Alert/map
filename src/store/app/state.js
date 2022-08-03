@@ -50,11 +50,11 @@ export default function () {
   }
 
   return {
+    authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
+    registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
     gridsize: 0.05,
-    // SIGSERVER4: G-ZLD12V4W3V
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
-    // Models related
     modelsServerPath: backendUrl + 'media/models/',
     modelsProperties: {
       gadm0: {

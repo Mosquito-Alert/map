@@ -94,3 +94,11 @@ export const getGridSize = state => {
 export const getModelDefaults = state => {
   return state.DEFAULTS.model
 }
+
+export const getAuthenticateUrl = state => {
+  return state.authenticateUrl
+}
+
+export const getRegisteredWebUrl = state => {
+  return state.registeredWebUrl
+}
