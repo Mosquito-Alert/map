@@ -45,17 +45,11 @@
     <modal-help :open="helpModalVisible" buttons="close">
     </modal-help>
 
-    <modal-wait>
-    </modal-wait>
-
-    <modal-error>
-    </modal-error>
-
-    <modal-cookie-settings>
-    </modal-cookie-settings>
-
-    <modal-cookie-policy>
-    </modal-cookie-policy>
+    <modal-wait/>
+    <modal-error/>
+    <modal-cookie-settings/>
+    <modal-login/>
+    <modal-cookie-policy/>
 
     <site-footer/>
     <cookies-compliance/>
@@ -66,6 +60,7 @@
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
+import ModalLogin from 'src/components/ModalLogin.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
@@ -87,6 +82,7 @@ export default {
     ModalShare,
     ModalHelp,
     ModalError,
+    ModalLogin,
     ModalWait,
     SiteHeader,
     LeftDrawerModels,

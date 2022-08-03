@@ -7,7 +7,7 @@
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <slot></slot>
         <q-form
-         @submit="onSubmit">
+         @submit.prevent="onSubmit">
         <div class="column">
           <div class="row content-center">
             <h5 class="text-h5 text-orange q-my-md">Mosquito Alert</h5>
@@ -18,7 +18,7 @@
             v-model="username"
             label="Username *"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Please type something']"
+            :rules="[ val => val && val.length > 0 || _('Field required') ]"
           ></q-input>
 
           <q-input
@@ -28,7 +28,7 @@
             label="Password *"
             filled :type="isPwd ? 'password' : 'text'"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Please type something']"
+            :rules="[ val => val && val.length > 0 || _('Field required')]"
             >
             <template v-slot:append>
               <q-icon
@@ -38,9 +38,9 @@
               />
             </template>
           </q-input>
-          <div class="row">
-            <button class="ma-btn" @click="onSubmit">Login</button>
-            <button class="ma-btn" @click="close">{{ _('Close')}} </button>
+          <div class="login row">
+            <button class="q-mt-md" @click="onSubmit">{{ _('Log in') }}</button>
+            <button class="q-mt-xs" @click="close">{{ _('Close')}} </button>
           </div>
         </div>
         </q-form>
@@ -55,7 +55,8 @@ import { useStore } from 'vuex'
 
 export default {
   setup (props, context) {
-    const submitResult = ref([])
+    const username = ref('')
+    const password = ref('')
     const $store = useStore()
 
     const open = computed(() => {
@@ -75,23 +76,39 @@ export default {
     }
 
     const onSubmit = function (evt) {
-      const formData = new FormData(evt.target)
-      const data = []
+      if (username.value && password.value) {
+        const controller = new AbortController()
+        const { signal } = controller
+        // const bEnd = $store.getters['app/getBackend']
+        const url = '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/'
+        // const data = { username: username.value, password: password.value }
+        const formData = new FormData()
+        formData.append('username', username.value)
+        formData.append('password', password.value)
 
-      for (const [name, value] of formData.entries()) {
-        data.push({
-          name,
-          value
+        fetch(`${url}`, {
+          signal: signal,
+          method: 'POST', // or 'PUT'
+          body: formData
         })
+          .then(res => res.json())
+          .then(res => {
+            console.log(res)
+            if (res.success) {
+              const url = 'https://sigserver4.udg.edu/mosquito/'
+              document.location = url
+              // document.location.reload()
+            } else {
+              console.log('Not authenticated')
+            }
+          })
       }
-      console.log(data)
-      submitResult.value = data
     }
 
     return {
       onSubmit,
-      username: ref(''),
-      password: ref(''),
+      username,
+      password,
       isPwd: ref(true),
       mobile,
       open,
@@ -119,5 +136,15 @@ button.ma-btn:hover,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
   opacity:0.7;
+}
+
+.login button{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  color: white;
+  padding: 4px 0px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 </style>
