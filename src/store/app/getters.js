@@ -102,3 +102,7 @@ export const getAuthenticateUrl = state => {
 export const getRegisteredWebUrl = state => {
   return state.registeredWebUrl
 }
+
+export const getUncertaintyColor = state => {
+  return state.DEFAULTS.model.uncertaintyColor
+}

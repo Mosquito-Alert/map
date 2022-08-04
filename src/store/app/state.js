@@ -124,7 +124,10 @@ export default function () {
         est: true,
         se: true,
         estTransparency: 0,
-        seTransparency: 0
+        seTransparency: 0,
+        estimationColorFrom: 'rgb(227,240,223)',
+        estimationColorTo: 'rgb(21,138,15)',
+        uncertaintyColor: 'rgb(0,0,0)'
       }
     },
     BACKEND: backendUrl,

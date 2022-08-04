@@ -12,6 +12,8 @@
       @checkModelUncertainty="checkModelUncertainty"
       @estimationTransparency="estimationTransparency"
       @uncertaintyTransparency="uncertaintyTransparency"
+      @estimationColorsChanged="estimationColorsChanged"
+      @uncertaintyColorsChanged="uncertaintyColorsChanged"
     />
 
     <q-page
@@ -217,7 +219,17 @@ export default {
       TOC.value.loadSharedModel(payload)
     }
 
+    const estimationColorsChanged = function () {
+      map.value.estimationRefresh()
+    }
+
+    const uncertaintyColorsChanged = function () {
+      map.value.uncertaintyRefresh()
+    }
+
     return {
+      estimationColorsChanged,
+      uncertaintyColorsChanged,
       loadSharedModel,
       checkModelEstimation,
       checkModelUncertainty,

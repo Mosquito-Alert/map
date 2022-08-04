@@ -52,6 +52,15 @@ export const setModelSe = (state, payload) => {
   state.DEFAULTS.model.se = payload
 }
 
+export const setEstimationColors = (state, payload) => {
+  state.DEFAULTS.model.estimationColorFrom = payload.from
+  state.DEFAULTS.model.estimationColorTo = payload.to
+}
+
+export const setUncertaintyColor = (state, payload) => {
+  state.DEFAULTS.model.uncertaintyColor = payload
+}
+
 export const setEstTransparency = (state, payload) => {
   state.DEFAULTS.model.estTransparency = payload
 }

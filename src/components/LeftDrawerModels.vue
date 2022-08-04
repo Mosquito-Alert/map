@@ -80,9 +80,30 @@
         <div v-if="showLegend">
           <hr class="q-my-xl">
           <div class="flex spaceBetween">
-            <div class="uppercase text-bold">{{ _('Probability') }}</div>
+            <div class="uppercase text-bold">
+              {{ _('Probability') }}
+              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" />
+            </div>
             <div>
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
+            </div>
+          </div>
+          <div class="flex spaceBetween">
+            <div>
+                <q-popup-proxy ref="colorPickerEst">
+                      <q-color
+                        v-model="estimationColorTo"
+                        no-header
+                        no-footer
+                        default-view="palette"
+                        :palette="[
+                          '#d600d6', '#0000d6', '#00d6d6',
+                          '#00d600', '#d6d600', '#d60000','#191919'
+                        ]"
+                        class="my-picker q-ma-md"
+                        @change="setColorTo"
+                      />
+                </q-popup-proxy>
             </div>
           </div>
           <!-- ESTIMATION -->
@@ -111,10 +132,31 @@
               @update:model-value="setEstTransparency"/>
           </div>
           <!-- UNCERTAINTY -->
-          <div class="flex spaceBetween q-mt-xl">
-            <div class="uppercase text-bold">{{ _('Uncertainty') }}</div>
+          <div class="flex spaceBetween">
+            <div class="uppercase text-bold">
+              {{ _('Uncertainty') }}
+              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker2" />
+            </div>
             <div>
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
+            </div>
+          </div>
+          <div class="flex spaceBetween">
+            <div>
+                <q-popup-proxy ref="colorPickerSe">
+                  <q-color
+                    v-model="uncertaintyColor"
+                    no-header
+                    no-footer
+                    default-view="palette"
+                    :palette="[
+                      '#d600d6', '#0000d6', '#00d6d6',
+                      '#00d600', '#d6d600', '#d60000','#191919'
+                    ]"
+                    class="my-picker q-ma-md"
+                    @change="setUncertaintyColor"
+                  />
+                </q-popup-proxy>
             </div>
           </div>
           <!-- UNCERTAINTY LEGEND -->
@@ -126,16 +168,16 @@
           </div>
           <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered">
               <div class="col-3 text-center">
-                <div class="circle very-low"></div>
+                <div class="circle very-low" :style="{ background: seColor }">></div>
               </div>
               <div class="col-3 text-center">
-                <div class="circle low"></div>
+                <div class="circle low" :style="{ background: seColor }"></div>
               </div>
               <div class="col-3 text-center">
-                <div class="circle medium"></div>
+                <div class="circle medium" :style="{ background: seColor }"></div>
               </div>
               <div class="col-3 text-center">
-                <div class="circle high"></div>
+                <div class="circle high" :style="{ background: seColor }"></div>
               </div>
           </div>
           <!-- UNCERTAINTY TRANSPARENCY -->
@@ -168,10 +210,17 @@ export default {
     'checkModelEstimation',
     'checkModelUncertainty',
     'estimationTransparency',
-    'uncertaintyTransparency'
+    'uncertaintyTransparency',
+    'estimationColorsChanged',
+    'uncertaintyColorsChanged'
   ],
   setup (props, context) {
+    const uncertaintyColor = ref(null)
+    const colorPickerEst = ref(null)
+    const colorPickerSe = ref(null)
     const refInput = ref(null)
+    const estimationColorTo = ref('#d600d6')
+    const estimationColorFrom = ref()
     const inputDate = ref(null)
     const legendCanvas = ref(null)
     const modelDate = ref(null)
@@ -186,14 +235,23 @@ export default {
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
-    const gradientString = ref()
     const backendUrl = $store.getters['app/getBackend']
+    const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
 
     onMounted(function () {
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
-      const json = JSON.parse(JSON.stringify($store.getters['app/getModelsProperties']))
-      gradientString.value = `linear-gradient(90deg, ${json.gadm0.colorFrom}, ${json.gadm0.colorTo})`
+      estimationColorFrom.value = defaults.estimationColorFrom
+      estimationColorTo.value = defaults.estimationColorTo
+      uncertaintyColor.value = defaults.uncertaintyColor
+    })
+
+    const seColor = computed(() => {
+      return $store.getters['app/getUncertaintyColor']
+    })
+    const gradientString = computed(() => {
+      const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+      return `linear-gradient(90deg, ${defaults.estimationColorFrom}, ${defaults.estimationColorTo})`
     })
 
     const models = computed(() => {
@@ -266,15 +324,30 @@ export default {
           backendUrl + 'media/centroids/gadm1_centroid.json',
           backendUrl + 'media/centroids/gadm2_centroid.json'
         ]
-        console.log(estimation.value)
+        const payload = {
+          esp: selectedModel,
+          year: parts[1],
+          month: parts[0],
+          est: estimation.value,
+          se: uncertainty.value,
+          estTransparency: estimationTransparency.value,
+          seTransparency: uncertaintyTransparency.value,
+          estimationColorFrom: estimationColorFrom.value,
+          estimationColorTo: estimationColorTo.value,
+          uncertaintyColor: uncertaintyColor.value
+        }
+        $store.commit('app/setModelDefaults', payload)
         context.emit('loadModel', {
           esp: selectedModel,
           year: parts[1],
           month: parts[0],
           est: estimation.value,
+          se: uncertainty.value,
           estTransparency: estimationTransparency.value,
           seTransparency: uncertaintyTransparency.value,
-          se: uncertainty.value,
+          estimationColorFrom: estimationColorFrom.value,
+          estimationColorTo: estimationColorTo.value,
+          uncertaintyColor: uncertaintyColor.value,
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         })
@@ -302,6 +375,9 @@ export default {
       modelDate.value = inputDate.value
       estimation.value = payload.est
       uncertainty.value = payload.se
+      estimationColorFrom.value = payload.estimationColorFrom
+      estimationColorTo.value = payload.estimationColorTo
+      uncertaintyColor.value = payload.uncertaintyColor
       estimationTransparency.value = 100 * (1 - payload.estTransparency)
       uncertaintyTransparency.value = 100 * (1 - payload.seTransparency)
       applyfilter()
@@ -315,8 +391,65 @@ export default {
       context.emit('uncertaintyTransparency', { transparency: uncertaintyTransparency.value })
     }
 
+    function hexToRgb (hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      const c = result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null
+      return c ? `rgb(${c.r},${c.g},${c.b})` : null
+    }
+
+    const setColorTo = function (e) {
+      const colorsTo = [
+        hexToRgb('#d600d6'), hexToRgb('#0000d6'),
+        hexToRgb('#00d6d6'), hexToRgb('#00d600'),
+        hexToRgb('#d6d600'), hexToRgb('#d60000'),
+        hexToRgb('#191919')
+      ]
+      const colorsFrom = [
+        hexToRgb('#ffccff'), hexToRgb('#ccccff'),
+        hexToRgb('#ccffff'), hexToRgb('#ccffcc'),
+        hexToRgb('#ffffcc'), hexToRgb('#ffcccc'),
+        hexToRgb('#cdcdcd')]
+
+      const ind = colorsTo.indexOf(e)
+      $store.commit('app/setEstimationColors', {
+        from: colorsFrom[ind],
+        to: e
+      })
+      colorPickerEst.value.hide()
+      context.emit('estimationColorsChanged')
+    }
+
+    const showPicker = function () {
+      colorPickerEst.value.show()
+    }
+
+    const showPicker2 = function () {
+      colorPickerSe.value.show()
+    }
+
+    const setUncertaintyColor = function (e) {
+      colorPickerSe.value.hide()
+      uncertaintyColor.value = e
+      $store.commit('app/setUncertaintyColor', uncertaintyColor.value)
+      context.emit('uncertaintyColorsChanged')
+    }
+
     return {
       _,
+      seColor,
+      estimationColorFrom,
+      estimationColorTo,
+      uncertaintyColor,
+      setUncertaintyColor,
+      showPicker,
+      showPicker2,
+      colorPickerEst,
+      colorPickerSe,
+      setColorTo,
       setEstTransparency,
       setUncertaintyTransparency,
       estimationTransparency,
@@ -465,7 +598,6 @@ input:checked + .cookie-comply-slider{
 }
 
 .circle {
-  background: rgba(0,0,0,0.6);
   border-radius: 50%;
   margin: auto;
 }
@@ -496,5 +628,8 @@ input:checked + .cookie-comply-slider{
   .aside button {
     scale: 0.9;
   }
+}
+.my-picker.q-color-picker{
+  box-shadow: none;
 }
 </style>

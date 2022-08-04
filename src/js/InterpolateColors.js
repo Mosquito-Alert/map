@@ -22,7 +22,7 @@ function colorInterpolate (colorA, colorB, intval) {
     r: colorVal('r'),
     g: colorVal('g'),
     b: colorVal('b'),
-    a: rgbB.a
+    a: 1
   }
 }
 

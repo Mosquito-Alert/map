@@ -49,7 +49,7 @@ export default class GridModelLayer {
             const type = feature.type
             // Draw only polygons
             if (type === 1) {
-              _this.drawPoint(context, feature, extent, size)
+              _this.drawPoint(context, feature, extent, size, _this.options.color)
             } else if (type === 3) {
               const color = _this.getColor(feature.tags.v)
               context.fillStyle = color
@@ -82,7 +82,7 @@ export default class GridModelLayer {
     this.map.addLayer(this.layer)
   }
 
-  drawPoint (context, feature, extent, size) {
+  drawPoint (context, feature, extent, size, color) {
     let radius = 4
     const pad = 0
     const value = feature.tags.se
@@ -95,8 +95,8 @@ export default class GridModelLayer {
     } else {
       radius = radius * 4
     }
-    context.strokeStyle = 'rgba(0,0,0,1)'
-    context.fillStyle = 'rgba(0,0,0,0.6)'
+    context.strokeStyle = color
+    context.fillStyle = color
     context.lineWidth = 1
     const d = feature.geometry[0]
     context.beginPath()

@@ -97,6 +97,7 @@ export default defineComponent({
     let seModelLayer1
     let seModelLayer2
     let ol
+    let dataGridGeojson
 
     // Map general configuration
     const zoom = computed(() => {
@@ -150,6 +151,13 @@ export default defineComponent({
       }
     })
 
+    const colors = computed(() => {
+      return {
+        from: $store.getters['app/getModelDefaults'].estimationColorFrom,
+        to: $store.getters['app/getModelDefaults'].estimationColorTo
+      }
+    })
+
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -173,7 +181,10 @@ export default defineComponent({
           est: modelData.est,
           se: modelData.se,
           estTransparency: modelData.estTransparency,
-          seTransparency: modelData.seTransparency
+          seTransparency: modelData.seTransparency,
+          estimationColorFrom: modelData.estimationColorFrom,
+          estimationColorTo: modelData.estimationColorTo,
+          uncertaintyColor: modelData.uncertaintyColor
         },
         url: shareViewUrl,
         callback: handleShareView
@@ -201,7 +212,6 @@ export default defineComponent({
       const d = response.view[0].date
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
-
       $store.commit('map/setDefaults', {
         zoom: jsonView.zoom,
         center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
@@ -218,7 +228,10 @@ export default defineComponent({
         est: jsonView.filters.est,
         se: jsonView.filters.se,
         estTransparency: jsonView.filters.estTransparency,
-        seTransparency: jsonView.filters.seTransparency
+        seTransparency: jsonView.filters.seTransparency,
+        estimationColorFrom: jsonView.filters.estimationColorFrom,
+        estimationColorTo: jsonView.filters.estimationColorTo,
+        uncertaintyColor: jsonView.filters.uncertaintyColor
       })
     }
 
@@ -251,13 +264,13 @@ export default defineComponent({
 
     const doGRID = function (data) {
       const gridSize = $store.getters['app/getGridSize']
-      const dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
-      const colors = {
-        from: jsonProperties.grid.colorFrom,
-        to: jsonProperties.grid.colorTo
-      }
+      dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
+      // const colors = {
+      //   from: jsonDefaults.colorEstimationFrom,
+      //   to: jsonProperties.colorEstimationTo
+      // }
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors,
+        colors: colors.value,
         zIndex: 15,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
@@ -268,8 +281,10 @@ export default defineComponent({
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
       }
+      const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
       seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
         zIndex: 15,
+        color: seColor.value,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
       })
@@ -279,15 +294,6 @@ export default defineComponent({
     const loadModel = async function (data) {
       map.value.map.removeLayer(modelsLayer)
       spinner(true)
-      $store.commit('app/setModelDefaults', {
-        esp: data.esp,
-        year: data.year,
-        month: data.month,
-        est: data.est,
-        se: data.se,
-        estTransparency: data.estTransparency,
-        seTransparency: data.seTransparency
-      })
       CSVS = {}
       const urls = data.modelsCsv
       await Promise.all(urls.map(m =>
@@ -377,20 +383,24 @@ export default defineComponent({
         if (seModelLayer2) {
           map.value.map.removeLayer(seModelLayer2.layer)
         }
+        const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
         seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
           zIndex: 15,
+          color: seColor,
           minZoom: jsonProperties.gadm0.minZoom,
           maxZoom: jsonProperties.gadm0.maxZoom
         })
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
           zIndex: 15,
+          color: seColor,
           minZoom: jsonProperties.gadm1.minZoom,
           maxZoom: jsonProperties.gadm1.maxZoom
         })
 
         seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
           zIndex: 15,
+          color: seColor,
           minZoom: jsonProperties.gadm2.minZoom,
           maxZoom: jsonProperties.gadm2.maxZoom
         })
@@ -424,26 +434,26 @@ export default defineComponent({
 
     // const styles = {}
     const colorizeGadm0 = (feature, style) => {
-      const colors = {
-        from: jsonProperties.gadm0.colorFrom,
-        to: jsonProperties.gadm0.colorTo
-      }
-      return colorizeGadm(feature, style, CSVS['0'], colors)
+      // const colors = {
+      //   from: jsonDefaults.colorEstimationFrom,
+      //   to: jsonProperties.colorEstimationTo
+      // }
+      return colorizeGadm(feature, style, CSVS['0'], colors.value)
     }
 
     const colorizeGadm1 = (feature, style) => {
-      const colors = {
-        from: jsonProperties.gadm1.colorFrom,
-        to: jsonProperties.gadm1.colorTo
-      }
-      return colorizeGadm(feature, style, CSVS['1'], colors)
+      // const colors = {
+      //   from: jsonProperties.gadm1.colorFrom,
+      //   to: jsonProperties.gadm1.colorTo
+      // }
+      return colorizeGadm(feature, style, CSVS['1'], colors.value)
     }
     const colorizeGadm2 = (feature, style) => {
-      const colors = {
-        from: jsonProperties.gadm2.colorFrom,
-        to: jsonProperties.gadm2.colorTo
-      }
-      return colorizeGadm(feature, style, CSVS['2'], colors)
+      // const colors = {
+      //   from: jsonProperties.gadm2.colorFrom,
+      //   to: jsonProperties.gadm2.colorTo
+      // }
+      return colorizeGadm(feature, style, CSVS['2'], colors.value)
     }
 
     const colorizeGadm = (feature, style, CSV, colors) => {
@@ -459,7 +469,7 @@ export default defineComponent({
       return new Style({
         fill: style,
         stroke: new Stroke({
-          color: 'rgb(145,0,63,1)'
+          color: 'rgb(0,0,0)'
         })
       })
     }
@@ -554,8 +564,65 @@ export default defineComponent({
       }
     }
 
+    const estimationRefresh = function () {
+      gadm0.getSource().refresh()
+      gadm1.getSource().refresh()
+      gadm2.getSource().refresh()
+    }
+
+    const uncertaintyRefresh = function () {
+      const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
+      if (seModelLayer) {
+        map.value.map.removeLayer(seModelLayer.layer)
+      }
+      if (seModelLayer0) {
+        map.value.map.removeLayer(seModelLayer0.layer)
+      }
+      if (seModelLayer1) {
+        map.value.map.removeLayer(seModelLayer1.layer)
+      }
+      if (seModelLayer2) {
+        map.value.map.removeLayer(seModelLayer2.layer)
+      }
+
+      seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
+        zIndex: 15,
+        color: seColor.value,
+        minZoom: jsonProperties.grid.minZoom,
+        maxZoom: jsonProperties.grid.maxZoom
+      })
+
+      seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm0.minZoom,
+        maxZoom: jsonProperties.gadm0.maxZoom
+      })
+
+      seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm1.minZoom,
+        maxZoom: jsonProperties.gadm1.maxZoom
+      })
+
+      seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm2.minZoom,
+        maxZoom: jsonProperties.gadm2.maxZoom
+      })
+
+      seModelLayer.addLayer()
+      seModelLayer0.addLayer()
+      seModelLayer1.addLayer()
+      seModelLayer2.addLayer()
+    }
+
     return {
       _,
+      uncertaintyRefresh,
+      estimationRefresh,
       estimationVisibility,
       uncertaintyVisibility,
       estimationOpacity,
