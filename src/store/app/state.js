@@ -6,17 +6,20 @@ export default function () {
   let backendUrl = ''
   let frontendUrl = ''
   let analyticsCode
+  let urlModels
 
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
+    urlModels = backendUrl + 'media/models/'
     // backendUrl = 'http://192.168.1.47:8080/django/'
     // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
     analyticsCode = 'G-ZLD12V4W3V'
+    urlModels = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/'
   }
   console.log(analyticsCode)
   // first language is default
@@ -55,7 +58,7 @@ export default function () {
     gridsize: 0.05,
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
-    modelsServerPath: backendUrl + 'media/models/',
+    modelsServerPath: urlModels,
     modelsProperties: {
       gadm0: {
         minZoom: 0,

@@ -96,10 +96,7 @@
                         no-header
                         no-footer
                         default-view="palette"
-                        :palette="[
-                          '#d600d6', '#0000d6', '#00d6d6',
-                          '#00d600', '#d6d600', '#d60000','#191919'
-                        ]"
+                        :palette="colorsTo"
                         class="my-picker q-ma-md"
                         @change="setColorTo"
                       />
@@ -149,10 +146,7 @@
                     no-header
                     no-footer
                     default-view="palette"
-                    :palette="[
-                      '#d600d6', '#0000d6', '#00d6d6',
-                      '#00d600', '#d6d600', '#d60000','#191919'
-                    ]"
+                    :palette="colorsTo"
                     class="my-picker q-ma-md"
                     @change="setUncertaintyColor"
                   />
@@ -237,6 +231,29 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+    // QUASAR COLORS
+    // red, pink, purple, deep-purple, indigo,
+    // blue, light-blue, cyan, teal, green,
+    // light-green, lime, yellow, amber, orange,
+    // deep-orange, brown, grey, blue-grey
+    const colorsTo = [
+      hexToRgb('#f44336'), hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
+      hexToRgb('#673ab7'), hexToRgb('#3f51b5'), hexToRgb('#2196f3'),
+      hexToRgb('#03a9f4'), hexToRgb('#00bcd4'), hexToRgb('#009688'),
+      hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
+      hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
+      hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
+      hexToRgb('#607d8b')
+    ]
+    const colorsFrom = [
+      hexToRgb('#ffebee'), hexToRgb('#fce4ec'), hexToRgb('#f3e5f5'),
+      hexToRgb('#ede7f6'), hexToRgb('#e8eaf6'), hexToRgb('#e3f2fd'),
+      hexToRgb('#e1f5fe'), hexToRgb('#e0f7fa'), hexToRgb('#e0f2f1'),
+      hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
+      hexToRgb('#fffde7'), hexToRgb('#fff8e1'), hexToRgb('#fff3e0'),
+      hexToRgb('#fbe9e7'), hexToRgb('#efebe9'), hexToRgb('#fafafa'),
+      hexToRgb('#eceff1')
+    ]
 
     onMounted(function () {
       const d = new Date()
@@ -402,18 +419,6 @@ export default {
     }
 
     const setColorTo = function (e) {
-      const colorsTo = [
-        hexToRgb('#d600d6'), hexToRgb('#0000d6'),
-        hexToRgb('#00d6d6'), hexToRgb('#00d600'),
-        hexToRgb('#d6d600'), hexToRgb('#d60000'),
-        hexToRgb('#191919')
-      ]
-      const colorsFrom = [
-        hexToRgb('#ffccff'), hexToRgb('#ccccff'),
-        hexToRgb('#ccffff'), hexToRgb('#ccffcc'),
-        hexToRgb('#ffffcc'), hexToRgb('#ffcccc'),
-        hexToRgb('#cdcdcd')]
-
       const ind = colorsTo.indexOf(e)
       $store.commit('app/setEstimationColors', {
         from: colorsFrom[ind],
@@ -440,6 +445,7 @@ export default {
 
     return {
       _,
+      colorsTo,
       seColor,
       estimationColorFrom,
       estimationColorTo,
