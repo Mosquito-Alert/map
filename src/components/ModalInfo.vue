@@ -142,6 +142,17 @@
                           {{ _('La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.') }}
                         </div>
                     </div>
+                    <HR/>
+                    <div class="text-subtitle1 q-my-md">
+                      {{ _('MODELED DATA') }}
+                    </div>
+                    <p>{{ _('Model maps show the probability of encountering a specific mosquito species or of receiving a mosquito bite. Probabilities are based on data submitted by citizens to Mosquito Alert. The first estimates for a month are based on observations received for that month in previous years, estimates that are updated weekly with data for the current year to readjust the values in real time.') }}</p>
+                    <p>{{ _('Models show the probability of encountering each of the target species: the tiger mosquito, the yellow fever mosquito, the Asian bush mosquito, the Korean mosquito, and the common house mosquito. Another model shows the probability of receiving a mosquito bite, which does not correspond to any specific mosquito species, but to all the reports of bites received, reflecting the human-mosquito interaction in the area.') }}</p>
+                    <p>{{ _('Estimates are displayed at different world’s administrative areas or boundaries depending on the zoom and the map view. Administrative areas in the database are countries and lower lever subdivisions such as provinces. At high resolution, estimates are displayed in grids of approximately 2x2 kilometers (grid of 0.05 degrees latitude by 0.05 degrees longitude). In addition to the probability of encountering a mosquito or receiving a bite, each administrative area also shows its uncertainty value.') }}</p>
+                    <p>{{ _('This calculation considers the sampling effort, considering the number of participants with the active app in each grid or area in the defined time. The probability of mosquitoes or of receiving a mosquito bite is higher in a grid in which 10 observations have been received and there are 5 participants, than in another with 10 observations and 10 participants. Modeling observations and active participants determines the value of the probability shown on the map.') }}</p>
+                    <p>{{ _('This probability has been observed to correspond to the observations of the tiger mosquito obtained by traditional surveillance methods (ovitraps), thus demonstrating that it is a good way of estimating the presence and abundance of a species. ') }}</p>
+                    <p>{{ _('for more information.')}}</p>
+                    <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>
                 </div>
               </q-carousel-slide>
             </q-carousel>

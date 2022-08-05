@@ -82,9 +82,9 @@
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
               {{ _('Probability') }}
-              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" />
             </div>
             <div>
+              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" />
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
@@ -132,9 +132,9 @@
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
               {{ _('Uncertainty') }}
-              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker2" />
             </div>
             <div>
+              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker2" />
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
@@ -162,7 +162,7 @@
           </div>
           <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered">
               <div class="col-3 text-center">
-                <div class="circle very-low" :style="{ background: seColor }">></div>
+                <div class="circle very-low" :style="{ background: seColor }"></div>
               </div>
               <div class="col-3 text-center">
                 <div class="circle low" :style="{ background: seColor }"></div>

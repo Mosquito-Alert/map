@@ -21,7 +21,6 @@ export default function () {
     analyticsCode = 'G-ZLD12V4W3V'
     urlModels = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/'
   }
-  console.log(analyticsCode)
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)

@@ -565,6 +565,17 @@ export default defineComponent({
     }
 
     const estimationRefresh = function () {
+      if (estModelLayer) {
+        map.value.map.removeLayer(estModelLayer.layer)
+      }
+      estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
+        colors: colors.value,
+        zIndex: 15,
+        minZoom: jsonProperties.grid.minZoom,
+        maxZoom: jsonProperties.grid.maxZoom
+      })
+      estModelLayer.addLayer()
+
       gadm0.getSource().refresh()
       gadm1.getSource().refresh()
       gadm2.getSource().refresh()
@@ -587,7 +598,7 @@ export default defineComponent({
 
       seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
         zIndex: 15,
-        color: seColor.value,
+        color: seColor,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
       })
