@@ -470,7 +470,7 @@ export default defineComponent({
       return new Style({
         fill: style,
         stroke: new Stroke({
-          color: 'rgb(0,0,0)'
+          color: c
         })
       })
     }

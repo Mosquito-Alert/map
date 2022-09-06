@@ -107,7 +107,6 @@ export default {
 
     const setLanguage = (lang, object) => {
       $store.dispatch('app/setLanguage', lang)
-      console.log(lang)
       cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')

@@ -237,7 +237,9 @@ export default {
     // light-green, lime, yellow, amber, orange,
     // deep-orange, brown, grey, blue-grey
     const colorsTo = [
-      hexToRgb('#f44336'), hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
+      // hexToRgb('#f44336'),
+      hexToRgb('#fbe727'),
+      hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
       hexToRgb('#673ab7'), hexToRgb('#3f51b5'), hexToRgb('#2196f3'),
       hexToRgb('#03a9f4'), hexToRgb('#00bcd4'), hexToRgb('#009688'),
       hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
@@ -246,7 +248,9 @@ export default {
       hexToRgb('#607d8b')
     ]
     const colorsFrom = [
-      hexToRgb('#ffebee'), hexToRgb('#fce4ec'), hexToRgb('#f3e5f5'),
+      // hexToRgb('#ffebee'),
+      hexToRgb('#46337e'),
+      hexToRgb('#fce4ec'), hexToRgb('#f3e5f5'),
       hexToRgb('#ede7f6'), hexToRgb('#e8eaf6'), hexToRgb('#e3f2fd'),
       hexToRgb('#e1f5fe'), hexToRgb('#e0f7fa'), hexToRgb('#e0f2f1'),
       hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
@@ -303,6 +307,7 @@ export default {
     })
 
     const checkValue = function (val, reason, details) {
+      console.log(val)
       if (reason === 'month') {
         modelDate.value = val
         inputDate.value = val

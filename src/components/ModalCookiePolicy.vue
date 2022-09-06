@@ -76,15 +76,14 @@
               <td>_ga</td>
               <td>{{ _('terceros') }}</td>
               <td>{{ _('2 años') }}</td>
-              <td>{{ _('Registra una identificación única que se utiliza para generar datos estadísticos sobre cómo se utiliza el visitante el sitio web') }}</td>
+              <td rowspan="2">{{ _('Registra una identificación única que se utiliza para generar datos estadísticos sobre cómo se utiliza el visitante el sitio web') }}</td>
             </tr>
             <tr>
-              <td></td>
+              <td>{{ _('Analíticas') }}</td>
               <td>Google</td>
               <td>_ga_ZLD12V4W3V</td>
+              <td>{{ _('terceros') }}</td>
               <td>{{ _('1 año') }}</td>
-              <td>{{ _('Analíticas') }}</td>
-              <td></td>
             </tr>
           </table>
         </div>

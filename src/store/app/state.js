@@ -26,7 +26,7 @@ export default function () {
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
   let defaultLang
-  console.log(cookies.get('lang'))
+
   if (!cookies.get('lang')) {
     defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
   } else {
@@ -67,7 +67,7 @@ export default function () {
     modelsProperties: {
       gadm0: {
         minZoom: 0,
-        maxZoom: 4,
+        maxZoom: 0,
         id: 'ID_0',
         est: 'est',
         se: 'se',
@@ -76,8 +76,8 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       gadm1: {
-        minZoom: 4,
-        maxZoom: 6,
+        minZoom: 0,
+        maxZoom: 0,
         id: 'ID_1',
         est: 'est',
         se: 'se',
@@ -85,7 +85,7 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       gadm2: {
-        minZoom: 6,
+        minZoom: 0,
         maxZoom: 9,
         id: 'ID_2',
         est: 'est',
