@@ -19,6 +19,7 @@
         <ol-view ref='view'
             multiWorld="true"
             maxZoom="19"
+            maxResolution="78271.51696402048"
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -133,7 +134,7 @@ export default defineComponent({
 
     onMounted(function () {
       ol = map.value.map
-      // Setup field names from models
+      // view.constrainResolution(view.getMaxResolution(), 10)
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       map.value.map.on('pointermove', function (event) {
@@ -516,8 +517,8 @@ export default defineComponent({
     })
 
     function showZoom () {
-      const z = map.value.map.getView().getZoom()
-      console.log(z)
+      const view = map.value.map.getView()
+      console.log(view.getResolution())
     }
 
     const estimationVisibility = function (state) {

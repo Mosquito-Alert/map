@@ -30,6 +30,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
+            maxResolution="78271.51696402048"
             multiWorld="true"
             maxZoom="19"
             :center='center'

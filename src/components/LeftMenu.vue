@@ -61,6 +61,7 @@ import { useQuasar } from 'quasar'
 import { onMounted, ref, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
+import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonMenu },
@@ -76,7 +77,7 @@ export default {
     const es = ref(null)
     const en = ref(null)
     const $q = useQuasar()
-
+    const { cookies } = useCookies()
     const $store = useStore()
 
     const _ = function (text) {
@@ -106,6 +107,8 @@ export default {
 
     const setLanguage = (lang, object) => {
       $store.dispatch('app/setLanguage', lang)
+      console.log(lang)
+      cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')
       })

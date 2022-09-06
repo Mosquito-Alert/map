@@ -57,6 +57,14 @@
             <tr>
               <td>{{ _('Necesarias') }}</td>
               <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>lang</td>
+              <td>{{ _('Propia') }}</td>
+              <td>{{ _('Persistente') }}</td>
+              <td>{{ _('Permite recordar el idioma seleccionado con anterioridad') }}</td>
+            </tr>
+            <tr>
+              <td>{{ _('Necesarias') }}</td>
+              <td>{{ _('MOSQQUITO ALERT') }}</td>
               <td>cookie-comply</td>
               <td>{{ _('Propia') }}</td>
               <td>{{ _('Persistente') }}</td>
@@ -231,5 +239,9 @@ dialog.mobile button{
 table.cookies-list{
   border: 1px solid black;
   background:#ccc;
+}
+
+table.cookies-list td{
+  border-bottom: 1px solid black;
 }
 </style>

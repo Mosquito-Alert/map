@@ -53,7 +53,7 @@
                 <q-date
                   :title="_('Select model date')"
                   :subtitle="_('Click on year and month')"
-                  navigation-min-year-month='2015/01'
+                  navigation-min-year-month='2014/05'
                   :navigation-max-year-month="getCurrentDate"
                   mask="MM/YYYY"
                   years-in-month-view="true"

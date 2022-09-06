@@ -7,6 +7,7 @@ export default function () {
   let frontendUrl = ''
   let analyticsCode
   let urlModels
+  const { cookies } = useCookies()
 
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
@@ -24,10 +25,15 @@ export default function () {
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
-  const defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+  let defaultLang
+  console.log(cookies.get('lang'))
+  if (!cookies.get('lang')) {
+    defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+  } else {
+    defaultLang = cookies.get('lang')
+  }
   // FORCE SPANISH
   // const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
-  const { cookies } = useCookies()
 
   function getCurrentYearDates () {
     return {
