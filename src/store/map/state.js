@@ -1,7 +1,7 @@
 export default function () {
   return {
     DEFAULTS: {
-      ZOOM: 5,
+      ZOOM: 4,
       CENTER: [13.6889, 44.8409],
       MOBILEZOOM: 3,
       length: 4

@@ -110,11 +110,17 @@
             <div class="col-4 text-right">{{ _('High') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
-          <div v-if="estimation" class="row">
-              <div
+          <div v-if="estimation" class="row legend-row">
+              <!-- <div
                 class="gradient"
                 :style="{ backgroundImage: gradientString }">
-              </div>
+              </div> -->
+              <div class="col-2 legend-1"></div>
+              <div class="col-2 legend-2"></div>
+              <div class="col-2 legend-3"></div>
+              <div class="col-2 legend-4"></div>
+              <div class="col-2 legend-5"></div>
+              <div class="col-2 legend-6"></div>
           </div>
           <!-- ESTIMATION TRANSPARENCY -->
           <div class="row q-mt-lg">
@@ -637,6 +643,33 @@ input:checked + .cookie-comply-slider{
 .alignt-items-centered{
   align-items: center;
 }
+.legend-row{
+  height: 25px;
+}
+.legend-1{
+  background: #fde725;
+}
+
+.legend-2{
+  background: #4ac16d;
+}
+
+.legend-3{
+  background: #1fa187;
+}
+
+.legend-4{
+  background: #9fda3a;
+}
+
+.legend-5{
+  background: #277f8e;
+}
+
+.legend-6{
+  background: #365c8d;
+}
+
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;

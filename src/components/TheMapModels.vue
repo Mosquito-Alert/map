@@ -64,7 +64,7 @@ import { Style, Fill, Stroke } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
-import { getInterpolatedColor } from '../js/InterpolateColors.js'
+// import { getInterpolatedColor } from '../js/InterpolateColors.js'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 // import { Buffer } from 'buffer'
 import GridModelLayer from '../js/GridModelLayer'
@@ -489,14 +489,31 @@ export default defineComponent({
         return null
       }
       const value = CSV[id].prob
-      const c = getInterpolatedColor(colors.from, colors.to, value)
+      // const c = getInterpolatedColor(colors.from, colors.to, value)
+      const C = ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
+      const R = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
+      let c
+      if (value < R[0]) {
+        c = C[0]
+      } else if (value < R[1]) {
+        c = C[1]
+      } else if (value < R[2]) {
+        c = C[2]
+      } else if (value < R[3]) {
+        c = C[3]
+      } else if (value < R[4]) {
+        c = C[4]
+      } else {
+        c = C[5]
+      }
       style = new Fill({
         color: c
       })
       return new Style({
         fill: style,
         stroke: new Stroke({
-          color: c
+          // color: c
+          color: '#fff'
         })
       })
     }
