@@ -91,12 +91,14 @@ export default defineComponent({
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
+    const GADM4 = 'gadm4'
     const backendUrl = $store.getters['app/getBackend']
     let estModelLayer
     let seModelLayer = null
     let seModelLayer0
     let seModelLayer1
     let seModelLayer2
+    let seModelLayer4
     let ol
     let dataGridGeojson
 
@@ -327,6 +329,8 @@ export default defineComponent({
             CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
             CSVS['2'] = csvJSON(decoded, GADM2)
+          } else if (!('4' in CSVS)) {
+            CSVS['4'] = csvJSON(decoded, GADM4)
           } else if (!estModelLayer) {
             doGRID(decoded)
           }
@@ -336,6 +340,7 @@ export default defineComponent({
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
+        gadm4.getSource().refresh()
 
         map.value.map.addLayer(modelsLayer)
         gadm0.on('prerender', function () {
@@ -347,7 +352,9 @@ export default defineComponent({
         gadm2.on('prerender', function () {
           spinner(true)
         })
-
+        gadm4.on('prerender', function () {
+          spinner(true)
+        })
         map.value.map.on('rendercomplete', function () {
           spinner(false)
         })
@@ -373,6 +380,8 @@ export default defineComponent({
             CENTROIDS['1'] = putDataOnCentroids(json, CSVS['1'], 1)
           } else if (!('2' in CENTROIDS)) {
             CENTROIDS['2'] = putDataOnCentroids(json, CSVS['2'], 2)
+          } else if (!('4' in CENTROIDS)) {
+            CENTROIDS['4'] = putDataOnCentroids(json, CSVS['4'], 4)
           }
         })
         if (seModelLayer0) {
@@ -383,6 +392,9 @@ export default defineComponent({
         }
         if (seModelLayer2) {
           map.value.map.removeLayer(seModelLayer2.layer)
+        }
+        if (seModelLayer4) {
+          map.value.map.removeLayer(seModelLayer4.layer)
         }
         const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
         seModelLayer0 = new GridModelLayer(ol, CENTROIDS['0'], {
@@ -405,10 +417,16 @@ export default defineComponent({
           minZoom: jsonProperties.gadm2.minZoom,
           maxZoom: jsonProperties.gadm2.maxZoom
         })
-
+        seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
+          zIndex: 15,
+          color: seColor,
+          minZoom: jsonProperties.gadm4.minZoom,
+          maxZoom: jsonProperties.gadm4.maxZoom
+        })
         seModelLayer0.addLayer()
         seModelLayer1.addLayer()
         seModelLayer2.addLayer()
+        seModelLayer4.addLayer()
         uncertaintyVisibility(data.se)
         uncertaintyOpacity(1 - (data.seTransparency / 100))
       }).catch((error) => {
@@ -455,6 +473,14 @@ export default defineComponent({
       //   to: jsonProperties.gadm2.colorTo
       // }
       return colorizeGadm(feature, style, CSVS['2'], colors.value)
+    }
+
+    const colorizeGadm4 = (feature, style) => {
+      // const colors = {
+      //   from: jsonProperties.gadm2.colorFrom,
+      //   to: jsonProperties.gadm2.colorTo
+      // }
+      return colorizeGadm(feature, style, CSVS['4'], colors.value)
     }
 
     const colorizeGadm = (feature, style, CSV, colors) => {
@@ -512,12 +538,26 @@ export default defineComponent({
       style: colorizeGadm2
     })
 
+    const gadm4 = new VectorTileLayer({
+      minZoom: jsonProperties.gadm4.minZoom,
+      maxZoom: jsonProperties.gadm4.maxZoom,
+      declutter: true,
+      renderMode: 'hybrid',
+      source: new VectorTileSource({
+        maxZoom: 6,
+        format: new MVT(),
+        url: backendUrl + 'api/tiles/gadm4/{z}/{x}/{y}'
+      }),
+      style: colorizeGadm4
+    })
+
     const modelsLayer = new LayerGroup({
-      layers: [gadm0, gadm1, gadm2]
+      layers: [gadm0, gadm1, gadm2, gadm4]
     })
 
     function showZoom () {
       const view = map.value.map.getView()
+      console.log(map.value.map.getView().getZoom())
       console.log(view.getResolution())
     }
 
@@ -526,6 +566,7 @@ export default defineComponent({
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
+      gadm4.setVisible(state)
       if (estModelLayer) {
         estModelLayer.layer.setVisible(state)
       }
@@ -536,6 +577,7 @@ export default defineComponent({
       seModelLayer0.layer.setVisible(state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)
+      seModelLayer4.layer.setVisible(state)
       seModelLayer.layer.setVisible(state)
     }
 
@@ -544,6 +586,7 @@ export default defineComponent({
       gadm0.setOpacity(opacity)
       gadm1.setOpacity(opacity)
       gadm2.setOpacity(opacity)
+      gadm4.setOpacity(opacity)
       if (estModelLayer.layer) {
         estModelLayer.layer.setOpacity(opacity)
       }
@@ -559,6 +602,9 @@ export default defineComponent({
       }
       if (seModelLayer2) {
         seModelLayer2.layer.setOpacity(opacity)
+      }
+      if (seModelLayer4) {
+        seModelLayer4.layer.setOpacity(opacity)
       }
       if (seModelLayer.layer) {
         seModelLayer.layer.setOpacity(opacity)
@@ -580,6 +626,7 @@ export default defineComponent({
       gadm0.getSource().refresh()
       gadm1.getSource().refresh()
       gadm2.getSource().refresh()
+      gadm4.getSource().refresh()
     }
 
     const uncertaintyRefresh = function () {
@@ -625,10 +672,18 @@ export default defineComponent({
         maxZoom: jsonProperties.gadm2.maxZoom
       })
 
+      seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm4.minZoom,
+        maxZoom: jsonProperties.gadm4.maxZoom
+      })
+
       seModelLayer.addLayer()
       seModelLayer0.addLayer()
       seModelLayer1.addLayer()
       seModelLayer2.addLayer()
+      seModelLayer4.addLayer()
     }
 
     return {
