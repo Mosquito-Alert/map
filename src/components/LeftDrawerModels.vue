@@ -83,12 +83,12 @@
             <div class="uppercase text-bold">
               {{ _('Probability') }}
             </div>
-            <div>
+            <!-- <div>
               <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" />
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
-            </div>
+            </div> -->
           </div>
-          <div class="flex spaceBetween">
+          <!-- <div class="flex spaceBetween">
             <div>
                 <q-popup-proxy ref="colorPickerEst">
                       <q-color
@@ -102,7 +102,7 @@
                       />
                 </q-popup-proxy>
             </div>
-          </div>
+          </div> -->
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
             <div class="col-4 text-left">{{ _('Low') }}</div>
