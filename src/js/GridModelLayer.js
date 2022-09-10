@@ -1,4 +1,4 @@
-import { getInterpolatedColor } from '../js/InterpolateColors.js'
+// import { getInterpolatedColor } from '../js/InterpolateColors.js'
 import DataTile from 'ol/source/DataTile'
 import TileLayer from 'ol/layer/WebGLTile'
 import geojsonvt from 'geojson-vt'
@@ -18,7 +18,22 @@ export default class GridModelLayer {
   }
 
   getColor (value) {
-    return getInterpolatedColor(this.options.colors.from, this.options.colors.to, value)
+    // return getInterpolatedColor(this.options.colors.from, this.options.colors.to, value)
+    let c
+    if (value < this.options.rangs[0]) {
+      c = this.options.colors[0]
+    } else if (value < this.options.rangs[1]) {
+      c = this.options.colors[1]
+    } else if (value < this.options.rangs[2]) {
+      c = this.options.colors[2]
+    } else if (value < this.options.rangs[3]) {
+      c = this.options.colors[3]
+    } else if (value < this.options.rangs[4]) {
+      c = this.options.colors[4]
+    } else {
+      c = this.options.colors[5]
+    }
+    return c
   }
 
   addLayer () {

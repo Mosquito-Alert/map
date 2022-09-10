@@ -83,10 +83,10 @@
             <div class="uppercase text-bold">
               {{ _('Probability') }}
             </div>
-            <!-- <div>
-              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" />
+            <div>
+              <!-- <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" /> -->
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
-            </div> -->
+            </div>
           </div>
           <!-- <div class="flex spaceBetween">
             <div>
@@ -507,6 +507,7 @@ export default {
 .toc-models{
   padding: 20px;
   width: 100%;
+  overflow: auto;
 }
 
 .toc-models::-webkit-scrollbar {
@@ -553,11 +554,13 @@ export default {
     flex-direction: column;
   }
 }
+
 :deep(.q-drawer__content) {
   display: flex;
   flex-direction: row;
   box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
   width: $left-drawer-width;
+  overflow:hidden;
 }
 
 * {
@@ -646,20 +649,21 @@ input:checked + .cookie-comply-slider{
 .legend-row{
   height: 25px;
 }
+
 .legend-1{
   background: #fde725;
 }
 
 .legend-2{
-  background: #4ac16d;
+  background: #9fda3a;
 }
 
 .legend-3{
-  background: #1fa187;
+  background: #4ac16d;
 }
 
 .legend-4{
-  background: #9fda3a;
+  background: #1fa187;
 }
 
 .legend-5{

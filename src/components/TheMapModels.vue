@@ -94,13 +94,15 @@ export default defineComponent({
     const GADM4 = 'gadm4'
     const backendUrl = $store.getters['app/getBackend']
     let estModelLayer
-    let seModelLayer = null
+    let seModelLayer
     let seModelLayer0
     let seModelLayer1
     let seModelLayer2
     let seModelLayer4
     let ol
     let dataGridGeojson
+    const COLORS = ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
+    const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
 
     // Map general configuration
     const zoom = computed(() => {
@@ -139,13 +141,13 @@ export default defineComponent({
       // view.constrainResolution(view.getMaxResolution(), 10)
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      map.value.map.on('pointermove', function (event) {
-        const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-          return true
-        }, { hitTolerance: 10 })
-        if (hit) this.getTargetElement().style.cursor = 'pointer'
-        else this.getTargetElement().style.cursor = ''
-      })
+      // map.value.map.on('pointermove', function (event) {
+      //   const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+      //     return true
+      //   }, { hitTolerance: 10 })
+      //   if (hit) this.getTargetElement().style.cursor = 'pointer'
+      //   else this.getTargetElement().style.cursor = ''
+      // })
 
       const paramViewCode = (props.viewCode) ? props.viewCode : null
       if (paramViewCode) {
@@ -273,7 +275,8 @@ export default defineComponent({
       //   to: jsonProperties.colorEstimationTo
       // }
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors: colors.value,
+        colors: COLORS,
+        rangs: RANGS,
         zIndex: 15,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
@@ -295,6 +298,16 @@ export default defineComponent({
     }
 
     const loadModel = async function (data) {
+      if (estModelLayer) {
+        map.value.map.removeLayer(estModelLayer.layer)
+        estModelLayer = null
+        // estModelLayer.addLayer()
+      }
+      if (seModelLayer) {
+        map.value.map.removeLayer(seModelLayer.layer)
+        seModelLayer = null
+        // seModelLayer.addLayer()
+      }
       map.value.map.removeLayer(modelsLayer)
       spinner(true)
       CSVS = {}
@@ -353,6 +366,9 @@ export default defineComponent({
           spinner(true)
         })
         gadm4.on('prerender', function () {
+          spinner(true)
+        })
+        estModelLayer.layer.on('prerender', function () {
           spinner(true)
         })
         map.value.map.on('rendercomplete', function () {
@@ -490,21 +506,19 @@ export default defineComponent({
       }
       const value = CSV[id].prob
       // const c = getInterpolatedColor(colors.from, colors.to, value)
-      const C = ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
-      const R = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
       let c
-      if (value < R[0]) {
-        c = C[0]
-      } else if (value < R[1]) {
-        c = C[1]
-      } else if (value < R[2]) {
-        c = C[2]
-      } else if (value < R[3]) {
-        c = C[3]
-      } else if (value < R[4]) {
-        c = C[4]
+      if (value < RANGS[0]) {
+        c = COLORS[0]
+      } else if (value < RANGS[1]) {
+        c = COLORS[1]
+      } else if (value < RANGS[2]) {
+        c = COLORS[2]
+      } else if (value < RANGS[3]) {
+        c = COLORS[3]
+      } else if (value < RANGS[4]) {
+        c = COLORS[4]
       } else {
-        c = C[5]
+        c = COLORS[5]
       }
       style = new Fill({
         color: c

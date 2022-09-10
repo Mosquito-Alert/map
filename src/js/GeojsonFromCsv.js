@@ -68,7 +68,7 @@ function GeojsonFromCsv (data, fields, gridSize) {
       properties: {
         // v: sdValue,
         // color: sdColor,
-        sd: parseFloat(raw[sePos])
+        se: parseFloat(raw[sePos])
       }
     }
     polygonGeojson.features.push(polygon)
