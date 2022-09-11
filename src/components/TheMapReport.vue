@@ -15,6 +15,7 @@
 
                 <ol-view ref='view'
                     maxZoom="19"
+                    maxResolution="39135.75848201024"
                     constrainResolution='true' />
 
                 <div class="ol-attribution">

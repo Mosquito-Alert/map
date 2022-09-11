@@ -19,7 +19,7 @@
         <ol-view ref='view'
             multiWorld="true"
             maxZoom="19"
-            maxResolution="78271.51696402048"
+            maxResolution="39135.75848201024"
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -545,7 +545,7 @@ export default defineComponent({
     })
 
     const gadm1 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm1.minZoom,
+      // minZoom: jsonProperties.gadm1.minZoom,
       maxZoom: jsonProperties.gadm1.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
@@ -562,7 +562,7 @@ export default defineComponent({
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
-        maxZoom: 7,
+        maxZoom: 6,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
       }),
