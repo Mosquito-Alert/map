@@ -86,7 +86,7 @@ export default function () {
       },
       gadm2: {
         minZoom: 2,
-        maxZoom: 6,
+        maxZoom: 5,
         id: 'ID_2',
         est: 'est',
         se: 'se',
@@ -94,8 +94,8 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       gadm4: {
-        minZoom: 6,
-        maxZoom: 8,
+        minZoom: 5,
+        maxZoom: 7,
         id: 'ID_4',
         est: 'est',
         se: 'se',
@@ -103,7 +103,7 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       grid: {
-        minZoom: 8,
+        minZoom: 7,
         maxZoom: 19,
         lon: 'masked_lon',
         lat: 'masked_lat',
@@ -153,7 +153,7 @@ export default function () {
     modals: {
       cookieSettings: { visibility: false },
       cookiePolicy: { visibility: false },
-      first: { visibility: !cookies.get('maCookie') },
+      first: { visibility: !cookies.get('ma-visited') },
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },

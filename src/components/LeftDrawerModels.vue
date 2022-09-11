@@ -251,7 +251,7 @@ export default {
       hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
       hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
       hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
-      hexToRgb('#607d8b')
+      hexToRgb('#607d8b'), hexToRgb('#000000')
     ]
     const colorsFrom = [
       // hexToRgb('#ffebee'),
@@ -262,7 +262,7 @@ export default {
       hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
       hexToRgb('#fffde7'), hexToRgb('#fff8e1'), hexToRgb('#fff3e0'),
       hexToRgb('#fbe9e7'), hexToRgb('#efebe9'), hexToRgb('#fafafa'),
-      hexToRgb('#eceff1')
+      hexToRgb('#eceff1'), hexToRgb('#000000')
     ]
 
     onMounted(function () {

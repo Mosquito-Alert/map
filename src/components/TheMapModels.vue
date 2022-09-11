@@ -19,7 +19,7 @@
         <ol-view ref='view'
             multiWorld="true"
             maxZoom="19"
-            maxResolution="78271.51696402048"
+            maxResolution="39135.75848201024"
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -172,7 +172,6 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      console.log(modelData)
       if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
@@ -423,7 +422,7 @@ export default defineComponent({
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
           zIndex: 15,
           color: seColor,
-          minZoom: jsonProperties.gadm1.minZoom,
+          minZoom: jsonProperties.gadm1.minZoom - 1,
           maxZoom: jsonProperties.gadm1.maxZoom
         })
 
@@ -545,11 +544,12 @@ export default defineComponent({
     })
 
     const gadm1 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm1.minZoom,
+      // minZoom: jsonProperties.gadm1.minZoom,
       maxZoom: jsonProperties.gadm1.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
+        maxZoom: jsonProperties.gadm1.maxZoom + 1,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}'
       }),
@@ -562,7 +562,7 @@ export default defineComponent({
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
-        maxZoom: 7,
+        maxZoom: jsonProperties.gadm2.maxZoom,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
       }),
@@ -575,7 +575,7 @@ export default defineComponent({
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
-        maxZoom: 6,
+        maxZoom: jsonProperties.gadm4.maxZoom - 1,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm4/{z}/{x}/{y}'
       }),

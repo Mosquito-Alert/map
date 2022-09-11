@@ -110,7 +110,7 @@ export default class GridModelLayer {
     } else {
       radius = radius * 4
     }
-    context.strokeStyle = color
+    // context.strokeStyle = color
     context.fillStyle = color
     context.lineWidth = 1
     const d = feature.geometry[0]
