@@ -3,7 +3,7 @@ export default function () {
     DEFAULTS: {
       ZOOM: 3,
       CENTER: [13.6889, 44.8409],
-      MOBILEZOOM: 3,
+      MOBILEZOOM: 1,
       length: 4
       // ZOOM: 17,
       // CENTER: [2.813930487775805, 41.97837835421166]

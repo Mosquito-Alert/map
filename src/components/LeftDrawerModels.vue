@@ -381,7 +381,9 @@ export default {
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         })
-
+        if (mobile.value) {
+          toggleLeftDrawer()
+        }
         disabled.value = true
         showLegend.value = true
       }
