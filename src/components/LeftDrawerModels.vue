@@ -345,6 +345,7 @@ export default {
           serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
           serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
+          serverModels + `gadm3/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm3_monthly.csv',
           serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv',
           serverModels + `sampling_cells_05/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_05_monthly.csv'
         ]
@@ -352,6 +353,7 @@ export default {
           backendUrl + 'media/centroids/gadm0_centroid.json',
           backendUrl + 'media/centroids/gadm1_centroid.json',
           backendUrl + 'media/centroids/gadm2_centroid.json',
+          backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
         const payload = {

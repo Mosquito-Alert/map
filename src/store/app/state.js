@@ -60,7 +60,7 @@ export default function () {
   return {
     authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
     registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
-    gridsize: 0.05,
+    gridsize: 0.025,
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
     modelsServerPath: urlModels,
@@ -86,16 +86,25 @@ export default function () {
       },
       gadm2: {
         minZoom: 2,
-        maxZoom: 5,
+        maxZoom: 4,
         id: 'ID_2',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',
         colorTo: 'rgb(145,0,63,1)'
       },
+      gadm3: {
+        minZoom: 4,
+        maxZoom: 6,
+        id: 'ID_3',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
       gadm4: {
-        minZoom: 5,
-        maxZoom: 7,
+        minZoom: 6,
+        maxZoom: 9,
         id: 'ID_4',
         est: 'est',
         se: 'se',
@@ -103,7 +112,7 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       grid: {
-        minZoom: 7,
+        minZoom: 9,
         maxZoom: 19,
         lon: 'masked_lon',
         lat: 'masked_lat',
