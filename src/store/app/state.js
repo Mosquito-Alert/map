@@ -93,9 +93,18 @@ export default function () {
         colorFrom: 'rgb(231,225,239,1)',
         colorTo: 'rgb(145,0,63,1)'
       },
-      gadm4: {
+      gadm3: {
         minZoom: 5,
-        maxZoom: 7,
+        maxZoom: 6,
+        id: 'ID_3',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
+      gadm4: {
+        minZoom: 6,
+        maxZoom: 8,
         id: 'ID_4',
         est: 'est',
         se: 'se',
@@ -103,7 +112,7 @@ export default function () {
         colorTo: 'rgb(145,0,63,1)'
       },
       grid: {
-        minZoom: 7,
+        minZoom: 8,
         maxZoom: 19,
         lon: 'masked_lon',
         lat: 'masked_lat',

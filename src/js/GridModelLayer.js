@@ -101,6 +101,10 @@ export default class GridModelLayer {
     let radius = 4
     const pad = 0
     const value = feature.tags.se
+    // Draw only uncertainty with data
+    if (!value) {
+      return true
+    }
     if (value < 0.25) {
       radius = radius * 1
     } else if (value < 0.5) {
