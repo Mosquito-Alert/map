@@ -106,7 +106,7 @@ self.onmessage = async function (e) {
             // Get last feature date
             if (j.features[j.features.length - 1].properties.d > lastDate) {
               lastDate = j.features[j.features.length - 1].properties.d
-            }            
+            }
             YEARS[index].data = JSON.parse(JSON.stringify(j.features))
             dataset = dataset.concat(j.features)
           }
@@ -264,10 +264,10 @@ self.onmessage = async function (e) {
 function loadMapData (data, fitFeatures) {
   index = new Supercluster({
     log: DEBUG,
-    radius: 45,
+    radius: 10,
     extent: 256,
-    maxZoom: 19,
-    minPoints: 5
+    maxZoom: 19
+    // ,minPoints: 5
   }).load(data)
 
   unclustered = new Supercluster({
