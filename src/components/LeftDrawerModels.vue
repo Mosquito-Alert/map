@@ -251,7 +251,7 @@ export default {
       hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
       hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
       hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
-      hexToRgb('#607d8b')
+      hexToRgb('#607d8b'), hexToRgb('#000000')
     ]
     const colorsFrom = [
       // hexToRgb('#ffebee'),
@@ -262,7 +262,7 @@ export default {
       hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
       hexToRgb('#fffde7'), hexToRgb('#fff8e1'), hexToRgb('#fff3e0'),
       hexToRgb('#fbe9e7'), hexToRgb('#efebe9'), hexToRgb('#fafafa'),
-      hexToRgb('#eceff1')
+      hexToRgb('#eceff1'), hexToRgb('#000000')
     ]
 
     onMounted(function () {
@@ -345,6 +345,7 @@ export default {
           serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
           serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
+          serverModels + `gadm3/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm3_monthly.csv',
           serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv',
           serverModels + `sampling_cells_05/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_05_monthly.csv'
         ]
@@ -352,6 +353,7 @@ export default {
           backendUrl + 'media/centroids/gadm0_centroid.json',
           backendUrl + 'media/centroids/gadm1_centroid.json',
           backendUrl + 'media/centroids/gadm2_centroid.json',
+          backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
         const payload = {
@@ -381,7 +383,9 @@ export default {
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         })
-
+        if (mobile.value) {
+          toggleLeftDrawer()
+        }
         disabled.value = true
         showLegend.value = true
       }

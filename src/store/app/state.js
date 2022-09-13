@@ -93,6 +93,15 @@ export default function () {
         colorFrom: 'rgb(231,225,239,1)',
         colorTo: 'rgb(145,0,63,1)'
       },
+      gadm3: {
+        minZoom: 5,
+        maxZoom: 6,
+        id: 'ID_3',
+        est: 'est',
+        se: 'se',
+        colorFrom: 'rgb(231,225,239,1)',
+        colorTo: 'rgb(145,0,63,1)'
+      },
       gadm4: {
         minZoom: 5,
         maxZoom: 7,
@@ -153,7 +162,7 @@ export default function () {
     modals: {
       cookieSettings: { visibility: false },
       cookiePolicy: { visibility: false },
-      first: { visibility: !cookies.get('maCookie') },
+      first: { visibility: !cookies.get('ma-visited') },
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },
