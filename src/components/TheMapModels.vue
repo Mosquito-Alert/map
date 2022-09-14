@@ -91,7 +91,7 @@ export default defineComponent({
     const GADM0 = 'gadm0'
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
-    const GADM3 = 'gadm3'
+    // const GADM3 = 'gadm3'
     const GADM4 = 'gadm4'
     const backendUrl = $store.getters['app/getBackend']
     let estModelLayer
@@ -99,7 +99,7 @@ export default defineComponent({
     let seModelLayer0
     let seModelLayer1
     let seModelLayer2
-    let seModelLayer3
+    // let seModelLayer3
     let seModelLayer4
     let ol
     let dataGridGeojson
@@ -356,7 +356,7 @@ export default defineComponent({
         gadm0.getSource().refresh()
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
-        gadm3.getSource().refresh()
+        // gadm3.getSource().refresh()
         gadm4.getSource().refresh()
 
         map.value.map.addLayer(modelsLayer)
@@ -369,9 +369,9 @@ export default defineComponent({
         gadm2.on('prerender', function () {
           spinner(true)
         })
-        gadm3.on('prerender', function () {
-          spinner(true)
-        })
+        // gadm3.on('prerender', function () {
+        //   spinner(true)
+        // })
         gadm4.on('prerender', function () {
           spinner(true)
         })
@@ -416,9 +416,9 @@ export default defineComponent({
         if (seModelLayer2) {
           map.value.map.removeLayer(seModelLayer2.layer)
         }
-        if (seModelLayer3) {
-          map.value.map.removeLayer(seModelLayer3.layer)
-        }
+        // if (seModelLayer3) {
+        //   map.value.map.removeLayer(seModelLayer3.layer)
+        // }
         if (seModelLayer4) {
           map.value.map.removeLayer(seModelLayer4.layer)
         }
@@ -443,6 +443,14 @@ export default defineComponent({
           minZoom: jsonProperties.gadm2.minZoom,
           maxZoom: jsonProperties.gadm2.maxZoom
         })
+
+        // seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
+        //   zIndex: 15,
+        //   color: seColor,
+        //   minZoom: jsonProperties.gadm3.minZoom,
+        //   maxZoom: jsonProperties.gadm3.maxZoom
+        // })
+
         seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
           zIndex: 15,
           color: seColor,
@@ -452,7 +460,7 @@ export default defineComponent({
         seModelLayer0.addLayer()
         seModelLayer1.addLayer()
         seModelLayer2.addLayer()
-        seModelLayer3.addLayer()
+        // seModelLayer3.addLayer()
         seModelLayer4.addLayer()
         uncertaintyVisibility(data.se)
         uncertaintyOpacity(1 - (data.seTransparency / 100))
@@ -498,9 +506,9 @@ export default defineComponent({
       return colorizeGadm(feature, style, CSVS['2'], colors.value)
     }
 
-    const colorizeGadm3 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['3'], colors.value)
-    }
+    // const colorizeGadm3 = (feature, style) => {
+    //   return colorizeGadm(feature, style, CSVS['3'], colors.value)
+    // }
 
     const colorizeGadm4 = (feature, style) => {
       // const colors = {
@@ -581,18 +589,18 @@ export default defineComponent({
       style: colorizeGadm2
     })
 
-    const gadm3 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm3.minZoom,
-      maxZoom: jsonProperties.gadm3.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm3.maxZoom - 1,
-        format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm3/{z}/{x}/{y}'
-      }),
-      style: colorizeGadm3
-    })
+    // const gadm3 = new VectorTileLayer({
+    //   minZoom: jsonProperties.gadm3.minZoom,
+    //   maxZoom: jsonProperties.gadm3.maxZoom,
+    //   declutter: true,
+    //   renderMode: 'hybrid',
+    //   source: new VectorTileSource({
+    //     maxZoom: jsonProperties.gadm3.maxZoom - 1,
+    //     format: new MVT(),
+    //     url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
+    //   }),
+    //   style: colorizeGadm3
+    // })
 
     const gadm4 = new VectorTileLayer({
       minZoom: jsonProperties.gadm4.minZoom,
@@ -600,7 +608,7 @@ export default defineComponent({
       declutter: true,
       renderMode: 'hybrid',
       source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm4.maxZoom - 1,
+        maxZoom: jsonProperties.gadm4.maxZoom - 2,
         format: new MVT(),
         url: backendUrl + 'api/tiles/gadm4/{z}/{x}/{y}'
       }),
@@ -621,7 +629,7 @@ export default defineComponent({
       gadm0.setVisible(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
-      gadm3.setVisible(state)
+      // gadm3.setVisible(state)
       gadm4.setVisible(state)
       if (estModelLayer) {
         estModelLayer.layer.setVisible(state)
@@ -633,7 +641,7 @@ export default defineComponent({
       seModelLayer0.layer.setVisible(state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)
-      seModelLayer3.layer.setVisible(state)
+      // seModelLayer3.layer.setVisible(state)
       seModelLayer4.layer.setVisible(state)
       seModelLayer.layer.setVisible(state)
     }
@@ -643,7 +651,7 @@ export default defineComponent({
       gadm0.setOpacity(opacity)
       gadm1.setOpacity(opacity)
       gadm2.setOpacity(opacity)
-      gadm3.setOpacity(opacity)
+      // gadm3.setOpacity(opacity)
       gadm4.setOpacity(opacity)
       if (estModelLayer.layer) {
         estModelLayer.layer.setOpacity(opacity)
@@ -661,9 +669,9 @@ export default defineComponent({
       if (seModelLayer2) {
         seModelLayer2.layer.setOpacity(opacity)
       }
-      if (seModelLayer3) {
-        seModelLayer3.layer.setOpacity(opacity)
-      }
+      // if (seModelLayer3) {
+      //   seModelLayer3.layer.setOpacity(opacity)
+      // }
       if (seModelLayer4) {
         seModelLayer4.layer.setOpacity(opacity)
       }
@@ -687,7 +695,7 @@ export default defineComponent({
       gadm0.getSource().refresh()
       gadm1.getSource().refresh()
       gadm2.getSource().refresh()
-      gadm3.getSource().refresh()
+      // gadm3.getSource().refresh()
       gadm4.getSource().refresh()
     }
 
@@ -705,9 +713,9 @@ export default defineComponent({
       if (seModelLayer2) {
         map.value.map.removeLayer(seModelLayer2.layer)
       }
-      if (seModelLayer3) {
-        map.value.map.removeLayer(seModelLayer3.layer)
-      }
+      // if (seModelLayer3) {
+      //   map.value.map.removeLayer(seModelLayer3.layer)
+      // }
 
       seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
         zIndex: 15,
@@ -737,12 +745,12 @@ export default defineComponent({
         maxZoom: jsonProperties.gadm2.maxZoom
       })
 
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm3.minZoom,
-        maxZoom: jsonProperties.gadm3.maxZoom
-      })
+      // seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
+      //   zIndex: 15,
+      //   color: seColor,
+      //   minZoom: jsonProperties.gadm3.minZoom,
+      //   maxZoom: jsonProperties.gadm3.maxZoom
+      // })
 
       seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
         zIndex: 15,

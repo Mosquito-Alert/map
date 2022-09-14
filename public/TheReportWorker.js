@@ -19,7 +19,7 @@ self.onmessage = function (e) {
     })
 
     index = new Supercluster({
-      radius: 45,
+      radius: 10,
       extent: 256,
       maxZoom: 19
     }).load(geojsonFeatures)
