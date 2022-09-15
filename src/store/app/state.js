@@ -78,7 +78,7 @@ export default function () {
       gadm1: {
         minZoom: 0,
         maxZoom: 2,
-        id: 'ID_1',
+        id: 'gid_1',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',
@@ -87,20 +87,16 @@ export default function () {
       gadm2: {
         minZoom: 2,
         maxZoom: 4,
-        id: 'ID_2',
+        id: 'gid_2',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',
         colorTo: 'rgb(145,0,63,1)'
       },
       gadm3: {
-<<<<<<< HEAD
-        minZoom: 5,
-=======
         minZoom: 4,
->>>>>>> 044479843d32b6b0421ee449fa1dd1df212618e2
         maxZoom: 6,
-        id: 'ID_3',
+        id: 'gid_3',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',
@@ -109,7 +105,7 @@ export default function () {
       gadm4: {
         minZoom: 6,
         maxZoom: 9,
-        id: 'ID_4',
+        id: 'gid_4',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',
@@ -118,8 +114,8 @@ export default function () {
       grid: {
         minZoom: 9,
         maxZoom: 19,
-        lon: 'masked_lon',
-        lat: 'masked_lat',
+        lon: 'lon',
+        lat: 'lat',
         est: 'est',
         se: 'se',
         colorFrom: 'rgb(231,225,239,1)',

@@ -60,7 +60,11 @@ export default class GridModelLayer {
           context.clearRect(0, 0, size, size)
           const features = tileContent.features
           for (let i = 0; i < features.length; i++) {
+            // Just draw cell with value
             const feature = features[i]
+            if (feature.tags.v === '') {
+              return true
+            }
             const type = feature.type
             // Draw only polygons
             if (type === 1) {
@@ -102,7 +106,7 @@ export default class GridModelLayer {
     const pad = 0
     const value = feature.tags.se
     // Draw only uncertainty with data
-    if (!value) {
+    if (value === '') {
       return true
     }
     if (value < 0.25) {
