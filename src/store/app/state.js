@@ -64,6 +64,9 @@ export default function () {
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
     modelsServerPath: urlModels,
+    // Manifest file is a csv with column target (albopictus, culex...),
+    // year(2014, ...), display (TRUE, FALSE)
+    modelsManifest: 'media/model_manifest.csv',
     modelsProperties: {
       gadm0: {
         minZoom: 0,

@@ -100,6 +100,7 @@ export default defineComponent({
     let seModelLayer3
     let seModelLayer4
     let ol
+    let gadm4MaxZoom
     let dataGridGeojson
     const COLORS = ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
     const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
@@ -138,16 +139,7 @@ export default defineComponent({
 
     onMounted(function () {
       ol = map.value.map
-      // view.constrainResolution(view.getMaxResolution(), 10)
-
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      // map.value.map.on('pointermove', function (event) {
-      //   const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-      //     return true
-      //   }, { hitTolerance: 10 })
-      //   if (hit) this.getTargetElement().style.cursor = 'pointer'
-      //   else this.getTargetElement().style.cursor = ''
-      // })
 
       const paramViewCode = (props.viewCode) ? props.viewCode : null
       if (paramViewCode) {
@@ -313,6 +305,7 @@ export default defineComponent({
       spinner(true)
       CSVS = {}
       const urls = data.modelsCsv
+      //
       await Promise.all(urls.map(m =>
         // fetch(m).then(resp => resp.json())
         fetch(m).then(resp => resp.text())
@@ -349,8 +342,6 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
-        estimationVisibility(data.est)
-        estimationOpacity(1 - (data.estTransparency / 100))
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
         gadm3.getSource().refresh()
@@ -369,9 +360,20 @@ export default defineComponent({
         gadm4.on('prerender', function () {
           spinner(true)
         })
-        estModelLayer.layer.on('prerender', function () {
-          spinner(true)
-        })
+        // If cell layer is on
+        if (urls.length > 4) {
+          gadm4MaxZoom = jsonProperties.gadm4.maxZoom
+          estimationVisibility(data.est)
+          estimationOpacity(1 - (data.estTransparency / 100))
+          gadm4.setMaxZoom(gadm4MaxZoom)
+          estModelLayer.layer.on('prerender', function () {
+            spinner(true)
+          })
+        } else {
+          // if it is not
+          gadm4MaxZoom = 19
+          gadm4.setMaxZoom(gadm4MaxZoom)
+        }
         map.value.map.on('rendercomplete', function () {
           spinner(false)
         })
@@ -413,7 +415,7 @@ export default defineComponent({
         if (seModelLayer4) {
           map.value.map.removeLayer(seModelLayer4.layer)
         }
-        const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
+        const seColor = $store.getters['app/getUncertaintyColor']
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
           zIndex: 15,
@@ -440,8 +442,9 @@ export default defineComponent({
           zIndex: 15,
           color: seColor,
           minZoom: jsonProperties.gadm4.minZoom,
-          maxZoom: jsonProperties.gadm4.maxZoom
+          maxZoom: gadm4MaxZoom
         })
+
         seModelLayer1.addLayer()
         seModelLayer2.addLayer()
         seModelLayer3.addLayer()
@@ -496,7 +499,7 @@ export default defineComponent({
 
     const colorizeGadm = (feature, style, CSV) => {
       const id = feature.properties_.id
-       if (CSV[id] === undefined) {
+      if (CSV[id] === undefined) {
         return null
       }
       const value = CSV[id].prob
@@ -605,7 +608,9 @@ export default defineComponent({
       seModelLayer2.layer.setVisible(state)
       seModelLayer3.layer.setVisible(state)
       seModelLayer4.layer.setVisible(state)
-      seModelLayer.layer.setVisible(state)
+      if (seModelLayer) {
+        seModelLayer.layer.setVisible(state)
+      }
     }
 
     const estimationOpacity = function (opacity) {
@@ -633,7 +638,7 @@ export default defineComponent({
       if (seModelLayer4) {
         seModelLayer4.layer.setOpacity(opacity)
       }
-      if (seModelLayer.layer) {
+      if (seModelLayer) {
         seModelLayer.layer.setOpacity(opacity)
       }
     }
@@ -670,13 +675,9 @@ export default defineComponent({
       if (seModelLayer3) {
         map.value.map.removeLayer(seModelLayer3.layer)
       }
-
-      seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.grid.minZoom,
-        maxZoom: jsonProperties.grid.maxZoom
-      })
+      if (seModelLayer4) {
+        map.value.map.removeLayer(seModelLayer4.layer)
+      }
 
       seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
         zIndex: 15,
@@ -703,12 +704,21 @@ export default defineComponent({
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm4.minZoom,
-        maxZoom: jsonProperties.gadm4.maxZoom
+        maxZoom: gadm4MaxZoom
       })
 
-      seModelLayer.addLayer()
+      if (gadm4MaxZoom === jsonProperties.gadm4.maxZoom) {
+        seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
+          zIndex: 15,
+          color: seColor,
+          minZoom: jsonProperties.grid.minZoom,
+          maxZoom: jsonProperties.grid.maxZoom
+        })
+        seModelLayer.addLayer()
+      }
       seModelLayer1.addLayer()
       seModelLayer2.addLayer()
+      seModelLayer3.addLayer()
       seModelLayer4.addLayer()
     }
 

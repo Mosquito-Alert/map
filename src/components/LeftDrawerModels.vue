@@ -37,6 +37,7 @@
         </div>
 
         <q-input
+          v-if="model"
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
@@ -53,7 +54,7 @@
                 <q-date
                   :title="_('Select model date')"
                   :subtitle="_('Click on year and month')"
-                  navigation-min-year-month='2014/05'
+                  :navigation-min-year-month="startingModelDate"
                   :navigation-max-year-month="getCurrentDate"
                   mask="MM/YYYY"
                   years-in-month-view="true"
@@ -237,6 +238,9 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+    const modelsManifest = {}
+    const startingModelDate = ref('2014/05')
+
     // QUASAR COLORS
     // red, pink, purple, deep-purple, indigo,
     // blue, light-blue, cyan, teal, green,
@@ -271,6 +275,32 @@ export default {
       estimationColorFrom.value = defaults.estimationColorFrom
       estimationColorTo.value = defaults.estimationColorTo
       uncertaintyColor.value = defaults.uncertaintyColor
+      // Fetch model manifest to activate/deactivate calendar
+      const manifestUrl = backendUrl + $store.getters['app/getModelsManifest']
+      fetch(manifestUrl)
+        .then(function (response) {
+          return response.text()
+        })
+        .then(function (manifest) {
+          // Read csv manifest
+          const lines = manifest.split(/\r?\n/)
+          const headers = lines[0].toLowerCase().split(',')
+          const targetIdx = headers.indexOf('target')
+          const yearIdx = headers.indexOf('from')
+          const cellIdx = headers.indexOf('cell')
+          for (let i = 1; i < lines.length; i++) {
+            if (lines[i] === '') break
+            const currentLine = lines[i].split(',')
+            const target = currentLine[targetIdx].toLowerCase()
+            const year = currentLine[yearIdx].toLowerCase()
+            const cell = currentLine[cellIdx].toLowerCase()
+            let cellValue = true
+            if (cell !== '') {
+              cellValue = currentLine[cellIdx].toLowerCase()
+            }
+            modelsManifest[target] = { year: year, cell: cellValue }
+          }
+        })
     })
 
     const seColor = computed(() => {
@@ -313,7 +343,6 @@ export default {
     })
 
     const checkValue = function (val, reason, details) {
-      console.log(val)
       if (reason === 'month') {
         modelDate.value = val
         inputDate.value = val
@@ -331,6 +360,7 @@ export default {
       if (model.value && inputDate.value) {
         disabled.value = false
       }
+      startingModelDate.value = modelsManifest[model.value.code].year + '/01'
     }
 
     const applyfilter = function () {
@@ -346,9 +376,12 @@ export default {
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
           serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
           serverModels + `gadm3/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm3_monthly.csv',
-          serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv',
-          serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv'
+          serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv'
         ]
+        // Add cell layer based on manifest
+        if (modelsManifest[selectedModel].cell === 'true') {
+          urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
+        }
         const centroidsUrls = [
           // backendUrl + 'media/centroids/gadm0_centroid.json',
           backendUrl + 'media/centroids/gadm1_centroid.json',
@@ -462,6 +495,7 @@ export default {
 
     return {
       _,
+      startingModelDate,
       colorsTo,
       seColor,
       estimationColorFrom,
