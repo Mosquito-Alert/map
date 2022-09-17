@@ -85,25 +85,25 @@
               {{ _('Probability') }}
             </div>
             <div>
-              <!-- <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPicker" /> -->
+              <!-- <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPalettes" /> -->
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
-          <!-- <div class="flex spaceBetween">
+          <div class="flex spaceBetween">
             <div>
                 <q-popup-proxy ref="colorPickerEst">
                       <q-color
-                        v-model="estimationColorTo"
+                        v-model="estimationColor"
                         no-header
                         no-footer
                         default-view="palette"
-                        :palette="colorsTo"
+                        :palette="palettes"
                         class="my-picker q-ma-md"
                         @change="setColorTo"
                       />
                 </q-popup-proxy>
             </div>
-          </div> -->
+          </div>
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
             <div class="col-4 text-left">{{ _('Low') }}</div>
@@ -112,10 +112,6 @@
           </div>
           <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row legend-row">
-              <!-- <div
-                class="gradient"
-                :style="{ backgroundImage: gradientString }">
-              </div> -->
               <div class="col-2 legend-1"></div>
               <div class="col-2 legend-2"></div>
               <div class="col-2 legend-3"></div>
@@ -141,7 +137,7 @@
               {{ _('Uncertainty') }}
             </div>
             <div>
-              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker2" />
+              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker" />
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
@@ -220,8 +216,6 @@ export default {
     const colorPickerEst = ref(null)
     const colorPickerSe = ref(null)
     const refInput = ref(null)
-    const estimationColorTo = ref('#d600d6')
-    const estimationColorFrom = ref()
     const inputDate = ref(null)
     const legendCanvas = ref(null)
     const modelDate = ref(null)
@@ -240,12 +234,24 @@ export default {
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
+    const estimationColor = ref(null)
 
     // QUASAR COLORS
     // red, pink, purple, deep-purple, indigo,
     // blue, light-blue, cyan, teal, green,
     // light-green, lime, yellow, amber, orange,
     // deep-orange, brown, grey, blue-grey
+    const palettes = [
+      // hexToRgb('#f44336'),
+      hexToRgb('#fbe727'),
+      hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
+      hexToRgb('#673ab7'), hexToRgb('#3f51b5'), hexToRgb('#2196f3'),
+      hexToRgb('#03a9f4'), hexToRgb('#00bcd4'), hexToRgb('#009688'),
+      hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
+      hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
+      hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
+      hexToRgb('#607d8b'), hexToRgb('#000000')
+    ]
     const colorsTo = [
       // hexToRgb('#f44336'),
       hexToRgb('#fbe727'),
@@ -272,8 +278,6 @@ export default {
     onMounted(function () {
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
-      estimationColorFrom.value = defaults.estimationColorFrom
-      estimationColorTo.value = defaults.estimationColorTo
       uncertaintyColor.value = defaults.uncertaintyColor
       // Fetch model manifest to activate/deactivate calendar
       const manifestUrl = backendUrl + $store.getters['app/getModelsManifest']
@@ -305,10 +309,6 @@ export default {
 
     const seColor = computed(() => {
       return $store.getters['app/getUncertaintyColor']
-    })
-    const gradientString = computed(() => {
-      const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      return `linear-gradient(90deg, ${defaults.estimationColorFrom}, ${defaults.estimationColorTo})`
     })
 
     const models = computed(() => {
@@ -360,7 +360,15 @@ export default {
       if (model.value && inputDate.value) {
         disabled.value = false
       }
+      // Check if selected models is available. if not clear modelDate
       startingModelDate.value = modelsManifest[model.value.code].year + '/01'
+      if (modelDate.value) {
+        const selected = parseInt(modelDate.value.slice(-4))
+        const previous = parseInt(startingModelDate.value.substring(0, 4))
+        if (previous > selected) {
+          inputDate.value = null
+        }
+      }
     }
 
     const applyfilter = function () {
@@ -389,6 +397,7 @@ export default {
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
+        const estColors = $store.getters['app/getEstColors']
         const payload = {
           esp: selectedModel,
           year: parts[1],
@@ -397,9 +406,8 @@ export default {
           se: uncertainty.value,
           estTransparency: estimationTransparency.value,
           seTransparency: uncertaintyTransparency.value,
-          estimationColorFrom: estimationColorFrom.value,
-          estimationColorTo: estimationColorTo.value,
-          uncertaintyColor: uncertaintyColor.value
+          uncertaintyColor: uncertaintyColor.value,
+          estColors: estColors
         }
         $store.commit('app/setModelDefaults', payload)
         context.emit('loadModel', {
@@ -410,8 +418,6 @@ export default {
           se: uncertainty.value,
           estTransparency: estimationTransparency.value,
           seTransparency: uncertaintyTransparency.value,
-          estimationColorFrom: estimationColorFrom.value,
-          estimationColorTo: estimationColorTo.value,
           uncertaintyColor: uncertaintyColor.value,
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
@@ -442,8 +448,6 @@ export default {
       modelDate.value = inputDate.value
       estimation.value = payload.est
       uncertainty.value = payload.se
-      estimationColorFrom.value = payload.estimationColorFrom
-      estimationColorTo.value = payload.estimationColorTo
       uncertaintyColor.value = payload.uncertaintyColor
       estimationTransparency.value = 100 * (1 - payload.estTransparency)
       uncertaintyTransparency.value = 100 * (1 - payload.seTransparency)
@@ -478,11 +482,11 @@ export default {
       context.emit('estimationColorsChanged')
     }
 
-    const showPicker = function () {
+    const showPalettes = function () {
       colorPickerEst.value.show()
     }
 
-    const showPicker2 = function () {
+    const showPicker = function () {
       colorPickerSe.value.show()
     }
 
@@ -496,14 +500,14 @@ export default {
     return {
       _,
       startingModelDate,
+      estimationColor,
+      palettes,
       colorsTo,
       seColor,
-      estimationColorFrom,
-      estimationColorTo,
       uncertaintyColor,
       setUncertaintyColor,
+      showPalettes,
       showPicker,
-      showPicker2,
       colorPickerEst,
       colorPickerSe,
       setColorTo,
@@ -514,7 +518,6 @@ export default {
       loadSharedModel,
       disabled,
       showLegend,
-      gradientString,
       legendCanvas,
       checkEstimation,
       checkUncertainty,

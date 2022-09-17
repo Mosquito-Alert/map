@@ -154,9 +154,8 @@ export default function () {
         se: true,
         estTransparency: 0,
         seTransparency: 0,
-        estimationColorFrom: 'rgb(227,240,223)',
-        estimationColorTo: 'rgb(21,138,15)',
-        uncertaintyColor: 'rgb(0,0,0)'
+        uncertaintyColor: 'rgb(0,0,0)',
+        estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
       }
     },
     BACKEND: backendUrl,

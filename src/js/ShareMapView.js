@@ -71,8 +71,6 @@ export default class ShareMapView {
       dataView.se = this.options.se
       dataView.estTransparency = this.options.estTransparency
       dataView.seTransparency = this.options.seTransparency
-      dataView.estimationColorFrom = this.options.estimationColorFrom
-      dataView.estimationColorTo = this.options.estimationColorTo
       dataView.uncertaintyColor = this.options.uncertaintyColor
     }
 

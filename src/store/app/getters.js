@@ -107,6 +107,10 @@ export const getRegisteredWebUrl = state => {
   return state.registeredWebUrl
 }
 
+export const getEstColors = state => {
+  return state.DEFAULTS.model.estColors
+}
+
 export const getUncertaintyColor = state => {
   return state.DEFAULTS.model.uncertaintyColor
 }

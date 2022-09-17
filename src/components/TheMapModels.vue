@@ -102,7 +102,6 @@ export default defineComponent({
     let ol
     let gadm4MaxZoom
     let dataGridGeojson
-    const COLORS = ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
     const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
 
     // Map general configuration
@@ -148,13 +147,6 @@ export default defineComponent({
       }
     })
 
-    const colors = computed(() => {
-      return {
-        from: $store.getters['app/getModelDefaults'].estimationColorFrom,
-        to: $store.getters['app/getModelDefaults'].estimationColorTo
-      }
-    })
-
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -178,8 +170,6 @@ export default defineComponent({
           se: modelData.se,
           estTransparency: modelData.estTransparency,
           seTransparency: modelData.seTransparency,
-          estimationColorFrom: modelData.estimationColorFrom,
-          estimationColorTo: modelData.estimationColorTo,
           uncertaintyColor: modelData.uncertaintyColor
         },
         url: shareViewUrl,
@@ -225,8 +215,6 @@ export default defineComponent({
         se: jsonView.filters.se,
         estTransparency: jsonView.filters.estTransparency,
         seTransparency: jsonView.filters.seTransparency,
-        estimationColorFrom: jsonView.filters.estimationColorFrom,
-        estimationColorTo: jsonView.filters.estimationColorTo,
         uncertaintyColor: jsonView.filters.uncertaintyColor
       })
     }
@@ -267,8 +255,9 @@ export default defineComponent({
       //   from: jsonDefaults.colorEstimationFrom,
       //   to: jsonProperties.colorEstimationTo
       // }
+      const estimationColors = $store.getters['app/getModelDefaults'].estimationColors
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors: COLORS,
+        colors: estimationColors,
         rangs: RANGS,
         zIndex: 15,
         minZoom: jsonProperties.grid.minZoom,
@@ -300,6 +289,18 @@ export default defineComponent({
         map.value.map.removeLayer(seModelLayer.layer)
         seModelLayer = null
         // seModelLayer.addLayer()
+      }
+      if (seModelLayer1) {
+        map.value.map.removeLayer(seModelLayer1.layer)
+      }
+      if (seModelLayer2) {
+        map.value.map.removeLayer(seModelLayer2.layer)
+      }
+      if (seModelLayer3) {
+        map.value.map.removeLayer(seModelLayer3.layer)
+      }
+      if (seModelLayer4) {
+        map.value.map.removeLayer(seModelLayer4.layer)
       }
       map.value.map.removeLayer(modelsLayer)
       spinner(true)
@@ -403,18 +404,6 @@ export default defineComponent({
             CENTROIDS['4'] = putDataOnCentroids(json, CSVS['4'], 4)
           }
         })
-        if (seModelLayer1) {
-          map.value.map.removeLayer(seModelLayer1.layer)
-        }
-        if (seModelLayer2) {
-          map.value.map.removeLayer(seModelLayer2.layer)
-        }
-        if (seModelLayer3) {
-          map.value.map.removeLayer(seModelLayer3.layer)
-        }
-        if (seModelLayer4) {
-          map.value.map.removeLayer(seModelLayer4.layer)
-        }
         const seColor = $store.getters['app/getUncertaintyColor']
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
@@ -498,6 +487,7 @@ export default defineComponent({
     }
 
     const colorizeGadm = (feature, style, CSV) => {
+      const estimationColors = $store.getters['app/getEstColors']
       const id = feature.properties_.id
       if (CSV[id] === undefined) {
         return null
@@ -506,17 +496,17 @@ export default defineComponent({
       // const c = getInterpolatedColor(colors.from, colors.to, value)
       let c
       if (value < RANGS[0]) {
-        c = COLORS[0]
+        c = estimationColors[0]
       } else if (value < RANGS[1]) {
-        c = COLORS[1]
+        c = estimationColors[1]
       } else if (value < RANGS[2]) {
-        c = COLORS[2]
+        c = estimationColors[2]
       } else if (value < RANGS[3]) {
-        c = COLORS[3]
+        c = estimationColors[3]
       } else if (value < RANGS[4]) {
-        c = COLORS[4]
+        c = estimationColors[4]
       } else {
-        c = COLORS[5]
+        c = estimationColors[5]
       }
       style = new Fill({
         color: c
@@ -647,8 +637,9 @@ export default defineComponent({
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
       }
+      const estimationColors = $store.getters['app/getModelDefaults'].estimationColors
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors: colors.value,
+        colors: estimationColors,
         zIndex: 15,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
