@@ -84,14 +84,14 @@
             <div class="uppercase text-bold">
               {{ _('Probability') }}
             </div>
-            <div>
-              <!-- <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPalettes" /> -->
+            <div class="estimation-palettes">
+              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPalettes" />
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
           <div class="flex spaceBetween">
             <div>
-                <q-popup-proxy ref="colorPickerEst">
+                <q-popup-proxy ref="colorPickerEst" class="estimation-colors">
                       <q-color
                         v-model="estimationColor"
                         no-header
@@ -112,12 +112,12 @@
           </div>
           <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row legend-row">
-              <div class="col-2 legend-1"></div>
-              <div class="col-2 legend-2"></div>
-              <div class="col-2 legend-3"></div>
-              <div class="col-2 legend-4"></div>
-              <div class="col-2 legend-5"></div>
-              <div class="col-2 legend-6"></div>
+              <div class="col-2" :style="{'background-color': estColors[0]}"></div>
+              <div class="col-2" :style="{'background-color': estColors[1]}"></div>
+              <div class="col-2" :style="{'background-color': estColors[2]}"></div>
+              <div class="col-2" :style="{'background-color': estColors[3]}"></div>
+              <div class="col-2" :style="{'background-color': estColors[4]}"></div>
+              <div class="col-2" :style="{'background-color': estColors[5]}"></div>
           </div>
           <!-- ESTIMATION TRANSPARENCY -->
           <div class="row q-mt-lg">
@@ -212,11 +212,13 @@ export default {
     'uncertaintyColorsChanged'
   ],
   setup (props, context) {
+    const estColors = ref(null)
     const uncertaintyColor = ref(null)
     const colorPickerEst = ref(null)
     const colorPickerSe = ref(null)
     const refInput = ref(null)
-    const inputDate = ref(null)
+    // const inputDate = ref(null)
+    const inputDate = ref('08/2021')
     const legendCanvas = ref(null)
     const modelDate = ref(null)
     const getCurrentDate = ref()
@@ -235,23 +237,14 @@ export default {
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
+    const palettes = ref(null)
 
     // QUASAR COLORS
     // red, pink, purple, deep-purple, indigo,
     // blue, light-blue, cyan, teal, green,
     // light-green, lime, yellow, amber, orange,
     // deep-orange, brown, grey, blue-grey
-    const palettes = [
-      // hexToRgb('#f44336'),
-      hexToRgb('#fbe727'),
-      hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
-      hexToRgb('#673ab7'), hexToRgb('#3f51b5'), hexToRgb('#2196f3'),
-      hexToRgb('#03a9f4'), hexToRgb('#00bcd4'), hexToRgb('#009688'),
-      hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
-      hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
-      hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
-      hexToRgb('#607d8b'), hexToRgb('#000000')
-    ]
+
     const colorsTo = [
       // hexToRgb('#f44336'),
       hexToRgb('#fbe727'),
@@ -263,19 +256,20 @@ export default {
       hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
       hexToRgb('#607d8b'), hexToRgb('#000000')
     ]
-    const colorsFrom = [
-      // hexToRgb('#ffebee'),
-      hexToRgb('#46337e'),
-      hexToRgb('#fce4ec'), hexToRgb('#f3e5f5'),
-      hexToRgb('#ede7f6'), hexToRgb('#e8eaf6'), hexToRgb('#e3f2fd'),
-      hexToRgb('#e1f5fe'), hexToRgb('#e0f7fa'), hexToRgb('#e0f2f1'),
-      hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
-      hexToRgb('#fffde7'), hexToRgb('#fff8e1'), hexToRgb('#fff3e0'),
-      hexToRgb('#fbe9e7'), hexToRgb('#efebe9'), hexToRgb('#fafafa'),
-      hexToRgb('#eceff1'), hexToRgb('#000000')
-    ]
+    // const colorsFrom = [
+    //   // hexToRgb('#ffebee'),
+    //   hexToRgb('#46337e'),
+    //   hexToRgb('#fce4ec'), hexToRgb('#f3e5f5'),
+    //   hexToRgb('#ede7f6'), hexToRgb('#e8eaf6'), hexToRgb('#e3f2fd'),
+    //   hexToRgb('#e1f5fe'), hexToRgb('#e0f7fa'), hexToRgb('#e0f2f1'),
+    //   hexToRgb('#e8f5e9'), hexToRgb('#f1f8e9'), hexToRgb('#f9fbe7'),
+    //   hexToRgb('#fffde7'), hexToRgb('#fff8e1'), hexToRgb('#fff3e0'),
+    //   hexToRgb('#fbe9e7'), hexToRgb('#efebe9'), hexToRgb('#fafafa'),
+    //   hexToRgb('#eceff1'), hexToRgb('#000000')
+    // ]
 
     onMounted(function () {
+      palettes.value = [].concat.apply([], $store.getters['app/getEstPalettes'])
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       uncertaintyColor.value = defaults.uncertaintyColor
@@ -397,7 +391,9 @@ export default {
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
-        const estColors = $store.getters['app/getEstColors']
+        estColors.value = $store.getters['app/getEstColors']
+        const estPalettes = $store.getters['app/getEstPalettes']
+
         const payload = {
           esp: selectedModel,
           year: parts[1],
@@ -407,7 +403,8 @@ export default {
           estTransparency: estimationTransparency.value,
           seTransparency: uncertaintyTransparency.value,
           uncertaintyColor: uncertaintyColor.value,
-          estColors: estColors
+          estColors: estColors,
+          estPalettes: estPalettes
         }
         $store.commit('app/setModelDefaults', payload)
         context.emit('loadModel', {
@@ -473,11 +470,18 @@ export default {
     }
 
     const setColorTo = function (e) {
-      const ind = colorsTo.indexOf(e)
-      $store.commit('app/setEstimationColors', {
-        from: colorsFrom[ind],
-        to: e
-      })
+      const p = $store.getters['app/getEstPalettes']
+      const index = Math.floor(palettes.value.indexOf(estimationColor.value) / 6)
+      console.log(p)
+      console.log(index)
+      const selectedPalette = p[index]
+      console.log(selectedPalette)
+      $store.commit('app/setEstColors', selectedPalette)
+      // const ind = colorsTo.indexOf(e)
+      // $store.commit('app/setEstimationColors', {
+      //   from: colorsFrom[ind],
+      //   to: e
+      // })
       colorPickerEst.value.hide()
       context.emit('estimationColorsChanged')
     }
@@ -499,6 +503,7 @@ export default {
 
     return {
       _,
+      estColors,
       startingModelDate,
       estimationColor,
       palettes,
@@ -722,5 +727,10 @@ input:checked + .cookie-comply-slider{
 }
 .my-picker.q-color-picker{
   box-shadow: none;
+}
+
+.estimation-colors div :deep(div.q-color-picker__cube){
+  width: 16% !important;
+  margin: 3px 0 !important;
 }
 </style>

@@ -63,3 +63,7 @@ export const setEstTransparency = (state, payload) => {
 export const setSeTransparency = (state, payload) => {
   state.DEFAULTS.model.seTransparency = payload
 }
+
+export const setEstColors = (state, payload) => {
+  state.DEFAULTS.model.estColors = payload
+}

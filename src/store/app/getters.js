@@ -114,3 +114,7 @@ export const getEstColors = state => {
 export const getUncertaintyColor = state => {
   return state.DEFAULTS.model.uncertaintyColor
 }
+
+export const getEstPalettes = state => {
+  return state.DEFAULTS.model.estPalettes
+}

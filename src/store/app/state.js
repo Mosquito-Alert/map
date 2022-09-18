@@ -155,7 +155,12 @@ export default function () {
         estTransparency: 0,
         seTransparency: 0,
         uncertaintyColor: 'rgb(0,0,0)',
-        estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d']
+        estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+        estPalettes: [
+          ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+          ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
+          ['#1b7837', '#7fbf7b', '#d9f0d3', '#e7d4e8', '#af8dc3', '#762a83']
+        ]
       }
     },
     BACKEND: backendUrl,

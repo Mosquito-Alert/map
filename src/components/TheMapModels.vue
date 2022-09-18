@@ -638,13 +638,15 @@ export default defineComponent({
         map.value.map.removeLayer(estModelLayer.layer)
       }
       const estimationColors = $store.getters['app/getModelDefaults'].estimationColors
-      estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors: estimationColors,
-        zIndex: 15,
-        minZoom: jsonProperties.grid.minZoom,
-        maxZoom: jsonProperties.grid.maxZoom
-      })
-      estModelLayer.addLayer()
+      if (dataGridGeojson) {
+        estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
+          colors: estimationColors,
+          zIndex: 15,
+          minZoom: jsonProperties.grid.minZoom,
+          maxZoom: jsonProperties.grid.maxZoom
+        })
+        estModelLayer.addLayer()
+      }
 
       gadm1.getSource().refresh()
       gadm2.getSource().refresh()
