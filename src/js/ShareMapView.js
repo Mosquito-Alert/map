@@ -72,6 +72,7 @@ export default class ShareMapView {
       dataView.estTransparency = this.options.estTransparency
       dataView.seTransparency = this.options.seTransparency
       dataView.uncertaintyColor = this.options.uncertaintyColor
+      dataView.estColors = this.options.estColors
     }
 
     fetch(this.options.url, {

@@ -156,10 +156,12 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+      console.log(modelData)
       if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
+      console.log($store.getters['app/getEstColors'])
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         filters: {
@@ -170,7 +172,8 @@ export default defineComponent({
           se: modelData.se,
           estTransparency: modelData.estTransparency,
           seTransparency: modelData.seTransparency,
-          uncertaintyColor: modelData.uncertaintyColor
+          uncertaintyColor: modelData.uncertaintyColor,
+          estColors: $store.getters['app/getEstColors']
         },
         url: shareViewUrl,
         callback: handleShareView
@@ -207,6 +210,7 @@ export default defineComponent({
       const type = Object.keys(models).find((key, index) => {
         return (models[key].modelName === jsonView.filters.esp)
       })
+      console.log(jsonView.filters.estTransparency)
       context.emit('loadSharedModel', {
         esp: { code: jsonView.filters.esp, type: _(models[type].common_name) },
         year: jsonView.filters.year,
@@ -215,7 +219,8 @@ export default defineComponent({
         se: jsonView.filters.se,
         estTransparency: jsonView.filters.estTransparency,
         seTransparency: jsonView.filters.seTransparency,
-        uncertaintyColor: jsonView.filters.uncertaintyColor
+        uncertaintyColor: jsonView.filters.uncertaintyColor,
+        estColors: jsonView.filters.estColors
       })
     }
 
@@ -361,11 +366,12 @@ export default defineComponent({
         gadm4.on('prerender', function () {
           spinner(true)
         })
+        estimationVisibility(data.est)
+        estimationOpacity(1 - (data.estTransparency / 100))
+
         // If cell layer is on
         if (urls.length > 4) {
           gadm4MaxZoom = jsonProperties.gadm4.maxZoom
-          estimationVisibility(data.est)
-          estimationOpacity(1 - (data.estTransparency / 100))
           gadm4.setMaxZoom(gadm4MaxZoom)
           estModelLayer.layer.on('prerender', function () {
             spinner(true)
@@ -609,7 +615,7 @@ export default defineComponent({
       gadm2.setOpacity(opacity)
       gadm3.setOpacity(opacity)
       gadm4.setOpacity(opacity)
-      if (estModelLayer.layer) {
+      if (estModelLayer) {
         estModelLayer.layer.setOpacity(opacity)
       }
     }

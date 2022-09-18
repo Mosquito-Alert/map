@@ -99,7 +99,7 @@
                         default-view="palette"
                         :palette="palettes"
                         class="my-picker q-ma-md"
-                        @change="setColorTo"
+                        @click="clickColor"
                       />
                 </q-popup-proxy>
             </div>
@@ -212,7 +212,6 @@ export default {
     'uncertaintyColorsChanged'
   ],
   setup (props, context) {
-    const estColors = ref(null)
     const uncertaintyColor = ref(null)
     const colorPickerEst = ref(null)
     const colorPickerSe = ref(null)
@@ -238,7 +237,7 @@ export default {
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
     const palettes = ref(null)
-
+    const estColors = ref($store.getters['app/getEstColors'])
     // QUASAR COLORS
     // red, pink, purple, deep-purple, indigo,
     // blue, light-blue, cyan, teal, green,
@@ -391,9 +390,7 @@ export default {
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
-        estColors.value = $store.getters['app/getEstColors']
         const estPalettes = $store.getters['app/getEstPalettes']
-
         const payload = {
           esp: selectedModel,
           year: parts[1],
@@ -403,7 +400,7 @@ export default {
           estTransparency: estimationTransparency.value,
           seTransparency: uncertaintyTransparency.value,
           uncertaintyColor: uncertaintyColor.value,
-          estColors: estColors,
+          estColors: estColors.value,
           estPalettes: estPalettes
         }
         $store.commit('app/setModelDefaults', payload)
@@ -448,6 +445,7 @@ export default {
       uncertaintyColor.value = payload.uncertaintyColor
       estimationTransparency.value = 100 * (1 - payload.estTransparency)
       uncertaintyTransparency.value = 100 * (1 - payload.seTransparency)
+      estColors.value = payload.estColors
       applyfilter()
     }
 
@@ -469,22 +467,15 @@ export default {
       return c ? `rgb(${c.r},${c.g},${c.b})` : null
     }
 
-    const setColorTo = function (e) {
-      const p = $store.getters['app/getEstPalettes']
-      const index = Math.floor(palettes.value.indexOf(estimationColor.value) / 6)
-      console.log(p)
-      console.log(index)
-      const selectedPalette = p[index]
-      console.log(selectedPalette)
-      $store.commit('app/setEstColors', selectedPalette)
-      // const ind = colorsTo.indexOf(e)
-      // $store.commit('app/setEstimationColors', {
-      //   from: colorsFrom[ind],
-      //   to: e
-      // })
-      colorPickerEst.value.hide()
-      context.emit('estimationColorsChanged')
-    }
+    // const setColorTo = function (e) {
+    //   const p = $store.getters['app/getEstPalettes']
+    //   const index = Math.floor(palettes.value.indexOf(estimationColor.value) / 6)
+    //   const selectedPalette = p[index]
+
+    //   $store.commit('app/setEstColors', selectedPalette)
+    //   colorPickerEst.value.hide()
+    //   context.emit('estimationColorsChanged')
+    // }
 
     const showPalettes = function () {
       colorPickerEst.value.show()
@@ -501,8 +492,24 @@ export default {
       context.emit('uncertaintyColorsChanged')
     }
 
+    const clickColor = function (event) {
+      let el = event.target
+      let idx = 0
+      while (el.previousElementSibling) {
+        idx += 1
+        el = el.previousElementSibling
+      }
+      const p = $store.getters['app/getEstPalettes']
+      const index = Math.floor(idx / 6)
+      const selectedPalette = p[index]
+      $store.commit('app/setEstColors', selectedPalette)
+      colorPickerEst.value.hide()
+      context.emit('estimationColorsChanged')
+    }
+
     return {
       _,
+      clickColor,
       estColors,
       startingModelDate,
       estimationColor,
@@ -515,7 +522,6 @@ export default {
       showPicker,
       colorPickerEst,
       colorPickerSe,
-      setColorTo,
       setEstTransparency,
       setUncertaintyTransparency,
       estimationTransparency,
