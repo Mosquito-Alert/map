@@ -12,6 +12,7 @@
     <ol-map ref='map'
       :loadTilesWhileAnimating='true'
       :loadTilesWhileInteracting='true'
+      @movestart='hideSpinner'
       @moveend='showZoom'
       style='height:100%'>
 
@@ -156,12 +157,10 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      console.log(modelData)
       if (!modelData.esp || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
-      console.log($store.getters['app/getEstColors'])
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         filters: {
@@ -210,7 +209,6 @@ export default defineComponent({
       const type = Object.keys(models).find((key, index) => {
         return (models[key].modelName === jsonView.filters.esp)
       })
-      console.log(jsonView.filters.estTransparency)
       context.emit('loadSharedModel', {
         esp: { code: jsonView.filters.esp, type: _(models[type].common_name) },
         year: jsonView.filters.year,
@@ -260,7 +258,7 @@ export default defineComponent({
       //   from: jsonDefaults.colorEstimationFrom,
       //   to: jsonProperties.colorEstimationTo
       // }
-      const estimationColors = $store.getters['app/getModelDefaults'].estimationColors
+      const estimationColors = $store.getters['app/getEstColors']
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
         colors: estimationColors,
         rangs: RANGS,
@@ -276,7 +274,7 @@ export default defineComponent({
       }
       const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
       seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
-        zIndex: 15,
+        zIndex: 16,
         color: seColor.value,
         minZoom: jsonProperties.grid.minZoom,
         maxZoom: jsonProperties.grid.maxZoom
@@ -525,7 +523,7 @@ export default defineComponent({
         })
       })
     }
-
+    const tilesUrl = $store.getters['app/getTilesUrl']
     const gadm1 = new VectorTileLayer({
       // minZoom: jsonProperties.gadm1.minZoom,
       maxZoom: jsonProperties.gadm1.maxZoom,
@@ -534,7 +532,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm1.maxZoom + 1,
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm1/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm1/{z}/{x}/{y}'
       }),
       style: colorizeGadm1
     })
@@ -547,7 +545,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm2.maxZoom,
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm2/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm2/{z}/{x}/{y}'
       }),
       style: colorizeGadm2
     })
@@ -560,7 +558,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm3.maxZoom - 1,
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm3/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm3/{z}/{x}/{y}'
       }),
       style: colorizeGadm3
     })
@@ -573,7 +571,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm4.maxZoom - 2,
         format: new MVT(),
-        url: backendUrl + 'api/tiles/gadm4/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm4/{z}/{x}/{y}'
       }),
       style: colorizeGadm4
     })
@@ -643,10 +641,11 @@ export default defineComponent({
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
       }
-      const estimationColors = $store.getters['app/getModelDefaults'].estimationColors
+      const estimationColors = $store.getters['app/getEstColors']
       if (dataGridGeojson) {
         estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
           colors: estimationColors,
+          rangs: RANGS,
           zIndex: 15,
           minZoom: jsonProperties.grid.minZoom,
           maxZoom: jsonProperties.grid.maxZoom
@@ -661,7 +660,7 @@ export default defineComponent({
     }
 
     const uncertaintyRefresh = function () {
-      const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
+      const seColor = $store.getters['app/getUncertaintyColor']
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
       }
@@ -708,7 +707,7 @@ export default defineComponent({
 
       if (gadm4MaxZoom === jsonProperties.gadm4.maxZoom) {
         seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
-          zIndex: 15,
+          zIndex: 16,
           color: seColor,
           minZoom: jsonProperties.grid.minZoom,
           maxZoom: jsonProperties.grid.maxZoom
@@ -721,8 +720,12 @@ export default defineComponent({
       seModelLayer4.addLayer()
     }
 
+    const hideSpinner = function () {
+      spinner(false)
+    }
     return {
       _,
+      hideSpinner,
       uncertaintyRefresh,
       estimationRefresh,
       estimationVisibility,

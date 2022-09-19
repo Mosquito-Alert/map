@@ -7,13 +7,15 @@ export default function () {
   let frontendUrl = ''
   let analyticsCode
   let urlModels
+  let modelsManifest
   const { cookies } = useCookies()
 
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
-    urlModels = backendUrl + 'media/models/'
+    urlModels = backendUrl + 'media/global_minimal_model_estimates/'
+    modelsManifest = backendUrl + 'media/global_minimal_model_estimates/model_manifest.csv'
     // backendUrl = 'http://192.168.1.47:8080/django/'
     // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
@@ -21,6 +23,7 @@ export default function () {
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
     analyticsCode = 'G-ZLD12V4W3V'
     urlModels = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/'
+    modelsManifest = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv'
   }
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
@@ -66,7 +69,8 @@ export default function () {
     modelsServerPath: urlModels,
     // Manifest file is a csv with column target (albopictus, culex...),
     // year(2014, ...), display (TRUE, FALSE)
-    modelsManifest: 'media/model_manifest.csv',
+    tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
+    modelsManifest: modelsManifest,
     modelsProperties: {
       gadm0: {
         minZoom: 0,
@@ -154,13 +158,18 @@ export default function () {
         se: true,
         estTransparency: 0,
         seTransparency: 0,
-        uncertaintyColor: 'rgb(0,0,0)',
+        // Default uncertainty color
+        uncertaintyColor: '#191919',
         estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
         estPalettes: [
+          // DIVERGENTS
           ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
           ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
           ['#1b7837', '#7fbf7b', '#d9f0d3', '#e7d4e8', '#af8dc3', '#762a83'],
-          ['#07cfcd', '#0fa7a5', '#3dc10c', '#ffdf01', '#fe6803', '#f21805']
+          ['#1a9850', '#91cf60', '#d9ef8b', '#fee08b', '#fc8d59', '#d73027'],
+          // GRADIENTS
+          ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
+          ['#edf8e9', '#c7e9c0', '#a1d99b', '#74c476', '#006d2c', '#31a354']
         ]
       }
     },

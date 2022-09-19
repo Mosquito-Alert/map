@@ -118,3 +118,7 @@ export const getUncertaintyColor = state => {
 export const getEstPalettes = state => {
   return state.DEFAULTS.model.estPalettes
 }
+
+export const getTilesUrl = state => {
+  return state.tilesUrl
+}
