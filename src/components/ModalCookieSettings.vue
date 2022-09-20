@@ -192,7 +192,7 @@ export default {
   z-index: 2100;
 }
 .cookie-settings dialog {
-  max-width: 60vw;
+  max-width: 600px;
   max-height: 70vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
