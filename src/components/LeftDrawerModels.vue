@@ -111,7 +111,7 @@
             <div class="col-4 text-right">{{ _('High') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
-          <div v-if="estimation" class="row legend-row">
+          <div v-if="estimation" class="row legend-row" :style="{'opacity': 1 - (estimationTransparency/100)}">
               <div class="col-2" :style="{'background-color': estLegendColors[0]}"></div>
               <div class="col-2" :style="{'background-color': estLegendColors[1]}"></div>
               <div class="col-2" :style="{'background-color': estLegendColors[2]}"></div>
@@ -163,7 +163,7 @@
             <div class="col-3 text-center">{{ _('Medium') }}</div>
             <div class="col-3 text-center">{{ _('High') }}</div>
           </div>
-          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered">
+          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': 1 - (uncertaintyTransparency/100)}">
               <div class="col-3 text-center">
                 <div class="circle very-low" :style="{ background: seColor }"></div>
               </div>
