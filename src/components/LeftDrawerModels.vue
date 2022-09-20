@@ -226,8 +226,6 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const model = ref()
-    const estimationTransparency = ref(0)
-    const uncertaintyTransparency = ref(0)
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
@@ -239,21 +237,10 @@ export default {
     const palettes = ref(null)
     let estColors = $store.getters['app/getEstColors']
     const estLegendColors = ref(estColors)
-    // QUASAR COLORS
-    // red, pink, purple, deep-purple, indigo,
-    // blue, light-blue, cyan, teal, green,
-    // light-green, lime, yellow, amber, orange,
-    // deep-orange, brown, grey, blue-grey
-
+    const initialSeTransparency = $store.getters['app/getModelDefaults'].seTransparency
+    const estimationTransparency = ref(0)
+    const uncertaintyTransparency = ref(initialSeTransparency * 100)
     const colorsTo = [
-      // hexToRgb('#fbe727'),
-      // hexToRgb('#e91e63'), hexToRgb('#9c27b0'),
-      // hexToRgb('#673ab7'), hexToRgb('#3f51b5'), hexToRgb('#2196f3'),
-      // hexToRgb('#03a9f4'), hexToRgb('#00bcd4'), hexToRgb('#009688'),
-      // hexToRgb('#4caf50'), hexToRgb('#8bc34a'), hexToRgb('#cddc39'),
-      // hexToRgb('#ffeb3b'), hexToRgb('#ffc107'), hexToRgb('#ff9800'),
-      // hexToRgb('#ff5722'), hexToRgb('#795548'), hexToRgb('#9e9e9e'),
-      // hexToRgb('#607d8b'), hexToRgb('#000000')
       hexToRgb('#ff0000'), hexToRgb('#ff8000'), hexToRgb('#ffff00'),
       hexToRgb('#00ff00'), hexToRgb('#00ff80'), hexToRgb('#00ff80'),
       hexToRgb('#0080ff'), hexToRgb('#0000ff'), hexToRgb('#8000ff'),
