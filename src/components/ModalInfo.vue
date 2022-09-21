@@ -143,6 +143,8 @@
                         </div>
                     </div>
                     <HR/>
+                    <a id="modeled_info" class="q-py-md"></a>
+                    <p></p>
                     <div class="text-subtitle1 q-my-md">
                       {{ _('MODELED DATA') }}
                     </div>
@@ -167,14 +169,26 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, ref, onUpdated } from 'vue'
 import { useStore } from 'vuex'
+import { scroll } from 'quasar'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
     const $store = useStore()
+    onUpdated(() => {
+      const modal = $store.getters['app/getModals'].info
+      const { getScrollTarget, setVerticalScrollPosition } = scroll
+      const el = document.getElementById(modal.anchor)
+      if (el) {
+        const target = getScrollTarget(el)
+        const offset = el.offsetTop
+        const duration = 1000
+        setVerticalScrollPosition(target, offset, duration)
+      }
+    })
     const close = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: false } })
     }

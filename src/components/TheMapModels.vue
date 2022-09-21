@@ -718,6 +718,7 @@ export default defineComponent({
       seModelLayer2.addLayer()
       seModelLayer3.addLayer()
       seModelLayer4.addLayer()
+      uncertaintyOpacity($store.getters['app/getModelDefaults'].seTransparency)
     }
 
     const hideSpinner = function () {

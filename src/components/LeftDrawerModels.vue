@@ -69,13 +69,26 @@
           </template>
         </q-input>
 
-        <div class="q-mt-xl flex-right">
-          <button
-            class="ma-btn no-margin"
-            :class="(disabled)?'disabled':''"
-            @click="applyfilter">
-              {{ _('Apply') }}
-          </button>
+        <div class="q-mt-xl flex model-buttons">
+            <div>
+            <q-btn
+              icon="info"
+              class="ma-btn no-margin"
+              :class="(disabledInfo)?'disabled':''"
+              @click="goInfoModal">
+              <div class="q-ml-xs">
+                {{ _('MODELED DATA') }}
+              </div>
+            </q-btn>
+          </div>
+            <div>
+            <q-btn
+              class="ma-btn no-margin"
+              :class="(disabled)?'disabled':''"
+              @click="applyfilter">
+                {{ _('Apply') }}
+            </q-btn>
+          </div>
         </div>
         <!-- LEGEND -->
         <div v-if="showLegend">
@@ -225,6 +238,7 @@ export default {
     const $store = useStore()
     const showLegend = ref(false)
     const disabled = ref(true)
+    const disabledInfo = ref(true)
     const model = ref()
     const estimation = ref(true)
     const uncertainty = ref(true)
@@ -324,6 +338,7 @@ export default {
         $store.commit('map/setModelDate', inputDate.value)
       }
       disabled.value = (!model.value || !inputDate.value)
+      disabledInfo.value = false
     }
 
     const filterModels = function () {
@@ -449,16 +464,6 @@ export default {
       return c ? `rgb(${c.r},${c.g},${c.b})` : null
     }
 
-    // const setColorTo = function (e) {
-    //   const p = $store.getters['app/getEstPalettes']
-    //   const index = Math.floor(palettes.value.indexOf(estimationColor.value) / 6)
-    //   const selectedPalette = p[index]
-
-    //   $store.commit('app/setEstColors', selectedPalette)
-    //   colorPickerEst.value.hide()
-    //   context.emit('estimationColorsChanged')
-    // }
-
     const showPalettes = function () {
       colorPickerEst.value.show()
     }
@@ -490,8 +495,12 @@ export default {
       context.emit('estimationColorsChanged')
     }
 
+    const goInfoModal = function () {
+      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
+    }
     return {
       _,
+      goInfoModal,
       estLegendColors,
       clickColor,
       estColors,
@@ -512,6 +521,7 @@ export default {
       uncertaintyTransparency,
       loadSharedModel,
       disabled,
+      disabledInfo,
       showLegend,
       legendCanvas,
       checkEstimation,
@@ -689,6 +699,9 @@ input:checked + .cookie-comply-slider{
   height: 25px;
 }
 
+.model-buttons{
+  justify-content: space-between;
+}
 @media (max-width: 640px) {
   .aside button {
     scale: 0.9;

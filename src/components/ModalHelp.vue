@@ -22,13 +22,15 @@
             padding
             :arrows="!mobile"
             class="rounded-borders">
-              <q-carousel-slide name="pag_1" class="column no-wrap flex-center">
-                <div class="pag_1 scroll q-pr-md">
-                  <h5>{{ _('Layers selector help') }}</h5>
-                  <div class="row q-mt-md q-pr-md text-left">
+              <q-carousel-slide name="pag_1" class="column no-wrap">
+                <div class="pag_1">
+                  <div class="img">
+                    <img class="gif" src="~/assets/img/help/help1.gif" />
+                  </div>
+                  <div class="q-ml-lg text">
                     <div>
-                      <img src="~/assets/img/help/help1.gif" />
-                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
+                      <h5 class="q-my-md">{{ _('Layers selector help') }}</h5>
+                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur velit alias quo laborum dignissimos aperiam provident qui, soluta culpa harum voluptas nulla quas blanditiis accusantium sunt aliquam iure itaque quasi. Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum similique, excepturi, modi inventore autem quasi quisquam veritatis, libero quaerat magnam ipsam explicabo incidunt dolor. Laborum earum adipisci beatae labore voluptatem. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tenetur sint nam consequatur, voluptatibus veritatis quaerat facilis odit vero, unde laudantium cum molestias cumque aliquid suscipit odio, repellendus ipsa quibusdam pariatur eos animi. Doloribus numquam sint aut. Illo quis rem tempore, excepturi maiores, consequuntur inventore atque itaque beatae reprehenderit blanditiis quibusdam quisquam quod sint dolorum adipisci! A itaque ullam dolorem vero veniam consequuntur placeat nihil minima distinctio obcaecati iure, et voluptates doloribus eius sit nemo maxime modi? Debitis ut sapiente autem magnam? Molestias explicabo ad rerum maiores nobis deserunt numquam quae quidem consequatur, doloremque ducimus? Corrupti eligendi ipsam impedit eius amet.</p>
                     </div>
                   </div>
                 </div>
@@ -182,25 +184,31 @@ export default {
 
 dialog {
   position:relative;
-  max-width: 80vw;
-  width: 80vw;
-  height: 85vh;
+  // max-width: 600px;
+  // width: 80vw;
+  height: 85vw;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   background-color: white;
   z-index: 2001;
   border: none;
   overflow:auto;
+  padding: 0;
 }
-
-dialog.mobile {
-  max-width: 80vw;
-  height: 90vh;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  background-color: white;
-  z-index: 2001;
-  border: none;
-  overflow:auto;
+dialog.modal-help.mobile {
+  margin:0;
 }
+:deep(.q-carousel__slide.column){
+  padding: 0;
+}
+// dialog.mobile {
+//   max-width: 80vw;
+//   height: 90vh;
+//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+//   background-color: white;
+//   z-index: 2001;
+//   border: none;
+//   overflow:auto;
+// }
 
 .backdrop-enter-from,
 .backdrop-leave-to {
@@ -241,25 +249,25 @@ button.close {
 
 // MOBILE
 dialog.mobile {
-  max-width: 90vw;
-  max-height: 90vh;
+  width: 100vw;
+  height: 100vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 1rem 1rem 1rem 1rem;
+  padding: 0px;
 }
 
 dialog.mobile button{
   padding: 5px 10px;
 }
 .mobile .q-carousel__slide img{
-  max-width: 100%;
+  // max-width: 100%;
   margin-bottom: 10px;
 }
 
 .q-carousel__slide img{
-  max-width: 50%;
+  // max-width: 50%;
   height: auto;
   float:left;
-  margin-right: 20px;
+  // margin-right: 20px;
 }
 dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
   padding: 4px 4px 60px 4px;
@@ -314,11 +322,57 @@ button.ma-close-btn:hover,
 .q-carousel__slide div.scroll{
   height: 100%;
 }
+.modal-help :deep(.q-panel.scroll){
+  overflow: hidden;
+}
+.pag_1{
+  height: 100%;
+  max-width: 450px;
+  // max-height: 70vw;
+  display:flex;
+  flex-direction: column;
+  align-items: stretch;
+  position:relative;
+}
+.pag_1 div.img{
+  // height: 100%;
+  height: 450px;
+  // max-height: 65%;
+}
+.pag_1 div.text{
+  margin-top: 20px;
+  height: calc(100% - 530px);
+  padding-right: 20px;
+  overflow: auto;
+  position: relative;
+}
+.gif{
+  // max-width: 100%;
+  width: 450px;
+}
 
-div.pag_1 img,
-div.pag_3 img,
-div.pag_4 img,
-div.pag_5 img{
-  max-width: 70%;
+.pag_1 h5{
+  margin-top: 0px;
+}
+.mobile .pag_1{
+  width: 100%;
+}
+dialog.mobile .pag_1 div.img{
+  height: 50%;
+  width: auto;
+  object-fit:contain;
+  margin: 0;
+  margin-left:auto;
+  margin-right:auto;
+}
+dialog.mobile .pag_1 div.img img{
+  height: 100%;
+  width: auto;
+}
+dialog.mobile .pag_1 div.text{
+  margin-top: 20px;
+  height: calc(50% - 70px);
+  overflow: auto;
+  position: relative;
 }
 </style>

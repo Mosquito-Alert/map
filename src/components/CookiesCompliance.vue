@@ -57,7 +57,6 @@ export default {
     })
 
     const openSettings = function () {
-      console.log('open')
       $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: true } })
     }
 
