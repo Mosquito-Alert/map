@@ -193,9 +193,9 @@ export default {
 }
 .cookie-settings dialog {
   max-width: 600px;
-  max-height: 70vh;
+  max-height: 600px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 5rem 5rem 3rem 5rem;
+  padding: 3rem;
   background-color: white;
   border: none;
   overflow:auto;
@@ -248,9 +248,9 @@ export default {
 }
 
 // MOBILE
-dialog.mobile {
-  max-width: 90vw;
-  max-height: 90vh;
+.cookie-settings dialog.mobile {
+  max-width: 100vw;
+  max-height: 96vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 1rem 1rem 1rem 1rem;
 }

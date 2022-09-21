@@ -157,7 +157,7 @@ export default function () {
         est: true,
         se: true,
         estTransparency: 0,
-        seTransparency: 0.5,
+        seTransparency: 0.75,
         // Default uncertainty color
         uncertaintyColor: '#191919',
         estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
