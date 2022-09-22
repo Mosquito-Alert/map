@@ -15,36 +15,36 @@
             height="95%"
             swipeable
             animated
-            prev-icon="arrow_left"
-            next-icon="arrow_right"
+            prev-icon="navigate_before"
+            next-icon="navigate_next"
             navigation
-            control-color="orange"
+            control-type="flat"
+            control-color="grey"
             padding
             :arrows="!mobile"
             class="rounded-borders">
               <q-carousel-slide name="pag_1" class="column no-wrap">
-                <div class="pag_1">
+                <div class="page pag_1">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help1.gif" />
+                    <img class="gif" src="~/assets/img/help/help1.gif" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
                       <h5 class="q-my-md">{{ _('Layers selector help') }}</h5>
-                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur velit alias quo laborum dignissimos aperiam provident qui, soluta culpa harum voluptas nulla quas blanditiis accusantium sunt aliquam iure itaque quasi. Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum similique, excepturi, modi inventore autem quasi quisquam veritatis, libero quaerat magnam ipsam explicabo incidunt dolor. Laborum earum adipisci beatae labore voluptatem. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tenetur sint nam consequatur, voluptatibus veritatis quaerat facilis odit vero, unde laudantium cum molestias cumque aliquid suscipit odio, repellendus ipsa quibusdam pariatur eos animi. Doloribus numquam sint aut. Illo quis rem tempore, excepturi maiores, consequuntur inventore atque itaque beatae reprehenderit blanditiis quibusdam quisquam quod sint dolorum adipisci! A itaque ullam dolorem vero veniam consequuntur placeat nihil minima distinctio obcaecati iure, et voluptates doloribus eius sit nemo maxime modi? Debitis ut sapiente autem magnam? Molestias explicabo ad rerum maiores nobis deserunt numquam quae quidem consequatur, doloremque ducimus? Corrupti eligendi ipsam impedit eius amet.</p>
+                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
                     </div>
                   </div>
                 </div>
               </q-carousel-slide>
 
-              <q-carousel-slide name="pag_2" class="column no-wrap flex-center">
-                <div class="pag_2 scroll q-pr-md">
-                  <h5>{{ _('Filters help') }}</h5>
-                  <div class="row q-mt-md q-pr-md text-left">
+              <q-carousel-slide name="pag_2" class="column no-wrap">
+                <div class="page pag_2">
+                  <div class="img">
+                    <img class="gif" src="~/assets/img/help/help2.gif" draggable="false" />
+                  </div>
+                  <div class="q-ml-lg text">
                     <div>
-                    <!-- <div class="column-img col-xl-7 col-lg-7 col-md-7 q-px-md self-center"> -->
-                      <img src="~/assets/img/help/help2.gif">
-                    <!-- </div> -->
-                    <!-- <div class="col-xl-5 col-lg-5 col-md-5 text-justify scroll"> -->
+                      <h5 class="q-my-md">{{ _('Filters help') }}</h5>
                       <p>{{ _('Filtra tu selección de distintas maneras:') }}</p>
                       <p><b>{{ _('POR LOCALIZACIÓN') }}</b>: {{ _('Escribe y selecciona del desplegable tu lugar de interés') }}</p>
                       <p><b>{{ _('POR HASHTAG') }}</b>: {{ _('puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.') }}</p>
@@ -58,43 +58,48 @@
                 </div>
               </q-carousel-slide>
 
-              <q-carousel-slide name="pag_3" class="column no-wrap flex-center">
-                <div class="pag_3 scroll q-pr-md">
-                  <h5>{{ _('Download and reports help') }}</h5>
-                  <div class="row q-mt-md q-pr-md text-left">
+              <q-carousel-slide name="pag_3" class="column no-wrap">
+                <div class="page pag_3">
+                  <div class="img">
+                    <img class="gif" src="~/assets/img/help/help3.gif" draggable="false" />
+                  </div>
+                  <div class="q-ml-lg text">
                     <div>
-                      <img src="~/assets/img/help/help3.gif">
+                      <h5>{{ _('Download and reports help') }}</h5>
                       <p>{{ _('Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.') }}</p>
                     </div>
                   </div>
                 </div>
               </q-carousel-slide>
 
-              <q-carousel-slide name="pag_4" class="column no-wrap flex-center">
-                <div class="pag_4 scroll q-pr-md">
-                  <h5>{{ _('Graph help') }}</h5>
-                  <div class="row q-mt-md q-pr-md text-left">
+              <q-carousel-slide name="pag_4" class="column no-wrap">
+                <div class="page pag_4">
+                  <div class="img">
+                    <img class="gif" src="~/assets/img/help/help4.gif" draggable="false">
+                  </div>
+                  <div class="q-ml-lg text">
                     <div>
-                      <img src="~/assets/img/help/help4.gif">
+                      <h5>{{ _('Graph help') }}</h5>
                       <p>{{ _('Consulta la información de la vista del mapa en formato de gráfico temporal') }}</p>
                     </div>
                   </div>
                 </div>
               </q-carousel-slide>
 
-              <q-carousel-slide name="pag_5" class="column no-wrap flex-center">
-                <div class="pag_5 scroll q-pr-md">
-                  <h5>{{ _('Shareview help') }}</h5>
-                  <div class="row q-mt-md q-pr-md text-left">
+              <q-carousel-slide name="pag_5" class="column no-wrap">
+                <div class="page pag_5">
+                  <div class="img">
+                    <img class="gif" src="~/assets/img/help/help5.gif" draggable="false">
+                  </div>
+                  <div class="q-ml-lg text">
                     <div>
-                      <img src="~/assets/img/help/help5.gif">
+                      <h5>{{ _('Shareview help') }}</h5>
                       <p>{{ _('Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa') }}</p>
                     </div>
                   </div>
                 </div>
               </q-carousel-slide>
             </q-carousel>
-
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
           <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
@@ -112,7 +117,7 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
-    const slide = ref('pag_1')
+    const slide = ref('pag_2')
     const $store = useStore()
     const close = function () {
       $store.commit('app/setModal', { id: 'help', content: { visibility: false } })
@@ -325,7 +330,7 @@ button.ma-close-btn:hover,
 .modal-help :deep(.q-panel.scroll){
   overflow: hidden;
 }
-.pag_1{
+.page{
   height: 100%;
   max-width: 450px;
   // max-height: 70vw;
@@ -334,12 +339,12 @@ button.ma-close-btn:hover,
   align-items: stretch;
   position:relative;
 }
-.pag_1 div.img{
+.page div.img{
   // height: 100%;
   height: 450px;
   // max-height: 65%;
 }
-.pag_1 div.text{
+.page div.text{
   margin-top: 20px;
   height: calc(100% - 530px);
   padding-right: 20px;
@@ -351,13 +356,13 @@ button.ma-close-btn:hover,
   width: 450px;
 }
 
-.pag_1 h5{
+.page h5{
   margin-top: 0px;
 }
-.mobile .pag_1{
+.mobile .page{
   width: 100%;
 }
-dialog.mobile .pag_1 div.img{
+dialog.mobile .page div.img{
   height: 50%;
   width: auto;
   object-fit:contain;
@@ -365,14 +370,24 @@ dialog.mobile .pag_1 div.img{
   margin-left:auto;
   margin-right:auto;
 }
-dialog.mobile .pag_1 div.img img{
+dialog.mobile .page div.img img{
   height: 100%;
   width: auto;
 }
-dialog.mobile .pag_1 div.text{
+dialog.mobile .page div.text{
   margin-top: 20px;
   height: calc(50% - 70px);
   overflow: auto;
   position: relative;
+}
+dialog.modal-help :deep(.q-carousel__arrow button span i) {
+  font-size: 38px;
+}
+dialog.modal-help :deep(button.q-carousel__navigation-icon--active span i) {
+  color: $primary-color;
+  font-size: 1.5em;
+}
+dialog.modal-help :deep(.q-carousel__control) {
+  align-items:end;
 }
 </style>
