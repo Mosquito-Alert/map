@@ -71,15 +71,12 @@
 
         <div class="q-mt-xl flex model-buttons">
             <div>
-            <q-btn
-              icon="info"
-              class="ma-btn no-margin"
-              :class="(disabledInfo)?'disabled':''"
-              @click="goInfoModal">
+            <div class="cursor-link" @click="goInfoModal">
               <div class="q-ml-xs">
+                <q-icon name="info"></q-icon>
                 {{ _('MODELED DATA') }}
               </div>
-            </q-btn>
+            </div>
           </div>
             <div>
             <q-btn
@@ -338,7 +335,9 @@ export default {
         $store.commit('map/setModelDate', inputDate.value)
       }
       disabled.value = (!model.value || !inputDate.value)
-      disabledInfo.value = false
+      if (inputDate.value) {
+        disabledInfo.value = false
+      }
     }
 
     const filterModels = function () {
@@ -636,6 +635,7 @@ div.flex-right{
   justify-content: space-between;
   align-items: center;
 }
+
 button.ma-btn{
   padding: 8px 10px;
   border-radius: 3px;
@@ -643,9 +643,15 @@ button.ma-btn{
   box-shadow: none;
   color: white;
 }
+button.ma-btn-no-bg{
+  padding: 8px 10px;
+  background: none;
+  box-shadow: none;
+}
 .no-margin{
   margin: 0px;
 }
+
 button.ma-btn.disabled{
   background: $grey-color;
   pointer-events: none;
@@ -714,5 +720,8 @@ input:checked + .cookie-comply-slider{
 .estimation-colors div :deep(div.q-color-picker__cube){
   width: 16% !important;
   margin: 3px 0 !important;
+}
+.cursor-link{
+  cursor: pointer;
 }
 </style>
