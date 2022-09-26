@@ -6,24 +6,16 @@ export default function () {
   let backendUrl = ''
   let frontendUrl = ''
   let analyticsCode
-  let urlModels
-  let modelsManifest
   const { cookies } = useCookies()
 
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
-    urlModels = backendUrl + 'media/global_minimal_model_estimates/'
-    modelsManifest = backendUrl + 'media/global_minimal_model_estimates/model_manifest.csv'
-    // backendUrl = 'http://192.168.1.47:8080/django/'
-    // frontendUrl = 'http://192.168.1.47:8080/'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
     analyticsCode = 'G-ZLD12V4W3V'
-    urlModels = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/'
-    modelsManifest = '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv'
   }
   // first language is default
   const allowedLangs = ['en', 'es', 'ca']
@@ -63,14 +55,12 @@ export default function () {
   return {
     authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
     registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
+    modelsManifestUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv',
+    modelsUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
+    tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
     gridsize: 0.025,
     analyticsId: analyticsCode,
     cookiesComply: compliance(),
-    modelsServerPath: urlModels,
-    // Manifest file is a csv with column target (albopictus, culex...),
-    // year(2014, ...), display (TRUE, FALSE)
-    tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
-    modelsManifest: modelsManifest,
     modelsProperties: {
       gadm0: {
         minZoom: 0,

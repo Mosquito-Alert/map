@@ -242,7 +242,7 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-    const modelsManifest = {}
+    const modelsManifestUrl = {}
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
     const palettes = ref(null)
@@ -265,7 +265,7 @@ export default {
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       uncertaintyColor.value = defaults.uncertaintyColor
       // Fetch model manifest to activate/deactivate calendar
-      const manifestUrl = $store.getters['app/getModelsManifest']
+      const manifestUrl = $store.getters['app/getModelsManifestUrl']
       fetch(manifestUrl)
         .then(function (response) {
           return response.text()
@@ -287,7 +287,7 @@ export default {
             if (cell !== '') {
               cellValue = currentLine[cellIdx].toLowerCase()
             }
-            modelsManifest[target] = { year: year, cell: cellValue }
+            modelsManifestUrl[target] = { year: year, cell: cellValue }
           }
         })
     })
@@ -349,7 +349,7 @@ export default {
         disabled.value = false
       }
       // Check if selected models is available. if not clear modelDate
-      startingModelDate.value = modelsManifest[model.value.code].year + '/01'
+      startingModelDate.value = modelsManifestUrl[model.value.code].year + '/01'
       if (modelDate.value) {
         const selected = parseInt(modelDate.value.slice(-4))
         const previous = parseInt(startingModelDate.value.substring(0, 4))
@@ -364,7 +364,7 @@ export default {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
-        const serverModels = $store.getters['app/getModelsServerPath']
+        const serverModels = $store.getters['app/getModelsUrl']
         // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
         const selectedModel = model.value.code
         const urls = [
@@ -375,7 +375,7 @@ export default {
           serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv'
         ]
         // Add cell layer based on manifest
-        if (modelsManifest[selectedModel].cell === 'true') {
+        if (modelsManifestUrl[selectedModel].cell === 'true') {
           urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
         }
         const centroidsUrls = [

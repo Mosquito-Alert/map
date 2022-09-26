@@ -63,8 +63,8 @@ export const getPendingView = state => {
   return state.pendingView
 }
 
-export const getModelsServerPath = state => {
-  return state.modelsServerPath
+export const getModelsUrl = state => {
+  return state.modelsUrl
 }
 
 export const getLeftDrawerStatus = state => {
@@ -83,8 +83,8 @@ export const getAnalyticsId = state => {
   return state.analyticsId
 }
 
-export const getModelsManifest = state => {
-  return state.modelsManifest
+export const getModelsManifestUrl = state => {
+  return state.modelsManifestUrl
 }
 
 export const getModelsProperties = state => {
