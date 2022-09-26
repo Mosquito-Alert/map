@@ -210,7 +210,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref } from 'vue'
+import { watch, computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 
@@ -248,7 +248,7 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-    const modelsManifestUrl = {}
+    const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
     const palettes = ref(null)
@@ -293,7 +293,7 @@ export default {
             if (cell !== '') {
               cellValue = currentLine[cellIdx].toLowerCase()
             }
-            modelsManifestUrl[target] = { year: year, cell: cellValue }
+            modelsManifest[target] = { year: year, cell: cellValue }
           }
         })
     })
@@ -349,7 +349,6 @@ export default {
     }
 
     const filterModels = function () {
-      console.log('selected')
       showLegend.value = false
       context.emit('clearModel')
 
@@ -357,17 +356,22 @@ export default {
         type: model.value.type,
         code: model.value.code
       })
-      if (model.value && inputDate.value) {
-        disabled.value = false
-      }
+
       // Check if selected models is available. if not clear modelDate
-      startingModelDate.value = modelsManifestUrl[model.value.code].year + '/01'
+      startingModelDate.value = modelsManifest[model.value.code].year + '/01'
       if (modelDate.value) {
         const selected = parseInt(modelDate.value.slice(-4))
         const previous = parseInt(startingModelDate.value.substring(0, 4))
         if (previous > selected) {
           inputDate.value = null
+          modelDate.value = null
         }
+      }
+
+      if (model.value && inputDate.value) {
+        disabled.value = false
+      } else {
+        disabled.value = true
       }
     }
 
@@ -387,7 +391,7 @@ export default {
           serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv'
         ]
         // Add cell layer based on manifest
-        if (modelsManifestUrl[selectedModel].cell === 'true') {
+        if (modelsManifest[selectedModel].cell === 'true') {
           urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
         }
         const centroidsUrls = [
@@ -509,6 +513,18 @@ export default {
     const goInfoModal = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
+
+    watch(options, (cur, old) => {
+      if (model.value) {
+        if (model.value.code) {
+          const index = cur.findIndex(obj => {
+            return (obj.code === model.value.code)
+          })
+          model.value = cur[index]
+        }
+      }
+    })
+
     return {
       _,
       goInfoModal,

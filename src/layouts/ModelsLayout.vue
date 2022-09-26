@@ -176,7 +176,6 @@ export default {
     }
 
     const clearModel = function () {
-      console.log('si')
       map.value.clearModel()
     }
 
