@@ -282,16 +282,10 @@ export default defineComponent({
       seModelLayer.addLayer()
     }
 
-    const loadModel = async function (data) {
-      if (estModelLayer) {
-        map.value.map.removeLayer(estModelLayer.layer)
-        estModelLayer = null
-        // estModelLayer.addLayer()
-      }
+    const clearModel = async function (data) {
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
         seModelLayer = null
-        // seModelLayer.addLayer()
       }
       if (seModelLayer1) {
         map.value.map.removeLayer(seModelLayer1.layer)
@@ -305,7 +299,19 @@ export default defineComponent({
       if (seModelLayer4) {
         map.value.map.removeLayer(seModelLayer4.layer)
       }
+      if (estModelLayer) {
+        map.value.map.removeLayer(estModelLayer.layer)
+        estModelLayer = null
+      }
       map.value.map.removeLayer(modelsLayer)
+    }
+
+    const loadModel = async function (data) {
+      if (estModelLayer) {
+        map.value.map.removeLayer(estModelLayer.layer)
+        estModelLayer = null
+      }
+      clearModel()
       spinner(true)
       CSVS = {}
       const urls = data.modelsCsv
@@ -746,7 +752,8 @@ export default defineComponent({
       unfoldAttribution,
       leftDrawerIcon,
       map,
-      loadModel
+      loadModel,
+      clearModel
     }
   }
 })

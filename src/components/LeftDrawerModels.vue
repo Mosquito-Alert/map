@@ -69,12 +69,16 @@
           </template>
         </q-input>
 
-        <div class="q-mt-xl flex model-buttons">
-            <div>
-            <div class="cursor-link" @click="goInfoModal">
-              <div class="q-ml-xs">
-                <q-icon name="info"></q-icon>
-                {{ _('MODELED DATA') }}
+        <div class="q-mt-xl flex-center model-buttons">
+          <div>
+            <div class="div-link" @click="goInfoModal">
+              <div class="flex-center q-ml-xs">
+                <div>
+                  <q-icon name="info_outline" class="text-h4-normal"></q-icon>
+                </div>
+                <div class="q-ml-xs lower-case capitalFirstLetter">
+                  {{ _('MODELED DATA') }}
+                </div>
               </div>
             </div>
           </div>
@@ -214,6 +218,8 @@ export default {
   components: { LeftMenu },
   props: ['expanded'],
   emits: [
+    'loadModel',
+    'clearModel',
     'checkModelEstimation',
     'checkModelUncertainty',
     'estimationTransparency',
@@ -328,6 +334,8 @@ export default {
     })
 
     const checkValue = function (val, reason, details) {
+      showLegend.value = false
+      context.emit('clearModel')
       if (reason === 'month') {
         modelDate.value = val
         inputDate.value = val
@@ -341,6 +349,10 @@ export default {
     }
 
     const filterModels = function () {
+      console.log('selected')
+      showLegend.value = false
+      context.emit('clearModel')
+
       context.emit('filterObservations', {
         type: model.value.type,
         code: model.value.code
@@ -721,7 +733,24 @@ input:checked + .cookie-comply-slider{
   width: 16% !important;
   margin: 3px 0 !important;
 }
-.cursor-link{
+.div-link{
   cursor: pointer;
+}
+.div-link:hover{
+  color: $primary-color;
+}
+.lower-case{
+      text-transform: lowercase;
+}
+.capitalFirstLetter:first-letter {
+    text-transform: uppercase;
+}
+.flex-center{
+  display: flex;
+  align-items: center;
+}
+.text-h4-normal{
+  font-size: 2.125rem;
+  font-weight: 100;
 }
 </style>

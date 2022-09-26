@@ -6,6 +6,7 @@
     <left-drawer-models ref="TOC"
       :expanded="expanded"
       @loadModel="loadModel"
+      @clearModel="clearModel"
       @toggleLeftDrawer="toggleLeftDrawer"
       @showShareUrl="showShareUrl"
       @checkModelEstimation="checkModelEstimation"
@@ -174,20 +175,10 @@ export default {
       map.value.loadModel(payload)
     }
 
-    // onMounted(() => {
-    //   const dataUrl = $store.getters['app/getBackend']
-    //   fetch(dataUrl + 'api/models/available/', {
-    //     method: 'GET'
-    //   })
-    //     .then((response) => {
-    //       return response.json()
-    //     })
-    //     .then(json => {
-    //       console.log(json)
-    //     }).catch((error) => {
-    //       console.log(error)
-    //     })
-    // })
+    const clearModel = function () {
+      console.log('si')
+      map.value.clearModel()
+    }
 
     const setModelDate = function (payload) {
       TOC.value.inputDate = payload
@@ -252,6 +243,7 @@ export default {
       timeseries,
       resizeMap,
       loadModel,
+      clearModel,
       setModelDate,
       CookiesCompliance
     }

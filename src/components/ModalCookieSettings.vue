@@ -191,6 +191,7 @@ export default {
   align-items: center;
   z-index: 2100;
 }
+
 .cookie-settings dialog {
   max-width: 600px;
   max-height: 600px;
