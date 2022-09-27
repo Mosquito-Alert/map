@@ -1,4 +1,4 @@
-L'arxiu que conté la configuració de l'aplicació es troba dins de la següent carpeta:
+Abans de fer un build de l'aplicació cal configurar l'arxiu
 
 src\store\app\state.js
 
