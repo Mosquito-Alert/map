@@ -70,10 +70,10 @@
 
         <div class="q-mt-xl flex-center model-buttons">
           <div>
-            <div class="div-link" @click="goInfoModal">
-              <div class="flex-center q-ml-xs">
+            <div @click="goInfoModal">
+              <div class="div-link flex-center q-ml-xs">
                 <div>
-                  <q-icon name="info_outline" class="text-h4-normal"></q-icon>
+                  <i class="fa-thin fa-circle-info"></i>
                 </div>
                 <div class="q-ml-xs lower-case capitalFirstLetter">
                   {{ _('MODELED DATA') }}
@@ -750,10 +750,15 @@ input:checked + .cookie-comply-slider{
 }
 .div-link{
   cursor: pointer;
+  color: rgb(0,0,0,0.6);
 }
 .div-link:hover{
   color: $primary-color;
 }
+.div-link div i {
+  font-size: 22px;
+}
+.div-link
 .lower-case{
       text-transform: lowercase;
 }
@@ -768,4 +773,5 @@ input:checked + .cookie-comply-slider{
   font-size: 2.125rem;
   font-weight: 100;
 }
+
 </style>
