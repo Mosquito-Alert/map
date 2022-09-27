@@ -474,10 +474,6 @@ export default defineComponent({
 
     // const styles = {}
     const colorizeGadm1 = (feature, style) => {
-      // const colors = {
-      //   from: jsonProperties.gadm1.colorFrom,
-      //   to: jsonProperties.gadm1.colorTo
-      // }
       return colorizeGadm(feature, style, CSVS['1'])
     }
     const colorizeGadm2 = (feature, style) => {
@@ -489,10 +485,6 @@ export default defineComponent({
     }
 
     const colorizeGadm4 = (feature, style) => {
-      // const colors = {
-      //   from: jsonProperties.gadm2.colorFrom,
-      //   to: jsonProperties.gadm2.colorTo
-      // }
       return colorizeGadm(feature, style, CSVS['4'])
     }
 
