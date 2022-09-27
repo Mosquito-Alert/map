@@ -98,7 +98,7 @@
               {{ _('Probability') }}
             </div>
             <div class="estimation-palettes">
-              <q-icon v-if="estimation" name="palette" class="text-orange" size="2em" @click="showPalettes" />
+              <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" />
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
@@ -150,7 +150,7 @@
               {{ _('Uncertainty') }}
             </div>
             <div>
-              <q-icon v-if="uncertainty" name="palette" class="text-orange" size="2em" @click="showPicker" />
+              <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" />
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
