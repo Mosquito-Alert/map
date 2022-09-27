@@ -1,0 +1,19 @@
+L'arxiu que conté la configuració de l'aplicació es troba dins de la següent carpeta:
+
+src\store\app\state.js
+
+Algunes variables tenen valors diferents en funció de si estan en un entorn de desenvolupament o no. Per exemple, el següent codi:
+
+  if (process.env.DEV) {
+    // ENTORN DE DESENVOLUPAMENT
+    backendUrl = 'http://localhost:8000/'
+    frontendUrl = 'http://localhost:8080/'
+    analyticsCode = 'G-RT6ZXWX8PS'
+  } else {
+    // PRODUCCIÓ. VERSIÓ COMPILADA
+    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
+    frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
+    analyticsCode = 'G-ZLD12V4W3V'
+  }
+
+  Les principals variables estan comentades en el mateix arxiu

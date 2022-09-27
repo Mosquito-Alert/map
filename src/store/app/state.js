@@ -53,60 +53,65 @@ export default function () {
   }
 
   return {
+    // URL to log in the "old" private area. Same domain of current web is required
     authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
+
+    // URL of the public old web
     registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
+
+    // URL of model_manifest.csv file. This files includes a relation of available pregenerated models
     modelsManifestUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv',
+
+    // URL where models are available
     modelsUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
+
+    // URL of vector tiles
     tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
+
+    // Grid size of cell format models
     gridsize: 0.025,
+
+    // Google Analytics code
     analyticsId: analyticsCode,
+
     cookiesComply: compliance(),
+
+    // Info about models.
     modelsProperties: {
       gadm0: {
         minZoom: 0,
         maxZoom: 0,
-        id: 'ID_0',
-        est: 'est',
-        se: 'se',
-        colorFrom:
-        'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        id: 'ID_0', // id column name
+        est: 'est', // estimation column name
+        se: 'se' // uncertainty column name
       },
       gadm1: {
         minZoom: 0,
         maxZoom: 2,
         id: 'gid_1',
         est: 'est',
-        se: 'se',
-        colorFrom: 'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        se: 'se'
       },
       gadm2: {
         minZoom: 2,
         maxZoom: 4,
         id: 'gid_2',
         est: 'est',
-        se: 'se',
-        colorFrom: 'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        se: 'se'
       },
       gadm3: {
         minZoom: 4,
         maxZoom: 6,
         id: 'gid_3',
         est: 'est',
-        se: 'se',
-        colorFrom: 'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        se: 'se'
       },
       gadm4: {
         minZoom: 6,
         maxZoom: 9,
         id: 'gid_4',
         est: 'est',
-        se: 'se',
-        colorFrom: 'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        se: 'se'
       },
       grid: {
         minZoom: 9,
@@ -114,16 +119,15 @@ export default function () {
         lon: 'lon',
         lat: 'lat',
         est: 'est',
-        se: 'se',
-        colorFrom: 'rgb(231,225,239,1)',
-        colorTo: 'rgb(145,0,63,1)'
+        se: 'se'
       }
     },
-    // key to make leftdrawer component re-render
     calendarSubtitle: '',
     isMobile: mobile(),
     pendingView: { extent: null },
     leftDrawerStatus: !mobile(),
+
+    // Max number of reports available per request
     reportsLimit: 300,
     lang: defaultLang,
     isFilteringTag: false,
@@ -132,14 +136,15 @@ export default function () {
       observations: [
         { type: 'observations', code: 'tiger' },
         { type: 'observations', code: 'culex' }
-        // { type: 'bites', code: 'pending' }
       ],
-      // dates: [{ from: '2021/01/01', to: '2021/12/31' }],
       dates: [getCurrentYearDates()],
       hashtags: [],
-      // INFO_OPEN: false
+
+      // Colors of selected administration boundaries
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
       strokeLocationColor: 'orange',
+
+      // Default values for selected models
       model: {
         esp: '',
         year: '',
@@ -166,6 +171,8 @@ export default function () {
     BACKEND: backendUrl,
     FRONTEND: frontendUrl,
     trans: {},
+
+    // Default values for all modal windows
     modals: {
       cookieSettings: { visibility: false },
       cookiePolicy: { visibility: false },
@@ -179,6 +186,8 @@ export default function () {
       wait: { visibility: false, seamless: false },
       login: { visibility: false }
     },
+
+    // File locations of map selected icons
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
       mosquito_tiger_probable: require('../../assets/img/marker_tiger_selected.svg'),
@@ -200,7 +209,8 @@ export default function () {
       breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
-    // worker,
+
+    // Info related with citizen observations (raw data)
     layers: {
       observations: { // Mosquito observations
         tiger: {
@@ -303,6 +313,8 @@ export default function () {
         ]
       }
     },
+
+    // Info related with species and models
     models: {
       tiger: {
         categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],

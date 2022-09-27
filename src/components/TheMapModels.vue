@@ -822,7 +822,6 @@ export default defineComponent({
     bottom: 4px;
     right: 10px;
     z-index: 9;
-    background: #33333342;
     font-size: 10px;
     color: white;
     padding: 4px 10px;
@@ -831,7 +830,9 @@ export default defineComponent({
     line-height: 13px;
     display:inline-block;
   }
-
+  .ol-attribution:not(.ol-collapsed){
+    background: #33333342;
+  }
   .ol-attribution div{
     display:inline;
   }

@@ -397,6 +397,9 @@ export default {
     display:inline-block;
   }
 
+  .ol-attribution:not(.ol-collapsed){
+    background: #33333342;
+  }
   .ol-attribution div{
     display:inline;
   }

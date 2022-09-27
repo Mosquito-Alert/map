@@ -53,7 +53,6 @@
               <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
                 <q-date
                   :title="_('Select model date')"
-                  :subtitle="_('Click on year and month')"
                   :navigation-min-year-month="startingModelDate"
                   :navigation-max-year-month="getCurrentDate"
                   mask="MM/YYYY"
