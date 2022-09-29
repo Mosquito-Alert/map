@@ -530,7 +530,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm1.maxZoom + 1,
         format: new MVT(),
-        url: tilesUrl + '/gadm1/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm1/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm1
     })
@@ -543,7 +543,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm2.maxZoom,
         format: new MVT(),
-        url: tilesUrl + '/gadm2/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm2/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm2
     })
@@ -556,7 +556,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm3.maxZoom - 1,
         format: new MVT(),
-        url: tilesUrl + '/gadm3/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm3/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm3
     })
@@ -569,7 +569,7 @@ export default defineComponent({
       source: new VectorTileSource({
         maxZoom: jsonProperties.gadm4.maxZoom - 2,
         format: new MVT(),
-        url: tilesUrl + '/gadm4/{z}/{x}/{y}'
+        url: tilesUrl + '/gadm4/{z}/{x}/{y}.pbf'
       }),
       style: colorizeGadm4
     })
