@@ -66,7 +66,7 @@
                 @range-end="rangeEnd"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="_('Delete calendar')" class="ma-btn"
+                  <q-btn :label="_('Select all')" class="ma-btn"
                     flat
                     v-close-popup
                     @click="resetDateFilter"

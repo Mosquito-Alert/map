@@ -717,6 +717,13 @@ export default defineComponent({
     function updateMap () {
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
+      $store.commit('map/setDefaults', {
+        zoom: newZoom,
+        center: transform(
+          olmap.getView().getCenter(),
+          'EPSG:3857', 'EPSG:4326'
+        )
+      })
       if (parseInt(currZoom) !== parseInt(newZoom)) {
         currZoom = newZoom
         spiderfiedIds = []

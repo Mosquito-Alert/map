@@ -1,20 +1,20 @@
 <template>
     <q-toolbar>
-      <fa-thin-button
+      <fa-thin-button-router
         name="fa-thin fa-layer-group"
-        :label="_('Layers')"
+        :label="_('Reports')"
         :class="active_item=='layers'?'active':''"
         :link="frontendUrl"
       >
-      </fa-thin-button>
+      </fa-thin-button-router>
 
-      <fa-thin-button
+      <fa-thin-button-router
         name="fa-thin fa-chart-scatter"
-        :label="_('Models')"
+        :label="_('Estimates')"
         :class="active_item=='models'?'active':''"
-        :link="linkModels"
+        link="models"
       >
-      </fa-thin-button>
+      </fa-thin-button-router>
 
       <q-toolbar-title></q-toolbar-title>
 
@@ -60,11 +60,12 @@ import { useStore } from 'vuex'
 import { useQuasar } from 'quasar'
 import { onMounted, ref, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
+import FaThinButtonRouter from 'components/FaThinButtonRouter.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import { useCookies } from 'vue3-cookies'
 
 export default {
-  components: { FaThinButton, FaThinButtonMenu },
+  components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
   emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort'],
   props: ['expanded', 'item'],
   computed: {

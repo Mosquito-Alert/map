@@ -13,7 +13,7 @@
       :loadTilesWhileAnimating='true'
       :loadTilesWhileInteracting='true'
       @movestart='hideSpinner'
-      @moveend='showZoom'
+      @moveend='updateMap'
       style='height:100%'>
 
         <ol-zoom-control :duration='600' />
@@ -578,9 +578,17 @@ export default defineComponent({
       layers: [gadm1, gadm2, gadm3, gadm4]
     })
 
-    function showZoom () {
+    function updateMap () {
       const view = map.value.map.getView()
       console.log(map.value.map.getView().getZoom() + ' ' + view.getResolution())
+      const newZoom = map.value.map.getView().getZoom()
+      $store.commit('map/setDefaults', {
+        zoom: newZoom,
+        center: transform(
+          map.value.map.getView().getCenter(),
+          'EPSG:3857', 'EPSG:4326'
+        )
+      })
     }
 
     const estimationVisibility = function (state) {
@@ -732,7 +740,7 @@ export default defineComponent({
       estimationOpacity,
       uncertaintyOpacity,
       baseMap,
-      showZoom,
+      updateMap,
       center,
       zoom,
       mobile,
