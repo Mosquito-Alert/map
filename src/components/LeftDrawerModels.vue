@@ -246,7 +246,7 @@ export default {
     const uncertainty = ref(true)
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
-    const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+    // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
@@ -266,6 +266,22 @@ export default {
 
     onMounted(function () {
       palettes.value = [].concat.apply([], $store.getters['app/getEstPalettes'])
+      const defaults = $store.getters['app/getModelDefaults']
+      console.log(defaults)
+      if (defaults.esp !== '') {
+        model.value = defaults.esp
+        showLegend.value = true
+        estimation.value = defaults.est
+        uncertainty.value = defaults.se
+        estimationTransparency.value = (1 - defaults.estTransparency) * 100
+        uncertaintyTransparency.value = (1 - defaults.seTransparency) * 100
+        uncertaintyColor.value = defaults.uncertaintyColor
+        estimationColor.value = defaults.estColors
+      }
+      if (defaults.year !== '' && defaults.month !== '') {
+        inputDate.value = defaults.month + '/' + defaults.year
+      }
+
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       uncertaintyColor.value = defaults.uncertaintyColor
@@ -411,7 +427,9 @@ export default {
           seTransparency: uncertaintyTransparency.value,
           uncertaintyColor: uncertaintyColor.value,
           estColors: estColors,
-          estPalettes: estPalettes
+          estPalettes: estPalettes,
+          modelsCsv: urls,
+          centroidsUrls: centroidsUrls
         }
         $store.commit('app/setModelDefaults', payload)
         context.emit('loadModel', {

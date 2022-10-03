@@ -66,8 +66,8 @@ export default function () {
     modelsUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    // tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
-    tilesUrl: '//localhost:8000/api/tiles',
+    tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
+    // tilesUrl: '//localhost:8000/api/tiles',
 
     // Grid size of cell format models
     gridsize: 0.025,
@@ -157,6 +157,8 @@ export default function () {
         // Default uncertainty color
         uncertaintyColor: '#191919',
         estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+        modelsCsv: [],
+        centroidsUrls: [],
         estPalettes: [
           // DIVERGENTS
           ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],

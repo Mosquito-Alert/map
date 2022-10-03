@@ -104,7 +104,7 @@ export default defineComponent({
     let gadm4MaxZoom
     let dataGridGeojson
     const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
-
+    $store.commit('map/selectFeature', {})
     // Map general configuration
     const zoom = computed(() => {
       return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
@@ -140,11 +140,15 @@ export default defineComponent({
     onMounted(function () {
       ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-
-      const paramViewCode = (props.viewCode) ? props.viewCode : null
-      if (paramViewCode) {
-        // Add model prefix to code
-        loadView(map.value.map, 'M-' + paramViewCode)
+      const defaults = $store.getters['app/getModelDefaults']
+      if (defaults.modelsCsv.length && defaults.centroidsUrls.length) {
+        loadModel(defaults)
+      } else {
+        const paramViewCode = (props.viewCode) ? props.viewCode : null
+        if (paramViewCode) {
+          // Add model prefix to code
+          loadView(map.value.map, 'M-' + paramViewCode)
+        }
       }
     })
 
@@ -307,6 +311,7 @@ export default defineComponent({
     }
 
     const loadModel = async function (data) {
+      console.log(data)
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null

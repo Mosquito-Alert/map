@@ -193,15 +193,15 @@ export default {
 
     const estimationTransparency = function (payload) {
       // Normalize transparency
-      $store.commit('app/setEstTransparency', payload.transparency)
       const t = 1 - (payload.transparency / 100)
+      $store.commit('app/setEstTransparency', t)
       map.value.estimationOpacity(t)
     }
 
     const uncertaintyTransparency = function (payload) {
       // Normalize transparency
-      $store.commit('app/setSeTransparency', payload.transparency)
       const t = 1 - (payload.transparency / 100)
+      $store.commit('app/setSeTransparency', t)
       map.value.uncertaintyOpacity(t)
     }
 
