@@ -25,10 +25,10 @@
         <div class="category-box q-my-md">
           <q-select
             :label="_('Models')"
-            v-model="model"
+            v-model="modelVector"
             color="orange"
-            :label-color="model?'orange':'rgba(0, 0, 0, 0.6)'"
-            :options="options"
+            :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
+            :options="vectorOptions"
             :option-value="'code'"
             :option-label="'type'"
             @update:model-value="filterModels"
@@ -37,7 +37,7 @@
         </div>
 
         <q-input
-          v-if="model"
+          v-if="modelVector"
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
@@ -142,7 +142,7 @@
               :max="100"
               v-model="estimationTransparency"
               color="orange"
-              @update:model-value="setEstTransparency"/>
+              @update:model-value="setEstimationTransparency"/>
           </div>
           <!-- UNCERTAINTY -->
           <div class="flex spaceBetween">
@@ -241,7 +241,7 @@ export default {
     const showLegend = ref(false)
     const disabled = ref(true)
     const disabledInfo = ref(true)
-    const model = ref()
+    const modelVector = ref()
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
@@ -251,11 +251,11 @@ export default {
     const startingModelDate = ref('2014/05')
     const estimationColor = ref(null)
     const palettes = ref(null)
-    let estColors = $store.getters['app/getEstColors']
-    const estLegendColors = ref(estColors)
-    const initialSeTransparency = $store.getters['app/getModelDefaults'].seTransparency
+    let estimationColors = $store.getters['app/getEstimationColors']
+    const estLegendColors = ref(estimationColors)
+    const initialSeTransparency = $store.getters['app/getModelDefaults'].uncertaintyTransparency
     const estimationTransparency = ref(0)
-    const uncertaintyTransparency = ref(initialSeTransparency * 100)
+    const uncertaintyTransparency = ref(initialSeTransparency)
     const colorsTo = [
       hexToRgb('#ff0000'), hexToRgb('#ff8000'), hexToRgb('#ffff00'),
       hexToRgb('#00ff00'), hexToRgb('#00ff80'), hexToRgb('#00ff80'),
@@ -265,21 +265,23 @@ export default {
     ]
 
     onMounted(function () {
-      palettes.value = [].concat.apply([], $store.getters['app/getEstPalettes'])
+      palettes.value = [].concat.apply([], $store.getters['app/getEstimationPalettes'])
       const defaults = $store.getters['app/getModelDefaults']
-      console.log(defaults)
-      if (defaults.esp !== '') {
-        model.value = defaults.esp
+      if (defaults.vector !== '') {
+        const index = vectorOptions.value.findIndex(obj => {
+          return (obj.code === defaults.vector)
+        })
+        modelVector.value = vectorOptions.value[index]
+
         showLegend.value = true
-        estimation.value = defaults.est
-        uncertainty.value = defaults.se
-        estimationTransparency.value = (1 - defaults.estTransparency) * 100
-        uncertaintyTransparency.value = (1 - defaults.seTransparency) * 100
+        estimation.value = defaults.estimation
+        uncertainty.value = defaults.uncertainty
+        estimationTransparency.value = defaults.estimationTransparency
+        uncertaintyTransparency.value = defaults.uncertaintyTransparency
         uncertaintyColor.value = defaults.uncertaintyColor
-        estimationColor.value = defaults.estColors
-      }
-      if (defaults.year !== '' && defaults.month !== '') {
+        estimationColor.value = defaults.estimationColors
         inputDate.value = defaults.month + '/' + defaults.year
+        context.emit('loadModel', defaults)
       }
 
       const d = new Date()
@@ -321,7 +323,7 @@ export default {
       return $store.getters['app/getModels']
     })
 
-    const options = computed(() => {
+    const vectorOptions = computed(() => {
       return [
         { code: 'albopictus', type: _('Tiger mosquito') },
         { code: 'aegypti', type: _('Yellow fever mosquito') },
@@ -357,7 +359,7 @@ export default {
         monthPicker.value.hide()
         $store.commit('map/setModelDate', inputDate.value)
       }
-      disabled.value = (!model.value || !inputDate.value)
+      disabled.value = (!modelVector.value || !inputDate.value)
       if (inputDate.value) {
         disabledInfo.value = false
       }
@@ -368,12 +370,12 @@ export default {
       context.emit('clearModel')
 
       context.emit('filterObservations', {
-        type: model.value.type,
-        code: model.value.code
+        type: modelVector.value.type,
+        code: modelVector.value.code
       })
 
       // Check if selected models is available. if not clear modelDate
-      startingModelDate.value = modelsManifest[model.value.code].year + '/01'
+      startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
       if (modelDate.value) {
         const selected = parseInt(modelDate.value.slice(-4))
         const previous = parseInt(startingModelDate.value.substring(0, 4))
@@ -383,7 +385,7 @@ export default {
         }
       }
 
-      if (model.value && inputDate.value) {
+      if (modelVector.value && inputDate.value) {
         disabled.value = false
       } else {
         disabled.value = true
@@ -391,13 +393,13 @@ export default {
     }
 
     const applyfilter = function () {
-      if (inputDate.value === null || !model.value) {
+      if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
         const serverModels = $store.getters['app/getModelsUrl']
         // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
-        const selectedModel = model.value.code
+        const selectedModel = modelVector.value.code
         const urls = [
           // serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
@@ -416,34 +418,25 @@ export default {
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
-        const estPalettes = $store.getters['app/getEstPalettes']
+        const estimationPalettes = $store.getters['app/getEstimationPalettes']
         const payload = {
-          esp: selectedModel,
+          vector: selectedModel,
           year: parts[1],
           month: parts[0],
-          est: estimation.value,
-          se: uncertainty.value,
-          estTransparency: estimationTransparency.value,
-          seTransparency: uncertaintyTransparency.value,
+          estimation: estimation.value,
+          uncertainty: uncertainty.value,
+          estimationTransparency: estimationTransparency.value,
+          estimationOpacity: 1 - (estimationTransparency.value / 100),
+          uncertaintyTransparency: uncertaintyTransparency.value,
+          uncertaintyOpacity: 1 - (uncertaintyTransparency.value / 100),
           uncertaintyColor: uncertaintyColor.value,
-          estColors: estColors,
-          estPalettes: estPalettes,
+          estimationColors: estimationColors,
+          estimationPalettes: estimationPalettes,
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         }
         $store.commit('app/setModelDefaults', payload)
-        context.emit('loadModel', {
-          esp: selectedModel,
-          year: parts[1],
-          month: parts[0],
-          est: estimation.value,
-          se: uncertainty.value,
-          estTransparency: estimationTransparency.value,
-          seTransparency: uncertaintyTransparency.value,
-          uncertaintyColor: uncertaintyColor.value,
-          modelsCsv: urls,
-          centroidsUrls: centroidsUrls
-        })
+        context.emit('loadModel', payload)
         if (mobile.value) {
           toggleLeftDrawer()
         }
@@ -465,20 +458,21 @@ export default {
     }
 
     const loadSharedModel = function (payload) {
-      estLegendColors.value = payload.estColors
-      model.value = payload.esp
+      estLegendColors.value = payload.estimationColors
+      modelVector.value = payload.vector
       inputDate.value = payload.month + '/' + payload.year
       modelDate.value = inputDate.value
       estimation.value = payload.est
       uncertainty.value = payload.se
       uncertaintyColor.value = payload.uncertaintyColor
-      estimationTransparency.value = 100 * (1 - payload.estTransparency)
-      uncertaintyTransparency.value = 100 * (1 - payload.seTransparency)
-      estColors = payload.estColors
+      estimationTransparency.value = payload.estimationTransparency
+      uncertaintyTransparency.value = payload.uncertaintyTransparency
+      estimationColors = payload.estimationColors
       applyfilter()
     }
 
-    const setEstTransparency = function () {
+    const setEstimationTransparency = function () {
+      // 0 - 100 slider values
       context.emit('estimationTransparency', { transparency: estimationTransparency.value })
     }
 
@@ -518,11 +512,11 @@ export default {
         idx += 1
         el = el.previousElementSibling
       }
-      const p = $store.getters['app/getEstPalettes']
+      const p = $store.getters['app/getEstimationPalettes']
       const index = Math.floor(idx / 6)
-      estColors = p[index]
-      estLegendColors.value = estColors
-      $store.commit('app/setEstColors', estColors)
+      estimationColors = p[index]
+      estLegendColors.value = estimationColors
+      $store.commit('app/setEstimationColors', estimationColors)
       colorPickerEst.value.hide()
       context.emit('estimationColorsChanged')
     }
@@ -531,13 +525,13 @@ export default {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
 
-    watch(options, (cur, old) => {
-      if (model.value) {
-        if (model.value.code) {
+    watch(vectorOptions, (cur, old) => {
+      if (modelVector.value) {
+        if (modelVector.value.code) {
           const index = cur.findIndex(obj => {
-            return (obj.code === model.value.code)
+            return (obj.code === modelVector.value.code)
           })
-          model.value = cur[index]
+          modelVector.value = cur[index]
         }
       }
     })
@@ -547,7 +541,7 @@ export default {
       goInfoModal,
       estLegendColors,
       clickColor,
-      estColors,
+      estimationColors,
       startingModelDate,
       estimationColor,
       palettes,
@@ -559,7 +553,7 @@ export default {
       showPicker,
       colorPickerEst,
       colorPickerSe,
-      setEstTransparency,
+      setEstimationTransparency,
       setUncertaintyTransparency,
       estimationTransparency,
       uncertaintyTransparency,
@@ -574,9 +568,9 @@ export default {
       estimation,
       showCalendar,
       modelsCalendar,
-      model,
+      modelVector,
       models,
-      options,
+      vectorOptions,
       mobile,
       dateSelected,
       getCurrentDate,

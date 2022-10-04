@@ -44,26 +44,28 @@ export const setModelDefaults = (state, payload) => {
   state.DEFAULTS.model = payload
 }
 
-export const setModelEst = (state, payload) => {
-  state.DEFAULTS.model.est = payload
+export const setModelEstimation = (state, payload) => {
+  state.DEFAULTS.model.estimation = payload
 }
 
-export const setModelSe = (state, payload) => {
-  state.DEFAULTS.model.se = payload
+export const setModelUncertainty = (state, payload) => {
+  state.DEFAULTS.model.uncertainty = payload
 }
 
 export const setUncertaintyColor = (state, payload) => {
   state.DEFAULTS.model.uncertaintyColor = payload
 }
 
-export const setEstTransparency = (state, payload) => {
-  state.DEFAULTS.model.estTransparency = payload
+export const setEstimationTransparency = (state, payload) => {
+  state.DEFAULTS.model.estimationTransparency = payload
+  state.DEFAULTS.model.estimationOpacity = 1 - (payload / 100)
 }
 
-export const setSeTransparency = (state, payload) => {
-  state.DEFAULTS.model.seTransparency = payload
+export const setUncertaintyTransparency = (state, payload) => {
+  state.DEFAULTS.model.uncertaintyTransparency = payload
+  state.DEFAULTS.model.uncertaintyOpacity = 1 - (payload / 100)
 }
 
-export const setEstColors = (state, payload) => {
-  state.DEFAULTS.model.estColors = payload
+export const setEstimationColors = (state, payload) => {
+  state.DEFAULTS.model.estimationColors = payload
 }

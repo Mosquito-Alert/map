@@ -107,16 +107,16 @@ export const getRegisteredWebUrl = state => {
   return state.registeredWebUrl
 }
 
-export const getEstColors = state => {
-  return state.DEFAULTS.model.estColors
+export const getEstimationColors = state => {
+  return state.DEFAULTS.model.estimationColors
 }
 
 export const getUncertaintyColor = state => {
   return state.DEFAULTS.model.uncertaintyColor
 }
 
-export const getEstPalettes = state => {
-  return state.DEFAULTS.model.estPalettes
+export const getEstimationPalettes = state => {
+  return state.DEFAULTS.model.estimationPalettes
 }
 
 export const getTilesUrl = state => {

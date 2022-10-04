@@ -64,15 +64,15 @@ export default class ShareMapView {
       // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
       dataView.filters.mode = 'resetFilter'
     } else if (this.options.viewType === 'models') {
-      dataView.esp = this.options.esp
+      dataView.vector = this.options.vector
       dataView.year = this.options.year
       dataView.month = this.options.month
-      dataView.est = this.options.est
-      dataView.se = this.options.se
-      dataView.estTransparency = this.options.estTransparency
-      dataView.seTransparency = this.options.seTransparency
+      dataView.estimation = this.options.estimation
+      dataView.uncertainty = this.options.uncertainty
+      dataView.estimationTransparency = this.options.estimationTransparency
+      dataView.uncertaintyTransparency = this.options.uncertaintyTransparency
       dataView.uncertaintyColor = this.options.uncertaintyColor
-      dataView.estColors = this.options.estColors
+      dataView.estimationColors = this.options.estimationColors
     }
 
     fetch(this.options.url, {

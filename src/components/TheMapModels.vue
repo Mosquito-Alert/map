@@ -140,15 +140,10 @@ export default defineComponent({
     onMounted(function () {
       ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const defaults = $store.getters['app/getModelDefaults']
-      if (defaults.modelsCsv.length && defaults.centroidsUrls.length) {
-        loadModel(defaults)
-      } else {
-        const paramViewCode = (props.viewCode) ? props.viewCode : null
-        if (paramViewCode) {
-          // Add model prefix to code
-          loadView(map.value.map, 'M-' + paramViewCode)
-        }
+      const paramViewCode = (props.viewCode) ? props.viewCode : null
+      if (paramViewCode) {
+        // Add model prefix to code
+        loadView(map.value.map, 'M-' + paramViewCode)
       }
     })
 
@@ -161,22 +156,22 @@ export default defineComponent({
 
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      if (!modelData.esp || !modelData.year) {
+      if (!modelData.vector || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         filters: {
-          esp: modelData.esp,
+          vector: modelData.vector,
           year: modelData.year,
           month: modelData.month,
-          est: modelData.est,
-          se: modelData.se,
-          estTransparency: modelData.estTransparency,
-          seTransparency: modelData.seTransparency,
+          estimation: modelData.estimation,
+          uncertainty: modelData.uncertainty,
+          estimationTransparency: modelData.estimationTransparency,
+          uncertaintyTransparency: modelData.uncertaintyTransparency,
           uncertaintyColor: modelData.uncertaintyColor,
-          estColors: $store.getters['app/getEstColors']
+          estimationColors: $store.getters['app/getEstimationColors']
         },
         url: shareViewUrl,
         callback: handleShareView
@@ -211,18 +206,18 @@ export default defineComponent({
       })
       // Search type from code
       const type = Object.keys(models).find((key, index) => {
-        return (models[key].modelName === jsonView.filters.esp)
+        return (models[key].modelName === jsonView.filters.vector)
       })
       context.emit('loadSharedModel', {
-        esp: { code: jsonView.filters.esp, type: _(models[type].common_name) },
+        vector: { code: jsonView.filters.vector, type: _(models[type].common_name) },
         year: jsonView.filters.year,
         month: jsonView.filters.month,
-        est: jsonView.filters.est,
-        se: jsonView.filters.se,
-        estTransparency: jsonView.filters.estTransparency,
-        seTransparency: jsonView.filters.seTransparency,
+        estimation: jsonView.filters.estimation,
+        uncertainty: jsonView.filters.uncertainty,
+        estimationTransparency: jsonView.filters.estimationTransparency,
+        uncertaintyTransparency: jsonView.filters.uncertaintyTransparency,
         uncertaintyColor: jsonView.filters.uncertaintyColor,
-        estColors: jsonView.filters.estColors
+        estimationColors: jsonView.filters.estimationColors
       })
     }
 
@@ -262,7 +257,7 @@ export default defineComponent({
       //   from: jsonDefaults.colorEstimationFrom,
       //   to: jsonProperties.colorEstimationTo
       // }
-      const estimationColors = $store.getters['app/getEstColors']
+      const estimationColors = $store.getters['app/getEstimationColors']
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
         colors: estimationColors,
         rangs: RANGS,
@@ -311,7 +306,6 @@ export default defineComponent({
     }
 
     const loadModel = async function (data) {
-      console.log(data)
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
@@ -375,8 +369,8 @@ export default defineComponent({
         gadm4.on('prerender', function () {
           spinner(true)
         })
-        estimationVisibility(data.est)
-        estimationOpacity(1 - (data.estTransparency / 100))
+        estimationVisibility(data.estimation)
+        estimationOpacity(1 - (data.estimationTransparency / 100))
 
         // If cell layer is on
         if (urls.length > 4) {
@@ -453,8 +447,8 @@ export default defineComponent({
         seModelLayer2.addLayer()
         seModelLayer3.addLayer()
         seModelLayer4.addLayer()
-        uncertaintyVisibility(data.se)
-        uncertaintyOpacity(1 - (data.seTransparency / 100))
+        uncertaintyVisibility(data.uncertainty)
+        uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
       }).catch((error) => {
         console.log(error)
       })
@@ -494,7 +488,7 @@ export default defineComponent({
     }
 
     const colorizeGadm = (feature, style, CSV) => {
-      const estimationColors = $store.getters['app/getEstColors']
+      const estimationColors = $store.getters['app/getEstimationColors']
       const id = feature.properties_.id
       if (CSV[id] === undefined) {
         return null
@@ -597,7 +591,7 @@ export default defineComponent({
     }
 
     const estimationVisibility = function (state) {
-      $store.commit('app/setModelEst', state)
+      $store.commit('app/setModelEstimation', state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
       gadm3.setVisible(state)
@@ -608,7 +602,7 @@ export default defineComponent({
     }
 
     const uncertaintyVisibility = function (state) {
-      $store.commit('app/setModelSe', state)
+      $store.commit('app/setModelUncertainty', state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)
       seModelLayer3.layer.setVisible(state)
@@ -619,7 +613,6 @@ export default defineComponent({
     }
 
     const estimationOpacity = function (opacity) {
-      $store.commit('app/setEstTransparency', opacity)
       gadm1.setOpacity(opacity)
       gadm2.setOpacity(opacity)
       gadm3.setOpacity(opacity)
@@ -630,7 +623,7 @@ export default defineComponent({
     }
 
     const uncertaintyOpacity = function (opacity) {
-      $store.commit('app/setSeTransparency', opacity)
+      // $store.commit('app/setUncertaintyTransparency', opacity)
       if (seModelLayer1) {
         seModelLayer1.layer.setOpacity(opacity)
       }
@@ -652,7 +645,7 @@ export default defineComponent({
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
       }
-      const estimationColors = $store.getters['app/getEstColors']
+      const estimationColors = $store.getters['app/getEstimationColors']
       if (dataGridGeojson) {
         estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
           colors: estimationColors,
@@ -729,7 +722,7 @@ export default defineComponent({
       seModelLayer2.addLayer()
       seModelLayer3.addLayer()
       seModelLayer4.addLayer()
-      uncertaintyOpacity($store.getters['app/getModelDefaults'].seTransparency)
+      uncertaintyOpacity(1 - ($store.getters['app/getModelDefaults'].uncertaintyTransparency / 100))
     }
 
     const hideSpinner = function () {

@@ -147,19 +147,23 @@ export default function () {
 
       // Default values for selected models
       model: {
-        esp: '',
+        vector: '',
         year: '',
         month: '',
-        est: true,
-        se: true,
-        estTransparency: 0,
-        seTransparency: 0.75,
+        estimation: true,
+        uncertainty: true,
+        // 0 - 100 values
+        estimationTransparency: 0,
+        uncertaintyTransparency: 75,
+        // 0 - 1 values
+        estimationOpacity: 1,
+        uncertaintyOpacity: 0.25,
         // Default uncertainty color
         uncertaintyColor: '#191919',
-        estColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+        estimationColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
         modelsCsv: [],
         centroidsUrls: [],
-        estPalettes: [
+        estimationPalettes: [
           // DIVERGENTS
           ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
           ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
