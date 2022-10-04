@@ -18,14 +18,26 @@ export const toggleLeftDrawerStatus = (state) => {
   state.leftDrawerStatus = !state.leftDrawerStatus
 }
 
+export const setDefaultObservations = (state, payload) => {
+  state.DEFAULTS.observations = payload
+}
+
 export const setDefaults = (state, payload) => {
   state.DEFAULTS.observations = payload.observations
   state.DEFAULTS.dates = payload.dates
   state.DEFAULTS.hashtags = payload.hashtags
 }
 
+export const setDefaultSamplingEffort = (state, payload) => {
+  state.DEFAULTS.sampling_effort = payload
+}
+
 export const setDefaultDates = (state, payload) => {
   state.DEFAULTS.dates = payload
+}
+
+export const setDefaultTags = (state, tags) => {
+  state.DEFAULTS.hashtags = tags
 }
 
 export const setPendingView = (state, payload) => {

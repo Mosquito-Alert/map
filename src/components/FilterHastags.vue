@@ -81,6 +81,7 @@ export default {
     }
 
     function setTags (t) {
+      tags.value = []
       tags.value.push(...t)
     }
 
@@ -89,16 +90,11 @@ export default {
       tags.value = defaults.hashtags
     })
 
-    // const tagis = computed(() => {
-    //   return $store.getters['app/getDefaults'].hashtags
-    // })
-
     return {
       _,
       setTags,
       newTag,
       tags,
-      // tagis,
       deleteTag,
       addTag,
       isFilteringTag: computed(() => $store.getters['app/isFilteringTag'])

@@ -544,7 +544,7 @@ export default defineComponent({
           mapFilters.dates = [currentDates]
           $store.commit('map/setMapDates', currentDates)
         }
-        if (defaults.hashtags) {
+        if (defaults.hashtags.length) {
           mapFilters.hashtags = defaults.hashtags
         }
         initialObservations.forEach(layerFilter => {
@@ -559,6 +559,26 @@ export default defineComponent({
             code: layerFilter.code
           })
         })
+
+        // Hashtag filter or report_id, not both at the same time
+        if (defaults.hashtags.length) {
+          context.emit('tagsChanged', defaults.hashtags)
+        } else {
+          if (defaults.report_id.length) {
+            // add 'semicolon to all report_ids'
+            const reports = defaults.report_id.map(e => {
+              return ':' + e
+            })
+            context.emit('tagsChanged', reports)
+          }
+        }
+
+        // Check for sampling effort
+        context.emit('loadUserFixes', {
+          status: defaults.sampling_effort,
+          dates: mapFilters.dates
+        })
+
         const workerData = {}
         workerData.layers = appLayers
         workerData.filters = mapFilters
@@ -568,8 +588,6 @@ export default defineComponent({
         const ol = map.value.map
         loadView(ol, viewCode)
       }
-
-      // mapFilters are ready, now call worker
     }
 
     function loadView (ol, viewCode) {
@@ -1199,6 +1217,7 @@ export default defineComponent({
           categories: observation.categories
         })
       }
+      $store.commit('app/setDefaultObservations', mapFilters.observations)
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       workerData.filters = mapFilters
@@ -1265,7 +1284,7 @@ export default defineComponent({
       } else {
         mapFilters.dates = []
       }
-
+      $store.commit('app/setDefaultDates', mapFilters.dates)
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       worker.postMessage(workerData)
@@ -1332,6 +1351,7 @@ export default defineComponent({
           mapFilters.mode = 'resetFilter'
           mapFilters.featuresSet = []
           mapFilters.hashtags = []
+          $store.commit('app/setDefaultTags', [])
           workerData.filters = mapFilters
           worker.postMessage(workerData)
         } else {
@@ -1344,6 +1364,7 @@ export default defineComponent({
             return t.startsWith('#') ? t.slice(1) : t
           })
           mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
+          // $store.commit('app/setDefaultTags', mapFilters.hashtags)
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
           fetch(`${url}`, {
@@ -1364,13 +1385,6 @@ export default defineComponent({
               $store.commit('app/setFilteringTag', { value: false })
             })
         }
-
-        // mapFilters.featuresSet = []
-        // mapFilters.report_id = []
-        // mapFilters.mode = 'resetFilter'
-
-        // workerData.filters = mapFilters
-        // worker.postMessage(workerData)
       }
     }
 
@@ -1402,10 +1416,11 @@ export default defineComponent({
 
     function checkSamplingEffort (payload) {
       if (!payload.status) {
+        $store.commit('app/setDefaultSamplingEffort', false)
         map.value.map.removeLayer(userfixesLayer.layer)
         return
       }
-
+      $store.commit('app/setDefaultSamplingEffort', payload.status)
       const sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
       const eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
 

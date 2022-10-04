@@ -133,13 +133,14 @@ export default function () {
     lang: defaultLang,
     isFilteringTag: false,
     DEFAULTS: {
-      sampling_effort: true,
+      sampling_effort: false,
       observations: [
         { type: 'observations', code: 'tiger' },
         { type: 'observations', code: 'culex' }
       ],
       dates: [getCurrentYearDates()],
       hashtags: [],
+      report_id: [],
 
       // Colors of selected administration boundaries
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
