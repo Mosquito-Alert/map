@@ -106,7 +106,6 @@
             <div>
                 <q-popup-proxy ref="colorPickerEst" class="estimation-colors">
                       <q-color
-                        v-model="estimationColor"
                         no-header
                         no-footer
                         default-view="palette"
@@ -247,9 +246,9 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-    const modelsManifest = {}
+    let modelsManifest = null
     const startingModelDate = ref('2014/05')
-    const estimationColor = ref(null)
+    // const estimationColor = ref()
     const palettes = ref(null)
     let estimationColors = $store.getters['app/getEstimationColors']
     const estLegendColors = ref(estimationColors)
@@ -279,7 +278,7 @@ export default {
         estimationTransparency.value = defaults.estimationTransparency
         uncertaintyTransparency.value = defaults.uncertaintyTransparency
         uncertaintyColor.value = defaults.uncertaintyColor
-        estimationColor.value = defaults.estimationColors
+        // estimationColor.value = defaults.estimationColors
         inputDate.value = defaults.month + '/' + defaults.year
         context.emit('loadModel', defaults)
       }
@@ -289,7 +288,15 @@ export default {
       uncertaintyColor.value = defaults.uncertaintyColor
       // Fetch model manifest to activate/deactivate calendar
       const manifestUrl = $store.getters['app/getModelsManifestUrl']
-      fetch(manifestUrl)
+      getManifest(manifestUrl)
+    })
+
+    const getManifest = async function (url) {
+      if (modelsManifest) {
+        return true
+      }
+
+      await fetch(url)
         .then(function (response) {
           return response.text()
         })
@@ -300,6 +307,7 @@ export default {
           const targetIdx = headers.indexOf('target')
           const yearIdx = headers.indexOf('from')
           const cellIdx = headers.indexOf('cell')
+          modelsManifest = {}
           for (let i = 1; i < lines.length; i++) {
             if (lines[i] === '') break
             const currentLine = lines[i].split(',')
@@ -313,7 +321,7 @@ export default {
             modelsManifest[target] = { year: year, cell: cellValue }
           }
         })
-    })
+    }
 
     const seColor = computed(() => {
       return $store.getters['app/getUncertaintyColor']
@@ -396,6 +404,10 @@ export default {
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
+        if (!modelsManifest) {
+          const manifestUrl = $store.getters['app/getModelsManifestUrl']
+          getManifest(manifestUrl)
+        }
         const parts = inputDate.value.split('/')
         const serverModels = $store.getters['app/getModelsUrl']
         // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
@@ -462,8 +474,8 @@ export default {
       modelVector.value = payload.vector
       inputDate.value = payload.month + '/' + payload.year
       modelDate.value = inputDate.value
-      estimation.value = payload.est
-      uncertainty.value = payload.se
+      estimation.value = payload.estimation
+      uncertainty.value = payload.uncertainty
       uncertaintyColor.value = payload.uncertaintyColor
       estimationTransparency.value = payload.estimationTransparency
       uncertaintyTransparency.value = payload.uncertaintyTransparency
@@ -543,7 +555,7 @@ export default {
       clickColor,
       estimationColors,
       startingModelDate,
-      estimationColor,
+      // estimationColor,
       palettes,
       colorsTo,
       seColor,

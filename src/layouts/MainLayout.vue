@@ -223,14 +223,7 @@ export default {
       }
     }
 
-    // const filteringLocations = function () {
-    //   return map.value.mapFilters.locations.length
-    // }
-
     const filterObservations = function (data) {
-      // if (filteringLocations()) {
-      //   TOC.value.searchLocation.loading = true
-      // }
       map.value.filterObservations(data)
     }
 
