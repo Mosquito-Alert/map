@@ -246,7 +246,7 @@ export default {
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-    let modelsManifest = null
+    const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     // const estimationColor = ref()
     const palettes = ref(null)
@@ -255,6 +255,7 @@ export default {
     const initialSeTransparency = $store.getters['app/getModelDefaults'].uncertaintyTransparency
     const estimationTransparency = ref(0)
     const uncertaintyTransparency = ref(initialSeTransparency)
+    const manifestUrl = $store.getters['app/getModelsManifestUrl']
     const colorsTo = [
       hexToRgb('#ff0000'), hexToRgb('#ff8000'), hexToRgb('#ffff00'),
       hexToRgb('#00ff00'), hexToRgb('#00ff80'), hexToRgb('#00ff80'),
@@ -266,6 +267,7 @@ export default {
     onMounted(function () {
       palettes.value = [].concat.apply([], $store.getters['app/getEstimationPalettes'])
       const defaults = $store.getters['app/getModelDefaults']
+      // Check if referer is Reports map
       if (defaults.vector !== '') {
         const index = vectorOptions.value.findIndex(obj => {
           return (obj.code === defaults.vector)
@@ -287,27 +289,27 @@ export default {
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       uncertaintyColor.value = defaults.uncertaintyColor
       // Fetch model manifest to activate/deactivate calendar
-      const manifestUrl = $store.getters['app/getModelsManifestUrl']
       getManifest(manifestUrl)
     })
 
-    const getManifest = function (url) {
-      if (modelsManifest) {
+    const getManifest = function (url, callback = false) {
+      if (Object.keys(modelsManifest).length !== 0) {
+        if (callback) {
+          callback()
+        }
         return true
       }
-      console.log('fetch now')
       fetch(url)
         .then(function (response) {
           return response.text()
         })
-        .then(function (manifest) {
+        .then(function (csv) {
           // Read csv manifest
-          const lines = manifest.split(/\r?\n/)
+          const lines = csv.split(/\r?\n/)
           const headers = lines[0].toLowerCase().split(',')
           const targetIdx = headers.indexOf('target')
           const yearIdx = headers.indexOf('from')
           const cellIdx = headers.indexOf('cell')
-          modelsManifest = {}
           for (let i = 1; i < lines.length; i++) {
             if (lines[i] === '') break
             const currentLine = lines[i].split(',')
@@ -320,9 +322,12 @@ export default {
             }
             modelsManifest[target] = { year: year, cell: cellValue }
           }
+          if (callback) {
+            callback()
+          }
         }).catch((error) => {
           console.log(error)
-          return false
+          return null
         })
     }
 
@@ -404,7 +409,6 @@ export default {
     }
 
     const applyfilter = function () {
-      console.log('inside applyfiter function')
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
@@ -469,7 +473,7 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
-    const loadSharedModel = async function (payload) {
+    const loadSharedModel = function (payload) {
       estLegendColors.value = payload.estimationColors
       modelVector.value = payload.vector
       inputDate.value = payload.month + '/' + payload.year
@@ -480,10 +484,8 @@ export default {
       estimationTransparency.value = payload.estimationTransparency
       uncertaintyTransparency.value = payload.uncertaintyTransparency
       estimationColors = payload.estimationColors
-      const manifestUrl = $store.getters['app/getModelsManifestUrl']
-      await getManifest(manifestUrl)
-      console.log(modelsManifest)
-      applyfilter()
+      // applyfilter as a callback after modelsManifest is downloaded
+      getManifest(manifestUrl, applyfilter)
     }
 
     const setEstimationTransparency = function () {
@@ -539,6 +541,9 @@ export default {
     const goInfoModal = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
+
+    // const manifestUrl = $store.getters['app/getModelsManifestUrl']
+    // getManifest(manifestUrl)
 
     watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {

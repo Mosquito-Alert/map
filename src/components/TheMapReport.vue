@@ -300,7 +300,15 @@ export default {
     })
 
     function handleReportView (report) {
-      if (report.status === 'ok') {
+      if (report.view.length === 0) {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: 'This report does not exist'
+          }
+        })
+      } else {
         anyFilters.value = false
         const view = JSON.parse(report.view[0].view)
         let lang
