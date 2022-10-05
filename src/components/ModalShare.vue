@@ -3,7 +3,7 @@
     <div class="backdrop-modal-share" v-if="open"></div>
   </transition>
   <transition name="modal">
-    <div class="dialog-share" v-if="open" @click="close">
+    <div class="dialog-share" v-if="open">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>

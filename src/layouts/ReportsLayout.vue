@@ -11,7 +11,7 @@
 
   <modal-cookie-settings>
   </modal-cookie-settings>
-
+  <modal-error/>
   <modal-cookie-policy>
   </modal-cookie-policy>
   <cookies-compliance/>
