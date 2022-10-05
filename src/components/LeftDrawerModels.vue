@@ -291,12 +291,12 @@ export default {
       getManifest(manifestUrl)
     })
 
-    const getManifest = async function (url) {
+    const getManifest = function (url) {
       if (modelsManifest) {
         return true
       }
-
-      await fetch(url)
+      console.log('fetch now')
+      fetch(url)
         .then(function (response) {
           return response.text()
         })
@@ -320,6 +320,9 @@ export default {
             }
             modelsManifest[target] = { year: year, cell: cellValue }
           }
+        }).catch((error) => {
+          console.log(error)
+          return false
         })
     }
 
@@ -401,13 +404,10 @@ export default {
     }
 
     const applyfilter = function () {
+      console.log('inside applyfiter function')
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
-        if (!modelsManifest) {
-          const manifestUrl = $store.getters['app/getModelsManifestUrl']
-          getManifest(manifestUrl)
-        }
         const parts = inputDate.value.split('/')
         const serverModels = $store.getters['app/getModelsUrl']
         // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
@@ -469,7 +469,7 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
-    const loadSharedModel = function (payload) {
+    const loadSharedModel = async function (payload) {
       estLegendColors.value = payload.estimationColors
       modelVector.value = payload.vector
       inputDate.value = payload.month + '/' + payload.year
@@ -480,6 +480,9 @@ export default {
       estimationTransparency.value = payload.estimationTransparency
       uncertaintyTransparency.value = payload.uncertaintyTransparency
       estimationColors = payload.estimationColors
+      const manifestUrl = $store.getters['app/getModelsManifestUrl']
+      await getManifest(manifestUrl)
+      console.log(modelsManifest)
       applyfilter()
     }
 
