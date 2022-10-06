@@ -293,6 +293,7 @@ export default {
     })
 
     const getManifest = function (url, callback = false) {
+      // IF modelsManifest already exists, then call callback
       if (Object.keys(modelsManifest).length !== 0) {
         if (callback) {
           callback()
@@ -408,7 +409,7 @@ export default {
       }
     }
 
-    const applyfilter = function () {
+    const applyfilter = async function () {
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
@@ -473,7 +474,7 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
-    const loadSharedModel = function (payload) {
+    const loadSharedModel = async function (payload) {
       estLegendColors.value = payload.estimationColors
       modelVector.value = payload.vector
       inputDate.value = payload.month + '/' + payload.year
