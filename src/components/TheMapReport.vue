@@ -300,7 +300,16 @@ export default {
     })
 
     function handleReportView (report) {
-      if (report.status === 'ok') {
+      if (report.status === 'error') {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: report.msg,
+            redirection: true
+          }
+        })
+      } else {
         anyFilters.value = false
         const view = JSON.parse(report.view[0].view)
         let lang

@@ -196,6 +196,18 @@ export default defineComponent({
     }
 
     function handleLoadView (response) {
+      // Check status response
+      if (response.status === 'error') {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: response.msg,
+            redirection: false
+          }
+        })
+        return true
+      }
       const d = response.view[0].date
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)

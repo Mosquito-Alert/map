@@ -190,7 +190,7 @@ export default function () {
       download: { visibility: false, n: 0 },
       share: { visibility: false },
       report: { visibility: false, n: 0 },
-      error: { visibility: false, msg: '', link: '' },
+      error: { visibility: false, msg: '', link: '', redirection: false },
       wait: { visibility: false, seamless: false },
       login: { visibility: false }
     },

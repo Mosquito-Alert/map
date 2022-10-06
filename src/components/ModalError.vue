@@ -13,8 +13,13 @@
             <a :href="link">{{ link }} </a>
           </div>
         <div class="buttons">
-          <div class="download-buttons">
-            <button @click="close" class="close">{{ _('Close') }}</button>
+          <div class="download-buttons" v-if="redirection">
+            <router-link class="main-menu-item" to="/">
+              <button @click="close" class="close">{{ _('Close') }}</button>
+            </router-link>
+          </div>
+          <div class="download-buttons" v-else>
+             <button @click="close" class="close">{{ _('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -43,6 +48,10 @@ export default {
       return $store.getters['app/getModals'].error.link
     })
 
+    const redirection = computed(() => {
+      return $store.getters['app/getModals'].error.redirection
+    })
+
     const close = function () {
       $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
     }
@@ -60,6 +69,7 @@ export default {
       close,
       msg,
       link,
+      redirection,
       _
     }
   }
