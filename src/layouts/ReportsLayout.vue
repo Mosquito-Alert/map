@@ -12,6 +12,8 @@
   <modal-cookie-settings>
   </modal-cookie-settings>
 
+  <modal-error/>
+
   <modal-cookie-policy>
   </modal-cookie-policy>
   <cookies-compliance/>
@@ -22,6 +24,7 @@
 
 import { useRoute } from 'vue-router'
 import TheMapReport from 'components/TheMapReport.vue'
+import ModalError from 'src/components/ModalError.vue'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
@@ -29,6 +32,7 @@ import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 export default {
   components: {
     TheMapReport,
+    ModalError,
     ModalCookieSettings,
     ModalCookiePolicy,
     CookiesCompliance

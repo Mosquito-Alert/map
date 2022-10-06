@@ -300,12 +300,13 @@ export default {
     })
 
     function handleReportView (report) {
-      if (report.view.length === 0) {
+      if (report.status === 'error') {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
             visibility: true,
-            msg: 'This report does not exist'
+            msg: report.msg,
+            redirection: true
           }
         })
       } else {

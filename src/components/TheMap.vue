@@ -603,9 +603,11 @@ export default defineComponent({
           id: 'error',
           content: {
             visibility: true,
-            msg: view.msg
+            msg: view.msg,
+            redirection: false
           }
         })
+        initMap()
         return
       }
       spinner()

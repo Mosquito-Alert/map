@@ -202,7 +202,8 @@ export default defineComponent({
           id: 'error',
           content: {
             visibility: true,
-            msg: response.msg
+            msg: response.msg,
+            redirection: false
           }
         })
         return true
