@@ -413,13 +413,6 @@ export default {
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
-<<<<<<< HEAD
-        if (!modelsManifest) {
-          const manifestUrl = $store.getters['app/getModelsManifestUrl']
-          getManifest(manifestUrl)
-        }
-=======
->>>>>>> 889035da638b237e2d7d9147e44164574e40f1e5
         const parts = inputDate.value.split('/')
         const serverModels = $store.getters['app/getModelsUrl']
         // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'

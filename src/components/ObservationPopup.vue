@@ -38,7 +38,9 @@
           </div>
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
-              <label class="popup-title">{{ _(selectedFeature.title) }}</label>
+              <label class="popup-title">{{ _(selectedFeature.title) }}
+                <!-- <i class="like-link cursor-pointer text-h4 q-ml-md fa-thin fa-share-nodes" @click="showShareUrl"></i> -->
+              </label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
                 <div class="report-id-wrapper" v-if="selectedFeature.report_id">
@@ -224,6 +226,7 @@ export default defineComponent({
       console.log('error...loading image')
       errorLoadingImage.value = true
     }
+
     return {
       _,
       mosquitoImageLoaded,
@@ -742,6 +745,10 @@ export default defineComponent({
 
 .ul-filters li, .filters .report-tag span{
   background-color: #ccc;
+}
+
+.like-link:hover{
+  color: $primary-color;
 }
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
