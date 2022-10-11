@@ -1,8 +1,7 @@
 <template>
   <router-link class="main-menu-item" :to="to_link">
-    <button class="fa-thin-button" :class="class_prop">
+    <button class="fa-thin-button" :class="class_prop" :title="label">
       <i :class="icon_code"></i>
-      <span>{{ label }}</span>
     </button>
   </router-link>
 </template>

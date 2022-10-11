@@ -1,7 +1,7 @@
 <template>
     <q-toolbar>
       <fa-thin-button-router
-        name="fa-thin fa-layer-group"
+        name="fa-thin fa-map-location-dot"
         :label="_('Reports')"
         :class="active_item=='layers'?'active':''"
         :link="frontendUrl"
