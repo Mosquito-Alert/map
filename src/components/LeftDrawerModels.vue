@@ -13,6 +13,9 @@
     <div class="toc-models"
       :class="expanded?'expanded':'collapsed'"
     >
+      <div class="text-h5 toc-title-estimates">
+        {{ _('Estimates') }}
+      </div>
       <div v-if="mobile">
         <q-icon
           name="close"
@@ -24,7 +27,7 @@
       <div>
         <div class="category-box q-my-md">
           <q-select
-            :label="_('Models')"
+            :label="_('Select species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -806,5 +809,10 @@ input:checked + .cookie-comply-slider{
   font-size: 2.125rem;
   font-weight: 100;
 }
-
+.toc-title-estimates{
+  font-family: 'Roboto';
+  text-transform: Capitalize;
+  font-weight: 700;
+  color: #666666;
+}
 </style>

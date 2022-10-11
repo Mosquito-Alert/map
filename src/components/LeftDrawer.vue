@@ -17,7 +17,7 @@
         <q-btn :label="_('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
-        <div class="toc-title" v-html="_('Select')"></div>
+        <div class="text-h5 toc-title-reports" v-html="_('Reports')"></div>
           <search-location
             ref="searchLocation"
             @locationSelected="locationSelected"
@@ -373,6 +373,12 @@ export default {
   padding-left: 18px;
 }
 
+.toc-title-reports{
+  font-family: 'Roboto';
+  text-transform: Capitalize;
+  font-weight: 700;
+  color: #666666;
+}
 .toc-title{
   font-family: 'Roboto';
   text-transform: uppercase;
