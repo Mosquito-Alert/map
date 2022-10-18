@@ -26,7 +26,7 @@
               <q-carousel-slide name="pag_1" class="column no-wrap">
                 <div class="page pag_1">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help1.gif" draggable="false"/>
+                    <img class="gif" :src="videos[0]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
@@ -40,7 +40,8 @@
               <q-carousel-slide name="pag_2" class="column no-wrap">
                 <div class="page pag_2">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help2.gif" draggable="false" />
+                    <!-- <img class="gif" src="~/assets/img/help/help2.gif" draggable="false" /> -->
+                    <img class="gif" :src="videos[1]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
@@ -61,7 +62,8 @@
               <q-carousel-slide name="pag_3" class="column no-wrap">
                 <div class="page pag_3">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help3.gif" draggable="false" />
+                    <!-- <img class="gif" src="~/assets/img/help/help3.gif" draggable="false" /> -->
+                    <img class="gif" :src="videos[2]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
@@ -75,7 +77,8 @@
               <q-carousel-slide name="pag_4" class="column no-wrap">
                 <div class="page pag_4">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help4.gif" draggable="false">
+                    <!-- <img class="gif" src="~/assets/img/help/help4.gif" draggable="false"> -->
+                    <img class="gif" :src="videos[3]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
@@ -89,7 +92,8 @@
               <q-carousel-slide name="pag_5" class="column no-wrap">
                 <div class="page pag_5">
                   <div class="img">
-                    <img class="gif" src="~/assets/img/help/help5.gif" draggable="false">
+                    <!-- <img class="gif" src="~/assets/img/help/help5.gif" draggable="false"> -->
+                    <img class="gif" :src="videos[4]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
                     <div>
@@ -117,8 +121,43 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
-    const slide = ref('pag_2')
+    const videosHelp = {
+      ca: [
+        require('../assets/img/help/help1.gif'),
+        require('../assets/img/help/help1.gif'),
+        require('../assets/img/help/help1.gif'),
+        require('../assets/img/help/help1.gif'),
+        require('../assets/img/help/help1.gif')
+      ],
+      es: [
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help2.gif')
+      ],
+      en: [
+        require('../assets/img/help/help1.gif'),
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help3.gif'),
+        require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif')
+      ]
+    }
+
     const $store = useStore()
+    const videos = computed(() => {
+      const lang = $store.getters['app/getLang']
+      if (lang === 'ca') {
+        return videosHelp.ca
+      } else if (lang === 'es') {
+        return videosHelp.es
+      } else {
+        return videosHelp.en
+      }
+    })
+
+    const slide = ref('pag_2')
     const close = function () {
       $store.commit('app/setModal', { id: 'help', content: { visibility: false } })
     }
@@ -138,6 +177,7 @@ export default {
     })
 
     return {
+      videos,
       layers,
       close,
       hasCloseButton,

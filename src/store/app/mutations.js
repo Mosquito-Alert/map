@@ -3,6 +3,7 @@ export const setTranslations = (state, payload) => {
 }
 
 export const setLanguage = (state, lang) => {
+  console.log(lang)
   state.lang = lang
 }
 

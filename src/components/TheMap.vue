@@ -221,7 +221,6 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
-    // watch([a, b], ([newA, newB], [prevA, prevB]) => {
     watch(features, (currentF, oldF) => {
       nPoints.value = 0
       currentF.forEach(f => {
