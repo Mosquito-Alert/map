@@ -103,6 +103,21 @@
                   </div>
                 </div>
               </q-carousel-slide>
+
+              <q-carousel-slide name="pag_6" class="column no-wrap">
+                <div class="page pag_6">
+                  <div class="img">
+                    <!-- <img class="gif" src="~/assets/img/help/help5.gif" draggable="false"> -->
+                    <img class="gif" :src="videos[5]" draggable="false"/>
+                  </div>
+                  <div class="q-ml-lg text">
+                    <div>
+                      <h5>{{ _('Estimates help') }}</h5>
+                      <p>{{ _('Consulta el grado de probabilidad e incertidumbre de encontrar una especie de mosquito concreta. Selecciona la especie que quieras consultar y el rango temporal') }}</p>
+                    </div>
+                  </div>
+                </div>
+              </q-carousel-slide>
             </q-carousel>
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
@@ -127,6 +142,7 @@ export default {
         require('../assets/img/help/help2.gif'),
         require('../assets/img/help/help3.gif'),
         require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif'),
         require('../assets/img/help/help5.gif')
       ],
       es: [
@@ -134,6 +150,7 @@ export default {
         require('../assets/img/help/help2.gif'),
         require('../assets/img/help/help3.gif'),
         require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif'),
         require('../assets/img/help/help5.gif')
       ],
       en: [
@@ -141,6 +158,7 @@ export default {
         require('../assets/img/help/help2.gif'),
         require('../assets/img/help/help3.gif'),
         require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif'),
         require('../assets/img/help/help5.gif')
       ]
     }
