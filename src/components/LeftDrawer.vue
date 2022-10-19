@@ -662,7 +662,6 @@ input{
 .ma-close-btn::before{
   box-shadow: none;
 }
-
 button.ma-close-btn,
 .ma-close-btn{
   padding: 8px 10px;

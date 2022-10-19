@@ -124,17 +124,17 @@ export default {
     const videosHelp = {
       ca: [
         require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help1.gif')
+        require('../assets/img/help/help2.gif'),
+        require('../assets/img/help/help3.gif'),
+        require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif')
       ],
       es: [
+        require('../assets/img/help/help1.gif'),
         require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help2.gif')
+        require('../assets/img/help/help3.gif'),
+        require('../assets/img/help/help4.gif'),
+        require('../assets/img/help/help5.gif')
       ],
       en: [
         require('../assets/img/help/help1.gif'),

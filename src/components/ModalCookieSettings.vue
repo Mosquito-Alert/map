@@ -250,8 +250,8 @@ export default {
 
 // MOBILE
 .cookie-settings dialog.mobile {
-  max-width: 100vw;
-  max-height: 96vh;
+  max-width: 90vw;
+  max-height: 90vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 1rem 1rem 1rem 1rem;
 }

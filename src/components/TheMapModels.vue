@@ -590,8 +590,8 @@ export default defineComponent({
     })
 
     function updateMap () {
-      const view = map.value.map.getView()
-      console.log(map.value.map.getView().getZoom() + ' ' + view.getResolution())
+      // const view = map.value.map.getView()
+      // console.log(map.value.map.getView().getZoom() + ' ' + view.getResolution())
       const newZoom = map.value.map.getView().getZoom()
       $store.commit('map/setDefaults', {
         zoom: newZoom,

@@ -13,15 +13,11 @@
     <div class="toc-models"
       :class="expanded?'expanded':'collapsed'"
     >
+      <div v-if="mobile" class="text-right q-ma-md">
+        <q-btn :label="_('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
+      </div>
       <div class="text-h5 toc-title-estimates">
         {{ _('Estimates') }}
-      </div>
-      <div v-if="mobile">
-        <q-icon
-          name="close"
-          class="close-menu"
-          @click="toggleLeftDrawer"
-        />
       </div>
 
       <div>
@@ -613,11 +609,14 @@ export default {
 
 <style scoped lang="scss">
 .toc-models{
-  padding: 20px;
+  padding: 0px;
   width: 100%;
   overflow: auto;
   &.expanded{
     z-index:10;
+  }
+  &.expanded > div:not(.text-right){
+    padding: 18px;
   }
 }
 
@@ -814,5 +813,20 @@ input:checked + .cookie-comply-slider{
   text-transform: Capitalize;
   font-weight: 700;
   color: #666666;
+}
+.ma-close-btn::before{
+  box-shadow: none;
+}
+button.ma-close-btn,
+.ma-close-btn{
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+}
+button.ma-close-btn:hover,
+.ma-close-btn:hover{
+  opacity:0.7;
 }
 </style>
