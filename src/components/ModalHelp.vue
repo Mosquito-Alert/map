@@ -138,28 +138,28 @@ export default {
   setup (props) {
     const videosHelp = {
       ca: [
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help3.gif'),
-        require('../assets/img/help/help4.gif'),
-        require('../assets/img/help/help5.gif'),
-        require('../assets/img/help/help5.gif')
+        require('../assets/img/help/help1_ca.gif'),
+        require('../assets/img/help/help2_ca.gif'),
+        require('../assets/img/help/help3_ca.gif'),
+        require('../assets/img/help/help4_ca.gif'),
+        require('../assets/img/help/help5_ca.gif'),
+        require('../assets/img/help/help6_ca.gif')
       ],
       es: [
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help3.gif'),
-        require('../assets/img/help/help4.gif'),
-        require('../assets/img/help/help5.gif'),
-        require('../assets/img/help/help5.gif')
+        require('../assets/img/help/help1_es.gif'),
+        require('../assets/img/help/help2_es.gif'),
+        require('../assets/img/help/help3_es.gif'),
+        require('../assets/img/help/help4_es.gif'),
+        require('../assets/img/help/help5_es.gif'),
+        require('../assets/img/help/help6_es.gif')
       ],
       en: [
-        require('../assets/img/help/help1.gif'),
-        require('../assets/img/help/help2.gif'),
-        require('../assets/img/help/help3.gif'),
-        require('../assets/img/help/help4.gif'),
-        require('../assets/img/help/help5.gif'),
-        require('../assets/img/help/help5.gif')
+        require('../assets/img/help/help1_en.gif'),
+        require('../assets/img/help/help2_en.gif'),
+        require('../assets/img/help/help3_en.gif'),
+        require('../assets/img/help/help4_en.gif'),
+        require('../assets/img/help/help5_en.gif'),
+        require('../assets/img/help/help6_en.gif')
       ]
     }
 
