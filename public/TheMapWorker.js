@@ -31,7 +31,7 @@ function log (text) {
 
 // Download data and send message when ready including first and last date in dataset
 function getData (year, flag = false) {
-  fetch(getdataUrl + year)
+  fetch(getdataUrl + year +'/')
     .then(function (response) {
       return response.json()
     })
