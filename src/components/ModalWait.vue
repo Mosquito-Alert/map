@@ -3,18 +3,17 @@
       <div class="backdrop-modal-wait" v-if="open"></div>
   </transition> -->
   <transition name="modal">
-    <!-- <div class="dialog toni" v-if="open"> -->
-      <q-dialog
-        v-model="open"
-        class="wait"
-        :seamless="seamless">
-        <!-- <slot></slot> -->
-          <q-spinner-oval
-            color="orange"
-            size="5.5em"
-          />
-      </q-dialog>
-    <!-- </div> -->
+    <q-dialog
+      v-model="open"
+      class="wait"
+      :class="leftDrawerStatus?'expanded':''"
+      :seamless="seamless">
+      <!-- <slot></slot> -->
+        <q-spinner-oval
+          color="orange"
+          size="5.5em"
+        />
+    </q-dialog>
   </transition>
 </template>
 
@@ -149,6 +148,10 @@ button:hover {
 }
 .modal-box.expanded:not(.mobile){
   padding-left: $left-drawer-width;
+}
+
+.q-dialog.expanded .q-dialog__inner{
+  margin-left: $left-drawer-width;
 }
 // MOBILE
 dialog.mobile {
