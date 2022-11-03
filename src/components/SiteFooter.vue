@@ -15,13 +15,14 @@
               </a>
             </div>
           </div>
-          <div>
+          <div v-if="mobile" class="main-logo">
+            <a href="https://www.ceab.csic.es/" target="_blank">
+              <img src="~assets/img/MA-mobile.png">
+            </a>
+          </div>
+
+          <div v-if="!mobile">
             <ul class="logos" :class="mobile?'mobile':''">
-              <li v-if="mobile">
-                <a href="https://www.ceab.csic.es/" target="_blank">
-                  <img src="~assets/img/MA-mobile.png">
-                </a>
-              </li>
               <li>
                 <a href="https://www.ceab.csic.es/" target="_blank">
                   <img src="~assets/img/CSIC-CEAB.png">
