@@ -3,35 +3,48 @@
   <q-footer v-if="!mobile || (!popupContent || !Object.keys(popupContent).length)" class="text-white">
     <q-toolbar>
       <q-toolbar-title>
-        <div v-if="!mobile" class="attribution"></div>
-        <ul class="logos" :class="mobile?'mobile':''">
-          <li v-if="mobile">
-            <a href="https://www.ceab.csic.es/" target="_blank">
-              <!-- <img src="~assets/img/mosquito_alert_mobile.png"> -->
-              <img src="~assets/img/MA-mobile.png">
-            </a>
-          </li>
-          <li>
-            <a href="https://www.ceab.csic.es/" target="_blank">
-              <img src="~assets/img/CSIC-CEAB.png">
-            </a>
-          </li>
-          <li>
-            <a href="https://www.upf.edu/" target="_blank">
-              <img src="~assets/img/UPF.png">
-            </a>
-          </li>
-          <li>
-            <a href="https://www.creaf.cat/" target="_blank">
-              <img src="~assets/img/CREAF-SO.png">
-            </a>
-          </li>
-          <li>
-            <a href="https://www.icrea.cat/" target="_blank">
-              <img src="~assets/img/ICREA.png">
-            </a>
-          </li>
-        </ul>
+        <!-- <div v-if="!mobile" class="attribution"></div> -->
+        <div class="flex" style="justify-content:space-between; width: 100%; align-items:center">
+          <div class="col q-my-xs">
+            <div class="logo-title">
+              {{ _('This interactive map has been funded by') }}
+            </div>
+            <div class="main-logo">
+              <a href="https://fundacionlacaixa.org" target="_blank">
+                <img src="~assets/img/fundacio_la_caixa.jpg">
+              </a>
+            </div>
+          </div>
+          <div>
+            <ul class="logos" :class="mobile?'mobile':''">
+              <li v-if="mobile">
+                <a href="https://www.ceab.csic.es/" target="_blank">
+                  <img src="~assets/img/MA-mobile.png">
+                </a>
+              </li>
+              <li>
+                <a href="https://www.ceab.csic.es/" target="_blank">
+                  <img src="~assets/img/CSIC-CEAB.png">
+                </a>
+              </li>
+              <li>
+                <a href="https://www.upf.edu/" target="_blank">
+                  <img src="~assets/img/UPF.png">
+                </a>
+              </li>
+              <li>
+                <a href="https://www.creaf.cat/" target="_blank">
+                  <img src="~assets/img/CREAF-SO.png">
+                </a>
+              </li>
+              <li>
+                <a href="https://www.icrea.cat/" target="_blank">
+                  <img src="~assets/img/ICREA.png">
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </q-toolbar-title>
     </q-toolbar>
   </q-footer>
@@ -59,7 +72,12 @@ export default defineComponent({
       return (!mobile.value || Object.keys(popupContent).length !== 0)
     })
 
+    const _ = function (text) {
+      return $store.getters['app/getText'](text)
+    }
+
     return {
+      _,
       mobile,
       popupContent,
       showFooter
@@ -79,7 +97,7 @@ export default defineComponent({
 }
 .q-footer .q-toolbar__title {
   display: flex;
-  height:50px;
+  height:$footer-height;
   justify-content: space-between;
 }
 .logos.mobile {
@@ -87,6 +105,7 @@ export default defineComponent({
   // transform: scale(0.5);
   // transform-origin: 0 0;
 }
+.main-logo,
 .logos {
   list-style: none;
   display: flex;
@@ -103,12 +122,20 @@ export default defineComponent({
   margin:0;
   padding:0;
 }
+.main-logo img,
 .logos li img {
   max-height: 35px;
   margin-left: 30px;
 }
+.main-logo img{
+  margin-left: 0px;
+}
 .logos.mobile li img {
   max-width: 95%;
   margin-left: 0px;
+}
+
+.logo-title{
+  font-size: 11px;
 }
 </style>
