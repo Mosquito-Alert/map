@@ -16,7 +16,9 @@
                 name="pag_1"
                 class="column no-wrap flex-center"
               >
-              <h5 v-if="mobile">Este mapa es iniciativa de</h5>
+              <h5 v-if="mobile">
+                {{ _('This interactive map has been funded by') }}
+              </h5>
                 <div class="q-mt-md q-pr-md text-justify scroll">
                   <div v-if="mobile" class="info-logos row">
                     <div>
