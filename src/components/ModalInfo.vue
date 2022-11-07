@@ -124,7 +124,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.with_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>{{ _('Storm_drain_water') }}</b>{{ (': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como imbornales con agua) en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
+                        <div class="q-pr-md"><b>{{ _('Storm_drain_water') }}</b>{{ _(': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales con agua”) en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.')}}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
