@@ -49,8 +49,8 @@ export default function () {
       yellow_fever_probable: 'Aedes aegypti',
       japonicus_confirmed: 'Aedes japonicus',
       japonicus_probable: 'Aedes japonicus',
-      culex_confirmed: 'Culex pipens',
-      culex_probable: 'Culex pipens',
+      culex_confirmed: 'Culex pipiens',
+      culex_probable: 'Culex pipiens',
       koreicus_confirmed: 'Aedes koreicus',
       koreicus_probable: 'Aedes koreicus',
       japonicus_koreicus: 'Aedes japonicus/koreicus'

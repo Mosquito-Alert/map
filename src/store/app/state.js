@@ -254,7 +254,7 @@ export default function () {
         culex: {
           categories: ['culex_probable', 'culex_confirmed'],
           common_name: 'Culex mosquito',
-          scientific_name: 'Culex pipens',
+          scientific_name: 'Culex pipiens',
           icon: require('../../assets/img/marker_culex.svg'),
           color: '#aa4499',
           separator: true
@@ -361,7 +361,7 @@ export default function () {
       culex: {
         categories: ['culex_probable', 'culex_confirmed'],
         common_name: 'Common mosquito',
-        scientific_name: 'Culex pipens',
+        scientific_name: 'Culex pipiens',
         icon: require('../../assets/img/marker_culex.svg'),
         color: '#aa4499',
         modelName: 'culex',
