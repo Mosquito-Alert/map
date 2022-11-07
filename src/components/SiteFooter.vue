@@ -15,11 +15,17 @@
               </a>
             </div>
           </div>
-          <!-- <div v-if="mobile" class="main-logo">
-            <a href="https://www.ceab.csic.es/" target="_blank">
-              <img src="~assets/img/MA-mobile.png">
-            </a>
-          </div> -->
+
+          <div v-if="mobile" class="main-logo flex">
+            <div>
+              <a href="https://www.ceab.csic.es/" target="_blank">
+                <img src="~assets/img/MA-mobile.png">
+              </a>
+            </div>
+            <div class="about cursor-pointer" @click="showLogos">
+              {{ _('About us') }}
+            </div>
+          </div>
 
           <div v-if="!mobile">
             <ul class="logos" :class="mobile?'mobile':''">
@@ -77,8 +83,18 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
 
+    const showLogos = function () {
+      $store.commit('app/setModal', {
+        id: 'logos',
+        content: {
+          visibility: true
+        }
+      })
+    }
+
     return {
       _,
+      showLogos,
       mobile,
       popupContent,
       showFooter
@@ -138,5 +154,12 @@ export default defineComponent({
 
 .logo-title{
   font-size: 11px;
+}
+.main-logo.flex{
+  width: 100%;
+  justify-content: space-between;
+}
+.about{
+  font-size: 18px;
 }
 </style>

@@ -17,45 +17,6 @@
                 class="column no-wrap flex-center"
               >
                 <div class="q-mt-md q-pr-md text-justify scroll">
-                  <div v-if="mobile" class="funded_by">
-                    <h5 class="q-my-lg">
-                      {{ _('This interactive map has been funded by') }}
-                    </h5>
-                  </div>
-                  <div v-if="mobile" class="col-12">
-                    <a href="https://fundacionlacaixa.org/es/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika" target="_blank">
-                      <img src="~assets/img/fundacio_la_caixa.jpg">
-                    </a>
-                  </div>
-
-                  <div v-if="mobile" class="coordinators col-12">
-                    <h5 class="q-my-lg">
-                      {{ _('Coordinators') }}
-                    </h5>
-                  </div>
-
-                  <div v-if="mobile" class="info-logos row">
-                    <div class="col-6">
-                      <a href="https://www.ceab.csic.es/" target="_blank">
-                        <img src="~assets/img/CSIC-CEAB.png">
-                      </a>
-                    </div>
-                    <div class="col-6">
-                      <a href="https://www.upf.edu/" target="_blank">
-                        <img src="~assets/img/UPF.png">
-                      </a>
-                    </div>
-                    <div class="col-6">
-                      <a href="https://www.creaf.cat/" target="_blank">
-                        <img src="~assets/img/CREAF-SO.png">
-                      </a>
-                    </div>
-                    <div class="col-6">
-                      <a href="https://www.icrea.cat/" target="_blank">
-                        <img src="~assets/img/ICREA.png">
-                      </a>
-                    </div>
-                  </div>
                   <h5 class="q-my-lg">
                     <a href="#" @click.prevent="showModalCookiePolicy">
                       {{ _('Cookies policy') }}

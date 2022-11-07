@@ -49,12 +49,13 @@
     </modal-help>
 
     <modal-wait/>
+    <modal-logos/>
     <modal-error/>
     <modal-cookie-settings/>
     <modal-login/>
     <modal-cookie-policy/>
 
-    <site-footer v-if="!mobile"/>
+    <site-footer/>
     <cookies-compliance/>
   </q-layout>
 </template>
@@ -64,6 +65,7 @@ import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
+import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
@@ -86,6 +88,7 @@ export default {
     ModalHelp,
     ModalError,
     ModalLogin,
+    ModalLogos,
     ModalWait,
     SiteHeader,
     LeftDrawerModels,

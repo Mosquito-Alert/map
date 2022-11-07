@@ -192,7 +192,8 @@ export default function () {
       report: { visibility: false, n: 0 },
       error: { visibility: false, msg: '', link: '', redirection: false },
       wait: { visibility: false, seamless: false },
-      login: { visibility: false }
+      login: { visibility: false },
+      logos: { visibility: false }
     },
 
     // File locations of map selected icons

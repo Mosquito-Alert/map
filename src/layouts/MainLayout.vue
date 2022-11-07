@@ -73,12 +73,13 @@
     </modal-reports>
 
     <modal-wait/>
+    <modal-logos/>
     <modal-error/>
     <modal-login/>
     <modal-cookie-settings/>
     <modal-cookie-policy/>
 
-    <site-footer v-if="!mobile"/>
+    <site-footer/>
     <cookies-compliance/>
   </q-layout>
 </template>
@@ -91,6 +92,7 @@ import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
+import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalDownload from 'components/ModalDownload.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalReports from 'src/components/ModalReports.vue'
@@ -112,6 +114,7 @@ export default {
     ModalHelp,
     ModalError,
     ModalWait,
+    ModalLogos,
     ModalCookieSettings,
     ModalCookiePolicy,
     ModalDownload,
