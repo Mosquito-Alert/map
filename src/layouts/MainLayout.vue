@@ -78,7 +78,7 @@
     <modal-cookie-settings/>
     <modal-cookie-policy/>
 
-    <site-footer/>
+    <site-footer v-if="!mobile"/>
     <cookies-compliance/>
   </q-layout>
 </template>

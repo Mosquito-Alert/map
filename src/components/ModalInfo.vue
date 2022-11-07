@@ -16,38 +16,54 @@
                 name="pag_1"
                 class="column no-wrap flex-center"
               >
-              <h5 v-if="mobile">
-                {{ _('This interactive map has been funded by') }}
-              </h5>
                 <div class="q-mt-md q-pr-md text-justify scroll">
+                  <div v-if="mobile" class="funded_by">
+                    <h5 class="q-my-lg">
+                      {{ _('This interactive map has been funded by') }}
+                    </h5>
+                  </div>
+                  <div v-if="mobile" class="col-12">
+                    <a href="https://fundacionlacaixa.org/es/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika" target="_blank">
+                      <img src="~assets/img/fundacio_la_caixa.jpg">
+                    </a>
+                  </div>
+
+                  <div v-if="mobile" class="coordinators col-12">
+                    <h5 class="q-my-lg">
+                      {{ _('Coordinators') }}
+                    </h5>
+                  </div>
+
                   <div v-if="mobile" class="info-logos row">
-                    <div>
+                    <div class="col-6">
                       <a href="https://www.ceab.csic.es/" target="_blank">
                         <img src="~assets/img/CSIC-CEAB.png">
                       </a>
                     </div>
-                    <div>
+                    <div class="col-6">
                       <a href="https://www.upf.edu/" target="_blank">
                         <img src="~assets/img/UPF.png">
                       </a>
                     </div>
-                    <div>
+                    <div class="col-6">
                       <a href="https://www.creaf.cat/" target="_blank">
                         <img src="~assets/img/CREAF-SO.png">
                       </a>
                     </div>
-                    <div>
+                    <div class="col-6">
                       <a href="https://www.icrea.cat/" target="_blank">
                         <img src="~assets/img/ICREA.png">
                       </a>
                     </div>
                   </div>
-                  <h5>
+                  <h5 class="q-my-lg">
                     <a href="#" @click.prevent="showModalCookiePolicy">
                       {{ _('Cookies policy') }}
                     </a>
                   </h5>
-                  <h5> {{ _('Información de los datos') }}</h5>
+                  <h5 class="q-my-lg">
+                     {{ _('Información de los datos') }}
+                  </h5>
                   <p>{{_("El mapa contiene información de 5 especies de mosquitos vectores de enfermedades:")}} {{_("el mosquito tigre")}} (<i>{{_("Aedes albopictus")}}</i>), {{_("el mosquito de la fiebre amarilla")}} (<i>{{_("Aedes aegypti")}})</i>, {{_("el mosquito del Japón")}} (<i>{{_("Aedes japonicus")}}</i>), {{_("el mosquito de Corea")}} (<i>{{_("Aedes koreicus")}}</i>) {{_("y el mosquito común")}} (<i>{{_("Culex pipiens")}}</i>).</p>
                   <p>{{ _('Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.') }}</p>
                   <HR/>
@@ -421,4 +437,9 @@ button.ma-close-btn:hover,
 .info-logos img{
   max-width: 100px;
 }
+
+.info-logos div {
+  text-align: center;
+}
+
 </style>

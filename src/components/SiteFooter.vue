@@ -5,21 +5,21 @@
       <q-toolbar-title>
         <!-- <div v-if="!mobile" class="attribution"></div> -->
         <div class="flex" style="justify-content:space-between; width: 100%; align-items:center">
-          <div class="col q-my-xs">
+          <div v-if="!mobile" class="col q-my-xs">
             <div class="logo-title">
               {{ _('This interactive map has been funded by') }}
             </div>
             <div class="main-logo">
-              <a href="https://fundacionlacaixa.org" target="_blank">
+              <a href="https://fundacionlacaixa.org/es/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika" target="_blank">
                 <img src="~assets/img/fundacio_la_caixa.jpg">
               </a>
             </div>
           </div>
-          <div v-if="mobile" class="main-logo">
+          <!-- <div v-if="mobile" class="main-logo">
             <a href="https://www.ceab.csic.es/" target="_blank">
               <img src="~assets/img/MA-mobile.png">
             </a>
-          </div>
+          </div> -->
 
           <div v-if="!mobile">
             <ul class="logos" :class="mobile?'mobile':''">
