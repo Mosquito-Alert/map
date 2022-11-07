@@ -17,8 +17,8 @@
           </div>
 
           <div v-if="mobile" class="main-logo flex">
-            <div>
-              <a href="https://www.ceab.csic.es/" target="_blank">
+            <div class="mosquito-logo flex">
+              <a href="https://www.ceab.csic.es/" target="_blank" class="flex">
                 <img src="~assets/img/MA-mobile.png">
               </a>
             </div>
@@ -160,6 +160,6 @@ export default defineComponent({
   justify-content: space-between;
 }
 .about{
-  font-size: 18px;
+  font-size: 12px;
 }
 </style>
