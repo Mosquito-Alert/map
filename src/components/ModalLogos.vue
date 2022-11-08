@@ -9,7 +9,7 @@
         <div v-if="mobile">
           <div v-if="mobile" class="coordinators col-12">
             <h5 class="q-my-lg">
-                {{ _('Este mapa interactivo ha sido coordinado por') }}:
+                {{ _('Mosquito Alert está coordinado por') }}:
             </h5>
           </div>
 
