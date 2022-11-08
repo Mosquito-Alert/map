@@ -10,7 +10,7 @@
               {{ _('This interactive map has been funded by') }}
             </div>
             <div class="main-logo">
-              <a href="https://fundacionlacaixa.org/es/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika" target="_blank">
+              <a :href="linkLaCaixa" target="_blank">
                 <img src="~assets/img/fundacio_la_caixa.jpg">
               </a>
             </div>
@@ -92,8 +92,14 @@ export default defineComponent({
       })
     }
 
+    const linkLaCaixa = computed(() => {
+      const lang = $store.getters['app/getLang']
+      return '//fundacionlacaixa.org/' + lang + '/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika'
+    })
+
     return {
       _,
+      linkLaCaixa,
       showLogos,
       mobile,
       popupContent,
@@ -161,5 +167,6 @@ export default defineComponent({
 }
 .about{
   font-size: 12px;
+  text-decoration: underline;
 }
 </style>

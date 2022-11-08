@@ -14,33 +14,33 @@
           </div>
 
           <div v-if="mobile" class="info-logos row">
-            <div class="col-6">
+            <div class="col-7">
                 <a href="https://www.ceab.csic.es/" target="_blank">
-                <img src="~assets/img/csic_ceab_logo.png">
+                <img src="~assets/img/csic_ceab_logo.png" class="csic-ceab">
                 </a>
             </div>
-            <div class="col-6">
+            <div class="col-5">
                 <a href="https://www.upf.edu/" target="_blank">
-                <img src="~assets/img/UPFt_rgb.png">
+                <img src="~assets/img/UPFt_rgb.png" class="upf">
                 </a>
             </div>
-            <div class="col-6">
+            <div class="col-7">
                 <a href="https://www.creaf.cat/" target="_blank">
-                <img src="~assets/img/CREAF-SO-logo.jpg">
+                <img src="~assets/img/CREAF-SO-logo.jpg" class="creaf">
                 </a>
             </div>
-            <div class="col-6">
+            <div class="col-5">
                 <a href="https://www.icrea.cat/" target="_blank">
-                <img src="~assets/img/icrea.jpeg">
+                <img src="~assets/img/icrea.jpeg" class="icrea">
                 </a>
             </div>
           </div>
           <h5 class="q-my-lg text-left">
             {{ _('Con el apoyo de') }}:
           </h5>
-          <div v-if="mobile" class="col-12 text-center funded-logos">
-            <a href="https://fundacionlacaixa.org/es/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika" target="_blank">
-                <img src="~assets/img/la_caixa.jpeg">
+          <div v-if="mobile" class="col-12 text-left funded-logos">
+            <a :href="linkLaCaixa" target="_blank">
+                <img src="~assets/img/la_caixa.jpeg" class="lacaixa">
             </a>
           </div>
 
@@ -82,11 +82,16 @@ export default {
       $store.commit('app/setModal', { id: 'logos', content: { visibility: false } })
     }
 
+    const linkLaCaixa = computed(() => {
+      const lang = $store.getters['app/getLang']
+      return '//fundacionlacaixa.org/' + lang + '/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika'
+    })
     const layers = $store.getters['app/getLayers']
 
     return {
       open,
       close,
+      linkLaCaixa,
       layers,
       hasCloseButton,
       mobile,
@@ -106,27 +111,28 @@ export default {
   justify-content: space-around;
   align-items: center;
 }
-.info-logos img{
-  max-width: 100px;
-}
-
-.info-logos div {
-  text-align: center;
-}
-.logos img{
+.info-logos img.csic-ceab,
+.info-logos img.creaf{
   max-width: 150px;
 }
 
+.info-logos div {
+  text-align: left;
+}
+.logos img.upf,
+.logos img.icrea{
+  max-width: 100px;
+}
 .info-logos img{
   max-width: 100px;
 }
 
 .funded-logos img{
-  max-width: 250px;
+  max-width: 230px;
 }
 
-.info-logos div {
-  text-align: center;
+.row .col-8,
+.row .col-4{
+  text-align: left;
 }
-
 </style>
