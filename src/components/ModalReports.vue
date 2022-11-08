@@ -9,6 +9,9 @@
           <div class="modal-title">{{ _('Reports modal title') }}</div>
           <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
           <p>{{ _('Verify this by looking at the map point counter') }}</p>
+          <p class="popup-blocking-warning" v-if="browser==='safari'">
+            {{ _('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
+          </p>
         <div class="error-message" v-if="tooManyFeatures">
           {{ _('Reports limit exceeded') }}
         </div>
@@ -56,7 +59,12 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
+    const browser = computed(() => {
+      return $store.getters['app/getBrowser']
+    })
+
     return {
+      browser,
       mobile,
       tooManyFeatures,
       newReport,
@@ -186,5 +194,9 @@ button.ma-btn:hover,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
   opacity:0.7;
+}
+
+.popup-blocking-warning{
+  font-weight: 500;
 }
 </style>

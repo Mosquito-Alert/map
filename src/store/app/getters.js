@@ -122,3 +122,7 @@ export const getEstimationPalettes = state => {
 export const getTilesUrl = state => {
   return state.tilesUrl
 }
+
+export const getBrowser = state => {
+  return state.browser
+}
