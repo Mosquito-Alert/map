@@ -1,23 +1,33 @@
 <template>
-  <router-link class="main-menu-item" :to="to_link">
-    <button class="fa-thin-button" :class="class_prop" :title="label">
-      <i :class="icon_code"></i>
+  <router-link class="main-menu-item" :to="toLink">
+    <button class="fa-thin-button" :class="classProp" :title="label">
+      <i :class="iconCode"></i>
     </button>
   </router-link>
 </template>
 
 <script>
+import { computed } from 'vue'
+
 export default {
-  props: ['name', 'label', 'link', 'class'],
-  computed: {
-    to_link (props) {
-      return `${props.link}`
-    },
-    icon_code (props) {
-      return `${props.name}`
-    },
-    class_prop (props) {
+  props: ['name', 'label', 'link', 'class', 'item'],
+  setup (props) {
+    const toLink = computed(() => {
+      return props.link
+    })
+
+    const iconCode = computed(() => {
+      return props.name
+    })
+
+    const classProp = computed(() => {
       return props.class
+    })
+
+    return {
+      toLink,
+      iconCode,
+      classProp
     }
   }
 }

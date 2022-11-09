@@ -136,7 +136,10 @@ export default {
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
-
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    if (lang) {
+      $store.dispatch('app/setLanguage', lang.toLowerCase())
+    }
     const resizeMap = function (args) {
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {

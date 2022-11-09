@@ -4,7 +4,8 @@
         name="fa-thin fa-map-location-dot"
         :label="_('Reports')"
         :class="active_item=='layers'?'active':''"
-        :link="frontendUrl"
+        link="/"
+        item="reports"
       >
       </fa-thin-button-router>
 
@@ -12,7 +13,8 @@
         name="fa-thin fa-chart-scatter"
         :label="_('Estimates')"
         :class="active_item=='models'?'active':''"
-        link="models"
+        link="/models"
+        item="models"
       >
       </fa-thin-button-router>
 
@@ -132,13 +134,22 @@ export default {
       initLanguage()
     })
 
+    const frontendUrl = computed(() => {
+      console.log($store.getters['app/getFrontendUrl'])
+      return $store.getters['app/getFrontendUrl']
+    })
+    const linkModels = computed(() => {
+      console.log($store.getters['app/getFrontendUrl'] + 'models')
+      return $store.getters['app/getFrontendUrl'] + 'models'
+    })
+
     return {
       _,
       ca,
       es,
       en,
-      frontendUrl: computed(() => $store.getters['app/getFrontendUrl']),
-      linkModels: computed(() => $store.getters['app/getFrontendUrl'] + 'models'),
+      frontendUrl,
+      linkModels,
       showInfo,
       showHelp,
       showShareUrl,

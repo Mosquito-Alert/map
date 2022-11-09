@@ -12,7 +12,9 @@
             </div>
             <div>
               <div class="row cookies-selector">
-                  <div class="col-10"><h5>Necesarias</h5></div>
+                  <div class="col-10">
+                    <h5>{{ _('Necesarias') }}</h5>
+                  </div>
                   <div class="col-2">
                     <q-toggle
                       disable
@@ -21,20 +23,16 @@
                       size="lg"
                       checked-icon="check"
                       color="orange"/>
-                    <!-- <label class="cookie-comply-switch" :title="_('Is required')">
-                      <input id="performance" checked type="checkbox" disabled="" value="performance">
-                      <span class="cookie-comply-slider cookie-comply-round cookie-comply-is-required"></span>
-                    </label> -->
                   </div>
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>Las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web.</p>
+                  <p>{{ _("las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web") }}</p>
                 </div>
               </div>
 
               <div class="row cookies-selector">
-                  <div class="col-10"><h5>{{ _("Analytics title") }}</h5></div>
+                  <div class="col-10"><h5>{{ _('Analíticas') }}</h5></div>
                   <div class="col-2">
                     <q-toggle
                       :title="_('Analytics tooltip')"
@@ -42,16 +40,11 @@
                       size="lg"
                       checked-icon="check"
                       color="orange"/>
-
-                    <!-- <label class="cookie-comply-switch" :title="_('Analytics tooltip')">
-                      <input id="ga" :checked="analyticsActivated" type="checkbox" value="ga" @click="analyticsActivated = !analyticsActivated">
-                      <span class="cookie-comply-slider cookie-comply-round"></span>
-                    </label> -->
                   </div>
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>Proporcionan información estadística y permiten mejorar los servicios.</p>
+                  <p>{{ _('proporcionan información estadística y permiten mejorar los servicios') }}</p>
                 </div>
               </div>
             </div>

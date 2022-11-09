@@ -6,9 +6,20 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     props: { initView: false }
   },
+  // DEFAULT WITH LANG
+  {
+    path: '/:lang(ca|es|en)',
+    component: () => import('layouts/MainLayout.vue'),
+    props: { initView: false }
+  },
   // MODELS MAP
   {
     path: '/models',
+    component: () => import('layouts/ModelsLayout.vue')
+  },
+  // MODELS WITH LANG
+  {
+    path: '/models/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
   },
   // SHARE OBSERVATIONS VIEW
@@ -28,7 +39,7 @@ const routes = [
   },
   {
     // Set the accepted characters and length of reports view with lang
-    path: '/:report([a-zA-Z0-9]{6})/:lang([a-zA-Z]{2})',
+    path: '/:report([a-zA-Z0-9]{6})/:lang(ca|es|en)',
     component: () => import('layouts/ReportsLayout.vue')
   },
   {

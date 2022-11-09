@@ -122,7 +122,6 @@ self.onmessage = async function (e) {
     let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
     // Calculate the extent of the cluster to speed up zooming in
     const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
-
     if (z >= 19) {
       z = 19
     }

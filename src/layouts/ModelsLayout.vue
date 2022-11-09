@@ -99,14 +99,17 @@ export default {
     CookiesCompliance
   },
   setup () {
-    // const route = useRoute()
+    const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    if (lang) {
+      $store.dispatch('app/setLanguage', lang.toLocaleLowerCase())
+    }
 
-    const route = useRoute()
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
 
     const frontendUrl = computed(() => {

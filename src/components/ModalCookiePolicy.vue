@@ -25,9 +25,9 @@
 
             <h5>{{ _('Según la finalidad') }}</h5>
             <ul>
-              <li>{{ _('Necesarias: las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web') }}</li>
-              <li>{{ _('Técnicas: las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros') }}</li>
-              <li>{{ _('Analíticas: proporcionan información estadística y permiten mejorar los servicios') }}</li>
+              <li>{{ _('Necesarias') }}: {{ _('las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web') }}</li>
+              <li>{{ _('Técnicas') }}: {{ _('las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros') }}</li>
+              <li>{{ _('Analíticas') }}: {{ _('proporcionan información estadística y permiten mejorar los servicios') }}</li>
             </ul>
 
           <h5>{{ _('Listado de cookies utilizadas') }}</h5>

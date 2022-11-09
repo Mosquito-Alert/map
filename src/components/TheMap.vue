@@ -24,7 +24,7 @@
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
-            :constrainResolution='true'
+            :constrainResolution='false'
             @moveend='updateMap'
             style='height:100%'>
 
@@ -480,8 +480,15 @@ export default defineComponent({
         // removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
+        const tExtent = transformExtent(event.data.clusterExtent, 'EPSG:4326', 'EPSG:3857')
+        const expandFactor = map.value.map.getView().getResolution()
+        // Make extent bigger to show cluster elments. Otherwise elements could just not been drawn
+        tExtent[0] = tExtent[0] - expandFactor
+        tExtent[1] = tExtent[1] - expandFactor
+        tExtent[2] = tExtent[2] + expandFactor
+        tExtent[3] = tExtent[3] + expandFactor
         map.value.map.getView().fit(
-          transformExtent(event.data.clusterExtent, 'EPSG:4326', 'EPSG:3857'),
+          tExtent,
           { duration: 600, nearest: false }
         )
         // const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
@@ -736,6 +743,7 @@ export default defineComponent({
     function updateMap () {
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
+      console.log('new zoom ' + newZoom)
       $store.commit('map/setDefaults', {
         zoom: newZoom,
         center: transform(
@@ -768,7 +776,6 @@ export default defineComponent({
         return e.toFixed(4)
       })
       $store.commit('map/setViewbox', viewBox)
-
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),
