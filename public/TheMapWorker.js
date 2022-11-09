@@ -221,10 +221,11 @@ self.onmessage = async function (e) {
     const temp = {}
 
     time.forEach(feature => {
-      const type = seriesMap[feature.properties.c]
       if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
 
       const dateSeries = temp[feature.properties.d]
+      const type = seriesMap[feature.properties.c]
+
       if (!(type in dateSeries)) dateSeries[type] = 0
       dateSeries[type] += 1
     })

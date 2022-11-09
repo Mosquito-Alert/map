@@ -24,13 +24,13 @@
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
-            :constrainResolution='false'
             @moveend='updateMap'
             style='height:100%'>
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
             maxResolution="39135.75848201024"
+            :constrainResolution='true'
             multiWorld="true"
             maxZoom="19"
             :center='center'
@@ -1112,10 +1112,10 @@ export default defineComponent({
 
         const circle = new Circle({
           fill: new Fill({
-            color: 'rgb(127, 153, 136, 1)'
+            color: 'rgba(127, 153, 136, 1)'
           }),
           stroke: new Stroke({
-            color: 'rgb(127, 153, 136, 0.5)',
+            color: 'rgba(127, 153, 136, 0.5)',
             width: 15
           }),
           radius: radius
