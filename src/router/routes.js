@@ -27,6 +27,11 @@ const routes = [
     path: '/:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/MainLayout.vue')
   },
+  // SHARE OBSERVATIONS VIEW WITH LANG
+  {
+    path: '/:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
+    component: () => import('layouts/MainLayout.vue')
+  },
   // SHARE MODELS VIEW
   {
     path: '/M-:code([a-zA-Z0-9]{4})',
@@ -45,6 +50,11 @@ const routes = [
   {
     // Only one feature map (by observation long id)
     path: '/:code([-a-zA-Z0-9]{36})',
+    component: () => import('src/layouts/OneFeatureLayout.vue')
+  },
+  {
+    // Only one feature map (by observation long id) with lang
+    path: '/:code([-a-zA-Z0-9]{36})/:lang(ca|es|en)',
     component: () => import('src/layouts/OneFeatureLayout.vue')
   },
   // Always leave this as last one,

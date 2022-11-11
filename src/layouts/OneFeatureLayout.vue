@@ -49,6 +49,11 @@ export default {
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
     const $store = useStore()
 
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    if (lang) {
+      $store.dispatch('app/setLanguage', lang.toLowerCase())
+    }
+
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })

@@ -42,6 +42,11 @@ export const setDefaults = (state, payload) => {
   state.DEFAULTS.MOBILEZOOM = payload.zoom
 }
 
+export const setCurrents = (state, payload) => {
+  state.CURRENTS.ZOOM = payload.zoom
+  state.CURRENTS.CENTER = payload.center
+}
+
 export const setModelDate = (state, payload) => {
   state.modelDate = payload
 }

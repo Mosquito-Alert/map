@@ -85,6 +85,7 @@
         :height="graphicHeight"
         :options="chartOptions"
         @wheel="handleWheel"
+        @chart:update="chartUpdated"
         />
     </div>
   </div>
@@ -258,9 +259,9 @@ export default defineComponent({
       context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     const getData = () => {
-      const rawData = $store.getters['timeseries/getData']
+      const rawData = $store.getters['timeseries/getDData']
       const layers = $store.getters['app/getLayers']
-      const datasets = Object.keys(rawData).map(layer => {
+      const datasets = Object.keys(rawData.data).map(layer => {
         const cat = Object.keys(layers).find(category => {
           return layer in layers[category]
         })
@@ -270,7 +271,7 @@ export default defineComponent({
           borderColor: color,
           backgroundColor: color,
           fill: false,
-          data: Array.from(rawData[layer]),
+          data: Array.from(rawData.data[layer]),
           pointHitRadius: 200
         }
         if ('faIcon' in layers[cat][layer]) {
@@ -281,12 +282,13 @@ export default defineComponent({
         return result
       })
       const data = {
-        labels: $store.getters['timeseries/getDates'],
+        labels: rawData.dates,
         datasets: datasets
       }
       moment.locale($store.getters['app/getLang'])
       return data
     }
+
     const chartData = computed(() => {
       let data = getData()
       // If the data is empty, the chart crashes and can't be updated.

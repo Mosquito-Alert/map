@@ -147,8 +147,9 @@ export default defineComponent({
     ratio.value = 0
 
     onUpdated(() => {
-      loading.value = props.selectedFeature.photo_url
-      imageRatio.value = mobile.value ? 'mobile' : null
+      if (Object.keys(props.selectedFeature).length === 0) {
+        mosquitoImageLoaded.value = false
+      }
     })
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']

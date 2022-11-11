@@ -4,6 +4,10 @@ export default function () {
     completeDatesRange: {},
     dates: [],
     data: [],
+    Data: {
+      dates: [],
+      data: []
+    },
     chart: {
       options: {
         responsive: true,

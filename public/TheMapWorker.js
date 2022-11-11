@@ -199,16 +199,20 @@ self.onmessage = async function (e) {
     }
   }
   else if (e.data) {
-    // This is fired when the user navigates the map.
+    // When map is just panned
     const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
     const map = index.getClusters(e.data.bbox, e.data.zoom)
+    postMessage({
+      map: map,
+      spiderfyCluster: e.data.spiderfyCluster,
+    })
 
     time.sort((a, b) => {
       if (a.properties.d < b.properties.d) return -1
       else if (a.properties.d > b.properties.d) return 1
       else return 0
     })
-
+    
     const dates = []
     const series = {}
     const seriesMap = {}
@@ -249,10 +253,8 @@ self.onmessage = async function (e) {
       })
       start = new Date(start.setDate(start.getDate() + 1))
     }
-
+    
     postMessage({
-      map: map,
-      spiderfyCluster: e.data.spiderfyCluster,
       timeseries: {
         dates: dates,
         data: series

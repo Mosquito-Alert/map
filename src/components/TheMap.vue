@@ -385,6 +385,11 @@ export default defineComponent({
         return
       }
 
+      if (event.data.timeseries) {
+        manageTimeSeries(event.data.timeseries)
+        return
+      }
+
       if (event.data.minMaxDates) {
         if (event.data.getAllDates) {
           $store.commit('map/setMinMaxDates', {
@@ -508,12 +513,12 @@ export default defineComponent({
           data.push(feat)
         }
         features.value = data
-        const graphDates = event.data.timeseries.dates
-        const sDate = graphDates[0]
-        const eDate = graphDates[graphDates.length - 1]
-        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
-        $store.commit('timeseries/updateXUnits', daysInRange)
-        $store.dispatch('timeseries/updateData', event.data.timeseries)
+        // const graphDates = event.data.timeseries.dates
+        // const sDate = graphDates[0]
+        // const eDate = graphDates[graphDates.length - 1]
+        // const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        // $store.commit('timeseries/updateXUnits', daysInRange)
+        // $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
 
@@ -743,8 +748,7 @@ export default defineComponent({
     function updateMap () {
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
-      console.log('new zoom ' + newZoom)
-      $store.commit('map/setDefaults', {
+      $store.commit('map/setCurrents', {
         zoom: newZoom,
         center: transform(
           olmap.getView().getCenter(),
@@ -1449,6 +1453,25 @@ export default defineComponent({
           seamless: false
         }
       })
+    }
+
+    function manageTimeSeries (data) {
+      if (data.dates) {
+        const graphDates = data.dates
+        const sDate = graphDates[0]
+        const eDate = graphDates[graphDates.length - 1]
+        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        $store.commit('timeseries/updateXUnits', daysInRange)
+        if ($store.getters['timeseries/getGraphIsVisible']) {
+          // $store.dispatch('timeseries/updateData', data)
+          // $store.commit('timeseries/updateData', data.data)
+          // $store.commit('timeseries/updateDates', data.dates)
+          $store.commit('timeseries/updateDData', {
+            data: data.data,
+            dates: data.dates
+          })
+        }
+      }
     }
 
     return {

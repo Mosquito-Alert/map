@@ -2,6 +2,10 @@ export const getData = state => {
   return state.data
 }
 
+export const getDData = state => {
+  return state.Data
+}
+
 export const getDates = state => {
   return Object.values(state.dates)
 }

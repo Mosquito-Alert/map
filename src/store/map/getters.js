@@ -10,6 +10,10 @@ export const getDefault = (state, payload) => {
   return state.DEFAULTS
 }
 
+export const getCurrents = (state, payload) => {
+  return state.CURRENTS
+}
+
 export const features = (state, payload) => {
   return state.features
 }
