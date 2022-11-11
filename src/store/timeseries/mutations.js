@@ -14,6 +14,14 @@ export const updateDData = (state, payload) => {
   state.Data = payload
 }
 
+export const updateCache = (state, payload) => {
+  state.cache = payload
+}
+
+export const updateDataFromCache = (state) => {
+  state.Data = state.cache
+}
+
 export const updateXUnits = (state, days) => {
   if (days < 40) {
     state.chart.options.scales.x.time.unit = 'day'

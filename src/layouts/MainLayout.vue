@@ -148,6 +148,7 @@ export default {
           args.start += 5
           resizeMap(args)
         }, 5)
+        $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
         if (pendingView.value.extent !== null) {

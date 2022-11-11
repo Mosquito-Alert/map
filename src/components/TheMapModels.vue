@@ -107,7 +107,7 @@ export default defineComponent({
     $store.commit('map/selectFeature', {})
     // Map general configuration
     const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
+      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
     })
 
     const center = computed(() => {

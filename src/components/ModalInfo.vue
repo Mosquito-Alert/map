@@ -46,7 +46,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.yellow.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ _('Mosquito de la fiebre amarilla') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de la fiebre amarilla') }} (<i>Aedes aegypti</i>)
+                      <div class="q-pr-md"><b>{{ _('Yellow fever mosquito') }}</b>{{ _(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de la fiebre amarilla') }} (<i>Aedes aegypti</i>)
                       </div>
                     </div>
 

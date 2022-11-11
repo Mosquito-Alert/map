@@ -11,7 +11,8 @@ export default function () {
     },
     CURRENTS: {
       ZOOM: 3,
-      CENTER: [13.6889, 44.8409]
+      CENTER: [13.6889, 44.8409],
+      MOBILEZOOM: 1
     },
     maxZoom: 19,
     features: [],

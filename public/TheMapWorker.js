@@ -200,66 +200,70 @@ self.onmessage = async function (e) {
   }
   else if (e.data) {
     // When map is just panned
-    const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-    const map = index.getClusters(e.data.bbox, e.data.zoom)
+    const grahData = getGraphData (e)
     postMessage({
-      map: map,
-      spiderfyCluster: e.data.spiderfyCluster,
+      timeseries: grahData
     })
+  }
+}
 
-    time.sort((a, b) => {
-      if (a.properties.d < b.properties.d) return -1
-      else if (a.properties.d > b.properties.d) return 1
-      else return 0
+function getGraphData (e) {
+  const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
+  const map = index.getClusters(e.data.bbox, e.data.zoom)
+  postMessage({
+    map: map,
+    spiderfyCluster: e.data.spiderfyCluster,
+  })
+
+  time.sort((a, b) => {
+    if (a.properties.d < b.properties.d) return -1
+    else if (a.properties.d > b.properties.d) return 1
+    else return 0
+  })
+
+  const dates = []
+  const series = {}
+  const seriesMap = {}
+  filters.observations.forEach(layer => {
+    all_layers[layer.type][layer.code].categories.forEach(validationType => {
+      seriesMap[validationType] = layer.code
     })
-    
-    const dates = []
-    const series = {}
-    const seriesMap = {}
-    filters.observations.forEach(layer => {
-      all_layers[layer.type][layer.code].categories.forEach(validationType => {
-        seriesMap[validationType] = layer.code
-      })
-      series[layer.code] = []
-    })
-    const temp = {}
+    series[layer.code] = []
+  })
+  const temp = {}
 
-    time.forEach(feature => {
-      if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+  time.forEach(feature => {
+    if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
 
-      const dateSeries = temp[feature.properties.d]
-      const type = seriesMap[feature.properties.c]
+    const dateSeries = temp[feature.properties.d]
+    const type = seriesMap[feature.properties.c]
 
-      if (!(type in dateSeries)) dateSeries[type] = 0
-      dateSeries[type] += 1
-    })
+    if (!(type in dateSeries)) dateSeries[type] = 0
+    dateSeries[type] += 1
+  })
 
-    const tempDates = Object.keys(temp)
-    let start = new Date(tempDates[0])
-    start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
-    let end = new Date(tempDates[tempDates.length - 1])
-    end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
-    while (start <= end) {
-      const dateLabel = start.toISOString().split('T')[0]
-      const values = temp[dateLabel]
-      dates.push(dateLabel)
-      Object.keys(series).forEach(type => {
-        if (values && type in values) {
-          const value = values[type]
-          series[type].push(value)
-        } else {
-          series[type].push(0)
-        }
-      })
-      start = new Date(start.setDate(start.getDate() + 1))
-    }
-    
-    postMessage({
-      timeseries: {
-        dates: dates,
-        data: series
+  const tempDates = Object.keys(temp)
+  let start = new Date(tempDates[0])
+  start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
+  let end = new Date(tempDates[tempDates.length - 1])
+  end = new Date(end.setDate(end.getDate() + 1)) // Finish on the day after the last date
+  while (start <= end) {
+    const dateLabel = start.toISOString().split('T')[0]
+    const values = temp[dateLabel]
+    dates.push(dateLabel)
+    Object.keys(series).forEach(type => {
+      if (values && type in values) {
+        const value = values[type]
+        series[type].push(value)
+      } else {
+        series[type].push(0)
       }
     })
+    start = new Date(start.setDate(start.getDate() + 1))
+  }
+  return {
+    dates: dates,
+    data: series
   }
 }
 
@@ -276,7 +280,7 @@ function loadMapData (data, fitFeatures) {
     log: DEBUG,
     radius: 1,
     extent: 256,
-    maxZoom: 1
+    maxZoom: 0
   }).load(data)
 
   const workerParams = {

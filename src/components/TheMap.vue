@@ -30,7 +30,7 @@
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
             maxResolution="39135.75848201024"
-            :constrainResolution='true'
+            constrainResolution='true'
             multiWorld="true"
             maxZoom="19"
             :center='center'
@@ -1463,10 +1463,12 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
-          // $store.dispatch('timeseries/updateData', data)
-          // $store.commit('timeseries/updateData', data.data)
-          // $store.commit('timeseries/updateDates', data.dates)
           $store.commit('timeseries/updateDData', {
+            data: data.data,
+            dates: data.dates
+          })
+        } else {
+          $store.commit('timeseries/updateCache', {
             data: data.data,
             dates: data.dates
           })

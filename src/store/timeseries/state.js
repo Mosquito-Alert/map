@@ -2,8 +2,12 @@ export default function () {
   return {
     graphIsVisible: false,
     completeDatesRange: {},
-    dates: [],
-    data: [],
+    // dates: [],
+    // data: [],
+    cache: {
+      dates: [],
+      data: []
+    },
     Data: {
       dates: [],
       data: []
