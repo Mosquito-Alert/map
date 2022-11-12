@@ -1,6 +1,7 @@
-/* global importScripts Supercluster */
+  /* global importScripts Supercluster */
 importScripts('supercluster.min.js')
 importScripts('https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js')
+importScripts('moment.js')
 
 let dataset = []
 let filteredDataset = []
@@ -214,7 +215,7 @@ function getGraphData (e) {
     map: map,
     spiderfyCluster: e.data.spiderfyCluster,
   })
-
+  
   time.sort((a, b) => {
     if (a.properties.d < b.properties.d) return -1
     else if (a.properties.d > b.properties.d) return 1
@@ -231,11 +232,22 @@ function getGraphData (e) {
     series[layer.code] = []
   })
   const temp = {}
-
+  let groupBy
+  
+  console.log(time.length)
+  let key
   time.forEach(feature => {
-    if (!(feature.properties.d in temp)) temp[feature.properties.d] = {}
+    if (time.length < 5000) {
+      key = feature.properties.d
+    } else if (time.length < 15000) {
+      key = moment(feature.properties.d).startOf('week').format('YYYY-MM-DD')
+    } else {
+      key = moment(feature.properties.d).startOf('month').format('YYYY-MM-DD')
+    }
 
-    const dateSeries = temp[feature.properties.d]
+    if (!(key in temp)) temp[key] = {}
+
+    const dateSeries = temp[key]
     const type = seriesMap[feature.properties.c]
 
     if (!(type in dateSeries)) dateSeries[type] = 0
