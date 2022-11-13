@@ -57,3 +57,11 @@ export const setChartOnPanComplete = (state, options) => {
 export const setYTickSuggetedMax = (state, max) => {
   state.chart.options.scales.y.suggestedMax = max
 }
+
+export const setToggling = (state, payload) => {
+  state.toggling = payload
+}
+
+export const setAnimationOptions = (state, payload) => {
+  state.chart.options.animation = payload
+}

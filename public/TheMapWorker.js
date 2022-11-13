@@ -73,6 +73,7 @@ function getMissingYears (date) {
 }
 
 self.onmessage = async function (e) {
+  console.time()
   if (e.data.fetchUrl) {
     const year = e.data.year
     getdataUrl = e.data.fetchUrl
@@ -205,17 +206,19 @@ self.onmessage = async function (e) {
     postMessage({
       timeseries: grahData
     })
+    console.timeEnd()
   }
 }
 
 function getGraphData (e) {
   const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
   const map = index.getClusters(e.data.bbox, e.data.zoom)
+
   postMessage({
     map: map,
     spiderfyCluster: e.data.spiderfyCluster,
   })
-  
+
   time.sort((a, b) => {
     if (a.properties.d < b.properties.d) return -1
     else if (a.properties.d > b.properties.d) return 1
@@ -233,11 +236,10 @@ function getGraphData (e) {
   })
   const temp = {}
   let groupBy
-  
-  console.log(time.length)
+
   let key
   time.forEach(feature => {
-    if (time.length < 5000) {
+    if (time.length < 1000000) {
       key = feature.properties.d
     } else if (time.length < 15000) {
       key = moment(feature.properties.d).startOf('week').format('YYYY-MM-DD')
@@ -255,6 +257,7 @@ function getGraphData (e) {
   })
 
   const tempDates = Object.keys(temp)
+  console.log(tempDates.length)
   let start = new Date(tempDates[0])
   start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
   let end = new Date(tempDates[tempDates.length - 1])
@@ -273,6 +276,7 @@ function getGraphData (e) {
     })
     start = new Date(start.setDate(start.getDate() + 1))
   }
+
   return {
     dates: dates,
     data: series

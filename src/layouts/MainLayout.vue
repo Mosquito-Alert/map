@@ -144,11 +144,14 @@ export default {
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {
         map.value.map.updateSize()
+        if (args.start + 5 >= args.end) {
+          $store.commit('timeseries/setToggling', false)
+          $store.commit('timeseries/updateDataFromCache')
+        }
         setTimeout(() => {
           args.start += 5
           resizeMap(args)
         }, 5)
-        $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
         if (pendingView.value.extent !== null) {
@@ -277,13 +280,15 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
-      $store.commit('app/setModal', {
-        id: 'wait',
-        content: {
-          visibility: false,
-          seamless: false
-        }
-      })
+      if (!$store.getters['timeseries/getGraphIsVisible']) {
+        $store.commit('app/setModal', {
+          id: 'wait',
+          content: {
+            visibility: false,
+            seamless: false
+          }
+        })
+      }
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }

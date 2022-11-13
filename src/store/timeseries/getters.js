@@ -29,3 +29,7 @@ export const getGraphIsVisible = state => {
 export const getYTickSuggestedMax = state => {
   return state.chart.options.scales.y.suggestedMax
 }
+
+export const getToggling = state => {
+  return state.toggling
+}

@@ -85,7 +85,6 @@
         :height="graphicHeight"
         :options="chartOptions"
         @wheel="handleWheel"
-        @chart:update="chartUpdated"
         />
     </div>
   </div>
@@ -170,6 +169,12 @@ export default defineComponent({
     onMounted(function () {
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
       initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
+      $store.commit('timeseries/setAnimationOptions', {
+        onComplete: function () {
+          hideSpinner()
+          console.timeEnd()
+        }
+      })
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
       defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
@@ -182,6 +187,15 @@ export default defineComponent({
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
     })
+
+    function hideSpinner () {
+      $store.commit('app/setModal', {
+        id: 'wait',
+        content: {
+          visibility: false
+        }
+      })
+    }
 
     onUpdated(function () {
       $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
@@ -256,6 +270,9 @@ export default defineComponent({
     const toggleTimeSeries = function () {
       timeIsVisible.value = !timeIsVisible.value
       iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
+      if (timeIsVisible.value) {
+        $store.commit('timeseries/setToggling', true)
+      }
       context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     const getData = () => {

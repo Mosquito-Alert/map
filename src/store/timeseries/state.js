@@ -1,5 +1,6 @@
 export default function () {
   return {
+    toggling: false,
     graphIsVisible: false,
     completeDatesRange: {},
     // dates: [],
@@ -14,6 +15,7 @@ export default function () {
     },
     chart: {
       options: {
+        animation: {},
         responsive: true,
         plugins: {
           legend: { display: false },

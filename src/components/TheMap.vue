@@ -513,6 +513,9 @@ export default defineComponent({
           data.push(feat)
         }
         features.value = data
+        if (!$store.getters['timeseries/getGraphIsVisible']) {
+          spinner(false)
+        }
         // const graphDates = event.data.timeseries.dates
         // const sDate = graphDates[0]
         // const eDate = graphDates[graphDates.length - 1]
@@ -780,6 +783,8 @@ export default defineComponent({
         return e.toFixed(4)
       })
       $store.commit('map/setViewbox', viewBox)
+
+      spinner(true)
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),
@@ -1445,17 +1450,21 @@ export default defineComponent({
       context.emit('calendarClicked', {})
     }
 
-    function spinner () {
+    function spinner (status = true) {
       $store.commit('app/setModal', {
         id: 'wait',
         content: {
-          visibility: true,
+          visibility: status,
           seamless: false
         }
       })
     }
 
     function manageTimeSeries (data) {
+      if ($store.getters['timeseries/getToggling']) {
+        // if graph is toggling, do not process graph
+        return
+      }
       if (data.dates) {
         const graphDates = data.dates
         const sDate = graphDates[0]
@@ -1463,6 +1472,11 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
+          console.log({
+            data: data.data,
+            dates: data.dates
+          })
+          console.time()
           $store.commit('timeseries/updateDData', {
             data: data.data,
             dates: data.dates
