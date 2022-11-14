@@ -1473,6 +1473,7 @@ export default defineComponent({
       if ($store.getters['timeseries/getToggling']) {
         // if graph is toggling, do not process graph
         console.log('return toggling ')
+        console.log(($store.getters['timeseries/getGraphIsVisible']))
         return
       }
       if (data.dates) {

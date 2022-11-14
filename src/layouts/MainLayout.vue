@@ -168,7 +168,6 @@ export default {
     // }
 
     const resizeMap = function (args, mode) {
-      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {
         if (!mobile.value) {
           map.value.map.updateSize()
