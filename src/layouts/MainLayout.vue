@@ -140,22 +140,16 @@ export default {
     if (lang) {
       $store.dispatch('app/setLanguage', lang.toLowerCase())
     }
+
     const resizeMap = function (args, mode) {
+      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {
         map.value.map.updateSize()
-        // If this is the last loop then set some vars
-        // if (args.start + 10 >= args.end) {
-        //   if (mode === 'timeseries') {
-        //     $store.commit('timeseries/setToggling', false)
-        //     $store.commit('timeseries/updateDataFromCache')
-        //   } else {
-        //     $store.commit('map/setLeftMenuToggling', false)
-        //   }
-        // }
         setTimeout(() => {
           args.start += 5
           resizeMap(args, mode)
         }, 5)
+        $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
         if (mode === 'timeseries') {
@@ -167,7 +161,6 @@ export default {
         } else {
           $store.commit('map/setLeftMenuToggling', false)
         }
-        map.value.updateMap()
         if (pendingView.value.extent !== null) {
           map.value.setPendingView(pendingView.value.extent)
         }
