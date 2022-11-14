@@ -1133,8 +1133,13 @@ export default defineComponent({
           radius: radius
         })
         const text = new Text({
-          font: 'bold 12px Roboto',
+          font: 'bold 1.7px Roboto',
+          scale: 9,
           text: size.toLocaleString(),
+          stroke: new Stroke({
+            color: 'black',
+            width: 0.018
+          }),
           fill: new Fill({
             color: 'white'
           })
@@ -1464,7 +1469,6 @@ export default defineComponent({
     }
 
     function manageTimeSeries (data) {
-      console.log('manageTimeSeries')
       if ($store.getters['timeseries/getToggling']) {
         // if graph is toggling, do not process graph
         return
@@ -1492,6 +1496,7 @@ export default defineComponent({
 
     return {
       mobile,
+      spinner,
       openDownloadModal,
       openReportsModal,
       calendarClicked,

@@ -73,8 +73,6 @@ function getMissingYears (date) {
 }
 
 self.onmessage = async function (e) {
-  console.time()
-  console.log(e.data)
   if (e.data.fetchUrl) {
     const year = e.data.year
     getdataUrl = e.data.fetchUrl
@@ -204,11 +202,9 @@ self.onmessage = async function (e) {
   else if (e.data) {
     // When map is just panned
     const grahData = getGraphData (e)
-    console.log('getGraphData')
     postMessage({
       timeseries: grahData
     })
-    console.timeEnd()
   }
 }
 

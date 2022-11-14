@@ -165,13 +165,13 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
-      $store.commit('app/setModal', {
-        id: 'wait',
-        content: {
-          visibility: false,
-          seamless: true
-        }
-      })
+      // $store.commit('app/setModal', {
+      //   id: 'wait',
+      //   content: {
+      //     visibility: false,
+      //     seamless: true
+      //   }
+      // })
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }

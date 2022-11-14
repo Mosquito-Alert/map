@@ -6,7 +6,7 @@
     <q-dialog
       v-model="open"
       class="wait"
-      :class="leftDrawerStatus?'expanded':''"
+      :class="diaglogClass"
       :seamless="seamless">
       <!-- <slot></slot> -->
         <q-spinner-oval
@@ -45,7 +45,12 @@ export default {
       return $store.getters['app/getLeftDrawerStatus']
     })
 
+    const diaglogClass = computed(() => {
+      return ($store.getters['app/getLeftDrawerStatus'] ? 'expanded' : '') + ' ' + (mobile.value) ? 'mobile' : ''
+    })
+
     return {
+      diaglogClass,
       seamless,
       leftDrawerStatus,
       mobile,
@@ -150,7 +155,7 @@ button:hover {
   padding-left: $left-drawer-width;
 }
 
-.q-dialog.expanded .q-dialog__inner{
+.q-dialog.expanded:not(.mobile) .q-dialog__inner{
   margin-left: $left-drawer-width;
 }
 // MOBILE

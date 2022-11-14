@@ -48,11 +48,19 @@ export default function () {
   }
 
   // Add default lang to browser URL
-  const nextURL = frontendUrl + defaultLang
-  const nextTitle = 'MosquitoAlert'
-  const nextState = { additionalInformation: 'Updated the URL with JS' }
-  window.history.pushState(nextState, nextTitle, nextURL)
-  window.history.replaceState(nextState, nextTitle, nextURL)
+  let currentUrl = document.location.toString().toLowerCase()
+  if (currentUrl.slice(-1) === '/') {
+    currentUrl = currentUrl.slice(-1)
+  }
+
+  if (allowedLangs.indexOf(currentUrl.slice(-2)) === -1) {
+    const nextURL = frontendUrl + defaultLang
+    const nextTitle = 'MosquitoAlert'
+    const nextState = { additionalInformation: 'Updated the URL with JS' }
+    window.history.pushState(nextState, nextTitle, nextURL)
+    window.history.replaceState(nextState, nextTitle, nextURL)
+  }
+
   // FORCE SPANISH
   // const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
 
