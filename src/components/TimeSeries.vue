@@ -307,6 +307,7 @@ export default defineComponent({
     }
 
     const chartData = computed(() => {
+      spinner(true)
       let data = getData()
       // If the data is empty, the chart crashes and can't be updated.
       // To avoid this, a dummy record is added when there is no data

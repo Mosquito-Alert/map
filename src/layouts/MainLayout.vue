@@ -144,27 +144,26 @@ export default {
       if (args.start < args.end) {
         map.value.map.updateSize()
         // If this is the last loop then set some vars
-        // if (args.start + 20 >= args.end) {
-        // if (mode === 'timeseries') {
-        //   $store.commit('timeseries/setToggling', false)
-        //   $store.commit('timeseries/updateDataFromCache')
-        // } else {
-        //   $store.commit('map/setLeftMenuToggling', false)
-        // }
+        // if (args.start + 10 >= args.end) {
+        //   if (mode === 'timeseries') {
+        //     $store.commit('timeseries/setToggling', false)
+        //     $store.commit('timeseries/updateDataFromCache')
+        //   } else {
+        //     $store.commit('map/setLeftMenuToggling', false)
+        //   }
         // }
         setTimeout(() => {
-          args.start += 10
+          args.start += 5
           resizeMap(args, mode)
-        }, 10)
+        }, 5)
       } else {
         // Ending resizing
         if (mode === 'timeseries') {
-          $store.commit('timeseries/setToggling', false)
-          $store.commit('timeseries/updateDataFromCache')
           if ($store.getters['timeseries/getGraphIsVisible']) {
-            console.log('spinner true')
             map.value.spinner(true)
           }
+          $store.commit('timeseries/setToggling', false)
+          $store.commit('timeseries/updateDataFromCache')
         } else {
           $store.commit('map/setLeftMenuToggling', false)
         }
