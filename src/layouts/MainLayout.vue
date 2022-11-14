@@ -141,21 +141,47 @@ export default {
       $store.dispatch('app/setLanguage', lang.toLowerCase())
     }
 
+    // const resizeMap = function (args, mode) {
+    //   $store.commit('timeseries/setGraphIsVisible', args.isVisible)
+    //   if (args.start < args.end) {
+    //     if (!mobile.value) {
+    //       map.value.map.updateSize()
+    //     }
+    //     setTimeout(() => {
+    //       args.start += 5
+    //       resizeMap(args, mode)
+    //     }, 5)
+    //     $store.commit('timeseries/updateDataFromCache')
+    //   } else {
+    //     // Ending resizing
+    //     map.value.updateMap()
+    //     if (mode === 'timeseries') {
+    //       $store.commit('timeseries/setToggling', false)
+    //       $store.commit('timeseries/updateDataFromCache')
+    //     } else {
+    //       $store.commit('map/setLeftMenuToggling', false)
+    //     }
+    //     if (pendingView.value.extent !== null) {
+    //       map.value.setPendingView(pendingView.value.extent)
+    //     }
+    //   }
+    // }
+
     const resizeMap = function (args, mode) {
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if (args.start < args.end) {
-        map.value.map.updateSize()
+        if (!mobile.value) {
+          map.value.map.updateSize()
+        }
         setTimeout(() => {
           args.start += 5
           resizeMap(args, mode)
         }, 5)
-        $store.commit('timeseries/updateDataFromCache')
+        // $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
+        map.value.updateMap()
         if (mode === 'timeseries') {
-          if ($store.getters['timeseries/getGraphIsVisible']) {
-            map.value.spinner(true)
-          }
           $store.commit('timeseries/setToggling', false)
           $store.commit('timeseries/updateDataFromCache')
         } else {

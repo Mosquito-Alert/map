@@ -488,7 +488,7 @@ export default defineComponent({
     box-sizing: inherit;
   }
   .map-footer>div:not(.toggle-time) {
-    padding: 10px 15px;
+    padding: 0px 15px;
     height: 100%;
   }
   .toggle-time {
