@@ -32,7 +32,7 @@
       />
       <time-series
         ref="timeseries"
-        @toggleTimeSeries='resizeMap'
+        @toggleTimeSeries='toggleGraphic'
         @dateSelected='filterDate'
       />
     </q-page>
@@ -140,18 +140,22 @@ export default {
     if (lang) {
       $store.dispatch('app/setLanguage', lang.toLowerCase())
     }
-    const resizeMap = function (args) {
-      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
+    const resizeMap = function (args, mode) {
       if (args.start < args.end) {
         map.value.map.updateSize()
-        if (args.start + 5 >= args.end) {
-          $store.commit('timeseries/setToggling', false)
-          $store.commit('timeseries/updateDataFromCache')
+        // If this is the last loop then set some vars
+        if (args.start + 20 >= args.end) {
+          if (mode === 'timeseries') {
+            $store.commit('timeseries/setToggling', false)
+            $store.commit('timeseries/updateDataFromCache')
+          } else {
+            $store.commit('map/setLeftMenuToggling', false)
+          }
         }
         setTimeout(() => {
-          args.start += 5
-          resizeMap(args)
-        }, 5)
+          args.start += 10
+          resizeMap(args, mode)
+        }, 10)
       } else {
         // Ending resizing
         if (pendingView.value.extent !== null) {
@@ -275,8 +279,14 @@ export default {
 
     const toggleLeftDrawer = function () {
       $store.commit('app/toggleLeftDrawerStatus')
+      $store.commit('map/setLeftMenuToggling', true)
       expanded.value = !expanded.value
-      resizeMap({ start: 0, end: 400 })
+      resizeMap({ start: 0, end: 400 }, 'leftDrawer')
+    }
+
+    const toggleGraphic = function (args) {
+      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
+      resizeMap({ start: 0, end: 400 }, 'timeseries')
     }
 
     const workerFinishedIndexing = function (payload) {
@@ -344,6 +354,7 @@ export default {
       tagsChanged,
       locationChanged,
       toggleLeftDrawer,
+      toggleGraphic,
       filterObservations,
       filterDate,
       filterLocations,

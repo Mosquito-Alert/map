@@ -749,6 +749,9 @@ export default defineComponent({
     }
 
     function updateMap () {
+      if ($store.getters['map/getLeftMenuToggling']) {
+        return
+      }
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
       $store.commit('map/setCurrents', {
@@ -1461,6 +1464,7 @@ export default defineComponent({
     }
 
     function manageTimeSeries (data) {
+      console.log('manageTimeSeries')
       if ($store.getters['timeseries/getToggling']) {
         // if graph is toggling, do not process graph
         return
@@ -1472,10 +1476,6 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
-          console.log({
-            data: data.data,
-            dates: data.dates
-          })
           console.time()
           $store.commit('timeseries/updateDData', {
             data: data.data,

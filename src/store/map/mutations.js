@@ -55,3 +55,7 @@ export const setModelDate = (state, payload) => {
 export const setViewbox = (state, payload) => {
   state.viewbox = payload
 }
+
+export const setLeftMenuToggling = (state, payload) => {
+  state.leftMenuToggling = payload
+}

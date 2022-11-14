@@ -171,7 +171,7 @@ export default defineComponent({
       initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       $store.commit('timeseries/setAnimationOptions', {
         onComplete: function () {
-          hideSpinner()
+          spinner(false)
           console.timeEnd()
         }
       })
@@ -188,11 +188,11 @@ export default defineComponent({
       $store.commit('map/setMapDates', { defaultDates })
     })
 
-    function hideSpinner () {
+    function spinner (visibility = true) {
       $store.commit('app/setModal', {
         id: 'wait',
         content: {
-          visibility: false
+          visibility: visibility
         }
       })
     }

@@ -105,7 +105,7 @@ export default {
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
       const nextURL = $store.getters['app/getFrontendUrl'] + lang
-      const nextTitle = 'My new page title'
+      const nextTitle = 'MosquitoAlert'
       const nextState = { additionalInformation: 'Updated the URL with JS' }
       window.history.pushState(nextState, nextTitle, nextURL)
       window.history.replaceState(nextState, nextTitle, nextURL)

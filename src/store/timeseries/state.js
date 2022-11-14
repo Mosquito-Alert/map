@@ -56,7 +56,8 @@ export default function () {
               display: false
             },
             ticks: {
-              autoSkip: false
+              // autoSkip: false
+              autoSkip: true
             },
             type: 'time',
             time: {

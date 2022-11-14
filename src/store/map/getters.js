@@ -49,3 +49,7 @@ export const getModelDate = state => {
 export const getViewbox = state => {
   return state.viewbox
 }
+
+export const getLeftMenuToggling = state => {
+  return state.leftMenuToggling
+}
