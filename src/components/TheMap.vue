@@ -134,7 +134,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import { extend } from 'ol/extent'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
-import AdministrativeLayer from '../js/AdministrativeLayer'
+// import AdministrativeLayer from '../js/AdministrativeLayer'
 // import CustomControl from '../js/CustomControl'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
@@ -160,7 +160,7 @@ export default defineComponent({
     let shareviewSpideryId = ''
     let locationName = ''
     let storeLayers
-    let administrativeLayer
+    // let administrativeLayer
     let userfixesLayer
     let spiderfyCluster
     let spiderfiedCluster
@@ -277,58 +277,26 @@ export default defineComponent({
 
       if (Feat) {
         // When loading view no simplification is required, because it is already simplified
-        if (!simplify) {
-          Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+        // if (!simplify) {
+        //   Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
 
-          const writer = new format.GeoJSON()
-          const json = JSON.parse(writer.writeFeatures([Feat], {
-            dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
-          }))
-          administrativeLayer.refreshLayer(json)
-          return
-        }
-        // let lineString = null
-        // let maxLength = 0
-        // if (Feat.getGeometry().getType() === 'MultiPolygon') {
-        //   const polis = Feat.getGeometry().getPolygons()
-        //   polis.forEach(function (poli, i, a) {
-        //     lineString = new LineString(
-        //       poli.getLinearRing(0).getCoordinates()
-        //     )
-        //     const poliLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-        //     if (poliLength > maxLength) {
-        //       maxLength = poliLength
-        //     }
-        //   })
-
-        //   lineString = new LineString(
-        //     Feat.getGeometry().getLinearRing(0).getCoordinates()
-        //   )
-        //   maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-        // } else {
-        //   lineString = new LineString(
-        //     Feat.getGeometry().getLinearRing(0).getCoordinates()
-        //   )
-        //   maxLength = lineString.transform('EPSG:4326', 'EPSG:3857').getLength()
-        // }
-
-        // simplify tolerance of 5% of perimeter
-        // simplifyTolerance = (maxLength * 0.001)
-        // if (simplifyTolerance > 500) {
-        //   simplifyTolerance = 200
+        //   const writer = new format.GeoJSON()
+        //   const json = JSON.parse(writer.writeFeatures([Feat], {
+        //     dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
+        //   }))
+        //   administrativeLayer.refreshLayer(json)
+        //   return
         // }
 
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
-        // Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
-        // for the moment do not add boundary feature to map
         locationFeatures.value = [Feat]
-        const writer = new format.GeoJSON()
-        const json = JSON.parse(writer.writeFeatures([Feat], {
-          dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
-        }))
-        administrativeLayer.refreshLayer(json)
-        console.timeEnd('FitFeature')
+        // const writer = new format.GeoJSON()
+        // const json = JSON.parse(writer.writeFeatures([Feat], {
+        //   dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
+        // }))
+        // administrativeLayer.refreshLayer(json)
+        // console.timeEnd('FitFeature')
       }
     }
 
@@ -951,9 +919,9 @@ export default defineComponent({
       // Then we set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty('--vh', `${vh}px`)
 
-      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      const fillLocationColor = defaults.fillLocationColor
-      const strokeLocationColor = defaults.strokeLocationColor
+      // const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      // const fillLocationColor = defaults.fillLocationColor
+      // const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
@@ -963,7 +931,7 @@ export default defineComponent({
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
-      administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
+      // administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 
       ol.on('click', function (event) {
         clickOnSpiral = false
@@ -1251,8 +1219,9 @@ export default defineComponent({
     const clearAdministrativeFeatures = function () {
       spinner()
       locationName = ''
-      administrativeLayer.tileIndex = null
-      map.value.map.removeLayer(administrativeLayer.layer)
+      // administrativeLayer.tileIndex = null
+      // map.value.map.removeLayer(administrativeLayer.layer)
+      locationFeatures.value = []
       spiderfyCluster = false
       spiderfiedCluster = null
       const workerData = {}
