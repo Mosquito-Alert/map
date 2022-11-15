@@ -140,6 +140,33 @@ export default {
     if (lang) {
       $store.dispatch('app/setLanguage', lang.toLowerCase())
     }
+
+    // const resizeMap = function (args, mode) {
+    //   $store.commit('timeseries/setGraphIsVisible', args.isVisible)
+    //   if (args.start < args.end) {
+    //     if (!mobile.value) {
+    //       map.value.map.updateSize()
+    //     }
+    //     setTimeout(() => {
+    //       args.start += 5
+    //       resizeMap(args, mode)
+    //     }, 5)
+    //     $store.commit('timeseries/updateDataFromCache')
+    //   } else {
+    //     // Ending resizing
+    //     map.value.updateMap()
+    //     if (mode === 'timeseries') {
+    //       $store.commit('timeseries/setToggling', false)
+    //       $store.commit('timeseries/updateDataFromCache')
+    //     } else {
+    //       $store.commit('map/setLeftMenuToggling', false)
+    //     }
+    //     if (pendingView.value.extent !== null) {
+    //       map.value.setPendingView(pendingView.value.extent)
+    //     }
+    //   }
+    // }
+
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
         if (!mobile.value) {
@@ -155,9 +182,10 @@ export default {
         // }
         // }
         setTimeout(() => {
-          args.start += 10
+          args.start += 5
           resizeMap(args, mode)
-        }, 10)
+        }, 5)
+        // $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
         map.value.updateMap()

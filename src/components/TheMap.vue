@@ -750,6 +750,7 @@ export default defineComponent({
 
     function updateMap () {
       if ($store.getters['map/getLeftMenuToggling']) {
+        console.log('retorno')
         return
       }
       const olmap = map.value.map
@@ -1471,6 +1472,8 @@ export default defineComponent({
     function manageTimeSeries (data) {
       if ($store.getters['timeseries/getToggling']) {
         // if graph is toggling, do not process graph
+        console.log('return toggling ')
+        console.log(($store.getters['timeseries/getGraphIsVisible']))
         return
       }
       if (data.dates) {

@@ -46,7 +46,7 @@ export default {
     })
 
     const diaglogClass = computed(() => {
-      return ($store.getters['app/getLeftDrawerStatus'] ? 'expanded' : '') + ' ' + (mobile.value) ? 'mobile' : ''
+      return ($store.getters['app/getLeftDrawerStatus'] ? 'expanded' : '') + ' ' + (mobile.value ? 'mobile' : '')
     })
 
     return {
