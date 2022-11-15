@@ -142,7 +142,9 @@ export default {
     }
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
-        map.value.map.updateSize()
+        if (!mobile.value) {
+          map.value.map.updateSize()
+        }
         // If this is the last loop then set some vars
         // if (args.start + 20 >= args.end) {
         // if (mode === 'timeseries') {
@@ -158,17 +160,17 @@ export default {
         }, 10)
       } else {
         // Ending resizing
+        map.value.updateMap()
         if (mode === 'timeseries') {
           $store.commit('timeseries/setToggling', false)
-          $store.commit('timeseries/updateDataFromCache')
           if ($store.getters['timeseries/getGraphIsVisible']) {
             console.log('spinner true')
+            $store.commit('timeseries/updateDataFromCache')
             map.value.spinner(true)
           }
         } else {
           $store.commit('map/setLeftMenuToggling', false)
         }
-        map.value.updateMap()
         if (pendingView.value.extent !== null) {
           map.value.setPendingView(pendingView.value.extent)
         }
