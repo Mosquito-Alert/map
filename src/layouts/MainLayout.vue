@@ -141,58 +141,21 @@ export default {
       $store.dispatch('app/setLanguage', lang.toLowerCase())
     }
 
-    // const resizeMap = function (args, mode) {
-    //   $store.commit('timeseries/setGraphIsVisible', args.isVisible)
-    //   if (args.start < args.end) {
-    //     if (!mobile.value) {
-    //       map.value.map.updateSize()
-    //     }
-    //     setTimeout(() => {
-    //       args.start += 5
-    //       resizeMap(args, mode)
-    //     }, 5)
-    //     $store.commit('timeseries/updateDataFromCache')
-    //   } else {
-    //     // Ending resizing
-    //     map.value.updateMap()
-    //     if (mode === 'timeseries') {
-    //       $store.commit('timeseries/setToggling', false)
-    //       $store.commit('timeseries/updateDataFromCache')
-    //     } else {
-    //       $store.commit('map/setLeftMenuToggling', false)
-    //     }
-    //     if (pendingView.value.extent !== null) {
-    //       map.value.setPendingView(pendingView.value.extent)
-    //     }
-    //   }
-    // }
-
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
         if (!mobile.value) {
           map.value.map.updateSize()
         }
-        // If this is the last loop then set some vars
-        // if (args.start + 20 >= args.end) {
-        // if (mode === 'timeseries') {
-        //   $store.commit('timeseries/setToggling', false)
-        //   $store.commit('timeseries/updateDataFromCache')
-        // } else {
-        //   $store.commit('map/setLeftMenuToggling', false)
-        // }
-        // }
         setTimeout(() => {
           args.start += 5
           resizeMap(args, mode)
         }, 5)
-        // $store.commit('timeseries/updateDataFromCache')
       } else {
         // Ending resizing
         map.value.updateMap()
         if (mode === 'timeseries') {
           $store.commit('timeseries/setToggling', false)
           if ($store.getters['timeseries/getGraphIsVisible']) {
-            console.log('spinner true')
             $store.commit('timeseries/updateDataFromCache')
             map.value.spinner(true)
           }
@@ -326,6 +289,7 @@ export default {
     }
 
     const toggleGraphic = function (args) {
+      $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       resizeMap({ start: 0, end: 400 }, 'timeseries')
     }

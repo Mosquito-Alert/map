@@ -270,9 +270,6 @@ export default defineComponent({
     const toggleTimeSeries = function () {
       timeIsVisible.value = !timeIsVisible.value
       iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
-      if (timeIsVisible.value) {
-        $store.commit('timeseries/setToggling', true)
-      }
       context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     const getData = () => {
@@ -486,6 +483,9 @@ export default defineComponent({
   }
   .map-footer.visible .toggle-time{
     box-sizing: inherit;
+  }
+  .map-footer.no-visible div.body{
+    display: none;
   }
   .map-footer>div:not(.toggle-time) {
     padding: 0px 15px;

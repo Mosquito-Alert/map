@@ -516,12 +516,6 @@ export default defineComponent({
         if (!$store.getters['timeseries/getGraphIsVisible']) {
           spinner(false)
         }
-        // const graphDates = event.data.timeseries.dates
-        // const sDate = graphDates[0]
-        // const eDate = graphDates[graphDates.length - 1]
-        // const daysInRange = moment(eDate).diff(moment(sDate), 'days')
-        // $store.commit('timeseries/updateXUnits', daysInRange)
-        // $store.dispatch('timeseries/updateData', event.data.timeseries)
       }
     }
 
@@ -749,7 +743,7 @@ export default defineComponent({
     }
 
     function updateMap () {
-      if ($store.getters['map/getLeftMenuToggling']) {
+      if ($store.getters['timeseries/getToggling'] || $store.getters['timeseries/getLeftMenuToggling']) {
         return
       }
       const olmap = map.value.map
@@ -1469,7 +1463,7 @@ export default defineComponent({
     }
 
     function manageTimeSeries (data) {
-      if ($store.getters['timeseries/getToggling']) {
+      if ($store.getters['timeseries/getToggling'] || $store.getters['timeseries/getLeftMenuToggling']) {
         // if graph is toggling, do not process graph
         return
       }
