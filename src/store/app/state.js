@@ -48,13 +48,13 @@ export default function () {
   }
 
   // Add default lang to browser URL
-  let currentUrl = document.location.toString().toLowerCase()
+  let currentUrl = document.location.toString()
   if (currentUrl.slice(-1) === '/') {
-    currentUrl = currentUrl.slice(-1)
+    currentUrl = currentUrl.slice(0, -1)
   }
 
-  if (allowedLangs.indexOf(currentUrl.slice(-2)) === -1) {
-    const nextURL = frontendUrl + defaultLang
+  if (allowedLangs.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
+    const nextURL = currentUrl + '/' + defaultLang
     const nextTitle = 'MosquitoAlert'
     const nextState = { additionalInformation: 'Updated the URL with JS' }
     window.history.pushState(nextState, nextTitle, nextURL)

@@ -21,6 +21,7 @@
 <script>
 
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import TheMapReport from 'components/TheMapReport.vue'
 import ModalError from 'src/components/ModalError.vue'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
@@ -37,8 +38,14 @@ export default {
   },
   setup () {
     const route = useRoute()
+    const $store = useStore()
     const reportId = (route.params) ? ((route.params.report) ? route.params.report : '') : ''
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+
+    if (lang) {
+      $store.dispatch('app/setLanguage', lang.toLowerCase())
+    }
+
     return {
       reportId,
       lang
