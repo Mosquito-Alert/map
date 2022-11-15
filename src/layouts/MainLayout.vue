@@ -143,17 +143,14 @@ export default {
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
-        if (!mobile.value) {
-          map.value.map.updateSize()
-        }
+        map.value.map.updateSize()
+
         setTimeout(() => {
           args.start += 5
           resizeMap(args, mode)
         }, 5)
       } else {
         // Ending resizing
-        map.value.map.updateSize()
-        map.value.updateMap()
         if (mode === 'timeseries') {
           $store.commit('timeseries/setToggling', false)
           if ($store.getters['timeseries/getGraphIsVisible']) {
@@ -163,6 +160,7 @@ export default {
         } else {
           $store.commit('map/setLeftMenuToggling', false)
         }
+        map.value.updateMap()
         if (pendingView.value.extent !== null) {
           map.value.setPendingView(pendingView.value.extent)
         }
