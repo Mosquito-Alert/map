@@ -346,10 +346,9 @@ export default {
     }
 
     const mapViewSaved = function (payload) {
-      console.log(payload)
       shareModal.value.status = payload
       if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + payload.code
+        shareModal.value.newUrl = frontendUrl.value + payload.code + '/' + $store.getters['app/getLang']
       }
     }
 
