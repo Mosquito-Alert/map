@@ -152,6 +152,7 @@ export default {
         }, 5)
       } else {
         // Ending resizing
+        map.value.map.updateSize()
         map.value.updateMap()
         if (mode === 'timeseries') {
           $store.commit('timeseries/setToggling', false)

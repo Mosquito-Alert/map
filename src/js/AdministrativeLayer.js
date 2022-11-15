@@ -66,7 +66,7 @@ export default class AdministrativeLayer {
     })
 
     this.layer.setZIndex(this.zIndex)
-    this.map.addLayer(this.layer)
+    // this.map.addLayer(this.layer)
   }
 
   refreshLayer (geojson) {

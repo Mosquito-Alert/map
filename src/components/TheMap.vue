@@ -65,14 +65,14 @@
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <!-- <ol-vector-layer ref='locationLayer' name="locationLayer" zIndex="5">
+        <ol-vector-layer ref='locationLayer' name="locationLayer" zIndex="5">
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
             <ol-style>
               <ol-style-fill :color="fillLocationColor"></ol-style-fill>
               <ol-style-stroke :color="strokeLocationColor" width="2"></ol-style-stroke>
             </ol-style>
           </ol-source-vector>
-        </ol-vector-layer> -->
+        </ol-vector-layer>
 
         <!-- CLUSTERS geojson layer -->
         <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
@@ -179,6 +179,7 @@ export default defineComponent({
     let ready = false
     const map = ref('null')
     const observationsSource = ref()
+    const locationFeatures = ref()
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
@@ -188,6 +189,9 @@ export default defineComponent({
     let currZoom
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
+    const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+    const fillLocationColor = ref(defaults.fillLocationColor)
+    const strokeLocationColor = ref(defaults.strokeLocationColor)
 
     function unfoldAttribution () {
       attrVisible.value = !attrVisible.value
@@ -275,6 +279,7 @@ export default defineComponent({
         // When loading view no simplification is required, because it is already simplified
         if (!simplify) {
           Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
+
           const writer = new format.GeoJSON()
           const json = JSON.parse(writer.writeFeatures([Feat], {
             dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
@@ -317,7 +322,7 @@ export default defineComponent({
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         // Feat.setGeometry(Feat.getGeometry().simplify(simplifyTolerance))
         // for the moment do not add boundary feature to map
-        // locationFeatures.value = [Feat]
+        locationFeatures.value = [Feat]
         const writer = new format.GeoJSON()
         const json = JSON.parse(writer.writeFeatures([Feat], {
           dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
@@ -1516,7 +1521,7 @@ export default defineComponent({
       map,
       observationsSource,
       locationLayer,
-      // locationFeatures,
+      locationFeatures,
       overrideStyleFunction,
       geoJson,
       features,
@@ -1533,7 +1538,9 @@ export default defineComponent({
       attrVisible,
       unfoldAttribution,
       setPendingView,
-      graphVisible
+      graphVisible,
+      fillLocationColor,
+      strokeLocationColor
     }
   }
 })
