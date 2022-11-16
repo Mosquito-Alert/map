@@ -178,9 +178,11 @@ export default defineComponent({
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
       initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       $store.commit('timeseries/setAnimationOptions', {
-        onComplete: function () {
+        onComplete: function (chart) {
+          if (chart.chart.config._config.data.labels.length > 1) {
+            reloading.value = false
+          }
           spinner(false)
-          reloading.value = false
         }
       })
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
