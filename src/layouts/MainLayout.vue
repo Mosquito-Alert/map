@@ -144,7 +144,6 @@ export default {
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
         map.value.map.updateSize()
-
         setTimeout(() => {
           args.start += 5
           resizeMap(args, mode)
@@ -155,7 +154,6 @@ export default {
           $store.commit('timeseries/setToggling', false)
           if ($store.getters['timeseries/getGraphIsVisible']) {
             $store.commit('timeseries/updateDataFromCache')
-            map.value.spinner(true)
           }
         } else {
           $store.commit('map/setLeftMenuToggling', false)
@@ -290,6 +288,16 @@ export default {
     const toggleGraphic = function (args) {
       $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
+      // console.log('togglegraphic updateDData')
+      // $store.commit('timeseries/updateDData', {
+      //   data: [],
+      //   dates: []
+      // })
+      if (!$store.getters['timeseries/getGraphIsVisible']) {
+        timeseries.value.reloading = true
+      } else {
+        map.value.spinner(false)
+      }
       resizeMap({ start: 0, end: 400 }, 'timeseries')
     }
 

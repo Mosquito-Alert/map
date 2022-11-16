@@ -17,7 +17,10 @@
       </div> -->
       </q-btn>
     </div>
-    <div class="body">
+    <div class="body" :class="reloading?'reloading':''">
+      <div v-if="reloading" id="reloading">
+        {{ _('reloading graph') }}
+      </div>
       <div v-if="mobile" class="flex-right" :class="zoomed?'spaceBetween':'flexRight'">
         <q-btn v-if="zoomed" class="timeseries-close ma-btn" @click="resetGraph">
           <i class="mobile reset-zoom fa-solid fa-backward q-mr-md"></i>
@@ -115,6 +118,7 @@ export default defineComponent({
   setup (props, context) {
     let initialOptions = null
     const chart = ref()
+    const reloading = ref(true)
     const zoomed = ref(false)
     const panned = ref(false)
     let currentYTickMax = null
@@ -163,16 +167,20 @@ export default defineComponent({
       } else {
         classes += ' no-visible'
       }
+      if ($store.getters['map/getLeftMenuToggling'] && (!$store.getters['timeseries/getGraphIsVisible'])) {
+        classes += ' display-none'
+      }
       return classes
     })
 
     onMounted(function () {
+      reloading.value = true
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
       initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       $store.commit('timeseries/setAnimationOptions', {
         onComplete: function () {
           spinner(false)
-          console.timeEnd()
+          reloading.value = false
         }
       })
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
@@ -189,6 +197,9 @@ export default defineComponent({
     })
 
     function spinner (visibility = true) {
+      if (visibility) {
+        reloading.value = false
+      }
       $store.commit('app/setModal', {
         id: 'wait',
         content: {
@@ -273,6 +284,7 @@ export default defineComponent({
       context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
     const getData = () => {
+      reloading.value = true
       const rawData = $store.getters['timeseries/getDData']
       const layers = $store.getters['app/getLayers']
       const datasets = Object.keys(rawData.data).map(layer => {
@@ -304,7 +316,7 @@ export default defineComponent({
     }
 
     const chartData = computed(() => {
-      spinner(true)
+      // spinner(true)
       let data = getData()
       // If the data is empty, the chart crashes and can't be updated.
       // To avoid this, a dummy record is added when there is no data
@@ -406,6 +418,7 @@ export default defineComponent({
 
     return {
       _,
+      reloading,
       handleWheel,
       zoomed,
       resetGraph,
@@ -484,11 +497,12 @@ export default defineComponent({
   .map-footer.visible .toggle-time{
     box-sizing: inherit;
   }
-  .map-footer.no-visible div.body{
+  .map-footer.mobile.no-visible div.body,
+  .map-footer.display-none div.body{
     display: none;
   }
   .map-footer>div:not(.toggle-time) {
-    padding: 0px 15px;
+    padding: 5px 15px;
     height: 100%;
   }
   .toggle-time {
@@ -702,5 +716,16 @@ export default defineComponent({
   }
   :deep(button.q-btn.disabled) {
     opacity: 0.3 !important;
+  }
+  .reloading div#reloading{
+    position: absolute;
+    display:flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center ;
+  }
+  .body.reloading{
+    opacity: .7
   }
 </style>

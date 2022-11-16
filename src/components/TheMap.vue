@@ -716,7 +716,7 @@ export default defineComponent({
     }
 
     function updateMap () {
-      if ($store.getters['timeseries/getToggling'] || $store.getters['timeseries/getLeftMenuToggling']) {
+      if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         return
       }
       const olmap = map.value.map
@@ -753,8 +753,9 @@ export default defineComponent({
         return e.toFixed(4)
       })
       $store.commit('map/setViewbox', viewBox)
-
-      spinner(true)
+      if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
+        spinner(true)
+      }
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
         bbox: southWest.concat(northEast),
@@ -1437,7 +1438,7 @@ export default defineComponent({
     }
 
     function manageTimeSeries (data) {
-      if ($store.getters['timeseries/getToggling'] || $store.getters['timeseries/getLeftMenuToggling']) {
+      if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         // if graph is toggling, do not process graph
         return
       }
@@ -1448,7 +1449,6 @@ export default defineComponent({
         const daysInRange = moment(eDate).diff(moment(sDate), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
-          console.time()
           $store.commit('timeseries/updateDData', {
             data: data.data,
             dates: data.dates
