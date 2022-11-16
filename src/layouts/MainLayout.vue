@@ -288,14 +288,7 @@ export default {
     const toggleGraphic = function (args) {
       $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
-      // console.log('togglegraphic updateDData')
-      // $store.commit('timeseries/updateDData', {
-      //   data: [],
-      //   dates: []
-      // })
-      if (!$store.getters['timeseries/getGraphIsVisible']) {
-        timeseries.value.reloading = true
-      } else {
+      if ($store.getters['timeseries/getGraphIsVisible']) {
         map.value.spinner(false)
       }
       resizeMap({ start: 0, end: 400 }, 'timeseries')
