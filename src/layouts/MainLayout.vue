@@ -289,7 +289,11 @@ export default {
       $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if ($store.getters['timeseries/getGraphIsVisible']) {
-        map.value.spinner(false)
+        // map.value.spinner(false)
+        $store.commit('timeseries/updateDData', {
+          data: [],
+          dates: []
+        })
       }
       resizeMap({ start: 0, end: 400 }, 'timeseries')
     }
