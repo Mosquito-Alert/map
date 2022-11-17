@@ -19,7 +19,7 @@
     </div>
     <div class="body" :class="reloading?'reloading':''">
       <div v-if="reloading" id="reloading">
-        {{ _('reloading graph') }}
+        <span>{{ _('reloading graph') }}</span>
       </div>
       <div v-if="mobile" class="flex-right" :class="zoomed?'spaceBetween':'flexRight'">
         <q-btn v-if="zoomed" class="timeseries-close ma-btn" @click="resetGraph">
@@ -179,7 +179,10 @@ export default defineComponent({
       initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       $store.commit('timeseries/setAnimationOptions', {
         onComplete: function (chart) {
-          if (chart.chart.config._config.data.labels.length > 1) {
+          // Be default chart has one label
+          // If chart is really drawn (that is more than one label)
+          // then reloading is true
+          if ($store.getters['timeseries/getGraphIsVisible']) {
             reloading.value = false
           }
           spinner(false)
@@ -726,6 +729,11 @@ export default defineComponent({
     height: 100%;
     justify-content: center;
     align-items: center ;
+    z-index: 10;
+  }
+  .reloading div#reloading span{
+    padding: 5px;
+    background: white;
   }
   .body.reloading{
     opacity: .7
