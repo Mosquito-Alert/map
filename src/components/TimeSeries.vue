@@ -96,15 +96,14 @@
 <script>
 import { defineComponent, computed, ref, onUpdated, onMounted } from 'vue'
 import { useStore } from 'vuex'
-// import { LineChart } from 'vue-chart-3'
 import { LineChart } from './VueChartJS.js'
 import { Chart, registerables } from 'chart.js'
 import 'chartjs-adapter-moment'
 import moment from 'moment'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import * as Hammer from 'hammerjs'
-window.Hammer = Hammer.default
 
+window.Hammer = Hammer.default
 Chart.register(...registerables)
 Chart.register(zoomPlugin)
 
@@ -116,7 +115,6 @@ export default defineComponent({
     timeSeriesVisible: { type: Boolean }
   },
   setup (props, context) {
-    let initialOptions = null
     const chart = ref()
     const reloading = ref(true)
     const zoomed = ref(false)
@@ -176,7 +174,6 @@ export default defineComponent({
     onMounted(function () {
       reloading.value = true
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
-      initialOptions = JSON.parse(JSON.stringify($store.getters['timeseries/getChartOptions']))
       $store.commit('timeseries/setAnimationOptions', {
         onComplete: function (chart) {
           // Be default chart has one label
@@ -273,10 +270,9 @@ export default defineComponent({
       zoomed.value = false
       panned.value = false
       calendarDate.value = mapDatesBeforeZoom
-      $store.commit('timeseries/setChartOptions', initialOptions)
-      $store.commit('timeseries/setYTickSuggetedMax', null)
+      // $store.commit('timeseries/setChartOptions', initialOptions)
+      // $store.commit('timeseries/setYTickSuggetedMax', null)
       datePicked()
-      // chart.value.chartInstance.update()
     }
 
     const calendarSubtitle = computed(() => {
@@ -711,6 +707,7 @@ export default defineComponent({
     margin: 10px 0px;
   }
   .reset-zoom{
+    cursor: pointer;
     color: $primary-color;
   }
   .mobile.reset-zoom{
