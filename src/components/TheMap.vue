@@ -1415,10 +1415,16 @@ export default defineComponent({
         return
       }
       $store.commit('app/setDefaultSamplingEffort', payload.status)
-      const sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
-      const eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
+      let sDate, eDate
+      if (payload.dates[0].from !== '') {
+        console.log('not empty')
+        sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
+        eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
+        userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
+      } else {
+        userfixesLayer.url = userfixesUrl
+      }
 
-      userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
       $store.commit('map/setSamplingEffortLoading', { loading: true })
       userfixesLayer.refreshLayer()
     }
