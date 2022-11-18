@@ -15,7 +15,7 @@
               {{ _('Escoge qué tipos de galletas aceptas que Mosquito Alert pueda guardar en tu navegador.') }}
             </p>
             <p>
-              <a href="#" @click.stop="openPolicy">Política de cookies</a>
+              <a href="#" @click.stop="openPolicy">{{ _("Cookies policy") }}</a>
             </p>
           </div>
         </div>
