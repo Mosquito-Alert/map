@@ -211,7 +211,7 @@ export default defineComponent({
       const d = response.view[0].date
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
-      $store.commit('map/setDefaults', {
+      $store.commit('map/setCurrents', {
         zoom: jsonView.zoom,
         center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
         mobilezoom: jsonView.zoom

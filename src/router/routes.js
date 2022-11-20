@@ -37,6 +37,11 @@ const routes = [
     path: '/M-:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/ModelsLayout.vue')
   },
+  // SHARE MODELS VIEW WITH LANG
+  {
+    path: '/M-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
+    component: () => import('layouts/ModelsLayout.vue')
+  },
   {
     // Set the accepted characters and length of reports view
     path: '/:report([a-zA-Z0-9]{6})',
