@@ -260,7 +260,6 @@ function getGraphData (e) {
   })
 
   const tempDates = Object.keys(temp)
-
   let start = new Date(tempDates[0])
   start = new Date(start.setDate(start.getDate() - 1)) // Start on the day before the first date
   let end = new Date(tempDates[tempDates.length - 1])
@@ -292,14 +291,14 @@ function loadMapData (data, fitFeatures) {
     radius: 10,
     extent: 256,
     maxZoom: 19
-    // ,minPoints: 5
   }).load(data)
 
   unclustered = new Supercluster({
     log: DEBUG,
     radius: 1,
     extent: 256,
-    maxZoom: 0
+    maxZoom: 0,
+    minPoints: 10000
   }).load(data)
 
   const workerParams = {
