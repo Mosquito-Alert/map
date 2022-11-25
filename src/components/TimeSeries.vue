@@ -1,3 +1,7 @@
+<!--
+  COMPONENT TO DRAW CHART
+-->
+
 <template>
   <div :class="timeSeriesClass">
     <div
@@ -12,9 +16,7 @@
         :label="_('Time series')"
         @click="toggleTimeSeries"
       >
-      <!-- <div class="timeseries-filter">
-        {{ dateFilter }}
-      </div> -->
+
       </q-btn>
     </div>
     <div class="body" :class="reloading?'reloading':''">
@@ -55,6 +57,7 @@
               transition-show="scale"
               transition-hide="scale"
             >
+            <!-- QUASAR CALENDAR -->
               <q-date
                 navigation-min-year-month='2014/06'
                 :navigation-max-year-month="getCurrentDate"
@@ -81,6 +84,7 @@
           </q-btn>
         </div>
       </div>
+      <!-- CHART -->
       <LineChart
         ref="chart"
         class="graph-canvas"
@@ -211,6 +215,7 @@ export default defineComponent({
     }
 
     onUpdated(function () {
+      // Define callbacks when pan on chart starts
       $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
         if (!zoomed.value && !panned.value) {
           mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
@@ -226,6 +231,7 @@ export default defineComponent({
         }
       })
 
+      // Define callbacks when pan on chart ends
       $store.commit('timeseries/setChartOnPanComplete', function ({ chart }) {
         if (!zoomed.value) {
           mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
@@ -243,6 +249,7 @@ export default defineComponent({
         datePicked()
       })
 
+      // Define callback when zoom on chart starts
       $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
         $store.commit('timeseries/setYTickSuggetedMax', null)
         if (!zoomed.value && !panned.value) {
@@ -252,6 +259,7 @@ export default defineComponent({
         }
       })
 
+      // Define callback when zoom on chart ends
       $store.commit('timeseries/setChartOnZoomComplete', function ({ chart }) {
         zoomed.value = true
         const start = new Date(chart.boxes[4].min)
@@ -260,18 +268,16 @@ export default defineComponent({
           from: moment(start).format('YYYY/MM/DD'),
           to: moment(end).format('YYYY/MM/DD')
         }
-        // $store.commit('map/setMapDates', dragged)
         calendarDate.value = draggedFormatted
         datePicked()
       })
     })
 
+    // Redraw chart with init data
     const resetGraph = function () {
       zoomed.value = false
       panned.value = false
       calendarDate.value = mapDatesBeforeZoom
-      // $store.commit('timeseries/setChartOptions', initialOptions)
-      // $store.commit('timeseries/setYTickSuggetedMax', null)
       datePicked()
     }
 
@@ -284,6 +290,8 @@ export default defineComponent({
       iconStatus.value = (timeIsVisible.value) ? 'open' : 'closed'
       context.emit('toggleTimeSeries', { isVisible: timeIsVisible.value, start: 0, end: 400 })
     }
+
+    // Get Chart data from store
     const getData = () => {
       reloading.value = true
       const rawData = $store.getters['timeseries/getDData']
@@ -316,8 +324,8 @@ export default defineComponent({
       return data
     }
 
+    // Prepare chart data to create chart
     const chartData = computed(() => {
-      // spinner(true)
       let data = getData()
       // If the data is empty, the chart crashes and can't be updated.
       // To avoid this, a dummy record is added when there is no data
@@ -352,6 +360,7 @@ export default defineComponent({
       }
     }
 
+    // Called when apply button is clicked
     const datePicked = function (event) {
       let daysInRange = 0
       let sDate

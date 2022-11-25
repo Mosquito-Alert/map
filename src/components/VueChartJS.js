@@ -1,6 +1,9 @@
 /****
 vue-chart-3 source code (v 3.1.2)
 ******/
+/*
+ADAPTED SO WHEN CHART DATA IS REMOVE, CHART IS ADAPTED INSTEAD OF DESTROYED
+*/
 const __defProp = Object.defineProperty
 const __defProps = Object.defineProperties
 const __getOwnPropDescs = Object.getOwnPropertyDescriptors

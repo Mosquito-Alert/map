@@ -1,5 +1,5 @@
 <!--
-  MAP COMPONENT
+  MAP COMPONENT FOR OBSERVATIONS TAB
   ON EACH MAP MOVEEND, GETS NEW OBSERVATION DATA AND GRAPH DATA FROM WORKER
   APPLIES ALL FILTERS AND CALLS WORKER TO RE-INDEX  DATA
   FIRES DIFERENT EVENTS TO SHOW MODAL WINDOWS (DOWNLOAD DATA, REPORTS, ETC.)
@@ -141,7 +141,6 @@ import { Polygon, MultiPolygon } from 'ol/geom'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
-import { extend } from 'ol/extent'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
@@ -206,7 +205,7 @@ export default defineComponent({
         foldingIcon.value = '<'
       }
     }
-
+    // Map filters for the worker
     const mapFilters = {
       mode: 'resetFilter',
       lastFilterApplied: '',
@@ -230,6 +229,7 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
+    // Watch feaures change to update map counter
     watch(features, (currentF, oldF) => {
       nPoints.value = 0
       currentF.forEach(f => {
@@ -350,15 +350,17 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
-      if (event.data.fetchedData) {
-        return
-      }
+      // if (event.data.fetchedData) {
+      //   return
+      // }
 
+      // if grap data is included then manage and exit
       if (event.data.timeseries) {
         manageTimeSeries(event.data.timeseries)
         return
       }
 
+      // Get min and max dates from worker and update store
       if (event.data.minMaxDates) {
         if (event.data.getAllDates) {
           $store.commit('map/setMinMaxDates', {
@@ -376,8 +378,9 @@ export default defineComponent({
         }
       }
 
+      // Check if new index is been done by worker
       if (event.data.ready) {
-        // Map data initialization
+        // First time
         if (!ready) {
           if (event.data.datesInterval) {
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
@@ -388,39 +391,12 @@ export default defineComponent({
           if (mapFilters.lastFilterApplied === event.data.indexing) {
             context.emit('workerFinishedIndexing', { mapFilters })
           }
-
-          if (event.data.features) {
-            const data = []
-            for (let a = 0; a < event.data.features.length; a++) {
-              const f = event.data.features[a]
-              // Exclude spiral features if there are any because they appear in another layer
-              if (spiderfiedIds.includes(f.properties.id)) continue
-              const feat = new Feature({
-                geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
-                properties: f.properties,
-                id: a
-              })
-              data.push(feat)
-            }
-            features.value = data
-            if (features.value.length) {
-              const extent = features.value[0].getGeometry().getExtent().slice(0)
-              features.value.forEach(function (f) {
-                extend(extent, f.getGeometry().getExtent())
-              })
-              if (mobile.value) {
-                $store.commit('app/setPendingView', { extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857') })
-              }
-              map.value.map.getView().fit(
-                extent
-              )
-            }
-          } else {
-            updateMap()
-          }
+          updateMap()
         }
+        // First time is done, so no more. Now ready = true
         ready = true
       } else if (event.data.spiderfyCluster) {
+        // If no index check if cluster is spiderfied
         if (event.data.center) {
           shareviewSpideryId = false
           const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
@@ -432,7 +408,7 @@ export default defineComponent({
           }
         }
         features.value = []
-
+        // Get spiderfied features ready
         for (let a = 0; a < event.data.map.length; a++) {
           const f = event.data.map[a]
           const feat = new Feature({
@@ -488,6 +464,7 @@ export default defineComponent({
       }
     }
 
+    // Get observatins from spiral layer
     function getSpiralFeature (id) {
       const fs = spiralSource.value.source.getFeatures()
       const f = fs.find(f => {
@@ -506,9 +483,12 @@ export default defineComponent({
       }
     }
 
+    // Prepare firt view map
     function initMap (viewCode) {
       const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      // Check if not loading shared view
       if (!viewCode) {
+        // Load default values
         const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
         const initialObservations = defaults.observations
 
@@ -561,12 +541,14 @@ export default defineComponent({
         workerData.filters = mapFilters
         worker.postMessage(workerData)
       } else {
+        // Here, shared view must be loaded.
         // Fetch view info from backend
         const ol = map.value.map
         loadView(ol, viewCode)
       }
     }
 
+    // Get shared view from database and handle it
     function loadView (ol, viewCode) {
       const newView = new ShareMapView(ol, {
         url: loadViewUrl + viewCode
@@ -574,6 +556,7 @@ export default defineComponent({
       newView.load(handleLoadView)
     }
 
+    // Hadle loaded view. Set UI accordingly
     function handleLoadView (view) {
       if (view.status === 'error') {
         $store.commit('app/setModal', {
@@ -671,6 +654,7 @@ export default defineComponent({
       initMap()
     }
 
+    // Init share view. Save data to database
     function shareView () {
       const samplingEffort = $store.getters['map/getActiveLayers'].some(layer => {
         return layer.type === 'sampling-effort'
@@ -703,6 +687,7 @@ export default defineComponent({
       newView.save()
     }
 
+    // After saviing view emit event to show its URL in modal window
     function handleShareView (status) {
       if (status.status === 'error') {
         console.log(status.msg)
@@ -712,6 +697,7 @@ export default defineComponent({
       context.emit('mapViewSaved', status)
     }
 
+    // Each time map moves, call worker to get observations for the new view
     function updateMap () {
       if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         return
@@ -739,7 +725,7 @@ export default defineComponent({
       if (!ready) {
         return
       }
-      // todo load sampling effor layer
+
       // Get map starting and endding data dates
       if (clickOnSpiral) return
       // Load observations layers
@@ -751,7 +737,10 @@ export default defineComponent({
       })
       $store.commit('map/setViewbox', viewBox)
       if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
-        spinner(true)
+        // Do not show spinner if cluster is spiderfied
+        if (!spiderfiedCluster) {
+          spinner(true)
+        }
       }
       // Add spiderfyCluster in case cluster is spiderfiied
       worker.postMessage({
@@ -762,6 +751,7 @@ export default defineComponent({
       })
     }
 
+    // When a new report is demanded, save data in database and then handle report
     function newReport () {
       const ol = map.value.map
       if (mapFilters.dates[0].from === '') {
@@ -777,6 +767,7 @@ export default defineComponent({
       newView.save()
     }
 
+    // Open new window and show report
     function handleReportView (report) {
       if (report.status === 'ok') {
         const frontend = $store.getters['app/getFrontendUrl']
@@ -784,8 +775,8 @@ export default defineComponent({
       }
     }
 
+    // Spiderfy observations and add then to spiralLayer
     function spiderfy (center, clusterFeatures) {
-      // update spiderfiedIds to exclude from worker feedback
       const features = []
       clusterFeatures.forEach((feature, index) => {
         spiderfiedIds.push(feature.properties.id)
@@ -808,6 +799,7 @@ export default defineComponent({
       spiralSource.value.source.addFeatures(spiderfied.lines)
     }
 
+    // Animation to move map to coordinates
     function flyTo (location, zoom, done) {
       const duration = 600
       let parts = 2
@@ -888,6 +880,7 @@ export default defineComponent({
       return data
     }
 
+    // Get observations from backend. Format is xls or gpkg
     function handleDownload (format) {
       const data = getDataFromFilters()
 
@@ -917,9 +910,6 @@ export default defineComponent({
       // Then we set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty('--vh', `${vh}px`)
 
-      // const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      // const fillLocationColor = defaults.fillLocationColor
-      // const strokeLocationColor = defaults.strokeLocationColor
       const ol = map.value.map
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
@@ -927,10 +917,9 @@ export default defineComponent({
       storeLayers = $store.getters['app/getLayers']
       const legend = $store.getters['app/getLayers'].sampling_effort.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
-      // loadReportUrl = backendUrl + 'api/report/load/'
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
-      // administrativeLayer = new AdministrativeLayer(ol, fillLocationColor, strokeLocationColor, (ZIndex + 1))
 
+      // Detect click events on map to select feature or expand cluster
       ol.on('click', function (event) {
         clickOnSpiral = false
         spiderfyCluster = false
@@ -1052,6 +1041,7 @@ export default defineComponent({
         }
       })
 
+      // Detect move event to change cursor style when mouse is over feature
       ol.on('pointermove', function (event) {
         const hit = this.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
           return true
@@ -1068,12 +1058,11 @@ export default defineComponent({
       })
     }
 
+    // Function to style all observations and clusters
     const overrideStyleFunction = (feature, style) => {
       if (feature.getGeometry().getType() === 'LineString') {
         const stroke = new Stroke({
           color: 'rgb(255, 0, 0, 0.5)',
-          // color: '#EFA501',
-          // lineDash: [2, 8],
           width: 2
         })
         style.setStroke(stroke)
@@ -1172,8 +1161,8 @@ export default defineComponent({
       }
     }
 
+    // Called when user activates/deactivates any observations from TOC
     function filterObservations (observation) {
-      // Just in case a Spiral is open
       spinner()
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1217,8 +1206,6 @@ export default defineComponent({
     const clearAdministrativeFeatures = function () {
       spinner()
       locationName = ''
-      // administrativeLayer.tileIndex = null
-      // map.value.map.removeLayer(administrativeLayer.layer)
       locationFeatures.value = []
       spiderfyCluster = false
       spiderfiedCluster = null
@@ -1230,8 +1217,8 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    // Called when administrative boundary filter is requested
     function filterLocations (location) {
-      // Just in case a Spiral is open
       spinner()
       spiralSource.value.source.clear()
       spiderfyCluster = false
@@ -1253,6 +1240,7 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    // Called when date filter is requested
     function filterDate (date) {
       // Just in case a Spiral is open
       spinner()
@@ -1269,8 +1257,6 @@ export default defineComponent({
       }
       mapFilters.lastFilterApplied = 'dates'
       if (date !== null) {
-        // const expandedDate = expandDate(date.data, 'YYYY-MM-DD')
-        // mapFilters.dates = [JSON.parse(JSON.stringify(expandedDate))]
         mapFilters.dates = [date.data]
       } else {
         mapFilters.dates = []
@@ -1281,9 +1267,9 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    // Called when hashrag filter is requested
     function filterTags (obj) {
       spinner()
-      // Just in case a Spiral is open
       spiderfyCluster = false
       spiderfiedCluster = null
       spiralSource.value.source.clear()
@@ -1292,8 +1278,9 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       closePopup()
-      // Check if tags contain featuresSet starting with ':'
+      // Check if tags start with ':'
       if (tag.startsWith(':')) {
+        // This are not generic tags
         mapFilters.lastFilterApplied = 'reports'
         mapFilters.hashtags = []
         if (obj.mode === 'addedTag') {
@@ -1355,7 +1342,6 @@ export default defineComponent({
             return t.startsWith('#') ? t.slice(1) : t
           })
           mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
-          // $store.commit('app/setDefaultTags', mapFilters.hashtags)
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
           fetch(`${url}`, {
@@ -1379,22 +1365,7 @@ export default defineComponent({
       }
     }
 
-    // eslint-disable-next-line no-unused-vars
-    function expandDate (date, f = 'YYYY/MM/DD') {
-      let expandedDate = null
-      if (!date) return
-      if (typeof date === 'string') {
-        const preDate = moment(date).subtract(1, 'd')
-        const postDate = moment(date).add(1, 'd')
-        expandedDate = { from: preDate.format(f), to: postDate.format(f) }
-      } else {
-        const preDate = moment(date.from).subtract(1, 'd')
-        const postDate = moment(date.to).add(1, 'd')
-        expandedDate = { from: preDate.format(f), to: postDate.format(f) }
-      }
-      return expandedDate
-    }
-
+    // Get new url for sampling effort layer based on new map dates
     function refreshUserfixesUrl () {
       const sDate = mapFilters.dates[0].from.replaceAll('/', '-')
       const eDate = mapFilters.dates[0].to.replaceAll('/', '-')
@@ -1405,6 +1376,7 @@ export default defineComponent({
       userfixesLayer.tileIndex = null
     }
 
+    // Update samplingeffort layer and redraw it
     function checkSamplingEffort (payload) {
       if (!payload.status) {
         $store.commit('app/setDefaultSamplingEffort', false)
@@ -1440,6 +1412,7 @@ export default defineComponent({
       })
     }
 
+    // Update chart data on store so it's ready when necessary
     function manageTimeSeries (data) {
       if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         // if graph is toggling, do not process graph

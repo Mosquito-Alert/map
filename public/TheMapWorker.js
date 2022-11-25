@@ -79,7 +79,7 @@ self.onmessage = async function (e) {
     getData(year, getdataUrl)
     return
   }
-  // console.log(e.data)
+
   if (e.data.filters) {
     // Worker vars are init before time worker is called
     filters = e.data.filters
@@ -165,9 +165,6 @@ self.onmessage = async function (e) {
       }
     }
     if (filters.locations.length > 0) {
-      // if (filters.tolerance) {
-      //   simplifyTolerance = filters.tolerance
-      // }
       const poly = JSON.parse(filters.locations[0]).features[0]
       filteredData = filterLocations(filteredData, poly)
     }
@@ -232,14 +229,8 @@ function getGraphData (e) {
     })
     series[layer.code] = []
   })
+
   const temp = {}
-  // const first = moment(time[0].properties.d)
-  // const last = moment(time[time.length - 1].properties.d)
-
-  // for (let i = 0; i < time.length; i++) {
-  //   temp[first.add(1, 'days')] = {}
-  // }
-
   let key
   time.forEach(feature => {
     if (time.length < 1000000) {
@@ -347,16 +338,8 @@ function filterLocations (data, poly) {
   if (poly.geometry.type.toLowerCase() === 'polygon') {
     polyCoords = [poly.geometry.coordinates]
     turfPoligon = turf.polygon(polyMercator.geometry.coordinates)
-  } 
-  // else {
-  //   polyCoords = poly.geometry.coordinates
-  //   turfPoligon = turf.multiPolygon([polyMercator.geometry.coordinates])
-  // }
+  }
 
-  // var options = {tolerance: 0.01, highQuality: false}
-  // var simplified = turf.simplify(geojson, options)
-
-  // get first candidates inside bounding box
   const myCoords = []
   const candidates = data.filter(point => {
     const ptCoords = point.geometry.coordinates
@@ -367,7 +350,7 @@ function filterLocations (data, poly) {
       return false
     }
   })
-  
+
   // from candidates get points inside poly
   filtered = candidates.filter(point => {
     const pt = turf.toMercator(point)
@@ -393,7 +376,6 @@ function filterRecordsId (data, reportsId) {
 
 function filterObservations (data, layers, filters) {
   if (!data) return []
-  // addObservationsFilter(type, code)
   let filteredData = {}
   // Get all visible layers categories from filters
   let visibleCategories = []
@@ -406,19 +388,6 @@ function filterObservations (data, layers, filters) {
   })
   return filteredData
 }
-
-// function getJSON (url, callback) {
-//   const xhr = new XMLHttpRequest()
-//   xhr.open('GET', url, true)
-//   xhr.responseType = 'json'
-//   xhr.setRequestHeader('Accept', 'application/json')
-//   xhr.onload = function () {
-//     if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300 && xhr.response) {
-//       callback(xhr.response)
-//     }
-//   }
-//   xhr.send()
-// }
 
 function getExtent (clusterId) {
   const leaves = index.getLeaves(clusterId, Infinity)

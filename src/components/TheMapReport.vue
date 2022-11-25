@@ -1,3 +1,7 @@
+<!--
+  MAP COMPONENT FOR REPORTS
+-->
+
 <template>
   <q-layout>
     <q-page-container>
@@ -74,7 +78,7 @@
         <div class="col-2 col-sm-1 col-md-1"></div>
       </div>
 
-      <!-- MAQUETING -->
+      <!-- OBSERVATIONS LIST -->
       <div class="row" v-for="feature, index in featuresGeoJson" :key="index">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-xs-12"></div>
         <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-xs-12">
@@ -256,8 +260,6 @@ export default {
     const anyFilters = ref(false)
     const $q = useQuasar()
 
-    // $store.dispatch('app/setLanguage', 'ca')
-
     const reportId = computed(() => {
       return (props.report)
     })
@@ -430,6 +432,7 @@ export default {
       features.value = mapFeatures
     }
 
+    // Function to style all clusters and observations
     const styleFunction = (feature, style) => {
       if ('point_count' in feature.values_.properties && feature.values_.properties.point_count > 1) {
         const size = feature.values_.properties.point_count
@@ -450,8 +453,13 @@ export default {
           radius: radius
         })
         const text = new Text({
-          font: 'bold 12px Roboto',
+          font: 'bold 1.7px Roboto',
+          scale: 9,
           text: size.toLocaleString(),
+          stroke: new Stroke({
+            color: 'black',
+            width: 0.018
+          }),
           fill: new Fill({
             color: 'white'
           })

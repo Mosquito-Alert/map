@@ -1,4 +1,7 @@
-/* eslint-disable no-unused-vars */
+<!--
+  MAP COMPONENT FOR MODELS TAB
+-->
+
 <template>
   <div id='mapa' class='bg-white'>
     <q-btn v-if="mobile"
@@ -31,7 +34,6 @@
         >
           <div v-if="!mobile || attrVisible">
             © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -65,9 +67,7 @@ import { Style, Fill, Stroke } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
 import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
-// import { getInterpolatedColor } from '../js/InterpolateColors.js'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
-// import { Buffer } from 'buffer'
 import GridModelLayer from '../js/GridModelLayer'
 
 export default defineComponent({
@@ -105,6 +105,7 @@ export default defineComponent({
     let dataGridGeojson
     const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
     $store.commit('map/selectFeature', {})
+
     // Map general configuration
     const zoom = computed(() => {
       return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
@@ -154,12 +155,14 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
 
+    // Call when user shares view
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
       if (!modelData.vector || !modelData.year) {
         context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
         return
       }
+      // After mapview is shared then handle it
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         filters: {
@@ -179,6 +182,7 @@ export default defineComponent({
       newView.save()
     }
 
+    // Handle shared view
     function handleShareView (status) {
       if (status.status === 'error') {
         console.log(status.msg)
@@ -188,6 +192,7 @@ export default defineComponent({
       context.emit('mapViewSaved', status)
     }
 
+    // Load shared view. Get data from database and then handle it
     function loadView (ol, viewCode) {
       const newView = new ShareMapView(ol, {
         url: loadViewUrl + viewCode
@@ -195,6 +200,7 @@ export default defineComponent({
       newView.load(handleLoadView)
     }
 
+    // Handle shared view
     function handleLoadView (response) {
       // Check status response
       if (response.status === 'error') {
@@ -220,6 +226,7 @@ export default defineComponent({
       const type = Object.keys(models).find((key, index) => {
         return (models[key].modelName === jsonView.filters.vector)
       })
+      // Send data to layout so it udpates UI accordingly
       context.emit('loadSharedModel', {
         vector: { code: jsonView.filters.vector, type: _(models[type].common_name) },
         year: jsonView.filters.year,
@@ -233,6 +240,7 @@ export default defineComponent({
       })
     }
 
+    // Turn CSV file into dict
     function csvJSON (csv, model) {
       const lines = csv.split(/\r?\n/)
       const dict = {}
@@ -262,13 +270,10 @@ export default defineComponent({
       })
     }
 
+    // Do geometry grid to show probability at bigger zooms
     const doGRID = function (data) {
       const gridSize = $store.getters['app/getGridSize']
       dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
-      // const colors = {
-      //   from: jsonDefaults.colorEstimationFrom,
-      //   to: jsonProperties.colorEstimationTo
-      // }
       const estimationColors = $store.getters['app/getEstimationColors']
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
         colors: estimationColors,
@@ -317,6 +322,7 @@ export default defineComponent({
       map.value.map.removeLayer(modelsLayer)
     }
 
+    // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
@@ -326,12 +332,11 @@ export default defineComponent({
       spinner(true)
       CSVS = {}
       const urls = data.modelsCsv
-      //
+
+      // PROBABILITY GEOMETRIES FROM VECTOR TILES
       await Promise.all(urls.map(m =>
-        // fetch(m).then(resp => resp.json())
         fetch(m).then(resp => resp.text())
       )).then(texts => {
-        // Check for errors
         texts.forEach(text => {
           if (text.message) {
             gitHubError = 1
@@ -347,9 +352,6 @@ export default defineComponent({
             return true
           }
 
-          // const encoded = text.content
-          // const buf = Buffer.from(encoded, 'base64')
-          // let decoded = buf.toString('utf-8')
           const decoded = text
           if (!('1' in CSVS)) {
             CSVS['1'] = csvJSON(decoded, GADM1)
@@ -408,6 +410,7 @@ export default defineComponent({
         return true
       }
 
+      // UNCERTAINTY GEOMETRIES FROM GEOJSON FILES
       CENTROIDS = {}
       const centroids = data.centroidsUrls
       await Promise.all(centroids.map(m =>
@@ -466,8 +469,8 @@ export default defineComponent({
       })
     }
 
+    // Filter centroids with data and add SE value from csv
     const putDataOnCentroids = function (json, csv, flag) {
-      // Filter centroids with data and add SE value from csv
       const filtered = json.features.filter(f => {
         if (f.properties.id in csv) {
           f.properties.se = csv[f.properties.id].se
@@ -483,7 +486,7 @@ export default defineComponent({
       }
     }
 
-    // const styles = {}
+    // Function styles for probability layers based on scale
     const colorizeGadm1 = (feature, style) => {
       return colorizeGadm(feature, style, CSVS['1'])
     }
@@ -499,6 +502,7 @@ export default defineComponent({
       return colorizeGadm(feature, style, CSVS['4'])
     }
 
+    // General function style for probability
     const colorizeGadm = (feature, style, CSV) => {
       const estimationColors = $store.getters['app/getEstimationColors']
       const id = feature.properties_.id
@@ -506,7 +510,6 @@ export default defineComponent({
         return null
       }
       const value = CSV[id].prob
-      // const c = getInterpolatedColor(colors.from, colors.to, value)
       let c
       if (value < RANGS[0]) {
         c = estimationColors[0]
@@ -527,14 +530,15 @@ export default defineComponent({
       return new Style({
         fill: style,
         stroke: new Stroke({
-          // color: c
           color: '#fff'
         })
       })
     }
+
     const tilesUrl = $store.getters['app/getTilesUrl']
+
+    // Define layers for probability
     const gadm1 = new VectorTileLayer({
-      // minZoom: jsonProperties.gadm1.minZoom,
       maxZoom: jsonProperties.gadm1.maxZoom,
       declutter: true,
       renderMode: 'hybrid',
@@ -585,13 +589,13 @@ export default defineComponent({
       style: colorizeGadm4
     })
 
+    // Group previous layers as a single map layer
     const modelsLayer = new LayerGroup({
       layers: [gadm1, gadm2, gadm3, gadm4]
     })
 
     function updateMap () {
-      // const view = map.value.map.getView()
-      // console.log(map.value.map.getView().getZoom() + ' ' + view.getResolution())
+      // Save view params into store
       const newZoom = map.value.map.getView().getZoom()
       $store.commit('map/setDefaults', {
         zoom: newZoom,
@@ -602,6 +606,7 @@ export default defineComponent({
       })
     }
 
+    // Change estimation visibility
     const estimationVisibility = function (state) {
       $store.commit('app/setModelEstimation', state)
       gadm1.setVisible(state)
@@ -613,6 +618,7 @@ export default defineComponent({
       }
     }
 
+    // Change uncertainty visibility
     const uncertaintyVisibility = function (state) {
       $store.commit('app/setModelUncertainty', state)
       seModelLayer1.layer.setVisible(state)
@@ -624,6 +630,7 @@ export default defineComponent({
       }
     }
 
+    // Change estimation opacity
     const estimationOpacity = function (opacity) {
       gadm1.setOpacity(opacity)
       gadm2.setOpacity(opacity)
@@ -634,8 +641,8 @@ export default defineComponent({
       }
     }
 
+    // Change uncertainty opacity
     const uncertaintyOpacity = function (opacity) {
-      // $store.commit('app/setUncertaintyTransparency', opacity)
       if (seModelLayer1) {
         seModelLayer1.layer.setOpacity(opacity)
       }
@@ -653,6 +660,7 @@ export default defineComponent({
       }
     }
 
+    // Redraw estimation. Get colors from store
     const estimationRefresh = function () {
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
@@ -675,6 +683,7 @@ export default defineComponent({
       gadm4.getSource().refresh()
     }
 
+    // Redraw uncertainty. Get colors from store
     const uncertaintyRefresh = function () {
       const seColor = $store.getters['app/getUncertaintyColor']
       if (seModelLayer) {
