@@ -1,3 +1,8 @@
+<!--
+  MODAL WINDOW TO SHOW ERRORS
+  ERORS MSG COMES FROM PROP
+-->
+
 <template>
   <transition name="backdrop">
       <div class="backdrop" v-if="open"></div>

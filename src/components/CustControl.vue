@@ -1,3 +1,7 @@
+<!--
+  COMPONENT TO ADD BUTTON ON MAP, IF BUTTON IS CLICKED EVENT IS FIRED
+-->
+
 <template>
   <div :class="className">
     <button

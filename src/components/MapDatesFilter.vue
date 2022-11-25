@@ -1,3 +1,8 @@
+<!--
+  SHOWS DATES SELECTION ON MAP
+  GETS DATA FROM PROPS
+-->
+
 <template>
   <div
     class = "date-box"

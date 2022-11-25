@@ -1,3 +1,7 @@
+<!--
+  MODAL WINDOW BEFORE REPORTS (INFO MESSAGE)
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop-modal-reports" v-if="open"></div>
@@ -84,7 +88,6 @@ export default {
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  // background-color: rgba(0, 0, 0, 0.75);
   background: transparent
 }
 

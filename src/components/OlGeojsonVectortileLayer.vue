@@ -20,7 +20,6 @@ import Projection from 'ol/proj/Projection'
 import VectorTileSource from 'ol/source/VectorTile'
 import VectorTileLayer from 'ol/layer/VectorTile'
 import { useStore } from 'vuex'
-// import {Fill, Style} from 'ol/style'
 
 export default {
   extends: TileLayer,

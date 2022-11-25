@@ -1,3 +1,8 @@
+<!--
+  COMPONENT TO ADD A BUTTON WITH FONT AWESOME ICON ON LEFT MENU
+  LINK USES VUE ROUTER
+-->
+
 <template>
   <router-link class="main-menu-item" :to="toLink">
     <button class="fa-thin-button" :class="classProp" :title="label">

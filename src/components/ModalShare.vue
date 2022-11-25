@@ -1,3 +1,7 @@
+<!--
+  MODAL WINDOW TO SHOW SHARED MAPVIEW URL
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop-modal-share" v-if="open"></div>
@@ -14,7 +18,6 @@
                 {{ _('Url has been copied') }}
               </div>
             </transition>
-            <!-- <p v-else>{{ _('Map view shared successfully') }}</p> -->
             <div class="row q-my-lg new-url-wrapper">
               <div class="col text-center">
                 <span
@@ -128,8 +131,6 @@ export default {
   z-index: 2001;
 }
 dialog {
-  // max-width: 50vw;
-  // max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
   padding: 5rem 5rem 3rem 5rem;
   background-color: white;
@@ -158,29 +159,6 @@ dialog {
   top: 5vh;
 }
 
-// .download-buttons button.disabled {
-//   background: #ccc;
-//   cursor: not-allowed;
-// }
-// .download-buttons button {
-//   background: $primary-button-background;
-//   border: none;
-//   color: white;
-//   text-transform: uppercase;
-//   padding: 15px 50px;
-//   cursor: pointer;
-//   font-weight: bold;
-//   margin: 10px;
-// }
-// .download-buttons button:hover {
-//   background: $primary-button-background-hover;
-//   color: #644a0f;
-// }
-// .download-buttons{
-//   display: flex;
-//   flex-direction: row;
-//   justify-content: center;
-// }
 .error-message{
   color: crimson;
   text-align: center;

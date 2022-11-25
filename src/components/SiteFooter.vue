@@ -1,9 +1,11 @@
-<template>
+<!--
+  SHOW FOOTER
+-->
 
+<template>
   <q-footer v-if="!mobile || (!popupContent || !Object.keys(popupContent).length)" class="text-white">
     <q-toolbar>
       <q-toolbar-title>
-        <!-- <div v-if="!mobile" class="attribution"></div> -->
         <div class="flex" style="justify-content:space-between; width: 100%; align-items:center">
           <div v-if="!mobile" class="col q-my-xs">
             <div class="logo-title">

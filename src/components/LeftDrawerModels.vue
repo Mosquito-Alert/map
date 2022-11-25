@@ -1,3 +1,9 @@
+<!--
+  THIS COMPONENT CONTAINS
+  - MAIN MENU TOOLS
+  - TABLE OF CONTENTS FOR MODELS
+-->
+
 <template>
   <q-drawer
     show-if-above
@@ -255,6 +261,8 @@ export default {
     const estimationTransparency = ref(0)
     const uncertaintyTransparency = ref(initialSeTransparency)
     const manifestUrl = $store.getters['app/getModelsManifestUrl']
+
+    // colors for uncertainty
     const colorsTo = [
       hexToRgb('#ff0000'), hexToRgb('#ff8000'), hexToRgb('#ffff00'),
       hexToRgb('#00ff00'), hexToRgb('#00ff80'), hexToRgb('#00ff80'),
@@ -272,14 +280,13 @@ export default {
           return (obj.code === defaults.vector)
         })
         modelVector.value = vectorOptions.value[index]
-
+        // Init view. Get values from store
         showLegend.value = true
         estimation.value = defaults.estimation
         uncertainty.value = defaults.uncertainty
         estimationTransparency.value = defaults.estimationTransparency
         uncertaintyTransparency.value = defaults.uncertaintyTransparency
         uncertaintyColor.value = defaults.uncertaintyColor
-        // estimationColor.value = defaults.estimationColors
         inputDate.value = defaults.month + '/' + defaults.year
         context.emit('loadModel', defaults)
       }
@@ -331,6 +338,7 @@ export default {
         })
     }
 
+    // Read default uncertainty color from store
     const seColor = computed(() => {
       return $store.getters['app/getUncertaintyColor']
     })
@@ -354,6 +362,7 @@ export default {
       return $store.getters['app/getText'](text)
     }
 
+    // Called when TOC is toggled
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
     }
@@ -366,6 +375,7 @@ export default {
       return modelDate.value !== null
     })
 
+    // Called when calendar is clicked
     const checkValue = function (val, reason, details) {
       showLegend.value = false
       context.emit('clearModel')
@@ -381,6 +391,7 @@ export default {
       }
     }
 
+    // Called when model is selected
     const filterModels = function () {
       showLegend.value = false
       context.emit('clearModel')
@@ -408,33 +419,33 @@ export default {
       }
     }
 
+    // Called when apply button is clicked
     const applyfilter = async function () {
       if (inputDate.value === null || !modelVector.value) {
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
         const serverModels = $store.getters['app/getModelsUrl']
-        // const serverModels = '//api.github.com/repos/Mosquito-Alert/global_minimal_model_estimates/contents/'
         const selectedModel = modelVector.value.code
         const urls = [
-          // serverModels + `gadm0/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm0_monthly.csv',
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
           serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
           serverModels + `gadm3/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm3_monthly.csv',
           serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv'
         ]
-        // Add cell layer based on manifest
+        // Add grid (2km x 2km) layer based on manifest
         if (modelsManifest[selectedModel].cell === 'true') {
           urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
         }
         const centroidsUrls = [
-          // backendUrl + 'media/centroids/gadm0_centroid.json',
           backendUrl + 'media/centroids/gadm1_centroid.json',
           backendUrl + 'media/centroids/gadm2_centroid.json',
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
         const estimationPalettes = $store.getters['app/getEstimationPalettes']
+
+        // Prepare payload to update store
         const payload = {
           vector: selectedModel,
           year: parts[1],
@@ -473,6 +484,7 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
+    // Update UI when loading a model from a shared view
     const loadSharedModel = async function (payload) {
       estLegendColors.value = payload.estimationColors
       modelVector.value = payload.vector
@@ -542,9 +554,7 @@ export default {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
 
-    // const manifestUrl = $store.getters['app/getModelsManifestUrl']
-    // getManifest(manifestUrl)
-
+    // Required to change lang on current selection
     watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {
         if (modelVector.value.code) {
@@ -563,7 +573,6 @@ export default {
       clickColor,
       estimationColors,
       startingModelDate,
-      // estimationColor,
       palettes,
       colorsTo,
       seColor,

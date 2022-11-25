@@ -1,10 +1,13 @@
+<!--
+  MODAL WINDOW TO SHOW APP HELP AS A QUASAR CAROUSEL
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop-modal-help" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog modal-help" v-if="open">
-    <!-- <div class="dialog" v-if="open" @click="close"> -->
       <dialog open class="modal-help q-pa-xl" :class="mobile?'mobile':''">
         <slot></slot>
           <q-carousel
@@ -23,6 +26,7 @@
             padding
             :arrows="!mobile"
             class="rounded-borders">
+              <!-- TAB 1 -->
               <q-carousel-slide name="pag_1" class="column no-wrap">
                 <div class="page pag_1">
                   <div class="img">
@@ -37,10 +41,10 @@
                 </div>
               </q-carousel-slide>
 
+              <!-- TAB 2 -->
               <q-carousel-slide name="pag_2" class="column no-wrap">
                 <div class="page pag_2">
                   <div class="img">
-                    <!-- <img class="gif" src="~/assets/img/help/help2.gif" draggable="false" /> -->
                     <img class="gif" :src="videos[1]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
@@ -59,10 +63,10 @@
                 </div>
               </q-carousel-slide>
 
+              <!-- TAB 3 -->
               <q-carousel-slide name="pag_3" class="column no-wrap">
                 <div class="page pag_3">
                   <div class="img">
-                    <!-- <img class="gif" src="~/assets/img/help/help3.gif" draggable="false" /> -->
                     <img class="gif" :src="videos[2]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
@@ -74,10 +78,10 @@
                 </div>
               </q-carousel-slide>
 
+              <!-- TAB 4 -->
               <q-carousel-slide name="pag_4" class="column no-wrap">
                 <div class="page pag_4">
                   <div class="img">
-                    <!-- <img class="gif" src="~/assets/img/help/help4.gif" draggable="false"> -->
                     <img class="gif" :src="videos[3]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
@@ -89,10 +93,10 @@
                 </div>
               </q-carousel-slide>
 
+              <!-- TAB 5 -->
               <q-carousel-slide name="pag_5" class="column no-wrap">
                 <div class="page pag_5">
                   <div class="img">
-                    <!-- <img class="gif" src="~/assets/img/help/help5.gif" draggable="false"> -->
                     <img class="gif" :src="videos[4]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
@@ -104,10 +108,10 @@
                 </div>
               </q-carousel-slide>
 
+              <!-- TAB 6 -->
               <q-carousel-slide name="pag_6" class="column no-wrap">
                 <div class="page pag_6">
                   <div class="img">
-                    <!-- <img class="gif" src="~/assets/img/help/help5.gif" draggable="false"> -->
                     <img class="gif" :src="videos[5]" draggable="false"/>
                   </div>
                   <div class="q-ml-lg text">
@@ -136,6 +140,7 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
+    // Define video location files for each lang
     const videosHelp = {
       ca: [
         require('../assets/img/help/help1_ca.gif'),

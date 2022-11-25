@@ -1,3 +1,7 @@
+<!--
+  MODAL WINDOW TO SHOW LOGIN FORM
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop" v-if="open"></div>
@@ -95,10 +99,8 @@ export default {
         })
           .then(res => res.json())
           .then(res => {
-            console.log(res)
             if (res.success) {
               document.location = registeredWeb
-              // document.location.reload()
             } else {
               console.log('Not authenticated')
             }

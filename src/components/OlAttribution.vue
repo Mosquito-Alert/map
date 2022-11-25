@@ -1,3 +1,7 @@
+<!--
+  ADDS ATTRIBUTION TO MAP
+-->
+
 <template>
   <div class="ol-attribution">
     © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors

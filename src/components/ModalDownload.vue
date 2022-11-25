@@ -1,3 +1,8 @@
+<!--
+  MODAL WINDOW TO DOWNLOAD DATA
+  FIRES EVENT 'startDownload' WITH PARAM 'format '(xls o geopackage)
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop" v-if="open"></div>

@@ -1,3 +1,7 @@
+<!--
+  MODAL WINDOW TO SHOW APP INFO
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop-modal-info" v-if="open"></div>

@@ -1,3 +1,8 @@
+<!--
+  UI FOR HASHTAG FILTERS
+  WHEN FILTER CHANGES, EVENT 'tagsModified' IS FIRED.
+-->
+
 <template>
   <div class = "hashtags-list">
     <q-input
@@ -36,6 +41,7 @@ export default {
       return $store.getters['app/getText'](text)
     }
 
+    // When user cancels a tag
     const deleteTag = function (tag) {
       const index = tags.value.indexOf(tag)
       tags.value.splice(index, 1)
@@ -46,6 +52,11 @@ export default {
       })
     }
 
+    /*
+    There are two types of tags. General tags and 'id' tags
+    Id tags start with : and are quite unique
+    Only tags of same type can sequenced.
+    */
     const addTag = function () {
       if (newTag.value.startsWith(':')) {
         $store.commit('app/setFilteringTag', { value: true })
@@ -80,11 +91,13 @@ export default {
       newTag.value = ''
     }
 
+    // Set tags in UI When loding sharedview
     function setTags (t) {
       tags.value = []
       tags.value.push(...t)
     }
 
+    // Preset default view
     onMounted(function () {
       const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
       tags.value = defaults.hashtags

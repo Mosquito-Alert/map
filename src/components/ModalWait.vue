@@ -1,7 +1,8 @@
+<!--
+  MODAL WINDOW TO SHOW SPINNER AND PREVENT USER INTERACTION WHILE MAP IS WORKING
+-->
+
 <template>
-  <!-- <transition name="backdrop">
-      <div class="backdrop-modal-wait" v-if="open"></div>
-  </transition> -->
   <transition name="modal">
     <q-dialog
       v-model="open"
@@ -69,7 +70,6 @@ export default {
   width: 100%;
   height: 100vh;
   z-index: 2000;
-  // background-color: rgba(0, 0, 0, 0.75);
   background: transparent
 }
 
@@ -120,12 +120,7 @@ button.disabled {
 button {
   background: $primary-button-background;
   border: none;
-  // color: white;
-  // text-transform: uppercase;
-  // padding: 15px 50px;
   cursor: pointer;
-  // font-weight: bold;
-  // margin: 10px;
 }
 
 button:hover {

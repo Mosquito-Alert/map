@@ -1,3 +1,9 @@
+<!--
+  COMPONENT TO SEARCH ADMINISTRATIVE BOUNDARIES TO FILTER DATA
+  ALSO SHOW SELECTED BOUNDARIES ON MAP
+  USES NOMINATIM API
+-->
+
 <template>
   <div>
       <q-input
@@ -93,10 +99,9 @@ export default {
       const { signal } = controller
       const lang = $store.getters['app/getLang']
 
-      // viewbox=<x1>,<y1>,<x2>,<y2>
-      // bounded=[0|1]
-
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
+
+      // Set geometry simplification to 0.001 and lang preferences
       url += `&polygon_threshold=0.001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
       // Check for viewBox parameter in store
       const viewBox = $store.getters['map/getViewbox']
@@ -107,7 +112,7 @@ export default {
         { signal })
         .then(res => res.json())
         .then(res => {
-          // Get only polygon and multipolygons
+          // Get only polygons and multipolygons. Ignore multilines, points and so on
           const polygons = res.filter(feature => {
             return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
           })
@@ -129,6 +134,7 @@ export default {
         })
     }
 
+    // Called when administrative boundary is selected
     const filterLocation = function (location) {
       searchString.value = location.display_name
       isVisible.value = false
@@ -170,6 +176,7 @@ export default {
       }
     }
 
+    // Called when administrative boundary is cleared
     const resetFilter = function () {
       inputLocation.value.$el.focus()
       filterIsActive.value = false

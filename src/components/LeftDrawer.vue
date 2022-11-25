@@ -1,3 +1,10 @@
+<!--
+  THIS COMPONENT CONTAINS
+  - MAIN MENU TOOLS
+  - TABLE OF CONTENTS FOR MAP OBSERVATIONS WITH FILTERS FOR ADMINISTRATIVE LOCATIONS, HASHTAGS AND CITIZEN OBSERVATIONS
+  - SAMPLING EFFORT SWITCHER
+-->
+
 <template>
   <q-drawer
     show-if-above
@@ -146,6 +153,7 @@ export default {
     // Get a copy of layers from store to get categories
     const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
 
+    // Set active and inactive layers
     const filterObservations = function (layer, event) {
       let obj = event.target
       if (!event.target.dataset.type) {
@@ -222,6 +230,7 @@ export default {
       hashtags.value.setTags(tags)
     }
 
+    // Fired when user selects an administrative filter
     const locationSelected = function (location) {
       let geojson = null
       if (location.location !== null) {
@@ -243,6 +252,7 @@ export default {
           ]
         }
       }
+      // Trigger event to show the selected geometry on map
       context.emit('filterLocations', geojson)
     }
 
@@ -259,11 +269,13 @@ export default {
       context.emit('filterTags', tags)
     }
 
+    // Show selection on form
     const setLocationName = function (name) {
       searchLocation.value.searchString = name
       searchLocation.value.filterIsActive = true
     }
 
+    // Called when user folds/unfolds the component
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
     }

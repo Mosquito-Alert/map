@@ -1,3 +1,9 @@
+<!--
+  COMPONENT TO SHOP OBSERVATION POPUP
+  GET FEATURE INFO FROM PROP
+  IF OBSERVATIONS INCLUDES IMAGE, THE RATIO OF THE IMAGE DETERMINES DE POPUP STRUCTURE (LANDSCAPE, PORTRAIT, SQUARE)
+-->
+
 <template>
   <ol-overlay
       :title="_(selectedFeature.title)"
@@ -39,7 +45,6 @@
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
               <label class="popup-title">{{ _(selectedFeature.title) }}
-                <!-- <i class="like-link cursor-pointer text-h4 q-ml-md fa-thin fa-share-nodes" @click="showShareUrl"></i> -->
               </label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -62,12 +67,7 @@
                       {{ _(selectedFeature.location) }}
                     </div>
                 </div>
-                <!-- <div class="description-wrapper" v-if="selectedFeature.howMany">
-                    <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="body-part">{{ _('Body part') }}</span>:
-                      {{ _(selectedFeature.bodyPart) }}
-                    </div>
-                </div> -->
+
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>

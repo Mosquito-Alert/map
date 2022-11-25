@@ -1,3 +1,7 @@
+<!--
+  COMPONENT TO ADD A BUTTON WITH FONT AWESOME ICON ON LEFT MENU
+-->
+
 <template>
   <a class="main-menu-item" :href="link_url">
     <button class="fa-thin-button" :class="class_prop">

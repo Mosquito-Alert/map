@@ -1,3 +1,8 @@
+<!--
+  COMPONENT TO ADD A BUTTON WITH FONT AWESOME ICON ON LEFT MENU
+  THIS BUTTON HAS ITS MENU
+-->
+
 <template>
   <button class="fa-thin-button-menu">
     <div>

@@ -1,3 +1,10 @@
+<!--
+  MAP COMPONENT
+  ON EACH MAP MOVEEND, GETS NEW OBSERVATION DATA AND GRAPH DATA FROM WORKER
+  APPLIES ALL FILTERS AND CALLS WORKER TO RE-INDEX  DATA
+  FIRES DIFERENT EVENTS TO SHOW MODAL WINDOWS (DOWNLOAD DATA, REPORTS, ETC.)
+-->
+
 -<template>
   <div id='mapa'
     class='bg-white'
@@ -11,16 +18,19 @@
     </q-btn>
     <q-btn v-else :icon="leftDrawerIcon" class="drawer-handler" @click="toggleLeftDrawer" />
 
+    <!-- SHOW SELECTED DATES ON MAP -->
     <map-dates-filter
       :dateFrom="mapDates.from"
       :dateTo="mapDates.to"
       @calendarClicked="calendarClicked"
     />
 
+    <!-- SHOW OBSERVATIONS COUNTER -->
     <observation-map-counter
       :nPoints="nPoints"
     />
 
+    <!-- MAIN MAP -->
     <ol-map ref='map'
             :loadTilesWhileAnimating='true'
             :loadTilesWhileInteracting='true'
@@ -42,7 +52,6 @@
         >
           <div v-if="!mobile || attrVisible">
             © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-            <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -55,9 +64,6 @@
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
           <ol-source-osm />
-          <!-- <ol-source-xyz
-              crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2w0cGd6OWJuMGhqMjNqcXY5MXRnemVlOSJ9.dgHXkb9iPXEa4p9iAWOUwA' /> -->
         </ol-tile-layer>
 
         <!-- SAMPLING EFFORT -->
@@ -74,7 +80,7 @@
           </ol-source-vector>
         </ol-vector-layer>
 
-        <!-- CLUSTERS geojson layer -->
+        <!-- CLUSTERS GEOJSON LAYER FOR ALL OBSERVATIONS-->
         <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
@@ -91,12 +97,15 @@
           </ol-source-vector>
         </ol-vector-layer>
 
+        <!-- OBSERVATION POPUP -->
         <observation-popup
           @closePopupButton="closePopup"
           @popupimageloaded="autoPanPopup"
           :selectedFeature="popupContent"
         ></observation-popup>
     </ol-map>
+
+        <!-- DOWNLOAD BUTTON -->
         <cust-control
           ref="donwnloadControl"
           icon="fa-solid fa-download"
@@ -106,6 +115,7 @@
         >
         </cust-control>
 
+        <!-- REPORTS BUTTON -->
         <cust-control
           ref="reportControl"
           icon="fa-solid fa-file-lines"
@@ -134,8 +144,6 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import { extend } from 'ol/extent'
 import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
-// import AdministrativeLayer from '../js/AdministrativeLayer'
-// import CustomControl from '../js/CustomControl'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
 
@@ -155,12 +163,9 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
-    // let olDownload
-    // let olReports
     let shareviewSpideryId = ''
     let locationName = ''
     let storeLayers
-    // let administrativeLayer
     let userfixesLayer
     let spiderfyCluster
     let spiderfiedCluster
@@ -234,12 +239,15 @@ export default defineComponent({
       nPoints.value += (spiralSource.value.source.getFeatures().length) / 2
     })
 
+    // Initialize some URLS
     const backendUrl = $store.getters['app/getBackend']
     const userfixesUrl = backendUrl + 'api/userfixes/'
     const downloadUrl = backendUrl + 'api/downloads/'
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
+
+    // Get data to initialize map view
     worker.postMessage({
       fetchUrl: backendUrl + 'api/get/data/',
       year: moment().year()
@@ -254,6 +262,7 @@ export default defineComponent({
       map.value.map.getView().fit(extent, { minResolution: 50, nearest: false })
     }
 
+    // Get selected administrative boundary and set locationFeatures to show on map
     const fitFeature = function (location, simplify = true) {
       locationName = location.features[0].properties.displayName
       const extent = location.features[0].properties.boundingBox.map(parseFloat)
@@ -276,30 +285,13 @@ export default defineComponent({
       }
 
       if (Feat) {
-        // When loading view no simplification is required, because it is already simplified
-        // if (!simplify) {
-        //   Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
-
-        //   const writer = new format.GeoJSON()
-        //   const json = JSON.parse(writer.writeFeatures([Feat], {
-        //     dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
-        //   }))
-        //   administrativeLayer.refreshLayer(json)
-        //   return
-        // }
-
         // transform geometry to MERCATOR
         Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
         locationFeatures.value = [Feat]
-        // const writer = new format.GeoJSON()
-        // const json = JSON.parse(writer.writeFeatures([Feat], {
-        //   dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
-        // }))
-        // administrativeLayer.refreshLayer(json)
-        // console.timeEnd('FitFeature')
       }
     }
 
+    // Adjunst map view to show popup
     const autoPanPopup = function () {
       // When popup is on mobile, don't autopan
       if (mobile.value) {
@@ -353,6 +345,10 @@ export default defineComponent({
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
 
+    /*
+     GET DATA FROM WORKER
+     SEVERAL MODES APPLY BASED ON event.data properties
+     */
     worker.onmessage = function (event) {
       if (event.data.fetchedData) {
         return

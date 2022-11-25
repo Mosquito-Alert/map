@@ -1,3 +1,7 @@
+<!--
+  UI FOR SAMPLING EFFORT LAYER
+  GETS DTA FROM STORE
+-->
 <template>
     <div
       class="sampling-effort-box"

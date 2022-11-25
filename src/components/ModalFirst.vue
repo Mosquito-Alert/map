@@ -1,3 +1,7 @@
+<!--
+  MODAL WINDOW TO SHOW FIRST COOKIES USE ADVICE
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop" v-if="open"></div>

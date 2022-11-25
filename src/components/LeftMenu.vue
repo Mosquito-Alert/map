@@ -1,3 +1,14 @@
+<!--
+  MAIN MENU TOOLS
+    - Observations view
+    - Models view
+    - Sharing views (observations and models)
+    - Show app info (include cookies policy)
+    - Show app help
+    - Lang selection
+    - Login form
+-->
+
 <template>
     <q-toolbar>
       <fa-thin-button-router

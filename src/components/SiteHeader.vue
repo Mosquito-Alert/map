@@ -1,3 +1,7 @@
+<!--
+  SHOW HEADER. MOSQUITO LOGO
+-->
+
 <template>
   <q-header
     class="bg-white text-black"

@@ -1,10 +1,13 @@
+<!--
+  MODAL WINDOW TO SHOW LOGOS (coordinators and sponsors)
+-->
+
 <template>
   <transition name="backdrop">
     <div class="backdrop" v-if="open"></div>
   </transition>
   <transition name="modal">
     <div class="dialog modal-first" v-if="open">
-    <!-- <div class="dialog" v-if="open" @click="close"> -->
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <div v-if="mobile">
           <div v-if="mobile" class="coordinators col-12">
@@ -105,7 +108,6 @@ export default {
 <style scoped lang="scss">
 .info-logos,
 .funded-logos{
-  // background: #333;
   padding: 10px;
   flex-wrap: wrap;
   justify-content: space-around;

@@ -1,3 +1,7 @@
+<!--
+  COOKIES SETTINGS
+-->
+
 <template>
   <transition name="backdrop">
       <div class="backdrop-cookie-settings" v-if="open"></div>
@@ -126,17 +130,13 @@ export default {
       cookies.set('cookie-comply', complied)
       $store.commit('app/setCookiesComply', true)
 
+      // ACCEPT OR DENY ANALYTICS
       if (['all', 'ga'].indexOf(complied) > -1) {
-        console.log('opt in')
-        // window['ga-disable-G-RT6ZXWX8PS'] = false
         gtag.optIn()
         event('login', { method: 'Google' })
       } else {
-        console.log('opt out')
-        // window['ga-disable-G-RT6ZXWX8PS'] = true
         gtag.optOut()
       }
-      // console.log(gtag)
       closeModal()
     }
 

@@ -1,3 +1,8 @@
+<!--
+  SHOW OBSERVATIONS COUNTER ON MAP
+  GETS INFO FROM PROP
+-->
+
 <template>
   <div class = "point-counter">
     <div v-if="!mobile || visible" class="counter" v-html="npoints"></div>

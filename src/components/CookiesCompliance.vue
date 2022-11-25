@@ -1,5 +1,8 @@
+<!--
+  THIS COMPONENT SHOWS COOKIES ADVICE FIRT TIME PAGE IS VISITED
+ -->
+
 <template>
-<!-- G-ZLD12V4W3V -->
   <transition name="cookies">
     <div class="cookie-comply-container" v-if="complyVisible">
       <div class="flex">
@@ -52,18 +55,22 @@ export default {
       return $store.getters['app/getText'](text)
     }
 
+    // SHOW INFO IF REQUIRED
     const complyVisible = computed(() => {
       return !$store.getters['app/getCookiesComply']
     })
 
+    // OPEN COOKIE SETTINGS MODAL
     const openSettings = function () {
       $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: true } })
     }
 
+    // OPEN COOKIE POLICY MODAL INFO
     const openPolicy = function () {
       $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
     }
 
+    // ACCEPT ALL COOKIES
     const acceptAll = function () {
       cookies.set('cookie-comply', 'all')
       $store.commit('app/setCookiesComply', true)
