@@ -594,6 +594,7 @@ export default defineComponent({
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
       let d
+
       if (v.filters.dates.length) {
         d = v.filters.dates
         $store.commit('app/setDefaultDates', d[0])
