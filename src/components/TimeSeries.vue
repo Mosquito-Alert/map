@@ -572,8 +572,8 @@ export default defineComponent({
   .calendar :deep(.q-date__header) {
     background: $primary-color;
   }
-  .calendar :deep(.q-date__main) {
-    // flex-direction: row-reverse;
+  .legend.row.mobile {
+    overflow: auto;
   }
   .ok-button {
     background: $primary-color;
