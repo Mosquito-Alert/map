@@ -34,7 +34,7 @@ export default function () {
       culex_probable: 'Culex mosquito',
       koreicus_confirmed: 'Koreicus mosquito',
       koreicus_probable: 'Koreicus mosquito',
-      albopictus_cretinus: 'Albopictus cretinus',
+      albopictus_cretinus: 'Mosquito albopictus/cretinus',
       unidentified: 'Unidentified mosquito',
       other_species: 'Other species',
       conflict: 'Conflict',
