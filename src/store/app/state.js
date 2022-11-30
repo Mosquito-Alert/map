@@ -236,6 +236,7 @@ export default function () {
     selectedIcons: {
       mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
       mosquito_tiger_probable: require('../../assets/img/marker_tiger_selected.svg'),
+      albopictus_cretinus: require('../../assets/img/marker_tiger_selected.svg'),
       yellow_fever_confirmed: require('../../assets/img/marker_yellow_selected.svg'),
       yellow_fever_probable: require('../../assets/img/marker_yellow_selected.svg'),
       japonicus_confirmed: require('../../assets/img/marker_japonicus_selected.svg'),
@@ -244,7 +245,6 @@ export default function () {
       culex_probable: require('../../assets/img/marker_culex_selected.svg'),
       koreicus_confirmed: require('../../assets/img/marker_koreicus_selected.svg'),
       koreicus_probable: require('../../assets/img/marker_koreicus_selected.svg'),
-      albopictus_cretinus: require('../../assets/img/marker_selected.svg'),
       unidentified: require('../../assets/img/marker_unidentified_selected.svg'),
       other_species: require('../../assets/img/marker_other_selected.svg'),
       japonicus_koreicus: require('../../assets/img/marker_japonicus_koreicus_selected.svg'),
@@ -259,7 +259,7 @@ export default function () {
     layers: {
       observations: { // Mosquito observations
         tiger: {
-          categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
+          categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed', 'albopictus_cretinus'],
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
           icon: require('../../assets/img/marker_tiger.svg'),
