@@ -58,7 +58,8 @@ export default function () {
       culex_probable: 'Culex pipiens',
       koreicus_confirmed: 'Aedes koreicus',
       koreicus_probable: 'Aedes koreicus',
-      japonicus_koreicus: 'Aedes japonicus/koreicus'
+      japonicus_koreicus: 'Aedes japonicus/koreicus',
+      albopictus_cretinus: 'Aedes albopictus/cretinus'
     }
   }
 }

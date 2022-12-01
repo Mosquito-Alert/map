@@ -263,6 +263,7 @@ export default function () {
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
           icon: require('../../assets/img/marker_tiger.svg'),
+          iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
           color: '#4d4d4d'
         },
         yellow: {

@@ -1150,6 +1150,9 @@ export default defineComponent({
             if (feature.values_.properties.c.toLowerCase() === 'japonicus_koreicus') {
               iconUrl = observations[featureKey].iconConflict
             }
+            if (feature.values_.properties.c.toLowerCase() === 'albopictus_cretinus') {
+              iconUrl = observations[featureKey].iconConflict
+            }
             const tiger = new Icon({
               src: iconUrl,
               anchor: [0.5, 1]
