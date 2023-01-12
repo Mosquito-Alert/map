@@ -37,6 +37,9 @@ function getData (year, flag = false) {
       return response.json()
     })
     .then(function (geojson) {
+      if (geojson.features === null) {
+        geojson.features = []
+      }
       dataset = geojson.features
       const index = YEARS.findIndex(y => {
         return (y.year === year)
@@ -45,7 +48,7 @@ function getData (year, flag = false) {
 
       if (flag) {
         loadMapData(YEARS[index].data, false)
-      }
+      } 
     })
 }
 
@@ -100,16 +103,19 @@ self.onmessage = async function (e) {
             const index = YEARS.findIndex(element => {
               return element.year === y
             })
-            // Get first feature date
-            if (j.features[0].properties.d < firstDate) {
-              firstDate = j.features[0].properties.d
+            // Check if there are any features for current year
+            if (j.features.length) {
+              // Get first feature date,
+              if (j.features[0].properties.d < firstDate) {
+                firstDate = j.features[0].properties.d
+              }
+              // Get last feature date
+              if (j.features[j.features.length - 1].properties.d > lastDate) {
+                lastDate = j.features[j.features.length - 1].properties.d
+              }
+              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+              dataset = dataset.concat(j.features)
             }
-            // Get last feature date
-            if (j.features[j.features.length - 1].properties.d > lastDate) {
-              lastDate = j.features[j.features.length - 1].properties.d
-            }
-            YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-            dataset = dataset.concat(j.features)
           }
         })
       })
@@ -291,14 +297,14 @@ function loadMapData (data, fitFeatures) {
     maxZoom: 0,
     minPoints: 10000
   }).load(data)
-
+  
   const workerParams = {
     indexing: filters.lastFilterApplied,
     ready: true,
     minMaxDates: { min: firstDate, max: lastDate },
     datesInterval: {
-      from: dataset[0].properties.d,
-      to: dataset[dataset.length - 1].properties.d
+      from: dataset.length ? dataset[0].properties.d : '01-01-' + moment().format('YYYY'),
+      to: dataset.length ? dataset[dataset.length - 1].properties.d : moment().format('DD') + '-01-2023'
     },
   }
   if (getAllDates) {
