@@ -484,6 +484,10 @@ export default {
       context.emit('checkModelUncertainty', { status: uncertainty.value })
     }
 
+    const errorDownloadingModels = function () {
+      showLegend.value = false
+    }
+
     // Update UI when loading a model from a shared view
     const loadSharedModel = async function (payload) {
       estLegendColors.value = payload.estimationColors
@@ -568,6 +572,7 @@ export default {
 
     return {
       _,
+      errorDownloadingModels,
       goInfoModal,
       estLegendColors,
       clickColor,

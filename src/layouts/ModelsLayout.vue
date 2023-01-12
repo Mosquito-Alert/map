@@ -30,6 +30,7 @@
         @mapViewSaved="mapViewSaved"
         @setModelDate="setModelDate"
         @loadSharedModel="loadSharedModel"
+        @errorDownloadingModels="errorDownloadingModels"
       />
     </q-page>
 
@@ -213,6 +214,10 @@ export default {
       TOC.value.loadSharedModel(payload)
     }
 
+    const errorDownloadingModels = function (payload) {
+      TOC.value.errorDownloadingModels(payload)
+    }
+
     const estimationColorsChanged = function () {
       map.value.estimationRefresh()
     }
@@ -222,6 +227,7 @@ export default {
     }
 
     return {
+      errorDownloadingModels,
       estimationColorsChanged,
       uncertaintyColorsChanged,
       loadSharedModel,

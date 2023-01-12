@@ -324,6 +324,7 @@ export default defineComponent({
 
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
+      let ERROR_404 = false
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
@@ -335,10 +336,15 @@ export default defineComponent({
 
       // PROBABILITY GEOMETRIES FROM VECTOR TILES
       await Promise.all(urls.map(m =>
-        fetch(m).then(resp => resp.text())
+        fetch(m).then(resp => {
+          if (resp.status === 404) {
+            ERROR_404 = true
+          }
+          return resp.text()
+        })
       )).then(texts => {
         texts.forEach(text => {
-          if (text.message) {
+          if (text.message || ERROR_404) {
             gitHubError = 1
             $store.commit('app/setModal', {
               id: 'error',
@@ -351,7 +357,6 @@ export default defineComponent({
             context.emit('errorDownloadingModels')
             return true
           }
-
           const decoded = text
           if (!('1' in CSVS)) {
             CSVS['1'] = csvJSON(decoded, GADM1)
@@ -365,6 +370,18 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
+
+        if (ERROR_404) {
+          $store.commit('app/setModal', {
+            id: 'error',
+            content: {
+              visibility: true,
+              msg: 'MODEL NOT FOUND'
+            }
+          })
+          context.emit('errorDownloadingModels')
+          return true
+        }
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
         gadm3.getSource().refresh()
