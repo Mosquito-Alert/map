@@ -48,7 +48,7 @@ function getData (year, flag = false) {
 
       if (flag) {
         loadMapData(YEARS[index].data, false)
-      } 
+      }
     })
 }
 
@@ -69,7 +69,8 @@ function getMissingYears (date) {
     if ((set.year < sYear) || (set.year > eYear)) {
       return false
     } else {
-      return Object.keys(set.data).length === 0
+      // return Object.keys(set.data).length === 0
+      return !Array.isArray(set.data)
     }
   })
   return missing
@@ -92,7 +93,7 @@ self.onmessage = async function (e) {
     const missing = getMissingYears(e.data.filters.dates)
     if (missing.length) {
       await Promise.all(missing.map(m =>
-        fetch(getdataUrl + m.year).then(resp => resp.json())
+        fetch(getdataUrl + m.year + '/').then(resp => resp.json())
       )).then(jsons => {
         // Check for errors
         jsons.forEach(j => {
