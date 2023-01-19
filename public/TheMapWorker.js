@@ -17,10 +17,9 @@ const initialYear = 2014
 const currentYear = new Date().getFullYear()
 let getdataUrl = ''
 let getAllDates = false
-let firstDate = new Date()
-let lastDate = new Date()
-firstDate = firstDate.toISOString().split('T')[0]
-lastDate = lastDate.toISOString().split('T')[0]
+let firstDate = '01-01-' + moment().format('YYYY-MM-DD')
+let lastDate = moment().format('YYYY-MM-DD')
+let loadSharedView = false
 
 for (let a = initialYear; a <= currentYear; a++) {
   YEARS.push({ year: a, data: {} })
@@ -31,25 +30,16 @@ function log (text) {
 }
 
 // Download data and send message when ready including first and last date in dataset
-function getData (year, flag = false) {
-  fetch(getdataUrl + year +'/')
-    .then(function (response) {
-      return response.json()
-    })
-    .then(function (geojson) {
-      if (geojson.features === null) {
-        geojson.features = []
-      }
-      dataset = geojson.features
-      const index = YEARS.findIndex(y => {
-        return (y.year === year)
-      })
-      YEARS[index].data = JSON.parse(JSON.stringify(geojson.features))
+function getData (data, year, flag = false) {
+  dataset = data.features
+  const index = YEARS.findIndex(y => {
+    return (y.year === year)
+  })
+  YEARS[index].data = JSON.parse(JSON.stringify(dataset))
 
-      if (flag) {
-        loadMapData(YEARS[index].data, false)
-      } 
-    })
+  // if (flag) {
+  loadMapData(YEARS[index].data, false)
+  // }
 }
 
 function getMissingYears (date) {
@@ -76,10 +66,15 @@ function getMissingYears (date) {
 }
 
 self.onmessage = async function (e) {
-  if (e.data.fetchUrl) {
+  if (e.data.loadSharedView){
+    loadSharedView = true
+  } else {
+    loadSharedView = false
+  }
+  if (e.data.initData) {
     const year = e.data.year
     getdataUrl = e.data.fetchUrl
-    getData(year, getdataUrl)
+    getData(e.data.data, year)
     return
   }
 
@@ -89,37 +84,42 @@ self.onmessage = async function (e) {
     all_layers = e.data.layers
     filteredData = []
     getAllDates = false
-    const missing = getMissingYears(e.data.filters.dates)
-    if (missing.length) {
-      await Promise.all(missing.map(m =>
-        fetch(getdataUrl + m.year).then(resp => resp.json())
-      )).then(jsons => {
-        // Check for errors
-        jsons.forEach(j => {
-          if ('status' in j) {
-            console.log(j.msg)
-          } else {
-            const y = j.year
-            const index = YEARS.findIndex(element => {
-              return element.year === y
-            })
-            // Check if there are any features for current year
-            if (j.features.length) {
-              // Get first feature date,
-              if (j.features[0].properties.d < firstDate) {
-                firstDate = j.features[0].properties.d
-              }
-              // Get last feature date
-              if (j.features[j.features.length - 1].properties.d > lastDate) {
-                lastDate = j.features[j.features.length - 1].properties.d
-              }
-              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-              dataset = dataset.concat(j.features)
-            }
-          }
-        })
-      })
+    if (e.data.dataset) {
+      dataset = e.data.dataset
     }
+    // const missing = getMissingYears(e.data.filters.dates)
+    // if (missing.length) {
+    //   await Promise.all(missing.map(m =>
+    //     fetch(getdataUrl + m.year).then(resp => resp.json(), {
+    //       credentials: 'include'
+    //     })
+    //   )).then(jsons => {
+    //     // Check for errors
+    //     jsons.forEach(j => {
+    //       if ('status' in j) {
+    //         console.log(j.msg)
+    //       } else {
+    //         const y = j.year
+    //         const index = YEARS.findIndex(element => {
+    //           return element.year === y
+    //         })
+    //         // Check if there are any features for current year
+    //         if (j.features.length) {
+    //           // Get first feature date,
+    //           if (j.features[0].properties.d < firstDate) {
+    //             firstDate = j.features[0].properties.d
+    //           }
+    //           // Get last feature date
+    //           if (j.features[j.features.length - 1].properties.d > lastDate) {
+    //             lastDate = j.features[j.features.length - 1].properties.d
+    //           }
+    //           YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+    //           dataset = dataset.concat(j.features)
+    //         }
+    //       }
+    //     })
+    //   })
+    // }
   }
 
   let fitFeatures = false
@@ -297,7 +297,7 @@ function loadMapData (data, fitFeatures) {
     maxZoom: 0,
     minPoints: 10000
   }).load(data)
-  
+
   const workerParams = {
     indexing: filters.lastFilterApplied,
     ready: true,
@@ -305,10 +305,16 @@ function loadMapData (data, fitFeatures) {
     datesInterval: {
       from: dataset.length ? dataset[0].properties.d : '01-01-' + moment().format('YYYY'),
       to: dataset.length ? dataset[dataset.length - 1].properties.d : moment().format('DD') + '-01-2023'
-    },
+    }
   }
   if (getAllDates) {
     workerParams.getAllDates = true
+  }
+
+  if (loadSharedView) {
+    workerParams.loadSharedView = true
+  } else {
+    workerParams.loadSharedView = false
   }
 
   if (fitFeatures) {

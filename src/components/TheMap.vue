@@ -196,6 +196,16 @@ export default defineComponent({
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
     const fillLocationColor = ref(defaults.fillLocationColor)
     const strokeLocationColor = ref(defaults.strokeLocationColor)
+    const YEARS = []
+    let dataset = []
+    const initialYear = 2014
+    const currentYear = new Date().getFullYear()
+    let firstDate = new Date()
+    let lastDate = new Date()
+
+    for (let a = initialYear; a <= currentYear; a++) {
+      YEARS.push({ year: a, data: {} })
+    }
 
     function unfoldAttribution () {
       attrVisible.value = !attrVisible.value
@@ -248,10 +258,38 @@ export default defineComponent({
     const loadViewUrl = backendUrl + 'api/view/load/'
 
     // Get data to initialize map view
-    worker.postMessage({
-      fetchUrl: backendUrl + 'api/get/data/',
-      year: moment().year()
+    const initUrl = backendUrl + 'api/get/data/' + moment().year() + '/'
+    fetch(initUrl, {
+      credentials: 'include'
     })
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (geojson) {
+        worker.postMessage({
+          initData: true,
+          year: moment().year(),
+          data: geojson
+        })
+
+        firstDate = moment().startOf('year').format('YYYY-MM-DD')
+        lastDate = moment().format('YYYY-MM-DD')
+
+        $store.commit('map/setMinMaxDates', {
+          min: firstDate,
+          max: lastDate
+        })
+
+        $store.commit('map/setMapDates', {
+          from: firstDate,
+          to: lastDate
+        })
+      })
+
+    // worker.postMessage({
+    //   fetchUrl: backendUrl + 'api/get/data/',
+    //   year: moment().year()
+    // })
 
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -350,9 +388,10 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
-      // if (event.data.fetchedData) {
-      //   return
-      // }
+      if (event.data.loadSharedView) {
+        console.log('call initMap')
+        initMap()
+      }
 
       // if grap data is included then manage and exit
       if (event.data.timeseries) {
@@ -557,7 +596,7 @@ export default defineComponent({
     }
 
     // Hadle loaded view. Set UI accordingly
-    function handleLoadView (view) {
+    async function handleLoadView (view) {
       if (view.status === 'error') {
         $store.commit('app/setModal', {
           id: 'error',
@@ -651,7 +690,48 @@ export default defineComponent({
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
       mapFilters.featuresSet = JSON.parse(JSON.stringify(v.filters.featuresSet))
-      initMap()
+      const missing = getMissingYears(mapFilters.dates[0])
+
+      if (missing.length) {
+        mapFilters.mode = 'resetFilter'
+        await Promise.all(missing.map(m =>
+          fetch(backendUrl + 'api/get/data/' + m.year + '/', {
+            credentials: 'include'
+          }).then(resp => resp.json())
+        )).then(jsons => {
+          // Check for errors
+          jsons.forEach(j => {
+            if ('status' in j) {
+              console.log(j.msg)
+            } else {
+              const y = j.year
+              const index = YEARS.findIndex(element => {
+                return element.year === y
+              })
+              // Check if there are any features for current year
+              if (j.features.length) {
+                // Get first feature date,
+                if (j.features[0].properties.d < firstDate) {
+                  firstDate = j.features[0].properties.d
+                }
+                // Get last feature date
+                if (j.features[j.features.length - 1].properties.d > lastDate) {
+                  lastDate = j.features[j.features.length - 1].properties.d
+                }
+                YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+                dataset = dataset.concat(j.features)
+              }
+              console.log(firstDate, lastDate)
+            }
+          })
+          const workerData = {
+            filters: mapFilters,
+            dataset: dataset,
+            loadSharedView: true
+          }
+          worker.postMessage(workerData)
+        })
+      }
     }
 
     // Init share view. Save data to database
@@ -886,6 +966,7 @@ export default defineComponent({
 
       const url = downloadUrl + format.format + '/'
       fetch(url, {
+        credentials: 'include',
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data),
         headers: {
@@ -1244,7 +1325,7 @@ export default defineComponent({
     }
 
     // Called when date filter is requested
-    function filterDate (date) {
+    async function filterDate (date) {
       // Just in case a Spiral is open
       spinner()
 
@@ -1267,7 +1348,68 @@ export default defineComponent({
       $store.commit('app/setDefaultDates', mapFilters.dates)
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+
+      const missing = getMissingYears(mapFilters.dates)
+
+      if (missing.length) {
+        mapFilters.mode = 'resetFilter'
+        await Promise.all(missing.map(m =>
+          fetch(backendUrl + 'api/get/data/' + m.year + '/', {
+            credentials: 'include'
+          }).then(resp => resp.json())
+        )).then(jsons => {
+          // Check for errors
+          jsons.forEach(j => {
+            if ('status' in j) {
+              console.log(j.msg)
+            } else {
+              const y = j.year
+              const index = YEARS.findIndex(element => {
+                return element.year === y
+              })
+              // Check if there are any features for current year
+              if (j.features.length) {
+                // Get first feature date,
+                if (j.features[0].properties.d < firstDate) {
+                  firstDate = j.features[0].properties.d
+                }
+                // Get last feature date
+                if (j.features[j.features.length - 1].properties.d > lastDate) {
+                  lastDate = j.features[j.features.length - 1].properties.d
+                }
+                YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+                dataset = dataset.concat(j.features)
+              }
+              console.log(firstDate, lastDate)
+            }
+          })
+          workerData.dataset = dataset
+        })
+      }
+
       worker.postMessage(workerData)
+    }
+
+    function getMissingYears (date) {
+      let sYear, eYear
+      const d = date[0]
+      if (d.from === '') {
+        // getAllDates = true
+        sYear = YEARS[0].year
+        eYear = YEARS[YEARS.length - 1].year
+      } else {
+        sYear = parseInt(d.from.substring(0, 4))
+        eYear = parseInt(d.to.substring(0, 4))
+      }
+
+      const missing = YEARS.filter(set => {
+        if ((set.year < sYear) || (set.year > eYear)) {
+          return false
+        } else {
+          return Object.keys(set.data).length === 0
+        }
+      })
+      return missing
     }
 
     // Called when hashrag filter is requested
@@ -1297,6 +1439,7 @@ export default defineComponent({
           const controller = new AbortController()
           const { signal } = controller
           fetch(`${url}`, {
+            credentials: 'include',
             signal: signal,
             method: 'POST', // or 'PUT'
             body: JSON.stringify({ reports: mapFilters.report_id.join(',') })
@@ -1348,6 +1491,7 @@ export default defineComponent({
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
           fetch(`${url}`, {
+            credentials: 'include',
             signal: signal,
             method: 'POST', // or 'PUT'
             body: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })

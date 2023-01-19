@@ -94,7 +94,9 @@ export default class UserfixesLayer {
       return
     }
 
-    fetch(this.url)
+    fetch(this.url, {
+      credentials: 'include'
+    })
       .then(function (response) {
         return response.json()
       })

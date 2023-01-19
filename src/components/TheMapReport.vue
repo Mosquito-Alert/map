@@ -365,6 +365,7 @@ export default {
         const backendUrl = $store.getters['app/getBackend']
         const url = backendUrl + 'api/downloads/features/'
         fetch(url, {
+          credentials: 'include',
           method: 'POST', // or 'PUT'
           body: JSON.stringify(reportFilters),
           headers: {
