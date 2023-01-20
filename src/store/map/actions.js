@@ -8,7 +8,9 @@ export const selectOneFeatureMap = (context, id) => {
 
   const url = root + 'api/get_observation/' + id
 
-  fetch(url)
+  fetch(url, {
+    credentials: 'include'
+  })
     .then(response => response.json())
     .then(json => {
       json.coordinates = transform(
@@ -34,7 +36,9 @@ export const selectFeature = (context, feature) => {
     return
   }
 
-  fetch(url).then(response => response.json()).then(json => {
+  fetch(url, {
+    credentials: 'include'
+  }).then(response => response.json()).then(json => {
     json.coordinates = feature.geometry.flatCoordinates
     const formated = new FormatObservation(json, titles, latinNames).format()
     context.commit('selectFeature', formated)

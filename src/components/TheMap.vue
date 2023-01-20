@@ -268,37 +268,10 @@ export default defineComponent({
         return response.json()
       })
       .then(function (geojson) {
-        firstDate = moment().startOf('year').format('YYYY-MM-DD')
-        lastDate = moment().format('YYYY-MM-DD')
-
-        const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-        const initialObservations = defaults.observations
-        const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
-
-        // Set default dates, otherwise current year data only
-        mapFilters.dates = [{ from: firstDate, to: lastDate }]
-        initialObservations.forEach(layerFilter => {
-          mapFilters.observations.push({
-            type: layerFilter.type,
-            code: layerFilter.code,
-            categories: appLayers[layerFilter.type][layerFilter.code].categories
-          })
-        })
-
         worker.postMessage({
           initData: true,
           year: moment().year(),
           data: geojson
-        })
-
-        $store.commit('map/setMinMaxDates', {
-          min: firstDate,
-          max: lastDate
-        })
-
-        $store.commit('map/setMapDates', {
-          from: firstDate,
-          to: lastDate
         })
       })
 

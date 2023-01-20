@@ -306,7 +306,9 @@ export default {
         }
         return true
       }
-      fetch(url)
+      fetch(url, {
+        credentials: 'include'
+      })
         .then(function (response) {
           return response.text()
         })

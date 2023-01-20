@@ -336,7 +336,9 @@ export default defineComponent({
 
       // PROBABILITY GEOMETRIES FROM VECTOR TILES
       await Promise.all(urls.map(m =>
-        fetch(m).then(resp => {
+        fetch(m, {
+          credentials: 'include'
+        }).then(resp => {
           if (resp.status === 404) {
             ERROR_404 = true
           }
@@ -431,7 +433,9 @@ export default defineComponent({
       CENTROIDS = {}
       const centroids = data.centroidsUrls
       await Promise.all(centroids.map(m =>
-        fetch(m).then(resp => resp.json())
+        fetch(m, {
+          credentials: 'include'
+        }).then(resp => resp.json())
       )).then(jsons => {
         // Check for errors
         jsons.forEach(json => {

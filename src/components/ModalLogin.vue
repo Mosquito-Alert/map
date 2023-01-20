@@ -93,6 +93,7 @@ export default {
         formData.append('password', password.value)
 
         fetch(`${authenticateUrl}`, {
+          credentials: 'include',
           signal: signal,
           method: 'POST', // or 'PUT'
           body: formData
