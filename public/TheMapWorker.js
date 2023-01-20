@@ -204,10 +204,12 @@ self.onmessage = async function (e) {
   }
   else if (e.data) {
     // When map is just panned
-    const grahData = getGraphData (e)
-    postMessage({
-      timeseries: grahData
-    })
+    if (filters.observations){
+      const grahData = getGraphData (e)
+      postMessage({
+        timeseries: grahData
+      })
+    }
   }
 }
 

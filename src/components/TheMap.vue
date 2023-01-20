@@ -257,8 +257,10 @@ export default defineComponent({
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
 
-    // Get data to initialize map view
+    // When not loading sharedView Get data to initialize map view
+    const sharedViewCode = (props.sharedView) ? props.sharedView : null
     const initUrl = backendUrl + 'api/get/data/' + moment().year() + '/'
+
     fetch(initUrl, {
       credentials: 'include'
     })
@@ -266,14 +268,28 @@ export default defineComponent({
         return response.json()
       })
       .then(function (geojson) {
+        firstDate = moment().startOf('year').format('YYYY-MM-DD')
+        lastDate = moment().format('YYYY-MM-DD')
+
+        const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+        const initialObservations = defaults.observations
+        const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+
+        // Set default dates, otherwise current year data only
+        mapFilters.dates = [{ from: firstDate, to: lastDate }]
+        initialObservations.forEach(layerFilter => {
+          mapFilters.observations.push({
+            type: layerFilter.type,
+            code: layerFilter.code,
+            categories: appLayers[layerFilter.type][layerFilter.code].categories
+          })
+        })
+
         worker.postMessage({
           initData: true,
           year: moment().year(),
           data: geojson
         })
-
-        firstDate = moment().startOf('year').format('YYYY-MM-DD')
-        lastDate = moment().format('YYYY-MM-DD')
 
         $store.commit('map/setMinMaxDates', {
           min: firstDate,
@@ -285,11 +301,6 @@ export default defineComponent({
           to: lastDate
         })
       })
-
-    // worker.postMessage({
-    //   fetchUrl: backendUrl + 'api/get/data/',
-    //   year: moment().year()
-    // })
 
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -389,7 +400,6 @@ export default defineComponent({
      */
     worker.onmessage = function (event) {
       if (event.data.loadSharedView) {
-        console.log('call initMap')
         initMap()
       }
 
@@ -424,8 +434,7 @@ export default defineComponent({
           if (event.data.datesInterval) {
             $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
           }
-          const param = (props.sharedView) ? props.sharedView : null
-          initMap(param)
+          initMap(sharedViewCode)
         } else {
           if (mapFilters.lastFilterApplied === event.data.indexing) {
             context.emit('workerFinishedIndexing', { mapFilters })
@@ -721,13 +730,13 @@ export default defineComponent({
                 YEARS[index].data = JSON.parse(JSON.stringify(j.features))
                 dataset = dataset.concat(j.features)
               }
-              console.log(firstDate, lastDate)
             }
           })
           const workerData = {
             filters: mapFilters,
             dataset: dataset,
-            loadSharedView: true
+            loadSharedView: true,
+            layers: JSON.parse(JSON.stringify($store.getters['app/layers']))
           }
           worker.postMessage(workerData)
         })
@@ -1533,7 +1542,6 @@ export default defineComponent({
       $store.commit('app/setDefaultSamplingEffort', payload.status)
       let sDate, eDate
       if (payload.dates[0].from !== '') {
-        console.log('not empty')
         sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
         eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
         userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
