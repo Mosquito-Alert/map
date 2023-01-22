@@ -1362,7 +1362,6 @@ export default defineComponent({
                 YEARS[index].data = JSON.parse(JSON.stringify(j.features))
                 dataset = dataset.concat(j.features)
               }
-              console.log(firstDate, lastDate)
             }
           })
           workerData.dataset = dataset
