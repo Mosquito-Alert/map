@@ -5,7 +5,6 @@ export const selectOneFeatureMap = (context, id) => {
   const root = context.rootGetters['app/getBackend']
   const titles = context.rootGetters['map/getTitles']
   const latinNames = context.rootGetters['map/getLatinNames']
-
   const url = root + 'api/get_observation/' + id
 
   fetch(url, {
@@ -13,6 +12,7 @@ export const selectOneFeatureMap = (context, id) => {
   })
     .then(response => response.json())
     .then(json => {
+      console.log(json)
       json.coordinates = transform(
         [json.lon, json.lat],
         'EPSG:4326', 'EPSG:3857'

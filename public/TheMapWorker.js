@@ -374,6 +374,9 @@ function doFilters(filters, layers) {
   }
   if (filters.dates.length > 0) {
     // array with only one date
+    if (filters.dates[0].from === '') {
+      getAllDates = true
+    }
     filteredData = filterDate(filteredData, filters.dates[0])
   }
   if (filters.hashtags.length > 0) {

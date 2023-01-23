@@ -145,6 +145,7 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
+import { useCookies } from 'vue3-cookies'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -202,6 +203,7 @@ export default defineComponent({
     const currentYear = new Date().getFullYear()
     let firstDate = new Date()
     let lastDate = new Date()
+    const { cookies } = useCookies()
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
@@ -261,19 +263,32 @@ export default defineComponent({
     const sharedViewCode = (props.sharedView) ? props.sharedView : null
     const initUrl = backendUrl + 'api/get/data/' + moment().year() + '/'
 
-    fetch(initUrl, {
-      credentials: 'include'
-    })
-      .then(function (response) {
-        return response.json()
+    const firstCall = function () {
+      fetch(initUrl, {
+        credentials: 'include'
       })
-      .then(function (geojson) {
-        worker.postMessage({
-          initData: true,
-          year: moment().year(),
-          data: geojson
+        .then(function (response) {
+          return response.json()
         })
+        .then(function (geojson) {
+          worker.postMessage({
+            initData: true,
+            year: moment().year(),
+            data: geojson
+          })
+        })
+    }
+
+    if (!cookies.get('lang')) {
+      const url = backendUrl + 'translations/ca/'
+      fetch(url, {
+        credentials: 'include'
+      }).then(function (response) {
+        firstCall()
       })
+    } else {
+      firstCall()
+    }
 
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -394,8 +409,8 @@ export default defineComponent({
             ' - ' + moment(event.data.minMaxDates.max).format('DD/MM/YYYY')
           ))
           $store.commit('map/setMapDates', {
-            from: event.data.minMaxDates.min,
-            to: event.data.minMaxDates.max
+            from: '',
+            to: ''
           })
         }
       }
@@ -1612,7 +1627,8 @@ export default defineComponent({
       setPendingView,
       graphVisible,
       fillLocationColor,
-      strokeLocationColor
+      strokeLocationColor,
+      firstCall
     }
   }
 })
