@@ -145,7 +145,7 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
-import { useCookies } from 'vue3-cookies'
+// import { useCookies } from 'vue3-cookies'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -203,7 +203,7 @@ export default defineComponent({
     const currentYear = new Date().getFullYear()
     let firstDate = new Date()
     let lastDate = new Date()
-    const { cookies } = useCookies()
+    // const { cookies } = useCookies()
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
@@ -277,17 +277,6 @@ export default defineComponent({
             data: geojson
           })
         })
-    }
-
-    if (!cookies.get('lang')) {
-      const url = backendUrl + 'translations/ca/'
-      fetch(url, {
-        credentials: 'include'
-      }).then(function (response) {
-        firstCall()
-      })
-    } else {
-      firstCall()
     }
 
     const toggleLeftDrawer = function () {

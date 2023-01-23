@@ -11,6 +11,7 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
+      @langCookieSet="langCookieSet"
     />
 
     <q-page
@@ -347,6 +348,10 @@ export default {
       timeseries.value.showCalendar()
     }
 
+    const langCookieSet = function () {
+      map.value.firstCall()
+    }
+
     return {
       mobile,
       calendarClicked,
@@ -381,7 +386,8 @@ export default {
       timeseries,
       resizeMap,
       shareModal,
-      loadUserFixes
+      loadUserFixes,
+      langCookieSet
     }
   }
 }

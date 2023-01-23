@@ -79,7 +79,7 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
   props: ['expanded', 'item'],
   computed: {
     active_item (props) {
@@ -147,12 +147,12 @@ export default {
       setLanguage(lang, object)
     }
 
-    onMounted(function () {
-      initLanguage()
+    onMounted(async function () {
+      await initLanguage()
+      context.emit('langCookieSet', {})
     })
 
     const frontendUrl = computed(() => {
-      console.log($store.getters['app/getFrontendUrl'])
       return $store.getters['app/getFrontendUrl']
     })
     const linkModels = computed(() => {
