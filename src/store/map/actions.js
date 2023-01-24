@@ -12,7 +12,6 @@ export const selectOneFeatureMap = (context, id) => {
   })
     .then(response => response.json())
     .then(json => {
-      console.log(json)
       json.coordinates = transform(
         [json.lon, json.lat],
         'EPSG:4326', 'EPSG:3857'

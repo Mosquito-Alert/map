@@ -7,9 +7,11 @@ let dataset = []
 let filteredDataset = []
 const LAYER_TYPES = ['observations', 'otherObservations', 'breeding', 'bites']
 const DEBUG = false
-let index, unclustered
+let cluseredIndex, unclusteredIndex
 const now = Date.now()
-let filters = {}
+let filters = {
+  lastFilterApplied: false
+}
 let all_layers = null
 // let simplifyTolerance = null
 let YEARS = []
@@ -17,7 +19,7 @@ const initialYear = 2014
 const currentYear = new Date().getFullYear()
 let getdataUrl = ''
 let getAllDates = false
-let firstDate = '01-01-' + moment().format('YYYY-MM-DD')
+let firstDate = '01-01-' + moment().format('YYYY')
 let lastDate = moment().format('YYYY-MM-DD')
 let loadSharedView = false
 
@@ -35,7 +37,6 @@ self.onmessage = async function (e) {
     indexInitialMapView(e.data.data)
     return
   }
-
   if (e.data.filters) {
     // Init worker vars
     filters = e.data.filters
@@ -50,7 +51,7 @@ self.onmessage = async function (e) {
   let fitFeatures = false
   if (clickOnMapCluster(e.data)) {
     // Returns the zoom level to zoom in and the center.
-    let z = parseInt(index.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
+    let z = parseInt(cluseredIndex.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
     // Calculate the extent of the cluster to speed up zooming in
     const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
     if (z >= 19) {
@@ -61,19 +62,12 @@ self.onmessage = async function (e) {
       center: e.data.center,
       clusterExtent: clusterExtent
     })
-  } else if (e.data.filters) {
-    // Get the smallest dataset (maybe featuresSet) before start filtering
-    filteredData = getFilteredData(filters, dataset)
-
-    // Filter observations that pass filters
-    filteredData = doFilters(filters, e.data.layers)
-
-    // Update filteredDataset
-    filteredDataset = filteredData
-    loadMapData(filteredData, fitFeatures)
   } else if (e.data.spiderfyCluster) {
     let openPopupId = ''
-    if (e.data.spiderfyId) {
+    if (e.data.spiderfyId && e.data.dataset) {
+      filteredData = dataset
+      filteredData = doFilters(filters, e.data.layers)
+      cluseredIndex = doClusteredIndex(filteredData)
       const cluster = getClusterByFeatureId(e.data)
       e.data.getClusterExpansionZoom = cluster.id
       e.data.center = cluster.geometry.coordinates
@@ -81,8 +75,8 @@ self.onmessage = async function (e) {
     }
     if (e.data.getClusterExpansionZoom) {
       postMessage({
-        map: index.getClusters(e.data.bbox, parseInt(e.data.zoom)),
-        spiderfyFeatures: index.getLeaves(e.data.getClusterExpansionZoom, Infinity),
+        map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
+        spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
         spiderfyCluster: e.data.spiderfyCluster,
         openPopupId: openPopupId,
         center: e.data.center,
@@ -90,15 +84,22 @@ self.onmessage = async function (e) {
       })
     } else {
       postMessage({
-        map: index.getClusters(e.data.bbox, e.data.zoom),
+        map: cluseredIndex.getClusters(e.data.bbox, e.data.zoom),
         spiderfyCluster: e.data.spiderfyCluster,
         center: e.data.center
       })
     }
-  }
-  else if (e.data) {
+  } else if (e.data.filters) {
+    // Get the smallest dataset (maybe featuresSet) before start filtering
+    filteredData = getDefaultData(filters, dataset)
+    // Filter observations that pass filters
+    filteredData = doFilters(filters, e.data.layers)
+    // Update filteredDataset
+    filteredDataset = filteredData
+    loadMapData(filteredData, fitFeatures, false)
+  } else if (e.data) {
     // When map is just panned
-    if (filters.observations){
+    if (filters.observations) {
       const grahData = getGraphData (e)
       postMessage({
         timeseries: grahData
@@ -108,8 +109,8 @@ self.onmessage = async function (e) {
 }
 
 function getGraphData (e) {
-  const time = unclustered.getClusters(e.data.bbox, e.data.zoom)
-  const map = index.getClusters(e.data.bbox, e.data.zoom)
+  const time = uncluseredIndex.getClusters(e.data.bbox, e.data.zoom)
+  const map = cluseredIndex.getClusters(e.data.bbox, e.data.zoom)
 
   postMessage({
     map: map,
@@ -178,15 +179,17 @@ function getGraphData (e) {
   }
 }
 
-function loadMapData (data, fitFeatures) {
-  index = new Supercluster({
+function doClusteredIndex (data) {
+  return new Supercluster({
     log: DEBUG,
     radius: 10,
     extent: 256,
     maxZoom: 19
   }).load(data)
-
-  unclustered = new Supercluster({
+}
+function loadMapData (data, fitFeatures, initData) {
+  cluseredIndex = doClusteredIndex(data)
+  uncluseredIndex = new Supercluster({
     log: DEBUG,
     radius: 1,
     extent: 256,
@@ -206,6 +209,11 @@ function loadMapData (data, fitFeatures) {
   if (getAllDates) {
     workerParams.getAllDates = true
   }
+
+  if (initData) {
+    workerParams.initData = true
+  }
+
 
   if (loadSharedView) {
     workerParams.loadSharedView = true
@@ -283,7 +291,7 @@ function filterRecordsId (data, reportsId) {
 }
 
 function filterObservations (data, layers, filters) {
-  if (!data) return []
+  if (!data || !data.length) return []
   let filteredData = {}
   // Get all visible layers categories from filters
   let visibleCategories = []
@@ -298,7 +306,7 @@ function filterObservations (data, layers, filters) {
 }
 
 function getExtent (clusterId) {
-  const leaves = index.getLeaves(clusterId, Infinity)
+  const leaves = cluseredIndex.getLeaves(clusterId, Infinity)
   let xmin = leaves[0].geometry.coordinates[0]
   let ymin = leaves[0].geometry.coordinates[1]
   let xmax = leaves[0].geometry.coordinates[0]
@@ -315,16 +323,14 @@ function getExtent (clusterId) {
 
 function getClusterByFeatureId (data) {
   const searchId = data.spiderfyId
-  const fs = index.getClusters(data.bbox, parseInt(data.zoom))
-
+  const fs = cluseredIndex.getClusters(data.bbox, data.zoom)
   // First get all clusters within the view
   const clusters = fs.filter(f => {
     return f.properties.cluster
   })
-
   // Now get with cluster contains de searchId feature
   const parent = clusters.find(c => {
-    const leaves = index.getLeaves(c.properties.cluster_id, Infinity)
+    const leaves = cluseredIndex.getLeaves(c.properties.cluster_id, Infinity)
     return leaves.find(l => {
       if (l.properties.id === searchId) {
         return c.properties.cluster_id
@@ -341,20 +347,20 @@ function isSharingView (param) {
     return true
   } else {
     return false
-  }  
+  }
 }
 
 // Index default map data
 function indexInitialMapView (data) {
   dataset = data.features
-  loadMapData(dataset, false)
+  loadMapData(dataset, false, true)
 }
 
 function clickOnMapCluster (param) {
   return (param.getClusterExpansionZoom && !param.spiderfyCluster)
 }
 
-function getFilteredData (filters, dataset) {
+function getDefaultData (filters, dataset) {
   if (filters.featuresSet.length) {
     return filters.featuresSet[0].features
   } else {
@@ -372,7 +378,7 @@ function doFilters(filters, layers) {
   } else {
     filteredData = []
   }
-  if (filters.dates.length > 0) {
+  if (filters.dates.length > 0) { 
     // array with only one date
     if (filters.dates[0].from === '') {
       getAllDates = true

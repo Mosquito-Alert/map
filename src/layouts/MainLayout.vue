@@ -24,6 +24,7 @@
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
+        @workerStartedIndexing="workerStartedIndexing"
         @mapViewSaved="mapViewSaved"
         @timeSeriesChanged="timeSeriesChanged"
         @tagsChanged="tagsChanged"
@@ -300,6 +301,7 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
+      $store.commit('map/setIndexingOn', false)
       if (!$store.getters['timeseries/getGraphIsVisible']) {
         $store.commit('app/setModal', {
           id: 'wait',
@@ -312,6 +314,10 @@ export default {
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }
+    }
+
+    const workerStartedIndexing = function () {
+      $store.commit('map/setIndexingOn', true)
     }
 
     const mapViewSaved = function (payload) {
@@ -349,7 +355,11 @@ export default {
     }
 
     const langCookieSet = function () {
-      map.value.firstCall()
+      if (!viewCode) {
+        map.value.firstCall()
+      } else {
+        map.value.loadView(map.value.map, viewCode)
+      }
     }
 
     return {
@@ -362,6 +372,7 @@ export default {
       startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
+      workerStartedIndexing,
       mapViewSaved,
       timeSeriesChanged,
       tagsChanged,

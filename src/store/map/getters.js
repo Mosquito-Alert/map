@@ -53,3 +53,7 @@ export const getViewbox = state => {
 export const getLeftMenuToggling = state => {
   return state.leftMenuToggling
 }
+
+export const getIndexingOn = state => {
+  return state.indexingOn
+}

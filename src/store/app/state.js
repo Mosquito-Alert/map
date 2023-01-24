@@ -28,10 +28,10 @@ export default function () {
   }
 
   if (process.env.DEV) {
-    // backendUrl = 'http://localhost:8000/'
-    // frontendUrl = 'http://localhost:8080/'
-    backendUrl = 'http://be.example.com:8000/'
-    frontendUrl = 'http://fe.example.com:8080/'
+    backendUrl = 'http://localhost:8000/'
+    frontendUrl = 'http://localhost:8080/'
+    // backendUrl = 'http://be.example.com:8000/'
+    // frontendUrl = 'http://fe.example.com:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'

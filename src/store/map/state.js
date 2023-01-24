@@ -1,5 +1,6 @@
 export default function () {
   return {
+    indexingOn: false,
     DEFAULTS: {
       ZOOM: 3,
       CENTER: [13.6889, 44.8409],

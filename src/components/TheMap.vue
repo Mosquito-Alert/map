@@ -152,6 +152,7 @@ export default defineComponent({
   name: 'TheMap',
   emits: [
     'toggleLeftDrawer',
+    'workerStartedIndexing',
     'workerFinishedIndexing',
     'loadingSamplingEffort',
     'mapViewSaved',
@@ -163,12 +164,13 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
-    let shareviewSpideryId = ''
+    let spiderfyId = ''
     let locationName = ''
     let storeLayers
     let userfixesLayer
     let spiderfyCluster
     let spiderfiedCluster
+    let disableUpdateMap = false
     let clickOnSpiral = false
     const leftDrawerIcon = ref('null')
     const nPoints = ref(0)
@@ -181,7 +183,6 @@ export default defineComponent({
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
-    let ready = false
     const map = ref('null')
     const observationsSource = ref()
     const locationFeatures = ref()
@@ -258,19 +259,22 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
-
-    // When not loading sharedView Get data to initialize map view
-    const sharedViewCode = (props.sharedView) ? props.sharedView : null
-    const initUrl = backendUrl + 'api/get/data/' + moment().year() + '/'
-
-    const firstCall = function () {
-      fetch(initUrl, {
+    const curYear = moment().year()
+    const initUrl = backendUrl + 'api/get/data/' + curYear + '/'
+    const index = YEARS.findIndex(element => {
+      return element.year === curYear
+    })
+    const firstCall = async function () {
+      await fetch(initUrl, {
         credentials: 'include'
       })
         .then(function (response) {
           return response.json()
         })
         .then(function (geojson) {
+          dataset = geojson.features
+          YEARS[index].data = JSON.parse(JSON.stringify(dataset))
+          context.emit('workerStartedIndexing')
           worker.postMessage({
             initData: true,
             year: moment().year(),
@@ -347,6 +351,7 @@ export default defineComponent({
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: olmap.getView().getZoom()
@@ -376,10 +381,9 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
-      if (event.data.loadSharedView) {
+      if (event.data.initData) {
         initMap()
       }
-
       // if grap data is included then manage and exit
       if (event.data.timeseries) {
         manageTimeSeries(event.data.timeseries)
@@ -406,24 +410,14 @@ export default defineComponent({
 
       // Check if new index is been done by worker
       if (event.data.ready) {
-        // First time
-        if (!ready) {
-          if (event.data.datesInterval) {
-            $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
-          }
-          initMap(sharedViewCode)
-        } else {
-          if (mapFilters.lastFilterApplied === event.data.indexing) {
-            context.emit('workerFinishedIndexing', { mapFilters })
-          }
-          updateMap()
+        if (mapFilters.lastFilterApplied === event.data.indexing) {
+          context.emit('workerFinishedIndexing', { mapFilters })
         }
-        // First time is done, so no more. Now ready = true
-        ready = true
+        updateMap()
       } else if (event.data.spiderfyCluster) {
         // If no index check if cluster is spiderfied
         if (event.data.center) {
-          shareviewSpideryId = false
+          spiderfyId = false
           const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
           spiderfy(center, event.data.spiderfyFeatures)
           if (event.data.openPopupId) {
@@ -489,6 +483,10 @@ export default defineComponent({
       }
     }
 
+    function cloneJson (j) {
+      return JSON.parse(JSON.stringify(j))
+    }
+
     // Get observatins from spiral layer
     function getSpiralFeature (id) {
       const fs = spiralSource.value.source.getFeatures()
@@ -509,68 +507,69 @@ export default defineComponent({
     }
 
     // Prepare firt view map
-    function initMap (viewCode) {
+    function initMap () {
       const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      // Load default values
       // Check if not loading shared view
-      if (!viewCode) {
-        // Load default values
-        const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-        const initialObservations = defaults.observations
-
-        // Set default dates, otherwise current year data only
-        if (defaults.dates.length) {
-          mapFilters.dates = [defaults.dates[0]]
-          $store.commit('map/setMapDates', defaults.dates[0])
-        } else {
-          const currentDates = getCurrentYearDates()
-          mapFilters.dates = [currentDates]
-          $store.commit('map/setMapDates', currentDates)
-        }
-        if (defaults.hashtags.length) {
-          mapFilters.hashtags = defaults.hashtags
-        }
-        initialObservations.forEach(layerFilter => {
-          mapFilters.observations.push({
-            type: layerFilter.type,
-            code: layerFilter.code,
-            categories: appLayers[layerFilter.type][layerFilter.code].categories
-          })
-
-          $store.commit('map/addActiveLayer', {
-            type: layerFilter.type,
-            code: layerFilter.code
-          })
-        })
-
-        // Hashtag filter or report_id, not both at the same time
-        if (defaults.hashtags.length) {
-          context.emit('tagsChanged', defaults.hashtags)
-        } else {
-          if (defaults.report_id.length) {
-            // add 'semicolon to all report_ids'
-            const reports = defaults.report_id.map(e => {
-              return ':' + e
-            })
-            context.emit('tagsChanged', reports)
-          }
-        }
-
-        // Check for sampling effort
-        context.emit('loadUserFixes', {
-          status: defaults.sampling_effort,
-          dates: mapFilters.dates
-        })
-
-        const workerData = {}
-        workerData.layers = appLayers
-        workerData.filters = mapFilters
-        worker.postMessage(workerData)
+      // Set default dates, otherwise current year data only
+      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      const initialObservations = defaults.observations
+      if (defaults.dates.length) {
+        mapFilters.dates = [defaults.dates[0]]
+        $store.commit('map/setMapDates', defaults.dates[0])
       } else {
-        // Here, shared view must be loaded.
-        // Fetch view info from backend
-        const ol = map.value.map
-        loadView(ol, viewCode)
+        const currentDates = getCurrentYearDates()
+        mapFilters.dates = [currentDates]
+        $store.commit('map/setMapDates', currentDates)
       }
+      if (defaults.hashtags.length) {
+        mapFilters.hashtags = defaults.hashtags
+      }
+      initialObservations.forEach(layerFilter => {
+        mapFilters.observations.push({
+          type: layerFilter.type,
+          code: layerFilter.code,
+          categories: appLayers[layerFilter.type][layerFilter.code].categories
+        })
+
+        $store.commit('map/addActiveLayer', {
+          type: layerFilter.type,
+          code: layerFilter.code
+        })
+      })
+
+      // Hashtag filter or report_id, not both at the same time
+      if (defaults.hashtags.length) {
+        context.emit('tagsChanged', defaults.hashtags)
+      } else {
+        if (defaults.report_id.length) {
+          // add 'semicolon to all report_ids'
+          const reports = defaults.report_id.map(e => {
+            return ':' + e
+          })
+          context.emit('tagsChanged', reports)
+        }
+      }
+
+      // Check for sampling effort
+      context.emit('loadUserFixes', {
+        status: defaults.sampling_effort,
+        dates: mapFilters.dates
+      })
+
+      const mapDefaults = JSON.parse(JSON.stringify($store.getters['map/getDefault']))
+      const workerData = {}
+      workerData.layers = appLayers
+      workerData.filters = mapFilters
+      workerData.dataset = dataset
+      workerData.bbox = cloneJson($store.getters['map/getViewbox'])
+      workerData.zoom = mapDefaults.ZOOM
+      if (spiderfyCluster) {
+        workerData.spiderfyId = spiderfyId
+        workerData.spiderfyCluster = true
+      }
+      context.emit('workerStartedIndexing')
+      worker.postMessage(workerData)
     }
 
     // Get shared view from database and handle it
@@ -595,7 +594,6 @@ export default defineComponent({
         initMap()
         return
       }
-      spinner()
       const v = JSON.parse(view.view[0].view)
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
@@ -605,21 +603,21 @@ export default defineComponent({
 
       if (v.filters.dates.length) {
         d = v.filters.dates
-        $store.commit('app/setDefaultDates', d[0])
+        d = d[0]
+        $store.commit('app/setDefaultDates', d)
         $store.commit('map/setMapDates', { d })
-        mapFilters.dates = [v.filters.dates]
+        mapFilters.dates = [d]
       } else {
         d = $store.getters['map/getDatesRange']
         $store.commit('app/setDefaultDates', d)
         $store.commit('map/setMapDates', d)
       }
-
       $store.commit('app/setDefaults', {
         observations: v.filters.observations,
-        dates: d,
+        dates: [d],
         hashtags: v.filters.hashtags
       })
-      context.emit('timeSeriesChanged', d)
+      context.emit('timeSeriesChanged', [d])
 
       // Hashtag filter or report_id, not both at the same time
       if (v.filters.hashtags.length) {
@@ -655,10 +653,14 @@ export default defineComponent({
           properties: f.properties,
           id: f.id
         })
+        disableUpdateMap = false
+        spiderfyId = ''
+        spiderfyCluster = false
         selectedFeat.value = feature
         selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
         if (v.spiderfyId) {
-          shareviewSpideryId = v.spiderfyId
+          disableUpdateMap = true
+          spiderfyId = v.spiderfyId
           spiderfyCluster = true
         } else {
           $store.dispatch('map/selectFeature', feature.values_)
@@ -676,8 +678,7 @@ export default defineComponent({
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
       mapFilters.featuresSet = JSON.parse(JSON.stringify(v.filters.featuresSet))
-      const missing = getMissingYears(mapFilters.dates[0])
-
+      const missing = getMissingYears(mapFilters.dates)
       if (missing.length) {
         mapFilters.mode = 'resetFilter'
         await Promise.all(missing.map(m =>
@@ -709,13 +710,7 @@ export default defineComponent({
               }
             }
           })
-          const workerData = {
-            filters: mapFilters,
-            dataset: dataset,
-            loadSharedView: true,
-            layers: JSON.parse(JSON.stringify($store.getters['app/layers']))
-          }
-          worker.postMessage(workerData)
+          initMap()
         })
       }
     }
@@ -788,19 +783,16 @@ export default defineComponent({
           closePopup()
         }
       }
-      if (!ready) {
-        return
-      }
-
-      // Get map starting and endding data dates
-      if (clickOnSpiral) return
-      // Load observations layers
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
       const viewBox = southWest.concat(northEast).map((e) => {
         return e.toFixed(4)
       })
+
+      // Get map starting and endding data dates
+      if (clickOnSpiral) return
+
       $store.commit('map/setViewbox', viewBox)
       if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
         // Do not show spinner if cluster is spiderfied
@@ -808,12 +800,17 @@ export default defineComponent({
           spinner(true)
         }
       }
-      // Add spiderfyCluster in case cluster is spiderfiied
+
+      if (disableUpdateMap) {
+        return
+      }
+
+      // Add spiderfyCluster in case cluster is spiderfied
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: parseInt(olmap.getView().getZoom()),
         spiderfyCluster: spiderfyCluster,
-        spiderfyId: shareviewSpideryId
+        spiderfyId: spiderfyId
       })
     }
 
@@ -1022,6 +1019,7 @@ export default defineComponent({
 
                 spiderfyCluster = true
                 spiderfiedCluster = feature
+
                 worker.postMessage({
                   bbox: southWest.concat(northEast),
                   zoom: parseInt(ol.getView().getZoom()),
@@ -1270,6 +1268,7 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       workerData.filters = mapFilters
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1284,6 +1283,7 @@ export default defineComponent({
       workerData.filters = mapFilters
       mapFilters.mode = 'resetFilter'
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1307,6 +1307,7 @@ export default defineComponent({
 
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1336,7 +1337,6 @@ export default defineComponent({
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
 
       const missing = getMissingYears(mapFilters.dates)
-
       if (missing.length) {
         mapFilters.mode = 'resetFilter'
         await Promise.all(missing.map(m =>
@@ -1371,7 +1371,7 @@ export default defineComponent({
           workerData.dataset = dataset
         })
       }
-
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1434,6 +1434,7 @@ export default defineComponent({
               // Only one report. So no push into array
               mapFilters.featuresSet = [res]
               workerData.filters = mapFilters
+              context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
             })
@@ -1452,6 +1453,7 @@ export default defineComponent({
             mapFilters.featuresSet = []
           }
           workerData.filters = mapFilters
+          context.emit('workerStartedIndexing')
           worker.postMessage(workerData)
         }
       } else {
@@ -1462,6 +1464,7 @@ export default defineComponent({
           mapFilters.hashtags = []
           $store.commit('app/setDefaultTags', [])
           workerData.filters = mapFilters
+          context.emit('workerStartedIndexing')
           worker.postMessage(workerData)
         } else {
           $store.commit('app/setFilteringTag', { value: true })
@@ -1487,6 +1490,7 @@ export default defineComponent({
               mapFilters.featuresSet = [res]
               mapFilters.mode = 'resetFilter'
               workerData.filters = mapFilters
+              context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
             })
@@ -1617,7 +1621,8 @@ export default defineComponent({
       graphVisible,
       fillLocationColor,
       strokeLocationColor,
-      firstCall
+      firstCall,
+      loadView
     }
   }
 })

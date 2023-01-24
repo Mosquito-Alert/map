@@ -125,8 +125,8 @@ export default {
       setLanguage(lang, object)
     }
 
-    const setLanguage = (lang, object) => {
-      $store.dispatch('app/setLanguage', lang)
+    const setLanguage = async function (lang, object) {
+      await $store.dispatch('app/setLanguage', lang)
       cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')
@@ -139,12 +139,12 @@ export default {
       })
     }
 
-    function initLanguage () {
+    async function initLanguage () {
       const lang = $store.getters['app/getLang']
       let object = ca.value
       if (lang === 'es') object = es.value
       else if (lang === 'en') object = en.value
-      setLanguage(lang, object)
+      await setLanguage(lang, object)
     }
 
     onMounted(async function () {
