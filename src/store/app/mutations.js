@@ -36,10 +36,6 @@ export const setDefaultDates = (state, payload) => {
   state.DEFAULTS.dates = payload
 }
 
-export const setDefaultTags = (state, tags) => {
-  state.DEFAULTS.hashtags = tags
-}
-
 export const setPendingView = (state, payload) => {
   state.pendingView = payload
 }

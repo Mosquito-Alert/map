@@ -63,3 +63,10 @@ export const setLeftMenuToggling = (state, payload) => {
 export const setIndexingOn = (state, value) => {
   state.indexingOn = value
 }
+
+export const setFirstViewMap = (state, value) => {
+  state.firstViewMap = value
+}
+export const setDataset = (state, value) => {
+  state.dataset = value
+}

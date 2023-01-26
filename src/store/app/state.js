@@ -179,6 +179,7 @@ export default function () {
       dates: [getCurrentYearDates()],
       hashtags: [],
       report_id: [],
+      locations: [],
 
       // Colors of selected administration boundaries
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',

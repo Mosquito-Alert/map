@@ -186,7 +186,6 @@ export default defineComponent({
           if ($store.getters['timeseries/getGraphIsVisible']) {
             reloading.value = false
           }
-          console.log((!$store.getters['map/getIndexingOn']))
           if (!$store.getters['map/getIndexingOn']) {
             spinner(false)
           }

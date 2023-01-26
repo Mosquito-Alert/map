@@ -57,3 +57,11 @@ export const getLeftMenuToggling = state => {
 export const getIndexingOn = state => {
   return state.indexingOn
 }
+
+export const getFirstViewMap = state => {
+  return state.firstViewMap
+}
+
+export const getDataset = state => {
+  return state.dataset
+}

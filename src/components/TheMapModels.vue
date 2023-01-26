@@ -336,9 +336,7 @@ export default defineComponent({
 
       // PROBABILITY GEOMETRIES FROM VECTOR TILES
       await Promise.all(urls.map(m =>
-        fetch(m, {
-          credentials: 'include'
-        }).then(resp => {
+        fetch(m).then(resp => {
           if (resp.status === 404) {
             ERROR_404 = true
           }

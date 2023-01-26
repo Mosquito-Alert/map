@@ -1,6 +1,8 @@
 export default function () {
   return {
     indexingOn: false,
+    firstViewMap: true,
+    dataset: [],
     DEFAULTS: {
       ZOOM: 3,
       CENTER: [13.6889, 44.8409],

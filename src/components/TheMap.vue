@@ -218,6 +218,7 @@ export default defineComponent({
         foldingIcon.value = '<'
       }
     }
+
     // Map filters for the worker
     const mapFilters = {
       mode: 'resetFilter',
@@ -265,22 +266,36 @@ export default defineComponent({
       return element.year === curYear
     })
     const firstCall = async function () {
-      await fetch(initUrl, {
-        credentials: 'include'
-      })
-        .then(function (response) {
-          return response.json()
+      if ($store.getters['map/getFirstViewMap']) {
+        await fetch(initUrl, {
+          credentials: 'include'
         })
-        .then(function (geojson) {
-          dataset = geojson.features
-          YEARS[index].data = JSON.parse(JSON.stringify(dataset))
-          context.emit('workerStartedIndexing')
-          worker.postMessage({
-            initData: true,
-            year: moment().year(),
-            data: geojson
+          .then(function (response) {
+            return response.json()
           })
-        })
+          .then(function (geojson) {
+            dataset = geojson.features
+            YEARS[index].data = JSON.parse(JSON.stringify(dataset))
+            context.emit('workerStartedIndexing')
+            worker.postMessage({
+              initData: true,
+              year: moment().year(),
+              data: geojson
+            })
+          })
+      } else {
+        const dates = cloneJson($store.getters['app/getDefaults'].dates)
+        const missing = getMissingYears(dates)
+        if (missing.length) {
+          await getDataset(missing)
+          initMap()
+        }
+        // worker.postMessage({
+        //   year: moment().year(),
+        //   // data: dataset,
+        //   filters: mapFilters
+        // })
+      }
     }
 
     const toggleLeftDrawer = function () {
@@ -381,7 +396,12 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
+      if (event.data.dataset) {
+        dataset = event.data.dataset
+      }
       if (event.data.initData) {
+        // initData is true only first time
+        $store.commit('map/setFirstViewMap', false)
         initMap()
       }
       // if grap data is included then manage and exit
@@ -446,6 +466,7 @@ export default defineComponent({
           }
           features.value.push(feat)
         }
+        spinner(false)
         // removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
@@ -512,18 +533,24 @@ export default defineComponent({
       // Load default values
       // Check if not loading shared view
       // Set default dates, otherwise current year data only
-      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-      const initialObservations = defaults.observations
-      if (defaults.dates.length) {
-        mapFilters.dates = [defaults.dates[0]]
-        $store.commit('map/setMapDates', defaults.dates[0])
+      const mapDefaults = JSON.parse(JSON.stringify($store.getters['map/getDefault']))
+      const appDefaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+
+      const initialObservations = appDefaults.observations
+
+      if (appDefaults.dates.length) {
+        mapFilters.dates = [appDefaults.dates[0]]
+        $store.commit('map/setMapDates', appDefaults.dates[0])
       } else {
         const currentDates = getCurrentYearDates()
         mapFilters.dates = [currentDates]
         $store.commit('map/setMapDates', currentDates)
       }
-      if (defaults.hashtags.length) {
-        mapFilters.hashtags = defaults.hashtags
+      if (appDefaults.hashtags.length) {
+        mapFilters.hashtags = appDefaults.hashtags
+      }
+      if (appDefaults.locations.length) {
+        mapFilters.locations = appDefaults.locations
       }
       initialObservations.forEach(layerFilter => {
         mapFilters.observations.push({
@@ -539,12 +566,12 @@ export default defineComponent({
       })
 
       // Hashtag filter or report_id, not both at the same time
-      if (defaults.hashtags.length) {
-        context.emit('tagsChanged', defaults.hashtags)
+      if (appDefaults.hashtags.length) {
+        context.emit('tagsChanged', appDefaults.hashtags)
       } else {
-        if (defaults.report_id.length) {
+        if (appDefaults.report_id.length) {
           // add 'semicolon to all report_ids'
-          const reports = defaults.report_id.map(e => {
+          const reports = appDefaults.report_id.map(e => {
             return ':' + e
           })
           context.emit('tagsChanged', reports)
@@ -553,11 +580,10 @@ export default defineComponent({
 
       // Check for sampling effort
       context.emit('loadUserFixes', {
-        status: defaults.sampling_effort,
+        status: appDefaults.sampling_effort,
         dates: mapFilters.dates
       })
 
-      const mapDefaults = JSON.parse(JSON.stringify($store.getters['map/getDefault']))
       const workerData = {}
       workerData.layers = appLayers
       workerData.filters = mapFilters
@@ -569,6 +595,7 @@ export default defineComponent({
         workerData.spiderfyCluster = true
       }
       context.emit('workerStartedIndexing')
+      $store.commit('map/setFirstViewMap', false)
       worker.postMessage(workerData)
     }
 
@@ -600,11 +627,10 @@ export default defineComponent({
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
       let d
-
       if (v.filters.dates.length) {
         d = v.filters.dates
         d = d[0]
-        $store.commit('app/setDefaultDates', d)
+        $store.commit('app/setDefaultDates', [d])
         $store.commit('map/setMapDates', { d })
         mapFilters.dates = [d]
       } else {
@@ -680,38 +706,8 @@ export default defineComponent({
       mapFilters.featuresSet = JSON.parse(JSON.stringify(v.filters.featuresSet))
       const missing = getMissingYears(mapFilters.dates)
       if (missing.length) {
-        mapFilters.mode = 'resetFilter'
-        await Promise.all(missing.map(m =>
-          fetch(backendUrl + 'api/get/data/' + m.year + '/', {
-            credentials: 'include'
-          }).then(resp => resp.json())
-        )).then(jsons => {
-          // Check for errors
-          jsons.forEach(j => {
-            if ('status' in j) {
-              console.log(j.msg)
-            } else {
-              const y = j.year
-              const index = YEARS.findIndex(element => {
-                return element.year === y
-              })
-              // Check if there are any features for current year
-              if (j.features.length) {
-                // Get first feature date,
-                if (j.features[0].properties.d < firstDate) {
-                  firstDate = j.features[0].properties.d
-                }
-                // Get last feature date
-                if (j.features[j.features.length - 1].properties.d > lastDate) {
-                  lastDate = j.features[j.features.length - 1].properties.d
-                }
-                YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-                dataset = dataset.concat(j.features)
-              }
-            }
-          })
-          initMap()
-        })
+        await getDataset(missing)
+        initMap()
       }
     }
 
@@ -1019,7 +1015,6 @@ export default defineComponent({
 
                 spiderfyCluster = true
                 spiderfiedCluster = feature
-
                 worker.postMessage({
                   bbox: southWest.concat(northEast),
                   zoom: parseInt(ol.getView().getZoom()),
@@ -1338,41 +1333,48 @@ export default defineComponent({
 
       const missing = getMissingYears(mapFilters.dates)
       if (missing.length) {
-        mapFilters.mode = 'resetFilter'
-        await Promise.all(missing.map(m =>
-          fetch(backendUrl + 'api/get/data/' + m.year + '/', {
-            credentials: 'include'
-          }).then(resp => resp.json())
-        )).then(jsons => {
-          // Check for errors
-          jsons.forEach(j => {
-            if ('status' in j) {
-              console.log(j.msg)
-            } else {
-              const y = j.year
-              const index = YEARS.findIndex(element => {
-                return element.year === y
-              })
-              // Check if there are any features for current year
-              if (j.features.length) {
-                // Get first feature date,
-                if (j.features[0].properties.d < firstDate) {
-                  firstDate = j.features[0].properties.d
-                }
-                // Get last feature date
-                if (j.features[j.features.length - 1].properties.d > lastDate) {
-                  lastDate = j.features[j.features.length - 1].properties.d
-                }
-                YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-                dataset = dataset.concat(j.features)
-              }
-            }
-          })
-          workerData.dataset = dataset
-        })
+        await getDataset(missing)
+        workerData.dataset = dataset
       }
       context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
+    }
+
+    async function getDataset (missing) {
+      mapFilters.mode = 'resetFilter'
+      await Promise.all(missing.map(m =>
+        fetch(backendUrl + 'api/get/data/' + m.year + '/', {
+          credentials: 'include'
+        }).then(resp => resp.json())
+      )).then(jsons => {
+        // Check for errors
+        jsons.forEach(j => {
+          if ('status' in j) {
+            console.log(j.msg)
+          } else {
+            const y = j.year
+            const index = YEARS.findIndex(element => {
+              return element.year === y
+            })
+            // Check if there are any features for current year
+            if (j.features.length) {
+              // Get first feature date,
+              if (j.features[0].properties.d < firstDate) {
+                firstDate = j.features[0].properties.d
+              }
+              // Get last feature date
+              if (j.features[j.features.length - 1].properties.d > lastDate) {
+                lastDate = j.features[j.features.length - 1].properties.d
+              }
+              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+              dataset = dataset.concat(j.features)
+            }
+          }
+        })
+      }).catch((error) => {
+        dataset = []
+        console.log(error)
+      })
     }
 
     function getMissingYears (date) {
@@ -1413,10 +1415,12 @@ export default defineComponent({
         // This are not generic tags
         mapFilters.lastFilterApplied = 'reports'
         mapFilters.hashtags = []
+
         if (obj.mode === 'addedTag') {
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
           })
+
           mapFilters.mode = 'resetFilter'
           $store.commit('app/setFilteringTag', { value: true })
 
@@ -1462,7 +1466,6 @@ export default defineComponent({
           mapFilters.mode = 'resetFilter'
           mapFilters.featuresSet = []
           mapFilters.hashtags = []
-          $store.commit('app/setDefaultTags', [])
           workerData.filters = mapFilters
           context.emit('workerStartedIndexing')
           worker.postMessage(workerData)
