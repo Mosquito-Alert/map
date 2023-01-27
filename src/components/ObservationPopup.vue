@@ -170,7 +170,6 @@ export default defineComponent({
     }
 
     const imageLoaded = function (e) {
-      console.log('looooooaded')
       mosquitoImageLoaded.value = true
       ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
       // Set poup class based on mobile device and image ratio

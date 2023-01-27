@@ -145,12 +145,14 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
+// import { useCookies } from 'vue3-cookies'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
   name: 'TheMap',
   emits: [
     'toggleLeftDrawer',
+    'workerStartedIndexing',
     'workerFinishedIndexing',
     'loadingSamplingEffort',
     'mapViewSaved',
@@ -162,12 +164,13 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
-    let shareviewSpideryId = ''
+    let spiderfyId = ''
     let locationName = ''
     let storeLayers
     let userfixesLayer
     let spiderfyCluster
     let spiderfiedCluster
+    let disableUpdateMap = false
     let clickOnSpiral = false
     const leftDrawerIcon = ref('null')
     const nPoints = ref(0)
@@ -180,7 +183,6 @@ export default defineComponent({
     const selectedIcon = ref('null')
     const features = ref([])
     const locationLayer = ref('null')
-    let ready = false
     const map = ref('null')
     const observationsSource = ref()
     const locationFeatures = ref()
@@ -196,6 +198,17 @@ export default defineComponent({
     const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
     const fillLocationColor = ref(defaults.fillLocationColor)
     const strokeLocationColor = ref(defaults.strokeLocationColor)
+    const YEARS = []
+    let dataset = []
+    const initialYear = 2014
+    const currentYear = new Date().getFullYear()
+    let firstDate = new Date()
+    let lastDate = new Date()
+    // const { cookies } = useCookies()
+
+    for (let a = initialYear; a <= currentYear; a++) {
+      YEARS.push({ year: a, data: {} })
+    }
 
     function unfoldAttribution () {
       attrVisible.value = !attrVisible.value
@@ -205,6 +218,7 @@ export default defineComponent({
         foldingIcon.value = '<'
       }
     }
+
     // Map filters for the worker
     const mapFilters = {
       mode: 'resetFilter',
@@ -246,12 +260,43 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
-
-    // Get data to initialize map view
-    worker.postMessage({
-      fetchUrl: backendUrl + 'api/get/data/',
-      year: moment().year()
+    const curYear = moment().year()
+    const initUrl = backendUrl + 'api/get/data/' + curYear + '/'
+    const index = YEARS.findIndex(element => {
+      return element.year === curYear
     })
+    const firstCall = async function () {
+      if ($store.getters['map/getFirstViewMap']) {
+        await fetch(initUrl, {
+          credentials: 'include'
+        })
+          .then(function (response) {
+            return response.json()
+          })
+          .then(function (geojson) {
+            dataset = geojson.features
+            YEARS[index].data = JSON.parse(JSON.stringify(dataset))
+            context.emit('workerStartedIndexing')
+            worker.postMessage({
+              initData: true,
+              year: moment().year(),
+              data: geojson
+            })
+          })
+      } else {
+        const dates = cloneJson($store.getters['app/getDefaults'].dates)
+        const missing = getMissingYears(dates)
+        if (missing.length) {
+          await getDataset(missing)
+          initMap()
+        }
+        // worker.postMessage({
+        //   year: moment().year(),
+        //   // data: dataset,
+        //   filters: mapFilters
+        // })
+      }
+    }
 
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -321,6 +366,7 @@ export default defineComponent({
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
+
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: olmap.getView().getZoom()
@@ -350,10 +396,14 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
-      // if (event.data.fetchedData) {
-      //   return
-      // }
-
+      if (event.data.dataset) {
+        dataset = event.data.dataset
+      }
+      if (event.data.initData) {
+        // initData is true only first time
+        $store.commit('map/setFirstViewMap', false)
+        initMap()
+      }
       // if grap data is included then manage and exit
       if (event.data.timeseries) {
         manageTimeSeries(event.data.timeseries)
@@ -372,33 +422,22 @@ export default defineComponent({
             ' - ' + moment(event.data.minMaxDates.max).format('DD/MM/YYYY')
           ))
           $store.commit('map/setMapDates', {
-            from: event.data.minMaxDates.min,
-            to: event.data.minMaxDates.max
+            from: '',
+            to: ''
           })
         }
       }
 
       // Check if new index is been done by worker
       if (event.data.ready) {
-        // First time
-        if (!ready) {
-          if (event.data.datesInterval) {
-            $store.commit('timeseries/setCompleteDatesRange', event.data.datesInterval)
-          }
-          const param = (props.sharedView) ? props.sharedView : null
-          initMap(param)
-        } else {
-          if (mapFilters.lastFilterApplied === event.data.indexing) {
-            context.emit('workerFinishedIndexing', { mapFilters })
-          }
-          updateMap()
+        if (mapFilters.lastFilterApplied === event.data.indexing) {
+          context.emit('workerFinishedIndexing', { mapFilters })
         }
-        // First time is done, so no more. Now ready = true
-        ready = true
+        updateMap()
       } else if (event.data.spiderfyCluster) {
         // If no index check if cluster is spiderfied
         if (event.data.center) {
-          shareviewSpideryId = false
+          spiderfyId = false
           const center = transform(event.data.center, 'EPSG:4326', 'EPSG:3857')
           spiderfy(center, event.data.spiderfyFeatures)
           if (event.data.openPopupId) {
@@ -427,6 +466,7 @@ export default defineComponent({
           }
           features.value.push(feat)
         }
+        spinner(false)
         // removeCluster(spiderfiedCluster)
       } else if (event.data.expansionZoom) {
         // User has clicked on a cluster
@@ -464,6 +504,10 @@ export default defineComponent({
       }
     }
 
+    function cloneJson (j) {
+      return JSON.parse(JSON.stringify(j))
+    }
+
     // Get observatins from spiral layer
     function getSpiralFeature (id) {
       const fs = spiralSource.value.source.getFeatures()
@@ -484,68 +528,75 @@ export default defineComponent({
     }
 
     // Prepare firt view map
-    function initMap (viewCode) {
+    function initMap () {
       const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      // Load default values
       // Check if not loading shared view
-      if (!viewCode) {
-        // Load default values
-        const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
-        const initialObservations = defaults.observations
+      // Set default dates, otherwise current year data only
+      const mapDefaults = JSON.parse(JSON.stringify($store.getters['map/getDefault']))
+      const appDefaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
 
-        // Set default dates, otherwise current year data only
-        if (defaults.dates.length) {
-          mapFilters.dates = [defaults.dates[0]]
-          $store.commit('map/setMapDates', defaults.dates[0])
-        } else {
-          const currentDates = getCurrentYearDates()
-          mapFilters.dates = [currentDates]
-          $store.commit('map/setMapDates', currentDates)
-        }
-        if (defaults.hashtags.length) {
-          mapFilters.hashtags = defaults.hashtags
-        }
-        initialObservations.forEach(layerFilter => {
-          mapFilters.observations.push({
-            type: layerFilter.type,
-            code: layerFilter.code,
-            categories: appLayers[layerFilter.type][layerFilter.code].categories
-          })
+      const initialObservations = appDefaults.observations
 
-          $store.commit('map/addActiveLayer', {
-            type: layerFilter.type,
-            code: layerFilter.code
-          })
-        })
-
-        // Hashtag filter or report_id, not both at the same time
-        if (defaults.hashtags.length) {
-          context.emit('tagsChanged', defaults.hashtags)
-        } else {
-          if (defaults.report_id.length) {
-            // add 'semicolon to all report_ids'
-            const reports = defaults.report_id.map(e => {
-              return ':' + e
-            })
-            context.emit('tagsChanged', reports)
-          }
-        }
-
-        // Check for sampling effort
-        context.emit('loadUserFixes', {
-          status: defaults.sampling_effort,
-          dates: mapFilters.dates
-        })
-
-        const workerData = {}
-        workerData.layers = appLayers
-        workerData.filters = mapFilters
-        worker.postMessage(workerData)
+      if (appDefaults.dates.length) {
+        mapFilters.dates = [appDefaults.dates[0]]
+        $store.commit('map/setMapDates', appDefaults.dates[0])
       } else {
-        // Here, shared view must be loaded.
-        // Fetch view info from backend
-        const ol = map.value.map
-        loadView(ol, viewCode)
+        const currentDates = getCurrentYearDates()
+        mapFilters.dates = [currentDates]
+        $store.commit('map/setMapDates', currentDates)
       }
+      if (appDefaults.hashtags.length) {
+        mapFilters.hashtags = appDefaults.hashtags
+      }
+      if (appDefaults.locations.length) {
+        mapFilters.locations = appDefaults.locations
+      }
+      initialObservations.forEach(layerFilter => {
+        mapFilters.observations.push({
+          type: layerFilter.type,
+          code: layerFilter.code,
+          categories: appLayers[layerFilter.type][layerFilter.code].categories
+        })
+
+        $store.commit('map/addActiveLayer', {
+          type: layerFilter.type,
+          code: layerFilter.code
+        })
+      })
+
+      // Hashtag filter or report_id, not both at the same time
+      if (appDefaults.hashtags.length) {
+        context.emit('tagsChanged', appDefaults.hashtags)
+      } else {
+        if (appDefaults.report_id.length) {
+          // add 'semicolon to all report_ids'
+          const reports = appDefaults.report_id.map(e => {
+            return ':' + e
+          })
+          context.emit('tagsChanged', reports)
+        }
+      }
+
+      // Check for sampling effort
+      context.emit('loadUserFixes', {
+        status: appDefaults.sampling_effort,
+        dates: mapFilters.dates
+      })
+
+      const workerData = {}
+      workerData.layers = appLayers
+      workerData.filters = mapFilters
+      workerData.dataset = dataset
+      workerData.bbox = cloneJson($store.getters['map/getViewbox'])
+      workerData.zoom = mapDefaults.ZOOM
+      if (spiderfyCluster) {
+        workerData.spiderfyId = spiderfyId
+        workerData.spiderfyCluster = true
+      }
+      context.emit('workerStartedIndexing')
+      $store.commit('map/setFirstViewMap', false)
+      worker.postMessage(workerData)
     }
 
     // Get shared view from database and handle it
@@ -557,7 +608,7 @@ export default defineComponent({
     }
 
     // Hadle loaded view. Set UI accordingly
-    function handleLoadView (view) {
+    async function handleLoadView (view) {
       if (view.status === 'error') {
         $store.commit('app/setModal', {
           id: 'error',
@@ -570,31 +621,29 @@ export default defineComponent({
         initMap()
         return
       }
-      spinner()
       const v = JSON.parse(view.view[0].view)
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
       let d
-
       if (v.filters.dates.length) {
         d = v.filters.dates
-        $store.commit('app/setDefaultDates', d[0])
+        d = d[0]
+        $store.commit('app/setDefaultDates', [d])
         $store.commit('map/setMapDates', { d })
-        mapFilters.dates = [v.filters.dates]
+        mapFilters.dates = [d]
       } else {
         d = $store.getters['map/getDatesRange']
         $store.commit('app/setDefaultDates', d)
         $store.commit('map/setMapDates', d)
       }
-
       $store.commit('app/setDefaults', {
         observations: v.filters.observations,
-        dates: d,
+        dates: [d],
         hashtags: v.filters.hashtags
       })
-      context.emit('timeSeriesChanged', d)
+      context.emit('timeSeriesChanged', [d])
 
       // Hashtag filter or report_id, not both at the same time
       if (v.filters.hashtags.length) {
@@ -620,6 +669,14 @@ export default defineComponent({
         }
       }
 
+      if (v.samplingEffort) {
+        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
+        context.emit('loadUserFixes', {
+          status: true,
+          dates: v.filters.dates
+        })
+      }
+
       if (v.popup) {
         // Disable closepopup to prevent reseting selectedId.value
         closedPopupDisable.value = true
@@ -630,28 +687,28 @@ export default defineComponent({
           properties: f.properties,
           id: f.id
         })
+        disableUpdateMap = false
+        spiderfyId = ''
+        spiderfyCluster = false
         selectedFeat.value = feature
         selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
         if (v.spiderfyId) {
-          shareviewSpideryId = v.spiderfyId
+          disableUpdateMap = true
+          spiderfyId = v.spiderfyId
           spiderfyCluster = true
         } else {
           $store.dispatch('map/selectFeature', feature.values_)
         }
       }
 
-      if (v.samplingEffort) {
-        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
-        context.emit('loadUserFixes', {
-          status: true,
-          dates: v.filters.dates
-        })
-      }
-
       mapFilters.locations = v.filters.locations
       mapFilters.report_id = JSON.parse(JSON.stringify(v.filters.report_id))
       mapFilters.featuresSet = JSON.parse(JSON.stringify(v.filters.featuresSet))
-      initMap()
+      const missing = getMissingYears(mapFilters.dates)
+      if (missing.length) {
+        await getDataset(missing)
+        initMap()
+      }
     }
 
     // Init share view. Save data to database
@@ -722,19 +779,16 @@ export default defineComponent({
           closePopup()
         }
       }
-      if (!ready) {
-        return
-      }
-
-      // Get map starting and endding data dates
-      if (clickOnSpiral) return
-      // Load observations layers
       const bounds = olmap.getView().calculateExtent(olmap.getSize())
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
       const viewBox = southWest.concat(northEast).map((e) => {
         return e.toFixed(4)
       })
+
+      // Get map starting and endding data dates
+      if (clickOnSpiral) return
+
       $store.commit('map/setViewbox', viewBox)
       if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
         // Do not show spinner if cluster is spiderfied
@@ -742,12 +796,17 @@ export default defineComponent({
           spinner(true)
         }
       }
-      // Add spiderfyCluster in case cluster is spiderfiied
+
+      if (disableUpdateMap) {
+        return
+      }
+
+      // Add spiderfyCluster in case cluster is spiderfied
       worker.postMessage({
         bbox: southWest.concat(northEast),
         zoom: parseInt(olmap.getView().getZoom()),
         spiderfyCluster: spiderfyCluster,
-        spiderfyId: shareviewSpideryId
+        spiderfyId: spiderfyId
       })
     }
 
@@ -886,6 +945,7 @@ export default defineComponent({
 
       const url = downloadUrl + format.format + '/'
       fetch(url, {
+        credentials: 'include',
         method: 'POST', // or 'PUT'
         body: JSON.stringify(data),
         headers: {
@@ -1203,6 +1263,7 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       workerData.filters = mapFilters
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1217,6 +1278,7 @@ export default defineComponent({
       workerData.filters = mapFilters
       mapFilters.mode = 'resetFilter'
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
@@ -1240,11 +1302,12 @@ export default defineComponent({
 
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
 
     // Called when date filter is requested
-    function filterDate (date) {
+    async function filterDate (date) {
       // Just in case a Spiral is open
       spinner()
 
@@ -1267,7 +1330,73 @@ export default defineComponent({
       $store.commit('app/setDefaultDates', mapFilters.dates)
       workerData.filters = mapFilters
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+
+      const missing = getMissingYears(mapFilters.dates)
+      if (missing.length) {
+        await getDataset(missing)
+        workerData.dataset = dataset
+      }
+      context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
+    }
+
+    async function getDataset (missing) {
+      mapFilters.mode = 'resetFilter'
+      await Promise.all(missing.map(m =>
+        fetch(backendUrl + 'api/get/data/' + m.year + '/', {
+          credentials: 'include'
+        }).then(resp => resp.json())
+      )).then(jsons => {
+        // Check for errors
+        jsons.forEach(j => {
+          if ('status' in j) {
+            console.log(j.msg)
+          } else {
+            const y = j.year
+            const index = YEARS.findIndex(element => {
+              return element.year === y
+            })
+            // Check if there are any features for current year
+            if (j.features.length) {
+              // Get first feature date,
+              if (j.features[0].properties.d < firstDate) {
+                firstDate = j.features[0].properties.d
+              }
+              // Get last feature date
+              if (j.features[j.features.length - 1].properties.d > lastDate) {
+                lastDate = j.features[j.features.length - 1].properties.d
+              }
+              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
+              dataset = dataset.concat(j.features)
+            }
+          }
+        })
+      }).catch((error) => {
+        dataset = []
+        console.log(error)
+      })
+    }
+
+    function getMissingYears (date) {
+      let sYear, eYear
+      const d = date[0]
+      if (d.from === '') {
+        // getAllDates = true
+        sYear = YEARS[0].year
+        eYear = YEARS[YEARS.length - 1].year
+      } else {
+        sYear = parseInt(d.from.substring(0, 4))
+        eYear = parseInt(d.to.substring(0, 4))
+      }
+
+      const missing = YEARS.filter(set => {
+        if ((set.year < sYear) || (set.year > eYear)) {
+          return false
+        } else {
+          return Object.keys(set.data).length === 0
+        }
+      })
+      return missing
     }
 
     // Called when hashrag filter is requested
@@ -1286,10 +1415,12 @@ export default defineComponent({
         // This are not generic tags
         mapFilters.lastFilterApplied = 'reports'
         mapFilters.hashtags = []
+
         if (obj.mode === 'addedTag') {
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
           })
+
           mapFilters.mode = 'resetFilter'
           $store.commit('app/setFilteringTag', { value: true })
 
@@ -1297,6 +1428,7 @@ export default defineComponent({
           const controller = new AbortController()
           const { signal } = controller
           fetch(`${url}`, {
+            credentials: 'include',
             signal: signal,
             method: 'POST', // or 'PUT'
             body: JSON.stringify({ reports: mapFilters.report_id.join(',') })
@@ -1306,6 +1438,7 @@ export default defineComponent({
               // Only one report. So no push into array
               mapFilters.featuresSet = [res]
               workerData.filters = mapFilters
+              context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
             })
@@ -1324,6 +1457,7 @@ export default defineComponent({
             mapFilters.featuresSet = []
           }
           workerData.filters = mapFilters
+          context.emit('workerStartedIndexing')
           worker.postMessage(workerData)
         }
       } else {
@@ -1332,8 +1466,8 @@ export default defineComponent({
           mapFilters.mode = 'resetFilter'
           mapFilters.featuresSet = []
           mapFilters.hashtags = []
-          $store.commit('app/setDefaultTags', [])
           workerData.filters = mapFilters
+          context.emit('workerStartedIndexing')
           worker.postMessage(workerData)
         } else {
           $store.commit('app/setFilteringTag', { value: true })
@@ -1348,6 +1482,7 @@ export default defineComponent({
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
           fetch(`${url}`, {
+            credentials: 'include',
             signal: signal,
             method: 'POST', // or 'PUT'
             body: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
@@ -1358,6 +1493,7 @@ export default defineComponent({
               mapFilters.featuresSet = [res]
               mapFilters.mode = 'resetFilter'
               workerData.filters = mapFilters
+              context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
             })
@@ -1389,7 +1525,6 @@ export default defineComponent({
       $store.commit('app/setDefaultSamplingEffort', payload.status)
       let sDate, eDate
       if (payload.dates[0].from !== '') {
-        console.log('not empty')
         sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
         eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
         userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
@@ -1488,7 +1623,9 @@ export default defineComponent({
       setPendingView,
       graphVisible,
       fillLocationColor,
-      strokeLocationColor
+      strokeLocationColor,
+      firstCall,
+      loadView
     }
   }
 })

@@ -180,13 +180,15 @@ export default defineComponent({
       const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
       $store.commit('timeseries/setAnimationOptions', {
         onComplete: function (chart) {
-          // Be default chart has one label
+          // By default chart has one label
           // If chart is really drawn (that is more than one label)
           // then reloading is true
           if ($store.getters['timeseries/getGraphIsVisible']) {
             reloading.value = false
           }
-          spinner(false)
+          if (!$store.getters['map/getIndexingOn']) {
+            spinner(false)
+          }
         }
       })
       defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')

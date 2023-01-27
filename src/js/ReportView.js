@@ -38,6 +38,7 @@ export default class ReportView {
     dataView.filters.mode = 'resetFilter'
 
     fetch(this.options.url, {
+      credentials: 'include',
       method: 'POST', // or 'PUT'
       body: JSON.stringify(dataView)
     })
@@ -51,6 +52,7 @@ export default class ReportView {
 
   load (callback) {
     fetch(this.options.url, {
+      credentials: 'include',
       method: 'GET' // or 'PUT'
     })
       .then(function (response) {

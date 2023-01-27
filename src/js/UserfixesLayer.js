@@ -39,7 +39,7 @@ export default class UserfixesLayer {
     context.strokeStyle = 'white'
     this.map.removeLayer(this.layer)
     this.layer = new TileLayer({
-      maxZoom: 19, // visible at zoom levels above 14
+      maxZoom: 20,
       source: new DataTile({
         loader: function (z, x, y) {
           const pad = 0
@@ -80,7 +80,6 @@ export default class UserfixesLayer {
         transition: 0
       })
     })
-
     this.layer.setZIndex(this.zIndex)
     this.map.addLayer(this.layer)
     this.$store.commit('map/setSamplingEffortLoading', { loading: false })
@@ -94,7 +93,9 @@ export default class UserfixesLayer {
       return
     }
 
-    fetch(this.url)
+    fetch(this.url, {
+      credentials: 'include'
+    })
       .then(function (response) {
         return response.json()
       })

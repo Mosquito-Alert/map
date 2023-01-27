@@ -11,6 +11,7 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
+      @langCookieSet="langCookieSet"
     />
 
     <q-page
@@ -23,6 +24,7 @@
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
+        @workerStartedIndexing="workerStartedIndexing"
         @mapViewSaved="mapViewSaved"
         @timeSeriesChanged="timeSeriesChanged"
         @tagsChanged="tagsChanged"
@@ -299,6 +301,7 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
+      $store.commit('map/setIndexingOn', false)
       if (!$store.getters['timeseries/getGraphIsVisible']) {
         $store.commit('app/setModal', {
           id: 'wait',
@@ -311,6 +314,10 @@ export default {
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }
+    }
+
+    const workerStartedIndexing = function () {
+      $store.commit('map/setIndexingOn', true)
     }
 
     const mapViewSaved = function (payload) {
@@ -347,6 +354,14 @@ export default {
       timeseries.value.showCalendar()
     }
 
+    const langCookieSet = function () {
+      if (!viewCode) {
+        map.value.firstCall()
+      } else {
+        map.value.loadView(map.value.map, viewCode)
+      }
+    }
+
     return {
       mobile,
       calendarClicked,
@@ -357,6 +372,7 @@ export default {
       startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
+      workerStartedIndexing,
       mapViewSaved,
       timeSeriesChanged,
       tagsChanged,
@@ -381,7 +397,8 @@ export default {
       timeseries,
       resizeMap,
       shareModal,
-      loadUserFixes
+      loadUserFixes,
+      langCookieSet
     }
   }
 }

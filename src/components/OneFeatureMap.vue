@@ -317,7 +317,9 @@ export default {
         $store.dispatch('map/selectOneFeatureMap', observationId)
       } else {
         const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId
-        fetch(url)
+        fetch(url, {
+          credentials: 'include'
+        })
           .then(response => response.json())
           .then(json => {
             const fCoords = transform(

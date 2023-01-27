@@ -94,7 +94,9 @@ export default {
       const layer = new VectorTileLayer({
         background: '#1a2b39'
       })
-      fetch(url)
+      fetch(url, {
+        credentials: 'include'
+      })
         .then(function (response) {
           return response.json()
         })

@@ -5,10 +5,11 @@ export const selectOneFeatureMap = (context, id) => {
   const root = context.rootGetters['app/getBackend']
   const titles = context.rootGetters['map/getTitles']
   const latinNames = context.rootGetters['map/getLatinNames']
-
   const url = root + 'api/get_observation/' + id
 
-  fetch(url)
+  fetch(url, {
+    credentials: 'include'
+  })
     .then(response => response.json())
     .then(json => {
       json.coordinates = transform(
@@ -34,7 +35,9 @@ export const selectFeature = (context, feature) => {
     return
   }
 
-  fetch(url).then(response => response.json()).then(json => {
+  fetch(url, {
+    credentials: 'include'
+  }).then(response => response.json()).then(json => {
     json.coordinates = feature.geometry.flatCoordinates
     const formated = new FormatObservation(json, titles, latinNames).format()
     context.commit('selectFeature', formated)

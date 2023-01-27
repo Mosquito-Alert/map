@@ -431,7 +431,9 @@ export default defineComponent({
       CENTROIDS = {}
       const centroids = data.centroidsUrls
       await Promise.all(centroids.map(m =>
-        fetch(m).then(resp => resp.json())
+        fetch(m, {
+          credentials: 'include'
+        }).then(resp => resp.json())
       )).then(jsons => {
         // Check for errors
         jsons.forEach(json => {

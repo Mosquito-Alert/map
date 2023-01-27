@@ -30,6 +30,8 @@ export default function () {
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
+    // backendUrl = 'http://be.example.com:8000/'
+    // frontendUrl = 'http://fe.example.com:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
   } else {
     backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
@@ -177,6 +179,7 @@ export default function () {
       dates: [getCurrentYearDates()],
       hashtags: [],
       report_id: [],
+      locations: [],
 
       // Colors of selected administration boundaries
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',

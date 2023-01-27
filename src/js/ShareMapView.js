@@ -76,6 +76,7 @@ export default class ShareMapView {
     }
 
     fetch(this.options.url, {
+      credentials: 'include',
       method: 'POST', // or 'PUT'
       body: JSON.stringify(dataView)
     })
@@ -89,6 +90,7 @@ export default class ShareMapView {
 
   load (callback) {
     fetch(this.options.url, {
+      credentials: 'include',
       method: 'GET' // or 'PUT'
     })
       .then(function (response) {

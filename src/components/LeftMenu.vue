@@ -79,7 +79,7 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
   props: ['expanded', 'item'],
   computed: {
     active_item (props) {
@@ -125,8 +125,8 @@ export default {
       setLanguage(lang, object)
     }
 
-    const setLanguage = (lang, object) => {
-      $store.dispatch('app/setLanguage', lang)
+    const setLanguage = async function (lang, object) {
+      await $store.dispatch('app/setLanguage', lang)
       cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')
@@ -139,20 +139,20 @@ export default {
       })
     }
 
-    function initLanguage () {
+    async function initLanguage () {
       const lang = $store.getters['app/getLang']
       let object = ca.value
       if (lang === 'es') object = es.value
       else if (lang === 'en') object = en.value
-      setLanguage(lang, object)
+      await setLanguage(lang, object)
     }
 
-    onMounted(function () {
-      initLanguage()
+    onMounted(async function () {
+      await initLanguage()
+      context.emit('langCookieSet', {})
     })
 
     const frontendUrl = computed(() => {
-      console.log($store.getters['app/getFrontendUrl'])
       return $store.getters['app/getFrontendUrl']
     })
     const linkModels = computed(() => {

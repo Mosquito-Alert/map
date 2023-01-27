@@ -53,9 +53,20 @@ export const setModelDate = (state, payload) => {
 }
 
 export const setViewbox = (state, payload) => {
-  state.viewbox = payload
+  state.viewbox = payload.map(Number)
 }
 
 export const setLeftMenuToggling = (state, payload) => {
   state.leftMenuToggling = payload
+}
+
+export const setIndexingOn = (state, value) => {
+  state.indexingOn = value
+}
+
+export const setFirstViewMap = (state, value) => {
+  state.firstViewMap = value
+}
+export const setDataset = (state, value) => {
+  state.dataset = value
 }
