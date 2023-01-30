@@ -220,9 +220,7 @@ export default defineComponent({
       // Define callbacks when pan on chart starts
       $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
         if (!zoomed.value && !panned.value) {
-          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
-          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+          setMapBeforeZoom()
         }
 
         if (!panned.value) {
@@ -236,9 +234,7 @@ export default defineComponent({
       // Define callbacks when pan on chart ends
       $store.commit('timeseries/setChartOnPanComplete', function ({ chart }) {
         if (!zoomed.value) {
-          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
-          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+          setMapBeforeZoom()
         }
         zoomed.value = true
         const start = new Date(chart.boxes[4].min)
@@ -255,9 +251,7 @@ export default defineComponent({
       $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
         $store.commit('timeseries/setYTickSuggetedMax', null)
         if (!zoomed.value && !panned.value) {
-          mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-          mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
-          mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+          setMapBeforeZoom()
         }
       })
 
@@ -275,12 +269,25 @@ export default defineComponent({
       })
     })
 
+    const setMapBeforeZoom = function () {
+      if ($store.getters['map/getMapDates'].from !== '') {
+        mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+        mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
+        mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+      } else {
+        mapDatesBeforeZoom = null
+      }
+    }
     // Redraw chart with init data
     const resetGraph = function () {
       zoomed.value = false
       panned.value = false
-      calendarDate.value = mapDatesBeforeZoom
-      datePicked()
+      if (mapDatesBeforeZoom !== null) {
+        calendarDate.value = mapDatesBeforeZoom
+        datePicked()
+      } else {
+        resetDateFilter()
+      }
     }
 
     const calendarSubtitle = computed(() => {
