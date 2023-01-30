@@ -260,6 +260,7 @@ export default function () {
 
     // Info related with citizen observations (raw data)
     layers: {
+      confirmed_possible: ['tiger', 'culex', 'koreicus', 'japonicus'],
       observations: { // Mosquito observations
         tiger: {
           categories: ['mosquito_tiger_confirmed', 'albopictus_cretinus'],

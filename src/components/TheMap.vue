@@ -552,13 +552,9 @@ export default defineComponent({
       if (appDefaults.locations.length) {
         mapFilters.locations = appDefaults.locations
       }
-      initialObservations.forEach(layerFilter => {
-        mapFilters.observations.push({
-          type: layerFilter.type,
-          code: layerFilter.code,
-          categories: appLayers[layerFilter.type][layerFilter.code].categories
-        })
 
+      mapFilters.observations = getObservationsToLoadOnMap(initialObservations)
+      mapFilters.observations.forEach(layerFilter => {
         $store.commit('map/addActiveLayer', {
           type: layerFilter.type,
           code: layerFilter.code
@@ -638,8 +634,12 @@ export default defineComponent({
         $store.commit('app/setDefaultDates', d)
         $store.commit('map/setMapDates', d)
       }
+
+      const viewObservations = cloneJson(v.filters.observations)
+      const observations = getObservationsToLoadOnMap(viewObservations)
+
       $store.commit('app/setDefaults', {
-        observations: v.filters.observations,
+        observations: observations,
         dates: [d],
         hashtags: v.filters.hashtags
       })
@@ -709,6 +709,26 @@ export default defineComponent({
         await getDataset(missing)
         initMap()
       }
+    }
+
+    function getObservationsToLoadOnMap (viewObservations) {
+      const observations = []
+      const codes = []
+      const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      viewObservations.forEach(layerFilter => {
+        if (layerFilter.code.toLowerCase().indexOf('_possible') > -1) {
+          layerFilter.code = layerFilter.code.replace('_possible', '')
+        }
+        if (!codes.includes(layerFilter.code)) {
+          codes.push(layerFilter.code)
+          observations.push({
+            type: layerFilter.type,
+            code: layerFilter.code,
+            categories: appLayers[layerFilter.type][layerFilter.code].categories
+          })
+        }
+      })
+      return observations
     }
 
     // Init share view. Save data to database
