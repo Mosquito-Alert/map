@@ -262,41 +262,80 @@ export default function () {
     layers: {
       observations: { // Mosquito observations
         tiger: {
-          categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed', 'albopictus_cretinus'],
+          categories: ['mosquito_tiger_confirmed', 'albopictus_cretinus'],
           common_name: 'Tiger mosquito',
           scientific_name: 'Aedes albopictus',
           icon: require('../../assets/img/marker_tiger.svg'),
           iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
           color: '#4d4d4d'
         },
+        tiger_possible: {
+          categories: ['mosquito_tiger_probable'],
+          common_name: 'Tiger mosquito',
+          scientific_name: 'Aedes albopictus',
+          icon: require('../../assets/img/marker_tiger_possible.svg'),
+          iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
+          color: '#4d4d4d'
+        },
         yellow: {
-          categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
+          categories: ['yellow_fever_confirmed'],
           common_name: 'Yellow fever mosquito',
           scientific_name: 'Aedes aegypti',
           icon: require('../../assets/img/marker_yellow.svg'),
           color: '#ffdd19'
         },
+        yellow_possible: {
+          categories: ['yellow_fever_probable'],
+          common_name: 'Yellow fever mosquito',
+          scientific_name: 'Aedes aegypti',
+          icon: require('../../assets/img/marker_yellow_possible.svg'),
+          color: '#ffdd19'
+        },
         japonicus: {
-          categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
+          categories: ['japonicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Japonicus mosquito',
           scientific_name: 'Aedes japonicus',
           icon: require('../../assets/img/marker_japonicus.svg'),
           iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
           color: '#49a999'
         },
+        japonicus_possible: {
+          categories: ['japonicus_probable'],
+          common_name: 'Japonicus mosquito',
+          scientific_name: 'Aedes japonicus',
+          icon: require('../../assets/img/marker_japonicus_possible.svg'),
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+          color: '#49a999'
+        },
         koreicus: {
-          categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
+          categories: ['koreicus_confirmed', 'japonicus_koreicus'],
           common_name: 'Koreicus mosquito',
           scientific_name: 'Aedes koreicus',
           icon: require('../../assets/img/marker_koreicus.svg'),
           iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
           color: '#499fff'
         },
+        koreicus_possible: {
+          categories: ['koreicus_probable'],
+          common_name: 'Koreicus mosquito',
+          scientific_name: 'Aedes koreicus',
+          icon: require('../../assets/img/marker_koreicus_possible.svg'),
+          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+          color: '#499fff'
+        },
         culex: {
-          categories: ['culex_probable', 'culex_confirmed'],
+          categories: ['culex_confirmed'],
           common_name: 'Culex mosquito',
           scientific_name: 'Culex pipiens',
           icon: require('../../assets/img/marker_culex.svg'),
+          color: '#aa4499',
+          separator: true
+        },
+        culex_possible: {
+          categories: ['culex_probable'],
+          common_name: 'Culex mosquito',
+          scientific_name: 'Culex pipiens',
+          icon: require('../../assets/img/marker_culex_possible.svg'),
           color: '#aa4499',
           separator: true
         },
@@ -304,6 +343,12 @@ export default function () {
           categories: ['unidentified'],
           common_name: 'Unidentified mosquito',
           icon: require('../../assets/img/marker_unidentified.svg'),
+          color: '#c0c0c0'
+        },
+        not_yet_validated: {
+          categories: ['not_yet_validated'],
+          common_name: 'No validat',
+          icon: require('../../assets/img/marker_not_yet_validated.svg'),
           color: '#c0c0c0'
         }
       },
@@ -344,6 +389,13 @@ export default function () {
           icon: require('../../assets/img/breeding_other.svg'),
           faIcon: 'fa-light fa-dharmachakra breeding',
           common_name: 'Breeding site other',
+          color: '#1072ad'
+        },
+        not_validated: {
+          categories: ['breeding_site_other'],
+          icon: require('../../assets/img/breeding_not_validated.svg'),
+          faIcon: 'fa-solid fa-droplet-degree breeding',
+          common_name: 'Breeding not validated',
           color: '#1072ad'
         }
       },

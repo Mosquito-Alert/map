@@ -58,27 +58,10 @@
 
       <!-- BITES AND BREEDING SITES-->
       <div class="toc-category">
-          <div class="bites-title" v-html="_('Bites')"></div>
-          <div class="breeding-title" v-html="_('Breeding sites')"></div>
+          <div class="bites-title" v-html="_('Breeding sites')"></div>
       </div>
 
       <div class="category-box bites-and-breeding">
-          <!-- BITES -->
-          <div class="item-container" v-for="layer, code in bites" :key="code">
-            <div class="content bites">
-              <div class="li-item"
-                @click="filterObservations(layer, $event)"
-                data-type="bites"
-                :data-code="code"
-                :class="initialClass(code, 'bites')"
-              >
-                  <i class="fa-solid" :class="layer.faIcon"></i>
-              </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            </div>
-            <div class="separator" :class="{ 'active': layer.separator }"></div>
-          </div>
-
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
@@ -96,6 +79,27 @@
               <div class="separator" :class="{ 'active': layer.separator }"></div>
           </div>
       </DIV>
+
+      <div class="toc-category">
+          <div class="bites-title" v-html="_('Bites')"></div>
+      </div>
+      <div class="category-box bites-and-breeding">
+          <!-- BITES -->
+          <div class="item-container" v-for="layer, code in bites" :key="code">
+            <div class="content bites">
+              <div class="li-item"
+                @click="filterObservations(layer, $event)"
+                data-type="bites"
+                :data-code="code"
+                :class="initialClass(code, 'bites')"
+              >
+                  <i class="fa-solid" :class="layer.faIcon"></i>
+              </div>
+              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+            </div>
+            <div class="separator" :class="{ 'active': layer.separator }"></div>
+          </div>
+        </div>
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
@@ -605,10 +609,25 @@ input{
   background-image: url($icon-mosquito-disabled);
 }
 
+.li-item.tiger_possible,
+.li-item.yellow_possible,
+.li-item.koreicus_possible,
+.li-item.japonicus_possible,
+.li-item.culex_possible{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-mosquito-possible-disabled);
+}
 .li-item.other{
   background-repeat: no-repeat;
   background-position: center;
   background-image: url($icon-other-disabled);
+}
+
+.li-item.not_yet_validated{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-not-yet-validated-disabled);
 }
 
 .li-item.unidentified{
@@ -620,21 +639,42 @@ input{
 .li-item.tiger.active{
   background-image: url($icon-tiger);
 }
+.li-item.tiger_possible.active{
+  background-image: url($icon-tiger-possible);
+}
 .li-item.yellow.active{
   background-image: url($icon-yellow);
+}
+.li-item.yellow_possible.active{
+  background-image: url($icon-yellow-possible);
 }
 .li-item.koreicus.active{
   background-image: url($icon-koreicus);
 }
+.li-item.koreicus_possible.active{
+  background-image: url($icon-koreicus-possible);
+}
 .li-item.japonicus.active{
   background-image: url($icon-japonicus);
+}
+.li-item.japonicus_possible.active{
+  background-image: url($icon-japonicus-possible);
 }
 .li-item.culex.active{
   background-image: url($icon-culex);
 }
+.li-item.culex_possible.active{
+  background-image: url($icon-culex-possible);
+}
 .li-item.unidentified.active{
   background-image: url($icon-unidentified);
 }
+.li-item.not_yet_validated.active{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-not-yet-validated);
+}
+
 .li-item.other.active{
   background-image: url($icon-other);
 }
