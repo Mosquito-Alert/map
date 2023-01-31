@@ -65,6 +65,14 @@
             <tr>
               <td>{{ _('Necesarias') }}</td>
               <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>sessionid</td>
+              <td>{{ _('Propia') }}</td>
+              <td>{{ _('Persistente') }}</td>
+              <td>{{ _('Cookie de sesión') }}</td>
+            </tr>
+            <tr>
+              <td>{{ _('Necesarias') }}</td>
+              <td>{{ _('MOSQQUITO ALERT') }}</td>
               <td>cookie-comply</td>
               <td>{{ _('Propia') }}</td>
               <td>{{ _('Persistente') }}</td>
