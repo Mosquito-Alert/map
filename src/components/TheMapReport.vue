@@ -238,6 +238,7 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
+// import { useCookies } from 'vue3-cookies'
 
 export default {
   name: 'TheMapReport',
@@ -371,6 +372,7 @@ export default {
 
         const backendUrl = $store.getters['app/getBackend']
         const url = backendUrl + 'api/downloads/features/'
+        // const { cookies } = useCookies()
         fetch(url, {
           credentials: 'include',
           method: 'POST', // or 'PUT'
