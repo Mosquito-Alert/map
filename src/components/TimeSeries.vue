@@ -317,6 +317,7 @@ export default defineComponent({
           fill: false,
           data: Array.from(rawData.data[layer]),
           pointHitRadius: 200
+          // borderDash: [15, 5]
         }
         if ('faIcon' in layers[cat][layer]) {
           result.faIcon = layers[cat][layer].faIcon

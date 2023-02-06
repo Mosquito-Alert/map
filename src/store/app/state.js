@@ -279,7 +279,7 @@ export default function () {
           scientific_name: 'Aedes albopictus',
           icon: require('../../assets/img/marker_tiger_possible.svg'),
           iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
-          color: '#4d4d4d'
+          color: '#4d4d4d55'
         },
         yellow: {
           categories: ['yellow_fever_confirmed'],
