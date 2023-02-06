@@ -73,9 +73,17 @@
                     <div>
                       <span class="date">{{ _('Date') }}</span>:
                       {{ formatData(selectedFeature) }}
-                    <span class="bite-time" v-if="selectedFeature.biteTime">
-                      | {{ _(selectedFeature.biteTime) }}
-                    </span>
+                      <span class="bite-time" v-if="selectedFeature.biteTime">
+                        | {{ _(selectedFeature.biteTime) }}
+                      </span>
+                    </div>
+                </div>
+
+                <div class="date-wrapper" v-if="selectedFeature.note">
+                    <div><i class="fa-regular fa-message"></i></div>
+                    <div>
+                      <span class="date">{{ _('Citizen note') }}</span>:
+                      {{ selectedFeature.note }}
                     </div>
                 </div>
 

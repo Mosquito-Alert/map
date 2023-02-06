@@ -171,6 +171,13 @@
                       {{ _(feature.withLarva) }}
                     </div>
                 </div>
+                <div class="date-wrapper" v-if="feature.note">
+                    <div><i class="fa-regular fa-message"></i></div>
+                    <div>
+                      <span class="date">{{ _('Citizen note') }}</span>:
+                      {{ feature.note }}
+                    </div>
+                </div>
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
@@ -295,7 +302,7 @@ export default {
       const loadViewUrl = backendUrl + 'api/report/load/'
 
       const newView = new ReportView(ol, {
-        url: loadViewUrl + reportId.value
+        url: loadViewUrl + reportId.value + '/'
       })
 
       newView.load(handleReportView)
@@ -367,10 +374,7 @@ export default {
         fetch(url, {
           credentials: 'include',
           method: 'POST', // or 'PUT'
-          body: JSON.stringify(reportFilters),
-          headers: {
-            'Content-Type': 'application/force-download'
-          }
+          body: JSON.stringify(reportFilters)
         })
           .then(res => res.json())
           .then(jsonRes => {

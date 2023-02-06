@@ -255,6 +255,7 @@ export default function () {
       storm_drain_water: require('../../assets/img/storm_drain_water_selected.svg'),
       storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
       breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
+      breeding_not_validated_selected: require('../../assets/img/breeding_other_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
 
@@ -393,7 +394,7 @@ export default function () {
           color: '#1072ad'
         },
         not_validated: {
-          categories: ['breeding_site_other'],
+          categories: ['breeding_not_validated'],
           icon: require('../../assets/img/breeding_not_validated.svg'),
           faIcon: 'fa-solid fa-droplet-degree breeding',
           common_name: 'Breeding not validated',

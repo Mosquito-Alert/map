@@ -598,7 +598,7 @@ export default defineComponent({
     // Get shared view from database and handle it
     function loadView (ol, viewCode) {
       const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode
+        url: loadViewUrl + viewCode + '/'
       })
       newView.load(handleLoadView)
     }
@@ -716,9 +716,12 @@ export default defineComponent({
       const codes = []
       const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       viewObservations.forEach(layerFilter => {
-        if (layerFilter.code.toLowerCase().indexOf('_possible') > -1) {
-          layerFilter.code = layerFilter.code.replace('_possible', '')
+        if (!(layerFilter.code in appLayers.observations)) {
+          if (layerFilter.code.toLowerCase().indexOf('_possible') > -1) {
+            layerFilter.code = layerFilter.code.replace('_possible', '')
+          }
         }
+
         if (!codes.includes(layerFilter.code)) {
           codes.push(layerFilter.code)
           observations.push({

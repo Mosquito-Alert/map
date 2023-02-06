@@ -316,7 +316,7 @@ export default {
       if (openPopup.value) {
         $store.dispatch('map/selectOneFeatureMap', observationId)
       } else {
-        const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId
+        const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId + '/'
         fetch(url, {
           credentials: 'include'
         })
