@@ -91,12 +91,13 @@ export default function () {
 
   return {
     // Browser name
+    csrfToken: '',
     authorized: false,
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
     // authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
-    authenticateUrl: '//localhost:8000/api/login/',
-    logoutUrl: '//localhost:8000/api/logout/',
+    authenticateUrl: '//localhost:8000/login/',
+    logoutUrl: '//localhost:8000/logout/',
 
     // URL of the public old web
     // registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',

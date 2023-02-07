@@ -598,7 +598,8 @@ export default defineComponent({
     // Get shared view from database and handle it
     function loadView (ol, viewCode) {
       const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode + '/'
+        url: loadViewUrl + viewCode + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.load(handleLoadView)
     }
@@ -762,7 +763,8 @@ export default defineComponent({
         samplingEffort: samplingEffort,
         url: shareViewUrl,
         callback: handleShareView,
-        spiderfyId: (clickOnSpiral) ? selectedId.value : ''
+        spiderfyId: (clickOnSpiral) ? selectedId.value : '',
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.save()
     }
@@ -844,7 +846,8 @@ export default defineComponent({
         locationName: locationName,
         url: reportViewUrl,
         callback: handleReportView,
-        lang: $store.getters['app/getLang']
+        lang: $store.getters['app/getLang'],
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.save()
     }
@@ -968,12 +971,13 @@ export default defineComponent({
 
       const url = downloadUrl + format.format + '/'
       fetch(url, {
-        credentials: 'include',
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data),
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/force-download'
-        }
+          'Content-Type': 'application/force-download',
+          'X-CSRFToken': $store.getters['app/getCsrfToken']
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
       })
         .then((transfer) => {
           return transfer.blob()

@@ -85,34 +85,56 @@ export default {
 
     const onSubmit = function (evt) {
       if (username.value && password.value) {
-        const controller = new AbortController()
-        const { signal } = controller
-        const authenticateUrl = $store.getters['app/getAuthenticateUrl']
+        // const controller = new AbortController()
+        // const { signal } = controller
+        // const authenticateUrl = $store.getters['app/getAuthenticateUrl']
         // const registeredWeb = $store.getters['app/getRegisteredWebUrl']
 
-        const formData = new FormData()
-        formData.append('username', username.value)
-        formData.append('password', password.value)
-
-        fetch(`${authenticateUrl}`, {
+        // const formData = new FormData()
+        // formData.append('username', username.value)
+        // formData.append('password', password.value)
+        fetch('http://localhost:8000/api/login/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $store.getters['app/getCsrfToken']
+          },
           credentials: 'include',
-          signal: signal,
-          method: 'POST', // or 'PUT'
-          body: formData
+          // body: formData
+          body: JSON.stringify({ username: username.value, password: password.value })
         })
-          .then(res => res.json())
-          .then(res => {
-            if (res.success) {
-              $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
-              $store.commit('app/setAuthorized', true)
-              $store.commit('app/setLayers', privateLayers)
-              // document.location = registeredWeb
-            } else {
-              $store.commit('app/setAuthorized', false)
-              console.log('Not authenticated')
-              $store.commit('app/setLayers', publicLayers)
-            }
+          .then((data) => {
+            console.log(data)
+            console.log({ isAuthenticated: true, username: '', password: '', error: '' })
+            $store.commit('app/setAuthorized', true)
+            $store.commit('app/setLayers', privateLayers)
+            $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
           })
+          .catch((err) => {
+            console.log(err)
+            this.setState({ error: 'Wrong username or password.' })
+            console.log('Not authenticated')
+            $store.commit('app/setLayers', publicLayers)
+          })
+        // fetch(`${authenticateUrl}`, {
+        //   credentials: 'include',
+        //   signal: signal,
+        //   method: 'POST', // or 'PUT'
+        //   body: formData
+        // })
+        //   .then(res => res.json())
+        //   .then(res => {
+        //     if (res.success) {
+        //       $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
+        //       $store.commit('app/setAuthorized', true)
+        //       $store.commit('app/setLayers', privateLayers)
+        //       // document.location = registeredWeb
+        //     } else {
+        //       $store.commit('app/setAuthorized', false)
+        //       console.log('Not authenticated')
+        //       $store.commit('app/setLayers', publicLayers)
+        //     }
+        //   })
       }
     }
 

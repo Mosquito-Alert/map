@@ -113,27 +113,43 @@ export default {
       }
     }
 
-    const logout = function () {
-      const controller = new AbortController()
-      const { signal } = controller
-      const logoutUrl = $store.getters['app/getLogoutUrl']
+    const logout = () => {
       const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-
-      fetch(`${logoutUrl}`, {
-        credentials: 'include',
-        signal: signal,
-        method: 'GET'
+      fetch('http://localhost:8000/api/logout/', {
+        credentials: 'include'
       })
-        .then(res => res.json())
-        .then(res => {
-          if (res.success) {
-            // $store.commit('app/setAuthorized', false)
-            document.location = registeredWeb
-          } else {
-            console.log('Not authenticated')
-          }
+        .then((data) => {
+          console.log(data)
+          $store.commit('app/setAuthorized', false)
+          document.location = registeredWeb
+          // this.getCSRF()
+        })
+        .catch((err) => {
+          console.log(err)
         })
     }
+
+    // const logout = function () {
+    //   const controller = new AbortController()
+    //   const { signal } = controller
+    //   const logoutUrl = $store.getters['app/getLogoutUrl']
+    //   const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+
+    //   fetch(`${logoutUrl}`, {
+    //     credentials: 'include',
+    //     signal: signal,
+    //     method: 'GET'
+    //   })
+    //     .then(res => res.json())
+    //     .then(res => {
+    //       if (res.success) {
+    //         // $store.commit('app/setAuthorized', false)
+    //         document.location = registeredWeb
+    //       } else {
+    //         console.log('Not authenticated')
+    //       }
+    //     })
+    // }
 
     const showShareUrl = function () {
       $store.commit('app/setModal', { id: 'share', content: { visibility: true } })

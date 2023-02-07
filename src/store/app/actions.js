@@ -16,18 +16,12 @@ export const setTranslations = async (context) => {
     const registered = ('registered-user' in json) ? json['registered-user'] : false
     context.commit('setAuthorized', registered)
   })
-  console.log(context.getters.getAuthorized)
+
   if (context.getters.getAuthorized) {
     context.commit('setLayers', privateLayers)
   } else {
     context.commit('app/setLayers', publicLayers)
   }
-
-  // await fetch('http://localhost:8000/csrf/', {
-  //   credentials: 'include'
-  // }).then(function (response) {
-  //   console.log(response)
-  // })
 }
 
 export const setFilter = async (context, filter) => {

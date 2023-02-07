@@ -1,3 +1,7 @@
+export const getCsrfToken = state => {
+  return state.csrfToken
+}
+
 export const selectedIcons = state => {
   return state.selectedIcons
 }

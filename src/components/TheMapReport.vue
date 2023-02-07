@@ -289,9 +289,19 @@ export default {
       setLanguage(lang)
     }
 
+    function loadR () {
+      const ol = map.value.map
+      const backendUrl = $store.getters['app/getBackend']
+      const loadViewUrl = backendUrl + 'api/report/load/'
+      const newView = new ReportView(ol, {
+        url: loadViewUrl + reportId.value + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
+      })
+
+      newView.load(handleReportView)
+    }
     onMounted(function () {
       // Fetch report view data
-      const ol = map.value.map
       const mCanvas = new MapToCanvas({ map: map.value.map })
       map.value.map.on('rendercomplete', function (e) {
         document.getElementById('c-mapa').src = mCanvas.doCanvas()
@@ -299,14 +309,7 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      const backendUrl = $store.getters['app/getBackend']
-      const loadViewUrl = backendUrl + 'api/report/load/'
-
-      const newView = new ReportView(ol, {
-        url: loadViewUrl + reportId.value + '/'
-      })
-
-      newView.load(handleReportView)
+      getSession(loadR)
     })
 
     function handleReportView (report) {
@@ -372,11 +375,14 @@ export default {
 
         const backendUrl = $store.getters['app/getBackend']
         const url = backendUrl + 'api/downloads/features/'
-        // const { cookies } = useCookies()
+
         fetch(url, {
           credentials: 'include',
           method: 'POST', // or 'PUT'
-          body: JSON.stringify(reportFilters)
+          body: JSON.stringify(reportFilters),
+          headers: {
+            'X-CSRFToken': $store.getters['app/getCsrfToken']
+          }
         })
           .then(res => res.json())
           .then(jsonRes => {
@@ -426,6 +432,37 @@ export default {
             console.log(error)
           })
       }
+    }
+
+    const getCSRF = (callback) => {
+      fetch('http://localhost:8000/api/csrf/', {
+        credentials: 'include'
+      })
+        .then((res) => {
+          const csrfToken = res.headers.get('X-CSRFToken')
+          $store.commit('app/setCsrfToken', csrfToken)
+          callback()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+
+    const getSession = function (callback) {
+      fetch('http://localhost:8000/api/session/', {
+        credentials: 'include'
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.isAuthenticated) {
+            console.log(true)
+          } else {
+            getCSRF(callback)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
     }
 
     worker.onmessage = function (data) {

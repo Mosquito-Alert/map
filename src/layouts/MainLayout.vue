@@ -173,7 +173,40 @@ export default {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
+      getSession()
     })
+
+    const getCSRF = () => {
+      fetch('http://localhost:8000/api/csrf/', {
+        credentials: 'include'
+      })
+        .then((res) => {
+          const csrfToken = res.headers.get('X-CSRFToken')
+          $store.commit('app/setCsrfToken', csrfToken)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+
+    const getSession = () => {
+      fetch('http://localhost:8000/api/session/', {
+        credentials: 'include'
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data)
+          if (data.isAuthenticated) {
+            console.log(true)
+          } else {
+            console.log(false)
+            getCSRF()
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
 
     const pendingView = computed(() => {
       return $store.getters['app/getPendingView']

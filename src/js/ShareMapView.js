@@ -78,7 +78,10 @@ export default class ShareMapView {
     fetch(this.options.url, {
       credentials: 'include',
       method: 'POST', // or 'PUT'
-      body: JSON.stringify(dataView)
+      body: JSON.stringify(dataView),
+      headers: {
+        'X-CSRFToken': _this.options.csrfToken
+      }
     })
       .then(function (response) {
         return response.json()
