@@ -155,7 +155,9 @@ export default {
     const $store = useStore()
 
     // Get a copy of layers from store to get categories
-    const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+    const layers = computed(() => {
+      return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+    })
 
     // Set active and inactive layers
     const filterObservations = function (layer, event) {
@@ -167,7 +169,7 @@ export default {
       context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code,
-        categories: layers[obj.dataset.type][obj.dataset.code].categories
+        categories: layers.value[obj.dataset.type][obj.dataset.code].categories
       })
 
       const classes = obj.classList

@@ -64,7 +64,7 @@
           </div>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')" @click="showLogin"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin"></fa-thin-button>
     </q-toolbar>
 </template>
 
@@ -105,8 +105,34 @@ export default {
       $store.commit('app/setModal', { id: 'help', content: { visibility: true } })
     }
 
-    const showLogin = function () {
-      $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
+    const processLogin = function () {
+      if ($store.getters['app/getAuthorized']) {
+        logout()
+      } else {
+        $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
+      }
+    }
+
+    const logout = function () {
+      const controller = new AbortController()
+      const { signal } = controller
+      const logoutUrl = $store.getters['app/getLogoutUrl']
+      const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+
+      fetch(`${logoutUrl}`, {
+        credentials: 'include',
+        signal: signal,
+        method: 'GET'
+      })
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            // $store.commit('app/setAuthorized', false)
+            document.location = registeredWeb
+          } else {
+            console.log('Not authenticated')
+          }
+        })
     }
 
     const showShareUrl = function () {
@@ -160,8 +186,17 @@ export default {
       return $store.getters['app/getFrontendUrl'] + 'models'
     })
 
+    const loginLabel = computed(() => {
+      if ($store.getters['app/getAuthorized']) {
+        return _('Log out')
+      } else {
+        return _('Log in')
+      }
+    })
+
     return {
       _,
+      loginLabel,
       ca,
       es,
       en,
@@ -170,7 +205,8 @@ export default {
       showInfo,
       showHelp,
       showShareUrl,
-      showLogin,
+      processLogin,
+      logout,
       clickLanguageSelector
     }
   }

@@ -58,6 +58,8 @@
 <script>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
+import privateLayers from '../store/app/privateTOC'
+import publicLayers from '../store/app/publicTOC'
 
 export default {
   setup (props, context) {
@@ -86,7 +88,7 @@ export default {
         const controller = new AbortController()
         const { signal } = controller
         const authenticateUrl = $store.getters['app/getAuthenticateUrl']
-        const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+        // const registeredWeb = $store.getters['app/getRegisteredWebUrl']
 
         const formData = new FormData()
         formData.append('username', username.value)
@@ -101,9 +103,14 @@ export default {
           .then(res => res.json())
           .then(res => {
             if (res.success) {
-              document.location = registeredWeb
+              $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
+              $store.commit('app/setAuthorized', true)
+              $store.commit('app/setLayers', privateLayers)
+              // document.location = registeredWeb
             } else {
+              $store.commit('app/setAuthorized', false)
               console.log('Not authenticated')
+              $store.commit('app/setLayers', publicLayers)
             }
           })
       }

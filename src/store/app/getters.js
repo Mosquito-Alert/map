@@ -31,6 +31,10 @@ export const getText = state => function (text) {
   else return text
 }
 
+export const getAuthorized = state => {
+  return state.authorized
+}
+
 export const getLang = state => {
   return state.lang
 }
@@ -101,6 +105,10 @@ export const getModelDefaults = state => {
 
 export const getAuthenticateUrl = state => {
   return state.authenticateUrl
+}
+
+export const getLogoutUrl = state => {
+  return state.logoutUrl
 }
 
 export const getRegisteredWebUrl = state => {

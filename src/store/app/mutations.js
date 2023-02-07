@@ -2,6 +2,10 @@ export const setTranslations = (state, payload) => {
   state.trans = payload
 }
 
+export const setAuthorized = (state, payload) => {
+  state.authorized = payload
+}
+
 export const setLanguage = (state, lang) => {
   state.lang = lang
 }
@@ -16,6 +20,10 @@ export const setFilteringTag = (state, payload) => {
 
 export const toggleLeftDrawerStatus = (state) => {
   state.leftDrawerStatus = !state.leftDrawerStatus
+}
+
+export const setLayers = (state, payload) => {
+  state.layers = payload
 }
 
 export const setDefaultObservations = (state, payload) => {
