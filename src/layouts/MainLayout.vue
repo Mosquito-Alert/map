@@ -11,7 +11,7 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @langCookieSet="langCookieSet"
+      @langCookieSet="buildSession"
     />
 
     <q-page
@@ -173,32 +173,46 @@ export default {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
-      getSession()
+      // getSession()
     })
 
-    const getCSRF = () => {
+    const buildSession = function () {
+      getSession(buildMap)
+    }
+
+    const buildMap = function () {
+      if (!viewCode) {
+        map.value.firstCall()
+      } else {
+        map.value.preLoadView(map.value.map, viewCode)
+      }
+    }
+
+    const getCSRF = (callback) => {
       fetch('http://localhost:8000/api/csrf/', {
         credentials: 'include'
       })
         .then((res) => {
           const csrfToken = res.headers.get('X-CSRFToken')
           $store.commit('app/setCsrfToken', csrfToken)
+          callback()
         })
         .catch((err) => {
           console.log(err)
         })
     }
 
-    const getSession = () => {
+    const getSession = (callback) => {
       fetch('http://localhost:8000/api/session/', {
         credentials: 'include'
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
+            // callback()
             console.log(true)
           } else {
-            getCSRF()
+            getCSRF(callback)
           }
         })
         .catch((err) => {
@@ -385,14 +399,6 @@ export default {
       timeseries.value.showCalendar()
     }
 
-    const langCookieSet = function () {
-      if (!viewCode) {
-        map.value.firstCall()
-      } else {
-        map.value.preLoadView(map.value.map, viewCode)
-      }
-    }
-
     return {
       mobile,
       calendarClicked,
@@ -429,7 +435,7 @@ export default {
       resizeMap,
       shareModal,
       loadUserFixes,
-      langCookieSet
+      buildSession
     }
   }
 }

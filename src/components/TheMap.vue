@@ -599,9 +599,9 @@ export default defineComponent({
       if (appDefaults.locations.length) {
         mapFilters.locations = appDefaults.locations
       }
-      console.log(privateView)
+
       mapFilters.observations = getObservationsToLoadOnMap(initialObservations, privateView)
-      console.log(mapFilters.observations)
+
       mapFilters.observations.forEach(layerFilter => {
         $store.commit('map/addActiveLayer', {
           type: layerFilter.type,

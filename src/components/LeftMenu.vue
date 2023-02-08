@@ -190,7 +190,6 @@ export default {
     // }
 
     onMounted(async function () {
-      // await initLanguage()
       context.emit('langCookieSet', {})
     })
 

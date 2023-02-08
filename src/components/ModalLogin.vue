@@ -10,8 +10,8 @@
     <div class="dialog modal-first" v-if="open">
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <slot></slot>
-        <q-form
-         @submit.prevent="onSubmit">
+        <!-- <q-form
+         @submit.prevent="onSubmit"> -->
         <div class="column">
           <div class="row content-center">
             <h5 class="text-h5 text-orange q-my-md">Mosquito Alert</h5>
@@ -49,7 +49,7 @@
             <button class="q-mt-xs" @click="close">{{ _('Close')}} </button>
           </div>
         </div>
-        </q-form>
+        <!-- </q-form> -->
       </dialog>
     </div>
   </transition>
@@ -66,7 +66,6 @@ export default {
     const username = ref('')
     const password = ref('')
     const $store = useStore()
-
     const open = computed(() => {
       return $store.getters['app/getModals'].login.visibility
     })
@@ -104,8 +103,6 @@ export default {
           body: JSON.stringify({ username: username.value, password: password.value })
         })
           .then((data) => {
-            console.log(data)
-            console.log({ isAuthenticated: true, username: '', password: '', error: '' })
             $store.commit('app/setAuthorized', true)
             $store.commit('app/setLayers', privateLayers)
             $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
@@ -116,25 +113,6 @@ export default {
             console.log('Not authenticated')
             $store.commit('app/setLayers', publicLayers)
           })
-        // fetch(`${authenticateUrl}`, {
-        //   credentials: 'include',
-        //   signal: signal,
-        //   method: 'POST', // or 'PUT'
-        //   body: formData
-        // })
-        //   .then(res => res.json())
-        //   .then(res => {
-        //     if (res.success) {
-        //       $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
-        //       $store.commit('app/setAuthorized', true)
-        //       $store.commit('app/setLayers', privateLayers)
-        //       // document.location = registeredWeb
-        //     } else {
-        //       $store.commit('app/setAuthorized', false)
-        //       console.log('Not authenticated')
-        //       $store.commit('app/setLayers', publicLayers)
-        //     }
-        //   })
       }
     }
 
