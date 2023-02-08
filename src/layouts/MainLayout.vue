@@ -139,9 +139,6 @@ export default {
     const timeseries = ref()
     const $store = useStore()
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-    if (lang) {
-      $store.dispatch('app/setLanguage', lang.toLowerCase())
-    }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -170,6 +167,9 @@ export default {
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
 
     onMounted(() => {
+      if (lang) {
+        $store.dispatch('app/setLanguage', lang.toLowerCase())
+      }
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
@@ -195,11 +195,9 @@ export default {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data)
-          if (data.isAuthenticated) {
+          if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
             console.log(true)
           } else {
-            console.log(false)
             getCSRF()
           }
         })
@@ -391,7 +389,7 @@ export default {
       if (!viewCode) {
         map.value.firstCall()
       } else {
-        map.value.loadView(map.value.map, viewCode)
+        map.value.preLoadView(map.value.map, viewCode)
       }
     }
 

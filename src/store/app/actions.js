@@ -1,5 +1,5 @@
-import privateLayers from './privateTOC'
-import publicLayers from './publicTOC'
+import { defaultObservations as privateDefaultObservations, observations as privateLayers } from './privateTOC'
+import { defaultObservations as publicDefaultObservations, observations as publicLayers } from './publicTOC'
 
 export const setLanguage = async (context, lang) => {
   context.commit('setLanguage', lang)
@@ -19,8 +19,10 @@ export const setTranslations = async (context) => {
 
   if (context.getters.getAuthorized) {
     context.commit('setLayers', privateLayers)
+    context.commit('setDefaultObservations', privateDefaultObservations)
   } else {
-    context.commit('app/setLayers', publicLayers)
+    context.commit('setLayers', publicLayers)
+    context.commit('setDefaultObservations', publicDefaultObservations)
   }
 }
 

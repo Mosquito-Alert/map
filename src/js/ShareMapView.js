@@ -60,6 +60,7 @@ export default class ShareMapView {
       dataView.samplingEffort = this.options.samplingEffort
       dataView.feature = this.options.feature
       dataView.spiderfyId = this.options.spiderfyId
+      dataView.privateView = this.options.privateView
 
       // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
       dataView.filters.mode = 'resetFilter'

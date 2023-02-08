@@ -181,16 +181,16 @@ export default {
       })
     }
 
-    async function initLanguage () {
-      const lang = $store.getters['app/getLang']
-      let object = ca.value
-      if (lang === 'es') object = es.value
-      else if (lang === 'en') object = en.value
-      await setLanguage(lang, object)
-    }
+    // async function initLanguage () {
+    //   const lang = $store.getters['app/getLang']
+    //   let object = ca.value
+    //   if (lang === 'es') object = es.value
+    //   else if (lang === 'en') object = en.value
+    //   await setLanguage(lang, object)
+    // }
 
     onMounted(async function () {
-      await initLanguage()
+      // await initLanguage()
       context.emit('langCookieSet', {})
     })
 

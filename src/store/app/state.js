@@ -1,7 +1,7 @@
 // const worker = new Worker('TheMapWorker.js')
 import moment from 'moment'
 import { useCookies } from 'vue3-cookies'
-import publicLayers from './publicTOC'
+import { defaultObservations, observations as publicLayers } from './publicTOC'
 
 export default function () {
   let backendUrl = ''
@@ -91,7 +91,7 @@ export default function () {
 
   return {
     // Browser name
-    csrfToken: '',
+    csrfToken: null,
     authorized: false,
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
@@ -178,10 +178,7 @@ export default function () {
     isFilteringTag: false,
     DEFAULTS: {
       sampling_effort: false,
-      observations: [
-        { type: 'observations', code: 'tiger' },
-        { type: 'observations', code: 'culex' }
-      ],
+      observations: defaultObservations,
       dates: [getCurrentYearDates()],
       hashtags: [],
       report_id: [],
@@ -266,6 +263,7 @@ export default function () {
     },
 
     // Info related with citizen observations (raw data)
+    possibleCategories: ['tiger', 'yellow', 'japonicus', 'koreicus', 'culex'],
     layers: publicLayers,
 
     // Info related with species and models

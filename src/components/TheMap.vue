@@ -164,6 +164,7 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
+    let privateView = false
     let spiderfyId = ''
     let locationName = ''
     let storeLayers
@@ -208,6 +209,57 @@ export default defineComponent({
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
+    }
+
+    const getCSRF = (callback, ol, viewCode) => {
+      fetch('http://localhost:8000/api/csrf/', {
+        credentials: 'include'
+      })
+        .then((res) => {
+          const csrfToken = res.headers.get('X-CSRFToken')
+          $store.commit('app/setCsrfToken', csrfToken)
+          callback(ol, viewCode)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+
+    const getSession = function (callback, ol, viewCode) {
+      fetch('http://localhost:8000/api/session/', {
+        credentials: 'include'
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
+            callback(ol, viewCode)
+          } else {
+            getCSRF(callback, ol, viewCode)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+
+    // Get shared view from database and handle it
+    // function loadView (ol, viewCode) {
+    //   const newView = new ShareMapView(ol, {
+    //     url: loadViewUrl + viewCode + '/',
+    //     csrfToken: $store.getters['app/getCsrfToken']
+    //   })
+    //   newView.load(handleLoadView)
+    // }
+    function preLoadView (ol, viewCode) {
+      getSession(loadView, ol, viewCode)
+    }
+
+    function loadView (ol, viewCode) {
+      const newView = new ShareMapView(ol, {
+        url: loadViewUrl + viewCode + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
+      })
+      newView.load(handleLoadView)
     }
 
     function unfoldAttribution () {
@@ -290,11 +342,6 @@ export default defineComponent({
           await getDataset(missing)
           initMap()
         }
-        // worker.postMessage({
-        //   year: moment().year(),
-        //   // data: dataset,
-        //   filters: mapFilters
-        // })
       }
     }
 
@@ -552,8 +599,9 @@ export default defineComponent({
       if (appDefaults.locations.length) {
         mapFilters.locations = appDefaults.locations
       }
-
-      mapFilters.observations = getObservationsToLoadOnMap(initialObservations)
+      console.log(privateView)
+      mapFilters.observations = getObservationsToLoadOnMap(initialObservations, privateView)
+      console.log(mapFilters.observations)
       mapFilters.observations.forEach(layerFilter => {
         $store.commit('map/addActiveLayer', {
           type: layerFilter.type,
@@ -595,16 +643,7 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
-    // Get shared view from database and handle it
-    function loadView (ol, viewCode) {
-      const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode + '/',
-        csrfToken: $store.getters['app/getCsrfToken']
-      })
-      newView.load(handleLoadView)
-    }
-
-    // Hadle loaded view. Set UI accordingly
+    // Handle loaded view. Set UI accordingly
     async function handleLoadView (view) {
       if (view.status === 'error') {
         $store.commit('app/setModal', {
@@ -619,6 +658,7 @@ export default defineComponent({
         return
       }
       const v = JSON.parse(view.view[0].view)
+      privateView = v.privateView
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
@@ -637,10 +677,10 @@ export default defineComponent({
       }
 
       const viewObservations = cloneJson(v.filters.observations)
-      const observations = getObservationsToLoadOnMap(viewObservations)
+      mapFilters.observations = getObservationsToLoadOnMap(viewObservations, privateView)
 
       $store.commit('app/setDefaults', {
-        observations: observations,
+        observations: mapFilters.observations,
         dates: [d],
         hashtags: v.filters.hashtags
       })
@@ -712,24 +752,44 @@ export default defineComponent({
       }
     }
 
-    function getObservationsToLoadOnMap (viewObservations) {
+    function getObservationsToLoadOnMap (viewObservations, privateView) {
+      const possibles = $store.getters['app/getPossibleCategories']
       const observations = []
       const codes = []
       const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       viewObservations.forEach(layerFilter => {
-        if (!(layerFilter.code in appLayers.observations)) {
-          if (layerFilter.code.toLowerCase().indexOf('_possible') > -1) {
-            layerFilter.code = layerFilter.code.replace('_possible', '')
+        // If user authorized add all _probable layers, otherwise remove _probable layers
+        if ($store.getters['app/getAuthorized']) {
+          if (!privateView && possibles.includes(layerFilter.code)) {
+            if (appLayers.observations[layerFilter.code].categories.indexOf('_probable') === -1) {
+              const possibleCode = layerFilter.code + '_probable'
+              if (!codes.includes(possibleCode)) {
+                codes.push(possibleCode)
+                observations.push({
+                  type: layerFilter.type,
+                  code: possibleCode,
+                  categories: appLayers[layerFilter.type][possibleCode].categories
+                })
+              }
+            }
+          }
+        } else {
+          if (!(layerFilter.code in appLayers.observations)) {
+            if (layerFilter.code.toLowerCase().indexOf('_probable') > -1) {
+              layerFilter.code = layerFilter.code.replace('_probable', '')
+            }
           }
         }
 
         if (!codes.includes(layerFilter.code)) {
-          codes.push(layerFilter.code)
-          observations.push({
-            type: layerFilter.type,
-            code: layerFilter.code,
-            categories: appLayers[layerFilter.type][layerFilter.code].categories
-          })
+          if (layerFilter.code in appLayers[layerFilter.type]) {
+            codes.push(layerFilter.code)
+            observations.push({
+              type: layerFilter.type,
+              code: layerFilter.code,
+              categories: appLayers[layerFilter.type][layerFilter.code].categories
+            })
+          }
         }
       })
       return observations
@@ -755,6 +815,7 @@ export default defineComponent({
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         viewType: 'layers',
+        privateView: $store.getters['app/getAuthorized'],
         filters: mapFilters,
         dates: $store.getters['map/getDatesRange'],
         locationName: locationName,
@@ -1259,7 +1320,6 @@ export default defineComponent({
       spiderfiedIds = []
       spiralSource.value.source.clear()
       closePopup()
-
       // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
@@ -1652,7 +1712,7 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       firstCall,
-      loadView
+      preLoadView
     }
   }
 })

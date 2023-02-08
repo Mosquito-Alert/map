@@ -8,7 +8,7 @@
    viewBox="0 0 29.999998 40.000001"
    xml:space="preserve"
    id="svg15"
-   sodipodi:docname="marker_mosquito_possible_disabled.svg"
+   sodipodi:docname="marker_koreicus_probable.svg"
    width="30"
    height="40"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
@@ -42,10 +42,10 @@
    inkscape:pageopacity="0.0"
    inkscape:pagecheckerboard="0"
    showgrid="false"
-   width="24px"
+   width="30px"
    inkscape:zoom="8.9205957"
-   inkscape:cx="30.210987"
-   inkscape:cy="23.148678"
+   inkscape:cx="15.750069"
+   inkscape:cy="40.187899"
    inkscape:window-width="1680"
    inkscape:window-height="987"
    inkscape:window-x="-8"
@@ -151,12 +151,12 @@
 </g>
 <g
    id="TOC_CONTENT"
-   transform="matrix(0.49332223,0,0,0.49186375,0.22420027,0.22420027)"
-   style="fill:#e6e6e6;fill-opacity:1">
+   transform="scale(0.49668874,0.49597024)"
+   style="fill:#499fff;fill-opacity:1">
 	<path
    d="M 0,30.2 C 0,13.5 13.5,0 30.2,0 46.9,0 60.4,13.5 60.4,30.2 60.4,42.4 56.2,45.8 33.3,79 31.8,81.2 28.6,81.2 27.1,79 4.2,45.8 0,42.4 0,30.2 Z"
    id="path9"
-   style="fill:#e6e6e6;fill-opacity:1" />
+   style="fill:#499fff;fill-opacity:1" />
 </g>
 <g
    id="MOBIL">
@@ -167,16 +167,4 @@
 <g
    id="POPUP">
 </g>
-<ellipse
-   id="path14613"
-   style="fill:#ffffff;stroke:#000000;stroke-width:0.770655"
-   cx="17.76128"
-   cy="33.291267"
-   rx="0.042041332"
-   ry="0.044991709" /><ellipse
-   id="path14615"
-   style="fill:#ffffff;stroke:#000000;stroke-width:0.770655"
-   cx="17.76128"
-   cy="33.291267"
-   rx="0.042041332"
-   ry="0.044991709" /></svg>
+</svg>

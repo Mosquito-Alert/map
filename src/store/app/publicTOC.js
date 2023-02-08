@@ -1,5 +1,10 @@
-export default {
-  confirmed_possible: ['tiger', 'culex', 'koreicus', 'japonicus'],
+export const defaultObservations = [
+  { type: 'observations', code: 'tiger' },
+  { type: 'observations', code: 'culex' }
+]
+
+export const observations = {
+  confirmed_probable: ['tiger', 'culex', 'koreicus', 'japonicus'],
   observations: { // Mosquito observations
     tiger: {
       categories: ['mosquito_tiger_confirmed', 'mosquito_tiger_probable', 'albopictus_cretinus'],

@@ -611,11 +611,11 @@ input{
   background-image: url($icon-mosquito-disabled);
 }
 
-.li-item.tiger_possible,
-.li-item.yellow_possible,
-.li-item.koreicus_possible,
-.li-item.japonicus_possible,
-.li-item.culex_possible{
+.li-item.tiger_probable,
+.li-item.yellow_probable,
+.li-item.koreicus_probable,
+.li-item.japonicus_probable,
+.li-item.culex_probable{
   background-repeat: no-repeat;
   background-position: center;
   background-image: url($icon-mosquito-possible-disabled);
@@ -641,31 +641,31 @@ input{
 .li-item.tiger.active{
   background-image: url($icon-tiger);
 }
-.li-item.tiger_possible.active{
+.li-item.tiger_probable.active{
   background-image: url($icon-tiger-possible);
 }
 .li-item.yellow.active{
   background-image: url($icon-yellow);
 }
-.li-item.yellow_possible.active{
+.li-item.yellow_probable.active{
   background-image: url($icon-yellow-possible);
 }
 .li-item.koreicus.active{
   background-image: url($icon-koreicus);
 }
-.li-item.koreicus_possible.active{
+.li-item.koreicus_probable.active{
   background-image: url($icon-koreicus-possible);
 }
 .li-item.japonicus.active{
   background-image: url($icon-japonicus);
 }
-.li-item.japonicus_possible.active{
+.li-item.japonicus_probable.active{
   background-image: url($icon-japonicus-possible);
 }
 .li-item.culex.active{
   background-image: url($icon-culex);
 }
-.li-item.culex_possible.active{
+.li-item.culex_probable.active{
   background-image: url($icon-culex-possible);
 }
 .li-item.unidentified.active{

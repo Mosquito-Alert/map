@@ -1,5 +1,12 @@
-export default {
-  confirmed_possible: ['tiger', 'culex', 'koreicus', 'japonicus'],
+export const defaultObservations = [
+  { type: 'observations', code: 'tiger' },
+  { type: 'observations', code: 'tiger_probable' },
+  { type: 'observations', code: 'culex' },
+  { type: 'observations', code: 'culex_probable' }
+]
+
+export const observations = {
+  confirmed_probable: ['tiger', 'culex', 'koreicus', 'japonicus'],
   observations: { // Mosquito observations
     tiger: {
       categories: ['mosquito_tiger_confirmed', 'albopictus_cretinus'],
@@ -9,11 +16,11 @@ export default {
       iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
       color: '#4d4d4d'
     },
-    tiger_possible: {
+    tiger_probable: {
       categories: ['mosquito_tiger_probable'],
       common_name: 'Tiger mosquito possible',
       scientific_name: 'Aedes albopictus',
-      icon: require('../../assets/img/marker_tiger_possible.svg'),
+      icon: require('../../assets/img/marker_tiger_probable.svg'),
       iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
       color: '#4d4d4d'
     },
@@ -24,11 +31,11 @@ export default {
       icon: require('../../assets/img/marker_yellow.svg'),
       color: '#ffdd19'
     },
-    yellow_possible: {
+    yellow_probable: {
       categories: ['yellow_fever_probable'],
       common_name: 'Yellow fever mosquito possible',
       scientific_name: 'Aedes aegypti',
-      icon: require('../../assets/img/marker_yellow_possible.svg'),
+      icon: require('../../assets/img/marker_yellow_probable.svg'),
       color: '#ffdd19'
     },
     japonicus: {
@@ -39,11 +46,11 @@ export default {
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
       color: '#49a999'
     },
-    japonicus_possible: {
+    japonicus_probable: {
       categories: ['japonicus_probable'],
       common_name: 'Japonicus mosquito possible',
       scientific_name: 'Aedes japonicus',
-      icon: require('../../assets/img/marker_japonicus_possible.svg'),
+      icon: require('../../assets/img/marker_japonicus_probable.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
       color: '#49a999'
     },
@@ -55,11 +62,11 @@ export default {
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
       color: '#499fff'
     },
-    koreicus_possible: {
+    koreicus_probable: {
       categories: ['koreicus_probable'],
       common_name: 'Koreicus mosquito possible',
       scientific_name: 'Aedes koreicus',
-      icon: require('../../assets/img/marker_koreicus_possible.svg'),
+      icon: require('../../assets/img/marker_koreicus_probable.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
       color: '#499fff'
     },
@@ -71,11 +78,11 @@ export default {
       color: '#aa4499',
       separator: true
     },
-    culex_possible: {
+    culex_probable: {
       categories: ['culex_probable'],
       common_name: 'Culex mosquito possible',
       scientific_name: 'Culex pipiens',
-      icon: require('../../assets/img/marker_culex_possible.svg'),
+      icon: require('../../assets/img/marker_culex_probable.svg'),
       color: '#aa6099',
       separator: true
     },

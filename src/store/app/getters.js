@@ -138,3 +138,7 @@ export const getTilesUrl = state => {
 export const getBrowser = state => {
   return state.browser
 }
+
+export const getPossibleCategories = state => {
+  return state.possibleCategories
+}

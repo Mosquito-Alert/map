@@ -277,6 +277,7 @@ export default {
     })
 
     const setLanguage = (lang) => {
+      console.log('one')
       $store.dispatch('app/setLanguage', lang)
       // NASTY
       if (lang === 'en') lang = 'en-US'
@@ -289,7 +290,7 @@ export default {
       setLanguage(lang)
     }
 
-    function loadR () {
+    function loadReport () {
       const ol = map.value.map
       const backendUrl = $store.getters['app/getBackend']
       const loadViewUrl = backendUrl + 'api/report/load/'
@@ -309,7 +310,7 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      getSession(loadR)
+      getSession(loadReport)
     })
 
     function handleReportView (report) {

@@ -58,8 +58,8 @@
 <script>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import privateLayers from '../store/app/privateTOC'
-import publicLayers from '../store/app/publicTOC'
+import { observations as privateLayers } from '../store/app/privateTOC'
+import { observations as publicLayers } from '../store/app/publicTOC'
 
 export default {
   setup (props, context) {
