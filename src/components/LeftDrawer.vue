@@ -14,7 +14,7 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="layers" @langCookieSet="callFirstMapCall"/>
+    <left-menu item="layers" @leftMenuMounted="callFirstMapCall"/>
 
     <!-- Drawer content -->
     <div class="toc-layers"
@@ -146,7 +146,7 @@ import FilterHastags from './FilterHastags.vue'
 
 export default {
   components: { LeftMenu, SamplingEffort, SearchLocation, FilterHastags },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'firstMapCall'],
   props: ['expanded'],
   setup (props, context) {
     const searchLocation = ref()
@@ -287,7 +287,7 @@ export default {
     }
 
     const callFirstMapCall = function () {
-      context.emit('langCookieSet', {})
+      context.emit('firstMapCall', {})
     }
 
     return {

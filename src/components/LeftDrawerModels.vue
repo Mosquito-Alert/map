@@ -13,7 +13,7 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="models" />
+    <left-menu item="models" @leftMenuMounted="callFirstMapCall"/>
 
     <!-- Drawer content -->
     <div class="toc-models"
@@ -297,6 +297,10 @@ export default {
       // Fetch model manifest to activate/deactivate calendar
       getManifest(manifestUrl)
     })
+
+    const callFirstMapCall = function () {
+      context.emit('firstMapCall', {})
+    }
 
     const getManifest = function (url, callback = false) {
       // IF modelsManifest already exists, then call callback
@@ -615,7 +619,8 @@ export default {
       toggleLeftDrawer,
       applyfilter,
       filterModels,
-      refInput
+      refInput,
+      callFirstMapCall
     }
   }
 }

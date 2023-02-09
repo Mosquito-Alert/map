@@ -145,7 +145,7 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
-// import { useCookies } from 'vue3-cookies'
+import MSession from '../js/session.js'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -164,6 +164,7 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
+    let mySession
     let privateView = false
     let spiderfyId = ''
     let locationName = ''
@@ -205,56 +206,54 @@ export default defineComponent({
     const currentYear = new Date().getFullYear()
     let firstDate = new Date()
     let lastDate = new Date()
+    let viewCode = null
     // const { cookies } = useCookies()
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
     }
 
-    const getCSRF = (callback, ol, viewCode) => {
-      fetch('http://localhost:8000/api/csrf/', {
-        credentials: 'include'
-      })
-        .then((res) => {
-          const csrfToken = res.headers.get('X-CSRFToken')
-          $store.commit('app/setCsrfToken', csrfToken)
-          callback(ol, viewCode)
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
-
-    const getSession = function (callback, ol, viewCode) {
-      fetch('http://localhost:8000/api/session/', {
-        credentials: 'include'
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
-            callback(ol, viewCode)
-          } else {
-            getCSRF(callback, ol, viewCode)
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
-
-    // Get shared view from database and handle it
-    // function loadView (ol, viewCode) {
-    //   const newView = new ShareMapView(ol, {
-    //     url: loadViewUrl + viewCode + '/',
-    //     csrfToken: $store.getters['app/getCsrfToken']
+    // const getCSRF = (callback, ol, viewCode) => {
+    //   fetch('http://localhost:8000/api/csrf/', {
+    //     credentials: 'include'
     //   })
-    //   newView.load(handleLoadView)
+    //     .then((res) => {
+    //       const csrfToken = res.headers.get('X-CSRFToken')
+    //       $store.commit('app/setCsrfToken', csrfToken)
+    //       callback(ol, viewCode)
+    //     })
+    //     .catch((err) => {
+    //       console.log(err)
+    //     })
     // }
-    function preLoadView (ol, viewCode) {
-      getSession(loadView, ol, viewCode)
+
+    // const getSession = function (callback, ol, viewCode) {
+    //   fetch('http://localhost:8000/api/session/', {
+    //     credentials: 'include'
+    //   })
+    //     .then((res) => res.json())
+    //     .then((data) => {
+    //       if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
+    //         callback(ol, viewCode)
+    //       } else {
+    //         getCSRF(callback, ol, viewCode)
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.log(err)
+    //     })
+    // }
+
+    function preLoadView (code) {
+      viewCode = code
+      const csrfToken = $store.getters['app/getCsrfToken']
+      mySession = new MSession(backendUrl, csrfToken)
+      mySession.getSession(loadView)
     }
 
-    function loadView (ol, viewCode) {
+    function loadView () {
+      const ol = map.value.map
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const newView = new ShareMapView(ol, {
         url: loadViewUrl + viewCode + '/',
         csrfToken: $store.getters['app/getCsrfToken']

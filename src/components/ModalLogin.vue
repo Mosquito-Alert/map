@@ -60,12 +60,16 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { observations as privateLayers } from '../store/app/privateTOC'
 import { observations as publicLayers } from '../store/app/publicTOC'
+import MSession from '../js/session.js'
 
 export default {
   setup (props, context) {
+    let mySession
     const username = ref('')
     const password = ref('')
     const $store = useStore()
+    const backendUrl = $store.getters['app/getBackend']
+
     const open = computed(() => {
       return $store.getters['app/getModals'].login.visibility
     })
@@ -84,15 +88,7 @@ export default {
 
     const onSubmit = function (evt) {
       if (username.value && password.value) {
-        // const controller = new AbortController()
-        // const { signal } = controller
-        // const authenticateUrl = $store.getters['app/getAuthenticateUrl']
-        // const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-
-        // const formData = new FormData()
-        // formData.append('username', username.value)
-        // formData.append('password', password.value)
-        fetch('http://localhost:8000/api/login/', {
+        fetch(backendUrl + 'api/login/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -103,9 +99,8 @@ export default {
           body: JSON.stringify({ username: username.value, password: password.value })
         })
           .then((data) => {
-            $store.commit('app/setAuthorized', true)
-            $store.commit('app/setLayers', privateLayers)
-            $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
+            mySession = new MSession(backendUrl, null)
+            mySession.getSession(resetTOC)
           })
           .catch((err) => {
             console.log(err)
@@ -114,6 +109,13 @@ export default {
             $store.commit('app/setLayers', publicLayers)
           })
       }
+    }
+
+    function resetTOC () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      $store.commit('app/setAuthorized', true)
+      $store.commit('app/setLayers', privateLayers)
+      $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
     }
 
     return {

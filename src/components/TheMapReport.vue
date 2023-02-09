@@ -238,13 +238,14 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
-// import { useCookies } from 'vue3-cookies'
+import MSession from '../js/session.js'
 
 export default {
   name: 'TheMapReport',
   props: ['report', 'reportLang'],
   components: { OneFeatureMap },
   setup (props, context) {
+    let mySession
     const $store = useStore()
     const map = ref()
     const center = ref()
@@ -267,6 +268,7 @@ export default {
     const layers = $store.getters['app/getLayers']
     const anyFilters = ref(false)
     const $q = useQuasar()
+    const backendUrl = $store.getters['app/getBackend']
 
     const reportId = computed(() => {
       return (props.report)
@@ -291,12 +293,12 @@ export default {
     }
 
     function loadReport () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const ol = map.value.map
-      const backendUrl = $store.getters['app/getBackend']
       const loadViewUrl = backendUrl + 'api/report/load/'
       const newView = new ReportView(ol, {
         url: loadViewUrl + reportId.value + '/',
-        csrfToken: $store.getters['app/getCsrfToken']
+        csrfToken: mySession.csrfToken
       })
 
       newView.load(handleReportView)
@@ -310,7 +312,9 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      getSession(loadReport)
+      const csrfToken = $store.getters['app/getCsrfToken']
+      mySession = new MSession(backendUrl, csrfToken)
+      mySession.getSession(loadReport)
     })
 
     function handleReportView (report) {
@@ -373,8 +377,6 @@ export default {
 
         // Get features as geoJson
         const reportFilters = formatParams(view)
-
-        const backendUrl = $store.getters['app/getBackend']
         const url = backendUrl + 'api/downloads/features/'
 
         fetch(url, {
@@ -382,7 +384,7 @@ export default {
           method: 'POST', // or 'PUT'
           body: JSON.stringify(reportFilters),
           headers: {
-            'X-CSRFToken': $store.getters['app/getCsrfToken']
+            'X-CSRFToken': mySession.csrfToken
           }
         })
           .then(res => res.json())
@@ -433,37 +435,6 @@ export default {
             console.log(error)
           })
       }
-    }
-
-    const getCSRF = (callback) => {
-      fetch('http://localhost:8000/api/csrf/', {
-        credentials: 'include'
-      })
-        .then((res) => {
-          const csrfToken = res.headers.get('X-CSRFToken')
-          $store.commit('app/setCsrfToken', csrfToken)
-          callback()
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
-
-    const getSession = function (callback) {
-      fetch('http://localhost:8000/api/session/', {
-        credentials: 'include'
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.isAuthenticated) {
-            console.log(true)
-          } else {
-            getCSRF(callback)
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     }
 
     worker.onmessage = function (data) {

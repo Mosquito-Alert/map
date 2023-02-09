@@ -141,11 +141,10 @@ export default defineComponent({
     onMounted(function () {
       ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const paramViewCode = (props.viewCode) ? props.viewCode : null
-      if (paramViewCode) {
-        // Add model prefix to code
-        loadView(map.value.map, 'M-' + paramViewCode)
-      }
+      // const paramViewCode = (props.viewCode) ? props.viewCode : null
+      // if (paramViewCode) {
+      //   loadView(map.value.map, 'M-' + paramViewCode)
+      // }
     })
 
     const _ = function (text) {
@@ -163,8 +162,10 @@ export default defineComponent({
         return
       }
       // After mapview is shared then handle it
+
       const newView = new ShareMapView(ol, {
         viewType: 'models',
+        csrfToken: $store.getters['app/getCsrfToken'],
         filters: {
           vector: modelData.vector,
           year: modelData.year,
@@ -193,8 +194,8 @@ export default defineComponent({
     }
 
     // Load shared view. Get data from database and then handle it
-    function loadView (ol, viewCode) {
-      const newView = new ShareMapView(ol, {
+    function loadView (viewCode) {
+      const newView = new ShareMapView(map.value.map, {
         url: loadViewUrl + viewCode
       })
       newView.load(handleLoadView)

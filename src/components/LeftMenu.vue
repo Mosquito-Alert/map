@@ -79,7 +79,7 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
+  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'leftMenuMounted'],
   props: ['expanded', 'item'],
   computed: {
     active_item (props) {
@@ -190,7 +190,7 @@ export default {
     // }
 
     onMounted(async function () {
-      context.emit('langCookieSet', {})
+      context.emit('leftMenuMounted', {})
     })
 
     const frontendUrl = computed(() => {

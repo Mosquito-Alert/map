@@ -11,7 +11,7 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @langCookieSet="buildSession"
+      @firstMapCall="buildSession"
     />
 
     <q-page
@@ -109,6 +109,7 @@ import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
+import MSession from '../js/session.js'
 
 export default {
   components: {
@@ -132,12 +133,14 @@ export default {
     CookiesCompliance
   },
   setup () {
+    let mySession
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+    const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
     const resizeMap = function (args, mode) {
@@ -173,51 +176,20 @@ export default {
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
-      // getSession()
     })
 
     const buildSession = function () {
-      getSession(buildMap)
+      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession.getSession(buildMap)
     }
 
     const buildMap = function () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
       if (!viewCode) {
         map.value.firstCall()
       } else {
-        map.value.preLoadView(map.value.map, viewCode)
+        map.value.preLoadView(viewCode)
       }
-    }
-
-    const getCSRF = (callback) => {
-      fetch('http://localhost:8000/api/csrf/', {
-        credentials: 'include'
-      })
-        .then((res) => {
-          const csrfToken = res.headers.get('X-CSRFToken')
-          $store.commit('app/setCsrfToken', csrfToken)
-          callback()
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
-
-    const getSession = (callback) => {
-      fetch('http://localhost:8000/api/session/', {
-        credentials: 'include'
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
-            // callback()
-            console.log(true)
-          } else {
-            getCSRF(callback)
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     }
 
     const pendingView = computed(() => {
