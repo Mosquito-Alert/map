@@ -165,6 +165,7 @@ export default defineComponent({
   props: ['sharedView'],
   setup (props, context) {
     let mySession
+    let redrawRequired = false
     let privateView = false
     let spiderfyId = ''
     let locationName = ''
@@ -337,6 +338,7 @@ export default defineComponent({
       } else {
         const dates = cloneJson($store.getters['app/getDefaults'].dates)
         const missing = getMissingYears(dates)
+
         if (missing.length) {
           await getDataset(missing)
           initMap()
@@ -403,6 +405,7 @@ export default defineComponent({
       if (selectedId.value) {
         selectedId.value = null
         $store.commit('map/selectFeature', {})
+        disableUpdateMap = false
         redrawMap()
       }
     }
@@ -449,6 +452,11 @@ export default defineComponent({
         // initData is true only first time
         $store.commit('map/setFirstViewMap', false)
         initMap()
+      }
+      if (redrawRequired) {
+        redrawRequired = false
+        spiderfyCluster = false
+        redrawMap()
       }
       // if grap data is included then manage and exit
       if (event.data.timeseries) {
@@ -600,9 +608,12 @@ export default defineComponent({
       }
 
       mapFilters.observations = getObservationsToLoadOnMap(initialObservations, privateView)
-
       mapFilters.observations.forEach(layerFilter => {
         $store.commit('map/addActiveLayer', {
+          type: layerFilter.type,
+          code: layerFilter.code
+        })
+        $store.commit('app/activateLayerIcon', {
           type: layerFilter.type,
           code: layerFilter.code
         })
@@ -736,6 +747,8 @@ export default defineComponent({
           disableUpdateMap = true
           spiderfyId = v.spiderfyId
           spiderfyCluster = true
+          // redraw required to get grahdata
+          redrawRequired = true
         } else {
           $store.dispatch('map/selectFeature', feature.values_)
         }
@@ -844,6 +857,7 @@ export default defineComponent({
       if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         return
       }
+
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
       $store.commit('map/setCurrents', {
@@ -875,18 +889,25 @@ export default defineComponent({
       if (clickOnSpiral) return
 
       $store.commit('map/setViewbox', viewBox)
-      if (!mobile.value || $store.getters['timeseries/getGraphIsVisible']) {
-        spinner(true)
-        // Do not show spinner if cluster is spiderfied
-        // if (!spiderfiedCluster) {
-        //   spinner(true)
-        // }
-      }
 
       if (disableUpdateMap) {
         return
       }
 
+      if (!mobile.value || $store.getters['timeseries/getGraphIsVisible']) {
+        // Do not show spinner if cluster is spiderfied
+        if (!spiderfiedCluster) {
+          spinner(true)
+        }
+      }
+
+      // If spider open an no selected feature,spider closes on pan
+      if (!Object.keys(popupContent.value).length) {
+        disableUpdateMap = false
+        spiderfiedCluster = false
+        spiderfyId = false
+        spiralSource.value.source.clear()
+      }
       // Add spiderfyCluster in case cluster is spiderfied
       worker.postMessage({
         bbox: southWest.concat(northEast),
@@ -1713,7 +1734,8 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       firstCall,
-      preLoadView
+      preLoadView,
+      initMap
     }
   }
 })

@@ -19,7 +19,7 @@ export default function () {
     },
     maxZoom: 19,
     features: [],
-    selectedFeature: null,
+    selectedFeature: {},
     activeLayers: [],
     modelDate: null,
     viewbox: [],

@@ -43,11 +43,11 @@
       <div class="category-box">
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
-            <div class="li-item"
+            <div class="li-item "
               @click="filterObservations(layer, $event)"
               data-type="observations"
               :data-code="code"
-              :class="initialClass(code, 'observations')"
+              :class="layer.active ? code +' active' : code"
             ></div>
             <div v-text="_(layer.common_name)" class="toc-item-name">
             </div>
@@ -70,7 +70,7 @@
                   @click="filterObservations(layer, $event)"
                   data-type="breeding"
                   :data-code="code"
-                  :class="initialClass(code, 'breeding')"
+                  :class="layer.active ? code +' active' : code"
                 >
                     <i :class="layer.faIcon"></i>
                 </div>
@@ -91,7 +91,7 @@
                 @click="filterObservations(layer, $event)"
                 data-type="bites"
                 :data-code="code"
-                :class="initialClass(code, 'bites')"
+                :class="layer.active ? code +' active' : code"
               >
                   <i class="fa-solid" :class="layer.faIcon"></i>
               </div>
@@ -113,7 +113,7 @@
               @click="filterObservations(layer, $event)"
               data-type="otherObservations"
               :data-code="code"
-              :class="initialClass(code, 'otherObservations')">
+              :class="layer.active ? code +' active' : code">
             </div>
             <div v-text="_(layer.common_name)" class="toc-item-name"></div>
           </div>
@@ -172,18 +172,10 @@ export default {
         categories: layers.value[obj.dataset.type][obj.dataset.code].categories
       })
 
-      const classes = obj.classList
-      if (classes.contains('active')) {
-        classes.remove('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon_disabled
-        }
-      } else {
-        classes.add('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon
-        }
-      }
+      $store.commit('app/toggleLayerIcon', {
+        type: obj.dataset.type,
+        code: obj.dataset.code
+      })
     }
 
     const mobile = computed(() => {
@@ -198,17 +190,6 @@ export default {
     const mouseOut = function (layer, event) {
       const obj = event.target
       obj.querySelector('img').src = layer.icon_disabled
-    }
-
-    const initialClass = function (code, type) {
-      const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
-      const isInitial = initialLayers.find(initialLayer => {
-        return initialLayer.code === code && initialLayer.type === type
-      })
-
-      let cls = code
-      if (isInitial) cls += ' active'
-      return cls
     }
 
     const observations = computed(() => {
@@ -299,7 +280,6 @@ export default {
       samplingEffort,
       searchLocation,
       setLocationName,
-      initialClass,
       filterObservations,
       tagsModified,
       observations,

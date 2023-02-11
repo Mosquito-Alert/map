@@ -22,6 +22,7 @@ let getAllDates = false
 let firstDate = '01-01-' + moment().format('YYYY')
 let lastDate = moment().format('YYYY-MM-DD')
 let loadSharedView = false
+let graphData = null
 
 for (let a = initialYear; a <= currentYear; a++) {
   YEARS.push({ year: a, data: {} })
@@ -100,7 +101,7 @@ self.onmessage = async function (e) {
   } else if (e.data) {
     // When map is just panned
     if (filters.observations) {
-      const grahData = getGraphData (e, filteredData)
+      grahData = getGraphData (e, filteredData)
       postMessage({
         timeseries: grahData
       })

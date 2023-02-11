@@ -185,6 +185,7 @@ export default defineComponent({
           // then reloading is true
           if ($store.getters['timeseries/getGraphIsVisible']) {
             reloading.value = false
+            spinner(false)
           }
           if (!$store.getters['map/getIndexingOn']) {
             spinner(false)

@@ -63,6 +63,9 @@ import { observations as publicLayers } from '../store/app/publicTOC'
 import MSession from '../js/session.js'
 
 export default {
+  emits: [
+    'resetTOC'
+  ],
   setup (props, context) {
     let mySession
     const username = ref('')
@@ -116,6 +119,7 @@ export default {
       $store.commit('app/setAuthorized', true)
       $store.commit('app/setLayers', privateLayers)
       $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
+      context.emit('resetTOC', {})
     }
 
     return {

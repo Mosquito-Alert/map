@@ -77,7 +77,7 @@
     <modal-wait/>
     <modal-logos/>
     <modal-error/>
-    <modal-login/>
+    <modal-login @resetTOC="resetTOC"/>
     <modal-cookie-settings/>
     <modal-cookie-policy/>
 
@@ -142,6 +142,10 @@ export default {
     const $store = useStore()
     const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+
+    const resetTOC = function () {
+      map.value.initMap()
+    }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -305,6 +309,7 @@ export default {
     }
 
     const toggleGraphic = function (args) {
+      map.value.closePopup()
       $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if ($store.getters['timeseries/getGraphIsVisible']) {
@@ -407,7 +412,8 @@ export default {
       resizeMap,
       shareModal,
       loadUserFixes,
-      buildSession
+      buildSession,
+      resetTOC
     }
   }
 }
