@@ -875,11 +875,12 @@ export default defineComponent({
       if (clickOnSpiral) return
 
       $store.commit('map/setViewbox', viewBox)
-      if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
+      if (!mobile.value || $store.getters['timeseries/getGraphIsVisible']) {
+        spinner(true)
         // Do not show spinner if cluster is spiderfied
-        if (!spiderfiedCluster) {
-          spinner(true)
-        }
+        // if (!spiderfiedCluster) {
+        //   spinner(true)
+        // }
       }
 
       if (disableUpdateMap) {
@@ -993,7 +994,8 @@ export default defineComponent({
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
       const viewLayers = []
-
+      storeLayers = $store.getters['app/getLayers']
+      storeLayers = $store.getters['app/getLayers']
       mapFilters.observations.forEach(o => {
         const categories = storeLayers[o.type][o.code].categories
         categories.forEach(c => {
@@ -1061,7 +1063,7 @@ export default defineComponent({
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
-      storeLayers = $store.getters['app/getLayers']
+
       const legend = $store.getters['app/getLayers'].sampling_effort.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
