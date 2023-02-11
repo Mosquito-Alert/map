@@ -924,6 +924,7 @@ export default defineComponent({
         mapFilters.dates[0] = $store.getters['map/getMapDates']
       }
       const newView = new ReportView(ol, {
+        privateView: $store.getters['app/getAuthorized'],
         filters: mapFilters,
         locationName: locationName,
         url: reportViewUrl,

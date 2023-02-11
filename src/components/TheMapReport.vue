@@ -239,6 +239,7 @@ import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
 import MSession from '../js/session.js'
+import { observations as privateLayers } from '../store/app/privateTOC'
 
 export default {
   name: 'TheMapReport',
@@ -246,6 +247,7 @@ export default {
   components: { OneFeatureMap },
   setup (props, context) {
     let mySession
+    let privateReport
     const $store = useStore()
     const map = ref()
     const center = ref()
@@ -265,7 +267,7 @@ export default {
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
-    const layers = $store.getters['app/getLayers']
+
     const anyFilters = ref(false)
     const $q = useQuasar()
     const backendUrl = $store.getters['app/getBackend']
@@ -317,6 +319,53 @@ export default {
       mySession.getSession(loadReport)
     })
 
+    function getObservationsToLoadOnMap (viewObservations, privateReport) {
+      const possibles = $store.getters['app/getPossibleCategories']
+      const observations = []
+      const codes = []
+      const appLayers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      viewObservations.forEach(layerFilter => {
+        // If user authorized add all _probable layers, otherwise remove _probable layers
+        if ($store.getters['app/getAuthorized']) {
+          if (!privateReport && possibles.includes(layerFilter.code)) {
+            if (appLayers.observations[layerFilter.code].categories.indexOf('_probable') === -1) {
+              const possibleCode = layerFilter.code + '_probable'
+              if (!codes.includes(possibleCode)) {
+                codes.push(possibleCode)
+                observations.push({
+                  type: layerFilter.type,
+                  code: possibleCode,
+                  categories: appLayers[layerFilter.type][possibleCode].categories
+                })
+              }
+            }
+          }
+        } else {
+          if (!(layerFilter.code in appLayers.observations)) {
+            if (layerFilter.code.toLowerCase().indexOf('_probable') > -1) {
+              layerFilter.code = layerFilter.code.replace('_probable', '')
+            }
+          }
+        }
+
+        if (!codes.includes(layerFilter.code)) {
+          if (layerFilter.code in appLayers[layerFilter.type]) {
+            codes.push(layerFilter.code)
+            observations.push({
+              type: layerFilter.type,
+              code: layerFilter.code,
+              categories: appLayers[layerFilter.type][layerFilter.code].categories
+            })
+          }
+        }
+      })
+      return observations
+    }
+
+    function cloneJson (j) {
+      return JSON.parse(JSON.stringify(j))
+    }
+
     function handleReportView (report) {
       if (report.status === 'error') {
         $store.commit('app/setModal', {
@@ -328,7 +377,11 @@ export default {
           }
         })
       } else {
+        if ($store.getters['app/getAuthorized']) {
+          $store.commit('app/setLayers', privateLayers)
+        }
         anyFilters.value = false
+        privateReport = report.privateReport
         const view = JSON.parse(report.view[0].view)
         let lang
         if (reportLang.value) {
@@ -341,8 +394,13 @@ export default {
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
 
+        const reportObservations = cloneJson(view.filters.observations)
+
+        view.filters.observations = getObservationsToLoadOnMap(reportObservations, privateReport)
+        const layers = $store.getters['app/getLayers']
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
+          console.log(o.type, o.code)
           return layers[o.type][o.code].common_name
         })
 

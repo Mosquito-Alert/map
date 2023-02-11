@@ -35,6 +35,7 @@ function log (text) {
 self.onmessage = async function (e) {
   loadSharedView = isSharingView(e.data.loadSharedView)
   if (e.data.initData) {
+    // If it is first app call 
     indexInitialMapView(e.data.data)
     return
   }
@@ -64,8 +65,10 @@ self.onmessage = async function (e) {
       clusterExtent: clusterExtent
     })
   } else if (e.data.spiderfyCluster) {
+    // Cluster must be spiderfied
     let openPopupId = ''
     if (e.data.spiderfyId && e.data.dataset) {
+      // Sharing spiderfied view
       filteredData = dataset
       filteredData = doFilters(filters, e.data.layers)
       cluseredIndex = doClusteredIndex(filteredData)
@@ -75,6 +78,8 @@ self.onmessage = async function (e) {
       openPopupId = e.data.spiderfyId
     }
     if (e.data.getClusterExpansionZoom) {
+      // Send data to spiderfy cluster
+      console.log('do nothing')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
@@ -84,6 +89,7 @@ self.onmessage = async function (e) {
         clusterId: e.data.getClusterExpansionZoom
       })
     } else {
+      console.log('AQUÍ QUAN ENTRA????')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, e.data.zoom),
         spiderfyCluster: e.data.spiderfyCluster,
@@ -91,6 +97,7 @@ self.onmessage = async function (e) {
       })
     }
   } else if (e.data.filters) {
+    // Do new index
     // Get the smallest dataset (maybe featuresSet) before start filtering
     filteredData = getDefaultData(filters, dataset)
     // Filter observations that pass filters
@@ -328,6 +335,7 @@ function getExtent (clusterId) {
   return [xmin, ymin, xmax, ymax]
 }
 
+// Get a feature Id and return the cluster that contains that feature
 function getClusterByFeatureId (data) {
   const searchId = data.spiderfyId
   const fs = cluseredIndex.getClusters(data.bbox, data.zoom)
@@ -359,6 +367,7 @@ function isSharingView (param) {
 
 // Index default map data
 function indexInitialMapView (data) {
+  // Init dataset var for the rest of calls
   dataset = data.features
   loadMapData(dataset, false, true)
 }
