@@ -110,6 +110,8 @@ export default {
     const timeseries = ref()
     const $store = useStore()
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+
+    $store.commit('timeseries/setGraphIsVisible', false)
     if (lang) {
       $store.dispatch('app/setLanguage', lang.toLocaleLowerCase())
     }

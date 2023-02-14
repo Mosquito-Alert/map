@@ -19,7 +19,6 @@ export const updateCache = (state, payload) => {
 }
 
 export const updateDataFromCache = (state) => {
-  console.log(state.cache)
   state.Data = state.cache
 }
 

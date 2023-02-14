@@ -36,7 +36,12 @@
             <template v-for="set in chartData.datasets" :key="set.label">
               <div class="col-6" :class="mobile?'q-py-xs':''">
                 <div class="no-wrap">
-                  <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
+                  <img v-if="set.icon"
+                    class="symbol"
+                    :src="set.icon"
+                    height="20"
+                    :class="(set.opacity)?' possible':''"
+                  >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
                   {{ _(set.label) }}
                 </div>
@@ -305,25 +310,26 @@ export default defineComponent({
     const getData = () => {
       reloading.value = true
       const rawData = $store.getters['timeseries/getDData']
-      const layers = $store.getters['app/getLayers']
-      const datasets = Object.keys(rawData.data).map(layer => {
+      const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      const datasets = Object.keys(rawData.data).map(code => {
         const cat = Object.keys(layers).find(category => {
-          return layer in layers[category]
+          return code in layers[category]
         })
-        const color = layers[cat][layer].color
+
+        const color = layers[cat][code].color
         const result = {
-          label: _(layers[cat][layer].common_name),
+          label: _(layers[cat][code].common_name),
           borderColor: color,
           backgroundColor: color,
           fill: false,
-          data: Array.from(rawData.data[layer]),
-          pointHitRadius: 200
-          // borderDash: [15, 5]
+          data: Array.from(rawData.data[code]),
+          pointHitRadius: 200,
+          opacity: (code.indexOf('_probable') > -1)
         }
-        if ('faIcon' in layers[cat][layer]) {
-          result.faIcon = layers[cat][layer].faIcon
+        if ('faIcon' in layers[cat][code]) {
+          result.faIcon = layers[cat][code].faIcon
         } else {
-          result.icon = layers[cat][layer].icon
+          result.icon = layers[cat][code].icon
         }
         return result
       })
@@ -645,6 +651,10 @@ export default defineComponent({
   }
   .legend div .symbol{
     margin: 0px 5px;
+  }
+
+  img.symbol.possible{
+    opacity: (1 - $graph-possible-transparency);
   }
   .timeseries-filter{
     margin-left:20px;

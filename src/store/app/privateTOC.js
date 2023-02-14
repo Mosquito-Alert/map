@@ -23,7 +23,7 @@ export const observations = {
       scientific_name: 'Aedes albopictus',
       icon: require('../../assets/img/marker_tiger_probable.svg'),
       iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
-      color: '#4d4d4d',
+      color: '#818181',
       active: true
     },
     yellow: {
@@ -39,7 +39,7 @@ export const observations = {
       common_name: 'Yellow fever mosquito possible',
       scientific_name: 'Aedes aegypti',
       icon: require('../../assets/img/marker_yellow_probable.svg'),
-      color: '#ffdd19',
+      color: '#ffe75d',
       active: false
     },
     japonicus: {
@@ -57,7 +57,7 @@ export const observations = {
       scientific_name: 'Aedes japonicus',
       icon: require('../../assets/img/marker_japonicus_probable.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
-      color: '#49a999',
+      color: '#7fc2b7',
       active: false
     },
     koreicus: {
@@ -75,7 +75,7 @@ export const observations = {
       scientific_name: 'Aedes koreicus',
       icon: require('../../assets/img/marker_koreicus_probable.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
-      color: '#499fff',
+      color: '#7fbbff',
       active: false
     },
     culex: {
@@ -92,7 +92,7 @@ export const observations = {
       common_name: 'Culex mosquito possible',
       scientific_name: 'Culex pipiens',
       icon: require('../../assets/img/marker_culex_probable.svg'),
-      color: '#aa6099',
+      color: '#c38fb7',
       separator: true,
       active: true
     },
