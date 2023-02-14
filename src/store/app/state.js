@@ -235,6 +235,7 @@ export default function () {
       error: { visibility: false, msg: '', link: '', redirection: false },
       wait: { visibility: false, seamless: false },
       login: { visibility: false },
+      confirmLogout: { visibility: false },
       logos: { visibility: false }
     },
 

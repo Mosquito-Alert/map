@@ -107,26 +107,10 @@ export default {
 
     const processLogin = function () {
       if ($store.getters['app/getAuthorized']) {
-        logout()
+        $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: true } })
       } else {
         $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
       }
-    }
-
-    const logout = () => {
-      const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-      fetch('http://localhost:8000/api/logout/', {
-        credentials: 'include'
-      })
-        .then((data) => {
-          console.log(data)
-          $store.commit('app/setAuthorized', false)
-          document.location = registeredWeb
-          // this.getCSRF()
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     }
 
     // const logout = function () {
@@ -221,7 +205,6 @@ export default {
       showHelp,
       showShareUrl,
       processLogin,
-      logout,
       clickLanguageSelector
     }
   }

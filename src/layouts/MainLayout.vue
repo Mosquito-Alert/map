@@ -48,6 +48,8 @@
     <modal-help :open="helpModalVisible" buttons="close">
     </modal-help>
 
+    <modal-confirm-logout/>
+
     <modal-download
       :open="downloadModalVisible"
       @startDownload="startDownload"
@@ -93,6 +95,7 @@ import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
+import ModalConfirmLogout from 'src/components/ModalConfirmLogout.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalDownload from 'components/ModalDownload.vue'
@@ -123,6 +126,7 @@ export default {
     ModalDownload,
     ModalShare,
     ModalLogin,
+    ModalConfirmLogout,
     ModalFirst,
     ModalReports,
     SiteHeader,
