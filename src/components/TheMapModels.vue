@@ -69,12 +69,13 @@ import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
+// import MSession from '../js/session.js'
 
 export default defineComponent({
   name: 'TheMapModels',
   emits: [
     'toggleLeftDrawer',
-    'mapViewSaved',
+    'endShareView',
     'setModelDate',
     'loadSharedModel'
   ],
@@ -89,6 +90,7 @@ export default defineComponent({
     let gitHubError = 0
     let CSVS = {}
     let CENTROIDS = {}
+    // let mySession
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const GADM3 = 'gadm3'
@@ -158,11 +160,20 @@ export default defineComponent({
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
       if (!modelData.vector || !modelData.year) {
-        context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
+        const content = {
+          error: 'Share view error. No model is loaded',
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
+        context.emit('endShareView', content)
         return
       }
-      // After mapview is shared then handle it
 
+      // After mapview is shared then handle it
       const newView = new ShareMapView(ol, {
         viewType: 'models',
         csrfToken: $store.getters['app/getCsrfToken'],
@@ -185,18 +196,37 @@ export default defineComponent({
 
     // Handle shared view
     function handleShareView (status) {
+      let content
       if (status.status === 'error') {
-        console.log(status.msg)
+        content = {
+          error: status.msg,
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       } else {
-        console.log(status.code)
+        const frontend = $store.getters['app/getFrontendUrl']
+        content = {
+          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       }
-      context.emit('mapViewSaved', status)
+      context.emit('endShareView', content)
     }
 
     // Load shared view. Get data from database and then handle it
     function loadView (viewCode) {
       const newView = new ShareMapView(map.value.map, {
-        url: loadViewUrl + viewCode
+        url: loadViewUrl + viewCode + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.load(handleLoadView)
     }

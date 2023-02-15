@@ -12,6 +12,7 @@
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
       @firstMapCall="buildSession"
+      @startShareView="startShareView"
     />
 
     <q-page
@@ -25,12 +26,12 @@
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
         @workerStartedIndexing="workerStartedIndexing"
-        @mapViewSaved="mapViewSaved"
         @timeSeriesChanged="timeSeriesChanged"
         @tagsChanged="tagsChanged"
         @locationChanged="locationChanged"
         @loadUserFixes="loadUserFixes"
         @calendarClicked="calendarClicked"
+        @endShareView="endShareView"
       />
       <time-series
         ref="timeseries"
@@ -61,7 +62,6 @@
     <modal-share
       ref="shareModal"
       :open="shareModalVisible"
-      @shareView="shareView"
     >
       <template v-slot:default>
       </template>
@@ -186,6 +186,10 @@ export default {
       }
     })
 
+    const startShareView = function () {
+      map.value.shareView()
+    }
+
     const buildSession = function () {
       mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
       mySession.getSession(buildMap)
@@ -212,10 +216,6 @@ export default {
 
     const startDownload = function (format) {
       map.value.handleDownload(format)
-    }
-
-    const shareView = function () {
-      map.value.shareView()
     }
 
     const filterLocations = function (location) {
@@ -301,9 +301,9 @@ export default {
       return $store.getters['app/getModals'].error.visibility
     })
 
-    const frontendUrl = computed(() => {
-      return $store.getters['app/getFrontendUrl']
-    })
+    // const frontendUrl = computed(() => {
+    //   return $store.getters['app/getFrontendUrl']
+    // })
 
     const toggleLeftDrawer = function () {
       $store.commit('app/toggleLeftDrawerStatus')
@@ -346,11 +346,8 @@ export default {
       $store.commit('map/setIndexingOn', true)
     }
 
-    const mapViewSaved = function (payload) {
-      shareModal.value.status = payload
-      if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + payload.code + '/' + $store.getters['app/getLang']
-      }
+    const endShareView = function (payload) {
+      shareModal.value.viewContent = payload
     }
 
     const newReport = function () {
@@ -384,14 +381,13 @@ export default {
       mobile,
       calendarClicked,
       viewCode,
-      shareView,
       newReport,
       expanded,
       startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
       workerStartedIndexing,
-      mapViewSaved,
+      endShareView,
       timeSeriesChanged,
       tagsChanged,
       locationChanged,
@@ -417,7 +413,8 @@ export default {
       shareModal,
       loadUserFixes,
       buildSession,
-      resetTOC
+      resetTOC,
+      startShareView
     }
   }
 }

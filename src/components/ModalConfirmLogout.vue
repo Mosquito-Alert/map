@@ -35,7 +35,6 @@ export default {
     const $store = useStore()
 
     const open = computed(() => {
-      console.log($store.getters['app/getModals'].confirmLogout.visibility)
       return $store.getters['app/getModals'].confirmLogout.visibility
     })
 

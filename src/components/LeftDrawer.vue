@@ -14,7 +14,10 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="layers" @leftMenuMounted="callFirstMapCall"/>
+    <left-menu item="layers"
+      @leftMenuMounted="callFirstMapCall"
+      @startShareView="startShareView"
+      />
 
     <!-- Drawer content -->
     <div class="toc-layers"
@@ -271,8 +274,13 @@ export default {
       context.emit('firstMapCall', {})
     }
 
+    const startShareView = function () {
+      context.emit('startShareView', {})
+    }
+
     return {
       callFirstMapCall,
+      startShareView,
       mobile,
       toggleLeftDrawer,
       hashtags,

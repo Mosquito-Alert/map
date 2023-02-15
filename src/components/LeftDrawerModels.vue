@@ -13,7 +13,10 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="models" @leftMenuMounted="callFirstMapCall"/>
+    <left-menu item="models"
+      @leftMenuMounted="callFirstMapCall"
+      @startShareView="startShareView"
+    />
 
     <!-- Drawer content -->
     <div class="toc-models"
@@ -562,6 +565,10 @@ export default {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
 
+    const startShareView = function () {
+      context.emit('startShareView', {})
+    }
+
     // Required to change lang on current selection
     watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {
@@ -620,7 +627,8 @@ export default {
       applyfilter,
       filterModels,
       refInput,
-      callFirstMapCall
+      callFirstMapCall,
+      startShareView
     }
   }
 }

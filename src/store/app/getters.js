@@ -47,6 +47,10 @@ export const getModals = state => {
   return state.modals
 }
 
+export const getShareViewUrl = state => {
+  return state.modals.share.url
+}
+
 export const getWorker = state => {
   return state.worker
 }

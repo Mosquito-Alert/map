@@ -93,15 +93,22 @@ export default class ShareMapView {
   }
 
   load (callback) {
+    const _this = this
     fetch(this.options.url, {
       credentials: 'include',
-      method: 'GET' // or 'PUT'
+      method: 'GET', // or 'PUT'
+      headers: {
+        'X-CSRFToken': _this.options.csrfToken
+      }
     })
       .then(function (response) {
         return response.json()
       })
       .then(function (json) {
         callback(json)
+      })
+      .catch(function (err) {
+        console.log(err)
       })
   }
 }

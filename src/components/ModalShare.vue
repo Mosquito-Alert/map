@@ -1,4 +1,4 @@
-<!--
+  <!--
   MODAL WINDOW TO SHOW SHARED MAPVIEW URL
 -->
 
@@ -11,8 +11,8 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
           <div class="modal-title"> {{ _('Share modal title') }} </div>
-          <p v-if="status.status=='error'">{{ status.msg }}</p>
-          <div class="modal-content" v-if="status.status=='ok'">
+          <p v-if="viewContent.error">{{ viewContent.error }}</p>
+          <div class="modal-content" v-if="viewContent.url">
             <transition name="toast">
               <div v-if="copied" class="toast-msg">
                 {{ _('Url has been copied') }}
@@ -22,7 +22,7 @@
               <div class="col text-center">
                 <span
                   class="url-text"
-                  v-html="newUrl"
+                  v-html="viewContent.url"
                   @click.stop
                 />
                 <span class="viewshare cursor-pointer"><i
@@ -52,10 +52,9 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close', 'shareView'],
   setup (props, context) {
-    const status = ref('')
     const copied = ref(false)
-    const newUrl = ref('')
     const $store = useStore()
+    const viewContent = ref('')
 
     const shareView = function () {
       // Check if model is loaded
@@ -73,9 +72,15 @@ export default {
     })
 
     const close = function () {
-      status.value = ''
       copied.value = false
-      $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
+      $store.commit('app/setModal', {
+        id: 'share',
+        content: {
+          visibility: false,
+          url: '',
+          error: ''
+        }
+      })
     }
 
     const _ = function (text) {
@@ -86,7 +91,8 @@ export default {
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
         copied.value = true
         setTimeout(hide, 3000)
-        return navigator.clipboard.writeText(newUrl.value)
+        console.log(viewContent.value.url)
+        return navigator.clipboard.writeText(viewContent.value.url)
       }
       return Promise.reject('The Clipboard API is not available.')
     }
@@ -99,8 +105,7 @@ export default {
       mobile,
       copyToClipboard,
       copied,
-      status,
-      newUrl,
+      viewContent,
       shareView,
       close,
       _

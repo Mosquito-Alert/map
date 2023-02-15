@@ -34,7 +34,7 @@
       <fa-thin-button
         name="fa-thin fa-share-nodes"
         :label="_('Share')"
-        @click="showShareUrl"
+        @click="startShareView"
       ></fa-thin-button>
 
       <fa-thin-button
@@ -79,7 +79,14 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'leftMenuMounted'],
+  emits: [
+    'filterObservations',
+    'filterLocations',
+    'clearLocations',
+    'toggleSamplingEffort',
+    'leftMenuMounted',
+    'startShareView'
+  ],
   props: ['expanded', 'item'],
   computed: {
     active_item (props) {
@@ -113,30 +120,8 @@ export default {
       }
     }
 
-    // const logout = function () {
-    //   const controller = new AbortController()
-    //   const { signal } = controller
-    //   const logoutUrl = $store.getters['app/getLogoutUrl']
-    //   const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-
-    //   fetch(`${logoutUrl}`, {
-    //     credentials: 'include',
-    //     signal: signal,
-    //     method: 'GET'
-    //   })
-    //     .then(res => res.json())
-    //     .then(res => {
-    //       if (res.success) {
-    //         // $store.commit('app/setAuthorized', false)
-    //         document.location = registeredWeb
-    //       } else {
-    //         console.log('Not authenticated')
-    //       }
-    //     })
-    // }
-
-    const showShareUrl = function () {
-      $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
+    const startShareView = function () {
+      context.emit('startShareView', {})
     }
 
     const clickLanguageSelector = (lang, event) => {
@@ -165,14 +150,6 @@ export default {
       })
     }
 
-    // async function initLanguage () {
-    //   const lang = $store.getters['app/getLang']
-    //   let object = ca.value
-    //   if (lang === 'es') object = es.value
-    //   else if (lang === 'en') object = en.value
-    //   await setLanguage(lang, object)
-    // }
-
     onMounted(async function () {
       context.emit('leftMenuMounted', {})
     })
@@ -181,7 +158,6 @@ export default {
       return $store.getters['app/getFrontendUrl']
     })
     const linkModels = computed(() => {
-      console.log($store.getters['app/getFrontendUrl'] + 'models')
       return $store.getters['app/getFrontendUrl'] + 'models'
     })
 
@@ -203,7 +179,7 @@ export default {
       linkModels,
       showInfo,
       showHelp,
-      showShareUrl,
+      startShareView,
       processLogin,
       clickLanguageSelector
     }

@@ -155,7 +155,7 @@ export default defineComponent({
     'workerStartedIndexing',
     'workerFinishedIndexing',
     'loadingSamplingEffort',
-    'mapViewSaved',
+    'endShareView',
     'timeSeriesChanged',
     'tagsChanged',
     'locationChanged',
@@ -213,37 +213,6 @@ export default defineComponent({
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
     }
-
-    // const getCSRF = (callback, ol, viewCode) => {
-    //   fetch('http://localhost:8000/api/csrf/', {
-    //     credentials: 'include'
-    //   })
-    //     .then((res) => {
-    //       const csrfToken = res.headers.get('X-CSRFToken')
-    //       $store.commit('app/setCsrfToken', csrfToken)
-    //       callback(ol, viewCode)
-    //     })
-    //     .catch((err) => {
-    //       console.log(err)
-    //     })
-    // }
-
-    // const getSession = function (callback, ol, viewCode) {
-    //   fetch('http://localhost:8000/api/session/', {
-    //     credentials: 'include'
-    //   })
-    //     .then((res) => res.json())
-    //     .then((data) => {
-    //       if (data.isAuthenticated && $store.getters['app/getCsrfToken'] !== null) {
-    //         callback(ol, viewCode)
-    //       } else {
-    //         getCSRF(callback, ol, viewCode)
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log(err)
-    //     })
-    // }
 
     function preLoadView (code) {
       viewCode = code
@@ -844,12 +813,30 @@ export default defineComponent({
 
     // After saviing view emit event to show its URL in modal window
     function handleShareView (status) {
+      let content
       if (status.status === 'error') {
-        console.log(status.msg)
+        content = {
+          error: status.msg,
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       } else {
-        console.log(status.code)
+        const frontend = $store.getters['app/getFrontendUrl']
+        content = {
+          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       }
-      context.emit('mapViewSaved', status)
+      context.emit('endShareView', content)
     }
 
     // Each time map moves, call worker to get observations for the new view

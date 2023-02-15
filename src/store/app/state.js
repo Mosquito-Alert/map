@@ -230,7 +230,7 @@ export default function () {
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },
-      share: { visibility: false },
+      share: { visibility: false, url: '', error: '' },
       report: { visibility: false, n: 0 },
       error: { visibility: false, msg: '', link: '', redirection: false },
       wait: { visibility: false, seamless: false },

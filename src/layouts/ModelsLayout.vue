@@ -8,7 +8,7 @@
       @loadModel="loadModel"
       @clearModel="clearModel"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @showShareUrl="showShareUrl"
+      @startShareView="startShareView"
       @checkModelEstimation="checkModelEstimation"
       @checkModelUncertainty="checkModelUncertainty"
       @estimationTransparency="estimationTransparency"
@@ -28,7 +28,7 @@
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
-        @mapViewSaved="mapViewSaved"
+        @endShareView="endShareView"
         @setModelDate="setModelDate"
         @loadSharedModel="loadSharedModel"
         @errorDownloadingModels="errorDownloadingModels"
@@ -38,11 +38,12 @@
     <modal-share
       ref="shareModal"
       :open="shareModalVisible"
-      @shareView="shareView"
     >
       <template v-slot:default>
       </template>
     </modal-share>
+
+    <modal-confirm-logout/>
 
     <modal-info :open="infoModalVisible" buttons="close">
     </modal-info>
@@ -67,6 +68,7 @@ import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
+import ModalConfirmLogout from 'src/components/ModalConfirmLogout.vue'
 import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
@@ -91,6 +93,7 @@ export default {
     ModalHelp,
     ModalError,
     ModalLogin,
+    ModalConfirmLogout,
     ModalLogos,
     ModalWait,
     SiteHeader,
@@ -117,11 +120,7 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-
     const backend = $store.getters['app/getBackend']
-    const frontendUrl = computed(() => {
-      return $store.getters['app/getFrontendUrl']
-    })
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -176,11 +175,15 @@ export default {
       }
     }
 
-    const mapViewSaved = function (payload) {
-      shareModal.value.status = payload
-      if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + payload.code
-      }
+    const endShareView = function (payload) {
+      shareModal.value.viewContent = payload
+      // $store.commit('app/setModal', {
+      //   id: 'share',
+      //   content: payload
+      // })
+      // if (payload.status === 'ok') {
+      //   shareModal.value.newUrl = frontendUrl.value + payload.code
+      // }
     }
 
     const workerFinishedIndexing = function (payload) {
@@ -237,6 +240,10 @@ export default {
       map.value.uncertaintyRefresh()
     }
 
+    const startShareView = function () {
+      map.value.shareModelView()
+    }
+
     return {
       errorDownloadingModels,
       estimationColorsChanged,
@@ -253,7 +260,7 @@ export default {
       toggleLeftDrawer,
       shareView,
       shareModal,
-      mapViewSaved,
+      endShareView,
       shareModalVisible,
       infoModalVisible,
       helpModalVisible,
@@ -266,7 +273,8 @@ export default {
       clearModel,
       setModelDate,
       CookiesCompliance,
-      buildSession
+      buildSession,
+      startShareView
     }
   }
 }
