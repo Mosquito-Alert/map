@@ -1,5 +1,6 @@
 import { transform } from 'ol/proj.js'
 import FormatObservation from '../../js/FormatObservation'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import { useStore } from 'vuex'
 
 export const selectOneFeatureMap = (context, id) => {
@@ -14,7 +15,7 @@ export const selectOneFeatureMap = (context, id) => {
   })
     .then(response => response.json())
     .then(json => {
-      if (json.status === 'error') {
+      if (json.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {

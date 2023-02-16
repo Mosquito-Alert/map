@@ -69,6 +69,7 @@ import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 // import MSession from '../js/session.js'
 
 export default defineComponent({
@@ -197,7 +198,7 @@ export default defineComponent({
     // Handle shared view
     function handleShareView (status) {
       let content
-      if (status.status === 'error') {
+      if (status.status !== STATUS_CODES.OK) {
         content = {
           error: status.msg,
           visibility: true,
@@ -234,7 +235,7 @@ export default defineComponent({
     // Handle shared view
     function handleLoadView (response) {
       // Check status response
-      if (response.status === 'error') {
+      if (response.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {

@@ -145,7 +145,8 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
-import MSession from '../js/session.js'
+import MSession from '../js/session'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -624,7 +625,7 @@ export default defineComponent({
 
     // Handle loaded view. Set UI accordingly
     async function handleLoadView (view) {
-      if (view.status === 'error') {
+      if (view.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
@@ -814,7 +815,7 @@ export default defineComponent({
     // After saviing view emit event to show its URL in modal window
     function handleShareView (status) {
       let content
-      if (status.status === 'error') {
+      if (status.status !== STATUS_CODES.OK) {
         content = {
           error: status.msg,
           visibility: true,
@@ -924,7 +925,7 @@ export default defineComponent({
 
     // Open new window and show report
     function handleReportView (report) {
-      if (report.status === 'ok') {
+      if (report.status === STATUS_CODES.OK) {
         const frontend = $store.getters['app/getFrontendUrl']
         window.open(frontend + report.code, '_bank')
       }

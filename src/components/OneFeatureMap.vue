@@ -66,6 +66,7 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import MapToCanvas from '../js/MapToCanvas'
 import { Icon } from 'ol/style'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default {
   props: ['popup', 'featContent', 'height', 'width', 'toCanvas', 'mapId', 'clickable'],
@@ -322,7 +323,7 @@ export default {
         })
           .then(response => response.json())
           .then(json => {
-            if (json.status === 'error') {
+            if (json.status !== STATUS_CODES.OK) {
               $store.commit('app/setModal', {
                 id: 'error',
                 content: {

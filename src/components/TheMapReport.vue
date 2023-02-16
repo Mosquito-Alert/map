@@ -240,6 +240,7 @@ import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
 import MSession from '../js/session.js'
 import { observations as privateLayers } from '../store/app/privateTOC'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default {
   name: 'TheMapReport',
@@ -367,7 +368,7 @@ export default {
     }
 
     function handleReportView (report) {
-      if (report.status === 'error') {
+      if (report.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
