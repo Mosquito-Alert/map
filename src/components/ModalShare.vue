@@ -137,7 +137,7 @@ export default {
 }
 dialog {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 5rem 5rem 3rem 5rem;
+  padding: 5rem 5rem 5rem 5rem;
   background-color: white;
   z-index: 2001;
   border: none;

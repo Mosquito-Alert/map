@@ -322,18 +322,31 @@ export default {
         })
           .then(response => response.json())
           .then(json => {
-            const fCoords = transform(
-              [json.lon, json.lat],
-              'EPSG:4326', 'EPSG:3857'
-            )
-            center.value = fCoords
-            // styleFunction layer uses c attribute for private_webmap_layer value
-            json.c = json.private_webmap_layer
-            feature = new Feature({
-              geometry: new Point(fCoords),
-              properties: json
-            })
-            observationSource.value.source.addFeature(feature)
+            if (json.status === 'error') {
+              $store.commit('app/setModal', {
+                id: 'error',
+                content: {
+                  visibility: true,
+                  msg: json.error
+                }
+              })
+            } else {
+              const fCoords = transform(
+                [json.lon, json.lat],
+                'EPSG:4326', 'EPSG:3857'
+              )
+              center.value = fCoords
+              // styleFunction layer uses c attribute for private_webmap_layer value
+              json.c = json.private_webmap_layer
+              feature = new Feature({
+                geometry: new Point(fCoords),
+                properties: json
+              })
+              observationSource.value.source.addFeature(feature)
+            }
+          })
+          .catch(e => {
+            console.log(e)
           })
       }
     }

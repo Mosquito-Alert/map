@@ -19,12 +19,12 @@
         :clickable="mobile?'true':'false'"
       />
     </q-page>
-    <modal-cookie-settings>
-    </modal-cookie-settings>
 
-    <modal-cookie-policy>
-    </modal-cookie-policy>
+    <modal-cookie-settings/>
+    <modal-error/>
+    <modal-cookie-policy/>
     <cookies-compliance/>
+
   </q-layout>
 </template>
 
@@ -33,6 +33,7 @@ import OneFeatureMap from 'components/OneFeatureMap.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import ModalError from 'src/components/ModalError.vue'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
@@ -40,6 +41,7 @@ import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 export default {
   components: {
     OneFeatureMap,
+    ModalError,
     ModalCookiePolicy,
     ModalCookieSettings,
     CookiesCompliance

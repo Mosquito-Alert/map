@@ -1,23 +1,35 @@
 import { transform } from 'ol/proj.js'
 import FormatObservation from '../../js/FormatObservation'
+import { useStore } from 'vuex'
 
 export const selectOneFeatureMap = (context, id) => {
   const root = context.rootGetters['app/getBackend']
   const titles = context.rootGetters['map/getTitles']
   const latinNames = context.rootGetters['map/getLatinNames']
   const url = root + 'api/get_observation/' + id + '/'
+  const $store = useStore()
 
   fetch(url, {
     credentials: 'include'
   })
     .then(response => response.json())
     .then(json => {
-      json.coordinates = transform(
-        [json.lon, json.lat],
-        'EPSG:4326', 'EPSG:3857'
-      )
-      const formated = new FormatObservation(json, titles, latinNames).format()
-      context.commit('selectFeature', formated)
+      if (json.status === 'error') {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: json.error
+          }
+        })
+      } else {
+        json.coordinates = transform(
+          [json.lon, json.lat],
+          'EPSG:4326', 'EPSG:3857'
+        )
+        const formated = new FormatObservation(json, titles, latinNames).format()
+        context.commit('selectFeature', formated)
+      }
     })
 }
 
