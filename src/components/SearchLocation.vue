@@ -51,6 +51,8 @@
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { mixin as VueClickAway } from 'vue3-click-away'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   props: [],
@@ -95,8 +97,6 @@ export default {
 
     const search = function () {
       loading.value = true
-      const controller = new AbortController()
-      const { signal } = controller
       const lang = $store.getters['app/getLang']
 
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
@@ -108,29 +108,28 @@ export default {
       if (viewBox.length) {
         url += '&viewbox=' + viewBox.join(',')
       }
-      fetch(url,
-        { signal })
-        .then(res => res.json())
-        .then(res => {
-          // Get only polygons and multipolygons. Ignore multilines, points and so on
-          const polygons = res.filter(feature => {
-            return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
-          })
-          results.value = []
-          polygons.forEach(function (feature) {
-            results.value.push(feature)
-          })
-          if (!results.value.length) {
+      axios(url)
+        .then(resp => {
+          if (resp.status === STATUS_CODES.OK) {
+            // Get only polygons and multipolygons. Ignore multilines, points and so on
+            const polygons = resp.data.filter(feature => {
+              return feature.geojson.type.toLowerCase().indexOf('polygon') > -1
+            })
+            results.value = []
+            polygons.forEach(function (feature) {
+              results.value.push(feature)
+            })
+            if (!results.value.length) {
+              error.value = true
+            }
+            loading.value = false
+            isVisible.value = true
+            itemRefs = []
+            clearTimeout(keyUpTimer)
+          } else {
+            loading.value = false
             error.value = true
           }
-          loading.value = false
-          isVisible.value = true
-          itemRefs = []
-          clearTimeout(keyUpTimer)
-        })
-        .catch(e => {
-          loading.value = false
-          error.value = true
         })
     }
 

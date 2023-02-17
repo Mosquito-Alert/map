@@ -1,3 +1,6 @@
+import axios from 'axios'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+
 export default class MSession {
   constructor (backend, csrftoken) {
     this.backend = backend
@@ -6,35 +9,36 @@ export default class MSession {
 
   getCSRF (callback) {
     const _this = this
-    fetch(_this.backend + 'api/csrf/', {
-      credentials: 'include'
+    axios(_this.backend + 'api/csrf/', {
+      withCredentials: true
     })
-      .then((res) => {
-        const csrfToken = res.headers.get('X-CSRFToken')
-        _this.csrfToken = csrfToken
-        callback()
-      })
-      .catch((err) => {
-        console.log(err)
+      .then((resp) => {
+        if (resp.status === STATUS_CODES.OK) {
+          const csrfToken = resp.headers.get('X-CSRFToken')
+          _this.csrfToken = csrfToken
+          callback()
+        } else {
+          console.log(resp.status)
+        }
       })
   }
 
   getSession (callback) {
     const _this = this
-    fetch(_this.backend + 'api/session/', {
-      credentials: 'include'
+    axios(_this.backend + 'api/session/', {
+      withCredentials: true
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.isAuthenticated && _this.csrfToken !== null) {
-          callback()
-          console.log(true)
+      .then((resp) => {
+        if (resp.status === STATUS_CODES.OK) {
+          if (resp.data.isAuthenticated && _this.csrfToken !== null) {
+            callback()
+            console.log(true)
+          } else {
+            _this.getCSRF(callback)
+          }
         } else {
-          _this.getCSRF(callback)
+          console.log(resp.status)
         }
-      })
-      .catch((err) => {
-        console.log(err)
       })
   }
 }

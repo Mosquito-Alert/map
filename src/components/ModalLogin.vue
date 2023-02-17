@@ -61,6 +61,8 @@ import { useStore } from 'vuex'
 import { observations as privateLayers } from '../store/app/privateTOC'
 import { observations as publicLayers } from '../store/app/publicTOC'
 import MSession from '../js/session.js'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   emits: [
@@ -91,25 +93,26 @@ export default {
 
     const onSubmit = function (evt) {
       if (username.value && password.value) {
-        fetch(backendUrl + 'api/login/', {
+        axios(backendUrl + 'api/login/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': $store.getters['app/getCsrfToken']
           },
-          credentials: 'include',
+          withCredentials: true,
           // body: formData
-          body: JSON.stringify({ username: username.value, password: password.value })
+          data: JSON.stringify({ username: username.value, password: password.value })
         })
-          .then((data) => {
-            mySession = new MSession(backendUrl, null)
-            mySession.getSession(resetTOC)
-          })
-          .catch((err) => {
-            console.log(err)
-            this.setState({ error: 'Wrong username or password.' })
-            console.log('Not authenticated')
-            $store.commit('app/setLayers', publicLayers)
+          .then((resp) => {
+            if (resp.status === STATUS_CODES.OK) {
+              mySession = new MSession(backendUrl, null)
+              mySession.getSession(resetTOC)
+            } else {
+              console.log(resp.status)
+              this.setState({ error: 'Wrong username or password.' })
+              console.log('Not authenticated')
+              $store.commit('app/setLayers', publicLayers)
+            }
           })
       }
     }

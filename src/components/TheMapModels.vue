@@ -70,7 +70,7 @@ import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
-// import MSession from '../js/session.js'
+import axios from 'axios'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -88,7 +88,6 @@ export default defineComponent({
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
-    let gitHubError = 0
     let CSVS = {}
     let CENTROIDS = {}
     // let mySession
@@ -356,7 +355,6 @@ export default defineComponent({
 
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
-      let ERROR_404 = false
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
@@ -366,30 +364,16 @@ export default defineComponent({
       CSVS = {}
       const urls = data.modelsCsv
 
-      // PROBABILITY GEOMETRIES FROM VECTOR TILES
-      await Promise.all(urls.map(m =>
-        fetch(m).then(resp => {
-          if (resp.status === 404) {
-            ERROR_404 = true
-          }
-          return resp.text()
+      const requests = urls.map((url) => {
+        return axios.get(url, {
+          withCredentials: true
         })
-      )).then(texts => {
-        texts.forEach(text => {
-          if (text.message || ERROR_404) {
-            gitHubError = 1
-            $store.commit('app/setModal', {
-              id: 'error',
-              content: {
-                visibility: true,
-                msg: text.message,
-                link: text.documentation_url
-              }
-            })
-            context.emit('errorDownloadingModels')
-            return true
-          }
-          const decoded = text
+      })
+
+      // PROBABILITY GEOMETRIES FROM VECTOR TILES
+      await axios.all(requests).then((responses) => {
+        responses.forEach((resp) => {
+          const decoded = resp.data
           if (!('1' in CSVS)) {
             CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
@@ -402,18 +386,6 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
-
-        if (ERROR_404) {
-          $store.commit('app/setModal', {
-            id: 'error',
-            content: {
-              visibility: true,
-              msg: 'MODEL NOT FOUND'
-            }
-          })
-          context.emit('errorDownloadingModels')
-          return true
-        }
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
         gadm3.getSource().refresh()
@@ -450,35 +422,31 @@ export default defineComponent({
         map.value.map.on('rendercomplete', function () {
           spinner(false)
         })
-      }).catch((error) => {
-        console.log(error)
       })
-
-      if (gitHubError) {
-        spinner(false)
-        return true
-      }
 
       // UNCERTAINTY GEOMETRIES FROM GEOJSON FILES
       CENTROIDS = {}
-      const centroids = data.centroidsUrls
-      await Promise.all(centroids.map(m =>
-        fetch(m, {
-          credentials: 'include'
-        }).then(resp => resp.json())
-      )).then(jsons => {
-        // Check for errors
-        jsons.forEach(json => {
+      const centroidUrls = data.centroidsUrls
+      const centroidsReq = centroidUrls.map((url) => {
+        return axios.get(url, {
+          withCredentials: true
+        })
+      })
+
+      await axios.all(centroidsReq).then((responses) => {
+        responses.forEach((resp) => {
+          console.log(resp.data)
           if (!('1' in CENTROIDS)) {
-            CENTROIDS['1'] = putDataOnCentroids(json, CSVS['1'], 1)
+            CENTROIDS['1'] = putDataOnCentroids(resp.data, CSVS['1'], 1)
           } else if (!('2' in CENTROIDS)) {
-            CENTROIDS['2'] = putDataOnCentroids(json, CSVS['2'], 2)
+            CENTROIDS['2'] = putDataOnCentroids(resp.data, CSVS['2'], 2)
           } else if (!('3' in CENTROIDS)) {
-            CENTROIDS['3'] = putDataOnCentroids(json, CSVS['3'], 3)
+            CENTROIDS['3'] = putDataOnCentroids(resp.data, CSVS['3'], 3)
           } else if (!('4' in CENTROIDS)) {
-            CENTROIDS['4'] = putDataOnCentroids(json, CSVS['4'], 4)
+            CENTROIDS['4'] = putDataOnCentroids(resp.data, CSVS['4'], 4)
           }
         })
+
         const seColor = $store.getters['app/getUncertaintyColor']
 
         seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
@@ -515,8 +483,6 @@ export default defineComponent({
         seModelLayer4.addLayer()
         uncertaintyVisibility(data.uncertainty)
         uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
-      }).catch((error) => {
-        console.log(error)
       })
     }
 

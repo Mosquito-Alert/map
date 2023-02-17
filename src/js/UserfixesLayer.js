@@ -2,6 +2,7 @@ import DataTile from 'ol/source/DataTile'
 import TileLayer from 'ol/layer/WebGLTile'
 import geojsonvt from 'geojson-vt'
 import { useStore } from 'vuex'
+import axios from 'axios'
 
 export default class UserfixesLayer {
   constructor (map, url, legend, zIndex) {
@@ -93,14 +94,11 @@ export default class UserfixesLayer {
       return
     }
 
-    fetch(this.url, {
-      credentials: 'include'
+    axios(this.url, {
+      withCredentials: true
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        _this.tileIndex = geojsonvt(json, {
+      .then(function (resp) {
+        _this.tileIndex = geojsonvt(resp.data, {
           extent: 4096,
           maxZoom: 20
         })

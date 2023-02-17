@@ -1,4 +1,6 @@
 import moment from 'moment'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default class ShareMapView {
   // constructor (map, filters, url, callback) {
@@ -76,39 +78,34 @@ export default class ShareMapView {
       dataView.estimationColors = this.options.estimationColors
     }
 
-    fetch(this.options.url, {
-      credentials: 'include',
+    axios(this.options.url, {
+      withCredentials: true,
       method: 'POST', // or 'PUT'
-      body: JSON.stringify(dataView),
+      data: JSON.stringify(dataView),
       headers: {
         'X-CSRFToken': _this.options.csrfToken
       }
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        _this.options.callback(json)
+      .then(function (resp) {
+        _this.options.callback(resp.data)
       })
   }
 
   load (callback) {
     const _this = this
-    fetch(this.options.url, {
-      credentials: 'include',
+    axios(this.options.url, {
+      withCredentials: true,
       method: 'GET', // or 'PUT'
       headers: {
         'X-CSRFToken': _this.options.csrfToken
       }
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        callback(json)
-      })
-      .catch(function (err) {
-        console.log(err)
+      .then(function (resp) {
+        if (resp.status === STATUS_CODES.OK) {
+          callback(resp.data)
+        } else {
+          console.log(resp.status)
+        }
       })
   }
 }

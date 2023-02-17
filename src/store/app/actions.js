@@ -1,5 +1,6 @@
 import { defaultObservations as privateDefaultObservations, observations as privateLayers } from './privateTOC'
 import { defaultObservations as publicDefaultObservations, observations as publicLayers } from './publicTOC'
+import axios from 'axios'
 
 export const setLanguage = async (context, lang) => {
   context.commit('setLanguage', lang)
@@ -9,11 +10,11 @@ export const setLanguage = async (context, lang) => {
 export const setTranslations = async (context) => {
   const lang = context.getters.getLang
   const url = context.getters.getBackend + 'translations/' + lang + '/'
-  await fetch(url, {
-    credentials: 'include'
-  }).then(function (response) { return response.json() }).then(function (json) {
-    context.commit('setTranslations', json)
-    const registered = ('registered-user' in json) ? json['registered-user'] : false
+  await axios(url, {
+    withCredentials: true
+  }).then(function (resp) {
+    context.commit('setTranslations', resp.data)
+    const registered = ('registered-user' in resp.data) ? resp.data['registered-user'] : false
     context.commit('setAuthorized', registered)
   })
 

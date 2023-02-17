@@ -241,6 +241,7 @@ import { useQuasar } from 'quasar'
 import MSession from '../js/session.js'
 import { observations as privateLayers } from '../store/app/privateTOC'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   name: 'TheMapReport',
@@ -282,7 +283,6 @@ export default {
     })
 
     const setLanguage = (lang) => {
-      console.log('one')
       $store.dispatch('app/setLanguage', lang)
       // NASTY
       if (lang === 'en') lang = 'en-US'
@@ -307,7 +307,7 @@ export default {
       newView.load(handleReportView)
     }
     onMounted(function () {
-      // Fetch report view data
+      // Get report view data
       const mCanvas = new MapToCanvas({ map: map.value.map })
       map.value.map.on('rendercomplete', function (e) {
         document.getElementById('c-mapa').src = mCanvas.doCanvas()
@@ -401,7 +401,6 @@ export default {
         const layers = $store.getters['app/getLayers']
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
-          console.log(o.type, o.code)
           return layers[o.type][o.code].common_name
         })
 
@@ -438,19 +437,22 @@ export default {
         const reportFilters = formatParams(view)
         const url = backendUrl + 'api/downloads/features/'
 
-        fetch(url, {
-          credentials: 'include',
+        axios(url, {
+          withCredentials: true,
           method: 'POST', // or 'PUT'
-          body: JSON.stringify(reportFilters),
+          data: JSON.stringify(reportFilters),
           headers: {
             'X-CSRFToken': mySession.csrfToken
           }
         })
-          .then(res => res.json())
-          .then(jsonRes => {
+          .then(resp => {
+            if (resp.status !== STATUS_CODES.OK) {
+              console.log(resp.status)
+              return
+            }
             const titles = $store.getters['map/getTitles']
             const latinNames = $store.getters['map/getLatinNames']
-            const formated = jsonRes.map(e => {
+            const formated = resp.data.map(e => {
               return new FormatObservation(e, titles, latinNames).format()
             })
 
@@ -488,10 +490,8 @@ export default {
             worker.postMessage({
               bbox: southWest.concat(northEast),
               zoom: map.value.map.getView().getZoom(),
-              features: jsonRes
+              features: resp.data
             })
-          }).catch((error) => {
-            console.log(error)
           })
       }
     }

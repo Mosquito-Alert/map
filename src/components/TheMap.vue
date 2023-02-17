@@ -147,6 +147,7 @@ import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
 import MSession from '../js/session'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -289,22 +290,19 @@ export default defineComponent({
     })
     const firstCall = async function () {
       if ($store.getters['map/getFirstViewMap']) {
-        await fetch(initUrl, {
-          credentials: 'include'
+        await axios.get(initUrl, {
+          withCredentials: true
+        }).then(response => {
+          const geojson = response.data
+          dataset = geojson.features
+          YEARS[index].data = JSON.parse(JSON.stringify(dataset))
+          context.emit('workerStartedIndexing')
+          worker.postMessage({
+            initData: true,
+            year: moment().year(),
+            data: geojson
+          })
         })
-          .then(function (response) {
-            return response.json()
-          })
-          .then(function (geojson) {
-            dataset = geojson.features
-            YEARS[index].data = JSON.parse(JSON.stringify(dataset))
-            context.emit('workerStartedIndexing')
-            worker.postMessage({
-              initData: true,
-              year: moment().year(),
-              data: geojson
-            })
-          })
       } else {
         const dates = cloneJson($store.getters['app/getDefaults'].dates)
         const missing = getMissingYears(dates)
@@ -1042,25 +1040,29 @@ export default defineComponent({
       const data = getDataFromFilters()
 
       const url = downloadUrl + format.format + '/'
-      fetch(url, {
+      axios(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/force-download',
           'X-CSRFToken': $store.getters['app/getCsrfToken']
         },
-        credentials: 'include',
-        body: JSON.stringify(data)
+        withCredentials: true,
+        data: JSON.stringify(data),
+        responseType: 'blob'
       })
-        .then((transfer) => {
-          return transfer.blob()
-        })
-        .then((bytes) => {
-          const elm = document.createElement('a')
-          elm.href = URL.createObjectURL(bytes)
-          elm.setAttribute('download', 'observations.zip')
-          elm.click()
-        }).catch((error) => {
-          console.log(error)
+        .then((resp) => {
+          if (resp.status === STATUS_CODES.OK) {
+            const fileReader = new window.FileReader()
+            fileReader.readAsDataURL(resp.data)
+            fileReader.onload = () => {
+              const elm = document.createElement('a')
+              elm.href = URL.createObjectURL(resp.data)
+              elm.setAttribute('download', 'observations.zip')
+              elm.click()
+            }
+          } else {
+            console.log(resp)
+          }
         })
     }
 
@@ -1440,38 +1442,33 @@ export default defineComponent({
 
     async function getDataset (missing) {
       mapFilters.mode = 'resetFilter'
-      await Promise.all(missing.map(m =>
-        fetch(backendUrl + 'api/get/data/' + m.year + '/', {
-          credentials: 'include'
-        }).then(resp => resp.json())
-      )).then(jsons => {
-        // Check for errors
-        jsons.forEach(j => {
-          if ('status' in j) {
-            console.log(j.msg)
-          } else {
-            const y = j.year
-            const index = YEARS.findIndex(element => {
-              return element.year === y
-            })
-            // Check if there are any features for current year
-            if (j.features.length) {
-              // Get first feature date,
-              if (j.features[0].properties.d < firstDate) {
-                firstDate = j.features[0].properties.d
-              }
-              // Get last feature date
-              if (j.features[j.features.length - 1].properties.d > lastDate) {
-                lastDate = j.features[j.features.length - 1].properties.d
-              }
-              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-              dataset = dataset.concat(j.features)
+      const requests = missing.map((obj) => {
+        const url = backendUrl + 'api/get/data/' + obj.year + '/'
+        return axios.get(url, {
+          withCredentials: true
+        })
+      })
+
+      await axios.all(requests).then((responses) => {
+        responses.forEach((resp) => {
+          const y = resp.data.year
+          const index = YEARS.findIndex(element => {
+            return element.year === y
+          })
+          // Check if there are any features for current year
+          if (resp.data.features.length) {
+            // Get first feature date,
+            if (resp.data.features[0].properties.d < firstDate) {
+              firstDate = resp.data.features[0].properties.d
             }
+            // Get last feature date
+            if (resp.data.features[resp.data.features.length - 1].properties.d > lastDate) {
+              lastDate = resp.data.features[resp.data.features.length - 1].properties.d
+            }
+            YEARS[index].data = JSON.parse(JSON.stringify(resp.data.features))
+            dataset = dataset.concat(resp.data.features)
           }
         })
-      }).catch((error) => {
-        dataset = []
-        console.log(error)
       })
     }
 
@@ -1523,26 +1520,21 @@ export default defineComponent({
           $store.commit('app/setFilteringTag', { value: true })
 
           const url = $store.getters['app/getBackend'] + 'api/get_reports/'
-          const controller = new AbortController()
-          const { signal } = controller
-          fetch(`${url}`, {
-            credentials: 'include',
-            signal: signal,
-            method: 'POST', // or 'PUT'
-            body: JSON.stringify({ reports: mapFilters.report_id.join(',') })
-          })
-            .then(res => res.json())
-            .then(res => {
-              // Only one report. So no push into array
-              mapFilters.featuresSet = [res]
+          axios(url, {
+            withCredentials: true,
+            method: 'post',
+            data: JSON.stringify({ reports: mapFilters.report_id.join(',') })
+          }).then(resp => {
+            if (resp.status === STATUS_CODES.OK) {
+              mapFilters.featuresSet = [resp.data]
               workerData.filters = mapFilters
               context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
-            })
-            .catch(e => {
+            } else {
               $store.commit('app/setFilteringTag', { value: false })
-            })
+            }
+          })
         } else {
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
@@ -1571,33 +1563,28 @@ export default defineComponent({
           $store.commit('app/setFilteringTag', { value: true })
 
           const url = $store.getters['app/getBackend'] + 'api/get_hashtags/'
-          const controller = new AbortController()
-          const { signal } = controller
           const normalizeTags = tags.map(t => {
             return t.startsWith('#') ? t.slice(1) : t
           })
           mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
-          fetch(`${url}`, {
-            credentials: 'include',
-            signal: signal,
-            method: 'POST', // or 'PUT'
-            body: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
-          })
-            .then(res => res.json())
-            .then(res => {
-              // Only one report. So no push into array
-              mapFilters.featuresSet = [res]
+          axios(url, {
+            withCredentials: true,
+            method: 'post',
+            data: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
+          }).then(resp => {
+            if (resp.status === STATUS_CODES.OK) {
+              mapFilters.featuresSet = [resp.data]
               mapFilters.mode = 'resetFilter'
               workerData.filters = mapFilters
               context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
-            })
-            .catch(e => {
+            } else {
               $store.commit('app/setFilteringTag', { value: false })
-            })
+            }
+          })
         }
       }
     }

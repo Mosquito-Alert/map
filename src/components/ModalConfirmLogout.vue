@@ -28,11 +28,14 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   emits: ['close'],
   setup (props, context) {
     const $store = useStore()
+    const backendUrl = $store.getters['app/getBackend']
 
     const open = computed(() => {
       return $store.getters['app/getModals'].confirmLogout.visibility
@@ -51,17 +54,17 @@ export default {
 
     const logout = () => {
       const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-      fetch('http://localhost:8000/api/logout/', {
-        credentials: 'include'
+      axios(backendUrl + '/api/logout/', {
+        withCredentials: true
       })
-        .then((data) => {
-          console.log(data)
-          $store.commit('app/setAuthorized', false)
-          document.location = registeredWeb
-          // this.getCSRF()
-        })
-        .catch((err) => {
-          console.log(err)
+        .then((resp) => {
+          if (resp.status === STATUS_CODES.OK) {
+            console.log(resp)
+            $store.commit('app/setAuthorized', false)
+            document.location = registeredWeb
+          } else {
+            console.log(resp.status)
+          }
         })
     }
 
