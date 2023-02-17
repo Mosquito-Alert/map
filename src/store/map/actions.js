@@ -2,6 +2,7 @@ import { transform } from 'ol/proj.js'
 import FormatObservation from '../../js/FormatObservation'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import { useStore } from 'vuex'
+import axios from 'axios'
 
 export const selectOneFeatureMap = (context, id) => {
   const root = context.rootGetters['app/getBackend']
@@ -10,25 +11,24 @@ export const selectOneFeatureMap = (context, id) => {
   const url = root + 'api/get_observation/' + id + '/'
   const $store = useStore()
 
-  fetch(url, {
-    credentials: 'include'
+  axios(url, {
+    withCredentials: true
   })
-    .then(response => response.json())
-    .then(json => {
-      if (json.status !== STATUS_CODES.OK) {
+    .then(resp => {
+      if (resp.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
             visibility: true,
-            msg: json.error
+            msg: resp.data.error
           }
         })
       } else {
-        json.coordinates = transform(
-          [json.lon, json.lat],
+        resp.data.coordinates = transform(
+          [resp.data.lon, resp.data.lat],
           'EPSG:4326', 'EPSG:3857'
         )
-        const formated = new FormatObservation(json, titles, latinNames).format()
+        const formated = new FormatObservation(resp.data, titles, latinNames).format()
         context.commit('selectFeature', formated)
       }
     })
@@ -48,11 +48,11 @@ export const selectFeature = (context, feature) => {
     return
   }
 
-  fetch(url, {
-    credentials: 'include'
-  }).then(response => response.json()).then(json => {
-    json.coordinates = feature.geometry.flatCoordinates
-    const formated = new FormatObservation(json, titles, latinNames).format()
+  axios(url, {
+    withCredentials: true
+  }).then(resp => {
+    resp.data.coordinates = feature.geometry.flatCoordinates
+    const formated = new FormatObservation(resp.data, titles, latinNames).format()
     context.commit('selectFeature', formated)
   })
 }

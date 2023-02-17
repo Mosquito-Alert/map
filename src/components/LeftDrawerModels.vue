@@ -220,7 +220,7 @@ import { watch, computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
-// import axios from 'axios'
+import axios from 'axios'
 
 export default {
   components: { LeftMenu },
@@ -299,7 +299,7 @@ export default {
       const d = new Date()
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       uncertaintyColor.value = defaults.uncertaintyColor
-      // Fetch model manifest to activate/deactivate calendar
+      // Get model manifest to activate/deactivate calendar
       getManifest(manifestUrl)
     })
 
@@ -315,13 +315,10 @@ export default {
         }
         return true
       }
-      fetch(url)
-        .then(function (response) {
-          return response.text()
-        })
-        .then(function (csv) {
+      axios(url)
+        .then(function (resp) {
           // Read csv manifest
-          const lines = csv.split(/\r?\n/)
+          const lines = resp.data.split(/\r?\n/)
           const headers = lines[0].toLowerCase().split(',')
           const targetIdx = headers.indexOf('target')
           const yearIdx = headers.indexOf('from')
@@ -341,9 +338,6 @@ export default {
           if (callback) {
             callback()
           }
-        }).catch((error) => {
-          console.log(error)
-          return null
         })
     }
 

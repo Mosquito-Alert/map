@@ -67,6 +67,7 @@ import Point from 'ol/geom/Point'
 import MapToCanvas from '../js/MapToCanvas'
 import { Icon } from 'ol/style'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   props: ['popup', 'featContent', 'height', 'width', 'toCanvas', 'mapId', 'clickable'],
@@ -318,36 +319,33 @@ export default {
         $store.dispatch('map/selectOneFeatureMap', observationId)
       } else {
         const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId + '/'
-        fetch(url, {
-          credentials: 'include'
+        axios.get(url, {
+          withCredentials: true
         })
-          .then(response => response.json())
-          .then(json => {
-            if (json.status !== STATUS_CODES.OK) {
+          .then(resp => {
+            console.log(resp)
+            if (resp.status !== STATUS_CODES.OK) {
               $store.commit('app/setModal', {
                 id: 'error',
                 content: {
                   visibility: true,
-                  msg: json.error
+                  msg: resp.data.error
                 }
               })
             } else {
               const fCoords = transform(
-                [json.lon, json.lat],
+                [resp.data.lon, resp.data.lat],
                 'EPSG:4326', 'EPSG:3857'
               )
               center.value = fCoords
               // styleFunction layer uses c attribute for private_webmap_layer value
-              json.c = json.private_webmap_layer
+              resp.data.c = resp.data.private_webmap_layer
               feature = new Feature({
                 geometry: new Point(fCoords),
-                properties: json
+                properties: resp.data
               })
               observationSource.value.source.addFeature(feature)
             }
-          })
-          .catch(e => {
-            console.log(e)
           })
       }
     }

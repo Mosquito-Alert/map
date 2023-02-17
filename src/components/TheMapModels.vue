@@ -435,7 +435,6 @@ export default defineComponent({
 
       await axios.all(centroidsReq).then((responses) => {
         responses.forEach((resp) => {
-          console.log(resp.data)
           if (!('1' in CENTROIDS)) {
             CENTROIDS['1'] = putDataOnCentroids(resp.data, CSVS['1'], 1)
           } else if (!('2' in CENTROIDS)) {
