@@ -4,6 +4,7 @@
 
 <template>
   <div id='mapa' class='bg-white'>
+    <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -83,6 +84,7 @@ export default defineComponent({
   props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
+    const progress = ref(0)
     const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
@@ -366,7 +368,10 @@ export default defineComponent({
 
       const requests = urls.map((url) => {
         return axios.get(url, {
-          withCredentials: true
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          }
         })
       })
 
@@ -429,7 +434,10 @@ export default defineComponent({
       const centroidUrls = data.centroidsUrls
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
-          withCredentials: true
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          }
         })
       })
 
@@ -788,7 +796,8 @@ export default defineComponent({
       leftDrawerIcon,
       map,
       loadModel,
-      clearModel
+      clearModel,
+      progress
     }
   }
 })
@@ -925,5 +934,10 @@ export default defineComponent({
 .drawer-handler span i,
 .drawer-handler-mobile span i{
   color: white;
+}
+.progress-bar-absolute{
+  position:absolute;
+  top:0;
+  z-index:1;
 }
 </style>

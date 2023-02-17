@@ -34,25 +34,25 @@ export const selectOneFeatureMap = (context, id) => {
     })
 }
 
-export const selectFeature = (context, feature) => {
-  const root = context.rootGetters['app/getBackend']
-  const url = root + 'api/get_observation/' + feature.properties.id + '/'
-  const titles = context.rootGetters['map/getTitles']
-  const latinNames = context.rootGetters['map/getLatinNames']
+// export const selectFeature = (context, feature) => {
+//   const root = context.rootGetters['app/getBackend']
+//   const url = root + 'api/get_observation/' + feature.properties.id + '/'
+//   const titles = context.rootGetters['map/getTitles']
+//   const latinNames = context.rootGetters['map/getLatinNames']
 
-  // If there is no id then all info is already in feature
-  if (!feature.properties.id) {
-    const formated = new FormatObservation(feature.properties, titles, latinNames).format()
-    formated.coordinates = feature.geometry.flatCoordinates
-    context.commit('selectFeature', formated)
-    return
-  }
+//   // If there is no id then all info is already in feature
+//   if (!feature.properties.id) {
+//     const formated = new FormatObservation(feature.properties, titles, latinNames).format()
+//     formated.coordinates = feature.geometry.flatCoordinates
+//     context.commit('selectFeature', formated)
+//     return
+//   }
 
-  axios(url, {
-    withCredentials: true
-  }).then(resp => {
-    resp.data.coordinates = feature.geometry.flatCoordinates
-    const formated = new FormatObservation(resp.data, titles, latinNames).format()
-    context.commit('selectFeature', formated)
-  })
-}
+//   axios(url, {
+//     withCredentials: true
+//   }).then(resp => {
+//     resp.data.coordinates = feature.geometry.flatCoordinates
+//     const formated = new FormatObservation(resp.data, titles, latinNames).format()
+//     context.commit('selectFeature', formated)
+//   })
+// }

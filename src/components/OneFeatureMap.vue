@@ -11,7 +11,7 @@
       :loadTilesWhileInteracting="true"
       :style="style"
     >
-
+      <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute" v-if="progress>0 && progress<100"/>
       <ol-view
         ref="view"
         :center="center"
@@ -68,11 +68,13 @@ import MapToCanvas from '../js/MapToCanvas'
 import { Icon } from 'ol/style'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import FormatObservation from '../js/FormatObservation'
 
 export default {
   props: ['popup', 'featContent', 'height', 'width', 'toCanvas', 'mapId', 'clickable'],
   components: { ObservationPopup },
   setup (props, context) {
+    const progress = ref()
     const $store = useStore()
     const route = useRoute()
     const map = ref('null')
@@ -95,6 +97,32 @@ export default {
       } else {
         foldingIcon.value = '<'
       }
+    }
+
+    async function selectFeature (feature) {
+      const root = $store.getters['app/getBackend']
+      const url = root + 'api/get_observation/' + feature.properties.id + '/'
+      const titles = $store.getters['map/getTitles']
+      const latinNames = $store.getters['map/getLatinNames']
+
+      // If there is no id then all info is already in feature
+      if (!feature.properties.id) {
+        const formated = new FormatObservation(feature.properties, titles, latinNames).format()
+        formated.coordinates = feature.geometry.flatCoordinates
+        $store.commit('map/selectFeature', formated)
+        return
+      }
+      progress.value = 0
+      await axios(url, {
+        withCredentials: true,
+        onDownloadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      }).then(resp => {
+        resp.data.coordinates = feature.geometry.flatCoordinates
+        const formated = new FormatObservation(resp.data, titles, latinNames).format()
+        $store.commit('map/selectFeature', formated)
+      })
     }
 
     const listenClick = computed(() => {
@@ -152,7 +180,8 @@ export default {
             if (feature.values_.properties.type && feature.values_.properties.type.toLowerCase() === 'linestring') return
 
             // Only move map if is not a mobile
-            $store.dispatch('map/selectFeature', feature.values_)
+            // $store.dispatch('map/selectFeature', feature.values_)
+            selectFeature(feature.values_)
           } else {
             // Close popup if any
             selectedFeatures = []
@@ -374,7 +403,8 @@ export default {
       styleFunction,
       observationSource,
       popupContent,
-      autoPanPopup
+      autoPanPopup,
+      progress
     }
   }
 }
@@ -441,5 +471,10 @@ export default {
 
   .report-fit{
     height: 100%;
+  }
+  .progress-bar-absolute{
+    position:absolute;
+    top:0;
+    z-index:1;
   }
 </style>

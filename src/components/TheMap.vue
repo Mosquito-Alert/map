@@ -10,6 +10,8 @@
     class='bg-white'
     :class="mobile && graphVisible?'mobile small-size':'full-size'"
   >
+    <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute" v-if="progress>0 && progress<100"/>
+
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -148,6 +150,7 @@ import ReportView from '../js/ReportView'
 import MSession from '../js/session'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import FormatObservation from '../js/FormatObservation'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -166,6 +169,7 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
+    const progress = ref()
     let mySession
     let redrawRequired = false
     let privateView = false
@@ -291,7 +295,10 @@ export default defineComponent({
     const firstCall = async function () {
       if ($store.getters['map/getFirstViewMap']) {
         await axios.get(initUrl, {
-          withCredentials: true
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          }
         }).then(response => {
           const geojson = response.data
           dataset = geojson.features
@@ -465,7 +472,8 @@ export default defineComponent({
           if (event.data.openPopupId) {
             const fId = event.data.openPopupId
             const sFeature = getSpiralFeature(fId)
-            $store.dispatch('map/selectFeature', sFeature.values_)
+            // $store.dispatch('map/selectFeature', sFeature.values_)
+            selectFeature(sFeature.value_)
           }
         }
         features.value = []
@@ -621,6 +629,32 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
+    async function selectFeature (feature) {
+      const root = $store.getters['app/getBackend']
+      const url = root + 'api/get_observation/' + feature.properties.id + '/'
+      const titles = $store.getters['map/getTitles']
+      const latinNames = $store.getters['map/getLatinNames']
+
+      // If there is no id then all info is already in feature
+      if (!feature.properties.id) {
+        const formated = new FormatObservation(feature.properties, titles, latinNames).format()
+        formated.coordinates = feature.geometry.flatCoordinates
+        $store.commit('map/selectFeature', formated)
+        return
+      }
+      progress.value = 0
+      await axios(url, {
+        withCredentials: true,
+        onDownloadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      }).then(resp => {
+        resp.data.coordinates = feature.geometry.flatCoordinates
+        const formated = new FormatObservation(resp.data, titles, latinNames).format()
+        $store.commit('map/selectFeature', formated)
+      })
+    }
+
     // Handle loaded view. Set UI accordingly
     async function handleLoadView (view) {
       if (view.status !== STATUS_CODES.OK) {
@@ -718,7 +752,8 @@ export default defineComponent({
           // redraw required to get grahdata
           redrawRequired = true
         } else {
-          $store.dispatch('map/selectFeature', feature.values_)
+          // $store.dispatch('map/selectFeature', feature.values_)
+          selectFeature(feature.values_)
         }
       }
 
@@ -1048,7 +1083,11 @@ export default defineComponent({
         },
         withCredentials: true,
         data: JSON.stringify(data),
-        responseType: 'blob'
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          console.log(progress.value)
+        }
       })
         .then((resp) => {
           if (resp.status === STATUS_CODES.OK) {
@@ -1173,7 +1212,9 @@ export default defineComponent({
           selectedFeat.value = feature
           selectedId.value = feature.values_.properties.id
           selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
-          $store.dispatch('map/selectFeature', feature.values_)
+
+          selectFeature(feature.values_)
+          // $store.dispatch('map/selectFeature', feature.values_)
         } else {
           if (selectedFeatures.length > 1) {
             // update spiderfiedIds to exclude from worker feedback
@@ -1441,11 +1482,15 @@ export default defineComponent({
     }
 
     async function getDataset (missing) {
+      progress.value = 0
       mapFilters.mode = 'resetFilter'
       const requests = missing.map((obj) => {
         const url = backendUrl + 'api/get/data/' + obj.year + '/'
         return axios.get(url, {
-          withCredentials: true
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          }
         })
       })
 
@@ -1520,10 +1565,14 @@ export default defineComponent({
           $store.commit('app/setFilteringTag', { value: true })
 
           const url = $store.getters['app/getBackend'] + 'api/get_reports/'
+          progress.value = 0
           axios(url, {
             withCredentials: true,
             method: 'post',
-            data: JSON.stringify({ reports: mapFilters.report_id.join(',') })
+            data: JSON.stringify({ reports: mapFilters.report_id.join(',') }),
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
           }).then(resp => {
             if (resp.status === STATUS_CODES.OK) {
               mapFilters.featuresSet = [resp.data]
@@ -1569,10 +1618,14 @@ export default defineComponent({
           mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
+          progress.value = 0
           axios(url, {
             withCredentials: true,
             method: 'post',
-            data: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
+            data: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') }),
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
           }).then(resp => {
             if (resp.status === STATUS_CODES.OK) {
               mapFilters.featuresSet = [resp.data]
@@ -1711,7 +1764,8 @@ export default defineComponent({
       strokeLocationColor,
       firstCall,
       preLoadView,
-      initMap
+      initMap,
+      progress
     }
   }
 })
@@ -1890,5 +1944,10 @@ export default defineComponent({
     color: $primary-button-text-hover;
     box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
     transition: all .6s cubic-bezier(.25,.8,.25,1);
+  }
+  .progress-bar-absolute{
+    position:absolute;
+    top:0;
+    z-index:1;
   }
 </style>
