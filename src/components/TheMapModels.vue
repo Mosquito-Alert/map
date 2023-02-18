@@ -91,7 +91,7 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const $store = useStore()
     let CSVS = {}
-    let CENTROIDS = {}
+    const CENTROIDS = {}
     // let mySession
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
@@ -355,14 +355,11 @@ export default defineComponent({
       map.value.map.removeLayer(modelsLayer)
     }
 
-    function newAbortSignal (timeoutMs) {
-      console.log('aborting axios call')
-      const abortController = new AbortController()
-      $store.commit('app/setErrorMessage', 'Timeout')
-      abortController.abort()
-
-      return abortController.signal
-    }
+    // function newAbortSignal (timeoutMs) {
+    //   const abortController = new AbortController()
+    //   setTimeout(abortController.abort(), timeoutMs)
+    //   return abortController.signal
+    // }
 
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
@@ -379,14 +376,14 @@ export default defineComponent({
       const requests = urls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          timeout: 5000,
+          // signal: newAbortSignal(10000), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
         })
       })
 
-      // PROBABILITY GEOMETRIES FROM VECTOR TILES
+      // GET CSV DATA FILES
       await axios.all(requests).then((responses) => {
         responses.forEach((resp) => {
           const decoded = resp.data
@@ -448,14 +445,12 @@ export default defineComponent({
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: process.data.message } })
         return false
       }
-      // UNCERTAINTY GEOMETRIES FROM GEOJSON FILES
-      CENTROIDS = {}
+      // GET CENTROIDS GEOJSON FOR UNCERTAINTY
       const centroidUrls = data.centroidsUrls
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          // timeout: 5,
-          signal: newAbortSignal(5), // Aborts request after 5 seconds
+          // signal: newAbortSignal(15000), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -464,63 +459,70 @@ export default defineComponent({
 
       await axios.all(centroidsReq).then((responses) => {
         responses.forEach((resp) => {
-          if (!('1' in CENTROIDS)) {
-            CENTROIDS['1'] = putDataOnCentroids(resp.data, CSVS['1'], 1)
-          } else if (!('2' in CENTROIDS)) {
-            CENTROIDS['2'] = putDataOnCentroids(resp.data, CSVS['2'], 2)
-          } else if (!('3' in CENTROIDS)) {
-            CENTROIDS['3'] = putDataOnCentroids(resp.data, CSVS['3'], 3)
-          } else if (!('4' in CENTROIDS)) {
-            CENTROIDS['4'] = putDataOnCentroids(resp.data, CSVS['4'], 4)
+          if (!('gadm1' in CENTROIDS)) {
+            CENTROIDS.gadm1 = putDataOnCentroids(resp.data, CSVS['1'])
+          } else if (!('gadm2' in CENTROIDS)) {
+            CENTROIDS.gadm2 = putDataOnCentroids(resp.data, CSVS['2'])
+          } else if (!('gadm3' in CENTROIDS)) {
+            CENTROIDS.gadm3 = putDataOnCentroids(resp.data, CSVS['3'])
+          } else if (!('gadm4' in CENTROIDS)) {
+            CENTROIDS.gadm4 = putDataOnCentroids(resp.data, CSVS['4'])
           }
         })
-
-        const seColor = $store.getters['app/getUncertaintyColor']
-
-        seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm1.minZoom - 1,
-          maxZoom: jsonProperties.gadm1.maxZoom
-        })
-
-        seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm2.minZoom,
-          maxZoom: jsonProperties.gadm2.maxZoom
-        })
-
-        seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm3.minZoom,
-          maxZoom: jsonProperties.gadm3.maxZoom
-        })
-
-        seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm4.minZoom,
-          maxZoom: gadm4MaxZoom
-        })
-
-        seModelLayer1.addLayer()
-        seModelLayer2.addLayer()
-        seModelLayer3.addLayer()
-        seModelLayer4.addLayer()
-        uncertaintyVisibility(data.uncertainty)
-        uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
       }).catch(function (err) {
         spinner(false)
         const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
         $store.commit('app/setErrorMessage', '')
       })
+
+      // PUT DATA ON CENTROIDS AND ADD LAYERS TO MAP
+
+      CENTROIDS.gadm1 = putDataOnCentroids(CENTROIDS.gadm1, CSVS['1'])
+      CENTROIDS.gadm2 = putDataOnCentroids(CENTROIDS.gadm2, CSVS['2'])
+      CENTROIDS.gadm3 = putDataOnCentroids(CENTROIDS.gadm3, CSVS['3'])
+      CENTROIDS.gadm4 = putDataOnCentroids(CENTROIDS.gadm4, CSVS['4'])
+
+      const seColor = $store.getters['app/getUncertaintyColor']
+
+      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm1.minZoom - 1,
+        maxZoom: jsonProperties.gadm1.maxZoom
+      })
+
+      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm2.minZoom,
+        maxZoom: jsonProperties.gadm2.maxZoom
+      })
+
+      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm3.minZoom,
+        maxZoom: jsonProperties.gadm3.maxZoom
+      })
+
+      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm4.minZoom,
+        maxZoom: gadm4MaxZoom
+      })
+
+      seModelLayer1.addLayer()
+      seModelLayer2.addLayer()
+      seModelLayer3.addLayer()
+      seModelLayer4.addLayer()
+      uncertaintyVisibility(data.uncertainty)
+      uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
     }
 
     // Filter centroids with data and add SE value from csv
-    const putDataOnCentroids = function (json, csv, flag) {
+    const putDataOnCentroids = function (json, csv) {
       const filtered = json.features.filter(f => {
         if (f.properties.id in csv) {
           f.properties.se = csv[f.properties.id].se
@@ -752,28 +754,28 @@ export default defineComponent({
         map.value.map.removeLayer(seModelLayer4.layer)
       }
 
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
+      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm1.minZoom,
         maxZoom: jsonProperties.gadm1.maxZoom
       })
 
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
+      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm2.minZoom,
         maxZoom: jsonProperties.gadm2.maxZoom
       })
 
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
+      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm3.minZoom,
         maxZoom: jsonProperties.gadm3.maxZoom
       })
 
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
+      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm4.minZoom,

@@ -17,19 +17,23 @@
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
+            <div class="progress-bar-container q-px-lg" v-if="progress>0 && progress<100">
+              <q-linear-progress :value="progress" color="orange" class="progress-bar-relative"/>
+            </div>
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
-                <q-circular-progress
-                  v-if="loading"
+                <!-- <q-circular-progress
                   indeterminate
+                  v-if="loading"
                   size="50px"
                   color="orange"
                   class="q-ma-md m-circular-progress text-center"
-                />
+                /> -->
                 <img v-if="!mosquitoImageLoaded" src="~/assets/img/notavailable.png">
                 <img
+                  v-if="mosquitoImageLoaded"
                   :height="loading"
-                  :src="selectedFeature.photo_url"
+                  :src="imgData"
                   @load="imageLoaded"
                   @error="errorLoading"
                 >
@@ -42,6 +46,8 @@
               </div>
             </a>
           </div>
+          <!-- end picture -->
+
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
               <label class="popup-title">{{ _(selectedFeature.title) }}
@@ -141,6 +147,7 @@
 import { onUpdated, defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
+import axios from 'axios'
 
 export default defineComponent({
   props: ['selectedFeature'],
@@ -152,13 +159,42 @@ export default defineComponent({
     const errorLoadingImage = ref()
     const loading = ref(true)
     const ratio = ref('null')
+    const progress = ref(0)
+    const imgData = ref()
+
     ratio.value = 0
 
-    onUpdated(() => {
+    function blobToData (blob) {
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.readAsDataURL(blob)
+      })
+    }
+
+    onUpdated(async function () {
+      mosquitoImageLoaded.value = false
       if (Object.keys(props.selectedFeature).length === 0) {
         mosquitoImageLoaded.value = false
+      } else {
+        if (props.selectedFeature.photo_url) {
+          const url = props.selectedFeature.photo_url
+          axios(url, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
+          }).then(async function (resp) {
+            if (resp.status === 200) {
+              const base64data = await blobToData(resp.data)
+              imgData.value = base64data
+              imageLoaded(base64data)
+            }
+          })
+        }
       }
     })
+
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -177,9 +213,11 @@ export default defineComponent({
       imageRatio.value = mobile.value ? 'landscape' : ''
     }
 
-    const imageLoaded = function (e) {
+    const imageLoaded = function (base64data) {
+      const image = new Image()
+      image.src = base64data
       mosquitoImageLoaded.value = true
-      ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
+      ratio.value = (image.width / image.height)
       // Set poup class based on mobile device and image ratio
       if (mobile.value) {
         imageRatio.value = mobile.value ? 'mobile ' : ''
@@ -189,8 +227,11 @@ export default defineComponent({
       imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
 
       loading.value = false
+      progress.value = 0
+      errorLoadingImage.value = false
       context.emit('popupimageloaded')
     }
+
     const getPopupClass = function (feature) {
       let css
       if (ratio.value === 0) {
@@ -250,7 +291,9 @@ export default defineComponent({
       getPopupClass,
       getValidationClass,
       getValidationIcon,
-      getValidationTypeTitle
+      getValidationTypeTitle,
+      progress,
+      imgData
     }
   }
 })
@@ -757,6 +800,16 @@ export default defineComponent({
 
 .like-link:hover{
   color: $primary-color;
+}
+.progress-bar-container{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+}
+.progress-bar-relative {
+  position:relative;
+  z-index: 10;
 }
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,
