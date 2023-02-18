@@ -1,3 +1,7 @@
+export const setErrorMessage = (state, message) => {
+  state.errorMessage = message
+}
+
 export const setCsrfToken = (state, token) => {
   state.csrfToken = token
 }

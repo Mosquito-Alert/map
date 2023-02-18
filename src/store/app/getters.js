@@ -1,3 +1,7 @@
+export const getErrorMessage = state => {
+  return state.errorMessage
+}
+
 export const getCsrfToken = state => {
   return state.csrfToken
 }

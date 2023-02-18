@@ -355,8 +355,18 @@ export default defineComponent({
       map.value.map.removeLayer(modelsLayer)
     }
 
+    function newAbortSignal (timeoutMs) {
+      console.log('aborting axios call')
+      const abortController = new AbortController()
+      $store.commit('app/setErrorMessage', 'Timeout')
+      abortController.abort()
+
+      return abortController.signal
+    }
+
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
+      const process = { status: 'ok', data: {} }
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
@@ -369,6 +379,7 @@ export default defineComponent({
       const requests = urls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
+          timeout: 5000,
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -427,14 +438,24 @@ export default defineComponent({
         map.value.map.on('rendercomplete', function () {
           spinner(false)
         })
+      }).catch(function (err) {
+        process.status = 'error'
+        process.data = err
       })
 
+      if (process.status !== 'ok') {
+        spinner(false)
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: process.data.message } })
+        return false
+      }
       // UNCERTAINTY GEOMETRIES FROM GEOJSON FILES
       CENTROIDS = {}
       const centroidUrls = data.centroidsUrls
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
+          // timeout: 5,
+          signal: newAbortSignal(5), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -490,6 +511,11 @@ export default defineComponent({
         seModelLayer4.addLayer()
         uncertaintyVisibility(data.uncertainty)
         uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
+      }).catch(function (err) {
+        spinner(false)
+        const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
+        $store.commit('app/setErrorMessage', '')
       })
     }
 
