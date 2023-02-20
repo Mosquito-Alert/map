@@ -84,6 +84,7 @@ export default defineComponent({
   props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
+    const requestTimeoutMs = 8000
     const progress = ref(0)
     const baseMap = ref('null')
     const attrVisible = ref(false)
@@ -363,6 +364,7 @@ export default defineComponent({
 
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
+      let connectionError = false
       const process = { status: 'ok', data: {} }
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
@@ -376,7 +378,7 @@ export default defineComponent({
       const requests = urls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          // signal: newAbortSignal(10000), // Aborts request after 5 seconds
+          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -438,19 +440,21 @@ export default defineComponent({
       }).catch(function (err) {
         process.status = 'error'
         process.data = err
-      })
-
-      if (process.status !== 'ok') {
+        connectionError = true
         spinner(false)
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: process.data.message } })
+      })
+
+      if (connectionError) {
         return false
       }
+
       // GET CENTROIDS GEOJSON FOR UNCERTAINTY
       const centroidUrls = data.centroidsUrls
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          // signal: newAbortSignal(15000), // Aborts request after 5 seconds
+          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -470,11 +474,16 @@ export default defineComponent({
           }
         })
       }).catch(function (err) {
+        connectionError = true
         spinner(false)
         const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
         $store.commit('app/setErrorMessage', '')
       })
+
+      if (connectionError) {
+        return false
+      }
 
       // PUT DATA ON CENTROIDS AND ADD LAYERS TO MAP
 
