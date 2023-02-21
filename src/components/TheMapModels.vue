@@ -84,7 +84,7 @@ export default defineComponent({
   props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
-    const requestTimeoutMs = 8000
+    // const requestTimeoutMs = 20000
     const progress = ref(0)
     const baseMap = ref('null')
     const attrVisible = ref(false)
@@ -378,7 +378,7 @@ export default defineComponent({
       const requests = urls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
+          // signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -438,6 +438,7 @@ export default defineComponent({
           spinner(false)
         })
       }).catch(function (err) {
+        console.log(err)
         process.status = 'error'
         process.data = err
         connectionError = true
@@ -454,7 +455,7 @@ export default defineComponent({
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
           withCredentials: true,
-          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
+          // signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
