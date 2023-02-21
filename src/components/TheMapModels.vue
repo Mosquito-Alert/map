@@ -454,7 +454,7 @@ export default defineComponent({
       const centroidUrls = data.centroidsUrls
       const centroidsReq = centroidUrls.map((url) => {
         return axios.get(url, {
-          // withCredentials: true,
+          withCredentials: true,
           // signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
