@@ -52,15 +52,18 @@
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
-              <span>Català</span>
+            <div v-for="item in LANGS" :key="item.code"
+              :class="lang==item.code?'menuItem active':'menuItem'" @click="clickLanguageSelector(item.code, $event)" ref="item.code">
+              <span>{{ item.label }}</span>
             </div>
-            <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
-              <span>Castellano</span>
-            </div>
-            <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
-              <span>English</span>
-            </div>
+
+              <!-- <div :class="lang=='es'?'menuItem active':'menuItem'" @click="clickLanguageSelector('es', $event)" ref="es">
+                <span>Castellano</span>
+              </div>
+
+              <div :class="lang=='en'?'menuItem active':'menuItem'" @click="clickLanguageSelector('en', $event)" ref="en">
+                <span>English</span>
+              </div>-->
           </div>
         </div>
       </fa-thin-button-menu>
@@ -100,7 +103,7 @@ export default {
     const $q = useQuasar()
     const { cookies } = useCookies()
     const $store = useStore()
-
+    const LANGS = $store.getters['app/getAllowedLangs']
     const _ = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -123,6 +126,10 @@ export default {
     const startShareView = function () {
       context.emit('startShareView', {})
     }
+
+    const lang = computed(() => {
+      return $store.getters['app/getLang']
+    })
 
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
@@ -151,6 +158,7 @@ export default {
     }
 
     onMounted(async function () {
+      lang.value = $store.getters['app/getLang']
       context.emit('leftMenuMounted', {})
     })
 
@@ -172,6 +180,8 @@ export default {
     return {
       _,
       loginLabel,
+      lang,
+      LANGS,
       ca,
       es,
       en,

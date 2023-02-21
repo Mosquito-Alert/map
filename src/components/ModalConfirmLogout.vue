@@ -54,7 +54,7 @@ export default {
 
     const logout = () => {
       const registeredWeb = $store.getters['app/getRegisteredWebUrl']
-      axios(backendUrl + '/api/logout/', {
+      axios(backendUrl + 'api/logout/', {
         withCredentials: true
       })
         .then((resp) => {

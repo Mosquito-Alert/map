@@ -40,12 +40,21 @@ export default function () {
     analyticsCode = 'G-ZLD12V4W3V'
   }
   // first language is default
-  const allowedLangs = ['en', 'es', 'ca']
+  // Array order shows in page
+  const allowedLangs = [
+    { code: 'ca', label: 'Català' },
+    { code: 'es', label: 'Castellano' },
+    { code: 'en', label: 'English' }
+  ]
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
   let defaultLang
+  const langKeys = allowedLangs.map(ele => {
+    return ele.code
+  })
 
   if (!cookies.get('lang')) {
-    defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+    defaultLang = (langKeys.includes(browserLang)) ? browserLang : allowedLangs[0]
+    cookies.set('lang', defaultLang)
   } else {
     defaultLang = cookies.get('lang')
   }
@@ -56,7 +65,7 @@ export default function () {
     currentUrl = currentUrl.slice(0, -1)
   }
 
-  if (allowedLangs.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
+  if (langKeys.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
     const nextURL = currentUrl + '/' + defaultLang
     const nextTitle = 'MosquitoAlert'
     const nextState = { additionalInformation: 'Updated the URL with JS' }
@@ -91,6 +100,7 @@ export default function () {
 
   return {
     // Browser name
+    allowedLangs: allowedLangs,
     csrfToken: null,
     authorized: false,
     errorMessage: '',

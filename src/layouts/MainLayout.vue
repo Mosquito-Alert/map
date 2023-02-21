@@ -113,6 +113,7 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
 import MSession from '../js/session.js'
+import { useCookies } from 'vue3-cookies'
 
 export default {
   components: {
@@ -144,6 +145,7 @@ export default {
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+    const { cookies } = useCookies()
     const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
@@ -180,6 +182,7 @@ export default {
     onMounted(() => {
       if (lang) {
         $store.dispatch('app/setLanguage', lang.toLowerCase())
+        cookies.set('lang', lang.toLocaleLowerCase())
       }
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
@@ -479,6 +482,7 @@ export default {
   }
   .q-layout .q-drawer-left{
     width: $left-drawer-width !important;
+    overflow-x: hidden;
   }
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;

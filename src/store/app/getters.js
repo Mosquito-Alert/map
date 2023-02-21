@@ -47,6 +47,10 @@ export const getLang = state => {
   return state.lang
 }
 
+export const getAllowedLangs = state => {
+  return state.allowedLangs
+}
+
 export const getModals = state => {
   return state.modals
 }
