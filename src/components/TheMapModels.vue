@@ -974,8 +974,19 @@ export default defineComponent({
   color: white;
 }
 .progress-bar-absolute{
-  position:absolute;
-  top:0;
-  z-index:1;
+    // On top of map
+    position:absolute;
+    top:0;
+    margin: auto;
+    z-index:1;
+    // Vertically centered
+    // margin: auto;
+    // position: absolute;
+    // top: 0;
+    // left: 0;
+    // bottom: 0;
+    // right: 0;
+    // z-index: 1;
+    // width: 90%;
 }
 </style>

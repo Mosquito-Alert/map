@@ -35,8 +35,8 @@ export default function () {
     // frontendUrl = 'http://fe.example.com:8080/'
     analyticsCode = 'G-RT6ZXWX8PS'
   } else {
-    backendUrl = 'http://sigserver4-nou.udg.edu/apps/mosquito2_backend/'
-    frontendUrl = 'http://sigserver4-nou.udg.edu/mos/spa/'
+    backendUrl = '//sigserver4.udg.edu/apps/mosquito2_backend/'
+    frontendUrl = '//sigserver4.udg.edu/mos/spa/'
     analyticsCode = 'G-ZLD12V4W3V'
   }
   // first language is default

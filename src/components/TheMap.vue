@@ -958,6 +958,7 @@ export default defineComponent({
 
     // Open new window and show report
     function handleReportView (report) {
+      console.log(report.status)
       if (report.status === STATUS_CODES.OK) {
         const frontend = $store.getters['app/getFrontendUrl']
         window.open(frontend + report.code, '_bank')
@@ -1946,8 +1947,19 @@ export default defineComponent({
     transition: all .6s cubic-bezier(.25,.8,.25,1);
   }
   .progress-bar-absolute{
+    // On top of map
     position:absolute;
     top:0;
+    margin: auto;
     z-index:1;
+    // Vertically centered
+    // margin: auto;
+    // position: absolute;
+    // top: 0;
+    // left: 0;
+    // bottom: 0;
+    // right: 0;
+    // z-index: 1;
+    // width: 90%;
   }
 </style>
