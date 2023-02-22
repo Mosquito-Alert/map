@@ -139,7 +139,9 @@ import ObservationMapCounter from './ObservationMapCounter.vue'
 import MapDatesFilter from './MapDatesFilter.vue'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import Vector from 'ol/source/Vector.js'
 import { Polygon, MultiPolygon } from 'ol/geom'
+import WebGLPointsLayer from 'ol/layer/WebGLPoints.js'
 import moment from 'moment'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
@@ -170,6 +172,7 @@ export default defineComponent({
   props: ['sharedView'],
   setup (props, context) {
     const progress = ref()
+    let webglLayer
     let mySession
     let redrawRequired = false
     let privateView = false
@@ -420,6 +423,18 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
+      if (event.data.rawData) {
+        console.log(event.data.rawData)
+        const geojsonDataset = {
+          type: 'FeatureCollection',
+          features: event.data.rawData
+        }
+
+        webglLayer.getSource().clear()
+        webglLayer.getSource().addFeatures(geoJson.readFeatures(geojsonDataset, {
+          featureProjection: map.value.map.getView().getProjection()
+        }))
+      }
       if (event.data.dataset) {
         dataset = event.data.dataset
       }
@@ -1111,6 +1126,23 @@ export default defineComponent({
       document.documentElement.style.setProperty('--vh', `${vh}px`)
 
       const ol = map.value.map
+      const style = {
+        symbol: {
+          symbolType: 'circle',
+          size: 6,
+          color: 'rgb(255, 0, 0)',
+          opacity: 0.5
+        }
+      }
+      webglLayer = new WebGLPointsLayer({
+        style: style,
+        ZIndex: parseInt(baseMap.value.tileLayer.values_.zIndex) + 10,
+        source: new Vector({
+          format: geoJson
+        })
+      })
+
+      ol.addLayer(webglLayer)
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()

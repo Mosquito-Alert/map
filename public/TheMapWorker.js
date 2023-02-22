@@ -79,7 +79,6 @@ self.onmessage = async function (e) {
     }
     if (e.data.getClusterExpansionZoom) {
       // Send data to spiderfy cluster
-      console.log('do nothing')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
@@ -89,7 +88,6 @@ self.onmessage = async function (e) {
         clusterId: e.data.getClusterExpansionZoom
       })
     } else {
-      console.log('AQUÍ QUAN ENTRA????')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, e.data.zoom),
         spiderfyCluster: e.data.spiderfyCluster,
@@ -213,6 +211,7 @@ function loadMapData (data, fitFeatures, initData) {
   cluseredIndex = doClusteredIndex(data)
   uncluseredIndex = doUnclusteredIndex(data)
   const workerParams = {
+    rawData: data,
     indexing: filters.lastFilterApplied,
     ready: true,
     minMaxDates: { min: firstDate, max: lastDate },

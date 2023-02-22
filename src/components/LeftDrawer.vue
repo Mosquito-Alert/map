@@ -159,8 +159,8 @@ export default {
 
     // Get a copy of layers from store to get categories
     const layers = computed(() => {
-      // return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
-      return $store.getters['app/getLayers']
+      return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      // return $store.getters['app/getLayers']
     })
 
     // Set active and inactive layers
