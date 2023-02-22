@@ -430,7 +430,7 @@ export default defineComponent({
           features: event.data.rawData
         }
 
-        webglLayer.getSource().clear()
+        // webglLayer.getSource().clear()
         webglLayer.getSource().addFeatures(geoJson.readFeatures(geojsonDataset, {
           featureProjection: map.value.map.getView().getProjection()
         }))
@@ -1126,14 +1126,31 @@ export default defineComponent({
       document.documentElement.style.setProperty('--vh', `${vh}px`)
 
       const ol = map.value.map
+      // const size = [15, 20]
+
       const style = {
         symbol: {
-          symbolType: 'circle',
-          size: 6,
-          color: 'rgb(255, 0, 0)',
-          opacity: 0.5
+          symbolType: 'image',
+          src: require('../assets/img/sprite_tiger_culex.svg'),
+          scale: [
+            'match', ['zoom'],
+            5, [10, 15],
+            10, [1, 2],
+            15, [2, 3]
+          ],
+          rotateWithView: false,
+          offset: [0.5, 1],
+          textureCoord: [
+            'match', ['get', 'c'],
+            'mosquito_tiger_probable', [0.5, 0, 1, 1],
+            'mosquito_tiger_confirmed', [0.5, 0, 1, 1],
+            'culex_probable', [0, 0, 0.5, 1],
+            'culex_confirmed', [0, 0, 0.5, 1],
+            [0.5, 0, 1, 1]
+          ]
         }
       }
+
       webglLayer = new WebGLPointsLayer({
         style: style,
         ZIndex: parseInt(baseMap.value.tileLayer.values_.zIndex) + 10,
