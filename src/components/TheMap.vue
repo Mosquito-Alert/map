@@ -896,6 +896,7 @@ export default defineComponent({
 
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
+      console.log('zoom ' + newZoom)
       $store.commit('map/setCurrents', {
         zoom: newZoom,
         center: transform(
@@ -1132,21 +1133,50 @@ export default defineComponent({
         symbol: {
           symbolType: 'image',
           src: require('../assets/img/sprite_tiger_culex.svg'),
-          scale: [
-            'match', ['zoom'],
+          size: ['match',
+            ['zoom'],
+            0, [6, 9],
+            1, [8, 12],
+            2, [10, 15],
+            3, [10, 15],
+            4, [10, 15],
             5, [10, 15],
-            10, [1, 2],
-            15, [2, 3]
+            6, [12, 18],
+            7, [12, 18],
+            8, [12, 18],
+            9, [12, 18],
+            10, [12, 18],
+            11, [14, 21],
+            12, [14, 21],
+            13, [14, 21],
+            14, [14, 21],
+            15, [14, 21],
+            16, [14, 21],
+            [20, 30]
           ],
           rotateWithView: false,
           offset: [0.5, 1],
           textureCoord: [
             'match', ['get', 'c'],
-            'mosquito_tiger_probable', [0.5, 0, 1, 1],
-            'mosquito_tiger_confirmed', [0.5, 0, 1, 1],
-            'culex_probable', [0, 0, 0.5, 1],
-            'culex_confirmed', [0, 0, 0.5, 1],
-            [0.5, 0, 1, 1]
+            'mosquito_tiger_confirmed', [0, 0, 0.2, 0.25],
+            'mosquito_tiger_probable', [0.2, 0, 0.4, 0.25],
+            'yellow_fever_confirmed', [0.4, 0, 0.6, 0.25],
+            'yellow_fever_probable', [0.6, 0, 0.8, 0.25],
+            'japonicus_confirmed', [0.8, 0, 1, 0.25],
+            'japonicus_probable', [0, 0.25, 0.2, 0.5],
+            'culex_confirmed', [0.2, 0.25, 0.4, 0.5],
+            'culex_probable', [0.4, 0.25, 0.6, 0.5],
+            'koreicus_confirmed', [0.6, 0.25, 0.8, 0.5],
+            'koreicus_probable', [0.8, 0.25, 1, 0.5],
+            'other_species', [0, 0.5, 0.2, 0.75],
+            'unidentified', [0.2, 0.5, 0.4, 0.75],
+            'not_yet_validated', [0.4, 0.5, 0.6, 0.75],
+            'bite', [0, 0.75, 0.2, 1],
+            'storm_drain_water', [0.2, 0.75, 0.4, 1],
+            'storm_drain_dry', [0.4, 0.75, 0.6, 1],
+            'breeding_site_other', [0.6, 0.75, 0.8, 1],
+            'breeding_site_not_yet_filtered', [0.8, 0.75, 1, 1],
+            [0, 0.8, 0.2, 1]
           ]
         }
       }
