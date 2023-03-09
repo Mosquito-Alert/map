@@ -37,10 +37,12 @@
 </template>
 
 <script>
-import { computed, ref, inject } from 'vue'
+import { computed, ref } from 'vue'
+// import { inject } from 'vue'
 import { useStore } from 'vuex'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import { useCookies } from 'vue3-cookies'
+import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   components: ['ModalCookieSettings'],
@@ -48,7 +50,9 @@ export default {
     const cookiesSettings = ref('null')
     const analyticsActivated = ref(false)
     const $store = useStore()
-    const gtag = inject('gtag')
+
+    // const gtag = inject('gtag')
+    const gtm = useGtm()
     const { cookies } = useCookies()
 
     const _ = function (text) {
@@ -74,7 +78,8 @@ export default {
     const acceptAll = function () {
       cookies.set('cookie-comply', 'all')
       $store.commit('app/setCookiesComply', true)
-      gtag.optIn()
+      // gtag.optIn()
+      gtm.enable = true
     }
 
     return {

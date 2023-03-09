@@ -80,17 +80,19 @@
 </template>
 
 <script>
-import { computed, onMounted, inject, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useCookies } from 'vue3-cookies'
 import { event } from 'vue-gtag'
+import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   emits: ['close'],
   setup (props, context) {
     const $store = useStore()
     const analyticsActivated = ref(false)
-    const gtag = inject('gtag')
+    // const gtag = inject('gtag')
+    const gtm = useGtm()
     const { cookies } = useCookies()
 
     onMounted(() => {
@@ -117,6 +119,7 @@ export default {
 
     const savePreferences = function (preferences) {
       // Prevent cookie message appearing next time
+
       let complied
       if (preferences === 'all') {
         complied = 'all'
@@ -131,12 +134,17 @@ export default {
       $store.commit('app/setCookiesComply', true)
 
       // ACCEPT OR DENY ANALYTICS
+      console.log(complied)
       if (['all', 'ga'].indexOf(complied) > -1) {
-        gtag.optIn()
+        // gtag.optIn()
+        gtm.enable(true)
         event('login', { method: 'Google' })
       } else {
-        gtag.optOut()
+        // gtag.optOut()
+        gtm.enable(false)
       }
+      console.log(gtm)
+      console.log(gtm.enabled())
       closeModal()
     }
 
