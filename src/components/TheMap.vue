@@ -130,6 +130,7 @@
 </template>
 
 <script>
+import { useGtm } from '@gtm-support/vue-gtm'
 import CustControl from './CustControl'
 import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
@@ -1073,8 +1074,17 @@ export default defineComponent({
 
     // Get observations from backend. Format is xls or gpkg
     function handleDownload (format) {
-      const data = getDataFromFilters()
+      const gtm = useGtm()
+      gtm.trackEvent({
+        event: 'clickDownload',
+        category: 'category',
+        action: 'click',
+        label: 'My custom component trigger',
+        value: 5000,
+        noninteraction: false
+      })
 
+      const data = getDataFromFilters()
       const url = downloadUrl + format.format + '/'
       axios(url, {
         method: 'POST',

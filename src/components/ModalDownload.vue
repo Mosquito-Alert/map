@@ -25,24 +25,38 @@
         </div>
         <div class="buttons">
           <div class="modal-content download-buttons flex">
-            <div><button
-              class="ma-btn"
-              :class="!nFeatures?'disabled':''"
-              @click="download('gpkg')"
-            >
-              <i class="fa-solid fa-download"></i>
-                <div class="q-pl-sm">{{ _('Download geopackage') }}</div>
-            </button></div>
+            <div>
 
-            <div><button
-              class="ma-btn"
-              :class="!nFeatures?'disabled':''"
-              @click="download('xlsx')"
-            >
+              <a
+                href="#"
+                class="gtm-download q-btn waves"
+                format="gpkg"
+                :class="!nFeatures?'disabled':''"
+                @click.prevent="download('gpkg')"
+              >
+              <span>
                 <i class="fa-solid fa-download"></i>
-                <div class="q-pl-sm">{{ _('Download excel') }}</div>
-            </button></div>
-            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
+                {{ _('Download geopackage') }}
+              </span>
+              </a>
+            </div>
+
+            <div>
+              <a
+                href="#"
+                class="q-btn gtm-download q-mx-md"
+                :class="!nFeatures?'disabled':''"
+                format="xlsx"
+                @click.prevent="download('xlsx')"
+              >
+                <span>
+                  <i class="fa-solid fa-download"></i>
+                  {{ _('Download excel') }}
+              </span>
+              </a>
+            </div>
+
+            <div><a href="#" @click.prevent="close" class="q-btn">{{ _('Close') }}</a></div>
           </div>
 
         </div>
@@ -215,15 +229,28 @@ dialog.mobile .buttons{
 button.ma-btn{
   display: flex;
 }
+
+.q-btn,
 button.ma-btn,
 button.ma-close-btn,
 .ma-close-btn{
+  cursor: pointer;
   padding: 8px 10px;
   border-radius: 3px;
   background: $primary-color;
   box-shadow: none;
   color: white;
 }
+
+.q-btn:active{
+  text-decoration: none;
+  color: #fff;
+  background-color: $grey-color;
+  text-align: center;
+  letter-spacing: .5px;
+  transition: all .3s ease-out;
+}
+.q-btn:hover,
 button.ma-btn:hover,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
