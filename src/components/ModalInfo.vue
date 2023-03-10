@@ -91,7 +91,7 @@
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
-                        <img :src="layers.bites.pending.icon" />
+                        <img :src="layers.bites.bite.icon" />
                       </div>
                         <div class="q-pr-md">
                          {{ _(' Observaciones ciudadanas de picaduras de mosquito, de cualquier especie y sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}

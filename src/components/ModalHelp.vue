@@ -249,7 +249,9 @@ export default {
   align-items: center;
   z-index: 2001;
 }
-
+:deep(.q-btn){
+  background-color: white;
+}
 dialog {
   position:relative;
   // max-width: 600px;

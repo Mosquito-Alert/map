@@ -17,6 +17,7 @@
         :class="active_item=='layers'?'active':''"
         link="/"
         item="reports"
+        id="reports"
       >
       </fa-thin-button-router>
 
@@ -26,6 +27,7 @@
         :class="active_item=='models'?'active':''"
         link="/models"
         item="models"
+        id="estimations"
       >
       </fa-thin-button-router>
 
@@ -35,27 +37,33 @@
         name="fa-thin fa-share-nodes"
         :label="_('Share')"
         @click="startShareView"
+        id="shareView"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
         :label="_('Info')"
         @click="showInfo"
+        id="showInfo"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-square-question"
         :label="_('Help')"
         @click="showHelp"
+        id="help"
       ></fa-thin-button>
 
       <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <div v-for="item in LANGS" :key="item.code"
-              :class="lang==item.code?'menuItem active':'menuItem'" @click="clickLanguageSelector(item.code, $event)" ref="item.code">
+            <a v-for="item in LANGS" :key="item.code"
+              href="#"
+              :id="item.code"
+              class="main-menu-item"
+              :class="lang==item.code?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.code, $event)" ref="item.code">
               <span>{{ item.label }}</span>
-            </div>
+          </a>
 
               <!-- <div :class="lang=='es'?'menuItem active':'menuItem'" @click="clickLanguageSelector('es', $event)" ref="es">
                 <span>Castellano</span>
@@ -67,7 +75,7 @@
           </div>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin" id="login"></fa-thin-button>
     </q-toolbar>
 </template>
 

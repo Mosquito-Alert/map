@@ -120,7 +120,7 @@ export const observations = {
     }
   },
   bites: { // Bites
-    pending: {
+    bite: {
       categories: ['bite'],
       icon: require('../../assets/img/marker_bite.svg'),
       faIcon: 'fa-solid fa-child-reaching bites',

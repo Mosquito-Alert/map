@@ -43,7 +43,7 @@ export const observations = {
     },
     culex: {
       categories: ['culex_confirmed', 'culex_probable'],
-      common_name: 'Culex mosquito confirmed',
+      common_name: 'Culex mosquito',
       scientific_name: 'Culex pipiens',
       icon: require('../../assets/img/marker_culex.svg'),
       color: '#aa4499',
@@ -68,7 +68,7 @@ export const observations = {
     }
   },
   bites: { // Bites
-    pending: {
+    bite: {
       categories: ['bite'],
       icon: require('../../assets/img/marker_bite.svg'),
       faIcon: 'fa-solid fa-child-reaching bites',
