@@ -47,6 +47,7 @@
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
             <div class="li-item "
+              :id="layer.common_name"
               @click="filterObservations(layer, $event)"
               data-type="observations"
               :data-code="code"
@@ -70,12 +71,13 @@
               <div class="content breeding">
                 <div
                   class="li-item"
+                  :id="code"
                   @click="filterObservations(layer, $event)"
                   data-type="breeding"
                   :data-code="code"
                   :class="layer.active ? code +' active' : code"
                 >
-                    <i :class="layer.faIcon"></i>
+                    <!-- <i :class="layer.faIcon"></i> -->
                 </div>
                 <div v-text="_(layer.common_name)" class="toc-item-name"></div>
               </div>
@@ -91,12 +93,13 @@
           <div class="item-container" v-for="layer, code in bites" :key="code">
             <div class="content bites">
               <div class="li-item"
+                :id="code"
                 @click="filterObservations(layer, $event)"
                 data-type="bites"
                 :data-code="code"
                 :class="layer.active ? code +' active' : code"
               >
-                  <i class="fa-solid" :class="layer.faIcon"></i>
+                  <!-- <i class="fa-solid" :class="layer.faIcon"></i> -->
               </div>
               <div v-text="_(layer.common_name)" class="toc-item-name"></div>
             </div>
@@ -626,6 +629,47 @@ input{
   background-image: url($icon-unidentified-disabled);
 }
 
+.li-item.with_water,
+.li-item.without_water,
+.li-item.other_water,
+.li-item.not_validated,
+.li-item.bite{
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.li-item.with_water:hover,
+.li-item.without_water:hover,
+.li-item.other_water:hover,
+.li-item.not_validated:hover,
+.li-item.bite:hover{
+  opacity: 0.7;
+}
+
+.li-item.bite{
+  background-image: url($icon-bite-disabled);
+}
+.li-item.with_water{
+  background-image: url($icon-with-water-disabled);
+}
+.li-item.without_water{
+  background-image: url($icon-without-water-disabled);
+}
+.li-item.other_water{
+  background-image: url($icon-other-water-disabled);
+}
+.li-item.bite.active{
+  background-image: url($icon-bite);
+}
+.li-item.with_water.active{
+  background-image: url($icon-with-water);
+}
+.li-item.without_water.active{
+  background-image: url($icon-without-water);
+}
+.li-item.other_water.active{
+  background-image: url($icon-other-water);
+}
 .li-item.tiger.active{
   background-image: url($icon-tiger);
 }

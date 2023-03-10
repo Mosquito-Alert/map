@@ -11,7 +11,7 @@
    sodipodi:docname="storm_drain_water.svg"
    width="30"
    height="40"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -30,30 +30,32 @@
    guidetolerance="10"
    id="namedview6"
    inkscape:current-layer="svg4"
-   inkscape:cx="4.4711495"
-   inkscape:cy="60.360518"
+   inkscape:cx="4.5953481"
+   inkscape:cy="60.484716"
    inkscape:pagecheckerboard="0"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
    inkscape:window-height="988"
    inkscape:window-maximized="0"
    inkscape:window-width="1493"
-   inkscape:window-x="0"
-   inkscape:window-y="13"
+   inkscape:window-x="26"
+   inkscape:window-y="23"
    inkscape:zoom="4.0258104"
    objecttolerance="10"
    pagecolor="#ffffff"
-   showgrid="false">
+   showgrid="false"
+   inkscape:showpageshadow="2"
+   inkscape:deskcolor="#d1d1d1">
 	</sodipodi:namedview>
 <path
    class="st0"
-   d="M 27.45,39.825 H 2.55 C 1.125,39.825 0,38.7 0,37.275 V 10.725 C 0,9.3 1.125,8.175 2.55,8.175 h 24.9 c 1.425,0 2.55,1.125 2.55,2.55 V 37.2 c 0,1.425 -1.125,2.625 -2.55,2.625 z"
+   d="M 27.45,35.825 H 2.55 C 1.125,35.825 0,34.7 0,33.275 V 6.725 C 0,5.3 1.125,4.175 2.55,4.175 h 24.9 C 28.875,4.175 30,5.3 30,6.725 V 33.2 c 0,1.425 -1.125,2.625 -2.55,2.625 z"
    id="path1381"
    style="stroke-width:0.75" />
 <path
    id="path2"
    inkscape:connector-curvature="0"
    class="st1"
-   d="m 8,26.5 c 0,-2.692308 4.076923,-8.384616 6,-11.000001 0.461538,-0.615383 1.538462,-0.615383 2,0 1.923077,2.538461 6,8.307693 6,11.000001 0,3.615386 -3.153848,6.461538 -7,6.461538 -3.846152,0 -7,-2.846153 -7,-6.461538 z m 3.846152,0 c 0,-0.307692 -0.307691,-0.615387 -0.615383,-0.615387 -0.384616,0 -0.615383,0.307695 -0.615383,0.615387 0,2.307691 1.999999,4.153847 4.461539,4.153847 0.384612,0 0.615383,-0.230771 0.615383,-0.615386 0,-0.307692 -0.307692,-0.615384 -0.615383,-0.615384 C 13.230769,29.499997 11.846152,28.192308 11.846152,26.5 Z"
+   d="m 8,22.5 c 0,-2.692308 4.076923,-8.384616 6,-11.000001 0.461538,-0.615383 1.538462,-0.615383 2,0 1.923077,2.538461 6,8.307693 6,11.000001 0,3.615386 -3.153848,6.461538 -7,6.461538 -3.846152,0 -7,-2.846153 -7,-6.461538 z m 3.846152,0 c 0,-0.307692 -0.307691,-0.615387 -0.615383,-0.615387 -0.384616,0 -0.615383,0.307695 -0.615383,0.615387 0,2.307691 1.999999,4.153847 4.461539,4.153847 0.384612,0 0.615383,-0.230771 0.615383,-0.615386 0,-0.307692 -0.307692,-0.615384 -0.615383,-0.615384 C 13.230769,25.499997 11.846152,24.192308 11.846152,22.5 Z"
    style="stroke-width:0.76923" />
 </svg>
