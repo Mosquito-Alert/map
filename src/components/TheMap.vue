@@ -1316,10 +1316,12 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         // When loading from shared view and popup must open, then selectedFeacture is required
+        const anchor = [0.5, 1]
+
         if (feature.values_.properties.id === selectedId.value) {
           const selectedIcon = new Icon({
             src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
-            anchor: [0.5, 1]
+            anchor: anchor
           })
           style.setImage(selectedIcon)
           style.setText('')
@@ -1368,9 +1370,10 @@ export default defineComponent({
             }
             const tiger = new Icon({
               src: iconUrl,
-              anchor: [0.5, 1]
+              anchor: anchor
             })
             style.setImage(tiger)
+            style.getImage().setAnchor(anchor)
             style.setText('')
           }
         }

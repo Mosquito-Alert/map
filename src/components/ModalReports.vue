@@ -21,8 +21,12 @@
         </div>
         <div class="modal-close buttons">
           <div class="report-buttons flex">
-            <div><button v-if="!tooManyFeatures" class="ma-btn" @click="newReport">{{ _('Continue') }}</button></div>
-            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
+            <div>
+              <a href="#" v-if="!tooManyFeatures" class="gtm-report-detailed q-btn q-mr-sm" @click.prevent="newReport">{{ _('Continue') }}</a>
+            </div>
+            <div>
+              <a href="#" @click.prevent="close" class="q-btn q-ml-sm">{{ _('Close') }}</a>
+            </div>
           </div>
         </div>
       </dialog>
