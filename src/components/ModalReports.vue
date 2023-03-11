@@ -22,10 +22,12 @@
         <div class="modal-close buttons">
           <div class="report-buttons flex">
             <div>
-              <a href="#" v-if="!tooManyFeatures" class="gtm-report-detailed q-btn q-mr-sm" @click.prevent="newReport">{{ _('Continue') }}</a>
+              <button v-if="!tooManyFeatures" class="gtm-report-detailed ma-btn q-mr-sm" @click="newReport">
+                {{ _('Continue') }}
+              </button>
             </div>
             <div>
-              <a href="#" @click.prevent="close" class="q-btn q-ml-sm">{{ _('Close') }}</a>
+              <button @click="close" class="ma-btn q-ml-sm">{{ _('Close') }}</button>
             </div>
           </div>
         </div>
@@ -42,11 +44,12 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close', 'newReport'],
   setup (props, context) {
+    // window.dataLayer.push({
+    //   event: 'detailedReport',
+    //   observationsCounter: $store.getters['app/getModals'].report.n
+    // })
     const $store = useStore()
     const newReport = function () {
-      window.dataLayer.push({
-        observationsCounter: $store.getters['app/getModals'].report.n
-      })
       context.emit('newReport')
     }
     const maxReports = $store.getters['app/getReportsLimit']
@@ -186,6 +189,15 @@ dialog.mobile button{
 .ma-btn::before,
 .ma-close-btn::before{
   box-shadow: none;
+}
+
+.ma-btn:active{
+  text-decoration: none;
+  color: #fff;
+  background-color: $grey-color;
+  text-align: center;
+  letter-spacing: .5px;
+  transition: all .3s ease-out;
 }
 
 button.ma-btn{

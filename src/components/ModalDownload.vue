@@ -27,36 +27,36 @@
           <div class="modal-content download-buttons flex">
             <div>
 
-              <a
-                href="#"
-                class="gtm-download q-btn waves"
-                format="gpkg"
+              <button
+                class="gtm-download ma-btn waves"
+                id="Geopackage"
                 :class="!nFeatures?'disabled':''"
-                @click.prevent="download('gpkg')"
+                @click="download('gpkg')"
               >
-              <span>
-                <i class="fa-solid fa-download"></i>
+              <span class="no-pointer-events">
+                <i class="fa-solid fa-download no-pointer-events"></i>
                 {{ _('Download geopackage') }}
               </span>
-              </a>
+            </button>
             </div>
 
             <div>
-              <a
-                href="#"
-                class="q-btn gtm-download q-mx-md"
+              <button
+                class="ma-btn gtm-download q-mx-md"
                 :class="!nFeatures?'disabled':''"
-                format="xlsx"
+                id="Xlsx"
                 @click.prevent="download('xlsx')"
               >
-                <span>
-                  <i class="fa-solid fa-download"></i>
+                <span class="no-pointer-events">
+                  <i class="fa-solid fa-download no-pointer-events"></i>
                   {{ _('Download excel') }}
               </span>
-              </a>
+              </button>
             </div>
 
-            <div><a href="#" @click.prevent="close" class="q-btn">{{ _('Close') }}</a></div>
+            <div>
+              <button @click="close" class="ma-btn">{{ _('Close') }}</button>
+            </div>
           </div>
 
         </div>
@@ -75,10 +75,10 @@ export default {
   setup (props, context) {
     const $store = useStore()
     const download = function (format) {
-      window.dataLayer.push({
-        pageCategory: 'download-page',
-        visitorType: 'Downloader'
-      })
+      // window.dataLayer.push({
+      //   pageCategory: 'download-page',
+      //   visitorType: 'Downloader'
+      // })
       context.emit('startDownload', { format })
     }
 
@@ -234,7 +234,6 @@ button.ma-btn{
   display: flex;
 }
 
-.q-btn,
 button.ma-btn,
 button.ma-close-btn,
 .ma-close-btn{
@@ -246,7 +245,7 @@ button.ma-close-btn,
   color: white;
 }
 
-.q-btn:active{
+.ma-btn:active{
   text-decoration: none;
   color: #fff;
   background-color: $grey-color;
@@ -254,7 +253,7 @@ button.ma-close-btn,
   letter-spacing: .5px;
   transition: all .3s ease-out;
 }
-.q-btn:hover,
+
 button.ma-btn:hover,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
