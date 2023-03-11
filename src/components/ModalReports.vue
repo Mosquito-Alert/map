@@ -44,6 +44,9 @@ export default {
   setup (props, context) {
     const $store = useStore()
     const newReport = function () {
+      window.dataLayer.push({
+        observationsCounter: $store.getters['app/getModals'].report.n
+      })
       context.emit('newReport')
     }
     const maxReports = $store.getters['app/getReportsLimit']

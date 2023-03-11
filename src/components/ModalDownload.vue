@@ -75,6 +75,10 @@ export default {
   setup (props, context) {
     const $store = useStore()
     const download = function (format) {
+      window.dataLayer.push({
+        pageCategory: 'download-page',
+        visitorType: 'Downloader'
+      })
       context.emit('startDownload', { format })
     }
 
