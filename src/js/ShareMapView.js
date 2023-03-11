@@ -30,6 +30,7 @@ export default class ShareMapView {
     const dataView = {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),
+      extent: ol.getView().calculateExtent(ol.getSize()),
       filters: filters,
       viewType: _this.options.viewType
     }
