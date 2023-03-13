@@ -105,3 +105,7 @@ export const deactivateLayerIcon = (state, payload) => {
 export const toggleLayerIcon = (state, payload) => {
   state.layers[payload.type][payload.code].active = !state.layers[payload.type][payload.code].active
 }
+
+export const setActiveLayer = (state, payload) => {
+  state.layers[payload.type][payload.code].active = payload.active
+}

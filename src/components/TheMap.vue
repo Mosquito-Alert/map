@@ -585,7 +585,13 @@ export default defineComponent({
       }
 
       mapFilters.observations = getObservationsToLoadOnMap(initialObservations, privateView)
+
       mapFilters.observations.forEach(layerFilter => {
+        $store.commit('app/setActiveLayer', {
+          type: layerFilter.type,
+          code: layerFilter.code,
+          active: true
+        })
         $store.commit('map/addActiveLayer', {
           type: layerFilter.type,
           code: layerFilter.code
@@ -1401,6 +1407,11 @@ export default defineComponent({
           type: observation.type,
           code: observation.code
         })
+        $store.commit('app/setActiveLayer', {
+          type: observation.type,
+          code: observation.code,
+          active: false
+        })
       } else {
         mapFilters.observations.push({
           type: observation.type,
@@ -1419,6 +1430,7 @@ export default defineComponent({
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       workerData.filters = mapFilters
+      workerData.filters.observations = JSON.parse(JSON.stringify(mapFilters.observations))
       context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }

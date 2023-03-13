@@ -13,7 +13,7 @@ export const observations = {
       icon: require('../../assets/img/marker_tiger.svg'),
       iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
       color: '#4d4d4d',
-      active: true
+      active: false
     },
     yellow: {
       categories: ['yellow_fever_confirmed', 'yellow_fever_probable'],
@@ -48,7 +48,7 @@ export const observations = {
       icon: require('../../assets/img/marker_culex.svg'),
       color: '#aa4499',
       separator: true,
-      active: true
+      active: false
     },
     unidentified: {
       categories: ['unidentified'],
