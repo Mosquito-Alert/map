@@ -671,6 +671,7 @@ export default defineComponent({
         return
       }
       const v = JSON.parse(view.view[0].view)
+      console.log(v)
       privateView = v.privateView
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
@@ -691,12 +692,12 @@ export default defineComponent({
 
       const viewObservations = cloneJson(v.filters.observations)
       mapFilters.observations = getObservationsToLoadOnMap(viewObservations, privateView)
-
       $store.commit('app/setDefaults', {
         observations: mapFilters.observations,
         dates: [d],
         hashtags: v.filters.hashtags
       })
+
       context.emit('timeSeriesChanged', [d])
 
       // Hashtag filter or report_id, not both at the same time
