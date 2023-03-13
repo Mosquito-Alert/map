@@ -94,10 +94,6 @@ export const setEstimationColors = (state, payload) => {
   state.DEFAULTS.model.estimationColors = payload
 }
 
-export const activateLayerIcon = (state, payload) => {
-  state.layers[payload.type][payload.code].active = true
-}
-
 export const deactivateLayerIcon = (state, payload) => {
   state.layers[payload.type][payload.code].active = false
 }

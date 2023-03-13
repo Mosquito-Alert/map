@@ -111,6 +111,9 @@ export const observations = {
     }
   },
   sampling_effort: {
+    sampling: {
+      active: false
+    },
     legend: [
       { from: 0, to: 10, color: '#ffffb266' },
       { from: 10, to: 100, color: '#fd8d3c66' },

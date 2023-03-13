@@ -247,9 +247,7 @@ export default {
       // }
       map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
-      const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
-        return l.type === 'sampling-effort'
-      })
+      const samplingIsActive = $store.getters['app/getLayers'].sampling_effort.sampling.active
       if (samplingIsActive) {
         let mapDate = {}
         if (payload.data.from === '') {

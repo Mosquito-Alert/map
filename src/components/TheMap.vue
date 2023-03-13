@@ -592,14 +592,6 @@ export default defineComponent({
           code: layerFilter.code,
           active: true
         })
-        $store.commit('map/addActiveLayer', {
-          type: layerFilter.type,
-          code: layerFilter.code
-        })
-        $store.commit('app/activateLayerIcon', {
-          type: layerFilter.type,
-          code: layerFilter.code
-        })
       })
 
       // Hashtag filter or report_id, not both at the same time
@@ -677,7 +669,7 @@ export default defineComponent({
         return
       }
       const v = JSON.parse(view.view[0].view)
-      console.log(v)
+
       privateView = v.privateView
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
@@ -731,7 +723,11 @@ export default defineComponent({
       }
 
       if (v.samplingEffort) {
-        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
+        $store.commit('app/setActiveLayer', {
+          type: 'sampling_effort',
+          code: 'sampling',
+          active: true
+        })
         context.emit('loadUserFixes', {
           status: true,
           dates: v.filters.dates
@@ -820,9 +816,7 @@ export default defineComponent({
 
     // Init share view. Save data to database
     function shareView () {
-      const samplingEffort = $store.getters['map/getActiveLayers'].some(layer => {
-        return layer.type === 'sampling-effort'
-      })
+      const samplingEffort = $store.getters['app/getLayers'].sampling_effort.sampling.active
 
       let obj = {}
       if (selectedId.value !== null) {
@@ -1395,7 +1389,7 @@ export default defineComponent({
       spiderfiedIds = []
       spiralSource.value.source.clear()
       closePopup()
-      // toggle selected layer
+
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
       })
@@ -1403,10 +1397,7 @@ export default defineComponent({
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
         mapFilters.mode = 'increaseFilter'
-        $store.commit('map/removeActiveLayer', {
-          type: observation.type,
-          code: observation.code
-        })
+
         $store.commit('app/setActiveLayer', {
           type: observation.type,
           code: observation.code,
@@ -1420,10 +1411,10 @@ export default defineComponent({
         })
         mapFilters.mode = 'resetFilter'
         mapFilters.lastFilterApplied = 'observations'
-        $store.commit('map/addActiveLayer', {
+        $store.commit('app/setActiveLayer', {
           type: observation.type,
           code: observation.code,
-          categories: observation.categories
+          active: true
         })
       }
       $store.commit('app/setDefaultObservations', mapFilters.observations)

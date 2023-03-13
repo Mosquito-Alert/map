@@ -44,9 +44,12 @@
               />
             </template>
           </q-input>
+          <div v-if="loginError" class="login-error">
+            {{ _('Invalid login') }}
+          </div>
           <div class="login row">
-            <button class="q-mt-md" @click="onSubmit">{{ _('Log in') }}</button>
-            <button class="q-mt-xs" @click="close">{{ _('Close')}} </button>
+            <button class="q-mt-md" @click.prevent="onSubmit">{{ _('Log in') }}</button>
+            <button class="q-mt-xs" @click.prevent="close">{{ _('Close')}} </button>
           </div>
         </div>
         </q-form>
@@ -64,12 +67,14 @@ export default {
     const username = ref('')
     const password = ref('')
     const $store = useStore()
+    const loginError = ref()
 
     const open = computed(() => {
       return $store.getters['app/getModals'].login.visibility
     })
 
     const close = function () {
+      loginError.value = false
       $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
     }
 
@@ -91,7 +96,7 @@ export default {
         const formData = new FormData()
         formData.append('username', username.value)
         formData.append('password', password.value)
-        console.log(authenticateUrl)
+
         fetch(`${authenticateUrl}`, {
           // credentials: 'include',
           signal: signal,
@@ -103,7 +108,11 @@ export default {
             if (res.success) {
               document.location = registeredWeb
             } else {
+              loginError.value = true
               console.log('Not authenticated')
+              // setTimeout(function () {
+              //   success.value = true
+              // }, 5000)
             }
           })
       }
@@ -117,6 +126,7 @@ export default {
       mobile,
       open,
       close,
+      loginError,
       _
     }
   }
@@ -150,5 +160,11 @@ button.ma-close-btn:hover,
   padding: 4px 0px;
   border-radius: 4px;
   text-transform: uppercase;
+}
+.login-error{
+  font-style:italic;
+  color: red;
+  font-weight: 600;
+  text-align: center;
 }
 </style>

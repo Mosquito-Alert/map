@@ -178,11 +178,6 @@ export default {
         code: obj.dataset.code,
         categories: layers.value[obj.dataset.type][obj.dataset.code].categories
       })
-
-      $store.commit('app/toggleLayerIcon', {
-        type: obj.dataset.type,
-        code: obj.dataset.code
-      })
     }
 
     const mobile = computed(() => {
