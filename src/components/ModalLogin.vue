@@ -10,8 +10,8 @@
     <div class="dialog modal-first" v-if="open">
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <slot></slot>
-        <!-- <q-form
-         @submit.prevent="onSubmit"> -->
+        <q-form
+         @submit.prevent="onSubmit">
         <div class="column">
           <div class="row content-center">
             <h5 class="text-h5 text-orange q-my-md">Mosquito Alert</h5>
@@ -49,7 +49,7 @@
             <button class="q-mt-xs" @click="close">{{ _('Close')}} </button>
           </div>
         </div>
-        <!-- </q-form> -->
+        </q-form>
       </dialog>
     </div>
   </transition>
@@ -58,22 +58,12 @@
 <script>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { observations as privateLayers } from '../store/app/privateTOC'
-import { observations as publicLayers } from '../store/app/publicTOC'
-import MSession from '../js/session.js'
-import { StatusCodes as STATUS_CODES } from 'http-status-codes'
-import axios from 'axios'
 
 export default {
-  emits: [
-    'resetTOC'
-  ],
   setup (props, context) {
-    let mySession
     const username = ref('')
     const password = ref('')
     const $store = useStore()
-    const backendUrl = $store.getters['app/getBackend']
 
     const open = computed(() => {
       return $store.getters['app/getModals'].login.visibility
@@ -93,36 +83,30 @@ export default {
 
     const onSubmit = function (evt) {
       if (username.value && password.value) {
-        axios(backendUrl + 'api/login/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': $store.getters['app/getCsrfToken']
-          },
-          withCredentials: true,
-          // body: formData
-          data: JSON.stringify({ username: username.value, password: password.value })
+        const controller = new AbortController()
+        const { signal } = controller
+        const authenticateUrl = $store.getters['app/getAuthenticateUrl']
+        const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+
+        const formData = new FormData()
+        formData.append('username', username.value)
+        formData.append('password', password.value)
+        console.log(authenticateUrl)
+        fetch(`${authenticateUrl}`, {
+          // credentials: 'include',
+          signal: signal,
+          method: 'POST', // or 'PUT'
+          body: formData
         })
-          .then((resp) => {
-            if (resp.status === STATUS_CODES.OK) {
-              mySession = new MSession(backendUrl, null)
-              mySession.getSession(resetTOC)
+          .then(res => res.json())
+          .then(res => {
+            if (res.success) {
+              document.location = registeredWeb
             } else {
-              console.log(resp.status)
-              this.setState({ error: 'Wrong username or password.' })
               console.log('Not authenticated')
-              $store.commit('app/setLayers', publicLayers)
             }
           })
       }
-    }
-
-    function resetTOC () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
-      $store.commit('app/setAuthorized', true)
-      $store.commit('app/setLayers', privateLayers)
-      $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
-      context.emit('resetTOC', {})
     }
 
     return {

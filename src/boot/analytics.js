@@ -1,25 +1,3 @@
-// // import { boot } from 'quasar/wrappers'
-// import VueGtag from 'vue-gtag'
-// import { useCookies } from 'vue3-cookies'
-
-// export default ({ app, router, store }) => {
-//   const { cookies } = useCookies()
-//   let enableCookies = false
-//   if (cookies.get('cookie-comply')) {
-//     const cookiesArray = cookies.get('cookie-comply').split(',')
-//     if (cookiesArray.indexOf('ga') > -1 || cookiesArray.indexOf('all') > -1) {
-//       enableCookies = true
-//     }
-//   }
-
-//   app.use(VueGtag, {
-//     config: { id: store.getters['app/getAnalyticsId'] },
-//     enabled: enableCookies
-//   })
-
-//   app.provide('gtag', app.config.globalProperties.$gtag)
-// }
-
 import { createGtm } from '@gtm-support/vue-gtm'
 import { useCookies } from 'vue3-cookies'
 
@@ -32,11 +10,10 @@ export default ({ app, router, store }) => {
       enableCookies = true
     }
   }
-  console.log('enableCookies')
-  console.log(enableCookies)
+  console.log(store.getters['app/getGoogleTagManagerId'])
   app.use(
     createGtm({
-      id: 'GTM-M5PRMJ9', // Your GTM single container ID, array of container ids ['GTM-xxxxxx', 'GTM-yyyyyy'] or array of objects [{id: 'GTM-xxxxxx', queryParams: { gtm_auth: 'abc123', gtm_preview: 'env-4', gtm_cookies_win: 'x'}}, {id: 'GTM-yyyyyy', queryParams: {gtm_auth: 'abc234', gtm_preview: 'env-5', gtm_cookies_win: 'x'}}], // Your GTM single container ID or array of container ids ['GTM-xxxxxx', 'GTM-yyyyyy']
+      id: store.getters['app/getGoogleTagManagerId'], // Your GTM single container ID, array of container ids ['GTM-xxxxxx', 'GTM-yyyyyy'] or array of objects [{id: 'GTM-xxxxxx', queryParams: { gtm_auth: 'abc123', gtm_preview: 'env-4', gtm_cookies_win: 'x'}}, {id: 'GTM-yyyyyy', queryParams: {gtm_auth: 'abc234', gtm_preview: 'env-5', gtm_cookies_win: 'x'}}], // Your GTM single container ID or array of container ids ['GTM-xxxxxx', 'GTM-yyyyyy']
       // queryParams: {
       //   // Add URL query string when loading gtm.js with GTM ID (required when using custom environments)
       //   gtm_auth: 'AB7cDEf3GHIjkl-MnOP8qr',

@@ -99,8 +99,8 @@ export const getCalendarSubtitle = state => {
   return state.calendarSubtitle
 }
 
-export const getAnalyticsId = state => {
-  return state.analyticsId
+export const getGoogleTagManagerId = state => {
+  return state.googleTagManagerId
 }
 
 export const getModelsManifestUrl = state => {

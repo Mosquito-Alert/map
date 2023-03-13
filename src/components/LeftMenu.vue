@@ -239,6 +239,9 @@ export default {
     font-weight: bold;
     color: $primary-color;
   }
+  .menuItem:not(.active){
+    color: $primary-color;
+  }
   .menuItem:not(.active):hover {
     background: $grey-color;
     transition: all 0.3s ease-in;

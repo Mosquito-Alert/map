@@ -33,11 +33,11 @@ export default function () {
     frontendUrl = 'http://localhost:8080/'
     // backendUrl = 'http://be.example.com:8000/'
     // frontendUrl = 'http://fe.example.com:8080/'
-    analyticsCode = 'G-RT6ZXWX8PS'
+    analyticsCode = 'GTM-M5PRMJ9'
   } else {
     backendUrl = '//sigserver4.udg.edu/apps/mosquito2_backend/'
     frontendUrl = '//sigserver4.udg.edu/mos/spa/'
-    analyticsCode = 'G-ZLD12V4W3V'
+    analyticsCode = 'GTM-M5PRMJ9'
   }
   // first language is default
   // Array order shows in page
@@ -106,13 +106,15 @@ export default function () {
     errorMessage: '',
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
-    // authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
-    authenticateUrl: '//localhost:8000/login/',
+
+    // authenticateUrl: '//localhost:8000/login/',
     logoutUrl: '//localhost:8000/logout/',
 
     // URL of the public old web
-    // registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
-    registeredWebUrl: '//localhost:8080/',
+    authenticateUrl: 'https://sigserver4.udg.edu/apps/mosquito_tigatrapp/tigapublic/ajax_login/',
+
+    // URL of the public old web
+    registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
 
     // URL of model_manifest.csv file. This files includes a relation of available pregenerated models
     modelsManifestUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv',
@@ -128,7 +130,7 @@ export default function () {
     gridsize: 0.025,
 
     // Google Analytics code
-    analyticsId: analyticsCode,
+    googleTagManagerId: analyticsCode,
 
     cookiesComply: compliance(),
 
