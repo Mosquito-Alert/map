@@ -4,7 +4,7 @@
 <svg
    version="1.1"
    id="svg4"
-   inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    sodipodi:docname="breeding_not_validated_selected.svg"
    x="0px"
    y="0px"
@@ -25,7 +25,7 @@
 </style>
 <path
    class="st0"
-   d="M 27.45,39.825 H 2.55 C 1.125,39.825 0,38.7 0,37.275 V 10.725 C 0,9.3 1.125,8.175 2.55,8.175 h 24.9 c 1.425,0 2.55,1.125 2.55,2.55 V 37.2 c 0,1.425 -1.125,2.625 -2.55,2.625 z"
+   d="M 27.45,35.825 H 2.55 C 1.125,35.825 0,34.7 0,33.275 V 6.725 C 0,5.3 1.125,4.175 2.55,4.175 h 24.9 C 28.875,4.175 30,5.3 30,6.725 V 33.2 c 0,1.425 -1.125,2.625 -2.55,2.625 z"
    id="path1052"
    style="fill:#ffffff;stroke-width:0.75" />
 
@@ -36,16 +36,16 @@
    guidetolerance="10"
    id="namedview6"
    inkscape:current-layer="svg4"
-   inkscape:cx="13.836958"
+   inkscape:cx="13.79553"
    inkscape:cy="31.692433"
    inkscape:pagecheckerboard="0"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-height="1136"
+   inkscape:window-height="1017"
    inkscape:window-maximized="1"
-   inkscape:window-width="1846"
-   inkscape:window-x="0"
-   inkscape:window-y="0"
+   inkscape:window-width="1920"
+   inkscape:window-x="1672"
+   inkscape:window-y="-8"
    inkscape:zoom="12.069127"
    objecttolerance="10"
    pagecolor="#ffffff"
