@@ -1127,7 +1127,7 @@ export default defineComponent({
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
 
-      const legend = $store.getters['app/getLayers'].sampling_effort.legend
+      const legend = $store.getters['app/getLayers'].sampling_effort.sampling.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
 

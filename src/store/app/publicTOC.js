@@ -4,7 +4,6 @@ export const defaultObservations = [
 ]
 
 export const observations = {
-  confirmed_probable: ['tiger', 'culex', 'koreicus', 'japonicus'],
   observations: { // Mosquito observations
     tiger: {
       categories: ['mosquito_tiger_confirmed', 'mosquito_tiger_probable', 'albopictus_cretinus'],
@@ -112,13 +111,13 @@ export const observations = {
   },
   sampling_effort: {
     sampling: {
-      active: false
-    },
-    legend: [
-      { from: 0, to: 10, color: '#ffffb266' },
-      { from: 10, to: 100, color: '#fd8d3c66' },
-      { from: 100, to: 1000, color: '#f03b2066' },
-      { from: 1000, to: Infinity, color: '#bd002666' }
-    ]
+      active: false,
+      legend: [
+        { from: 0, to: 10, color: '#ffffb266' },
+        { from: 10, to: 100, color: '#fd8d3c66' },
+        { from: 100, to: 1000, color: '#f03b2066' },
+        { from: 1000, to: Infinity, color: '#bd002666' }
+      ]
+    }
   }
 }

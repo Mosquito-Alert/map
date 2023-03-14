@@ -51,6 +51,18 @@ export default {
     const $store = useStore()
     const newReport = function () {
       context.emit('newReport')
+      // const mapLayers = $store.getters['app/getLayers']
+      // const activeLayers = []
+      // for (const group in mapLayers) {
+      //   console.log(group)
+      //   for (const category in mapLayers[group]) {
+      //     console.log(category)
+      //     if (mapLayers[group][category].active) {
+      //       activeLayers.push(category)
+      //     }
+      //   }
+      // }
+      // console.log(activeLayers)
     }
     const maxReports = $store.getters['app/getReportsLimit']
     const tooManyFeatures = computed(() => {

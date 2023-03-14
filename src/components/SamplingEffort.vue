@@ -44,7 +44,7 @@ export default {
     })
 
     const samplingEffort = computed(() => {
-      return $store.getters['app/layers'].sampling_effort
+      return $store.getters['app/layers'].sampling_effort.sampling
     })
 
     const samplingIsActive = function () {

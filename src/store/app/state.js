@@ -278,6 +278,7 @@ export default function () {
 
     // Info related with citizen observations (raw data)
     possibleCategories: ['tiger', 'yellow', 'japonicus', 'koreicus', 'culex'],
+    confirmed_probable: ['tiger', 'culex', 'koreicus', 'japonicus'],
     layers: publicLayers,
 
     // Info related with species and models
