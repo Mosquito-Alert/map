@@ -39,31 +39,58 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close', 'newReport'],
   setup (props, context) {
-    // window.dataLayer.push({
-    //   event: 'detailedReport',
-    //   observationsCounter: $store.getters['app/getModals'].report.n
-    // })
     const $store = useStore()
+
+    function doDataLayer (activeLayers) {
+      const dict = {}
+      activeLayers.forEach(layer => {
+        dict[layer] = true
+      })
+      return dict
+    }
+
     const newReport = function () {
       context.emit('newReport')
-      // const mapLayers = $store.getters['app/getLayers']
-      // const activeLayers = []
-      // for (const group in mapLayers) {
-      //   console.log(group)
-      //   for (const category in mapLayers[group]) {
-      //     console.log(category)
-      //     if (mapLayers[group][category].active) {
-      //       activeLayers.push(category)
-      //     }
-      //   }
-      // }
-      // console.log(activeLayers)
+      const mapLayers = $store.getters['app/getLayers']
+      const activeLayers = []
+      for (const group in mapLayers) {
+        for (const category in mapLayers[group]) {
+          if (mapLayers[group][category].active) {
+            activeLayers.push(category)
+          }
+        }
+      }
+      // [ "tiger", "yellow", "japonicus", "koreicus", "culex", "unidentified", "other", "bite", "with_water", "without_water", "other_water" ]
+      const gtm = useGtm()
+      // window.dataLayer.push({
+      //   pageCategory: 'home',
+      //   visitorType: 'Developerssss'
+      // })
+      // window.dataLayer.push({
+      //   event: 'detailedReport',
+      //   tiger: activeLayers.includes('tiger'),
+      //   yellow: activeLayers.includes('yellow'),
+      //   japonicus: activeLayers.includes('japonicus'),
+      //   culex: activeLayers.includes('culex'),
+      //   unidentified: activeLayers.includes('unidentified'),
+      //   other: activeLayers.includes('other'),
+      //   bite: activeLayers.includes('bite'),
+      //   with_water: activeLayers.includes('with_water'),
+      //   without_water: activeLayers.includes('without_water'),
+      //   other_water: activeLayers.includes('other_water')
+      // })
+      const dl = doDataLayer(activeLayers)
+      dl.event = 'detailedReport'
+      dl.action = 'click'
+      gtm.trackEvent(dl)
     }
+
     const maxReports = $store.getters['app/getReportsLimit']
     const tooManyFeatures = computed(() => {
       return ($store.getters['app/getModals'].report.n > maxReports)
