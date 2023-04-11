@@ -297,7 +297,7 @@ export default {
       }
 
       const d = new Date()
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth())
       uncertaintyColor.value = defaults.uncertaintyColor
       // Get model manifest to activate/deactivate calendar
       getManifest(manifestUrl)
