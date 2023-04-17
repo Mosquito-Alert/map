@@ -438,12 +438,17 @@ export default defineComponent({
           spinner(false)
         })
       }).catch(function (err) {
-        console.log(err)
         process.status = 'error'
         process.data = err
         connectionError = true
+        let errMsg = ''
+        if (err.response.status === 404) {
+          errMsg = 'Model not found on Server'
+        } else {
+          errMsg = err.message
+        }
         spinner(false)
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: process.data.message } })
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: errMsg } })
       })
 
       if (connectionError) {
