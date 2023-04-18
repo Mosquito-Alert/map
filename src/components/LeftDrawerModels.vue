@@ -62,7 +62,7 @@
                 <q-date
                   :title="trans('Select model date')"
                   :navigation-min-year-month="startingModelDate"
-                  :navigation-max-year-month="getCurrentDate"
+                  :navigation-max-year-month="getLastDate"
                   mask="MM/YYYY"
                   :years-in-month-view=true
                   emit-immediately
@@ -247,7 +247,7 @@ export default {
     const inputDate = ref(null)
     const legendCanvas = ref(null)
     const modelDate = ref(null)
-    const getCurrentDate = ref()
+    const getLastDate = ref()
     const monthPicker = ref()
     const $store = useStore()
     const showLegend = ref(false)
@@ -301,7 +301,7 @@ export default {
 
       const d = new Date(Date.now())
       const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
-      getCurrentDate.value = d.getFullYear() + '/' + monthIn2Digit
+      getLastDate.value = d.getFullYear() + '/' + monthIn2Digit
       uncertaintyColor.value = defaults.uncertaintyColor
       // Get model manifest to activate/deactivate calendar
       getManifest(manifestUrl)
@@ -325,19 +325,27 @@ export default {
           const lines = resp.data.split(/\r?\n/)
           const headers = lines[0].toLowerCase().split(',')
           const targetIdx = headers.indexOf('target')
-          const yearIdx = headers.indexOf('from')
+          const fromIdx = headers.indexOf('from')
+          const toIdx = headers.indexOf('to')
           const cellIdx = headers.indexOf('cell')
           for (let i = 1; i < lines.length; i++) {
             if (lines[i] === '') break
             const currentLine = lines[i].split(',')
             const target = currentLine[targetIdx].toLowerCase()
-            const year = currentLine[yearIdx].toLowerCase()
+            const from = currentLine[fromIdx].toLowerCase().split('-')
+            const to = currentLine[toIdx].toLowerCase().split('-')
             const cell = currentLine[cellIdx].toLowerCase()
             let cellValue = true
             if (cell !== '') {
               cellValue = currentLine[cellIdx].toLowerCase()
             }
-            modelsManifest[target] = { year: year, cell: cellValue }
+            modelsManifest[target] = {
+              fromYear: from[0],
+              fromMonth: from[1],
+              toYear: to[0],
+              toMonth: to[1],
+              cell: cellValue
+            }
           }
           if (callback) {
             callback()
@@ -409,7 +417,9 @@ export default {
       })
 
       // Check if selected models is available. if not clear modelDate
-      startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
+      // startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
+      startingModelDate.value = modelsManifest[modelVector.value.code].fromYear + '/' + modelsManifest[modelVector.value.code].fromMonth
+      getLastDate.value = modelsManifest[modelVector.value.code].toYear + '/' + modelsManifest[modelVector.value.code].toMonth
       if (modelDate.value) {
         const selected = parseInt(modelDate.value.slice(-4))
         const previous = parseInt(startingModelDate.value.substring(0, 4))
@@ -618,7 +628,7 @@ export default {
       vectorOptions,
       mobile,
       dateSelected,
-      getCurrentDate,
+      getLastDate,
       modelDate,
       inputDate,
       monthPicker,
