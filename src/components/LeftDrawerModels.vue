@@ -64,7 +64,7 @@
                   :navigation-min-year-month="startingModelDate"
                   :navigation-max-year-month="getCurrentDate"
                   mask="MM/YYYY"
-                  years-in-month-view="true"
+                  :years-in-month-view=true
                   emit-immediately
                   default-view="Years"
                   v-model="modelDate"
@@ -234,7 +234,9 @@ export default {
     'estimationTransparency',
     'uncertaintyTransparency',
     'estimationColorsChanged',
-    'uncertaintyColorsChanged'
+    'uncertaintyColorsChanged',
+    'filterObservations',
+    'toggleLeftDrawer'
   ],
   setup (props, context) {
     const uncertaintyColor = ref(null)
@@ -298,7 +300,8 @@ export default {
       }
 
       const d = new Date(Date.now())
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth())
+      const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
+      getCurrentDate.value = d.getFullYear() + '/' + monthIn2Digit
       uncertaintyColor.value = defaults.uncertaintyColor
       // Get model manifest to activate/deactivate calendar
       getManifest(manifestUrl)

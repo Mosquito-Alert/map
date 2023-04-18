@@ -152,7 +152,16 @@ import FilterHastags from './FilterHastags.vue'
 
 export default {
   components: { LeftMenu, SamplingEffort, SearchLocation, FilterHastags },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'firstMapCall'],
+  emits: [
+    'filterObservations',
+    'filterLocations',
+    'clearLocations',
+    'toggleSamplingEffort',
+    'firstMapCall',
+    'startShareView',
+    'toggleLeftDrawer',
+    'filterTags'
+  ],
   props: ['expanded'],
   setup (props, context) {
     const searchLocation = ref()

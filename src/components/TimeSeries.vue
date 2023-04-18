@@ -57,19 +57,18 @@
             class="no-pointer-events calendar-button"
           >
             <q-popup-proxy
-              @before-show="updateProxy"
               cover
               transition-show="scale"
               transition-hide="scale"
             >
             <!-- QUASAR CALENDAR -->
               <q-date
-                navigation-min-year-month='2014/06'
+                navigation-min-year-month="2014/06"
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
                 :subtitle="rangeEndValue?rangeEndValue:(rangeStartValue?rangeStartValue:calendarSubtitle)"
                 range
-                years-in-month-view="true"
+                :years-in-month-view=true
                 class="calendar"
                 color="orange-4"
                 text-color="black"
@@ -206,7 +205,8 @@ export default defineComponent({
       $store.commit('app/setCalendarSubtitle', subtitle)
 
       const d = new Date(Date.now())
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
+      getCurrentDate.value = d.getFullYear() + '/' + monthIn2Digit
       $store.commit('map/setMapDates', { defaultDates })
     })
 
@@ -243,11 +243,11 @@ export default defineComponent({
           setMapBeforeZoom()
         }
         zoomed.value = true
-        const start = new Date(chart.boxes[4].min)
-        const end = new Date(chart.boxes[4].max)
+        const start = moment(new Date(chart.boxes[4].min)).format('YYYY/MM/DD')
+        const end = moment(new Date(chart.boxes[4].max)).format('YYYY/MM/DD')
         const draggedFormatted = {
-          from: moment(start).format('YYYY/MM/DD'),
-          to: moment(end).format('YYYY/MM/DD')
+          from: start,
+          to: end
         }
         calendarDate.value = draggedFormatted
         datePicked()
@@ -267,8 +267,8 @@ export default defineComponent({
         const start = new Date(chart.boxes[4].min)
         const end = new Date(chart.boxes[4].max)
         const draggedFormatted = {
-          from: moment(start).format('YYYY/MM/DD'),
-          to: moment(end).format('YYYY/MM/DD')
+          from: moment(start, 'YYYY-MM-DD').format('YYYY/MM/DD'),
+          to: moment(end, 'YYYY-MM-DD').format('YYYY/MM/DD')
         }
         calendarDate.value = draggedFormatted
         datePicked()
@@ -278,8 +278,8 @@ export default defineComponent({
     const setMapBeforeZoom = function () {
       if ($store.getters['map/getMapDates'].from !== '') {
         mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-        mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
-        mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+        mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from, 'YYYY-MM-DD').format('YYYY/MM/DD')
+        mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to, 'YYYY-MM-DD').format('YYYY/MM/DD')
       } else {
         mapDatesBeforeZoom = null
       }
@@ -399,19 +399,20 @@ export default defineComponent({
         if (calendarDate.value) {
           sDate = calendarDate.value.from
           eDate = calendarDate.value.to
+
           // dateFilterToString(date)
-          daysInRange = moment(eDate).diff(moment(sDate), 'days')
+          daysInRange = moment(eDate, 'YYYY/MM/DD').diff(moment(sDate, 'YYYY/MM/DD'), 'days')
 
           // Format date must be YYYY-MM-DD
-          sDate = moment(calendarDate.value.from).format('YYYY-MM-DD')
-          eDate = moment(calendarDate.value.to).format('YYYY-MM-DD')
+          sDate = moment(calendarDate.value.from, 'YYYY/MM/DD').format('YYYY-MM-DD')
+          eDate = moment(calendarDate.value.to, 'YYYY/MM/DD').format('YYYY-MM-DD')
           date = {
             from: sDate,
             to: eDate
           }
           // Set calendar subtitle
-          let subtitle = moment(calendarDate.value.from).format('DD/MM/YYYY')
-          subtitle += ' - ' + moment(calendarDate.value.to).format('DD/MM/YYYY')
+          let subtitle = moment(calendarDate.value.from, 'YYYY/MM/DD').format('DD/MM/YYYY')
+          subtitle += ' - ' + moment(calendarDate.value.to, 'YYYY/MM/DD').format('DD/MM/YYYY')
           $store.commit('app/setCalendarSubtitle', subtitle)
         }
       }
