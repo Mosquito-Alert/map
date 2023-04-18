@@ -9,7 +9,7 @@
       <q-input
         ref="inputLocation"
         v-model="searchString"
-        :label="error?_('No results found'):_('Placeholder location')"
+        :label="error?trans('No results found'):trans('Placeholder location')"
         :color="(filterIsActive && loading)?'white':'orange'"
         class="search-location"
         :loading="loading"
@@ -77,7 +77,7 @@ export default {
       searchString.value = v
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -185,7 +185,7 @@ export default {
     }
 
     return {
-      _,
+      trans,
       throttle,
       error,
       searchString,

@@ -12,16 +12,16 @@
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <slot></slot>
           <img src="~assets/img/mosquitoalert_logo.png" class="q-mb-lg">
-          <p>{{ _('Check the') }} <b>{{ _('data on mosquitoes, breeding places and bites') }}</b> {{ _('sent by citizens, through the Mosquito Alert app.') }} {{ _('Part of this data has been validated by entomology professionals or by Artificial Intelligence (AI) algorithms. You will also find data modeled from the original data.') }}</p>
+          <p>{{ trans('Check the') }} <b>{{ trans('data on mosquitoes, breeding places and bites') }}</b> {{ trans('sent by citizens, through the Mosquito Alert app.') }} {{ trans('Part of this data has been validated by entomology professionals or by Artificial Intelligence (AI) algorithms. You will also find data modeled from the original data.') }}</p>
 
-          <p> {{ _('You can ') }} <b>{{ _('view, filter and download data') }}</b>, {{ _("among other functions") }}. {{ _('Use the Help') }} <i class="fa-thin fa-square-question"></i> {{ _('and Info') }} <i class="fa-thin fa-circle-info"></i> {{ _('for more information.') }}</p>
+          <p> {{ trans('You can ') }} <b>{{ trans('view, filter and download data') }}</b>, {{ trans("among other functions") }}. {{ trans('Use the Help') }} <i class="fa-thin fa-square-question"></i> {{ trans('and Info') }} <i class="fa-thin fa-circle-info"></i> {{ trans('for more information.') }}</p>
           <p>
-            {{ _('If you want the complete Mosquito Alert data set, with advanced documentation and download options, go to the Mosquito Alert Data Portal:') }} <a href="http://www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal" target="_blank">www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal</a></p>
-          <p> {{ _('You can also consult the Mosquito Alert website: ') }} <a href="http://www.mosquitoalert.com" target="_blank">www.mosquitoalert.com</a></p>
+            {{ trans('If you want the complete Mosquito Alert data set, with advanced documentation and download options, go to the Mosquito Alert Data Portal:') }} <a href="http://www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal" target="_blank">www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal</a></p>
+          <p> {{ trans('You can also consult the Mosquito Alert website: ') }} <a href="http://www.mosquitoalert.com" target="_blank">www.mosquitoalert.com</a></p>
 
           <div class="row text-center">
             <div class="col">
-              <button @click="close" class="ma-close-btn">{{ _('Close') }}</button>
+              <button @click="close" class="ma-close-btn">{{ trans('Close') }}</button>
             </div>
           </div>
       </dialog>
@@ -51,7 +51,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     const layers = $store.getters['app/getLayers']
@@ -60,7 +60,7 @@ export default {
       close,
       hasCloseButton,
       mobile,
-      _,
+      trans,
       slide: ref('pag_1')
     }
   }

@@ -152,7 +152,7 @@ export default defineComponent({
       // }
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -262,7 +262,7 @@ export default defineComponent({
       })
       // Send data to layout so it udpates UI accordingly
       context.emit('loadSharedModel', {
-        vector: { code: jsonView.filters.vector, type: _(models[type].common_name) },
+        vector: { code: jsonView.filters.vector, type: trans(models[type].common_name) },
         year: jsonView.filters.year,
         month: jsonView.filters.month,
         estimation: jsonView.filters.estimation,
@@ -817,7 +817,7 @@ export default defineComponent({
       spinner(false)
     }
     return {
-      _,
+      trans,
       hideSpinner,
       uncertaintyRefresh,
       estimationRefresh,

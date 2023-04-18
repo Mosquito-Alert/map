@@ -23,16 +23,16 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right q-ma-md">
-        <q-btn :label="_('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
+        <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ _('Estimates') }}
+        {{ trans('Estimates') }}
       </div>
 
       <div>
         <div class="category-box q-my-md">
           <q-select
-            :label="_('Select species')"
+            :label="trans('Select species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -49,7 +49,7 @@
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
-          :label="_('Month / Year')"
+          :label="trans('Month / Year')"
           v-model="inputDate"
           mask="##/####"
           :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -60,7 +60,7 @@
             <q-icon ref="modelsCalendar" name="event_note" class="models-calendar cursor-pointer" color="orange">
               <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
                 <q-date
-                  :title="_('Select model date')"
+                  :title="trans('Select model date')"
                   :navigation-min-year-month="startingModelDate"
                   :navigation-max-year-month="getCurrentDate"
                   mask="MM/YYYY"
@@ -84,7 +84,7 @@
                   <i class="fa-thin fa-circle-info"></i>
                 </div>
                 <div class="q-ml-xs lower-case capitalFirstLetter">
-                  {{ _('MODELED DATA') }}
+                  {{ trans('MODELED DATA') }}
                 </div>
               </div>
             </div>
@@ -94,7 +94,7 @@
               class="ma-btn no-margin"
               :class="(disabled)?'disabled':''"
               @click="applyfilter">
-                {{ _('Apply') }}
+                {{ trans('Apply') }}
             </q-btn>
           </div>
         </div>
@@ -103,7 +103,7 @@
           <hr class="q-my-xl">
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ _('Probability') }}
+              {{ trans('Probability') }}
             </div>
             <div class="estimation-palettes">
               <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" />
@@ -126,9 +126,9 @@
           </div>
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
-            <div class="col-4 text-left">{{ _('Low') }}</div>
-            <div class="col-4 text-center">{{ _('Medium') }}</div>
-            <div class="col-4 text-right">{{ _('High') }}</div>
+            <div class="col-4 text-left">{{ trans('Low') }}</div>
+            <div class="col-4 text-center">{{ trans('Medium') }}</div>
+            <div class="col-4 text-right">{{ trans('High') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row legend-row" :style="{'opacity': 1 - (estimationTransparency/100)}">
@@ -141,7 +141,7 @@
           </div>
           <!-- ESTIMATION TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="estimation" class="col text-center">{{ _('Transparency') }}</div>
+            <div v-if="estimation" class="col text-center">{{ trans('Transparency') }}</div>
           </div>
           <div v-if="estimation" class="row">
             <q-slider
@@ -154,7 +154,7 @@
           <!-- UNCERTAINTY -->
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ _('Uncertainty') }}
+              {{ trans('Uncertainty') }}
             </div>
             <div>
               <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" />
@@ -178,10 +178,10 @@
           </div>
           <!-- UNCERTAINTY LEGEND -->
           <div v-if="uncertainty" class="row q-mt-md">
-            <div class="col-3 text-center">{{ _('Very low') }}</div>
-            <div class="col-3 text-center">{{ _('Low') }}</div>
-            <div class="col-3 text-center">{{ _('Medium') }}</div>
-            <div class="col-3 text-center">{{ _('High') }}</div>
+            <div class="col-3 text-center">{{ trans('Very low') }}</div>
+            <div class="col-3 text-center">{{ trans('Low') }}</div>
+            <div class="col-3 text-center">{{ trans('Medium') }}</div>
+            <div class="col-3 text-center">{{ trans('High') }}</div>
           </div>
           <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': 1 - (uncertaintyTransparency/100)}">
               <div class="col-3 text-center">
@@ -199,7 +199,7 @@
           </div>
           <!-- UNCERTAINTY TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="uncertainty" class="col text-center">{{ _('Transparency') }}</div>
+            <div v-if="uncertainty" class="col text-center">{{ trans('Transparency') }}</div>
           </div>
           <div v-if="uncertainty" class="row">
             <q-slider
@@ -352,16 +352,16 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'albopictus', type: _('Tiger mosquito') },
-        { code: 'aegypti', type: _('Yellow fever mosquito') },
-        { code: 'japonicus', type: _('Japonicus mosquito') },
-        { code: 'koreicus', type: _('Koreicus mosquito') },
-        { code: 'culex', type: _('Culex mosquito') },
-        { code: 'biting', type: _('Bites') }
+        { code: 'albopictus', type: trans('Tiger mosquito') },
+        { code: 'aegypti', type: trans('Yellow fever mosquito') },
+        { code: 'japonicus', type: trans('Japonicus mosquito') },
+        { code: 'koreicus', type: trans('Koreicus mosquito') },
+        { code: 'culex', type: trans('Culex mosquito') },
+        { code: 'biting', type: trans('Bites') }
       ]
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -578,7 +578,7 @@ export default {
     })
 
     return {
-      _,
+      trans,
       errorDownloadingModels,
       goInfoModal,
       estLegendColors,

@@ -21,9 +21,9 @@
             color="orange"
             name="username"
             v-model="username"
-            :label="_('Username *')"
+            :label="trans('Username *')"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || _('Field required') ]"
+            :rules="[ val => val && val.length > 0 || trans('Field required') ]"
           ></q-input>
 
           <q-input
@@ -31,10 +31,10 @@
             color="orange"
             v-model="password"
             name="password"
-            :label="_('Password *')"
+            :label="trans('Password *')"
             filled :type="isPwd ? 'password' : 'text'"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || _('Field required')]"
+            :rules="[ val => val && val.length > 0 || trans('Field required')]"
             >
             <template v-slot:append>
               <q-icon
@@ -45,11 +45,11 @@
             </template>
           </q-input>
           <div v-if="loginError" class="login-error">
-            {{ _('Invalid login') }}
+            {{ trans('Invalid login') }}
           </div>
           <div class="login row">
-            <button class="q-mt-md" @click.prevent="onSubmit">{{ _('Log in') }}</button>
-            <button class="q-mt-xs" @click.prevent="close">{{ _('Close')}} </button>
+            <button class="q-mt-md" @click.prevent="onSubmit">{{ trans('Log in') }}</button>
+            <button class="q-mt-xs" @click.prevent="close">{{ trans('Close')}} </button>
           </div>
         </div>
         </q-form>
@@ -82,7 +82,7 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -127,7 +127,7 @@ export default {
       open,
       close,
       loginError,
-      _
+      trans
     }
   }
 }

@@ -7,7 +7,7 @@
       class="flex expanded"
       :class="mobile?'mobile':''"
     >
-      <div class="ma-logo" :title="_('Mosquito Alert')">
+      <div class="ma-logo" :title="trans('Mosquito Alert')">
         <a href="//webserver.mosquitoalert.com/">
           <img src="~assets/img/logo_mosquito_alert.png">
         </a>
@@ -60,12 +60,12 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
     return {
-      _,
+      trans,
       mobile,
       observationId
     }

@@ -10,12 +10,12 @@
     <div class="dialog-share" v-if="open">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title"> {{ _('Share modal title') }} </div>
+          <div class="modal-title"> {{ trans('Share modal title') }} </div>
           <p v-if="viewContent.error">{{ viewContent.error }}</p>
           <div class="modal-content" v-if="viewContent.url">
             <transition name="toast">
               <div v-if="copied" class="toast-msg">
-                {{ _('Url has been copied') }}
+                {{ trans('Url has been copied') }}
               </div>
             </transition>
             <div class="row q-my-lg new-url-wrapper">
@@ -35,7 +35,7 @@
           </div>
         <div class="buttons close-modal">
           <div class="download-buttons">
-            <button class="q-btn ma-share-btn" @click="close">{{ _('Close') }}</button>
+            <button class="q-btn ma-share-btn" @click="close">{{ trans('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -83,7 +83,7 @@ export default {
       })
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -108,7 +108,7 @@ export default {
       viewContent,
       shareView,
       close,
-      _
+      trans
     }
   }
 }

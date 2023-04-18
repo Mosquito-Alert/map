@@ -5,7 +5,7 @@
 <template>
   <div :class="className">
     <button
-      :title="_(titleText)"
+      :title="trans(titleText)"
       @click.stop="buttonClicked"
     >
       <i :class="faIcon"></i>
@@ -38,12 +38,12 @@ export default {
       context.emit('clicked')
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
     return {
-      _,
+      trans,
       className,
       faIcon,
       titleText,

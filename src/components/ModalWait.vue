@@ -34,7 +34,7 @@ export default {
       return $store.getters['app/getModals'].wait.seamless
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -56,7 +56,7 @@ export default {
       leftDrawerStatus,
       mobile,
       open,
-      _
+      trans
     }
   }
 }

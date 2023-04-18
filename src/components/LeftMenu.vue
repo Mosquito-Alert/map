@@ -13,7 +13,7 @@
     <q-toolbar>
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="_('Reports')"
+        :label="trans('Reports')"
         :class="active_item=='layers'?'active':''"
         link="/"
         item="reports"
@@ -23,7 +23,7 @@
 
       <fa-thin-button-router
         name="fa-thin fa-chart-scatter"
-        :label="_('Estimates')"
+        :label="trans('Estimates')"
         :class="active_item=='models'?'active':''"
         link="/models"
         item="models"
@@ -35,26 +35,26 @@
 
       <fa-thin-button
         name="fa-thin fa-share-nodes"
-        :label="_('Share')"
+        :label="trans('Share')"
         @click="startShareView"
         id="shareView"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
-        :label="_('Info')"
+        :label="trans('Info')"
         @click="showInfo"
         id="showInfo"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-square-question"
-        :label="_('Help')"
+        :label="trans('Help')"
         @click="showHelp"
         id="help"
       ></fa-thin-button>
 
-      <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="trans('Lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
             <a v-for="item in LANGS" :key="item.code"
@@ -112,7 +112,7 @@ export default {
     const { cookies } = useCookies()
     const $store = useStore()
     const LANGS = $store.getters['app/getAllowedLangs']
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     const showInfo = function () {
@@ -179,14 +179,14 @@ export default {
 
     const loginLabel = computed(() => {
       if ($store.getters['app/getAuthorized']) {
-        return _('Log out')
+        return trans('Log out')
       } else {
-        return _('Log in')
+        return trans('Log in')
       }
     })
 
     return {
-      _,
+      trans,
       loginLabel,
       lang,
       LANGS,

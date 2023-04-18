@@ -1,5 +1,5 @@
 <template>
-  <div v-if="observationId" class="ma-logo" :title="_('Mosquito Alert')">
+  <div v-if="observationId" class="ma-logo" :title="trans('Mosquito Alert')">
     <a href="//webserver.mosquitoalert.com/">
       <img src="~assets/img/logo_mosquito_alert.png">
     </a>
@@ -379,12 +379,12 @@ export default {
       }
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
     return {
-      _,
+      trans,
       observationId,
       mobile,
       attrVisible,

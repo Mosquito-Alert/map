@@ -14,20 +14,20 @@
         <div class="text-center">
           <q-icon name="warning" color="white" size="4rem" class="text-center"/>
         </div>
-          <div class="modal-title text-center">{{ _('Error') }}</div>
-          <p class="modal-error-message" v-html="_(msg)"></p>
+          <div class="modal-title text-center">{{ trans('Error') }}</div>
+          <p class="modal-error-message" v-html="trans(msg)"></p>
           <div v-if="link">
-            <p>{{ _('More info') }}</p>
+            <p>{{ trans('More info') }}</p>
             <a :href="link">{{ link }} </a>
           </div>
         <div class="buttons">
           <div class="download-buttons" v-if="redirection">
             <router-link class="main-menu-item" to="/">
-              <button @click="close" class="close">{{ _('Close') }}</button>
+              <button @click="close" class="close">{{ trans('Close') }}</button>
             </router-link>
           </div>
           <div class="download-buttons" v-else>
-             <button @click="close" class="close">{{ _('Close') }}</button>
+             <button @click="close" class="close">{{ trans('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -63,7 +63,7 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
     }
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -78,7 +78,7 @@ export default {
       msg,
       link,
       redirection,
-      _
+      trans
     }
   }
 }

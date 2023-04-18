@@ -10,24 +10,24 @@
     <div class="dialog modal-reports" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ _('Reports modal title') }}</div>
-          <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
-          <p>{{ _('Verify this by looking at the map point counter') }}</p>
+          <div class="modal-title">{{ trans('Reports modal title') }}</div>
+          <p>{{ trans('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
+          <p>{{ trans('Verify this by looking at the map point counter') }}</p>
           <p class="popup-blocking-warning" v-if="browser==='safari'">
-            {{ _('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
+            {{ trans('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
           </p>
         <div class="error-message" v-if="tooManyFeatures">
-          {{ _('Reports limit exceeded') }}
+          {{ trans('Reports limit exceeded') }}
         </div>
         <div class="modal-close buttons">
           <div class="report-buttons flex">
             <div>
               <button v-if="!tooManyFeatures" class="gtm-report-detailed ma-btn q-mr-sm" @click="newReport">
-                {{ _('Continue') }}
+                {{ trans('Continue') }}
               </button>
             </div>
             <div>
-              <button @click="close" class="ma-btn q-ml-sm">{{ _('Close') }}</button>
+              <button @click="close" class="ma-btn q-ml-sm">{{ trans('Close') }}</button>
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -123,7 +123,7 @@ export default {
       newReport,
       close,
       hasCloseButton,
-      _
+      trans
     }
   }
 }

@@ -32,7 +32,7 @@ export default {
   setup (props, context) {
     const $store = useStore()
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -49,7 +49,7 @@ export default {
     }
 
     return {
-      _,
+      trans,
       dFrom,
       dTo,
       calendarClicked

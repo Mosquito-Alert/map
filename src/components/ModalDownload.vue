@@ -11,17 +11,17 @@
     <div class="dialog modal-download" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ _('Download') }}</div>
-          <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
-          <p>{{ _('Once verified, press the download button.') }}</p>
+          <div class="modal-title">{{ trans('Download') }}</div>
+          <p>{{ trans('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
+          <p>{{ trans('Once verified, press the download button.') }}</p>
           <p>
-            {{ _('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
-            <a :href="_('Mosquito portal URL')" target="_blank">
-            {{ _('Mosquito portal URL') }}
+            {{ trans('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
+            <a :href="trans('Mosquito portal URL')" target="_blank">
+            {{ trans('Mosquito portal URL') }}
             </a>
           </p>
         <div class="error-message" v-if="!nFeatures">
-          {{ _('No features to download') }}
+          {{ trans('No features to download') }}
         </div>
         <div class="buttons">
           <div class="modal-content download-buttons flex">
@@ -35,7 +35,7 @@
               >
               <span class="no-pointer-events">
                 <i class="fa-solid fa-download no-pointer-events"></i>
-                {{ _('Download geopackage') }}
+                {{ trans('Download geopackage') }}
               </span>
             </button>
             </div>
@@ -49,13 +49,13 @@
               >
                 <span class="no-pointer-events">
                   <i class="fa-solid fa-download no-pointer-events"></i>
-                  {{ _('Download excel') }}
+                  {{ trans('Download excel') }}
               </span>
               </button>
             </div>
 
             <div>
-              <button @click="close" class="ma-btn">{{ _('Close') }}</button>
+              <button @click="close" class="ma-btn">{{ trans('Close') }}</button>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     return {
@@ -105,7 +105,7 @@ export default {
       download,
       close,
       hasCloseButton,
-      _
+      trans
     }
   }
 }

@@ -9,7 +9,7 @@
       <div class="reference-map row">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-md-1"></div>
         <div class="col-xl-5 col-lg-5 col-md-5 col-xs-12 col-sm-5 col-md-6">
-          <h5 class="title"> {{ _('List of observations') }} </h5>
+          <h5 class="title"> {{ trans('List of observations') }} </h5>
           <img style="width:100%" id="c-mapa" />
           <div id='mapa' class='bg-white'>
             <ol-map ref='map'
@@ -45,19 +45,19 @@
         </div>
 
         <div class="report-filters col-3 col-md-4 col-xs-12 col-sm-5">
-          <h6> {{ _('Selected observations') }} </h6>
+          <h6> {{ trans('Selected observations') }} </h6>
           <div class="observations">
             <ul class="ul-filters">
-              <li v-html="_(name)" v-for="name, index in observationNames" :key="index">
+              <li v-html="trans(name)" v-for="name, index in observationNames" :key="index">
               </li>
             </ul>
           </div>
 
-          <h6 v-if="anyFilters"> {{ _('Filters applied') }} </h6>
+          <h6 v-if="anyFilters"> {{ trans('Filters applied') }} </h6>
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
-              <span v-else v-html="_('All years and all months')"></span>
+              <span v-else v-html="transrans('All years and all months')"></span>
             </div>
 
             <div class="dates" v-if="locationName">
@@ -113,7 +113,7 @@
                 >
               </div>
               <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                {{ _('Anonymous')}},
+                {{ trans('Anonymous')}},
                 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
               </div>
             </div>
@@ -124,8 +124,8 @@
               <div class="q-pb-lg flex">
                   <span class="counter">{{ index + 1 }}</span>
                   <div class="report-names q-pt-sm">
-                    <span class="common-name" v-html="_(feature.title)"></span>
-                    <span class="latin-name" v-html="_(feature.latinName)"></span>
+                    <span class="common-name" v-html="trans(feature.title)"></span>
+                    <span class="latin-name" v-html="trans(feature.latinName)"></span>
                   </div>
               </div>
               <div :class="mobile?'q-mx-lg':'q-ml-xl'">
@@ -138,62 +138,62 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="feature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
-                      {{ _(feature.howMany) }}
+                    <div><span class="how-many-bites">{{ transrans('How many bites') }}</span>:
+                      {{ transrans(feature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.location">
                     <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="bite-location">{{ _('Bite location') }}</span>:
-                      {{ _(feature.location) }}
+                    <div><span class="bite-location">{{ trans('Bite location') }}</span>:
+                      {{ trans(feature.location) }}
                     </div>
                 </div>
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                        <span class="date">{{ _('Date') }}</span>:
+                        <span class="date">{{ transransransrans('Date') }}</span>:
                         {{ formatData(feature) }}
                       <span class="bite-time" v-if="feature.biteTime">
-                        | {{ _(feature.biteTime) }}
+                        | {{ trans(feature.biteTime) }}
                       </span>
                     </div>
                 </div>
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="feature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
-                      {{ _(feature.withWater) }}
+                    <div><span class="water-status">{{ transrans('Breeding site with water') }}</span>
+                      {{ trans(feature.withWater) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
-                      {{ _(feature.withLarva) }}
+                    <div><span class="with-larva">{{ trans('Breeding site with larva') }}</span>
+                      {{ trans(feature.withLarva) }}
                     </div>
                 </div>
                 <div class="date-wrapper" v-if="feature.note">
                     <div><i class="fa-regular fa-message"></i></div>
                     <div>
-                      <span class="date">{{ _('Citizen note') }}</span>:
+                      <span class="date">{{ transransrans('Citizen note') }}</span>:
                       {{ feature.note }}
                     </div>
                 </div>
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
-                    <div><span class="description">{{ _('Expert note') }}</span>:
+                    <div><span class="description">{{ trans('Expert note') }}</span>:
                       {{ feature.edited_user_notes }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.lat && feature.lon">
                     <div><i class="fa-solid fa-location-check"></i></div>
-                    <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                    <div><span class="description">{{ trans('Coordinates (latitud, longitud)') }}</span>:
                       {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.version_uuid">
                     <div><i class="fa-solid fa-eye"></i></div>
-                    <div><span class="description">{{ _('Observation code') }}</span>:
+                    <div><span class="description">{{ transrans('Observation code') }}</span>:
                       {{ feature.version_uuid }}
                     </div>
                 </div>
@@ -208,7 +208,7 @@
                       v-if="feature.validation_type==='human' &&
                             feature.validation"
                     >
-                      {{ _(feature.validation) }}
+                      {{ trans(feature.validation) }}
                     </span>
                   </div>
                 </div>
@@ -630,7 +630,7 @@ export default {
       return params
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -662,8 +662,8 @@ export default {
     }
 
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return _('Expert validation')
-      else return _('AI validation')
+      if (feature.validation_type === 'human') return trans('Expert validation')
+      else return trans('AI validation')
     }
 
     const mobile = computed(() => {
@@ -671,7 +671,7 @@ export default {
     })
 
     return {
-      _,
+      trans,
       mobile,
       errorLoading,
       getValidationClass,

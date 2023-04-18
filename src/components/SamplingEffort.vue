@@ -79,7 +79,7 @@ export default {
       })
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -89,7 +89,7 @@ export default {
       samplingEffort,
       toggleClass,
       isActive,
-      _
+      trans
     }
   }
 }

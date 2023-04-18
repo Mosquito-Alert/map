@@ -8,25 +8,25 @@
       <div class="flex">
         <div class="col-8 col-sm-12 col-xs-12 q-mr-xl">
           <div>
-            <h6>{{ _('Cookies comply title') }}</h6>
+            <h6>{{ trans('Cookies comply title') }}</h6>
           </div>
           <div>
             <p>
-              {{ _('La web de Mosquito Alert utiliza cookies propias y de terceros con finalidades técnicas y analíticas. Para administrarlas utilice el gestor. Si desea más información acceda a la Política de cookies') }}
+              {{ trans('La web de Mosquito Alert utiliza cookies propias y de terceros con finalidades técnicas y analíticas. Para administrarlas utilice el gestor. Si desea más información acceda a la Política de cookies') }}
             </p>
             <p>
-              {{ _('Escoge qué tipos de galletas aceptas que Mosquito Alert pueda guardar en tu navegador.') }}
+              {{ trans('Escoge qué tipos de galletas aceptas que Mosquito Alert pueda guardar en tu navegador.') }}
             </p>
             <p>
-              <a href="#" @click.stop="openPolicy">{{ _("Cookies policy") }}</a>
+              <a href="#" @click.stop="openPolicy">{{ trans("Cookies policy") }}</a>
             </p>
           </div>
         </div>
         <div class="col-2 col-sm-6 col-xs-12 q-mr-md">
-          <button class="ma-btn" @click="openSettings">{{ _('Manage cookies') }}</button>
+          <button class="ma-btn" @click="openSettings">{{ trans('Manage cookies') }}</button>
         </div>
         <div class="col-2 col-sm-6 col-xs-12">
-          <button class="ma-btn" @click="acceptAll">{{ _('Accept all') }}</button>
+          <button class="ma-btn" @click="acceptAll">{{ trans('Accept all') }}</button>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@ export default {
     const gtm = useGtm()
     const { cookies } = useCookies()
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -83,7 +83,7 @@ export default {
     }
 
     return {
-      _,
+      trans,
       cookiesSettings,
       acceptAll,
       openSettings,
