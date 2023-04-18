@@ -211,9 +211,9 @@ export default defineComponent({
     const YEARS = []
     let dataset = []
     const initialYear = 2014
-    const currentYear = new Date().getFullYear()
-    let firstDate = new Date()
-    let lastDate = new Date()
+    const currentYear = new Date(Date.now()).getFullYear()
+    let firstDate = new Date(Date.now())
+    let lastDate = new Date(Date.now())
     let viewCode = null
     // const { cookies } = useCookies()
 
@@ -288,7 +288,7 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
-    const curYear = moment().year()
+    const curYear = moment(new Date(Date.now())).year()
     const initUrl = backendUrl + 'api/get/data/' + curYear + '/'
     const index = YEARS.findIndex(element => {
       return element.year === curYear
@@ -307,7 +307,7 @@ export default defineComponent({
           context.emit('workerStartedIndexing')
           worker.postMessage({
             initData: true,
-            year: moment().year(),
+            year: moment(new Date(Date.now())).year(),
             data: geojson
           })
         })
@@ -448,8 +448,8 @@ export default defineComponent({
             max: event.data.minMaxDates.max
           })
           $store.commit('app/setCalendarSubtitle', (
-            moment(event.data.minMaxDates.min).format('DD/MM/YYYY') +
-            ' - ' + moment(event.data.minMaxDates.max).format('DD/MM/YYYY')
+            moment(event.data.minMaxDates.min, 'DD-MM-YYYY').format('DD/MM/YYYY') +
+            ' - ' + moment(event.data.minMaxDates.max, 'DD-MM-YYYY').format('DD/MM/YYYY')
           ))
           $store.commit('map/setMapDates', {
             from: '',
@@ -553,8 +553,8 @@ export default defineComponent({
 
     function getCurrentYearDates () {
       return {
-        from: moment().startOf('year').format('YYYY-MM-DD'),
-        to: moment().format('YYYY-MM-DD')
+        from: moment(new Date(Date.now())).startOf('year').format('YYYY-MM-DD'),
+        to: moment(new Date(Date.now())).format('YYYY-MM-DD')
       }
     }
 
@@ -1681,8 +1681,8 @@ export default defineComponent({
       $store.commit('app/setDefaultSamplingEffort', payload.status)
       let sDate, eDate
       if (payload.dates[0].from !== '') {
-        sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
-        eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
+        sDate = moment(payload.dates[0].from, 'YYYY-MM-DD').format('YYYY-MM-DD')
+        eDate = moment(payload.dates[0].to, 'YYYY-MM-DD').format('YYYY-MM-DD')
         userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
       } else {
         userfixesLayer.url = userfixesUrl
@@ -1716,7 +1716,7 @@ export default defineComponent({
         const graphDates = data.dates
         const sDate = graphDates[0]
         const eDate = graphDates[graphDates.length - 1]
-        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        const daysInRange = moment(eDate, 'YYYY-MM-DD').diff(moment(sDate, 'YYYY-MM-DD'), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
           $store.commit('timeseries/updateDData', {

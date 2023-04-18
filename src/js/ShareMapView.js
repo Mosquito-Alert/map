@@ -16,8 +16,8 @@ export default class ShareMapView {
     if (typeof date === 'string') {
       expandedDate = { from: date.format(f), to: date.format(f) }
     } else {
-      const preDate = moment(date.from).add(1, 'd')
-      const postDate = moment(date.to).subtract(1, 'd')
+      const preDate = moment(date.from, 'YYYY-MM-DD').add(1, 'd')
+      const postDate = moment(date.to, 'YYYY-MM-DD').subtract(1, 'd')
       expandedDate = { from: preDate.format(f), to: postDate.format(f) }
     }
     return expandedDate
@@ -46,6 +46,7 @@ export default class ShareMapView {
       }
 
       if (filters.dates.length) {
+        console.log(filters.dates)
         // dataView.filters.dates = [this.constrictDate(filters.dates[0])]
         dataView.filters.dates = [filters.dates[0]]
       } else {

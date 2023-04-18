@@ -297,7 +297,7 @@ export default {
         context.emit('loadModel', defaults)
       }
 
-      const d = new Date()
+      const d = new Date(Date.now())
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth())
       uncertaintyColor.value = defaults.uncertaintyColor
       // Get model manifest to activate/deactivate calendar

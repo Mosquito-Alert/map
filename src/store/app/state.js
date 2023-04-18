@@ -78,8 +78,8 @@ export default function () {
 
   function getCurrentYearDates () {
     return {
-      from: moment().startOf('year').format('YYYY-MM-DD'),
-      to: moment().format('YYYY-MM-DD')
+      from: moment(new Date(Date.now())).startOf('year').format('YYYY-MM-DD'),
+      to: moment(new Date(Date.now())).format('YYYY-MM-DD')
     }
   }
   const mobile = () => {

@@ -249,6 +249,7 @@ export default defineComponent({
         return true
       }
       const d = response.view[0].date
+      console.log(d)
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
       $store.commit('map/setCurrents', {

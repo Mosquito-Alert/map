@@ -197,15 +197,15 @@ export default defineComponent({
           }
         }
       })
-      defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
-      defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
+      defaultDates.from = moment(defaultDates.from, 'YYYY-MM-DD').format('YYYY/MM/DD')
+      defaultDates.to = moment(defaultDates.to, 'YYYY-MM-DD').format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
 
-      let subtitle = moment(defaultDates.from).format('DD/MM/YYYY')
-      subtitle += ' - ' + moment(defaultDates.to).format('DD/MM/YYYY')
+      let subtitle = moment(defaultDates.from, 'YYYY-MM-DD').format('DD/MM/YYYY')
+      subtitle += ' - ' + moment(defaultDates.to, 'YYYY-MM-DD').format('DD/MM/YYYY')
       $store.commit('app/setCalendarSubtitle', subtitle)
 
-      const d = new Date()
+      const d = new Date(Date.now())
       getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
       $store.commit('map/setMapDates', { defaultDates })
     })
@@ -348,7 +348,7 @@ export default defineComponent({
       // To avoid this, a dummy record is added when there is no data
       if (!data.labels.length || !data.datasets.length) {
         data = {
-          labels: [moment().format('YYYY-MM-DD')],
+          labels: [moment(new Date(Date.now())).format('YYYY-MM-DD')],
           datasets: [{
             borderColor: '#FFFFFF',
             data: [0]

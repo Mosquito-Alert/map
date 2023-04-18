@@ -16,11 +16,11 @@ let all_layers = null
 // let simplifyTolerance = null
 let YEARS = []
 const initialYear = 2014
-const currentYear = new Date().getFullYear()
+const currentYear = new Date(Date.now()).getFullYear()
 let getdataUrl = ''
 let getAllDates = false
-let firstDate = '01-01-' + moment().format('YYYY')
-let lastDate = moment().format('YYYY-MM-DD')
+let firstDate = '01-01-' + moment(new Date(Date.now())).format('YYYY')
+let lastDate = moment(new Date(Date.now())).format('YYYY-MM-DD')
 let loadSharedView = false
 let graphData = null
 
@@ -217,8 +217,8 @@ function loadMapData (data, fitFeatures, initData) {
     ready: true,
     minMaxDates: { min: firstDate, max: lastDate },
     datesInterval: {
-      from: dataset.length ? dataset[0].properties.d : '01-01-' + moment().format('YYYY'),
-      to: dataset.length ? dataset[dataset.length - 1].properties.d : moment().format('DD') + '-01-2023'
+      from: dataset.length ? dataset[0].properties.d : '01-01-' + moment(new Date(Date.now())).format('YYYY'),
+      to: dataset.length ? dataset[dataset.length - 1].properties.d : moment(new Date(Date.now())).format('DD') + '-01-2023'
     }
   }
   if (getAllDates) {

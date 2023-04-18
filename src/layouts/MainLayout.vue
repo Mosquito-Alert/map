@@ -252,7 +252,7 @@ export default {
         let mapDate = {}
         if (payload.data.from === '') {
           mapDate.from = '2014-01-01'
-          mapDate.to = moment().format('YYYY-MM-DD')
+          mapDate.to = moment(new Date(Date.now())).format('YYYY-MM-DD')
         } else {
           mapDate = payload.data
         }
@@ -356,6 +356,7 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
+      console.log(date[0].from)
       timeseries.value.calendarDate = [{
         from: moment(date[0].from).format('YYYY/MM/DD'),
         to: moment(date[0].to).format('YYYY/MM/DD')
