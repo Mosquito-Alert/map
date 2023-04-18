@@ -56,7 +56,7 @@
                       <p><b>{{ trans('POR IDENTIFICADOR') }}</b>{{ trans(': escribe el identificador corto de un informe en el buscador de hashtag precedido por el símbolo :') }}</p>
                       <p>{{ trans('Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo uno de los identificadores utilizados.') }}</p>
                       <p><b>{{ trans('POR FECHA O RANGO DE FECHAS') }}</b>{{ trans('Los filtros aplican a todas las capas de información de las observaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.') }}</p>
-                      <hr/>
+                      <q-separator size="1"/>
                       <p>{{ trans('Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.') }}</p>
                     </div>
                   </div>
@@ -213,6 +213,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+hr{
+  margin-bottom: 10px;
+}
 .backdrop-modal-help {
   position: fixed;
   top: 0;
@@ -342,9 +345,7 @@ dialog.mobile button{
 dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
   padding: 4px 4px 60px 4px;
 }
-hr{
-  border: 1px solid #cccccc88;
-}
+
 .help-icon img{
   height: 30px;
   width: auto;

@@ -31,7 +31,7 @@
                   </h5>
                   <p>{{trans("El mapa contiene información de 5 especies de mosquitos vectores de enfermedades:")}} {{trans("el mosquito tigre")}} (<i>{{trans("Aedes albopictus")}}</i>), {{trans("el mosquito de la fiebre amarilla")}} (<i>{{trans("Aedes aegypti")}})</i>, {{trans("el mosquito del Japón")}} (<i>{{trans("Aedes japonicus")}}</i>), {{trans("el mosquito de Corea")}} (<i>{{trans("Aedes koreicus")}}</i>) {{trans("y el mosquito común")}} (<i>{{trans("Culex pipiens")}}</i>).</p>
                   <p>{{ trans('Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.') }}</p>
-                  <HR/>
+                  <q-separator size="1"/>
                   <div class="text-subtitle1 q-my-md">
                     {{ trans('DATOS NO MODELADOS') }}
                   </div>
@@ -85,7 +85,7 @@
                       <div class="q-pr-md"><b>{{ trans('Otras categorías. Mosquito no identificable:') }}</b> {{ trans('según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.') }}
                       </div>
                   </div>
-                  <HR/>
+                  <q-separator size="1"/>
                   <div class="text-subtitle2 text-left q-mb-md">
                       {{ trans('Bites') }}
                     </div>
@@ -97,7 +97,7 @@
                          {{ trans(' Observaciones ciudadanas de picaduras de mosquito, de cualquier especie y sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
                         </div>
                     </div>
-                  <HR/>
+                    <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
                       {{ trans("Breeding sites") }}
                     </div>
@@ -123,7 +123,7 @@
                           <b> {{ trans("Unidentified mosquito") }}</b>{{ trans(': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “otros tipos de lugares de cría”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
                         </div>
                     </div>
-                    <HR/>
+                    <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
                       {{ trans("Other species") }}
                     </div>
@@ -135,7 +135,7 @@
                           {{ trans('Según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser de otras especies de mosquito') }}
                         </div>
                     </div>
-                    <HR/>
+                    <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
                       {{ trans("Sampling effort") }}
 
@@ -148,7 +148,7 @@
                           {{ trans('La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.') }}
                         </div>
                     </div>
-                    <HR/>
+                    <q-separator size="1"/>
                     <a id="modeled_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
@@ -338,7 +338,7 @@ dialog.mobile button{
   height: auto;
 }
 hr{
-  border: 1px solid #cccccc88;
+  margin-bottom: 10px;
 }
 .help-icon img{
   // height: 30px;

@@ -18,9 +18,9 @@
                     style="position: relative; height: 300px; display: width:100%">
 
                 <ol-view ref='view'
-                    maxZoom="19"
-                    maxResolution="39135.75848201024"
-                    constrainResolution='true' />
+                    :maxZoom=19
+                    :maxResolution=39135.75848201024
+                    :constrainResolution=true />
 
                 <div class="ol-attribution">
                   © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
@@ -28,12 +28,12 @@
                   | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
                 </div>
                 <!-- base map -->
-                <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+                <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
                   <ol-source-osm />
                 </ol-tile-layer>
 
                 <!-- CLUSTERS geojson layer -->
-                <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+                <ol-vector-layer ref='observationsLayer' name="observationsLayer" :zIndex=10>
                   <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
                     <ol-style :overrideStyleFunction="styleFunction">
                     </ol-style>

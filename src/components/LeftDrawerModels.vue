@@ -228,6 +228,7 @@ export default {
   emits: [
     'loadModel',
     'clearModel',
+    'firstMapCall',
     'checkModelEstimation',
     'checkModelUncertainty',
     'estimationTransparency',

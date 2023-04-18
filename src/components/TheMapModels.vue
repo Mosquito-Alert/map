@@ -22,9 +22,9 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            multiWorld="true"
-            maxZoom="19"
-            maxResolution="39135.75848201024"
+            :multiWorld=true
+            :maxZoom=19
+            :maxResolution=39135.75848201024
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -45,7 +45,7 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
           <ol-source-osm />
             <!-- <ol-source-xyz
               crossOrigin='anonymous'

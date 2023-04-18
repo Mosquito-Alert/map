@@ -41,10 +41,10 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            maxResolution="39135.75848201024"
-            constrainResolution='true'
-            multiWorld="true"
-            maxZoom="19"
+            :maxResolution=39135.75848201024
+            :constrainResolution=true
+            :multiWorld=true
+            :maxZoom=19
             :center='center'
             :zoom='zoom' />
 
@@ -64,7 +64,7 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
           <ol-source-osm />
         </ol-tile-layer>
 
@@ -73,17 +73,17 @@
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <ol-vector-layer ref='locationLayer' name="locationLayer" zIndex="5">
+        <ol-vector-layer ref='locationLayer' name="locationLayer" :zIndex=5>
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
             <ol-style>
               <ol-style-fill :color="fillLocationColor"></ol-style-fill>
-              <ol-style-stroke :color="strokeLocationColor" width="2"></ol-style-stroke>
+              <ol-style-stroke :color="strokeLocationColor" :width=2></ol-style-stroke>
             </ol-style>
           </ol-source-vector>
         </ol-vector-layer>
 
         <!-- CLUSTERS GEOJSON LAYER FOR ALL OBSERVATIONS-->
-        <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+        <ol-vector-layer ref='observationsLayer' name="observationsLayer" :zIndex=10>
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -91,7 +91,7 @@
         </ol-vector-layer>
 
         <!-- SPIDERFIED MARKERS -->
-        <ol-vector-layer ref='spiralLayer' name="spiralLayer" zIndex="10">
+        <ol-vector-layer ref='spiralLayer' name="spiralLayer" :zIndex=10>
           <ol-source-vector :format='geoJson' ref='spiralSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>

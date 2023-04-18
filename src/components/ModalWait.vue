@@ -4,6 +4,7 @@
 
 <template>
   <transition name="modal">
+    <div>
     <q-dialog
       v-model="open"
       class="wait"
@@ -15,6 +16,7 @@
           size="5.5em"
         />
     </q-dialog>
+    </div>
   </transition>
 </template>
 

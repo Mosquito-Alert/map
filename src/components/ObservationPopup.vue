@@ -8,7 +8,7 @@
   <ol-overlay
       :title="trans(selectedFeature.title)"
       :position="selectedFeature.coordinates"
-      positioning='bottom-center'
+      positioning="bottom-center"
       :offset="[0, -35]"
       v-if="selectedFeature"
     >

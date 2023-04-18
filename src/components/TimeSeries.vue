@@ -39,7 +39,7 @@
                   <img v-if="set.icon"
                     class="symbol"
                     :src="set.icon"
-                    height="20"
+                    :height=20
                     :class="(set.opacity)?' possible':''"
                   >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
@@ -144,7 +144,7 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
-    graphicHeight.value = mobile.value ? '400' : '230'
+    graphicHeight.value = mobile.value ? 400 : 230
 
     const resetDateFilter = function () {
       rangeStartValue.value = false

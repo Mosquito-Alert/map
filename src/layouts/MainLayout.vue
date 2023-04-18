@@ -79,7 +79,7 @@
     <modal-wait/>
     <modal-logos/>
     <modal-error/>
-    <modal-login @resetTOC="resetTOC"/>
+    <modal-login/>
     <modal-cookie-settings/>
     <modal-cookie-policy/>
 
@@ -149,9 +149,9 @@ export default {
     const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
-    const resetTOC = function () {
-      map.value.initMap()
-    }
+    // const resetTOC = function () {
+    //   map.value.initMap()
+    // }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -414,7 +414,7 @@ export default {
       shareModal,
       loadUserFixes,
       buildSession,
-      resetTOC,
+      // resetTOC,
       startShareView
     }
   }
