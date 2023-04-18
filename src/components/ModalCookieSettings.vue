@@ -83,7 +83,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useCookies } from 'vue3-cookies'
-import { event } from 'vue-gtag'
 import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
@@ -138,7 +137,6 @@ export default {
       if (['all', 'ga'].indexOf(complied) > -1) {
         // gtag.optIn()
         gtm.enable(true)
-        event('login', { method: 'Google' })
       } else {
         // gtag.optOut()
         gtm.enable(false)
