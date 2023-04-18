@@ -74,6 +74,7 @@
                 text-color="black"
                 @range-start="rangeStart"
                 @range-end="rangeEnd"
+                @update:model-value="applyButtonClass"
               >
                 <div class="row items-center justify-end q-gutter-sm">
                   <q-btn :label="trans('Select all')" class="ma-btn"
@@ -81,7 +82,12 @@
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="trans('Apply calendar')" class="ma-btn" flat v-close-popup @click="datePicked"/>
+                  <q-btn
+                    :label="trans('Apply calendar')"
+                    :class="enableButton?'ma-btn':'ma-btn disabled'"
+                    flat v-close-popup
+                    @click="datePicked"
+                  />
                 </div>
               </q-date>
             </q-popup-proxy>
@@ -127,6 +133,7 @@ export default defineComponent({
     const reloading = ref(true)
     const zoomed = ref(false)
     const panned = ref(false)
+    const enableButton = ref(false)
     let currentYTickMax = null
     const getCurrentDate = ref()
     const calendarDate = ref()
@@ -359,7 +366,7 @@ export default defineComponent({
     })
 
     const rangeStart = function (range) {
-      const sDate = moment(range.year + '/' + range.month + '/' + range.day)
+      const sDate = moment(range.year + '/' + range.month + '/' + range.day, 'YYYY/MM/DD')
       rangeStartValue.value = moment(sDate).format('DD/MM/YYYY')
     }
 
@@ -367,8 +374,8 @@ export default defineComponent({
       const start = range.from.year + '/' + range.from.month + '/' + range.from.day
       const end = range.to.year + '/' + range.to.month + '/' + range.to.day
 
-      const sDate = moment(start)
-      const eDate = moment(end)
+      const sDate = moment(start, 'YYYY/MM/DD')
+      const eDate = moment(end, 'YYYY/MM/DD')
 
       if (start === end) {
         rangeEndValue.value = moment(sDate).format('DD/MM/YYYY')
@@ -385,7 +392,7 @@ export default defineComponent({
       let date
       rangeStartValue.value = false
       rangeEndValue.value = false
-      // If only one day is selected
+
       if (typeof calendarDate.value === 'string') {
         const day = calendarDate.value
         daysInRange = 1
@@ -444,8 +451,18 @@ export default defineComponent({
       }
     }
 
+    const applyButtonClass = function () {
+      if (calendarDate.value) {
+        enableButton.value = true
+      } else {
+        enableButton.value = false
+      }
+    }
+
     return {
       trans,
+      enableButton,
+      applyButtonClass,
       reloading,
       handleWheel,
       zoomed,
@@ -749,6 +766,7 @@ export default defineComponent({
   }
   :deep(button.q-btn.disabled) {
     opacity: 0.3 !important;
+    background: $grey-color;
   }
   .reloading div#reloading{
     position: absolute;
