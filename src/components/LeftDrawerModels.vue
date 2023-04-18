@@ -341,9 +341,9 @@ export default {
             }
             modelsManifest[target] = {
               fromYear: from[0],
-              fromMonth: from[1],
+              fromMonth: from[1].padStart(2, '0'),
               toYear: to[0],
-              toMonth: to[1],
+              toMonth: to[1].padStart(2, '0'),
               cell: cellValue
             }
           }
