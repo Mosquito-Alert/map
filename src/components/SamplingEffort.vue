@@ -5,7 +5,7 @@
 <template>
     <div
       class="sampling-effort-box"
-      :class="{active: (isActive)}"
+      :class="isActive?' active':''"
       @click="toggleClass"
     >
       <i :class="icon_code"></i>
@@ -26,7 +26,7 @@
 
 <script>
 import { useStore } from 'vuex'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 export default {
   props: ['title', 'colors'],
@@ -38,10 +38,13 @@ export default {
   },
   setup (props, context) {
     const $store = useStore()
-    const isActive = ref(false)
+    const isActive = computed(() => {
+      // return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      return $store.getters['app/getLayers'].sampling_effort.sampling.active
+    })
 
     const samplingEffort = computed(() => {
-      return $store.getters['app/layers'].sampling_effort
+      return $store.getters['app/layers'].sampling_effort.sampling
     })
 
     const samplingIsActive = function () {
@@ -55,22 +58,28 @@ export default {
     })
 
     const toggleClass = () => {
-      isActive.value = !isActive.value
-
       const d = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+
+      if (isActive.value) {
+        $store.commit('app/setActiveLayer', {
+          type: 'sampling_effort',
+          code: 'sampling',
+          active: false
+        })
+      } else {
+        $store.commit('app/setActiveLayer', {
+          type: 'sampling_effort',
+          code: 'sampling',
+          active: true
+        })
+      }
       context.emit('samplingEffort', {
         status: isActive.value,
         dates: [d]
       })
-
-      if (isActive.value) {
-        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
-      } else {
-        $store.commit('map/removeActiveLayer', { type: 'sampling-effort' })
-      }
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -80,7 +89,7 @@ export default {
       samplingEffort,
       toggleClass,
       isActive,
-      _
+      trans
     }
   }
 }

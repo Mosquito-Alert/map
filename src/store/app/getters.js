@@ -1,3 +1,11 @@
+export const getErrorMessage = state => {
+  return state.errorMessage
+}
+
+export const getCsrfToken = state => {
+  return state.csrfToken
+}
+
 export const selectedIcons = state => {
   return state.selectedIcons
 }
@@ -31,12 +39,24 @@ export const getText = state => function (text) {
   else return text
 }
 
+export const getAuthorized = state => {
+  return state.authorized
+}
+
 export const getLang = state => {
   return state.lang
 }
 
+export const getAllowedLangs = state => {
+  return state.allowedLangs
+}
+
 export const getModals = state => {
   return state.modals
+}
+
+export const getShareViewUrl = state => {
+  return state.modals.share.url
 }
 
 export const getWorker = state => {
@@ -79,8 +99,8 @@ export const getCalendarSubtitle = state => {
   return state.calendarSubtitle
 }
 
-export const getAnalyticsId = state => {
-  return state.analyticsId
+export const getGoogleTagManagerId = state => {
+  return state.googleTagManagerId
 }
 
 export const getModelsManifestUrl = state => {
@@ -101,6 +121,10 @@ export const getModelDefaults = state => {
 
 export const getAuthenticateUrl = state => {
   return state.authenticateUrl
+}
+
+export const getLogoutUrl = state => {
+  return state.logoutUrl
 }
 
 export const getRegisteredWebUrl = state => {
@@ -125,4 +149,8 @@ export const getTilesUrl = state => {
 
 export const getBrowser = state => {
   return state.browser
+}
+
+export const getPossibleCategories = state => {
+  return state.possibleCategories
 }

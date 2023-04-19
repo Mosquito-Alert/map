@@ -1,13 +1,14 @@
 // const worker = new Worker('TheMapWorker.js')
 import moment from 'moment'
 import { useCookies } from 'vue3-cookies'
+import { defaultObservations, observations as publicLayers } from './publicTOC'
 
 export default function () {
   let backendUrl = ''
   let frontendUrl = ''
   let analyticsCode
   const { cookies } = useCookies()
-
+  // const transparency = 'aa'
   function fnBrowserDetect () {
     const userAgent = navigator.userAgent
     let browserName
@@ -32,19 +33,28 @@ export default function () {
     frontendUrl = 'http://localhost:8080/'
     // backendUrl = 'http://be.example.com:8000/'
     // frontendUrl = 'http://fe.example.com:8080/'
-    analyticsCode = 'G-RT6ZXWX8PS'
+    analyticsCode = 'GTM-M5PRMJ9'
   } else {
-    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
-    frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
-    analyticsCode = 'G-ZLD12V4W3V'
+    backendUrl = '//sigserver4.udg.edu/apps/mosquito2_backend/'
+    frontendUrl = '//sigserver4.udg.edu/mos/spa/'
+    analyticsCode = 'GTM-M5PRMJ9'
   }
   // first language is default
-  const allowedLangs = ['en', 'es', 'ca']
+  // Array order shows in page
+  const allowedLangs = [
+    { code: 'ca', label: 'Català' },
+    { code: 'es', label: 'Castellano' },
+    { code: 'en', label: 'English' }
+  ]
   const browserLang = navigator.language.toLowerCase().substring(0, 2)
   let defaultLang
+  const langKeys = allowedLangs.map(ele => {
+    return ele.code
+  })
 
   if (!cookies.get('lang')) {
-    defaultLang = (allowedLangs.includes(browserLang)) ? browserLang : allowedLangs[0]
+    defaultLang = (langKeys.includes(browserLang)) ? browserLang : allowedLangs[0]
+    cookies.set('lang', defaultLang)
   } else {
     defaultLang = cookies.get('lang')
   }
@@ -55,7 +65,7 @@ export default function () {
     currentUrl = currentUrl.slice(0, -1)
   }
 
-  if (allowedLangs.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
+  if (langKeys.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
     const nextURL = currentUrl + '/' + defaultLang
     const nextTitle = 'MosquitoAlert'
     const nextState = { additionalInformation: 'Updated the URL with JS' }
@@ -68,8 +78,8 @@ export default function () {
 
   function getCurrentYearDates () {
     return {
-      from: moment().startOf('year').format('YYYY-MM-DD'),
-      to: moment().format('YYYY-MM-DD')
+      from: moment(new Date(Date.now())).startOf('year').format('YYYY-MM-DD'),
+      to: moment(new Date(Date.now())).format('YYYY-MM-DD')
     }
   }
   const mobile = () => {
@@ -90,9 +100,18 @@ export default function () {
 
   return {
     // Browser name
+    allowedLangs: allowedLangs,
+    csrfToken: null,
+    authorized: false,
+    errorMessage: '',
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
-    authenticateUrl: '//sigserver4.udg.edu/apps/mosquito/tigapublic/ajax_login/',
+
+    // authenticateUrl: '//localhost:8000/login/',
+    logoutUrl: '//localhost:8000/logout/',
+
+    // URL of the public old web
+    authenticateUrl: 'https://sigserver4.udg.edu/apps/mosquito_tigatrapp/tigapublic/ajax_login/',
 
     // URL of the public old web
     registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
@@ -111,7 +130,7 @@ export default function () {
     gridsize: 0.025,
 
     // Google Analytics code
-    analyticsId: analyticsCode,
+    googleTagManagerId: analyticsCode,
 
     cookiesComply: compliance(),
 
@@ -172,10 +191,7 @@ export default function () {
     isFilteringTag: false,
     DEFAULTS: {
       sampling_effort: false,
-      observations: [
-        { type: 'observations', code: 'tiger' },
-        { type: 'observations', code: 'culex' }
-      ],
+      observations: defaultObservations,
       dates: [getCurrentYearDates()],
       hashtags: [],
       report_id: [],
@@ -227,11 +243,12 @@ export default function () {
       info: { visibility: false },
       help: { visibility: false },
       download: { visibility: false, n: 0 },
-      share: { visibility: false },
+      share: { visibility: false, url: '', error: '' },
       report: { visibility: false, n: 0 },
       error: { visibility: false, msg: '', link: '', redirection: false },
       wait: { visibility: false, seamless: false },
       login: { visibility: false },
+      confirmLogout: { visibility: false },
       logos: { visibility: false }
     },
 
@@ -255,113 +272,14 @@ export default function () {
       storm_drain_water: require('../../assets/img/storm_drain_water_selected.svg'),
       storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
       breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
+      breeding_site_not_yet_filtered: require('../../assets/img/breeding_not_validated_selected.svg'),
       bite: require('../../assets/img/marker_bite_selected.svg')
     },
 
     // Info related with citizen observations (raw data)
-    layers: {
-      observations: { // Mosquito observations
-        tiger: {
-          categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed', 'albopictus_cretinus'],
-          common_name: 'Tiger mosquito',
-          scientific_name: 'Aedes albopictus',
-          icon: require('../../assets/img/marker_tiger.svg'),
-          iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
-          color: '#4d4d4d'
-        },
-        yellow: {
-          categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
-          common_name: 'Yellow fever mosquito',
-          scientific_name: 'Aedes aegypti',
-          icon: require('../../assets/img/marker_yellow.svg'),
-          color: '#ffdd19'
-        },
-        japonicus: {
-          categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
-          common_name: 'Japonicus mosquito',
-          scientific_name: 'Aedes japonicus',
-          icon: require('../../assets/img/marker_japonicus.svg'),
-          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
-          color: '#49a999'
-        },
-        koreicus: {
-          categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
-          common_name: 'Koreicus mosquito',
-          scientific_name: 'Aedes koreicus',
-          icon: require('../../assets/img/marker_koreicus.svg'),
-          iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
-          color: '#499fff'
-        },
-        culex: {
-          categories: ['culex_probable', 'culex_confirmed'],
-          common_name: 'Culex mosquito',
-          scientific_name: 'Culex pipiens',
-          icon: require('../../assets/img/marker_culex.svg'),
-          color: '#aa4499',
-          separator: true
-        },
-        unidentified: {
-          categories: ['unidentified'],
-          common_name: 'Unidentified mosquito',
-          icon: require('../../assets/img/marker_unidentified.svg'),
-          color: '#c0c0c0'
-        }
-      },
-      otherObservations: {
-        other: {
-          categories: ['other_species'],
-          common_name: 'Other species',
-          icon: require('../../assets/img/marker_other.svg'),
-          color: '#c0c0c0'
-        }
-      },
-      bites: { // Bites
-        pending: {
-          categories: ['bite'],
-          icon: require('../../assets/img/marker_bite.svg'),
-          faIcon: 'fa-solid fa-child-reaching bites',
-          common_name: 'Bites',
-          color: '#cc6677'
-        }
-      },
-      breeding: { // Breeding sites
-        with_water: {
-          categories: ['storm_drain_water'],
-          icon: require('../../assets/img/storm_drain_water.svg'),
-          faIcon: 'fa-solid fa-droplet breeding',
-          common_name: 'Stormdrain with water',
-          color: '#1072ad'
-        },
-        without_water: {
-          categories: ['storm_drain_dry'],
-          icon: require('../../assets/img/storm_drain_dry.svg'),
-          faIcon: 'fa-solid fa-droplet-slash breeding',
-          common_name: 'Stormdrain without water',
-          color: '#1072ad'
-        },
-        other_water: {
-          categories: ['breeding_site_other'],
-          icon: require('../../assets/img/breeding_other.svg'),
-          faIcon: 'fa-light fa-dharmachakra breeding',
-          common_name: 'Breeding site other',
-          color: '#1072ad'
-        }
-      },
-      other: { // ??
-        conflict: {
-          // categories: ['conflict'],
-          icon: require('../../assets/img/marker_other.svg')
-        }
-      },
-      sampling_effort: {
-        legend: [
-          { from: 0, to: 10, color: '#ffffb266' },
-          { from: 10, to: 100, color: '#fd8d3c66' },
-          { from: 100, to: 1000, color: '#f03b2066' },
-          { from: 1000, to: Infinity, color: '#bd002666' }
-        ]
-      }
-    },
+    possibleCategories: ['tiger', 'yellow', 'japonicus', 'koreicus', 'culex'],
+    confirmed_probable: ['tiger', 'culex', 'koreicus', 'japonicus'],
+    layers: publicLayers,
 
     // Info related with species and models
     models: {

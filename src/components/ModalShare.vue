@@ -1,4 +1,4 @@
-<!--
+  <!--
   MODAL WINDOW TO SHOW SHARED MAPVIEW URL
 -->
 
@@ -10,19 +10,19 @@
     <div class="dialog-share" v-if="open">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title"> {{ _('Share modal title') }} </div>
-          <p v-if="status.status=='error'">{{ status.msg }}</p>
-          <div class="modal-content" v-if="status.status=='ok'">
+          <div class="modal-title"> {{ trans('Share modal title') }} </div>
+          <p v-if="viewContent.error">{{ viewContent.error }}</p>
+          <div class="modal-content" v-if="viewContent.url">
             <transition name="toast">
               <div v-if="copied" class="toast-msg">
-                {{ _('Url has been copied') }}
+                {{ trans('Url has been copied') }}
               </div>
             </transition>
             <div class="row q-my-lg new-url-wrapper">
               <div class="col text-center">
                 <span
                   class="url-text"
-                  v-html="newUrl"
+                  v-html="viewContent.url"
                   @click.stop
                 />
                 <span class="viewshare cursor-pointer"><i
@@ -35,7 +35,7 @@
           </div>
         <div class="buttons close-modal">
           <div class="download-buttons">
-            <button class="q-btn ma-share-btn" @click="close">{{ _('Close') }}</button>
+            <button class="q-btn ma-share-btn" @click="close">{{ trans('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -52,10 +52,9 @@ export default {
   props: ['open', 'buttons'],
   emits: ['close', 'shareView'],
   setup (props, context) {
-    const status = ref('')
     const copied = ref(false)
-    const newUrl = ref('')
     const $store = useStore()
+    const viewContent = ref('')
 
     const shareView = function () {
       // Check if model is loaded
@@ -73,12 +72,18 @@ export default {
     })
 
     const close = function () {
-      status.value = ''
       copied.value = false
-      $store.commit('app/setModal', { id: 'share', content: { visibility: false } })
+      $store.commit('app/setModal', {
+        id: 'share',
+        content: {
+          visibility: false,
+          url: '',
+          error: ''
+        }
+      })
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -86,7 +91,8 @@ export default {
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
         copied.value = true
         setTimeout(hide, 3000)
-        return navigator.clipboard.writeText(newUrl.value)
+        console.log(viewContent.value.url)
+        return navigator.clipboard.writeText(viewContent.value.url)
       }
       return Promise.reject('The Clipboard API is not available.')
     }
@@ -99,11 +105,10 @@ export default {
       mobile,
       copyToClipboard,
       copied,
-      status,
-      newUrl,
+      viewContent,
       shareView,
       close,
-      _
+      trans
     }
   }
 }
@@ -132,7 +137,7 @@ export default {
 }
 dialog {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 5rem 5rem 3rem 5rem;
+  padding: 5rem 5rem 5rem 5rem;
   background-color: white;
   z-index: 2001;
   border: none;

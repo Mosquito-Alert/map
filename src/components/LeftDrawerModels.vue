@@ -13,23 +13,26 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="models" />
+    <left-menu item="models"
+      @leftMenuMounted="callFirstMapCall"
+      @startShareView="startShareView"
+    />
 
     <!-- Drawer content -->
     <div class="toc-models"
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right q-ma-md">
-        <q-btn :label="_('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
+        <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ _('Estimates') }}
+        {{ trans('Estimates') }}
       </div>
 
       <div>
         <div class="category-box q-my-md">
           <q-select
-            :label="_('Select species')"
+            :label="trans('Select species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -46,7 +49,7 @@
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
-          :label="_('Month / Year')"
+          :label="trans('Month / Year')"
           v-model="inputDate"
           mask="##/####"
           :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -57,11 +60,11 @@
             <q-icon ref="modelsCalendar" name="event_note" class="models-calendar cursor-pointer" color="orange">
               <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
                 <q-date
-                  :title="_('Select model date')"
+                  :title="trans('Select model date')"
                   :navigation-min-year-month="startingModelDate"
-                  :navigation-max-year-month="getCurrentDate"
+                  :navigation-max-year-month="getLastDate"
                   mask="MM/YYYY"
-                  years-in-month-view="true"
+                  :years-in-month-view=true
                   emit-immediately
                   default-view="Years"
                   v-model="modelDate"
@@ -81,7 +84,7 @@
                   <i class="fa-thin fa-circle-info"></i>
                 </div>
                 <div class="q-ml-xs lower-case capitalFirstLetter">
-                  {{ _('MODELED DATA') }}
+                  {{ trans('MODELED DATA') }}
                 </div>
               </div>
             </div>
@@ -91,7 +94,7 @@
               class="ma-btn no-margin"
               :class="(disabled)?'disabled':''"
               @click="applyfilter">
-                {{ _('Apply') }}
+                {{ trans('Apply') }}
             </q-btn>
           </div>
         </div>
@@ -100,7 +103,7 @@
           <hr class="q-my-xl">
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ _('Probability') }}
+              {{ trans('Probability') }}
             </div>
             <div class="estimation-palettes">
               <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" />
@@ -123,9 +126,9 @@
           </div>
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
-            <div class="col-4 text-left">{{ _('Low') }}</div>
-            <div class="col-4 text-center">{{ _('Medium') }}</div>
-            <div class="col-4 text-right">{{ _('High') }}</div>
+            <div class="col-4 text-left">{{ trans('Low') }}</div>
+            <div class="col-4 text-center">{{ trans('Medium') }}</div>
+            <div class="col-4 text-right">{{ trans('High') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row legend-row" :style="{'opacity': 1 - (estimationTransparency/100)}">
@@ -138,7 +141,7 @@
           </div>
           <!-- ESTIMATION TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="estimation" class="col text-center">{{ _('Transparency') }}</div>
+            <div v-if="estimation" class="col text-center">{{ trans('Transparency') }}</div>
           </div>
           <div v-if="estimation" class="row">
             <q-slider
@@ -151,7 +154,7 @@
           <!-- UNCERTAINTY -->
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ _('Uncertainty') }}
+              {{ trans('Uncertainty') }}
             </div>
             <div>
               <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" />
@@ -175,10 +178,10 @@
           </div>
           <!-- UNCERTAINTY LEGEND -->
           <div v-if="uncertainty" class="row q-mt-md">
-            <div class="col-3 text-center">{{ _('Very low') }}</div>
-            <div class="col-3 text-center">{{ _('Low') }}</div>
-            <div class="col-3 text-center">{{ _('Medium') }}</div>
-            <div class="col-3 text-center">{{ _('High') }}</div>
+            <div class="col-3 text-center">{{ trans('Very low') }}</div>
+            <div class="col-3 text-center">{{ trans('Low') }}</div>
+            <div class="col-3 text-center">{{ trans('Medium') }}</div>
+            <div class="col-3 text-center">{{ trans('High') }}</div>
           </div>
           <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': 1 - (uncertaintyTransparency/100)}">
               <div class="col-3 text-center">
@@ -196,7 +199,7 @@
           </div>
           <!-- UNCERTAINTY TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="uncertainty" class="col text-center">{{ _('Transparency') }}</div>
+            <div v-if="uncertainty" class="col text-center">{{ trans('Transparency') }}</div>
           </div>
           <div v-if="uncertainty" class="row">
             <q-slider
@@ -216,6 +219,8 @@
 import { watch, computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
+// import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   components: { LeftMenu },
@@ -223,12 +228,15 @@ export default {
   emits: [
     'loadModel',
     'clearModel',
+    'firstMapCall',
     'checkModelEstimation',
     'checkModelUncertainty',
     'estimationTransparency',
     'uncertaintyTransparency',
     'estimationColorsChanged',
-    'uncertaintyColorsChanged'
+    'uncertaintyColorsChanged',
+    'filterObservations',
+    'toggleLeftDrawer'
   ],
   setup (props, context) {
     const uncertaintyColor = ref(null)
@@ -239,7 +247,7 @@ export default {
     const inputDate = ref(null)
     const legendCanvas = ref(null)
     const modelDate = ref(null)
-    const getCurrentDate = ref()
+    const getLastDate = ref()
     const monthPicker = ref()
     const $store = useStore()
     const showLegend = ref(false)
@@ -291,12 +299,17 @@ export default {
         context.emit('loadModel', defaults)
       }
 
-      const d = new Date()
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      const d = new Date(Date.now())
+      const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
+      getLastDate.value = d.getFullYear() + '/' + monthIn2Digit
       uncertaintyColor.value = defaults.uncertaintyColor
-      // Fetch model manifest to activate/deactivate calendar
+      // Get model manifest to activate/deactivate calendar
       getManifest(manifestUrl)
     })
+
+    const callFirstMapCall = function () {
+      context.emit('firstMapCall', {})
+    }
 
     const getManifest = function (url, callback = false) {
       // IF modelsManifest already exists, then call callback
@@ -306,35 +319,37 @@ export default {
         }
         return true
       }
-      fetch(url)
-        .then(function (response) {
-          return response.text()
-        })
-        .then(function (csv) {
+      axios(url)
+        .then(function (resp) {
           // Read csv manifest
-          const lines = csv.split(/\r?\n/)
+          const lines = resp.data.split(/\r?\n/)
           const headers = lines[0].toLowerCase().split(',')
           const targetIdx = headers.indexOf('target')
-          const yearIdx = headers.indexOf('from')
+          const fromIdx = headers.indexOf('from')
+          const toIdx = headers.indexOf('to')
           const cellIdx = headers.indexOf('cell')
           for (let i = 1; i < lines.length; i++) {
             if (lines[i] === '') break
             const currentLine = lines[i].split(',')
             const target = currentLine[targetIdx].toLowerCase()
-            const year = currentLine[yearIdx].toLowerCase()
+            const from = currentLine[fromIdx].toLowerCase().split('-')
+            const to = currentLine[toIdx].toLowerCase().split('-')
             const cell = currentLine[cellIdx].toLowerCase()
             let cellValue = true
             if (cell !== '') {
               cellValue = currentLine[cellIdx].toLowerCase()
             }
-            modelsManifest[target] = { year: year, cell: cellValue }
+            modelsManifest[target] = {
+              fromYear: from[0],
+              fromMonth: from[1].padStart(2, '0'),
+              toYear: to[0],
+              toMonth: to[1].padStart(2, '0'),
+              cell: cellValue
+            }
           }
           if (callback) {
             callback()
           }
-        }).catch((error) => {
-          console.log(error)
-          return null
         })
     }
 
@@ -349,16 +364,16 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'albopictus', type: _('Tiger mosquito') },
-        { code: 'aegypti', type: _('Yellow fever mosquito') },
-        { code: 'japonicus', type: _('Japonicus mosquito') },
-        { code: 'koreicus', type: _('Koreicus mosquito') },
-        { code: 'culex', type: _('Culex mosquito') },
-        { code: 'biting', type: _('Bites') }
+        { code: 'albopictus', type: trans('Tiger mosquito') },
+        { code: 'aegypti', type: trans('Yellow fever mosquito') },
+        { code: 'japonicus', type: trans('Japonicus mosquito') },
+        { code: 'koreicus', type: trans('Koreicus mosquito') },
+        { code: 'culex', type: trans('Culex mosquito') },
+        { code: 'biting', type: trans('Bites') }
       ]
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -402,7 +417,9 @@ export default {
       })
 
       // Check if selected models is available. if not clear modelDate
-      startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
+      // startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
+      startingModelDate.value = modelsManifest[modelVector.value.code].fromYear + '/' + modelsManifest[modelVector.value.code].fromMonth
+      getLastDate.value = modelsManifest[modelVector.value.code].toYear + '/' + modelsManifest[modelVector.value.code].toMonth
       if (modelDate.value) {
         const selected = parseInt(modelDate.value.slice(-4))
         const previous = parseInt(startingModelDate.value.substring(0, 4))
@@ -558,6 +575,10 @@ export default {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
 
+    const startShareView = function () {
+      context.emit('startShareView', {})
+    }
+
     // Required to change lang on current selection
     watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {
@@ -571,7 +592,7 @@ export default {
     })
 
     return {
-      _,
+      trans,
       errorDownloadingModels,
       goInfoModal,
       estLegendColors,
@@ -607,7 +628,7 @@ export default {
       vectorOptions,
       mobile,
       dateSelected,
-      getCurrentDate,
+      getLastDate,
       modelDate,
       inputDate,
       monthPicker,
@@ -615,7 +636,9 @@ export default {
       toggleLeftDrawer,
       applyfilter,
       filterModels,
-      refInput
+      refInput,
+      callFirstMapCall,
+      startShareView
     }
   }
 }

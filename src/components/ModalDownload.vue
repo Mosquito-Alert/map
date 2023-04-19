@@ -11,38 +11,52 @@
     <div class="dialog modal-download" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ _('Download') }}</div>
-          <p>{{ _('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
-          <p>{{ _('Once verified, press the download button.') }}</p>
+          <div class="modal-title">{{ trans('Download') }}</div>
+          <p>{{ trans('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
+          <p>{{ trans('Once verified, press the download button.') }}</p>
           <p>
-            {{ _('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
-            <a :href="_('Mosquito portal URL')" target="_blank">
-            {{ _('Mosquito portal URL') }}
+            {{ trans('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
+            <a :href="trans('Mosquito portal URL')" target="_blank">
+            {{ trans('Mosquito portal URL') }}
             </a>
           </p>
         <div class="error-message" v-if="!nFeatures">
-          {{ _('No features to download') }}
+          {{ trans('No features to download') }}
         </div>
         <div class="buttons">
           <div class="modal-content download-buttons flex">
-            <div><button
-              class="ma-btn"
-              :class="!nFeatures?'disabled':''"
-              @click="download('gpkg')"
-            >
-              <i class="fa-solid fa-download"></i>
-                <div class="q-pl-sm">{{ _('Download geopackage') }}</div>
-            </button></div>
+            <div>
 
-            <div><button
-              class="ma-btn"
-              :class="!nFeatures?'disabled':''"
-              @click="download('xlsx')"
-            >
-                <i class="fa-solid fa-download"></i>
-                <div class="q-pl-sm">{{ _('Download excel') }}</div>
-            </button></div>
-            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
+              <button
+                class="gtm-download ma-btn waves"
+                id="Geopackage"
+                :class="!nFeatures?'disabled':''"
+                @click="download('gpkg')"
+              >
+              <span class="no-pointer-events">
+                <i class="fa-solid fa-download no-pointer-events"></i>
+                {{ trans('Download geopackage') }}
+              </span>
+            </button>
+            </div>
+
+            <div>
+              <button
+                class="ma-btn gtm-download q-mx-md"
+                :class="!nFeatures?'disabled':''"
+                id="Xlsx"
+                @click.prevent="download('xlsx')"
+              >
+                <span class="no-pointer-events">
+                  <i class="fa-solid fa-download no-pointer-events"></i>
+                  {{ trans('Download excel') }}
+              </span>
+              </button>
+            </div>
+
+            <div>
+              <button @click="close" class="ma-btn">{{ trans('Close') }}</button>
+            </div>
           </div>
 
         </div>
@@ -61,6 +75,10 @@ export default {
   setup (props, context) {
     const $store = useStore()
     const download = function (format) {
+      // window.dataLayer.push({
+      //   pageCategory: 'download-page',
+      //   visitorType: 'Downloader'
+      // })
       context.emit('startDownload', { format })
     }
 
@@ -78,7 +96,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     return {
@@ -87,7 +105,7 @@ export default {
       download,
       close,
       hasCloseButton,
-      _
+      trans
     }
   }
 }
@@ -215,15 +233,27 @@ dialog.mobile .buttons{
 button.ma-btn{
   display: flex;
 }
+
 button.ma-btn,
 button.ma-close-btn,
 .ma-close-btn{
+  cursor: pointer;
   padding: 8px 10px;
   border-radius: 3px;
   background: $primary-color;
   box-shadow: none;
   color: white;
 }
+
+.ma-btn:active{
+  text-decoration: none;
+  color: #fff;
+  background-color: $grey-color;
+  text-align: center;
+  letter-spacing: .5px;
+  transition: all .3s ease-out;
+}
+
 button.ma-btn:hover,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{

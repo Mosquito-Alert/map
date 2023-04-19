@@ -9,7 +9,7 @@
         <div class="flex" style="justify-content:space-between; width: 100%; align-items:center">
           <div v-if="!mobile" class="col q-my-xs">
             <div class="logo-title">
-              {{ _('This interactive map has been funded by') }}
+              {{ trans('This interactive map has been funded by') }}
             </div>
             <div class="main-logo">
               <a :href="linkLaCaixa" target="_blank">
@@ -25,7 +25,7 @@
               </a>
             </div>
             <div class="about cursor-pointer" @click="showLogos">
-              {{ _('About us') }}
+              {{ trans('About us') }}
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export default defineComponent({
       return (!mobile.value || Object.keys(popupContent).length !== 0)
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -100,7 +100,7 @@ export default defineComponent({
     })
 
     return {
-      _,
+      trans,
       linkLaCaixa,
       showLogos,
       mobile,

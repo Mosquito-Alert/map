@@ -1,3 +1,6 @@
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
+
 export default class ReportView {
   // constructor (map, filters, url, callback) {
   constructor (map, opt) {
@@ -37,29 +40,34 @@ export default class ReportView {
     // Filtering mode is always 'resetFilter'. So it applies at once when loading the view
     dataView.filters.mode = 'resetFilter'
 
-    fetch(this.options.url, {
-      credentials: 'include',
+    axios(this.options.url, {
+      withCredentials: true,
       method: 'POST', // or 'PUT'
-      body: JSON.stringify(dataView)
+      data: JSON.stringify(dataView),
+      headers: {
+        'X-CSRFToken': _this.options.csrfToken
+      }
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        _this.options.callback(json)
+      .then(function (resp) {
+        if (resp.status === STATUS_CODES.OK) {
+          _this.options.callback(resp.data)
+        } else {
+          console.log(resp.status)
+        }
       })
   }
 
   load (callback) {
-    fetch(this.options.url, {
-      credentials: 'include',
+    axios(this.options.url, {
+      withCredentials: true,
       method: 'GET' // or 'PUT'
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        callback(json)
+      .then(function (resp) {
+        if (resp.status === STATUS_CODES.OK) {
+          callback(resp.data)
+        } else {
+          console.log(resp.status)
+        }
       })
   }
 }

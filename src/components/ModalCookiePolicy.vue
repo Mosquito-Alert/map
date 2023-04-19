@@ -7,100 +7,92 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
         <div class="scroll">
-            <h4>{{ _("Cookies policy") }}</h4>
-            <p>{{ _('Las galletas o cookies son pequeños archivos de texto que se instalan en los equipos desde los cuales se accede a nuestro sitio web. Entre otras finalidades, las cookies registran las preferencias y los hábitos de navegación de un usuario.') }}</p>
-            <p>{{ _('Se asocian al usuario y a su equipo, pero no proporcionan datos directamente identificativos. Algunas cookies, por ejemplo las que permiten elaborar estadísticas o anuncios, necesitan el consentimiento del usuario de nuestro sitio web. En cambio otras cookies, las de carácter técnico o las necesarias para ofrecer un servicio solicitado por el usuario, son imprescindibles para el funcionamiento del sitio.') }}</p>
-            <p>{{ _('Las cookies se pueden clasificar según su vigencia, quien las gestiona o su finalidad.') }}</p>
-            <h5>{{ _('Según la vigencia')}} </h5>
+            <h4>{{ trans("Cookies policy") }}</h4>
+            <p>{{ trans('Las galletas o cookies son pequeños archivos de texto que se instalan en los equipos desde los cuales se accede a nuestro sitio web. Entre otras finalidades, las cookies registran las preferencias y los hábitos de navegación de un usuario.') }}</p>
+            <p>{{ trans('Se asocian al usuario y a su equipo, pero no proporcionan datos directamente identificativos. Algunas cookies, por ejemplo las que permiten elaborar estadísticas o anuncios, necesitan el consentimiento del usuario de nuestro sitio web. En cambio otras cookies, las de carácter técnico o las necesarias para ofrecer un servicio solicitado por el usuario, son imprescindibles para el funcionamiento del sitio.') }}</p>
+            <p>{{ trans('Las cookies se pueden clasificar según su vigencia, quien las gestiona o su finalidad.') }}</p>
+            <h5>{{ trans('Según la vigencia')}} </h5>
               <ul>
-                <li>{{ _('De sesión: son temporales y quedan en el archivo de galletas de vuestro navegador hasta el momento que abandonáis el sitio web') }}</li>
-                <li>{{ _('Persistentes: quedan almacenadas y el sitio web les lee cada vez que hacéis una visita') }}</li>
+                <li>{{ trans('De sesión: son temporales y quedan en el archivo de galletas de vuestro navegador hasta el momento que abandonáis el sitio web') }}</li>
+                <li>{{ trans('Persistentes: quedan almacenadas y el sitio web les lee cada vez que hacéis una visita') }}</li>
               </ul>
 
-            <h5>{{ _('Según quién las gestione') }}</h5>
+            <h5>{{ trans('Según quién las gestione') }}</h5>
             <ul>
-              <li>{{ _('Propias: son las propias del titular del sitio web desde lo que se prestan los servicios al usuario') }}</li>
-              <li>{{ _('De terceros: se envían al usuario por parte de uno tercero, diferente al titular del lugar') }}</li>
+              <li>{{ trans('Propias: son las propias del titular del sitio web desde lo que se prestan los servicios al usuario') }}</li>
+              <li>{{ trans('De terceros: se envían al usuario por parte de uno tercero, diferente al titular del lugar') }}</li>
             </ul>
 
-            <h5>{{ _('Según la finalidad') }}</h5>
+            <h5>{{ trans('Según la finalidad') }}</h5>
             <ul>
-              <li>{{ _('Necesarias') }}: {{ _('las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web') }}</li>
-              <li>{{ _('Técnicas') }}: {{ _('las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros') }}</li>
-              <li>{{ _('Analíticas') }}: {{ _('proporcionan información estadística y permiten mejorar los servicios') }}</li>
+              <li>{{ trans('Necesarias') }}: {{ trans('las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web') }}</li>
+              <li>{{ trans('Técnicas') }}: {{ trans('las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros') }}</li>
+              <li>{{ trans('Analíticas') }}: {{ trans('proporcionan información estadística y permiten mejorar los servicios') }}</li>
             </ul>
 
-          <h5>{{ _('Listado de cookies utilizadas') }}</h5>
-          <p>{{ _('En la web de Mosquito Alert utilizamos una única cookie de tipo técnico y las cookies de Google Analytics') }}</p>
-          <p>{{ _('Las cookies de Google Analytics, permiten analizar estadísticamente la información a que acceden los usuarios de nuestro lugar. Los datos recopilados pueden incluir la actividad del navegador del usuario cuando nos visita, la ruta que siguen los usuarios en nuestro lugar, información del proveedor de servicios de Internet del visitante, el número a veces que los usuarios acceden al lugar y el comportamiento de los usuarios en nuestro lugar (páginas que ha visitado, formularios que se han completado y similares)') }}</p>
+          <h5>{{ trans('Listado de cookies utilizadas') }}</h5>
+          <p>{{ trans('En la web de Mosquito Alert utilizamos una única cookie de tipo técnico y las cookies de Google Analytics') }}</p>
+          <p>{{ trans('Las cookies de Google Analytics, permiten analizar estadísticamente la información a que acceden los usuarios de nuestro lugar. Los datos recopilados pueden incluir la actividad del navegador del usuario cuando nos visita, la ruta que siguen los usuarios en nuestro lugar, información del proveedor de servicios de Internet del visitante, el número a veces que los usuarios acceden al lugar y el comportamiento de los usuarios en nuestro lugar (páginas que ha visitado, formularios que se han completado y similares)') }}</p>
 
-          <p>{{ _('Puedes obtener más información sobre Google Analytics a') }} <a href="//www.google.com/analytics/">www.google.com/analytics/</a>. {{ _('Para controlar la recopilación de datos con finalidades analíticas por parte de Google Analytics, puedes ir a') }} <a href="//tools.google.com/dlpage/gaoptout?hl=en">https://tools.google.com/dlpage/gaoptout?hl=en</a></p>
+          <p>{{ trans('Puedes obtener más información sobre Google Analytics a') }} <a href="//www.google.com/analytics/">www.google.com/analytics/</a>. {{ trans('Para controlar la recopilación de datos con finalidades analíticas por parte de Google Analytics, puedes ir a') }} <a href="//tools.google.com/dlpage/gaoptout?hl=en">https://tools.google.com/dlpage/gaoptout?hl=en</a></p>
 
-          <p>{{ _('A continuación mostramos una tabla con las cookies utilizadas. Para cada cookie incluimos los siguientes atributos: finalidad, proveedor, nombre de la cookie, gestión, vigencia y función') }}</p>
+          <p>{{ trans('A continuación mostramos una tabla con las cookies utilizadas. Para cada cookie incluimos los siguientes atributos: finalidad, proveedor, nombre de la cookie, gestión, vigencia y función') }}</p>
           <table class="cookies-list">
             <tr>
-              <th>{{ _('Finalidad') }}</th>
-              <th>{{ _('Proveedor') }}</th>
-              <th>{{ _('Nombre de la cookie') }}</th>
-              <th>{{ _('Gestión') }}</th>
-              <th>{{ _('Vigencia') }}</th>
-              <th>{{ _('Función')}} </th>
+              <th>{{ trans('Finalidad') }}</th>
+              <th>{{ trans('Proveedor') }}</th>
+              <th>{{ trans('Nombre de la cookie') }}</th>
+              <th>{{ trans('Gestión') }}</th>
+              <th>{{ trans('Vigencia') }}</th>
+              <th>{{ trans('Función')}} </th>
             </tr>
             <tr>
-              <td>{{ _('Necesarias') }}</td>
-              <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>{{ trans('Necesarias') }}</td>
+              <td>{{ trans('MOSQQUITO ALERT') }}</td>
               <td>ma-visited</td>
-              <td>{{ _('Propia') }}</td>
-              <td>{{ _('Persistente') }}</td>
-              <td>{{ _('Mostrar la ventana informativa solo en la primera visita') }}</td>
+              <td>{{ trans('Propia') }}</td>
+              <td>{{ trans('Persistente') }}</td>
+              <td>{{ trans('Mostrar la ventana informativa solo en la primera visita') }}</td>
             </tr>
             <tr>
-              <td>{{ _('Necesarias') }}</td>
-              <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>{{ trans('Necesarias') }}</td>
+              <td>{{ trans('MOSQQUITO ALERT') }}</td>
               <td>lang</td>
-              <td>{{ _('Propia') }}</td>
-              <td>{{ _('Persistente') }}</td>
-              <td>{{ _('Permite recordar el idioma seleccionado con anterioridad') }}</td>
+              <td>{{ trans('Propia') }}</td>
+              <td>{{ trans('Persistente') }}</td>
+              <td>{{ trans('Permite recordar el idioma seleccionado con anterioridad') }}</td>
             </tr>
             <tr>
-              <td>{{ _('Necesarias') }}</td>
-              <td>{{ _('MOSQQUITO ALERT') }}</td>
-              <td>sessionid</td>
-              <td>{{ _('Propia') }}</td>
-              <td>{{ _('Persistente') }}</td>
-              <td>{{ _('Cookie de sesión') }}</td>
-            </tr>
-            <tr>
-              <td>{{ _('Necesarias') }}</td>
-              <td>{{ _('MOSQQUITO ALERT') }}</td>
+              <td>{{ trans('Necesarias') }}</td>
+              <td>{{ trans('MOSQQUITO ALERT') }}</td>
               <td>cookie-comply</td>
-              <td>{{ _('Propia') }}</td>
-              <td>{{ _('Persistente') }}</td>
-              <td>{{ _('Permite recordar las cookies aceptadas con anterioridad') }}</td>
+              <td>{{ trans('Propia') }}</td>
+              <td>{{ trans('Persistente') }}</td>
+              <td>{{ trans('Permite recordar las cookies aceptadas con anterioridad') }}</td>
             </tr>
             <tr>
-              <td>{{ _('Analíticas') }}</td>
+              <td>{{ trans('Analíticas') }}</td>
               <td>Google</td>
               <td>_ga</td>
-              <td>{{ _('terceros') }}</td>
-              <td>{{ _('2 años') }}</td>
-              <td rowspan="2">{{ _('Registra una identificación única que se utiliza para generar datos estadísticos sobre cómo se utiliza el visitante el sitio web') }}</td>
+              <td>{{ trans('terceros') }}</td>
+              <td>{{ trans('2 años') }}</td>
+              <td rowspan="2">{{ trans('Registra una identificación única que se utiliza para generar datos estadísticos sobre cómo se utiliza el visitante el sitio web') }}</td>
             </tr>
             <tr>
-              <td>{{ _('Analíticas') }}</td>
+              <td>{{ trans('Analíticas') }}</td>
               <td>Google</td>
               <td>_ga_ZLD12V4W3V</td>
-              <td>{{ _('terceros') }}</td>
-              <td>{{ _('1 año') }}</td>
+              <td>{{ trans('terceros') }}</td>
+              <td>{{ trans('1 año') }}</td>
             </tr>
           </table>
         </div>
         <div class="buttons">
           <div class="download-buttons">
             <button @click="showModalCookieSettings" class="ma-btn">
-              {{ _('Manage cookies') }}
+              {{ trans('Manage cookies') }}
             </button>
-            <button @click="close" class="ma-btn">{{ _('Close') }}</button>
+            <button @click="close" class="ma-btn">{{ trans('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -124,7 +116,7 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: false } })
     }
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -142,7 +134,7 @@ export default {
       open,
       close,
       showModalCookieSettings,
-      _
+      trans
     }
   }
 }

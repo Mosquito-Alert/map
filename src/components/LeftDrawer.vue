@@ -14,17 +14,20 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="layers" @langCookieSet="callFirstMapCall"/>
+    <left-menu item="layers"
+      @leftMenuMounted="callFirstMapCall"
+      @startShareView="startShareView"
+      />
 
     <!-- Drawer content -->
     <div class="toc-layers"
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right">
-        <q-btn :label="_('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
+        <q-btn :label="trans('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
-        <div class="text-h5 toc-title-reports" v-html="_('Reports')"></div>
+        <div class="text-h5 toc-title-reports" v-html="trans('Reports')"></div>
           <search-location
             ref="searchLocation"
             @locationSelected="locationSelected"
@@ -37,19 +40,20 @@
       </div>
 
       <div class="toc-category">
-        <div class="toc-title" v-html="_('Mosquitos')"></div>
+        <div class="toc-title" v-html="trans('Mosquitos')"></div>
       </div>
 
       <div class="category-box">
         <div class="item-container" v-for="layer, code in observations" :key="code" >
           <div class="content">
-            <div class="li-item"
+            <div class="li-item "
+              :id="layer.common_name"
               @click="filterObservations(layer, $event)"
               data-type="observations"
               :data-code="code"
-              :class="initialClass(code, 'observations')"
+              :class="layer.active ? code +' active' : code"
             ></div>
-            <div v-text="_(layer.common_name)" class="toc-item-name">
+            <div v-text="trans(layer.common_name)" class="toc-item-name">
             </div>
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
@@ -58,48 +62,54 @@
 
       <!-- BITES AND BREEDING SITES-->
       <div class="toc-category">
-          <div class="bites-title" v-html="_('Bites')"></div>
-          <div class="breeding-title" v-html="_('Breeding sites')"></div>
+          <div class="bites-title" v-html="trans('Breeding sites')"></div>
       </div>
 
       <div class="category-box bites-and-breeding">
-          <!-- BITES -->
-          <div class="item-container" v-for="layer, code in bites" :key="code">
-            <div class="content bites">
-              <div class="li-item"
-                @click="filterObservations(layer, $event)"
-                data-type="bites"
-                :data-code="code"
-                :class="initialClass(code, 'bites')"
-              >
-                  <i class="fa-solid" :class="layer.faIcon"></i>
-              </div>
-              <div v-text="_(layer.common_name)" class="toc-item-name"></div>
-            </div>
-            <div class="separator" :class="{ 'active': layer.separator }"></div>
-          </div>
-
           <!-- BREEDING SITES -->
           <div class="item-container" v-for="layer, code in breeding" :key="code">
               <div class="content breeding">
                 <div
                   class="li-item"
+                  :id="code"
                   @click="filterObservations(layer, $event)"
                   data-type="breeding"
                   :data-code="code"
-                  :class="initialClass(code, 'breeding')"
+                  :class="layer.active ? code +' active' : code"
                 >
-                    <i :class="layer.faIcon"></i>
+                    <!-- <i :class="layer.faIcon"></i> -->
                 </div>
-                <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+                <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
               </div>
               <div class="separator" :class="{ 'active': layer.separator }"></div>
           </div>
       </DIV>
 
+      <div class="toc-category">
+          <div class="bites-title" v-html="trans('Bites')"></div>
+      </div>
+      <div class="category-box bites-and-breeding">
+          <!-- BITES -->
+          <div class="item-container" v-for="layer, code in bites" :key="code">
+            <div class="content bites">
+              <div class="li-item"
+                :id="code"
+                @click="filterObservations(layer, $event)"
+                data-type="bites"
+                :data-code="code"
+                :class="layer.active ? code +' active' : code"
+              >
+                  <!-- <i class="fa-solid" :class="layer.faIcon"></i> -->
+              </div>
+              <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
+            </div>
+            <div class="separator" :class="{ 'active': layer.separator }"></div>
+          </div>
+        </div>
+
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="_('Other species')"></div>
+        <div class="toc-title" v-html="trans('Other species')"></div>
       </div>
 
       <div class="category-box other-species">
@@ -109,9 +119,9 @@
               @click="filterObservations(layer, $event)"
               data-type="otherObservations"
               :data-code="code"
-              :class="initialClass(code, 'otherObservations')">
+              :class="layer.active ? code +' active' : code">
             </div>
-            <div v-text="_(layer.common_name)" class="toc-item-name"></div>
+            <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
@@ -120,7 +130,7 @@
       <div class="fill-space"></div>
       <!-- SAMPLIING EFFORT -->
         <div class="toc-category last">
-          <div class="toc-title" v-html="_('Sampling effort')"></div>
+          <div class="toc-title" v-html="trans('Sampling effort')"></div>
         </div>
         <div class="category-box">
           <sampling-effort ref="samplingEffort"
@@ -142,7 +152,16 @@ import FilterHastags from './FilterHastags.vue'
 
 export default {
   components: { LeftMenu, SamplingEffort, SearchLocation, FilterHastags },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
+  emits: [
+    'filterObservations',
+    'filterLocations',
+    'clearLocations',
+    'toggleSamplingEffort',
+    'firstMapCall',
+    'startShareView',
+    'toggleLeftDrawer',
+    'filterTags'
+  ],
   props: ['expanded'],
   setup (props, context) {
     const searchLocation = ref()
@@ -151,7 +170,10 @@ export default {
     const $store = useStore()
 
     // Get a copy of layers from store to get categories
-    const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+    const layers = computed(() => {
+      // return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      return $store.getters['app/getLayers']
+    })
 
     // Set active and inactive layers
     const filterObservations = function (layer, event) {
@@ -163,21 +185,8 @@ export default {
       context.emit('filterObservations', {
         type: obj.dataset.type,
         code: obj.dataset.code,
-        categories: layers[obj.dataset.type][obj.dataset.code].categories
+        categories: layers.value[obj.dataset.type][obj.dataset.code].categories
       })
-
-      const classes = obj.classList
-      if (classes.contains('active')) {
-        classes.remove('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon_disabled
-        }
-      } else {
-        classes.add('active')
-        if (obj.querySelector('img')) {
-          obj.querySelector('img').src = layer.icon
-        }
-      }
     }
 
     const mobile = computed(() => {
@@ -192,17 +201,6 @@ export default {
     const mouseOut = function (layer, event) {
       const obj = event.target
       obj.querySelector('img').src = layer.icon_disabled
-    }
-
-    const initialClass = function (code, type) {
-      const initialLayers = JSON.parse(JSON.stringify($store.getters['app/initialLayers']))
-      const isInitial = initialLayers.find(initialLayer => {
-        return initialLayer.code === code && initialLayer.type === type
-      })
-
-      let cls = code
-      if (isInitial) cls += ' active'
-      return cls
     }
 
     const observations = computed(() => {
@@ -222,7 +220,7 @@ export default {
     })
 
     // Language functions
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -281,11 +279,16 @@ export default {
     }
 
     const callFirstMapCall = function () {
-      context.emit('langCookieSet', {})
+      context.emit('firstMapCall', {})
+    }
+
+    const startShareView = function () {
+      context.emit('startShareView', {})
     }
 
     return {
       callFirstMapCall,
+      startShareView,
       mobile,
       toggleLeftDrawer,
       hashtags,
@@ -293,7 +296,6 @@ export default {
       samplingEffort,
       searchLocation,
       setLocationName,
-      initialClass,
       filterObservations,
       tagsModified,
       observations,
@@ -305,7 +307,7 @@ export default {
       locationSelected,
       locationCleared,
       toggleSamplingEffort,
-      _
+      trans
     }
   }
 }
@@ -605,10 +607,25 @@ input{
   background-image: url($icon-mosquito-disabled);
 }
 
+.li-item.tiger_probable,
+.li-item.yellow_probable,
+.li-item.koreicus_probable,
+.li-item.japonicus_probable,
+.li-item.culex_probable{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-mosquito-possible-disabled);
+}
 .li-item.other{
   background-repeat: no-repeat;
   background-position: center;
   background-image: url($icon-other-disabled);
+}
+
+.li-item.not_yet_validated{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-not-yet-validated-disabled);
 }
 
 .li-item.unidentified{
@@ -617,24 +634,86 @@ input{
   background-image: url($icon-unidentified-disabled);
 }
 
+.li-item.with_water,
+.li-item.without_water,
+.li-item.other_water,
+.li-item.not_validated,
+.li-item.bite{
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.li-item.with_water:hover,
+.li-item.without_water:hover,
+.li-item.other_water:hover,
+.li-item.not_validated:hover,
+.li-item.bite:hover{
+  opacity: 0.7;
+}
+
+.li-item.bite{
+  background-image: url($icon-bite-disabled);
+}
+.li-item.with_water{
+  background-image: url($icon-with-water-disabled);
+}
+.li-item.without_water{
+  background-image: url($icon-without-water-disabled);
+}
+.li-item.other_water{
+  background-image: url($icon-other-water-disabled);
+}
+.li-item.bite.active{
+  background-image: url($icon-bite);
+}
+.li-item.with_water.active{
+  background-image: url($icon-with-water);
+}
+.li-item.without_water.active{
+  background-image: url($icon-without-water);
+}
+.li-item.other_water.active{
+  background-image: url($icon-other-water);
+}
 .li-item.tiger.active{
   background-image: url($icon-tiger);
+}
+.li-item.tiger_probable.active{
+  background-image: url($icon-tiger-possible);
 }
 .li-item.yellow.active{
   background-image: url($icon-yellow);
 }
+.li-item.yellow_probable.active{
+  background-image: url($icon-yellow-possible);
+}
 .li-item.koreicus.active{
   background-image: url($icon-koreicus);
+}
+.li-item.koreicus_probable.active{
+  background-image: url($icon-koreicus-possible);
 }
 .li-item.japonicus.active{
   background-image: url($icon-japonicus);
 }
+.li-item.japonicus_probable.active{
+  background-image: url($icon-japonicus-possible);
+}
 .li-item.culex.active{
   background-image: url($icon-culex);
+}
+.li-item.culex_probable.active{
+  background-image: url($icon-culex-possible);
 }
 .li-item.unidentified.active{
   background-image: url($icon-unidentified);
 }
+.li-item.not_yet_validated.active{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url($icon-not-yet-validated);
+}
+
 .li-item.other.active{
   background-image: url($icon-other);
 }

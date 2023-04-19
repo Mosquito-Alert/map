@@ -8,13 +8,14 @@
       @loadModel="loadModel"
       @clearModel="clearModel"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @showShareUrl="showShareUrl"
+      @startShareView="startShareView"
       @checkModelEstimation="checkModelEstimation"
       @checkModelUncertainty="checkModelUncertainty"
       @estimationTransparency="estimationTransparency"
       @uncertaintyTransparency="uncertaintyTransparency"
       @estimationColorsChanged="estimationColorsChanged"
       @uncertaintyColorsChanged="uncertaintyColorsChanged"
+      @firstMapCall="buildSession"
     />
 
     <q-page
@@ -27,7 +28,7 @@
         :class="expanded?'drawer-expanded':'drawer-collapsed'"
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
-        @mapViewSaved="mapViewSaved"
+        @endShareView="endShareView"
         @setModelDate="setModelDate"
         @loadSharedModel="loadSharedModel"
         @errorDownloadingModels="errorDownloadingModels"
@@ -37,11 +38,12 @@
     <modal-share
       ref="shareModal"
       :open="shareModalVisible"
-      @shareView="shareView"
     >
       <template v-slot:default>
       </template>
     </modal-share>
+
+    <modal-confirm-logout/>
 
     <modal-info :open="infoModalVisible" buttons="close">
     </modal-info>
@@ -66,6 +68,7 @@ import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import CookiesCompliance from 'src/components/CookiesCompliance.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
+import ModalConfirmLogout from 'src/components/ModalConfirmLogout.vue'
 import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
@@ -79,6 +82,7 @@ import TheMapModels from 'components/TheMapModels.vue'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import MSession from '../js/session.js'
 
 // import moment from 'moment'
 
@@ -89,6 +93,7 @@ export default {
     ModalHelp,
     ModalError,
     ModalLogin,
+    ModalConfirmLogout,
     ModalLogos,
     ModalWait,
     SiteHeader,
@@ -100,6 +105,7 @@ export default {
     CookiesCompliance
   },
   setup () {
+    let mySession
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
@@ -114,10 +120,7 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-
-    const frontendUrl = computed(() => {
-      return $store.getters['app/getFrontendUrl']
-    })
+    const backend = $store.getters['app/getBackend']
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -141,6 +144,18 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
+    const buildSession = function () {
+      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession.getSession(buildMap)
+    }
+
+    const buildMap = function () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      if (viewCode) {
+        map.value.loadView('M-' + viewCode)
+      }
+    }
+
     const shareView = function () {
       map.value.shareModelView()
     }
@@ -160,21 +175,18 @@ export default {
       }
     }
 
-    const mapViewSaved = function (payload) {
-      shareModal.value.status = payload
-      if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + payload.code
-      }
+    const endShareView = function (payload) {
+      shareModal.value.viewContent = payload
+      // $store.commit('app/setModal', {
+      //   id: 'share',
+      //   content: payload
+      // })
+      // if (payload.status === 'ok') {
+      //   shareModal.value.newUrl = frontendUrl.value + payload.code
+      // }
     }
 
     const workerFinishedIndexing = function (payload) {
-      // $store.commit('app/setModal', {
-      //   id: 'wait',
-      //   content: {
-      //     visibility: false,
-      //     seamless: true
-      //   }
-      // })
       if (payload.mapFilters.locations.length) {
         TOC.value.searchLocation.loading = false
       }
@@ -228,6 +240,10 @@ export default {
       map.value.uncertaintyRefresh()
     }
 
+    const startShareView = function () {
+      map.value.shareModelView()
+    }
+
     return {
       errorDownloadingModels,
       estimationColorsChanged,
@@ -244,7 +260,7 @@ export default {
       toggleLeftDrawer,
       shareView,
       shareModal,
-      mapViewSaved,
+      endShareView,
       shareModalVisible,
       infoModalVisible,
       helpModalVisible,
@@ -256,7 +272,9 @@ export default {
       loadModel,
       clearModel,
       setModelDate,
-      CookiesCompliance
+      CookiesCompliance,
+      buildSession,
+      startShareView
     }
   }
 }

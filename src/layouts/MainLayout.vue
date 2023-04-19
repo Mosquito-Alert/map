@@ -11,7 +11,8 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @langCookieSet="langCookieSet"
+      @firstMapCall="buildSession"
+      @startShareView="startShareView"
     />
 
     <q-page
@@ -25,12 +26,12 @@
         @toggleLeftDrawer="toggleLeftDrawer"
         @workerFinishedIndexing="workerFinishedIndexing"
         @workerStartedIndexing="workerStartedIndexing"
-        @mapViewSaved="mapViewSaved"
         @timeSeriesChanged="timeSeriesChanged"
         @tagsChanged="tagsChanged"
         @locationChanged="locationChanged"
         @loadUserFixes="loadUserFixes"
         @calendarClicked="calendarClicked"
+        @endShareView="endShareView"
       />
       <time-series
         ref="timeseries"
@@ -48,6 +49,8 @@
     <modal-help :open="helpModalVisible" buttons="close">
     </modal-help>
 
+    <modal-confirm-logout/>
+
     <modal-download
       :open="downloadModalVisible"
       @startDownload="startDownload"
@@ -59,7 +62,6 @@
     <modal-share
       ref="shareModal"
       :open="shareModalVisible"
-      @shareView="shareView"
     >
       <template v-slot:default>
       </template>
@@ -93,6 +95,7 @@ import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
 import ModalFirst from 'src/components/ModalFirst.vue'
 import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalLogin from 'src/components/ModalLogin.vue'
+import ModalConfirmLogout from 'src/components/ModalConfirmLogout.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalLogos from 'src/components/ModalLogos.vue'
 import ModalDownload from 'components/ModalDownload.vue'
@@ -109,6 +112,8 @@ import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
+import MSession from '../js/session.js'
+import { useCookies } from 'vue3-cookies'
 
 export default {
   components: {
@@ -122,6 +127,7 @@ export default {
     ModalDownload,
     ModalShare,
     ModalLogin,
+    ModalConfirmLogout,
     ModalFirst,
     ModalReports,
     SiteHeader,
@@ -132,16 +138,20 @@ export default {
     CookiesCompliance
   },
   setup () {
+    let mySession
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
     const $store = useStore()
+    const { cookies } = useCookies()
+    const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-    if (lang) {
-      $store.dispatch('app/setLanguage', lang.toLowerCase())
-    }
+
+    // const resetTOC = function () {
+    //   map.value.initMap()
+    // }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -170,10 +180,32 @@ export default {
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
 
     onMounted(() => {
+      if (lang) {
+        $store.dispatch('app/setLanguage', lang.toLowerCase())
+        cookies.set('lang', lang.toLocaleLowerCase())
+      }
       if ($store.getters['app/getDefaults'].INFO_OPEN) {
         $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
       }
     })
+
+    const startShareView = function () {
+      map.value.shareView()
+    }
+
+    const buildSession = function () {
+      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession.getSession(buildMap)
+    }
+
+    const buildMap = function () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      if (!viewCode) {
+        map.value.firstCall()
+      } else {
+        map.value.preLoadView(viewCode)
+      }
+    }
 
     const pendingView = computed(() => {
       return $store.getters['app/getPendingView']
@@ -187,10 +219,6 @@ export default {
 
     const startDownload = function (format) {
       map.value.handleDownload(format)
-    }
-
-    const shareView = function () {
-      map.value.shareView()
     }
 
     const filterLocations = function (location) {
@@ -219,14 +247,12 @@ export default {
       // }
       map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
-      const samplingIsActive = $store.getters['map/getActiveLayers'].some(l => {
-        return l.type === 'sampling-effort'
-      })
+      const samplingIsActive = $store.getters['app/getLayers'].sampling_effort.sampling.active
       if (samplingIsActive) {
         let mapDate = {}
         if (payload.data.from === '') {
           mapDate.from = '2014-01-01'
-          mapDate.to = moment().format('YYYY-MM-DD')
+          mapDate.to = moment(new Date(Date.now())).format('YYYY-MM-DD')
         } else {
           mapDate = payload.data
         }
@@ -276,9 +302,9 @@ export default {
       return $store.getters['app/getModals'].error.visibility
     })
 
-    const frontendUrl = computed(() => {
-      return $store.getters['app/getFrontendUrl']
-    })
+    // const frontendUrl = computed(() => {
+    //   return $store.getters['app/getFrontendUrl']
+    // })
 
     const toggleLeftDrawer = function () {
       $store.commit('app/toggleLeftDrawerStatus')
@@ -288,6 +314,7 @@ export default {
     }
 
     const toggleGraphic = function (args) {
+      map.value.closePopup()
       $store.commit('timeseries/setToggling', true)
       $store.commit('timeseries/setGraphIsVisible', args.isVisible)
       if ($store.getters['timeseries/getGraphIsVisible']) {
@@ -320,11 +347,8 @@ export default {
       $store.commit('map/setIndexingOn', true)
     }
 
-    const mapViewSaved = function (payload) {
-      shareModal.value.status = payload
-      if (payload.status === 'ok') {
-        shareModal.value.newUrl = frontendUrl.value + payload.code + '/' + $store.getters['app/getLang']
-      }
+    const endShareView = function (payload) {
+      shareModal.value.viewContent = payload
     }
 
     const newReport = function () {
@@ -332,6 +356,7 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
+      console.log(date[0].from)
       timeseries.value.calendarDate = [{
         from: moment(date[0].from).format('YYYY/MM/DD'),
         to: moment(date[0].to).format('YYYY/MM/DD')
@@ -354,26 +379,17 @@ export default {
       timeseries.value.showCalendar()
     }
 
-    const langCookieSet = function () {
-      if (!viewCode) {
-        map.value.firstCall()
-      } else {
-        map.value.loadView(map.value.map, viewCode)
-      }
-    }
-
     return {
       mobile,
       calendarClicked,
       viewCode,
-      shareView,
       newReport,
       expanded,
       startDownload,
       toggleSamplingEffort,
       workerFinishedIndexing,
       workerStartedIndexing,
-      mapViewSaved,
+      endShareView,
       timeSeriesChanged,
       tagsChanged,
       locationChanged,
@@ -398,7 +414,9 @@ export default {
       resizeMap,
       shareModal,
       loadUserFixes,
-      langCookieSet
+      buildSession,
+      // resetTOC,
+      startShareView
     }
   }
 }
@@ -463,6 +481,7 @@ export default {
   }
   .q-layout .q-drawer-left{
     width: $left-drawer-width !important;
+    overflow-x: hidden;
   }
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;

@@ -13,19 +13,21 @@
     <q-toolbar>
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="_('Reports')"
+        :label="trans('Reports')"
         :class="active_item=='layers'?'active':''"
         link="/"
         item="reports"
+        id="reports"
       >
       </fa-thin-button-router>
 
       <fa-thin-button-router
         name="fa-thin fa-chart-scatter"
-        :label="_('Estimates')"
+        :label="trans('Estimates')"
         :class="active_item=='models'?'active':''"
         link="/models"
         item="models"
+        id="estimations"
       >
       </fa-thin-button-router>
 
@@ -33,38 +35,47 @@
 
       <fa-thin-button
         name="fa-thin fa-share-nodes"
-        :label="_('Share')"
-        @click="showShareUrl"
+        :label="trans('Share')"
+        @click="startShareView"
+        id="shareView"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
-        :label="_('Info')"
+        :label="trans('Info')"
         @click="showInfo"
+        id="showInfo"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-square-question"
-        :label="_('Help')"
+        :label="trans('Help')"
         @click="showHelp"
+        id="help"
       ></fa-thin-button>
 
-      <fa-thin-button-menu name="fa-thin fa-globe" :label="_('Lang')">
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="trans('Lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <div class="menuItem" @click="clickLanguageSelector('ca', $event)" ref="ca">
-              <span>Català</span>
-            </div>
-            <div class="menuItem" @click="clickLanguageSelector('es', $event)" ref="es">
-              <span>Castellano</span>
-            </div>
-            <div class="menuItem" @click="clickLanguageSelector('en', $event)" ref="en">
-              <span>English</span>
-            </div>
+            <a v-for="item in LANGS" :key="item.code"
+              href="#"
+              :id="item.code"
+              class="main-menu-item"
+              :class="lang==item.code?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.code, $event)" ref="item.code">
+              <span>{{ item.label }}</span>
+          </a>
+
+              <!-- <div :class="lang=='es'?'menuItem active':'menuItem'" @click="clickLanguageSelector('es', $event)" ref="es">
+                <span>Castellano</span>
+              </div>
+
+              <div :class="lang=='en'?'menuItem active':'menuItem'" @click="clickLanguageSelector('en', $event)" ref="en">
+                <span>English</span>
+              </div>-->
           </div>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="_('Log in')" @click="showLogin"></fa-thin-button>
+      <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin" id="login"></fa-thin-button>
     </q-toolbar>
 </template>
 
@@ -79,7 +90,14 @@ import { useCookies } from 'vue3-cookies'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
-  emits: ['filterObservations', 'filterLocations', 'clearLocations', 'toggleSamplingEffort', 'langCookieSet'],
+  emits: [
+    'filterObservations',
+    'filterLocations',
+    'clearLocations',
+    'toggleSamplingEffort',
+    'leftMenuMounted',
+    'startShareView'
+  ],
   props: ['expanded', 'item'],
   computed: {
     active_item (props) {
@@ -93,8 +111,8 @@ export default {
     const $q = useQuasar()
     const { cookies } = useCookies()
     const $store = useStore()
-
-    const _ = function (text) {
+    const LANGS = $store.getters['app/getAllowedLangs']
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     const showInfo = function () {
@@ -105,13 +123,21 @@ export default {
       $store.commit('app/setModal', { id: 'help', content: { visibility: true } })
     }
 
-    const showLogin = function () {
-      $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
+    const processLogin = function () {
+      if ($store.getters['app/getAuthorized']) {
+        $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: true } })
+      } else {
+        $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
+      }
     }
 
-    const showShareUrl = function () {
-      $store.commit('app/setModal', { id: 'share', content: { visibility: true } })
+    const startShareView = function () {
+      context.emit('startShareView', {})
     }
+
+    const lang = computed(() => {
+      return $store.getters['app/getLang']
+    })
 
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
@@ -139,29 +165,31 @@ export default {
       })
     }
 
-    async function initLanguage () {
-      const lang = $store.getters['app/getLang']
-      let object = ca.value
-      if (lang === 'es') object = es.value
-      else if (lang === 'en') object = en.value
-      await setLanguage(lang, object)
-    }
-
     onMounted(async function () {
-      await initLanguage()
-      context.emit('langCookieSet', {})
+      lang.value = $store.getters['app/getLang']
+      context.emit('leftMenuMounted', {})
     })
 
     const frontendUrl = computed(() => {
       return $store.getters['app/getFrontendUrl']
     })
     const linkModels = computed(() => {
-      console.log($store.getters['app/getFrontendUrl'] + 'models')
       return $store.getters['app/getFrontendUrl'] + 'models'
     })
 
+    const loginLabel = computed(() => {
+      if ($store.getters['app/getAuthorized']) {
+        return trans('Log out')
+      } else {
+        return trans('Log in')
+      }
+    })
+
     return {
-      _,
+      trans,
+      loginLabel,
+      lang,
+      LANGS,
       ca,
       es,
       en,
@@ -169,8 +197,8 @@ export default {
       linkModels,
       showInfo,
       showHelp,
-      showShareUrl,
-      showLogin,
+      startShareView,
+      processLogin,
       clickLanguageSelector
     }
   }
@@ -209,6 +237,9 @@ export default {
     background: white;
     transition: all 0.3s ease-in;
     font-weight: bold;
+    color: $primary-color;
+  }
+  .menuItem:not(.active){
     color: $primary-color;
   }
   .menuItem:not(.active):hover {

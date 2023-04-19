@@ -21,9 +21,9 @@
             color="orange"
             name="username"
             v-model="username"
-            :label="_('Username *')"
+            :label="trans('Username *')"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || _('Field required') ]"
+            :rules="[ val => val && val.length > 0 || trans('Field required') ]"
           ></q-input>
 
           <q-input
@@ -31,10 +31,10 @@
             color="orange"
             v-model="password"
             name="password"
-            :label="_('Password *')"
+            :label="trans('Password *')"
             filled :type="isPwd ? 'password' : 'text'"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || _('Field required')]"
+            :rules="[ val => val && val.length > 0 || trans('Field required')]"
             >
             <template v-slot:append>
               <q-icon
@@ -44,9 +44,12 @@
               />
             </template>
           </q-input>
+          <div v-if="loginError" class="login-error">
+            {{ trans('Invalid login') }}
+          </div>
           <div class="login row">
-            <button class="q-mt-md" @click="onSubmit">{{ _('Log in') }}</button>
-            <button class="q-mt-xs" @click="close">{{ _('Close')}} </button>
+            <button class="q-mt-md" @click.prevent="onSubmit">{{ trans('Log in') }}</button>
+            <button class="q-mt-xs" @click.prevent="close">{{ trans('Close')}} </button>
           </div>
         </div>
         </q-form>
@@ -64,12 +67,14 @@ export default {
     const username = ref('')
     const password = ref('')
     const $store = useStore()
+    const loginError = ref()
 
     const open = computed(() => {
       return $store.getters['app/getModals'].login.visibility
     })
 
     const close = function () {
+      loginError.value = false
       $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
     }
 
@@ -77,7 +82,7 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -93,7 +98,7 @@ export default {
         formData.append('password', password.value)
 
         fetch(`${authenticateUrl}`, {
-          credentials: 'include',
+          // credentials: 'include',
           signal: signal,
           method: 'POST', // or 'PUT'
           body: formData
@@ -103,7 +108,11 @@ export default {
             if (res.success) {
               document.location = registeredWeb
             } else {
+              loginError.value = true
               console.log('Not authenticated')
+              // setTimeout(function () {
+              //   success.value = true
+              // }, 5000)
             }
           })
       }
@@ -117,7 +126,8 @@ export default {
       mobile,
       open,
       close,
-      _
+      loginError,
+      trans
     }
   }
 }
@@ -150,5 +160,11 @@ button.ma-close-btn:hover,
   padding: 4px 0px;
   border-radius: 4px;
   text-transform: uppercase;
+}
+.login-error{
+  font-style:italic;
+  color: red;
+  font-weight: 600;
+  text-align: center;
 }
 </style>

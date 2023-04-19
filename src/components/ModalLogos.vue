@@ -12,7 +12,7 @@
         <div v-if="mobile">
           <div v-if="mobile" class="coordinators col-12">
             <h5 class="q-my-lg">
-                {{ _('Mosquito Alert está coordinado por') }}:
+                {{ trans('Mosquito Alert está coordinado por') }}:
             </h5>
           </div>
 
@@ -39,7 +39,7 @@
             </div>
           </div>
           <h5 class="q-my-lg text-left">
-            {{ _('Con el apoyo de') }}:
+            {{ trans('Con el apoyo de') }}:
           </h5>
           <div v-if="mobile" class="col-12 text-left funded-logos">
             <a :href="linkLaCaixa" target="_blank">
@@ -49,7 +49,7 @@
 
         </div>
         <div class="download-buttons q-mt-lg">
-          <button class="q-btn ma-share-btn" @click="close">{{ _('Close') }}</button>
+          <button class="q-btn ma-share-btn" @click="close">{{ trans('Close') }}</button>
         </div>
       </dialog>
     </div>
@@ -73,7 +73,7 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -98,7 +98,7 @@ export default {
       layers,
       hasCloseButton,
       mobile,
-      _,
+      trans,
       slide: ref('pag_1')
     }
   }

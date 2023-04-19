@@ -9,7 +9,7 @@
       <div class="reference-map row">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-md-1"></div>
         <div class="col-xl-5 col-lg-5 col-md-5 col-xs-12 col-sm-5 col-md-6">
-          <h5 class="title"> {{ _('List of observations') }} </h5>
+          <h5 class="title"> {{ trans('List of observations') }} </h5>
           <img style="width:100%" id="c-mapa" />
           <div id='mapa' class='bg-white'>
             <ol-map ref='map'
@@ -18,9 +18,9 @@
                     style="position: relative; height: 300px; display: width:100%">
 
                 <ol-view ref='view'
-                    maxZoom="19"
-                    maxResolution="39135.75848201024"
-                    constrainResolution='true' />
+                    :maxZoom=19
+                    :maxResolution=39135.75848201024
+                    :constrainResolution=true />
 
                 <div class="ol-attribution">
                   © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
@@ -28,12 +28,12 @@
                   | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
                 </div>
                 <!-- base map -->
-                <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+                <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
                   <ol-source-osm />
                 </ol-tile-layer>
 
                 <!-- CLUSTERS geojson layer -->
-                <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+                <ol-vector-layer ref='observationsLayer' name="observationsLayer" :zIndex=10>
                   <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
                     <ol-style :overrideStyleFunction="styleFunction">
                     </ol-style>
@@ -45,19 +45,19 @@
         </div>
 
         <div class="report-filters col-3 col-md-4 col-xs-12 col-sm-5">
-          <h6> {{ _('Selected observations') }} </h6>
+          <h6> {{ trans('Selected observations') }} </h6>
           <div class="observations">
             <ul class="ul-filters">
-              <li v-html="_(name)" v-for="name, index in observationNames" :key="index">
+              <li v-html="trans(name)" v-for="name, index in observationNames" :key="index">
               </li>
             </ul>
           </div>
 
-          <h6 v-if="anyFilters"> {{ _('Filters applied') }} </h6>
+          <h6 v-if="anyFilters"> {{ trans('Filters applied') }} </h6>
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
-              <span v-else v-html="_('All years and all months')"></span>
+              <span v-else v-html="transrans('All years and all months')"></span>
             </div>
 
             <div class="dates" v-if="locationName">
@@ -113,7 +113,7 @@
                 >
               </div>
               <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                {{ _('Anonymous')}},
+                {{ trans('Anonymous')}},
                 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
               </div>
             </div>
@@ -124,8 +124,8 @@
               <div class="q-pb-lg flex">
                   <span class="counter">{{ index + 1 }}</span>
                   <div class="report-names q-pt-sm">
-                    <span class="common-name" v-html="_(feature.title)"></span>
-                    <span class="latin-name" v-html="_(feature.latinName)"></span>
+                    <span class="common-name" v-html="trans(feature.title)"></span>
+                    <span class="latin-name" v-html="trans(feature.latinName)"></span>
                   </div>
               </div>
               <div :class="mobile?'q-mx-lg':'q-ml-xl'">
@@ -138,55 +138,62 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="feature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
-                      {{ _(feature.howMany) }}
+                    <div><span class="how-many-bites">{{ transrans('How many bites') }}</span>:
+                      {{ transrans(feature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.location">
                     <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="bite-location">{{ _('Bite location') }}</span>:
-                      {{ _(feature.location) }}
+                    <div><span class="bite-location">{{ trans('Bite location') }}</span>:
+                      {{ trans(feature.location) }}
                     </div>
                 </div>
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                        <span class="date">{{ _('Date') }}</span>:
+                        <span class="date">{{ transransransrans('Date') }}</span>:
                         {{ formatData(feature) }}
                       <span class="bite-time" v-if="feature.biteTime">
-                        | {{ _(feature.biteTime) }}
+                        | {{ trans(feature.biteTime) }}
                       </span>
                     </div>
                 </div>
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="feature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
-                      {{ _(feature.withWater) }}
+                    <div><span class="water-status">{{ transrans('Breeding site with water') }}</span>
+                      {{ trans(feature.withWater) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
-                      {{ _(feature.withLarva) }}
+                    <div><span class="with-larva">{{ trans('Breeding site with larva') }}</span>
+                      {{ trans(feature.withLarva) }}
+                    </div>
+                </div>
+                <div class="date-wrapper" v-if="feature.note">
+                    <div><i class="fa-regular fa-message"></i></div>
+                    <div>
+                      <span class="date">{{ transransrans('Citizen note') }}</span>:
+                      {{ feature.note }}
                     </div>
                 </div>
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
-                    <div><span class="description">{{ _('Expert note') }}</span>:
+                    <div><span class="description">{{ trans('Expert note') }}</span>:
                       {{ feature.edited_user_notes }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.lat && feature.lon">
                     <div><i class="fa-solid fa-location-check"></i></div>
-                    <div><span class="description">{{ _('Coordinates (latitud, longitud)') }}</span>:
+                    <div><span class="description">{{ trans('Coordinates (latitud, longitud)') }}</span>:
                       {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.version_uuid">
                     <div><i class="fa-solid fa-eye"></i></div>
-                    <div><span class="description">{{ _('Observation code') }}</span>:
+                    <div><span class="description">{{ transrans('Observation code') }}</span>:
                       {{ feature.version_uuid }}
                     </div>
                 </div>
@@ -201,7 +208,7 @@
                       v-if="feature.validation_type==='human' &&
                             feature.validation"
                     >
-                      {{ _(feature.validation) }}
+                      {{ trans(feature.validation) }}
                     </span>
                   </div>
                 </div>
@@ -231,12 +238,18 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
+import MSession from '../js/session.js'
+import { observations as privateLayers } from '../store/app/privateTOC'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default {
   name: 'TheMapReport',
   props: ['report', 'reportLang'],
   components: { OneFeatureMap },
   setup (props, context) {
+    let mySession
+    let privateReport
     const $store = useStore()
     const map = ref()
     const center = ref()
@@ -256,9 +269,10 @@ export default {
     const geoJson = new format.GeoJSON()
     const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
-    const layers = $store.getters['app/getLayers']
+
     const anyFilters = ref(false)
     const $q = useQuasar()
+    const backendUrl = $store.getters['app/getBackend']
 
     const reportId = computed(() => {
       return (props.report)
@@ -281,9 +295,19 @@ export default {
       setLanguage(lang)
     }
 
-    onMounted(function () {
-      // Fetch report view data
+    function loadReport () {
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const ol = map.value.map
+      const loadViewUrl = backendUrl + 'api/report/load/'
+      const newView = new ReportView(ol, {
+        url: loadViewUrl + reportId.value + '/',
+        csrfToken: mySession.csrfToken
+      })
+
+      newView.load(handleReportView)
+    }
+    onMounted(function () {
+      // Get report view data
       const mCanvas = new MapToCanvas({ map: map.value.map })
       map.value.map.on('rendercomplete', function (e) {
         document.getElementById('c-mapa').src = mCanvas.doCanvas()
@@ -291,18 +315,60 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      const backendUrl = $store.getters['app/getBackend']
-      const loadViewUrl = backendUrl + 'api/report/load/'
-
-      const newView = new ReportView(ol, {
-        url: loadViewUrl + reportId.value
-      })
-
-      newView.load(handleReportView)
+      const csrfToken = $store.getters['app/getCsrfToken']
+      mySession = new MSession(backendUrl, csrfToken)
+      mySession.getSession(loadReport)
     })
 
+    function getObservationsToLoadOnMap (viewObservations, privateReport) {
+      const possibles = $store.getters['app/getPossibleCategories']
+      const observations = []
+      const codes = []
+      const appLayers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      viewObservations.forEach(layerFilter => {
+        // If user authorized add all _probable layers, otherwise remove _probable layers
+        if ($store.getters['app/getAuthorized']) {
+          if (!privateReport && possibles.includes(layerFilter.code)) {
+            if (appLayers.observations[layerFilter.code].categories.indexOf('_probable') === -1) {
+              const possibleCode = layerFilter.code + '_probable'
+              if (!codes.includes(possibleCode)) {
+                codes.push(possibleCode)
+                observations.push({
+                  type: layerFilter.type,
+                  code: possibleCode,
+                  categories: appLayers[layerFilter.type][possibleCode].categories
+                })
+              }
+            }
+          }
+        } else {
+          if (!(layerFilter.code in appLayers.observations)) {
+            if (layerFilter.code.toLowerCase().indexOf('_probable') > -1) {
+              layerFilter.code = layerFilter.code.replace('_probable', '')
+            }
+          }
+        }
+
+        if (!codes.includes(layerFilter.code)) {
+          if (layerFilter.code in appLayers[layerFilter.type]) {
+            codes.push(layerFilter.code)
+            observations.push({
+              type: layerFilter.type,
+              code: layerFilter.code,
+              categories: appLayers[layerFilter.type][layerFilter.code].categories
+            })
+          }
+        }
+      })
+      return observations
+    }
+
+    function cloneJson (j) {
+      return JSON.parse(JSON.stringify(j))
+    }
+
     function handleReportView (report) {
-      if (report.status === 'error') {
+      if (report.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
@@ -312,7 +378,11 @@ export default {
           }
         })
       } else {
+        if ($store.getters['app/getAuthorized']) {
+          $store.commit('app/setLayers', privateLayers)
+        }
         anyFilters.value = false
+        privateReport = report.privateReport
         const view = JSON.parse(report.view[0].view)
         let lang
         if (reportLang.value) {
@@ -325,6 +395,10 @@ export default {
         zoom.value = view.zoom
         filters.value = JSON.parse(JSON.stringify(view.filters))
 
+        const reportObservations = cloneJson(view.filters.observations)
+
+        view.filters.observations = getObservationsToLoadOnMap(reportObservations, privateReport)
+        const layers = $store.getters['app/getLayers']
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
           return layers[o.type][o.code].common_name
@@ -361,22 +435,24 @@ export default {
 
         // Get features as geoJson
         const reportFilters = formatParams(view)
-
-        const backendUrl = $store.getters['app/getBackend']
         const url = backendUrl + 'api/downloads/features/'
-        fetch(url, {
-          credentials: 'include',
+
+        axios(url, {
+          withCredentials: true,
           method: 'POST', // or 'PUT'
-          body: JSON.stringify(reportFilters),
+          data: JSON.stringify(reportFilters),
           headers: {
-            'Content-Type': 'application/force-download'
+            'X-CSRFToken': mySession.csrfToken
           }
         })
-          .then(res => res.json())
-          .then(jsonRes => {
+          .then(resp => {
+            if (resp.status !== STATUS_CODES.OK) {
+              console.log(resp.status)
+              return
+            }
             const titles = $store.getters['map/getTitles']
             const latinNames = $store.getters['map/getLatinNames']
-            const formated = jsonRes.map(e => {
+            const formated = resp.data.map(e => {
               return new FormatObservation(e, titles, latinNames).format()
             })
 
@@ -414,10 +490,8 @@ export default {
             worker.postMessage({
               bbox: southWest.concat(northEast),
               zoom: map.value.map.getView().getZoom(),
-              features: jsonRes
+              features: resp.data
             })
-          }).catch((error) => {
-            console.log(error)
           })
       }
     }
@@ -556,7 +630,7 @@ export default {
       return params
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -588,8 +662,8 @@ export default {
     }
 
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return _('Expert validation')
-      else return _('AI validation')
+      if (feature.validation_type === 'human') return trans('Expert validation')
+      else return trans('AI validation')
     }
 
     const mobile = computed(() => {
@@ -597,7 +671,7 @@ export default {
     })
 
     return {
-      _,
+      trans,
       mobile,
       errorLoading,
       getValidationClass,

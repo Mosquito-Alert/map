@@ -10,6 +10,8 @@
     class='bg-white'
     :class="mobile && graphVisible?'mobile small-size':'full-size'"
   >
+    <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute" v-if="progress>0 && progress<100"/>
+
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -39,10 +41,10 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            maxResolution="39135.75848201024"
-            constrainResolution='true'
-            multiWorld="true"
-            maxZoom="19"
+            :maxResolution=39135.75848201024
+            :constrainResolution=true
+            :multiWorld=true
+            :maxZoom=19
             :center='center'
             :zoom='zoom' />
 
@@ -62,7 +64,7 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
           <ol-source-osm />
         </ol-tile-layer>
 
@@ -71,17 +73,17 @@
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->
-        <ol-vector-layer ref='locationLayer' name="locationLayer" zIndex="5">
+        <ol-vector-layer ref='locationLayer' name="locationLayer" :zIndex=5>
           <ol-source-vector :features="locationFeatures" :format='geoJson'>
             <ol-style>
               <ol-style-fill :color="fillLocationColor"></ol-style-fill>
-              <ol-style-stroke :color="strokeLocationColor" width="2"></ol-style-stroke>
+              <ol-style-stroke :color="strokeLocationColor" :width=2></ol-style-stroke>
             </ol-style>
           </ol-source-vector>
         </ol-vector-layer>
 
         <!-- CLUSTERS GEOJSON LAYER FOR ALL OBSERVATIONS-->
-        <ol-vector-layer ref='observationsLayer' name="observationsLayer" zIndex="10">
+        <ol-vector-layer ref='observationsLayer' name="observationsLayer" :zIndex=10>
           <ol-source-vector :features='features' :format='geoJson' ref='observationsSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -89,7 +91,7 @@
         </ol-vector-layer>
 
         <!-- SPIDERFIED MARKERS -->
-        <ol-vector-layer ref='spiralLayer' name="spiralLayer" zIndex="10">
+        <ol-vector-layer ref='spiralLayer' name="spiralLayer" :zIndex=10>
           <ol-source-vector :format='geoJson' ref='spiralSource'>
             <ol-style :overrideStyleFunction="overrideStyleFunction">
             </ol-style>
@@ -128,6 +130,7 @@
 </template>
 
 <script>
+import { useGtm } from '@gtm-support/vue-gtm'
 import CustControl from './CustControl'
 import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
@@ -145,7 +148,10 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
-// import { useCookies } from 'vue3-cookies'
+import MSession from '../js/session'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
+import FormatObservation from '../js/FormatObservation'
 
 export default defineComponent({
   components: { CustControl, ObservationPopup, ObservationMapCounter, MapDatesFilter },
@@ -155,7 +161,7 @@ export default defineComponent({
     'workerStartedIndexing',
     'workerFinishedIndexing',
     'loadingSamplingEffort',
-    'mapViewSaved',
+    'endShareView',
     'timeSeriesChanged',
     'tagsChanged',
     'locationChanged',
@@ -164,6 +170,10 @@ export default defineComponent({
   ],
   props: ['sharedView'],
   setup (props, context) {
+    const progress = ref()
+    let mySession
+    let redrawRequired = false
+    let privateView = false
     let spiderfyId = ''
     let locationName = ''
     let storeLayers
@@ -201,13 +211,31 @@ export default defineComponent({
     const YEARS = []
     let dataset = []
     const initialYear = 2014
-    const currentYear = new Date().getFullYear()
-    let firstDate = new Date()
-    let lastDate = new Date()
+    const currentYear = new Date(Date.now()).getFullYear()
+    let firstDate = new Date(Date.now())
+    let lastDate = new Date(Date.now())
+    let viewCode = null
     // const { cookies } = useCookies()
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
+    }
+
+    function preLoadView (code) {
+      viewCode = code
+      const csrfToken = $store.getters['app/getCsrfToken']
+      mySession = new MSession(backendUrl, csrfToken)
+      mySession.getSession(loadView)
+    }
+
+    function loadView () {
+      const ol = map.value.map
+      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      const newView = new ShareMapView(ol, {
+        url: loadViewUrl + viewCode + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
+      })
+      newView.load(handleLoadView)
     }
 
     function unfoldAttribution () {
@@ -260,41 +288,37 @@ export default defineComponent({
     const shareViewUrl = backendUrl + 'api/view/save/'
     const reportViewUrl = backendUrl + 'api/report/save/'
     const loadViewUrl = backendUrl + 'api/view/load/'
-    const curYear = moment().year()
+    const curYear = moment(new Date(Date.now())).year()
     const initUrl = backendUrl + 'api/get/data/' + curYear + '/'
     const index = YEARS.findIndex(element => {
       return element.year === curYear
     })
     const firstCall = async function () {
       if ($store.getters['map/getFirstViewMap']) {
-        await fetch(initUrl, {
-          credentials: 'include'
+        await axios.get(initUrl, {
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          }
+        }).then(response => {
+          const geojson = response.data
+          dataset = geojson.features
+          YEARS[index].data = JSON.parse(JSON.stringify(dataset))
+          context.emit('workerStartedIndexing')
+          worker.postMessage({
+            initData: true,
+            year: moment(new Date(Date.now())).year(),
+            data: geojson
+          })
         })
-          .then(function (response) {
-            return response.json()
-          })
-          .then(function (geojson) {
-            dataset = geojson.features
-            YEARS[index].data = JSON.parse(JSON.stringify(dataset))
-            context.emit('workerStartedIndexing')
-            worker.postMessage({
-              initData: true,
-              year: moment().year(),
-              data: geojson
-            })
-          })
       } else {
         const dates = cloneJson($store.getters['app/getDefaults'].dates)
         const missing = getMissingYears(dates)
+
         if (missing.length) {
           await getDataset(missing)
           initMap()
         }
-        // worker.postMessage({
-        //   year: moment().year(),
-        //   // data: dataset,
-        //   filters: mapFilters
-        // })
       }
     }
 
@@ -357,6 +381,7 @@ export default defineComponent({
       if (selectedId.value) {
         selectedId.value = null
         $store.commit('map/selectFeature', {})
+        disableUpdateMap = false
         redrawMap()
       }
     }
@@ -404,6 +429,11 @@ export default defineComponent({
         $store.commit('map/setFirstViewMap', false)
         initMap()
       }
+      if (redrawRequired) {
+        redrawRequired = false
+        spiderfyCluster = false
+        redrawMap()
+      }
       // if grap data is included then manage and exit
       if (event.data.timeseries) {
         manageTimeSeries(event.data.timeseries)
@@ -418,8 +448,8 @@ export default defineComponent({
             max: event.data.minMaxDates.max
           })
           $store.commit('app/setCalendarSubtitle', (
-            moment(event.data.minMaxDates.min).format('DD/MM/YYYY') +
-            ' - ' + moment(event.data.minMaxDates.max).format('DD/MM/YYYY')
+            moment(event.data.minMaxDates.min, 'DD-MM-YYYY').format('DD/MM/YYYY') +
+            ' - ' + moment(event.data.minMaxDates.max, 'DD-MM-YYYY').format('DD/MM/YYYY')
           ))
           $store.commit('map/setMapDates', {
             from: '',
@@ -443,7 +473,8 @@ export default defineComponent({
           if (event.data.openPopupId) {
             const fId = event.data.openPopupId
             const sFeature = getSpiralFeature(fId)
-            $store.dispatch('map/selectFeature', sFeature.values_)
+            // $store.dispatch('map/selectFeature', sFeature.values_)
+            selectFeature(sFeature.value_)
           }
         }
         features.value = []
@@ -522,8 +553,8 @@ export default defineComponent({
 
     function getCurrentYearDates () {
       return {
-        from: moment().startOf('year').format('YYYY-MM-DD'),
-        to: moment().format('YYYY-MM-DD')
+        from: moment(new Date(Date.now())).startOf('year').format('YYYY-MM-DD'),
+        to: moment(new Date(Date.now())).format('YYYY-MM-DD')
       }
     }
 
@@ -552,16 +583,14 @@ export default defineComponent({
       if (appDefaults.locations.length) {
         mapFilters.locations = appDefaults.locations
       }
-      initialObservations.forEach(layerFilter => {
-        mapFilters.observations.push({
+
+      mapFilters.observations = getObservationsToLoadOnMap(initialObservations, privateView)
+
+      mapFilters.observations.forEach(layerFilter => {
+        $store.commit('app/setActiveLayer', {
           type: layerFilter.type,
           code: layerFilter.code,
-          categories: appLayers[layerFilter.type][layerFilter.code].categories
-        })
-
-        $store.commit('map/addActiveLayer', {
-          type: layerFilter.type,
-          code: layerFilter.code
+          active: true
         })
       })
 
@@ -599,17 +628,35 @@ export default defineComponent({
       worker.postMessage(workerData)
     }
 
-    // Get shared view from database and handle it
-    function loadView (ol, viewCode) {
-      const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode
+    async function selectFeature (feature) {
+      const root = $store.getters['app/getBackend']
+      const url = root + 'api/get_observation/' + feature.properties.id + '/'
+      const titles = $store.getters['map/getTitles']
+      const latinNames = $store.getters['map/getLatinNames']
+
+      // If there is no id then all info is already in feature
+      if (!feature.properties.id) {
+        const formated = new FormatObservation(feature.properties, titles, latinNames).format()
+        formated.coordinates = feature.geometry.flatCoordinates
+        $store.commit('map/selectFeature', formated)
+        return
+      }
+      progress.value = 0
+      await axios(url, {
+        withCredentials: true,
+        onDownloadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      }).then(resp => {
+        resp.data.coordinates = feature.geometry.flatCoordinates
+        const formated = new FormatObservation(resp.data, titles, latinNames).format()
+        $store.commit('map/selectFeature', formated)
       })
-      newView.load(handleLoadView)
     }
 
-    // Hadle loaded view. Set UI accordingly
+    // Handle loaded view. Set UI accordingly
     async function handleLoadView (view) {
-      if (view.status === 'error') {
+      if (view.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
@@ -622,6 +669,8 @@ export default defineComponent({
         return
       }
       const v = JSON.parse(view.view[0].view)
+
+      privateView = v.privateView
       $store.commit('map/setDefaults', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
@@ -638,11 +687,15 @@ export default defineComponent({
         $store.commit('app/setDefaultDates', d)
         $store.commit('map/setMapDates', d)
       }
+
+      const viewObservations = cloneJson(v.filters.observations)
+      mapFilters.observations = getObservationsToLoadOnMap(viewObservations, privateView)
       $store.commit('app/setDefaults', {
-        observations: v.filters.observations,
+        observations: mapFilters.observations,
         dates: [d],
         hashtags: v.filters.hashtags
       })
+
       context.emit('timeSeriesChanged', [d])
 
       // Hashtag filter or report_id, not both at the same time
@@ -670,7 +723,11 @@ export default defineComponent({
       }
 
       if (v.samplingEffort) {
-        $store.commit('map/addActiveLayer', { type: 'sampling-effort' })
+        $store.commit('app/setActiveLayer', {
+          type: 'sampling_effort',
+          code: 'sampling',
+          active: true
+        })
         context.emit('loadUserFixes', {
           status: true,
           dates: v.filters.dates
@@ -696,8 +753,11 @@ export default defineComponent({
           disableUpdateMap = true
           spiderfyId = v.spiderfyId
           spiderfyCluster = true
+          // redraw required to get grahdata
+          redrawRequired = true
         } else {
-          $store.dispatch('map/selectFeature', feature.values_)
+          // $store.dispatch('map/selectFeature', feature.values_)
+          selectFeature(feature.values_)
         }
       }
 
@@ -711,11 +771,52 @@ export default defineComponent({
       }
     }
 
+    function getObservationsToLoadOnMap (viewObservations, privateView) {
+      const possibles = $store.getters['app/getPossibleCategories']
+      const observations = []
+      const codes = []
+      const appLayers = JSON.parse(JSON.stringify($store.getters['app/layers']))
+      viewObservations.forEach(layerFilter => {
+        // If user authorized add all _probable layers, otherwise remove _probable layers
+        if ($store.getters['app/getAuthorized']) {
+          if (!privateView && possibles.includes(layerFilter.code)) {
+            if (appLayers.observations[layerFilter.code].categories.indexOf('_probable') === -1) {
+              const possibleCode = layerFilter.code + '_probable'
+              if (!codes.includes(possibleCode)) {
+                codes.push(possibleCode)
+                observations.push({
+                  type: layerFilter.type,
+                  code: possibleCode,
+                  categories: appLayers[layerFilter.type][possibleCode].categories
+                })
+              }
+            }
+          }
+        } else {
+          if (!(layerFilter.code in appLayers.observations)) {
+            if (layerFilter.code.toLowerCase().indexOf('_probable') > -1) {
+              layerFilter.code = layerFilter.code.replace('_probable', '')
+            }
+          }
+        }
+
+        if (!codes.includes(layerFilter.code)) {
+          if (layerFilter.code in appLayers[layerFilter.type]) {
+            codes.push(layerFilter.code)
+            observations.push({
+              type: layerFilter.type,
+              code: layerFilter.code,
+              categories: appLayers[layerFilter.type][layerFilter.code].categories
+            })
+          }
+        }
+      })
+      return observations
+    }
+
     // Init share view. Save data to database
     function shareView () {
-      const samplingEffort = $store.getters['map/getActiveLayers'].some(layer => {
-        return layer.type === 'sampling-effort'
-      })
+      const samplingEffort = $store.getters['app/getLayers'].sampling_effort.sampling.active
 
       let obj = {}
       if (selectedId.value !== null) {
@@ -731,6 +832,7 @@ export default defineComponent({
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         viewType: 'layers',
+        privateView: $store.getters['app/getAuthorized'],
         filters: mapFilters,
         dates: $store.getters['map/getDatesRange'],
         locationName: locationName,
@@ -739,19 +841,38 @@ export default defineComponent({
         samplingEffort: samplingEffort,
         url: shareViewUrl,
         callback: handleShareView,
-        spiderfyId: (clickOnSpiral) ? selectedId.value : ''
+        spiderfyId: (clickOnSpiral) ? selectedId.value : '',
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.save()
     }
 
     // After saviing view emit event to show its URL in modal window
     function handleShareView (status) {
-      if (status.status === 'error') {
-        console.log(status.msg)
+      let content
+      if (status.status !== STATUS_CODES.OK) {
+        content = {
+          error: status.msg,
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       } else {
-        console.log(status.code)
+        const frontend = $store.getters['app/getFrontendUrl']
+        content = {
+          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       }
-      context.emit('mapViewSaved', status)
+      context.emit('endShareView', content)
     }
 
     // Each time map moves, call worker to get observations for the new view
@@ -759,6 +880,7 @@ export default defineComponent({
       if ($store.getters['timeseries/getToggling'] || $store.getters['map/getLeftMenuToggling']) {
         return
       }
+
       const olmap = map.value.map
       const newZoom = olmap.getView().getZoom()
       $store.commit('map/setCurrents', {
@@ -790,17 +912,25 @@ export default defineComponent({
       if (clickOnSpiral) return
 
       $store.commit('map/setViewbox', viewBox)
-      if (!mobile.value || !$store.getters['timeseries/getGraphIsVisible']) {
+
+      if (disableUpdateMap) {
+        return
+      }
+
+      if (!mobile.value || $store.getters['timeseries/getGraphIsVisible']) {
         // Do not show spinner if cluster is spiderfied
         if (!spiderfiedCluster) {
           spinner(true)
         }
       }
 
-      if (disableUpdateMap) {
-        return
+      // If spider open an no selected feature,spider closes on pan
+      if (!Object.keys(popupContent.value).length) {
+        disableUpdateMap = false
+        spiderfiedCluster = false
+        spiderfyId = false
+        spiralSource.value.source.clear()
       }
-
       // Add spiderfyCluster in case cluster is spiderfied
       worker.postMessage({
         bbox: southWest.concat(northEast),
@@ -817,18 +947,21 @@ export default defineComponent({
         mapFilters.dates[0] = $store.getters['map/getMapDates']
       }
       const newView = new ReportView(ol, {
+        privateView: $store.getters['app/getAuthorized'],
         filters: mapFilters,
         locationName: locationName,
         url: reportViewUrl,
         callback: handleReportView,
-        lang: $store.getters['app/getLang']
+        lang: $store.getters['app/getLang'],
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.save()
     }
 
     // Open new window and show report
     function handleReportView (report) {
-      if (report.status === 'ok') {
+      console.log(report.status)
+      if (report.status === STATUS_CODES.OK) {
         const frontend = $store.getters['app/getFrontendUrl']
         window.open(frontend + report.code, '_bank')
       }
@@ -907,7 +1040,8 @@ export default defineComponent({
       const southWest = transform([bounds[0], bounds[1]], 'EPSG:3857', 'EPSG:4326')
       const northEast = transform([bounds[2], bounds[3]], 'EPSG:3857', 'EPSG:4326')
       const viewLayers = []
-
+      storeLayers = $store.getters['app/getLayers']
+      storeLayers = $store.getters['app/getLayers']
       mapFilters.observations.forEach(o => {
         const categories = storeLayers[o.type][o.code].categories
         categories.forEach(c => {
@@ -941,27 +1075,45 @@ export default defineComponent({
 
     // Get observations from backend. Format is xls or gpkg
     function handleDownload (format) {
-      const data = getDataFromFilters()
+      const gtm = useGtm()
+      gtm.trackEvent({
+        event: 'clickDownload',
+        category: 'category',
+        action: 'click',
+        label: 'My custom component trigger',
+        value: 5000,
+        noninteraction: false
+      })
 
+      const data = getDataFromFilters()
       const url = downloadUrl + format.format + '/'
-      fetch(url, {
-        credentials: 'include',
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data),
+      axios(url, {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/force-download'
+          'Content-Type': 'application/force-download',
+          'X-CSRFToken': $store.getters['app/getCsrfToken']
+        },
+        withCredentials: true,
+        data: JSON.stringify(data),
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          console.log(progress.value)
         }
       })
-        .then((transfer) => {
-          return transfer.blob()
-        })
-        .then((bytes) => {
-          const elm = document.createElement('a')
-          elm.href = URL.createObjectURL(bytes)
-          elm.setAttribute('download', 'observations.zip')
-          elm.click()
-        }).catch((error) => {
-          console.log(error)
+        .then((resp) => {
+          if (resp.status === STATUS_CODES.OK) {
+            const fileReader = new window.FileReader()
+            fileReader.readAsDataURL(resp.data)
+            fileReader.onload = () => {
+              const elm = document.createElement('a')
+              elm.href = URL.createObjectURL(resp.data)
+              elm.setAttribute('download', 'observations.zip')
+              elm.click()
+            }
+          } else {
+            console.log(resp)
+          }
         })
     }
 
@@ -974,8 +1126,8 @@ export default defineComponent({
 
       leftDrawerIcon.value = 'keyboard_arrow_left'
       currZoom = ol.getView().getZoom()
-      storeLayers = $store.getters['app/getLayers']
-      const legend = $store.getters['app/getLayers'].sampling_effort.legend
+
+      const legend = $store.getters['app/getLayers'].sampling_effort.sampling.legend
       const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
       userfixesLayer = new UserfixesLayer(ol, userfixesUrl, legend, ZIndex)
 
@@ -1072,7 +1224,9 @@ export default defineComponent({
           selectedFeat.value = feature
           selectedId.value = feature.values_.properties.id
           selectedIcon.value = $store.getters['app/selectedIcons'][feature.values_.properties.c]
-          $store.dispatch('map/selectFeature', feature.values_)
+
+          selectFeature(feature.values_)
+          // $store.dispatch('map/selectFeature', feature.values_)
         } else {
           if (selectedFeatures.length > 1) {
             // update spiderfiedIds to exclude from worker feedback
@@ -1163,10 +1317,12 @@ export default defineComponent({
       } else {
         // This is no cluster, just an Icon
         // When loading from shared view and popup must open, then selectedFeacture is required
+        const anchor = [0.5, 1]
+
         if (feature.values_.properties.id === selectedId.value) {
           const selectedIcon = new Icon({
             src: $store.getters['app/selectedIcons'][feature.values_.properties.c],
-            anchor: [0.5, 1]
+            anchor: anchor
           })
           style.setImage(selectedIcon)
           style.setText('')
@@ -1215,9 +1371,10 @@ export default defineComponent({
             }
             const tiger = new Icon({
               src: iconUrl,
-              anchor: [0.5, 1]
+              anchor: anchor
             })
             style.setImage(tiger)
+            style.getImage().setAnchor(anchor)
             style.setText('')
           }
         }
@@ -1233,7 +1390,6 @@ export default defineComponent({
       spiralSource.value.source.clear()
       closePopup()
 
-      // toggle selected layer
       const filterIndex = mapFilters.observations.findIndex(element => {
         return element.type === observation.type && element.code === observation.code
       })
@@ -1241,9 +1397,11 @@ export default defineComponent({
       if (filterIndex > -1) {
         mapFilters.observations.splice(filterIndex, 1)
         mapFilters.mode = 'increaseFilter'
-        $store.commit('map/removeActiveLayer', {
+
+        $store.commit('app/setActiveLayer', {
           type: observation.type,
-          code: observation.code
+          code: observation.code,
+          active: false
         })
       } else {
         mapFilters.observations.push({
@@ -1253,16 +1411,17 @@ export default defineComponent({
         })
         mapFilters.mode = 'resetFilter'
         mapFilters.lastFilterApplied = 'observations'
-        $store.commit('map/addActiveLayer', {
+        $store.commit('app/setActiveLayer', {
           type: observation.type,
           code: observation.code,
-          categories: observation.categories
+          active: true
         })
       }
       $store.commit('app/setDefaultObservations', mapFilters.observations)
       const workerData = {}
       workerData.layers = JSON.parse(JSON.stringify($store.getters['app/layers']))
       workerData.filters = mapFilters
+      workerData.filters.observations = JSON.parse(JSON.stringify(mapFilters.observations))
       context.emit('workerStartedIndexing')
       worker.postMessage(workerData)
     }
@@ -1341,39 +1500,38 @@ export default defineComponent({
     }
 
     async function getDataset (missing) {
+      progress.value = 0
       mapFilters.mode = 'resetFilter'
-      await Promise.all(missing.map(m =>
-        fetch(backendUrl + 'api/get/data/' + m.year + '/', {
-          credentials: 'include'
-        }).then(resp => resp.json())
-      )).then(jsons => {
-        // Check for errors
-        jsons.forEach(j => {
-          if ('status' in j) {
-            console.log(j.msg)
-          } else {
-            const y = j.year
-            const index = YEARS.findIndex(element => {
-              return element.year === y
-            })
-            // Check if there are any features for current year
-            if (j.features.length) {
-              // Get first feature date,
-              if (j.features[0].properties.d < firstDate) {
-                firstDate = j.features[0].properties.d
-              }
-              // Get last feature date
-              if (j.features[j.features.length - 1].properties.d > lastDate) {
-                lastDate = j.features[j.features.length - 1].properties.d
-              }
-              YEARS[index].data = JSON.parse(JSON.stringify(j.features))
-              dataset = dataset.concat(j.features)
-            }
+      const requests = missing.map((obj) => {
+        const url = backendUrl + 'api/get/data/' + obj.year + '/'
+        return axios.get(url, {
+          withCredentials: true,
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
         })
-      }).catch((error) => {
-        dataset = []
-        console.log(error)
+      })
+
+      await axios.all(requests).then((responses) => {
+        responses.forEach((resp) => {
+          const y = resp.data.year
+          const index = YEARS.findIndex(element => {
+            return element.year === y
+          })
+          // Check if there are any features for current year
+          if (resp.data.features.length) {
+            // Get first feature date,
+            if (resp.data.features[0].properties.d < firstDate) {
+              firstDate = resp.data.features[0].properties.d
+            }
+            // Get last feature date
+            if (resp.data.features[resp.data.features.length - 1].properties.d > lastDate) {
+              lastDate = resp.data.features[resp.data.features.length - 1].properties.d
+            }
+            YEARS[index].data = JSON.parse(JSON.stringify(resp.data.features))
+            dataset = dataset.concat(resp.data.features)
+          }
+        })
       })
     }
 
@@ -1425,26 +1583,25 @@ export default defineComponent({
           $store.commit('app/setFilteringTag', { value: true })
 
           const url = $store.getters['app/getBackend'] + 'api/get_reports/'
-          const controller = new AbortController()
-          const { signal } = controller
-          fetch(`${url}`, {
-            credentials: 'include',
-            signal: signal,
-            method: 'POST', // or 'PUT'
-            body: JSON.stringify({ reports: mapFilters.report_id.join(',') })
-          })
-            .then(res => res.json())
-            .then(res => {
-              // Only one report. So no push into array
-              mapFilters.featuresSet = [res]
+          progress.value = 0
+          axios(url, {
+            withCredentials: true,
+            method: 'post',
+            data: JSON.stringify({ reports: mapFilters.report_id.join(',') }),
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
+          }).then(resp => {
+            if (resp.status === STATUS_CODES.OK) {
+              mapFilters.featuresSet = [resp.data]
               workerData.filters = mapFilters
               context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
-            })
-            .catch(e => {
+            } else {
               $store.commit('app/setFilteringTag', { value: false })
-            })
+            }
+          })
         } else {
           mapFilters.report_id = tags.map(t => {
             return t.substring(1)
@@ -1473,33 +1630,32 @@ export default defineComponent({
           $store.commit('app/setFilteringTag', { value: true })
 
           const url = $store.getters['app/getBackend'] + 'api/get_hashtags/'
-          const controller = new AbortController()
-          const { signal } = controller
           const normalizeTags = tags.map(t => {
             return t.startsWith('#') ? t.slice(1) : t
           })
           mapFilters.hashtags = JSON.parse(JSON.stringify(normalizeTags))
           mapFilters.report_id = []
           mapFilters.lastFilterApplied = 'hashtags'
-          fetch(`${url}`, {
-            credentials: 'include',
-            signal: signal,
-            method: 'POST', // or 'PUT'
-            body: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') })
-          })
-            .then(res => res.json())
-            .then(res => {
-              // Only one report. So no push into array
-              mapFilters.featuresSet = [res]
+          progress.value = 0
+          axios(url, {
+            withCredentials: true,
+            method: 'post',
+            data: JSON.stringify({ hashtags: mapFilters.hashtags.join(',') }),
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
+          }).then(resp => {
+            if (resp.status === STATUS_CODES.OK) {
+              mapFilters.featuresSet = [resp.data]
               mapFilters.mode = 'resetFilter'
               workerData.filters = mapFilters
               context.emit('workerStartedIndexing')
               worker.postMessage(workerData)
               $store.commit('app/setFilteringTag', { value: false })
-            })
-            .catch(e => {
+            } else {
               $store.commit('app/setFilteringTag', { value: false })
-            })
+            }
+          })
         }
       }
     }
@@ -1525,8 +1681,8 @@ export default defineComponent({
       $store.commit('app/setDefaultSamplingEffort', payload.status)
       let sDate, eDate
       if (payload.dates[0].from !== '') {
-        sDate = moment(payload.dates[0].from).format('YYYY-MM-DD')
-        eDate = moment(payload.dates[0].to).format('YYYY-MM-DD')
+        sDate = moment(payload.dates[0].from, 'YYYY-MM-DD').format('YYYY-MM-DD')
+        eDate = moment(payload.dates[0].to, 'YYYY-MM-DD').format('YYYY-MM-DD')
         userfixesLayer.url = userfixesUrl + sDate + '/' + eDate
       } else {
         userfixesLayer.url = userfixesUrl
@@ -1560,7 +1716,7 @@ export default defineComponent({
         const graphDates = data.dates
         const sDate = graphDates[0]
         const eDate = graphDates[graphDates.length - 1]
-        const daysInRange = moment(eDate).diff(moment(sDate), 'days')
+        const daysInRange = moment(eDate, 'YYYY-MM-DD').diff(moment(sDate, 'YYYY-MM-DD'), 'days')
         $store.commit('timeseries/updateXUnits', daysInRange)
         if ($store.getters['timeseries/getGraphIsVisible']) {
           $store.commit('timeseries/updateDData', {
@@ -1625,7 +1781,9 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       firstCall,
-      loadView
+      preLoadView,
+      initMap,
+      progress
     }
   }
 })
@@ -1804,5 +1962,21 @@ export default defineComponent({
     color: $primary-button-text-hover;
     box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
     transition: all .6s cubic-bezier(.25,.8,.25,1);
+  }
+  .progress-bar-absolute{
+    // On top of map
+    position:absolute;
+    top:0;
+    margin: auto;
+    z-index:1;
+    // Vertically centered
+    // margin: auto;
+    // position: absolute;
+    // top: 0;
+    // left: 0;
+    // bottom: 0;
+    // right: 0;
+    // z-index: 1;
+    // width: 90%;
   }
 </style>

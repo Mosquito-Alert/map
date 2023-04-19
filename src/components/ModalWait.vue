@@ -4,6 +4,7 @@
 
 <template>
   <transition name="modal">
+    <div>
     <q-dialog
       v-model="open"
       class="wait"
@@ -15,6 +16,7 @@
           size="5.5em"
         />
     </q-dialog>
+    </div>
   </transition>
 </template>
 
@@ -34,7 +36,7 @@ export default {
       return $store.getters['app/getModals'].wait.seamless
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -56,7 +58,7 @@ export default {
       leftDrawerStatus,
       mobile,
       open,
-      _
+      trans
     }
   }
 }

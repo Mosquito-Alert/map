@@ -16,12 +16,13 @@ let all_layers = null
 // let simplifyTolerance = null
 let YEARS = []
 const initialYear = 2014
-const currentYear = new Date().getFullYear()
+const currentYear = new Date(Date.now()).getFullYear()
 let getdataUrl = ''
 let getAllDates = false
-let firstDate = '01-01-' + moment().format('YYYY')
-let lastDate = moment().format('YYYY-MM-DD')
+let firstDate = '01-01-' + moment(new Date(Date.now())).format('YYYY')
+let lastDate = moment(new Date(Date.now())).format('YYYY-MM-DD')
 let loadSharedView = false
+let graphData = null
 
 for (let a = initialYear; a <= currentYear; a++) {
   YEARS.push({ year: a, data: {} })
@@ -34,6 +35,7 @@ function log (text) {
 self.onmessage = async function (e) {
   loadSharedView = isSharingView(e.data.loadSharedView)
   if (e.data.initData) {
+    // If it is first app call 
     indexInitialMapView(e.data.data)
     return
   }
@@ -63,8 +65,10 @@ self.onmessage = async function (e) {
       clusterExtent: clusterExtent
     })
   } else if (e.data.spiderfyCluster) {
+    // Cluster must be spiderfied
     let openPopupId = ''
     if (e.data.spiderfyId && e.data.dataset) {
+      // Sharing spiderfied view
       filteredData = dataset
       filteredData = doFilters(filters, e.data.layers)
       cluseredIndex = doClusteredIndex(filteredData)
@@ -74,6 +78,8 @@ self.onmessage = async function (e) {
       openPopupId = e.data.spiderfyId
     }
     if (e.data.getClusterExpansionZoom) {
+      // Send data to spiderfy cluster
+      console.log('do nothing')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
@@ -83,6 +89,7 @@ self.onmessage = async function (e) {
         clusterId: e.data.getClusterExpansionZoom
       })
     } else {
+      console.log('AQUÍ QUAN ENTRA????')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, e.data.zoom),
         spiderfyCluster: e.data.spiderfyCluster,
@@ -90,6 +97,7 @@ self.onmessage = async function (e) {
       })
     }
   } else if (e.data.filters) {
+    // Do new index
     // Get the smallest dataset (maybe featuresSet) before start filtering
     filteredData = getDefaultData(filters, dataset)
     // Filter observations that pass filters
@@ -100,7 +108,7 @@ self.onmessage = async function (e) {
   } else if (e.data) {
     // When map is just panned
     if (filters.observations) {
-      const grahData = getGraphData (e, filteredData)
+      grahData = getGraphData (e, filteredData)
       postMessage({
         timeseries: grahData
       })
@@ -209,8 +217,8 @@ function loadMapData (data, fitFeatures, initData) {
     ready: true,
     minMaxDates: { min: firstDate, max: lastDate },
     datesInterval: {
-      from: dataset.length ? dataset[0].properties.d : '01-01-' + moment().format('YYYY'),
-      to: dataset.length ? dataset[dataset.length - 1].properties.d : moment().format('DD') + '-01-2023'
+      from: dataset.length ? dataset[0].properties.d : '01-01-' + moment(new Date(Date.now())).format('YYYY'),
+      to: dataset.length ? dataset[dataset.length - 1].properties.d : moment(new Date(Date.now())).format('DD') + '-01-2023'
     }
   }
   if (getAllDates) {
@@ -327,6 +335,7 @@ function getExtent (clusterId) {
   return [xmin, ymin, xmax, ymax]
 }
 
+// Get a feature Id and return the cluster that contains that feature
 function getClusterByFeatureId (data) {
   const searchId = data.spiderfyId
   const fs = cluseredIndex.getClusters(data.bbox, data.zoom)
@@ -358,6 +367,7 @@ function isSharingView (param) {
 
 // Index default map data
 function indexInitialMapView (data) {
+  // Init dataset var for the rest of calls
   dataset = data.features
   loadMapData(dataset, false, true)
 }

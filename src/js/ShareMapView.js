@@ -1,4 +1,6 @@
 import moment from 'moment'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default class ShareMapView {
   // constructor (map, filters, url, callback) {
@@ -14,8 +16,8 @@ export default class ShareMapView {
     if (typeof date === 'string') {
       expandedDate = { from: date.format(f), to: date.format(f) }
     } else {
-      const preDate = moment(date.from).add(1, 'd')
-      const postDate = moment(date.to).subtract(1, 'd')
+      const preDate = moment(date.from, 'YYYY-MM-DD').add(1, 'd')
+      const postDate = moment(date.to, 'YYYY-MM-DD').subtract(1, 'd')
       expandedDate = { from: preDate.format(f), to: postDate.format(f) }
     }
     return expandedDate
@@ -28,6 +30,7 @@ export default class ShareMapView {
     const dataView = {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),
+      extent: ol.getView().calculateExtent(ol.getSize()),
       filters: filters,
       viewType: _this.options.viewType
     }
@@ -60,6 +63,7 @@ export default class ShareMapView {
       dataView.samplingEffort = this.options.samplingEffort
       dataView.feature = this.options.feature
       dataView.spiderfyId = this.options.spiderfyId
+      dataView.privateView = this.options.privateView
 
       // When sharing a view, filtering mode is always 'resetFilter'. So it applies at once when loading the view
       dataView.filters.mode = 'resetFilter'
@@ -75,29 +79,34 @@ export default class ShareMapView {
       dataView.estimationColors = this.options.estimationColors
     }
 
-    fetch(this.options.url, {
-      credentials: 'include',
+    axios(this.options.url, {
+      withCredentials: true,
       method: 'POST', // or 'PUT'
-      body: JSON.stringify(dataView)
+      data: JSON.stringify(dataView),
+      headers: {
+        'X-CSRFToken': _this.options.csrfToken
+      }
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        _this.options.callback(json)
+      .then(function (resp) {
+        _this.options.callback(resp.data)
       })
   }
 
   load (callback) {
-    fetch(this.options.url, {
-      credentials: 'include',
-      method: 'GET' // or 'PUT'
+    const _this = this
+    axios(this.options.url, {
+      withCredentials: true,
+      method: 'GET', // or 'PUT'
+      headers: {
+        'X-CSRFToken': _this.options.csrfToken
+      }
     })
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (json) {
-        callback(json)
+      .then(function (resp) {
+        if (resp.status === STATUS_CODES.OK) {
+          callback(resp.data)
+        } else {
+          console.log(resp.status)
+        }
       })
   }
 }

@@ -9,7 +9,7 @@
     <div v-if="!mobile || visible"
       class="counter-label"
       :class="mobile?'mobile':''"
-      v-html="_('Shown points')">
+      v-html="trans('Shown points')">
       </div>
     <div v-if="mobile"
       class="unfold"
@@ -33,7 +33,7 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -54,7 +54,7 @@ export default {
       }
     }
     return {
-      _,
+      trans,
       visible,
       unfold,
       foldingIcon,

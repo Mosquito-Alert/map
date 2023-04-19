@@ -16,8 +16,13 @@
       >
       </q-btn>
     </div>
-    <div v-if="dFrom" class="date-from" v-html="dFrom"></div>
-    <div v-if="dTo" class="date-to" v-html="dTo"></div>
+    <div
+      v-if="dFrom"
+      class="date-from"
+      :class="dTo?'':'loading'">
+        {{ dFrom }}
+    </div>
+    <div v-if="dTo" class="date-to">{{ dTo }}</div>
   </div>
 </template>
 <script>
@@ -32,16 +37,24 @@ export default {
   setup (props, context) {
     const $store = useStore()
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
     const dFrom = computed(() => {
-      return (props.dateFrom !== props.dateTo) ? moment(props.dateFrom).format('DD/MM/YYYY') : ''
+      if (props.dateFrom !== undefined && props.dateTo !== undefined) {
+        return (props.dateFrom !== props.dateTo) ? moment(props.dateFrom, 'YYYY-MM-DD').format('DD/MM/YYYY') : ''
+      } else {
+        return trans('Loading...')
+      }
     })
 
     const dTo = computed(() => {
-      return (props.dateFrom === '' && props.dateTo === '') ? '' : moment(props.dateTo).format('DD/MM/YYYY')
+      if (props.dateFrom !== undefined && props.dateTo !== undefined) {
+        return (props.dateFrom === '' && props.dateTo === '') ? '' : moment(props.dateTo, 'YYYY-MM-DD').format('DD/MM/YYYY')
+      } else {
+        return ''
+      }
     })
 
     const calendarClicked = function () {
@@ -49,7 +62,7 @@ export default {
     }
 
     return {
-      _,
+      trans,
       dFrom,
       dTo,
       calendarClicked
@@ -89,11 +102,13 @@ export default {
   box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
   transition: all .6s cubic-bezier(.25,.8,.25,1);
 }
-.date-from::after{
+.date-from::not(.loading)::after{
   content: '-';
   margin-left:10px;
 }
-
+.date-from.loading{
+  margin-right: 10px;
+}
 .date-to{
   padding-left: 10px;
   padding-right: 7px;

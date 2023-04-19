@@ -11,20 +11,23 @@
     <div class="dialog" v-if="open">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ _('Error modal title') }}</div>
-          <p v-html="_(msg)"></p>
+        <div class="text-center">
+          <q-icon name="warning" color="white" size="4rem" class="text-center"/>
+        </div>
+          <div class="modal-title text-center">{{ trans('Error') }}</div>
+          <p class="modal-error-message" v-html="trans(msg)"></p>
           <div v-if="link">
-            <p>{{ _('More info') }}</p>
+            <p>{{ trans('More info') }}</p>
             <a :href="link">{{ link }} </a>
           </div>
         <div class="buttons">
           <div class="download-buttons" v-if="redirection">
             <router-link class="main-menu-item" to="/">
-              <button @click="close" class="close">{{ _('Close') }}</button>
+              <button @click="close" class="close">{{ trans('Close') }}</button>
             </router-link>
           </div>
           <div class="download-buttons" v-else>
-             <button @click="close" class="close">{{ _('Close') }}</button>
+             <button @click="close" class="close">{{ trans('Close') }}</button>
           </div>
         </div>
       </dialog>
@@ -60,7 +63,7 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
     }
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -75,7 +78,7 @@ export default {
       msg,
       link,
       redirection,
-      _
+      trans
     }
   }
 }
@@ -107,11 +110,13 @@ dialog {
   max-width: 50vw;
   max-height: 80vh;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 5rem 5rem 3rem 5rem;
+  padding: 3rem 5rem 3rem 5rem;
   background-color: white;
   z-index: 2001;
   border: none;
   overflow:auto;
+  background: $warning;
+  color: white;
 }
 .backdrop-enter-from,
 .backdrop-leave-to {
@@ -138,9 +143,9 @@ button.disabled {
   pointer: not-allowed;
 }
 button {
-  background: $primary-button-background;
+  background: white;
   border: none;
-  color: white;
+  // color: white;
   text-transform: uppercase;
   padding: 15px 50px;
   cursor: pointer;
@@ -148,7 +153,8 @@ button {
   margin: 10px;
 }
 button:hover {
-  background: $primary-button-background-hover;
+  // background: $primary-button-background-hover;
+  background: $grey-color;
   color: #644a0f;
 }
 .download-buttons{
@@ -156,14 +162,14 @@ button:hover {
   flex-direction: row;
   justify-content: center;
 }
-.error-message{
-  color: crimson;
+.modal-error-message{
   text-align: center;
-  font-weight: bold;
+  font-size: 1.2em;
 }
 .modal-title{
   font-size: 1.5em;
   padding-bottom: 10px;
+  color: white;
 }
 
 // MOBILE

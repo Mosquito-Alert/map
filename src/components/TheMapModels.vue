@@ -4,6 +4,7 @@
 
 <template>
   <div id='mapa' class='bg-white'>
+    <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -21,9 +22,9 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            multiWorld="true"
-            maxZoom="19"
-            maxResolution="39135.75848201024"
+            :multiWorld=true
+            :maxZoom=19
+            :maxResolution=39135.75848201024
             :center='center'
             :zoom='zoom'
             :constrainResolution='true' />
@@ -44,7 +45,7 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' zIndex="0">
+        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
           <ol-source-osm />
             <!-- <ol-source-xyz
               crossOrigin='anonymous'
@@ -69,26 +70,30 @@ import ShareMapView from '../js/ShareMapView'
 import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import axios from 'axios'
 
 export default defineComponent({
   name: 'TheMapModels',
   emits: [
     'toggleLeftDrawer',
-    'mapViewSaved',
+    'endShareView',
     'setModelDate',
     'loadSharedModel'
   ],
   props: ['viewCode'],
   setup (props, context) {
     const map = ref('null')
+    const requestTimeoutMs = 20000
+    const progress = ref(0)
     const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
-    let gitHubError = 0
     let CSVS = {}
-    let CENTROIDS = {}
+    const CENTROIDS = {}
+    // let mySession
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const GADM3 = 'gadm3'
@@ -141,14 +146,13 @@ export default defineComponent({
     onMounted(function () {
       ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const paramViewCode = (props.viewCode) ? props.viewCode : null
-      if (paramViewCode) {
-        // Add model prefix to code
-        loadView(map.value.map, 'M-' + paramViewCode)
-      }
+      // const paramViewCode = (props.viewCode) ? props.viewCode : null
+      // if (paramViewCode) {
+      //   loadView(map.value.map, 'M-' + paramViewCode)
+      // }
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -159,12 +163,23 @@ export default defineComponent({
     function shareModelView () {
       const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
       if (!modelData.vector || !modelData.year) {
-        context.emit('mapViewSaved', { status: 'error', msg: 'Share view error. No model is loaded' })
+        const content = {
+          error: 'Share view error. No model is loaded',
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
+        context.emit('endShareView', content)
         return
       }
+
       // After mapview is shared then handle it
       const newView = new ShareMapView(ol, {
         viewType: 'models',
+        csrfToken: $store.getters['app/getCsrfToken'],
         filters: {
           vector: modelData.vector,
           year: modelData.year,
@@ -184,18 +199,37 @@ export default defineComponent({
 
     // Handle shared view
     function handleShareView (status) {
-      if (status.status === 'error') {
-        console.log(status.msg)
+      let content
+      if (status.status !== STATUS_CODES.OK) {
+        content = {
+          error: status.msg,
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       } else {
-        console.log(status.code)
+        const frontend = $store.getters['app/getFrontendUrl']
+        content = {
+          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       }
-      context.emit('mapViewSaved', status)
+      context.emit('endShareView', content)
     }
 
     // Load shared view. Get data from database and then handle it
-    function loadView (ol, viewCode) {
-      const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode
+    function loadView (viewCode) {
+      const newView = new ShareMapView(map.value.map, {
+        url: loadViewUrl + viewCode + '/',
+        csrfToken: $store.getters['app/getCsrfToken']
       })
       newView.load(handleLoadView)
     }
@@ -203,7 +237,7 @@ export default defineComponent({
     // Handle shared view
     function handleLoadView (response) {
       // Check status response
-      if (response.status === 'error') {
+      if (response.status !== STATUS_CODES.OK) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
@@ -215,6 +249,7 @@ export default defineComponent({
         return true
       }
       const d = response.view[0].date
+      console.log(d)
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
       $store.commit('map/setCurrents', {
@@ -228,7 +263,7 @@ export default defineComponent({
       })
       // Send data to layout so it udpates UI accordingly
       context.emit('loadSharedModel', {
-        vector: { code: jsonView.filters.vector, type: _(models[type].common_name) },
+        vector: { code: jsonView.filters.vector, type: trans(models[type].common_name) },
         year: jsonView.filters.year,
         month: jsonView.filters.month,
         estimation: jsonView.filters.estimation,
@@ -322,9 +357,16 @@ export default defineComponent({
       map.value.map.removeLayer(modelsLayer)
     }
 
+    // function newAbortSignal (timeoutMs) {
+    //   const abortController = new AbortController()
+    //   setTimeout(abortController.abort(), timeoutMs)
+    //   return abortController.signal
+    // }
+
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
-      let ERROR_404 = false
+      let connectionError = false
+      const process = { status: 'ok', data: {} }
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
@@ -334,30 +376,20 @@ export default defineComponent({
       CSVS = {}
       const urls = data.modelsCsv
 
-      // PROBABILITY GEOMETRIES FROM VECTOR TILES
-      await Promise.all(urls.map(m =>
-        fetch(m).then(resp => {
-          if (resp.status === 404) {
-            ERROR_404 = true
+      const requests = urls.map((url) => {
+        return axios.get(url, {
+          // withCredentials: true,
+          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
-          return resp.text()
         })
-      )).then(texts => {
-        texts.forEach(text => {
-          if (text.message || ERROR_404) {
-            gitHubError = 1
-            $store.commit('app/setModal', {
-              id: 'error',
-              content: {
-                visibility: true,
-                msg: text.message,
-                link: text.documentation_url
-              }
-            })
-            context.emit('errorDownloadingModels')
-            return true
-          }
-          const decoded = text
+      })
+
+      // GET CSV DATA FILES
+      await axios.all(requests).then((responses) => {
+        responses.forEach((resp) => {
+          const decoded = resp.data
           if (!('1' in CSVS)) {
             CSVS['1'] = csvJSON(decoded, GADM1)
           } else if (!('2' in CSVS)) {
@@ -370,18 +402,6 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
-
-        if (ERROR_404) {
-          $store.commit('app/setModal', {
-            id: 'error',
-            content: {
-              visibility: true,
-              msg: 'MODEL NOT FOUND'
-            }
-          })
-          context.emit('errorDownloadingModels')
-          return true
-        }
         gadm1.getSource().refresh()
         gadm2.getSource().refresh()
         gadm3.getSource().refresh()
@@ -418,78 +438,107 @@ export default defineComponent({
         map.value.map.on('rendercomplete', function () {
           spinner(false)
         })
-      }).catch((error) => {
-        console.log(error)
+      }).catch(function (err) {
+        process.status = 'error'
+        process.data = err
+        connectionError = true
+        let errMsg = ''
+        if (err.response.status === 404) {
+          errMsg = 'Model not found on Server'
+        } else {
+          errMsg = err.message
+        }
+        spinner(false)
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: errMsg } })
       })
 
-      if (gitHubError) {
-        spinner(false)
-        return true
+      if (connectionError) {
+        return false
       }
 
-      // UNCERTAINTY GEOMETRIES FROM GEOJSON FILES
-      CENTROIDS = {}
-      const centroids = data.centroidsUrls
-      await Promise.all(centroids.map(m =>
-        fetch(m, {
-          credentials: 'include'
-        }).then(resp => resp.json())
-      )).then(jsons => {
-        // Check for errors
-        jsons.forEach(json => {
-          if (!('1' in CENTROIDS)) {
-            CENTROIDS['1'] = putDataOnCentroids(json, CSVS['1'], 1)
-          } else if (!('2' in CENTROIDS)) {
-            CENTROIDS['2'] = putDataOnCentroids(json, CSVS['2'], 2)
-          } else if (!('3' in CENTROIDS)) {
-            CENTROIDS['3'] = putDataOnCentroids(json, CSVS['3'], 3)
-          } else if (!('4' in CENTROIDS)) {
-            CENTROIDS['4'] = putDataOnCentroids(json, CSVS['4'], 4)
+      // GET CENTROIDS GEOJSON FOR UNCERTAINTY
+      const centroidUrls = data.centroidsUrls
+      const centroidsReq = centroidUrls.map((url) => {
+        return axios.get(url, {
+          withCredentials: true,
+          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 20 seconds
+          onDownloadProgress: (progressEvent) => {
+            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
         })
-        const seColor = $store.getters['app/getUncertaintyColor']
-
-        seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm1.minZoom - 1,
-          maxZoom: jsonProperties.gadm1.maxZoom
-        })
-
-        seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm2.minZoom,
-          maxZoom: jsonProperties.gadm2.maxZoom
-        })
-
-        seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm3.minZoom,
-          maxZoom: jsonProperties.gadm3.maxZoom
-        })
-
-        seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
-          zIndex: 15,
-          color: seColor,
-          minZoom: jsonProperties.gadm4.minZoom,
-          maxZoom: gadm4MaxZoom
-        })
-
-        seModelLayer1.addLayer()
-        seModelLayer2.addLayer()
-        seModelLayer3.addLayer()
-        seModelLayer4.addLayer()
-        uncertaintyVisibility(data.uncertainty)
-        uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
-      }).catch((error) => {
-        console.log(error)
       })
+
+      await axios.all(centroidsReq).then((responses) => {
+        responses.forEach((resp) => {
+          if (!('gadm1' in CENTROIDS)) {
+            CENTROIDS.gadm1 = putDataOnCentroids(resp.data, CSVS['1'])
+          } else if (!('gadm2' in CENTROIDS)) {
+            CENTROIDS.gadm2 = putDataOnCentroids(resp.data, CSVS['2'])
+          } else if (!('gadm3' in CENTROIDS)) {
+            CENTROIDS.gadm3 = putDataOnCentroids(resp.data, CSVS['3'])
+          } else if (!('gadm4' in CENTROIDS)) {
+            CENTROIDS.gadm4 = putDataOnCentroids(resp.data, CSVS['4'])
+          }
+        })
+      }).catch(function (err) {
+        connectionError = true
+        spinner(false)
+        const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
+        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
+        $store.commit('app/setErrorMessage', '')
+      })
+
+      if (connectionError) {
+        return false
+      }
+
+      // PUT DATA ON CENTROIDS AND ADD LAYERS TO MAP
+
+      CENTROIDS.gadm1 = putDataOnCentroids(CENTROIDS.gadm1, CSVS['1'])
+      CENTROIDS.gadm2 = putDataOnCentroids(CENTROIDS.gadm2, CSVS['2'])
+      CENTROIDS.gadm3 = putDataOnCentroids(CENTROIDS.gadm3, CSVS['3'])
+      CENTROIDS.gadm4 = putDataOnCentroids(CENTROIDS.gadm4, CSVS['4'])
+
+      const seColor = $store.getters['app/getUncertaintyColor']
+
+      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm1.minZoom - 1,
+        maxZoom: jsonProperties.gadm1.maxZoom
+      })
+
+      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm2.minZoom,
+        maxZoom: jsonProperties.gadm2.maxZoom
+      })
+
+      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm3.minZoom,
+        maxZoom: jsonProperties.gadm3.maxZoom
+      })
+
+      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
+        zIndex: 15,
+        color: seColor,
+        minZoom: jsonProperties.gadm4.minZoom,
+        maxZoom: gadm4MaxZoom
+      })
+
+      seModelLayer1.addLayer()
+      seModelLayer2.addLayer()
+      seModelLayer3.addLayer()
+      seModelLayer4.addLayer()
+      uncertaintyVisibility(data.uncertainty)
+      uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
     }
 
     // Filter centroids with data and add SE value from csv
-    const putDataOnCentroids = function (json, csv, flag) {
+    const putDataOnCentroids = function (json, csv) {
       const filtered = json.features.filter(f => {
         if (f.properties.id in csv) {
           f.properties.se = csv[f.properties.id].se
@@ -721,28 +770,28 @@ export default defineComponent({
         map.value.map.removeLayer(seModelLayer4.layer)
       }
 
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS['1'], {
+      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm1.minZoom,
         maxZoom: jsonProperties.gadm1.maxZoom
       })
 
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS['2'], {
+      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm2.minZoom,
         maxZoom: jsonProperties.gadm2.maxZoom
       })
 
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS['3'], {
+      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm3.minZoom,
         maxZoom: jsonProperties.gadm3.maxZoom
       })
 
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS['4'], {
+      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
         zIndex: 15,
         color: seColor,
         minZoom: jsonProperties.gadm4.minZoom,
@@ -769,7 +818,7 @@ export default defineComponent({
       spinner(false)
     }
     return {
-      _,
+      trans,
       hideSpinner,
       uncertaintyRefresh,
       estimationRefresh,
@@ -791,7 +840,8 @@ export default defineComponent({
       leftDrawerIcon,
       map,
       loadModel,
-      clearModel
+      clearModel,
+      progress
     }
   }
 })
@@ -928,5 +978,21 @@ export default defineComponent({
 .drawer-handler span i,
 .drawer-handler-mobile span i{
   color: white;
+}
+.progress-bar-absolute{
+    // On top of map
+    position:absolute;
+    top:0;
+    margin: auto;
+    z-index:1;
+    // Vertically centered
+    // margin: auto;
+    // position: absolute;
+    // top: 0;
+    // left: 0;
+    // bottom: 0;
+    // right: 0;
+    // z-index: 1;
+    // width: 90%;
 }
 </style>

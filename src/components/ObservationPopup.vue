@@ -6,9 +6,9 @@
 
 <template>
   <ol-overlay
-      :title="_(selectedFeature.title)"
+      :title="trans(selectedFeature.title)"
       :position="selectedFeature.coordinates"
-      positioning='bottom-center'
+      positioning="bottom-center"
       :offset="[0, -35]"
       v-if="selectedFeature"
     >
@@ -17,34 +17,40 @@
         <div :class="getPopupClass(selectedFeature)">
           {{ slotProps.empty }}
           <div class="image" :class="imageRatio" v-if="selectedFeature.photo_url">
+            <div class="progress-bar-container q-px-lg" v-if="progress>0 && progress<100">
+              <q-linear-progress :value="progress" color="orange" class="progress-bar-relative"/>
+            </div>
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
-                <q-circular-progress
-                  v-if="loading"
+                <!-- <q-circular-progress
                   indeterminate
+                  v-if="loading"
                   size="50px"
                   color="orange"
                   class="q-ma-md m-circular-progress text-center"
-                />
+                /> -->
                 <img v-if="!mosquitoImageLoaded" src="~/assets/img/notavailable.png">
                 <img
+                  v-if="mosquitoImageLoaded"
                   :height="loading"
-                  :src="selectedFeature.photo_url"
+                  :src="imgData"
                   @load="imageLoaded"
                   @error="errorLoading"
                 >
                 <div
                   v-if="!errorLoadingImage"
                   class="credits"
-                >{{ _('Anonymous')}},
+                >{{ trans('Anonymous')}},
                   <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a> Mosquito Alert
                 </div>
               </div>
             </a>
           </div>
+          <!-- end picture -->
+
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
-              <label class="popup-title">{{ _(selectedFeature.title) }}
+              <label class="popup-title">{{ trans(selectedFeature.title) }}
               </label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -57,46 +63,54 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="selectedFeature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ _('How many bites') }}</span>:
-                      {{ _(selectedFeature.howMany) }}
+                    <div><span class="how-many-bites">{{ trans('How many bites') }}</span>:
+                      {{ trans(selectedFeature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="selectedFeature.location">
                     <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="bite-location">{{ _('Bite location') }}</span>:
-                      {{ _(selectedFeature.location) }}
+                    <div><span class="bite-location">{{ trans('Bite location') }}</span>:
+                      {{ trans(selectedFeature.location) }}
                     </div>
                 </div>
 
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                      <span class="date">{{ _('Date') }}</span>:
+                      <span class="date">{{ trans('Date') }}</span>:
                       {{ formatData(selectedFeature) }}
-                    <span class="bite-time" v-if="selectedFeature.biteTime">
-                      | {{ _(selectedFeature.biteTime) }}
-                    </span>
+                      <span class="bite-time" v-if="selectedFeature.biteTime">
+                        | {{ trans(selectedFeature.biteTime) }}
+                      </span>
+                    </div>
+                </div>
+
+                <div class="date-wrapper" v-if="selectedFeature.note">
+                    <div><i class="fa-regular fa-message"></i></div>
+                    <div>
+                      <span class="date">{{ trans('Citizen note') }}</span>:
+                      {{ selectedFeature.note }}
                     </div>
                 </div>
 
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="selectedFeature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ _('Breeding site with water') }}</span>
-                      {{ _(selectedFeature.withWater) }}
+                    <div><span class="water-status">{{ trans('Breeding site with water') }}</span>
+                      {{ trans(selectedFeature.withWater) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="selectedFeature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ _('Breeding site with larva') }}</span>
-                      {{ _(selectedFeature.withLarva) }}
+                    <div><span class="with-larva">{{ trans('Breeding site with larva') }}</span>
+                      {{ trans(selectedFeature.withLarva) }}
                     </div>
                 </div>
 
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="selectedFeature.edited_user_notes && selectedFeature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
-                    <div><span class="description">{{ _('Expert note') }}</span>:
+                    <div><span class="description">{{ trans('Expert note') }}</span>:
                       {{ selectedFeature.edited_user_notes }}
                     </div>
                 </div>
@@ -113,14 +127,14 @@
                   v-if="selectedFeature.validation_type==='human' &&
                         selectedFeature.validation"
                 >
-                  {{ _(selectedFeature.validation) }}
+                  {{ trans(selectedFeature.validation) }}
                 </span>
               </div>
             </div>
           </div>
           <div class="btn-close text-center" v-if="mobile">
             <button class="q-btn ma-btn" @click.stop="closePopup">
-              {{ _('Close') }}
+              {{ trans('Close') }}
             </button>
           </div>
         </div>
@@ -133,6 +147,7 @@
 import { onUpdated, defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
+import axios from 'axios'
 
 export default defineComponent({
   props: ['selectedFeature'],
@@ -144,13 +159,42 @@ export default defineComponent({
     const errorLoadingImage = ref()
     const loading = ref(true)
     const ratio = ref('null')
+    const progress = ref(0)
+    const imgData = ref()
+
     ratio.value = 0
 
-    onUpdated(() => {
+    function blobToData (blob) {
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.readAsDataURL(blob)
+      })
+    }
+
+    onUpdated(async function () {
+      mosquitoImageLoaded.value = false
       if (Object.keys(props.selectedFeature).length === 0) {
         mosquitoImageLoaded.value = false
+      } else {
+        if (props.selectedFeature.photo_url) {
+          const url = props.selectedFeature.photo_url
+          axios(url, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+              progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            }
+          }).then(async function (resp) {
+            if (resp.status === 200) {
+              const base64data = await blobToData(resp.data)
+              imgData.value = base64data
+              imageLoaded(base64data)
+            }
+          })
+        }
       }
     })
+
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -159,7 +203,7 @@ export default defineComponent({
       context.emit('closePopupButton')
     }
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -169,9 +213,11 @@ export default defineComponent({
       imageRatio.value = mobile.value ? 'landscape' : ''
     }
 
-    const imageLoaded = function (e) {
+    const imageLoaded = function (base64data) {
+      const image = new Image()
+      image.src = base64data
       mosquitoImageLoaded.value = true
-      ratio.value = (e.target.naturalWidth / e.target.naturalHeight)
+      ratio.value = (image.width / image.height)
       // Set poup class based on mobile device and image ratio
       if (mobile.value) {
         imageRatio.value = mobile.value ? 'mobile ' : ''
@@ -181,8 +227,11 @@ export default defineComponent({
       imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
 
       loading.value = false
+      progress.value = 0
+      errorLoadingImage.value = false
       context.emit('popupimageloaded')
     }
+
     const getPopupClass = function (feature) {
       let css
       if (ratio.value === 0) {
@@ -206,19 +255,19 @@ export default defineComponent({
       else return 'validation probable'
     }
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return _('Expert validation')
-      else return _('AI validation')
+      if (feature.validation_type === 'human') return trans('Expert validation')
+      else return trans('AI validation')
     }
 
     const formatData = function (feature) {
       // Some locales add '.' after month, so we remove it
       if (feature.biteTime) {
-        const d = moment(feature.observation_date).format('DD/MMM/YYYY').replace('.', '')
-        const hour = moment(feature.observation_date).format('HH')
-        const minutes = moment(feature.observation_date).format('MM')
+        const d = moment(feature.observation_date, 'YYYY-MM-DD').format('DD/MMM/YYYY').replace('.', '')
+        const hour = moment(feature.observation_date, 'YYYY-MM-DD').format('HH')
+        const minutes = moment(feature.observation_date, 'YYYY-MM-DD').format('MM')
         return d + ' ' + hour + 'h:' + minutes + 'm'
       } else {
-        return moment(feature.observation_date).format('DD/MM/YYYY').replace('.', '')
+        return moment(feature.observation_date, 'YYYY-MM-DD').format('DD/MM/YYYY').replace('.', '')
       }
     }
 
@@ -228,7 +277,7 @@ export default defineComponent({
     }
 
     return {
-      _,
+      trans,
       mosquitoImageLoaded,
       ratio,
       mobile,
@@ -242,7 +291,9 @@ export default defineComponent({
       getPopupClass,
       getValidationClass,
       getValidationIcon,
-      getValidationTypeTitle
+      getValidationTypeTitle,
+      progress,
+      imgData
     }
   }
 })
@@ -749,6 +800,16 @@ export default defineComponent({
 
 .like-link:hover{
   color: $primary-color;
+}
+.progress-bar-container{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+}
+.progress-bar-relative {
+  position:relative;
+  z-index: 10;
 }
 @media (max-width: 640px) {
   .ol-viewport .ol-overlaycontainer-stopevent,

@@ -13,7 +13,7 @@
         icon="expand_less"
         class="white-text"
         :class="iconStatus"
-        :label="_('Time series')"
+        :label="trans('Time series')"
         @click="toggleTimeSeries"
       >
 
@@ -21,24 +21,29 @@
     </div>
     <div class="body" :class="reloading?'reloading':''">
       <div v-if="reloading" id="reloading">
-        <span>{{ _('reloading graph') }}</span>
+        <span>{{ trans('reloading graph') }}</span>
       </div>
       <div v-if="mobile" class="flex-right" :class="zoomed?'spaceBetween':'flexRight'">
         <q-btn v-if="zoomed" class="timeseries-close ma-btn" @click="resetGraph">
           <i class="mobile reset-zoom fa-solid fa-backward q-mr-md"></i>
         </q-btn>
-        <q-btn :label="_('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
+        <q-btn :label="trans('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'row mobile':'no-row'">
-        <i v-if="zoomed && !mobile" :title="_('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
+        <i v-if="zoomed && !mobile" :title="trans('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
         <div :class="mobile?'col-12':''">
           <div class="flex" :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
               <div class="col-6" :class="mobile?'q-py-xs':''">
                 <div class="no-wrap">
-                  <img v-if="set.icon" class="symbol" :src="set.icon" height="20">
+                  <img v-if="set.icon"
+                    class="symbol"
+                    :src="set.icon"
+                    :height=20
+                    :class="(set.opacity)?' possible':''"
+                  >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
-                  {{ _(set.label) }}
+                  {{ trans(set.label) }}
                 </div>
               </div>
             </template>
@@ -52,32 +57,37 @@
             class="no-pointer-events calendar-button"
           >
             <q-popup-proxy
-              @before-show="updateProxy"
               cover
               transition-show="scale"
               transition-hide="scale"
             >
             <!-- QUASAR CALENDAR -->
               <q-date
-                navigation-min-year-month='2014/06'
+                navigation-min-year-month="2014/06"
                 :navigation-max-year-month="getCurrentDate"
                 v-model="calendarDate"
                 :subtitle="rangeEndValue?rangeEndValue:(rangeStartValue?rangeStartValue:calendarSubtitle)"
                 range
-                years-in-month-view="true"
+                :years-in-month-view=true
                 class="calendar"
                 color="orange-4"
                 text-color="black"
                 @range-start="rangeStart"
                 @range-end="rangeEnd"
+                @update:model-value="applyButtonClass"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="_('Select all')" class="ma-btn"
+                  <q-btn :label="trans('Select all')" class="ma-btn"
                     flat
                     v-close-popup
                     @click="resetDateFilter"
                   />
-                  <q-btn :label="_('Apply calendar')" class="ma-btn" flat v-close-popup @click="datePicked"/>
+                  <q-btn
+                    :label="trans('Apply calendar')"
+                    :class="enableButton?'ma-btn':'ma-btn disabled'"
+                    flat v-close-popup
+                    @click="datePicked"
+                  />
                 </div>
               </q-date>
             </q-popup-proxy>
@@ -123,6 +133,7 @@ export default defineComponent({
     const reloading = ref(true)
     const zoomed = ref(false)
     const panned = ref(false)
+    const enableButton = ref(false)
     let currentYTickMax = null
     const getCurrentDate = ref()
     const calendarDate = ref()
@@ -139,7 +150,7 @@ export default defineComponent({
       return $store.getters['app/getIsMobile']
     })
 
-    graphicHeight.value = mobile.value ? '400' : '230'
+    graphicHeight.value = mobile.value ? 400 : 230
 
     const resetDateFilter = function () {
       rangeStartValue.value = false
@@ -185,22 +196,24 @@ export default defineComponent({
           // then reloading is true
           if ($store.getters['timeseries/getGraphIsVisible']) {
             reloading.value = false
+            spinner(false)
           }
           if (!$store.getters['map/getIndexingOn']) {
             spinner(false)
           }
         }
       })
-      defaultDates.from = moment(defaultDates.from).format('YYYY/MM/DD')
-      defaultDates.to = moment(defaultDates.to).format('YYYY/MM/DD')
+      defaultDates.from = moment(defaultDates.from, 'YYYY-MM-DD').format('YYYY/MM/DD')
+      defaultDates.to = moment(defaultDates.to, 'YYYY-MM-DD').format('YYYY/MM/DD')
       calendarDate.value = [defaultDates]
 
-      let subtitle = moment(defaultDates.from).format('DD/MM/YYYY')
-      subtitle += ' - ' + moment(defaultDates.to).format('DD/MM/YYYY')
+      let subtitle = moment(defaultDates.from, 'YYYY-MM-DD').format('DD/MM/YYYY')
+      subtitle += ' - ' + moment(defaultDates.to, 'YYYY-MM-DD').format('DD/MM/YYYY')
       $store.commit('app/setCalendarSubtitle', subtitle)
 
-      const d = new Date()
-      getCurrentDate.value = d.getFullYear() + '/' + (d.getMonth() + 1)
+      const d = new Date(Date.now())
+      const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
+      getCurrentDate.value = d.getFullYear() + '/' + monthIn2Digit
       $store.commit('map/setMapDates', { defaultDates })
     })
 
@@ -237,11 +250,11 @@ export default defineComponent({
           setMapBeforeZoom()
         }
         zoomed.value = true
-        const start = new Date(chart.boxes[4].min)
-        const end = new Date(chart.boxes[4].max)
+        const start = moment(new Date(chart.boxes[4].min)).format('YYYY/MM/DD')
+        const end = moment(new Date(chart.boxes[4].max)).format('YYYY/MM/DD')
         const draggedFormatted = {
-          from: moment(start).format('YYYY/MM/DD'),
-          to: moment(end).format('YYYY/MM/DD')
+          from: start,
+          to: end
         }
         calendarDate.value = draggedFormatted
         datePicked()
@@ -261,8 +274,8 @@ export default defineComponent({
         const start = new Date(chart.boxes[4].min)
         const end = new Date(chart.boxes[4].max)
         const draggedFormatted = {
-          from: moment(start).format('YYYY/MM/DD'),
-          to: moment(end).format('YYYY/MM/DD')
+          from: moment(start, 'YYYY-MM-DD').format('YYYY/MM/DD'),
+          to: moment(end, 'YYYY-MM-DD').format('YYYY/MM/DD')
         }
         calendarDate.value = draggedFormatted
         datePicked()
@@ -272,8 +285,8 @@ export default defineComponent({
     const setMapBeforeZoom = function () {
       if ($store.getters['map/getMapDates'].from !== '') {
         mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
-        mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from).format('YYYY/MM/DD')
-        mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to).format('YYYY/MM/DD')
+        mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from, 'YYYY-MM-DD').format('YYYY/MM/DD')
+        mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to, 'YYYY-MM-DD').format('YYYY/MM/DD')
       } else {
         mapDatesBeforeZoom = null
       }
@@ -304,24 +317,26 @@ export default defineComponent({
     const getData = () => {
       reloading.value = true
       const rawData = $store.getters['timeseries/getDData']
-      const layers = $store.getters['app/getLayers']
-      const datasets = Object.keys(rawData.data).map(layer => {
+      const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      const datasets = Object.keys(rawData.data).map(code => {
         const cat = Object.keys(layers).find(category => {
-          return layer in layers[category]
+          return code in layers[category]
         })
-        const color = layers[cat][layer].color
+
+        const color = layers[cat][code].color
         const result = {
-          label: _(layers[cat][layer].common_name),
+          label: trans(layers[cat][code].common_name),
           borderColor: color,
           backgroundColor: color,
           fill: false,
-          data: Array.from(rawData.data[layer]),
-          pointHitRadius: 200
+          data: Array.from(rawData.data[code]),
+          pointHitRadius: 200,
+          opacity: (code.indexOf('_probable') > -1)
         }
-        if ('faIcon' in layers[cat][layer]) {
-          result.faIcon = layers[cat][layer].faIcon
+        if ('faIcon' in layers[cat][code]) {
+          result.faIcon = layers[cat][code].faIcon
         } else {
-          result.icon = layers[cat][layer].icon
+          result.icon = layers[cat][code].icon
         }
         return result
       })
@@ -340,7 +355,7 @@ export default defineComponent({
       // To avoid this, a dummy record is added when there is no data
       if (!data.labels.length || !data.datasets.length) {
         data = {
-          labels: [moment().format('YYYY-MM-DD')],
+          labels: [moment(new Date(Date.now())).format('YYYY-MM-DD')],
           datasets: [{
             borderColor: '#FFFFFF',
             data: [0]
@@ -351,7 +366,7 @@ export default defineComponent({
     })
 
     const rangeStart = function (range) {
-      const sDate = moment(range.year + '/' + range.month + '/' + range.day)
+      const sDate = moment(range.year + '/' + range.month + '/' + range.day, 'YYYY/MM/DD')
       rangeStartValue.value = moment(sDate).format('DD/MM/YYYY')
     }
 
@@ -359,8 +374,8 @@ export default defineComponent({
       const start = range.from.year + '/' + range.from.month + '/' + range.from.day
       const end = range.to.year + '/' + range.to.month + '/' + range.to.day
 
-      const sDate = moment(start)
-      const eDate = moment(end)
+      const sDate = moment(start, 'YYYY/MM/DD')
+      const eDate = moment(end, 'YYYY/MM/DD')
 
       if (start === end) {
         rangeEndValue.value = moment(sDate).format('DD/MM/YYYY')
@@ -377,7 +392,7 @@ export default defineComponent({
       let date
       rangeStartValue.value = false
       rangeEndValue.value = false
-      // If only one day is selected
+
       if (typeof calendarDate.value === 'string') {
         const day = calendarDate.value
         daysInRange = 1
@@ -391,19 +406,20 @@ export default defineComponent({
         if (calendarDate.value) {
           sDate = calendarDate.value.from
           eDate = calendarDate.value.to
+
           // dateFilterToString(date)
-          daysInRange = moment(eDate).diff(moment(sDate), 'days')
+          daysInRange = moment(eDate, 'YYYY/MM/DD').diff(moment(sDate, 'YYYY/MM/DD'), 'days')
 
           // Format date must be YYYY-MM-DD
-          sDate = moment(calendarDate.value.from).format('YYYY-MM-DD')
-          eDate = moment(calendarDate.value.to).format('YYYY-MM-DD')
+          sDate = moment(calendarDate.value.from, 'YYYY/MM/DD').format('YYYY-MM-DD')
+          eDate = moment(calendarDate.value.to, 'YYYY/MM/DD').format('YYYY-MM-DD')
           date = {
             from: sDate,
             to: eDate
           }
           // Set calendar subtitle
-          let subtitle = moment(calendarDate.value.from).format('DD/MM/YYYY')
-          subtitle += ' - ' + moment(calendarDate.value.to).format('DD/MM/YYYY')
+          let subtitle = moment(calendarDate.value.from, 'YYYY/MM/DD').format('DD/MM/YYYY')
+          subtitle += ' - ' + moment(calendarDate.value.to, 'YYYY/MM/DD').format('DD/MM/YYYY')
           $store.commit('app/setCalendarSubtitle', subtitle)
         }
       }
@@ -421,7 +437,7 @@ export default defineComponent({
     })
 
     // Language function
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -435,8 +451,18 @@ export default defineComponent({
       }
     }
 
+    const applyButtonClass = function () {
+      if (calendarDate.value) {
+        enableButton.value = true
+      } else {
+        enableButton.value = false
+      }
+    }
+
     return {
-      _,
+      trans,
+      enableButton,
+      applyButtonClass,
       reloading,
       handleWheel,
       zoomed,
@@ -644,6 +670,10 @@ export default defineComponent({
   .legend div .symbol{
     margin: 0px 5px;
   }
+
+  img.symbol.possible{
+    opacity: (1 - $graph-possible-transparency);
+  }
   .timeseries-filter{
     margin-left:20px;
     font-weight:300;
@@ -736,6 +766,7 @@ export default defineComponent({
   }
   :deep(button.q-btn.disabled) {
     opacity: 0.3 !important;
+    background: $grey-color;
   }
   .reloading div#reloading{
     position: absolute;

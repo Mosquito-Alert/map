@@ -10,19 +10,25 @@
     <div class="dialog modal-reports" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ _('Reports modal title') }}</div>
-          <p>{{ _('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
-          <p>{{ _('Verify this by looking at the map point counter') }}</p>
+          <div class="modal-title">{{ trans('Reports modal title') }}</div>
+          <p>{{ trans('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
+          <p>{{ trans('Verify this by looking at the map point counter') }}</p>
           <p class="popup-blocking-warning" v-if="browser==='safari'">
-            {{ _('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
+            {{ trans('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
           </p>
         <div class="error-message" v-if="tooManyFeatures">
-          {{ _('Reports limit exceeded') }}
+          {{ trans('Reports limit exceeded') }}
         </div>
         <div class="modal-close buttons">
           <div class="report-buttons flex">
-            <div><button v-if="!tooManyFeatures" class="ma-btn" @click="newReport">{{ _('Continue') }}</button></div>
-            <div><button @click="close" class="ma-close-btn">{{ _('Close') }}</button></div>
+            <div>
+              <button v-if="!tooManyFeatures" class="gtm-report-detailed ma-btn q-mr-sm" @click="newReport">
+                {{ trans('Continue') }}
+              </button>
+            </div>
+            <div>
+              <button @click="close" class="ma-btn q-ml-sm">{{ trans('Close') }}</button>
+            </div>
           </div>
         </div>
       </dialog>
@@ -33,15 +39,58 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close', 'newReport'],
   setup (props, context) {
     const $store = useStore()
+
+    function doDataLayer (activeLayers) {
+      const dict = {}
+      activeLayers.forEach(layer => {
+        dict[layer] = true
+      })
+      return dict
+    }
+
     const newReport = function () {
       context.emit('newReport')
+      const mapLayers = $store.getters['app/getLayers']
+      const activeLayers = []
+      for (const group in mapLayers) {
+        for (const category in mapLayers[group]) {
+          if (mapLayers[group][category].active) {
+            activeLayers.push(category)
+          }
+        }
+      }
+      // [ "tiger", "yellow", "japonicus", "koreicus", "culex", "unidentified", "other", "bite", "with_water", "without_water", "other_water" ]
+      const gtm = useGtm()
+      // window.dataLayer.push({
+      //   pageCategory: 'home',
+      //   visitorType: 'Developerssss'
+      // })
+      // window.dataLayer.push({
+      //   event: 'detailedReport',
+      //   tiger: activeLayers.includes('tiger'),
+      //   yellow: activeLayers.includes('yellow'),
+      //   japonicus: activeLayers.includes('japonicus'),
+      //   culex: activeLayers.includes('culex'),
+      //   unidentified: activeLayers.includes('unidentified'),
+      //   other: activeLayers.includes('other'),
+      //   bite: activeLayers.includes('bite'),
+      //   with_water: activeLayers.includes('with_water'),
+      //   without_water: activeLayers.includes('without_water'),
+      //   other_water: activeLayers.includes('other_water')
+      // })
+      const dl = doDataLayer(activeLayers)
+      dl.event = 'detailedReport'
+      dl.action = 'click'
+      gtm.trackEvent(dl)
     }
+
     const maxReports = $store.getters['app/getReportsLimit']
     const tooManyFeatures = computed(() => {
       return ($store.getters['app/getModals'].report.n > maxReports)
@@ -55,7 +104,7 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -74,7 +123,7 @@ export default {
       newReport,
       close,
       hasCloseButton,
-      _
+      trans
     }
   }
 }
@@ -179,6 +228,15 @@ dialog.mobile button{
 .ma-btn::before,
 .ma-close-btn::before{
   box-shadow: none;
+}
+
+.ma-btn:active{
+  text-decoration: none;
+  color: #fff;
+  background-color: $grey-color;
+  text-align: center;
+  letter-spacing: .5px;
+  transition: all .3s ease-out;
 }
 
 button.ma-btn{

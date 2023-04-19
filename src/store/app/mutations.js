@@ -1,5 +1,17 @@
+export const setErrorMessage = (state, message) => {
+  state.errorMessage = message
+}
+
+export const setCsrfToken = (state, token) => {
+  state.csrfToken = token
+}
+
 export const setTranslations = (state, payload) => {
   state.trans = payload
+}
+
+export const setAuthorized = (state, payload) => {
+  state.authorized = payload
 }
 
 export const setLanguage = (state, lang) => {
@@ -16,6 +28,10 @@ export const setFilteringTag = (state, payload) => {
 
 export const toggleLeftDrawerStatus = (state) => {
   state.leftDrawerStatus = !state.leftDrawerStatus
+}
+
+export const setLayers = (state, payload) => {
+  state.layers = payload
 }
 
 export const setDefaultObservations = (state, payload) => {
@@ -76,4 +92,16 @@ export const setUncertaintyTransparency = (state, payload) => {
 
 export const setEstimationColors = (state, payload) => {
   state.DEFAULTS.model.estimationColors = payload
+}
+
+export const deactivateLayerIcon = (state, payload) => {
+  state.layers[payload.type][payload.code].active = false
+}
+
+export const toggleLayerIcon = (state, payload) => {
+  state.layers[payload.type][payload.code].active = !state.layers[payload.type][payload.code].active
+}
+
+export const setActiveLayer = (state, payload) => {
+  state.layers[payload.type][payload.code].active = payload.active
 }

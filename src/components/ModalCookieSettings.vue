@@ -17,13 +17,13 @@
             <div>
               <div class="row cookies-selector">
                   <div class="col-10">
-                    <h5>{{ _('Necesarias') }}</h5>
+                    <h5>{{ trans('Necesarias') }}</h5>
                   </div>
                   <div class="col-2">
                     <q-toggle
                       disable
                       v-model="onValue"
-                      :title="_('Is required')"
+                      :title="trans('Is required')"
                       size="lg"
                       checked-icon="check"
                       color="orange"/>
@@ -31,15 +31,15 @@
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>{{ _("las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web") }}</p>
+                  <p>{{ trans("las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web") }}</p>
                 </div>
               </div>
 
               <div class="row cookies-selector">
-                  <div class="col-10"><h5>{{ _('Analíticas') }}</h5></div>
+                  <div class="col-10"><h5>{{ trans('Analíticas') }}</h5></div>
                   <div class="col-2">
                     <q-toggle
-                      :title="_('Analytics tooltip')"
+                      :title="trans('Analytics tooltip')"
                       v-model="analyticsActivated"
                       size="lg"
                       checked-icon="check"
@@ -48,7 +48,7 @@
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>{{ _('proporcionan información estadística y permiten mejorar los servicios') }}</p>
+                  <p>{{ trans('proporcionan información estadística y permiten mejorar los servicios') }}</p>
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@
                   class="ma-btn"
                   @click="savePreferences('all')"
                 >
-                  {{ _('Accept all') }}
+                  {{ trans('Accept all') }}
                 </button>
               </div>
               <div class="">
@@ -69,7 +69,7 @@
                   @click="savePreferences('custom')"
                   class="ma-btn close"
                 >
-                  {{ _('Save and close') }}
+                  {{ trans('Save and close') }}
                 </button>
               </div>
             </div>
@@ -80,17 +80,18 @@
 </template>
 
 <script>
-import { computed, onMounted, inject, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useCookies } from 'vue3-cookies'
-import { event } from 'vue-gtag'
+import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   emits: ['close'],
   setup (props, context) {
     const $store = useStore()
     const analyticsActivated = ref(false)
-    const gtag = inject('gtag')
+    // const gtag = inject('gtag')
+    const gtm = useGtm()
     const { cookies } = useCookies()
 
     onMounted(() => {
@@ -107,7 +108,7 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
@@ -117,6 +118,7 @@ export default {
 
     const savePreferences = function (preferences) {
       // Prevent cookie message appearing next time
+
       let complied
       if (preferences === 'all') {
         complied = 'all'
@@ -131,12 +133,16 @@ export default {
       $store.commit('app/setCookiesComply', true)
 
       // ACCEPT OR DENY ANALYTICS
+      console.log(complied)
       if (['all', 'ga'].indexOf(complied) > -1) {
-        gtag.optIn()
-        event('login', { method: 'Google' })
+        // gtag.optIn()
+        gtm.enable(true)
       } else {
-        gtag.optOut()
+        // gtag.optOut()
+        gtm.enable(false)
       }
+      console.log(gtm)
+      console.log(gtm.enabled())
       closeModal()
     }
 
@@ -157,7 +163,7 @@ export default {
       close,
       savePreferences,
       onAccept,
-      _
+      trans
     }
   }
 }

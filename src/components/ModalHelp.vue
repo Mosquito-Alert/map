@@ -34,8 +34,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5 class="q-my-md">{{ _('Layers selector help') }}</h5>
-                      <p>{{ _('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
+                      <h5 class="q-my-md">{{ trans('Layers selector help') }}</h5>
+                      <p>{{ trans('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -49,15 +49,15 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5 class="q-my-md">{{ _('Filters help') }}</h5>
-                      <p>{{ _('Filtra tu selección de distintas maneras:') }}</p>
-                      <p><b>{{ _('POR LOCALIZACIÓN') }}</b>: {{ _('Escribe y selecciona del desplegable tu lugar de interés') }}</p>
-                      <p><b>{{ _('POR HASHTAG') }}</b>: {{ _('puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.') }}</p>
-                      <p><b>{{ _('POR IDENTIFICADOR') }}</b>{{ _(': escribe el identificador corto de un informe en el buscador de hashtag precedido por el símbolo :') }}</p>
-                      <p>{{ _('Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo uno de los identificadores utilizados.') }}</p>
-                      <p><b>{{ _('POR FECHA O RANGO DE FECHAS') }}</b>{{ _('Los filtros aplican a todas las capas de información de las observaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.') }}</p>
-                      <hr/>
-                      <p>{{ _('Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.') }}</p>
+                      <h5 class="q-my-md">{{ trans('Filters help') }}</h5>
+                      <p>{{ trans('Filtra tu selección de distintas maneras:') }}</p>
+                      <p><b>{{ trans('POR LOCALIZACIÓN') }}</b>: {{ trans('Escribe y selecciona del desplegable tu lugar de interés') }}</p>
+                      <p><b>{{ trans('POR HASHTAG') }}</b>: {{ trans('puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.') }}</p>
+                      <p><b>{{ trans('POR IDENTIFICADOR') }}</b>{{ trans(': escribe el identificador corto de un informe en el buscador de hashtag precedido por el símbolo :') }}</p>
+                      <p>{{ trans('Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo uno de los identificadores utilizados.') }}</p>
+                      <p><b>{{ trans('POR FECHA O RANGO DE FECHAS') }}</b>{{ trans('Los filtros aplican a todas las capas de información de las observaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.') }}</p>
+                      <q-separator size="1"/>
+                      <p>{{ trans('Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -71,8 +71,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ _('Download and reports help') }}</h5>
-                      <p>{{ _('Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.') }}</p>
+                      <h5>{{ trans('Download and reports help') }}</h5>
+                      <p>{{ trans('Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.') }}</p>
                     </div>
                   </div>
                 </div>
@@ -86,8 +86,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ _('Graph help') }}</h5>
-                      <p>{{ _('Consulta la información de la vista del mapa en formato de gráfico temporal') }}</p>
+                      <h5>{{ trans('Graph help') }}</h5>
+                      <p>{{ trans('Consulta la información de la vista del mapa en formato de gráfico temporal') }}</p>
                     </div>
                   </div>
                 </div>
@@ -101,8 +101,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ _('Shareview help') }}</h5>
-                      <p>{{ _('Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa') }}</p>
+                      <h5>{{ trans('Shareview help') }}</h5>
+                      <p>{{ trans('Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa') }}</p>
                     </div>
                   </div>
                 </div>
@@ -116,8 +116,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ _('Estimates help') }}</h5>
-                      <p>{{ _('Consulta el grado de probabilidad e incertidumbre de encontrar una especie de mosquito concreta. Selecciona la especie que quieras consultar y el rango temporal') }}</p>
+                      <h5>{{ trans('Estimates help') }}</h5>
+                      <p>{{ trans('Consulta el grado de probabilidad e incertidumbre de encontrar una especie de mosquito concreta. Selecciona la especie que quieras consultar y el rango temporal') }}</p>
                     </div>
                   </div>
                 </div>
@@ -125,7 +125,7 @@
             </q-carousel>
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ _('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ trans('Close') }}</button>
         </div>
       </dialog>
     </div>
@@ -190,7 +190,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const _ = function (text) {
+    const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
     const layers = $store.getters['app/getLayers']
@@ -205,7 +205,7 @@ export default {
       close,
       hasCloseButton,
       mobile,
-      _,
+      trans,
       slide
     }
   }
@@ -213,6 +213,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+hr{
+  margin-bottom: 10px;
+}
 .backdrop-modal-help {
   position: fixed;
   top: 0;
@@ -249,7 +252,9 @@ export default {
   align-items: center;
   z-index: 2001;
 }
-
+:deep(.q-btn){
+  background-color: white;
+}
 dialog {
   position:relative;
   // max-width: 600px;
@@ -340,9 +345,7 @@ dialog.mobile button{
 dialog.mobile .q-carousel__slide.column.no-wrap.flex-center{
   padding: 4px 4px 60px 4px;
 }
-hr{
-  border: 1px solid #cccccc88;
-}
+
 .help-icon img{
   height: 30px;
   width: auto;
