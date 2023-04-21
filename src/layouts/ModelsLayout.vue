@@ -1,66 +1,71 @@
 <template>
-  <q-layout
-    :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
-  >
-    <site-header v-if="!mobile" :expanded="expanded"/>
-    <left-drawer-models ref="TOC"
-      :expanded="expanded"
-      @loadModel="loadModel"
-      @clearModel="clearModel"
-      @toggleLeftDrawer="toggleLeftDrawer"
-      @startShareView="startShareView"
-      @checkModelEstimation="checkModelEstimation"
-      @checkModelUncertainty="checkModelUncertainty"
-      @estimationTransparency="estimationTransparency"
-      @uncertaintyTransparency="uncertaintyTransparency"
-      @estimationColorsChanged="estimationColorsChanged"
-      @uncertaintyColorsChanged="uncertaintyColorsChanged"
-      @firstMapCall="buildSession"
-    />
-
-    <q-page
-      class='flex'
+  <div v-if="estimatesIsVisible">
+    <q-layout
       :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
     >
-      <the-map-models ref='map'
-        init
-        :viewCode="viewCode"
-        :class="expanded?'drawer-expanded':'drawer-collapsed'"
+      <site-header v-if="!mobile" :expanded="expanded"/>
+      <left-drawer-models ref="TOC"
+        :expanded="expanded"
+        @loadModel="loadModel"
+        @clearModel="clearModel"
         @toggleLeftDrawer="toggleLeftDrawer"
-        @workerFinishedIndexing="workerFinishedIndexing"
-        @endShareView="endShareView"
-        @setModelDate="setModelDate"
-        @loadSharedModel="loadSharedModel"
-        @errorDownloadingModels="errorDownloadingModels"
+        @startShareView="startShareView"
+        @checkModelEstimation="checkModelEstimation"
+        @checkModelUncertainty="checkModelUncertainty"
+        @estimationTransparency="estimationTransparency"
+        @uncertaintyTransparency="uncertaintyTransparency"
+        @estimationColorsChanged="estimationColorsChanged"
+        @uncertaintyColorsChanged="uncertaintyColorsChanged"
+        @firstMapCall="buildSession"
       />
-    </q-page>
 
-    <modal-share
-      ref="shareModal"
-      :open="shareModalVisible"
-    >
-      <template v-slot:default>
-      </template>
-    </modal-share>
+      <q-page
+        class='flex'
+        :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
+      >
+        <the-map-models ref='map'
+          init
+          :viewCode="viewCode"
+          :class="expanded?'drawer-expanded':'drawer-collapsed'"
+          @toggleLeftDrawer="toggleLeftDrawer"
+          @workerFinishedIndexing="workerFinishedIndexing"
+          @endShareView="endShareView"
+          @setModelDate="setModelDate"
+          @loadSharedModel="loadSharedModel"
+          @errorDownloadingModels="errorDownloadingModels"
+        />
+      </q-page>
 
-    <modal-confirm-logout/>
+      <modal-share
+        ref="shareModal"
+        :open="shareModalVisible"
+      >
+        <template v-slot:default>
+        </template>
+      </modal-share>
 
-    <modal-info :open="infoModalVisible" buttons="close">
-    </modal-info>
+      <modal-confirm-logout/>
 
-    <modal-help :open="helpModalVisible" buttons="close">
-    </modal-help>
+      <modal-info :open="infoModalVisible" buttons="close">
+      </modal-info>
 
-    <modal-wait/>
-    <modal-logos/>
-    <modal-error/>
-    <modal-cookie-settings/>
-    <modal-login/>
-    <modal-cookie-policy/>
+      <modal-help :open="helpModalVisible" buttons="close">
+      </modal-help>
 
-    <site-footer/>
-    <cookies-compliance/>
-  </q-layout>
+      <modal-wait/>
+      <modal-logos/>
+      <modal-error/>
+      <modal-cookie-settings/>
+      <modal-login/>
+      <modal-cookie-policy/>
+
+      <site-footer/>
+      <cookies-compliance/>
+    </q-layout>
+  </div>
+  <router-link v-else to="/">
+    <page-error-not-found/>
+  </router-link>
 </template>
 
 <script>
@@ -74,6 +79,7 @@ import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalError from 'src/components/ModalError.vue'
+import PageErrorNotFound from 'src/components/PageErrorNotFound.vue'
 import ModalWait from 'src/components/ModalWait.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
@@ -92,6 +98,7 @@ export default {
     ModalShare,
     ModalHelp,
     ModalError,
+    PageErrorNotFound,
     ModalLogin,
     ModalConfirmLogout,
     ModalLogos,
@@ -115,12 +122,22 @@ export default {
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
     $store.commit('timeseries/setGraphIsVisible', false)
+
     if (lang) {
-      $store.dispatch('app/setLanguage', lang.toLocaleLowerCase())
+      $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
     const backend = $store.getters['app/getBackend']
+
+    const estimatesIsVisible = computed(() => {
+      const tabs = $store.getters['app/getLeftMenuTabs']
+      if (Object.keys(tabs).length) {
+        return tabs.estimates.active
+      } else {
+        return false
+      }
+    })
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -245,6 +262,7 @@ export default {
     }
 
     return {
+      estimatesIsVisible,
       errorDownloadingModels,
       estimationColorsChanged,
       uncertaintyColorsChanged,

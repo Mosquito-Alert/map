@@ -53,7 +53,7 @@ export default {
 
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
     if (lang) {
-      $store.dispatch('app/setLanguage', lang.toLowerCase())
+      $store.dispatch('app/setInitData', lang.toLowerCase())
     }
 
     const mobile = computed(() => {

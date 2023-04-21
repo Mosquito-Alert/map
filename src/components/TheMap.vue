@@ -816,6 +816,7 @@ export default defineComponent({
 
     // Init share view. Save data to database
     function shareView () {
+      $store.commit('map/setCenter', { center: [0, 0] })
       const samplingEffort = $store.getters['app/getLayers'].sampling_effort.sampling.active
 
       let obj = {}

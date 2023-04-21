@@ -10,6 +10,11 @@ export const setTranslations = (state, payload) => {
   state.trans = payload
 }
 
+export const setTabsVisibility = (state, payload) => {
+  console.log('set tabs vibibility')
+  state.leftMenuTabs = payload
+}
+
 export const setAuthorized = (state, payload) => {
   state.authorized = payload
 }

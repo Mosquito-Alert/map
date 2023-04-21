@@ -181,7 +181,7 @@ export default {
 
     onMounted(() => {
       if (lang) {
-        $store.dispatch('app/setLanguage', lang.toLowerCase())
+        $store.dispatch('app/setInitData', lang.toLowerCase())
         cookies.set('lang', lang.toLocaleLowerCase())
       }
       if ($store.getters['app/getDefaults'].INFO_OPEN) {

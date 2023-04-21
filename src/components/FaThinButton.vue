@@ -53,16 +53,16 @@ a button.fa-thin-button {
   &:first-child {
     border: none;
   }
-  &:focus {
+  &:not(.disabled):focus {
     border-left: 0;
     transition: all 0.1s ease-in;
   }
-  &:hover {
+  &:not(.disabled):hover {
     border-left: 6px solid $primary-color;
     transition: all 0.1s ease-in;
   }
-  &:hover span,
-  &:hover i{
+  &:not(.disabled):hover span,
+  &:not(.disabled):hover i{
     font-weight: bold;
     color: #efa501;
   }

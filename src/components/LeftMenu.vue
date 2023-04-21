@@ -11,6 +11,7 @@
 
 <template>
     <q-toolbar>
+      <!-- First tab is always visible -->
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
         :label="trans('Reports')"
@@ -23,8 +24,18 @@
 
       <fa-thin-button-router
         name="fa-thin fa-chart-scatter"
+        :label="trans('Wms')"
+        :class="(wmsVisibility?(active_item=='models'?'active':''):'disabled')"
+        link="/wms"
+        item="wms"
+        id="wms"
+      >
+      </fa-thin-button-router>
+
+      <fa-thin-button-router
+        name="fa-thin fa-chart-scatter"
         :label="trans('Estimates')"
-        :class="active_item=='models'?'active':''"
+        :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
         link="/models"
         item="models"
         id="estimations"
@@ -108,10 +119,12 @@ export default {
     const ca = ref(null)
     const es = ref(null)
     const en = ref(null)
+
     const $q = useQuasar()
     const { cookies } = useCookies()
     const $store = useStore()
     const LANGS = $store.getters['app/getAllowedLangs']
+
     const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
@@ -152,7 +165,7 @@ export default {
     }
 
     const setLanguage = async function (lang, object) {
-      await $store.dispatch('app/setLanguage', lang)
+      await $store.dispatch('app/setInitData', lang)
       cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')
@@ -166,13 +179,33 @@ export default {
     }
 
     onMounted(async function () {
+      console.log('mounted left menu')
       lang.value = $store.getters['app/getLang']
       context.emit('leftMenuMounted', {})
+    })
+
+    const wmsVisibility = computed(() => {
+      const tabs = $store.getters['app/getLeftMenuTabs']
+      if (Object.keys(tabs).length) {
+        return tabs.wms.active
+      } else {
+        return false
+      }
+    })
+
+    const estimationsVisibility = computed(() => {
+      const tabs = $store.getters['app/getLeftMenuTabs']
+      if (Object.keys(tabs).length) {
+        return tabs.estimates.active
+      } else {
+        return false
+      }
     })
 
     const frontendUrl = computed(() => {
       return $store.getters['app/getFrontendUrl']
     })
+
     const linkModels = computed(() => {
       return $store.getters['app/getFrontendUrl'] + 'models'
     })
@@ -187,6 +220,8 @@ export default {
 
     return {
       trans,
+      wmsVisibility,
+      estimationsVisibility,
       loginLabel,
       lang,
       LANGS,

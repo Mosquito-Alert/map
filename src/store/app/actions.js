@@ -2,7 +2,7 @@ import { defaultObservations as privateDefaultObservations, observations as priv
 import { defaultObservations as publicDefaultObservations, observations as publicLayers } from './publicTOC'
 import axios from 'axios'
 
-export const setLanguage = async (context, lang) => {
+export const setInitData = async (context, lang) => {
   context.commit('setLanguage', lang)
   await context.dispatch('setTranslations')
 }
@@ -13,7 +13,8 @@ export const setTranslations = async (context) => {
   await axios(url, {
     withCredentials: true
   }).then(function (resp) {
-    context.commit('setTranslations', resp.data)
+    context.commit('setTranslations', resp.data.trans)
+    context.commit('setTabsVisibility', resp.data.config.tabs)
     const registered = ('registered-user' in resp.data) ? resp.data['registered-user'] : false
     context.commit('setAuthorized', registered)
   })

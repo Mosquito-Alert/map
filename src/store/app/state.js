@@ -104,6 +104,7 @@ export default function () {
     csrfToken: null,
     authorized: false,
     errorMessage: '',
+    leftMenuTabs: {},
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
 

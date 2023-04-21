@@ -154,3 +154,7 @@ export const getBrowser = state => {
 export const getPossibleCategories = state => {
   return state.possibleCategories
 }
+
+export const getLeftMenuTabs = state => {
+  return state.leftMenuTabs
+}
