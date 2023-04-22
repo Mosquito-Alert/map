@@ -158,3 +158,11 @@ export const getPossibleCategories = state => {
 export const getLeftMenuTabs = state => {
   return state.leftMenuTabs
 }
+
+export const getWmsTabLayers = state => {
+  return state.wmsTabLayers
+}
+
+export const getSelectedWmsLayers = state => {
+  return state.selectedWmsLayer
+}

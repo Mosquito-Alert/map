@@ -15,6 +15,7 @@ export const setTranslations = async (context) => {
   }).then(function (resp) {
     context.commit('setTranslations', resp.data.trans)
     context.commit('setTabsVisibility', resp.data.config.tabs)
+    context.commit('setWmsTabLayers', resp.data.config.wms)
     const registered = ('registered-user' in resp.data) ? resp.data['registered-user'] : false
     context.commit('setAuthorized', registered)
   })

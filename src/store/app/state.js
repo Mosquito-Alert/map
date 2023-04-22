@@ -105,6 +105,8 @@ export default function () {
     authorized: false,
     errorMessage: '',
     leftMenuTabs: {},
+    wmsTabLayers: {},
+    selectedWmsLayer: {},
     browser: fnBrowserDetect(),
     // URL to log in the "old" private area. Same domain of current web is required
 

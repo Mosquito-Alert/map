@@ -110,3 +110,11 @@ export const toggleLayerIcon = (state, payload) => {
 export const setActiveLayer = (state, payload) => {
   state.layers[payload.type][payload.code].active = payload.active
 }
+
+export const setWmsTabLayers = (state, payload) => {
+  state.wmsTabLayers = payload
+}
+
+export const setSelectedWmsLayers = (state, payload) => {
+  state.selectedWmsLayer = payload
+}
