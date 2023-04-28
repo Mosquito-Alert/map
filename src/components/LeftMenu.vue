@@ -23,7 +23,7 @@
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-chart-scatter"
+        name="fa-thin fa-globe"
         :label="trans('Wms')"
         :class="(wmsVisibility?(active_item=='models'?'active':''):'disabled')"
         link="/wms"
@@ -179,7 +179,6 @@ export default {
     }
 
     onMounted(async function () {
-      console.log('mounted left menu')
       lang.value = $store.getters['app/getLang']
       context.emit('leftMenuMounted', {})
     })

@@ -1,3 +1,5 @@
+import { getWmsDataFromServer } from './getters'
+
 export const setErrorMessage = (state, message) => {
   state.errorMessage = message
 }
@@ -11,7 +13,6 @@ export const setTranslations = (state, payload) => {
 }
 
 export const setTabsVisibility = (state, payload) => {
-  console.log('set tabs vibibility')
   state.leftMenuTabs = payload
 }
 
@@ -117,4 +118,12 @@ export const setWmsTabLayers = (state, payload) => {
 
 export const setSelectedWmsLayers = (state, payload) => {
   state.selectedWmsLayer = payload
+}
+
+export const setWMSsetWmsData = (state, data) => {
+  if (getWmsDataFromServer) {
+    state.WMS = data
+  } else {
+    console.log('No server data allowed. Check configuration file')
+  }
 }

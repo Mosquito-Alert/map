@@ -12,7 +12,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     props: { initView: false }
   },
-  // MODELS MAP
+  // MODELS TAB
   {
     path: '/models',
     component: () => import('layouts/ModelsLayout.vue')
@@ -21,6 +21,16 @@ const routes = [
   {
     path: '/models/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
+  },
+  // WMS TAB
+  {
+    path: '/wms',
+    component: () => import('layouts/WMSLayout.vue')
+  },
+  // MODELS WITH LANG
+  {
+    path: '/wms/:lang(ca|es|en)',
+    component: () => import('layouts/WMSLayout.vue')
   },
   // SHARE OBSERVATIONS VIEW
   {

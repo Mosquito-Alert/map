@@ -166,3 +166,12 @@ export const getWmsTabLayers = state => {
 export const getSelectedWmsLayers = state => {
   return state.selectedWmsLayer
 }
+
+export const getWmsDataFromServer = state => {
+  console.log('in getter to get ')
+  return state.getWmsDataFromServer === true
+}
+
+export const getWmsData = state => {
+  return state.WMS
+}
