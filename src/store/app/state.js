@@ -349,6 +349,7 @@ export default function () {
     //       {"wms_id": 1, "wms_url": "https://...", "year": 2023, "layer": "xxx", "transparency": 1},
     //       {"year": 2022, "layer": "xxx", "transparency": 1}
     //   ]}
-    WMS: []
+    WMS: [],
+    currentWMSView: {}
   }
 }

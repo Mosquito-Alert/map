@@ -175,3 +175,7 @@ export const getWmsDataFromServer = state => {
 export const getWmsData = state => {
   return state.WMS
 }
+
+export const getCurrentWMSView = state => {
+  return state.currentWMSView
+}

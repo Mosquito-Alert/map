@@ -75,7 +75,10 @@ export default defineComponent({
     const map = ref('null')
     const leftDrawerIcon = ref('null')
     const $store = useStore()
-    const LOADED_WMS = {}
+    const baseMap = ref('null')
+    const attrVisible = ref(false)
+    const foldingIcon = ref('<')
+    const PREVIOUS_WMS = [] // keep layer Id
     // Map general configuration
     const zoom = computed(() => {
       return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
@@ -105,6 +108,11 @@ export default defineComponent({
     }
 
     onMounted(function () {
+      leftDrawerIcon.value = 'keyboard_arrow_left'
+      const currentWMSView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
+      if (Object.keys(currentWMSView).length > 0) {
+        loadWmsLayer(currentWMSView.years)
+      }
     })
 
     const trans = function (text) {
@@ -143,6 +151,11 @@ export default defineComponent({
     }
 
     const loadWmsLayer = function (wms) {
+      // Remove previous layers if any, except base layer (index = 0)
+      PREVIOUS_WMS.forEach((layerId) => {
+        const layer = findLayer(layerId)
+        map.value.map.removeLayer(layer)
+      })
       wms.forEach((layer) => {
         try {
           const wmsSource = new TileWMS({
@@ -155,13 +168,14 @@ export default defineComponent({
           })
 
           const wmsLayer = new TileLayer({
+            visible: layer.visible,
             source: wmsSource,
             opacity: 1 - (layer.transparency),
             id: layer.id
           })
           map.value.map.addLayer(wmsLayer)
+          PREVIOUS_WMS.push(layer.id)
           // Add layer to dict to handle it from TOC
-          LOADED_WMS[layer.id] = wmsLayer
         } catch (err) {
           console.log(err)
         }
@@ -197,7 +211,7 @@ export default defineComponent({
       loadWmsLayer,
       changeLayerProperty,
       // hideSpinner,
-      // baseMap,
+      baseMap,
       updateMap,
       center,
       zoom,
@@ -205,7 +219,8 @@ export default defineComponent({
       // loadView,
       shareModelView,
       toggleLeftDrawer,
-      // foldingIcon,
+      attrVisible,
+      foldingIcon,
       unfoldAttribution,
       leftDrawerIcon,
       map

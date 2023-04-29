@@ -25,7 +25,7 @@
       <fa-thin-button-router
         name="fa-thin fa-globe"
         :label="trans('Wms')"
-        :class="(wmsVisibility?(active_item=='models'?'active':''):'disabled')"
+        :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
         link="/wms"
         item="wms"
         id="wms"

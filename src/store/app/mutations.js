@@ -127,3 +127,14 @@ export const setWMSsetWmsData = (state, data) => {
     console.log('No server data allowed. Check configuration file')
   }
 }
+
+export const setCurrentWMSView = (state, payload) => {
+  state.currentWMSView = payload
+}
+
+export const setWmsProperties = (state, payload) => {
+  const index = state.currentWMSView.years.findIndex((e) => {
+    return e.id === payload.id
+  })
+  state.currentWMSView.years[index][payload.property] = payload.value
+}

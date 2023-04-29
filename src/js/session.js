@@ -32,7 +32,6 @@ export default class MSession {
         if (resp.status === STATUS_CODES.OK) {
           if (resp.data.isAuthenticated && _this.csrfToken !== null) {
             callback()
-            console.log(true)
           } else {
             _this.getCSRF(callback)
           }

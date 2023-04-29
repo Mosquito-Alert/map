@@ -32,16 +32,16 @@
       <div>
         <div class="category-box q-my-md">
           <q-select
+            ref="qSelect"
             :label="trans('Select species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
-            :options="categories"
+            :options="vectorOptions"
             :option-value="'code'"
             :option-label="'type'"
             @update:model-value="getWMS"
           />
-
           </div>
           <!-- INFO LINK -->
             <div class="q-mt-xl flex-center model-buttons">
@@ -79,7 +79,7 @@
                 v-model="layer.visible"
                 color="orange"
                 size="lg"
-                @update:model-value="checkVisibility($event, layer.id, 'visible')"
+                @update:model-value="checkVisibility($event, layer, 'visible')"
               />
             </div>
 
@@ -92,7 +92,7 @@
               :step="0.05"
               v-model="layer.transparency"
               color="orange"
-              @update:model-value="checkVisibility($event, layer.id, 'transparency')"
+              @update:model-value="checkVisibility($event, layer, 'transparency')"
               />
             </div>
           </div>
@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import { watch, computed, onMounted, ref } from 'vue'
+import { watch, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
@@ -123,7 +123,14 @@ export default {
     const disabledInfo = ref(true)
     const modelVector = ref()
     const selectedLayers = ref()
+    const qSelect = ref()
+    let currentView
     let WMS
+
+    onUnmounted(() => {
+      // Save customized WMS visibility for next rendering
+      $store.commit('app/setWMSsetWmsData', WMS)
+    })
 
     onMounted(function () {
       WMS = JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
@@ -135,8 +142,16 @@ export default {
             WMS[species][layer].visible = false
           }
           WMS[species][layer].transparency = 0.5
-          WMS[species][layer].id = species + '_' + layer
+          WMS[species][layer].id = species + '_' + WMS[species][layer].year
         }
+      }
+      currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
+      if ('code' in currentView) {
+        const index = vectorOptions.value.findIndex(obj => {
+          return (obj.code === currentView.code)
+        })
+        modelVector.value = vectorOptions.value[index]
+        getWMS(currentView)
       }
     })
 
@@ -145,21 +160,6 @@ export default {
     const callFirstMapCall = function () {
       context.emit('firstMapCall', {})
     }
-
-    // Read default uncertainty color from store
-    // const models = computed(() => {
-    //   return $store.getters['app/getModels']
-    // })
-
-    const categories = computed(() => {
-      return [
-        { code: 'tiger', type: trans('Tiger mosquito') },
-        { code: 'yellow', type: trans('Yellow fever mosquito') },
-        { code: 'japonicus', type: trans('Japonicus mosquito') },
-        { code: 'koreicus', type: trans('Koreicus mosquito') },
-        { code: 'culex', type: trans('Culex mosquito') }
-      ]
-    })
 
     const trans = function (text) {
       return $store.getters['app/getText'](text)
@@ -177,7 +177,15 @@ export default {
     // Called when model is selected
     const getWMS = function (formValue) {
       const code = formValue.code
+      // if ('code' in currentView) {
+      //   selectedLayers.value = currentView.years
+      // } else {
       selectedLayers.value = WMS[code]
+      $store.commit('app/setCurrentWMSView', {
+        code: code,
+        years: JSON.parse(JSON.stringify(WMS[code]))
+      })
+      // }
       context.emit('loadWms', WMS[code])
     }
 
@@ -193,35 +201,58 @@ export default {
       context.emit('startShareView', {})
     }
 
+    const vectorOptions = computed(() => {
+      return [
+        { code: 'tiger', type: trans('Tiger mosquito') },
+        { code: 'yellow', type: trans('Yellow fever mosquito') },
+        { code: 'japonicus', type: trans('Japonicus mosquito') },
+        { code: 'koreicus', type: trans('Koreicus mosquito') },
+        { code: 'culex', type: trans('Culex mosquito') }
+      ]
+    })
+
     // Required to change lang on current selection
-    watch(categories, (cur, old) => {
+    watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {
         if (modelVector.value.code) {
           const index = cur.findIndex(obj => {
             return (obj.code === modelVector.value.code)
           })
+          console.log(index)
+          console.log(cur[index])
           modelVector.value = cur[index]
         }
       }
     })
 
-    const checkVisibility = function (e, layerId, property) {
+    const checkVisibility = function (e, layer, property) {
+      // Update WMS
+      // console.log(layer.id)
+      const selectedSpecies = modelVector.value.code
+      WMS[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
       context.emit('layerChange', {
         key: property,
-        layerId,
+        layerId: layer.id,
+        value: e
+      })
+      $store.commit('app/setWmsProperties', {
+        id: layer.id,
+        property: property,
         value: e
       })
     }
 
     return {
       trans,
+      qSelect,
       checkVisibility,
       selectedLayers,
       goInfoModal,
       loadSharedModel,
       disabled,
       disabledInfo,
-      categories,
+      modelVector,
+      vectorOptions,
       mobile,
       toggleLeftDrawer,
       getWMS,
