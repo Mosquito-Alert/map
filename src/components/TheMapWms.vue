@@ -151,6 +151,10 @@ export default defineComponent({
       })
     }
 
+    const reorderLayers = function (wms) {
+      loadWmsLayer(wms)
+    }
+
     const loadWmsLayer = function (wms) {
       // Remove previous layers if any, except base layer (index = 0)
       PREVIOUS_WMS.forEach((layerId) => {
@@ -209,6 +213,7 @@ export default defineComponent({
 
     return {
       trans,
+      reorderLayers,
       loadWmsLayer,
       changeLayerProperty,
       // hideSpinner,

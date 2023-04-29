@@ -71,31 +71,48 @@
             <div class="col-2 q-px-md"></div>
             <div class="col-8 text-center">{{ trans('Transparency') }}</div>
           </div>
-          <div v-for="(layer, index) in selectedLayers" :key="index" class="flex row">
-            <div class="col-2">
-              <q-checkbox
-                dense
-                checked-icon="check"
-                v-model="layer.visible"
-                color="orange"
-                size="lg"
-                @update:model-value="checkVisibility($event, layer, 'visible')"
-              />
-            </div>
+          <!-- DRAGGABLE LIST -->
+            <draggable
+              v-model="selectedLayers"
+              item-key="id"
+              ghost-class="ghost"
+              animation=450
+              handle=".handle"
+              @change="reorderLayers"
+            >
+              <template #item="{ element }">
+                <div class="flex row">
+                  <div class="col-2">
+                    <q-checkbox
+                      dense
+                      checked-icon="check"
+                      v-model="element.visible"
+                      color="orange"
+                      size="lg"
+                      @update:model-value="checkVisibility($event, element, 'visible')"
+                    />
+                  </div>
 
-            <div class="col-2 q-px-xs">{{ layer.year }}</div>
+                  <div class="col-2 q-px-xs">{{ element.year }}</div>
 
-            <div class="col-8 q-px-sm">
-              <q-slider
-              :min="0"
-              :max="1"
-              :step="0.05"
-              v-model="layer.transparency"
-              color="orange"
-              @update:model-value="checkVisibility($event, layer, 'transparency')"
-              />
-            </div>
-          </div>
+                  <div class="col-7 q-px-sm">
+                    <q-slider
+                    :min="0"
+                    :max="1"
+                    :step="0.05"
+                    v-model="element.transparency"
+                    color="orange"
+                    @update:model-value="checkVisibility($event, element, 'transparency')"
+                    />
+                  </div>
+
+                  <div class="col-1 q-px-xs">
+                    <q-icon name="more_vert" class="handle" size="1.5em"/>
+                  </div>
+
+                </div>
+              </template>
+            </draggable>
         </div>
       </div>
     </div>
@@ -106,16 +123,18 @@
 import { watch, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
+import draggable from 'vuedraggable'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default {
-  components: { LeftMenu },
+  components: { LeftMenu, draggable },
   props: ['expanded'],
   emits: [
     'firstMapCall',
     'toggleLeftDrawer',
     'loadWms',
-    'layerVisibleChange'
+    'layerVisibleChange',
+    'reorderLayers'
   ],
   setup (props, context) {
     const $store = useStore()
@@ -194,7 +213,7 @@ export default {
     }
 
     const goInfoModal = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
+      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'wms_info' } })
     }
 
     const startShareView = function () {
@@ -243,8 +262,14 @@ export default {
       })
     }
 
+    const reorderLayers = function () {
+      context.emit('reorderLayers',
+        JSON.parse(JSON.stringify(selectedLayers.value))
+      )
+    }
     return {
       trans,
+      reorderLayers,
       qSelect,
       checkVisibility,
       selectedLayers,
@@ -418,5 +443,9 @@ div.flex-right{
 }
 .flex.row{
   align-items:center;
+}
+.handle{
+  opacity:0;
+  cursor: move;
 }
 </style>

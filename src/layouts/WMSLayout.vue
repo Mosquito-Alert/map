@@ -11,6 +11,7 @@
         @firstMapCall="buildSession"
         @loadWms="loadWms"
         @layerChange="layerChange"
+        @reorderLayers="reorderLayers"
       />
 
       <q-page
@@ -212,10 +213,15 @@ export default {
       map.value.changeLayerProperty(payload)
     }
 
+    const reorderLayers = function (payload) {
+      map.value.reorderLayers(payload)
+    }
+
     return {
       tabIsVisible,
       loadWms,
       layerChange,
+      reorderLayers,
       errorDownloadingModels,
       loadSharedModel,
       viewCode,

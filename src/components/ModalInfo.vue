@@ -149,6 +149,7 @@
                         </div>
                     </div>
                     <q-separator size="1"/>
+                    <!-- MODELS INFO -->
                     <a id="modeled_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
@@ -161,6 +162,18 @@
                     <p>{{ trans('This probability has been observed to correspond to the observations of the tiger mosquito obtained by traditional surveillance methods (ovitraps), thus demonstrating that it is a good way of estimating the presence and abundance of a species.') }}</p>
                     <p class="capitalFirstLetter">{{ trans('for more information.')}}</p>
                     <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>
+                    <q-separator size="1"/>
+                    <!-- WMS INFO -->
+                    <a id="wms_info" class="q-py-md"></a>
+                    <p></p>
+                    <div class="text-subtitle1 q-my-md">
+                      {{ trans('WMS DATA') }}
+                    </div>
+                    <p>
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci nesciunt qui placeat, soluta vero ea tenetur delectus possimus, laudantium laborum ut aut hic expedita doloremque? Alias non natus quod similique ipsum labore qui porro blanditiis distinctio assumenda aliquam voluptate provident delectus eos optio voluptatum, dolor, possimus velit? Obcaecati hic doloribus accusantium? Distinctio tenetur quasi modi impedit laboriosam illo, nobis possimus voluptatum natus labore tempora amet inventore incidunt consectetur repellendus, magnam maiores dicta sunt voluptates delectus repellat rem dolore. Obcaecati, vel. Enim et animi facilis sequi dolorum nesciunt nisi, doloribus quaerat ad ratione esse obcaecati porro harum impedit laudantium dolor sint!
+                    </p>
+                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rerum consequuntur nesciunt sed aliquam blanditiis maxime, hic necessitatibus non incidunt! Sequi totam dolores enim nemo neque vitae sunt, labore voluptate consectetur rerum? Eveniet iste iure temporibus impedit doloremque. Provident ullam sint, quisquam soluta eaque molestias et quo in corrupti iusto cumque.</p>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt, deleniti! Excepturi hic culpa, qui odio sunt obcaecati. Maiores obcaecati odit corporis consequuntur, itaque officiis sunt voluptate deserunt nam earum commodi.</p>
                 </div>
               </q-carousel-slide>
             </q-carousel>
