@@ -134,17 +134,17 @@ export default {
 
     onMounted(function () {
       WMS = JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
-      for (const species in WMS) {
-        for (const layer in WMS[species]) {
-          if (layer < 2) {
-            WMS[species][layer].visible = true
-          } else {
-            WMS[species][layer].visible = false
-          }
-          WMS[species][layer].transparency = 0.5
-          WMS[species][layer].id = species + '_' + WMS[species][layer].year
-        }
-      }
+      // for (const species in WMS) {
+      //   for (const layer in WMS[species]) {
+      //     if (layer < 2) {
+      //       WMS[species][layer].visible = true
+      //     } else {
+      //       WMS[species][layer].visible = false
+      //     }
+      //     WMS[species][layer].transparency = 0.5
+      //     WMS[species][layer].id = species + '_' + WMS[species][layer].year
+      //   }
+      // }
       currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
       if ('code' in currentView) {
         const index = vectorOptions.value.findIndex(obj => {
@@ -238,7 +238,8 @@ export default {
       $store.commit('app/setWmsProperties', {
         id: layer.id,
         property: property,
-        value: e
+        value: e,
+        species: selectedSpecies
       })
     }
 

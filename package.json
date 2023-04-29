@@ -30,6 +30,7 @@
     "vue3-click-away": "^1.2.4",
     "vue3-cookies": "^1.0.6",
     "vue3-openlayers": "^0.1.54",
+    "vuedraggable": "^4.1.0",
     "vuex": "^4.0.2"
   },
   "devDependencies": {

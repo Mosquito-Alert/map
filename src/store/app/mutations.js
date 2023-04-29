@@ -137,4 +137,5 @@ export const setWmsProperties = (state, payload) => {
     return e.id === payload.id
   })
   state.currentWMSView.years[index][payload.property] = payload.value
+  state.WMS[payload.species][index][payload.property] = payload.value
 }

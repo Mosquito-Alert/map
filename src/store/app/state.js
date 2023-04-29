@@ -341,14 +341,19 @@ export default function () {
     // WMS RELATED
     getWmsDataFromServer: true,
     // SAMPLE STRUCTURE FOR wmswms: {
-    //   "tiger": [
-    //       {"wms_id": 1, "wms_url": "https://...", "year": 2023, "layer": "xxx", "transparency": 1},
-    //       {"year": 2022, "layer": "xxx", "transparency": 1}
+    // {
+
+    //   tiger: [         // For every species
+    //     {             // For every year
+    //       id: 1, wms_id: 1, wms_url: "https://montesdata.creaf.cat/geoserver/SIPAN/wms",
+    //       year: 2023, layer: "MASSA_AIGUA", visible: true, transparency: 0.0
+    //     },....
     //   ],
-    //   "yellow": [
-    //       {"wms_id": 1, "wms_url": "https://...", "year": 2023, "layer": "xxx", "transparency": 1},
-    //       {"year": 2022, "layer": "xxx", "transparency": 1}
-    //   ]}
+    //   yellow[
+    //     {....},
+    //     {....},
+    //   ]
+    // }
     WMS: [],
     currentWMSView: {}
   }

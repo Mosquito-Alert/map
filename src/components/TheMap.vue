@@ -407,12 +407,21 @@ export default defineComponent({
     })
 
     // Map general configuration
+    // const zoom = computed(() => {
+    //   return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
+    // })
+
+    // const center = computed(() => {
+    //   const center = $store.getters['map/getDefault'].CENTER
+    //   return transform(center, 'EPSG:4326', 'EPSG:3857')
+    // })
+
     const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getDefault'].MOBILEZOOM : $store.getters['map/getDefault'].ZOOM
+      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
     })
 
     const center = computed(() => {
-      const center = $store.getters['map/getDefault'].CENTER
+      const center = $store.getters['map/getCurrents'].CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
 

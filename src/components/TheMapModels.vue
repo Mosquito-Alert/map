@@ -665,7 +665,7 @@ export default defineComponent({
     function updateMap () {
       // Save view params into store
       const newZoom = map.value.map.getView().getZoom()
-      $store.commit('map/setDefaults', {
+      $store.commit('map/setCurrents', {
         zoom: newZoom,
         center: transform(
           map.value.map.getView().getCenter(),
