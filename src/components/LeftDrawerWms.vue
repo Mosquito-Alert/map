@@ -81,7 +81,7 @@
               @change="reorderLayers"
             >
               <template #item="{ element }">
-                <div class="flex row">
+                <div class="flex row draggable-item">
                   <div class="col-2">
                     <q-checkbox
                       dense
@@ -95,7 +95,7 @@
 
                   <div class="col-2 q-px-xs">{{ element.year }}</div>
 
-                  <div class="col-7 q-px-sm">
+                  <div class="col-7 q-pl-md">
                     <q-slider
                     :min="0"
                     :max="1"
@@ -124,7 +124,6 @@ import { watch, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 import draggable from 'vuedraggable'
-// import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default {
   components: { LeftMenu, draggable },
@@ -153,17 +152,6 @@ export default {
 
     onMounted(function () {
       WMS = JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
-      // for (const species in WMS) {
-      //   for (const layer in WMS[species]) {
-      //     if (layer < 2) {
-      //       WMS[species][layer].visible = true
-      //     } else {
-      //       WMS[species][layer].visible = false
-      //     }
-      //     WMS[species][layer].transparency = 0.5
-      //     WMS[species][layer].id = species + '_' + WMS[species][layer].year
-      //   }
-      // }
       currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
       if ('code' in currentView) {
         const index = vectorOptions.value.findIndex(obj => {
@@ -217,16 +205,41 @@ export default {
     }
 
     const startShareView = function () {
-      context.emit('startShareView', {})
+      if (!modelVector.value) {
+        $store.commit('app/setModal', {
+          id: 'error',
+          content: {
+            visibility: true,
+            msg: 'Must select wms first'
+          }
+        })
+        context.emit('endShareView', {
+          error: 'Shareview error. No WMS is loaded',
+          visibility: true,
+          url: ''
+        })
+      } else {
+      // Prepare WMS data.
+        const layersJSON = JSON.parse(JSON.stringify(selectedLayers.value))
+        // const visibleLayers = layersJSON.filter((layer) => {
+        //   return layer.visible === true
+        // })
+        const payload = {
+          species: modelVector.value.code,
+          layers: layersJSON
+        }
+        context.emit('startShareView', payload)
+      }
     }
 
     const vectorOptions = computed(() => {
+      const WMS = $store.getters['app/getWmsData']
       return [
-        { code: 'tiger', type: trans('Tiger mosquito') },
-        { code: 'yellow', type: trans('Yellow fever mosquito') },
-        { code: 'japonicus', type: trans('Japonicus mosquito') },
-        { code: 'koreicus', type: trans('Koreicus mosquito') },
-        { code: 'culex', type: trans('Culex mosquito') }
+        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.tiger },
+        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.yellow },
+        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.japonicus },
+        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.koreicus },
+        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.culex }
       ]
     })
 
@@ -267,8 +280,21 @@ export default {
         JSON.parse(JSON.stringify(selectedLayers.value))
       )
     }
+
+    const setForm = function (view) {
+      const index = vectorOptions.value.findIndex(obj => {
+        return (obj.code === view.species)
+      })
+      modelVector.value = vectorOptions.value[index]
+      // override wms from shared view
+      WMS[view.species] = view.layers
+      selectedLayers.value = WMS[view.species]
+      getWMS({ code: view.species })
+    }
+
     return {
       trans,
+      setForm,
       reorderLayers,
       qSelect,
       checkVisibility,
@@ -447,5 +473,15 @@ div.flex-right{
 .handle{
   opacity:0;
   cursor: move;
+}
+.draggable-item{
+  padding: 0px 5px;
+  border-radius: 5px;
+  background-color: $grey-color;
+  margin: 3px 0px;
+}
+
+.draggable-item:hover .handle{
+  opacity:1
 }
 </style>

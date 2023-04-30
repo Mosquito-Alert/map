@@ -60,8 +60,8 @@ import { useStore } from 'vuex'
 import { transform } from 'ol/proj.js'
 import TileLayer from 'ol/layer/Tile.js'
 import TileWMS from 'ol/source/TileWMS.js'
-// import ShareMapView from '../js/ShareMapView'
-// import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import ShareMapView from '../js/ShareMapView'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -79,6 +79,7 @@ export default defineComponent({
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const PREVIOUS_WMS = [] // keep layer Id
+    const backendUrl = $store.getters['app/getBackend']
 
     // Map general configuration
     const zoom = computed(() => {
@@ -120,17 +121,52 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
 
-    // const shareViewUrl = backendUrl + 'api/view/save/'
+    const shareViewUrl = backendUrl + 'api/view/save/'
     // const loadViewUrl = backendUrl + 'api/view/load/'
 
     // Call when user shares view
-    function shareModelView () {
+    function shareWmsView (data) {
+      // After mapview is shared then handle it
+      const ol = map.value.map
+      const newView = new ShareMapView(ol, {
+        viewType: 'wms',
+        csrfToken: $store.getters['app/getCsrfToken'],
+        species: data.species,
+        layers: data.layers,
+        url: shareViewUrl,
+        callback: handleShareView
+      })
+      newView.save()
     }
 
     // Handle shared view
-    // function handleShareView (status) {
-    // }
-
+    // Handle shared view
+    function handleShareView (status) {
+      let content
+      if (status.status !== STATUS_CODES.OK) {
+        content = {
+          error: status.msg,
+          visibility: true,
+          url: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
+      } else {
+        const frontend = $store.getters['app/getFrontendUrl']
+        content = {
+          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
+      }
+      context.emit('endShareView', content)
+    }
     // Load shared view. Get data from database and then handle it
     // function loadView (viewCode) {
     // }
@@ -156,12 +192,13 @@ export default defineComponent({
     }
 
     const loadWmsLayer = function (wms) {
+      const n = wms.length
       // Remove previous layers if any, except base layer (index = 0)
       PREVIOUS_WMS.forEach((layerId) => {
         const layer = findLayer(layerId)
         map.value.map.removeLayer(layer)
       })
-      wms.forEach((layer) => {
+      wms.forEach((layer, index) => {
         try {
           const wmsSource = new TileWMS({
             projection: 'EPSG:3857',
@@ -176,7 +213,8 @@ export default defineComponent({
             visible: layer.visible,
             source: wmsSource,
             opacity: 1 - (layer.transparency),
-            id: layer.id
+            id: layer.id,
+            zIndex: 5 * (n - index)
           })
           map.value.map.addLayer(wmsLayer)
           PREVIOUS_WMS.push(layer.id)
@@ -207,12 +245,14 @@ export default defineComponent({
         console.log(err)
       }
     }
-    // const hideSpinner = function () {
-    //   spinner(false)
-    // }
+    const fitExtent = function (extent) {
+      map.value.map.getView().fit(extent, { minResolution: 50, nearest: false }
+      )
+    }
 
     return {
       trans,
+      fitExtent,
       reorderLayers,
       loadWmsLayer,
       changeLayerProperty,
@@ -223,7 +263,7 @@ export default defineComponent({
       zoom,
       mobile,
       // loadView,
-      shareModelView,
+      shareWmsView,
       toggleLeftDrawer,
       attrVisible,
       foldingIcon,

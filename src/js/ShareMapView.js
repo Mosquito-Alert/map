@@ -25,18 +25,25 @@ export default class ShareMapView {
 
   save () {
     const _this = this
-    const filters = _this.options.filters
     const ol = this.map
     const dataView = {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),
       extent: ol.getView().calculateExtent(ol.getSize()),
-      filters: filters,
       viewType: _this.options.viewType
+    }
+
+    // Check for filter this.options.
+    // Reports and Modal tab views have filters, WMS has layers
+    if ('filters' in _this.options) {
+      dataView.filters = _this.options.filters
+    } else {
+      dataView.layers = _this.options.layers
     }
 
     if (this.options.viewType === 'layers') {
       // If share is not type models then  check for other filters
+      const filters = _this.options.filters
       if (this.options.locationName.length) {
         dataView.locationName = this.options.locationName
       }
@@ -77,6 +84,8 @@ export default class ShareMapView {
       dataView.uncertaintyTransparency = this.options.uncertaintyTransparency
       dataView.uncertaintyColor = this.options.uncertaintyColor
       dataView.estimationColors = this.options.estimationColors
+    } else if (this.options.viewType === 'wms') {
+      dataView.species = this.options.species
     }
 
     axios(this.options.url, {

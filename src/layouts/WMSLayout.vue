@@ -81,6 +81,8 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import MSession from '../js/session.js'
+import ShareMapView from '../js/ShareMapView'
+import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 // import moment from 'moment'
 
 export default {
@@ -158,8 +160,36 @@ export default {
 
     const buildMap = function () {
       $store.commit('app/setCsrfToken', mySession.csrfToken)
+      const backendUrl = $store.getters['app/getBackend']
+      const loadViewUrl = backendUrl + 'api/view/load/'
+
+      // if loading previously shared view
       if (viewCode) {
-        map.value.loadView('M-' + viewCode)
+        const wmsCode = 'W-' + viewCode
+        const newView = new ShareMapView(null, {
+          url: loadViewUrl + wmsCode + '/',
+          csrfToken: $store.getters['app/getCsrfToken']
+        })
+        newView.load(handleLoadView)
+      }
+    }
+
+    const handleLoadView = function (data) {
+      if (data.status === STATUS_CODES.OK) {
+        const viewProperties = JSON.parse(data.view[0].view)
+        map.value.fitExtent(viewProperties.extent)
+        TOC.value.setForm(viewProperties)
+      } else {
+        const frontend = $store.getters['app/getFrontendUrl']
+        const content = {
+          url: frontend + data.status + '/' + $store.getters['app/getLang'],
+          visibility: true,
+          error: ''
+        }
+        $store.commit('app/setModal', {
+          id: 'share',
+          content: content
+        })
       }
     }
 
@@ -184,13 +214,6 @@ export default {
 
     const endShareView = function (payload) {
       shareModal.value.viewContent = payload
-      // $store.commit('app/setModal', {
-      //   id: 'share',
-      //   content: payload
-      // })
-      // if (payload.status === 'ok') {
-      //   shareModal.value.newUrl = frontendUrl.value + payload.code
-      // }
     }
 
     const loadSharedModel = function (payload) {
@@ -201,8 +224,8 @@ export default {
       TOC.value.errorDownloadingModels(payload)
     }
 
-    const startShareView = function () {
-      map.value.shareModelView()
+    const startShareView = function (data) {
+      map.value.shareWmsView(data)
     }
 
     const loadWms = function (data) {

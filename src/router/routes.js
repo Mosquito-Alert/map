@@ -52,6 +52,16 @@ const routes = [
     path: '/M-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
   },
+  // SHARE WMS VIEW
+  {
+    path: '/W-:code([a-zA-Z0-9]{4})',
+    component: () => import('layouts/WMSLayout.vue')
+  },
+  // SHARE WMS VIEW WITH LANG
+  {
+    path: '/W-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
+    component: () => import('layouts/WMSLayout.vue')
+  },
   {
     // Set the accepted characters and length of reports view
     path: '/:report([a-zA-Z0-9]{6})',

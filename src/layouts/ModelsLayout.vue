@@ -194,13 +194,6 @@ export default {
 
     const endShareView = function (payload) {
       shareModal.value.viewContent = payload
-      // $store.commit('app/setModal', {
-      //   id: 'share',
-      //   content: payload
-      // })
-      // if (payload.status === 'ok') {
-      //   shareModal.value.newUrl = frontendUrl.value + payload.code
-      // }
     }
 
     const workerFinishedIndexing = function (payload) {
