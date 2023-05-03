@@ -51,7 +51,7 @@
                     <div>
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
-                    <div class="q-ml-xs lower-case capitalFirstLetter">
+                    <div class="q-ml-xs">
                       {{ trans('WMS info link') }}
                     </div>
                   </div>
@@ -114,6 +114,13 @@
               </template>
             </draggable>
         </div>
+        <!-- LEGEND -->
+        <div v-if="selectedLayers" class="wms-legend" >
+          <div class="legend-title q-mt-lg q-mb-md">{{ trans('Legend') }}</div>
+          <div class="q-mt-lg">
+            <img :src="legendImageSource">
+          </div>
+        </div>
       </div>
     </div>
   </q-drawer>
@@ -163,6 +170,18 @@ export default {
     })
 
     // Get rid off reactiveness
+    const legendImageSource = computed(() => {
+      const layerName = 'topp:states'
+      const lang = $store.getters['app/getLang']
+      const geoserverUrl = 'localhost:8888/geoserver/wms'
+      const bgcolor = '0xFFFFFF'
+      const fontColor = '#ccc'
+      const fontsize = '13'
+      const widthSize = 40
+      const heightSize = 30
+
+      return `//${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&legend_options=fontName:Times%20New%20Roman;fontAntiAliasing:true;fontColor:${fontColor};fontSize:${fontsize};bgColor${bgcolor};dpi:180&LANGUAGE=${lang}`
+    })
 
     const callFirstMapCall = function () {
       context.emit('firstMapCall', {})
@@ -294,6 +313,7 @@ export default {
 
     return {
       trans,
+      legendImageSource,
       setForm,
       reorderLayers,
       qSelect,
@@ -480,8 +500,10 @@ div.flex-right{
   background-color: $grey-color;
   margin: 3px 0px;
 }
-
 .draggable-item:hover .handle{
   opacity:1
+}
+.legend-title{
+  display: none;
 }
 </style>
