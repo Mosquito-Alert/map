@@ -171,16 +171,20 @@ export default {
 
     // Get rid off reactiveness
     const legendImageSource = computed(() => {
-      const layerName = 'topp:states'
       const lang = $store.getters['app/getLang']
-      const geoserverUrl = 'localhost:8888/geoserver/wms'
-      const bgcolor = '0xFFFFFF'
-      const fontColor = '#ccc'
-      const fontsize = '13'
+      // const geoserverUrl = 'localhost:8888/geoserver/wms'
+      const geoserverUrl = selectedLayers.value[0].wms_url
+      // const layerName = 'topp:states'
+      const layerName = selectedLayers.value[0].layer
+      // const bgcolor = '0xFFFFFF'
+      // const fontColor = '#ccc'
+      // const fontsize = '13'
       const widthSize = 40
       const heightSize = 30
 
-      return `//${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&legend_options=fontName:Times%20New%20Roman;fontAntiAliasing:true;fontColor:${fontColor};fontSize:${fontsize};bgColor${bgcolor};dpi:180&LANGUAGE=${lang}`
+      // const legendOptions = `fontName:Times%20New%20Roman;fontAntiAliasing:true;fontColor:${fontColor};fontSize:${fontsize};bgColor${bgcolor}`
+
+      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}`
     })
 
     const callFirstMapCall = function () {
@@ -203,15 +207,11 @@ export default {
     // Called when model is selected
     const getWMS = function (formValue) {
       const code = formValue.code
-      // if ('code' in currentView) {
-      //   selectedLayers.value = currentView.years
-      // } else {
       selectedLayers.value = WMS[code]
       $store.commit('app/setCurrentWMSView', {
         code: code,
         years: JSON.parse(JSON.stringify(WMS[code]))
       })
-      // }
       context.emit('loadWms', WMS[code])
     }
 
