@@ -135,7 +135,7 @@ export default {
       if (Object.keys(tabs).length) {
         return tabs.estimates.active
       } else {
-        return false
+        return true
       }
     })
 

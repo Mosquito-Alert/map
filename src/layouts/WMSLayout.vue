@@ -127,7 +127,7 @@ export default {
       if (Object.keys(tabs).length) {
         return tabs.wms.active
       } else {
-        return false
+        return true
       }
     })
 

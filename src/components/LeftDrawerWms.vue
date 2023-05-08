@@ -150,7 +150,10 @@ export default {
     const selectedLayers = ref()
     const qSelect = ref()
     let currentView
-    let WMS
+
+    const WMS = computed(() => {
+      return $store.getters['app/getWmsData']
+    })
 
     onUnmounted(() => {
       // Save customized WMS visibility for next rendering
@@ -158,7 +161,6 @@ export default {
     })
 
     onMounted(function () {
-      WMS = JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
       currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
       if ('code' in currentView) {
         const index = vectorOptions.value.findIndex(obj => {
@@ -207,12 +209,12 @@ export default {
     // Called when model is selected
     const getWMS = function (formValue) {
       const code = formValue.code
-      selectedLayers.value = WMS[code]
+      selectedLayers.value = WMS.value[code]
       $store.commit('app/setCurrentWMSView', {
         code: code,
-        years: JSON.parse(JSON.stringify(WMS[code]))
+        years: JSON.parse(JSON.stringify(WMS.value[code]))
       })
-      context.emit('loadWms', WMS[code])
+      context.emit('loadWms', WMS.value[code])
     }
 
     // Update UI when loading a model from a shared view
@@ -252,13 +254,12 @@ export default {
     }
 
     const vectorOptions = computed(() => {
-      const WMS = $store.getters['app/getWmsData']
       return [
-        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.tiger },
-        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.yellow },
-        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.japonicus },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.koreicus },
-        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.culex }
+        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.value.tiger },
+        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.value.yellow },
+        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.value.japonicus },
+        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.value.koreicus },
+        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.value.culex }
       ]
     })
 
@@ -280,7 +281,7 @@ export default {
       // Update WMS
       // console.log(layer.id)
       const selectedSpecies = modelVector.value.code
-      WMS[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
+      WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
       context.emit('layerChange', {
         key: property,
         layerId: layer.id,
@@ -306,8 +307,8 @@ export default {
       })
       modelVector.value = vectorOptions.value[index]
       // override wms from shared view
-      WMS[view.species] = view.layers
-      selectedLayers.value = WMS[view.species]
+      WMS.value[view.species] = view.layers
+      selectedLayers.value = WMS.value[view.species]
       getWMS({ code: view.species })
     }
 
