@@ -179,3 +179,11 @@ export const getWmsData = state => {
 export const getCurrentWMSView = state => {
   return state.currentWMSView
 }
+
+export const wmsSelectedLayers = state => {
+  return state.wmsSelectedLayers
+}
+
+export const legendData = state => {
+  return state.legendData
+}

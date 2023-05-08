@@ -4,7 +4,7 @@
       :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
     >
       <site-header v-if="!mobile" :expanded="expanded"/>
-      <left-drawer-wms ref="TOC"
+      <left-drawer-wms v-if="loadDrawer" ref="TOC"
         :expanded="expanded"
         @toggleLeftDrawer="toggleLeftDrawer"
         @startShareView="startShareView"
@@ -110,13 +110,21 @@ export default {
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
+    const loadDrawer = ref(false)
     const $store = useStore()
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
+    async function getInitData () {
+      console.log('initData')
+      await $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
+      console.log('keep going')
+      loadDrawer.value = true
+    }
     $store.commit('timeseries/setGraphIsVisible', false)
-
     if (lang) {
-      $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
+      getInitData()
+    } else {
+      loadDrawer.value = true
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
@@ -242,6 +250,7 @@ export default {
 
     return {
       tabIsVisible,
+      loadDrawer,
       loadWms,
       layerChange,
       reorderLayers,

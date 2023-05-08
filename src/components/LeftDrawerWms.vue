@@ -131,6 +131,7 @@ import { watch, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 import draggable from 'vuedraggable'
+// import { wmsSelectedLayers } from 'src/store/app/getters'
 
 export default {
   components: { LeftMenu, draggable },
@@ -147,17 +148,17 @@ export default {
     const disabled = ref(true)
     const disabledInfo = ref(true)
     const modelVector = ref()
-    const selectedLayers = ref()
     const qSelect = ref()
     let currentView
-
-    const WMS = computed(() => {
-      return $store.getters['app/getWmsData']
-    })
+    const selectedLayers = ref()
 
     onUnmounted(() => {
       // Save customized WMS visibility for next rendering
       $store.commit('app/setWMSsetWmsData', WMS)
+    })
+
+    const WMS = computed(() => {
+      return JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
     })
 
     onMounted(function () {
@@ -171,20 +172,24 @@ export default {
       }
     })
 
-    // Get rid off reactiveness
+    const vectorOptions = computed(() => {
+      return [
+        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.value.tiger },
+        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.value.yellow },
+        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.value.japonicus },
+        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.value.koreicus },
+        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.value.culex }
+      ]
+    })
+
+    // // Get rid off reactiveness
     const legendImageSource = computed(() => {
+      const data = JSON.parse(JSON.stringify($store.getters['app/legendData']))
       const lang = $store.getters['app/getLang']
-      // const geoserverUrl = 'localhost:8888/geoserver/wms'
-      const geoserverUrl = selectedLayers.value[0].wms_url
-      // const layerName = 'topp:states'
-      const layerName = selectedLayers.value[0].layer
-      // const bgcolor = '0xFFFFFF'
-      // const fontColor = '#ccc'
-      // const fontsize = '13'
+      const geoserverUrl = data.wms_url
+      const layerName = data.layer
       const widthSize = 40
       const heightSize = 30
-
-      // const legendOptions = `fontName:Times%20New%20Roman;fontAntiAliasing:true;fontColor:${fontColor};fontSize:${fontsize};bgColor${bgcolor}`
 
       return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}`
     })
@@ -210,6 +215,8 @@ export default {
     const getWMS = function (formValue) {
       const code = formValue.code
       selectedLayers.value = WMS.value[code]
+
+      $store.commit('app/setWmsSelectedLayers', WMS[code])
       $store.commit('app/setCurrentWMSView', {
         code: code,
         years: JSON.parse(JSON.stringify(WMS.value[code]))
@@ -253,16 +260,6 @@ export default {
       }
     }
 
-    const vectorOptions = computed(() => {
-      return [
-        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.value.tiger },
-        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.value.yellow },
-        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.value.japonicus },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.value.koreicus },
-        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.value.culex }
-      ]
-    })
-
     // Required to change lang on current selection
     watch(vectorOptions, (cur, old) => {
       if (modelVector.value) {
@@ -270,18 +267,14 @@ export default {
           const index = cur.findIndex(obj => {
             return (obj.code === modelVector.value.code)
           })
-          console.log(index)
-          console.log(cur[index])
           modelVector.value = cur[index]
         }
       }
     })
 
     const checkVisibility = function (e, layer, property) {
-      // Update WMS
-      // console.log(layer.id)
       const selectedSpecies = modelVector.value.code
-      WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
+      WMS[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
       context.emit('layerChange', {
         key: property,
         layerId: layer.id,
@@ -296,6 +289,11 @@ export default {
     }
 
     const reorderLayers = function () {
+      const selectedSpecies = modelVector.value.code
+      $store.commit('app/setWMSLayers', {
+        species: selectedSpecies,
+        layers: selectedLayers.value
+      })
       context.emit('reorderLayers',
         JSON.parse(JSON.stringify(selectedLayers.value))
       )
@@ -307,19 +305,20 @@ export default {
       })
       modelVector.value = vectorOptions.value[index]
       // override wms from shared view
-      WMS.value[view.species] = view.layers
+      WMS[view.species] = view.layers
       selectedLayers.value = WMS.value[view.species]
+      $store.commit('app/setWmsSelectedLayers', WMS[view.species])
       getWMS({ code: view.species })
     }
 
     return {
       trans,
+      selectedLayers,
       legendImageSource,
       setForm,
       reorderLayers,
       qSelect,
       checkVisibility,
-      selectedLayers,
       goInfoModal,
       loadSharedModel,
       disabled,

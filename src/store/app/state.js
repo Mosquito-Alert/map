@@ -355,6 +355,8 @@ export default function () {
     //   ]
     // }
     WMS: [],
-    currentWMSView: {}
+    currentWMSView: {},
+    wmsSelectedLayers: [],
+    legendData: {}
   }
 }

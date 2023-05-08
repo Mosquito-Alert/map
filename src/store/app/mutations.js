@@ -128,8 +128,20 @@ export const setWMSsetWmsData = (state, data) => {
   }
 }
 
+export const setLegendData = (state, payload) => {
+  state.legendData = payload
+}
+
+export const setWMSLayers = (state, payload) => {
+  state.WMS[payload.species] = payload.layers
+}
+
 export const setCurrentWMSView = (state, payload) => {
   state.currentWMSView = payload
+}
+
+export const setWmsSelectedLayers = (state, payload) => {
+  state.wmsSelectedLayers = payload
 }
 
 export const setWmsProperties = (state, payload) => {
