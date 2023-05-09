@@ -140,10 +140,6 @@ export const setCurrentWMSView = (state, payload) => {
   state.currentWMSView = payload
 }
 
-export const setWmsSelectedLayers = (state, payload) => {
-  state.wmsSelectedLayers = payload
-}
-
 export const setWmsProperties = (state, payload) => {
   const index = state.currentWMSView.years.findIndex((e) => {
     return e.id === payload.id

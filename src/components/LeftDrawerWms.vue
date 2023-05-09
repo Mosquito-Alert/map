@@ -127,7 +127,7 @@
 </template>
 
 <script>
-import { watch, computed, onMounted, onUnmounted, ref } from 'vue'
+import { watch, computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 import draggable from 'vuedraggable'
@@ -151,11 +151,6 @@ export default {
     const qSelect = ref()
     let currentView
     const selectedLayers = ref()
-
-    onUnmounted(() => {
-      // Save customized WMS visibility for next rendering
-      $store.commit('app/setWMSsetWmsData', WMS)
-    })
 
     const WMS = computed(() => {
       return JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
@@ -216,16 +211,11 @@ export default {
       const code = formValue.code
       selectedLayers.value = WMS.value[code]
 
-      $store.commit('app/setWmsSelectedLayers', WMS[code])
       $store.commit('app/setCurrentWMSView', {
         code: code,
         years: JSON.parse(JSON.stringify(WMS.value[code]))
       })
       context.emit('loadWms', WMS.value[code])
-    }
-
-    // Update UI when loading a model from a shared view
-    const loadSharedModel = async function (payload) {
     }
 
     const goInfoModal = function () {
@@ -274,17 +264,23 @@ export default {
 
     const checkVisibility = function (e, layer, property) {
       const selectedSpecies = modelVector.value.code
-      WMS[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
-      context.emit('layerChange', {
-        key: property,
-        layerId: layer.id,
-        value: e
+      // WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
+      $store.commit('app/setWMSLayers', {
+        species: selectedSpecies,
+        layers: JSON.parse(JSON.stringify(selectedLayers.value))
       })
+
       $store.commit('app/setWmsProperties', {
         id: layer.id,
         property: property,
         value: e,
         species: selectedSpecies
+      })
+
+      context.emit('layerChange', {
+        key: property,
+        layerId: layer.id,
+        value: e
       })
     }
 
@@ -292,7 +288,7 @@ export default {
       const selectedSpecies = modelVector.value.code
       $store.commit('app/setWMSLayers', {
         species: selectedSpecies,
-        layers: selectedLayers.value
+        layers: JSON.parse(JSON.stringify(selectedLayers.value))
       })
       context.emit('reorderLayers',
         JSON.parse(JSON.stringify(selectedLayers.value))
@@ -306,8 +302,11 @@ export default {
       modelVector.value = vectorOptions.value[index]
       // override wms from shared view
       WMS[view.species] = view.layers
-      selectedLayers.value = WMS.value[view.species]
-      $store.commit('app/setWmsSelectedLayers', WMS[view.species])
+      selectedLayers.value = view.layers
+      $store.commit('app/setWMSLayers', {
+        species: view.species,
+        layers: view.layers
+      })
       getWMS({ code: view.species })
     }
 
@@ -320,7 +319,6 @@ export default {
       qSelect,
       checkVisibility,
       goInfoModal,
-      loadSharedModel,
       disabled,
       disabledInfo,
       modelVector,

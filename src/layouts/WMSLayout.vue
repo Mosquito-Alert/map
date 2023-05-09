@@ -115,9 +115,7 @@ export default {
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
     async function getInitData () {
-      console.log('initData')
       await $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
-      console.log('keep going')
       loadDrawer.value = true
     }
     $store.commit('timeseries/setGraphIsVisible', false)
