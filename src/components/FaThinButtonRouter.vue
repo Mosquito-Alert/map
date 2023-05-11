@@ -57,6 +57,9 @@ button.fa-thin-button i.fa-thin{
   font-size: 2em;
 }
 
+div.tab-link-container{
+  border-bottom: 1px solid $grey-color;
+}
 div.tab-link-container.disabled{
   cursor: not-allowed;
 }

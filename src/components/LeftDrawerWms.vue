@@ -65,11 +65,12 @@
 
         <!-- YEARS FOR SELECTED SPECIES -->
         <div v-if="selectedLayers" class="wms-layers-container">
+          <hr class="q-my-xl"/>
           <!-- Columns titles -->
           <div class="row">
-            <div class="col-2"></div>
+            <div class="col-3"></div>
             <div class="col-2 q-px-md"></div>
-            <div class="col-8 text-center">{{ trans('Transparency') }}</div>
+            <div class="col-7 text-center">{{ trans('Transparency') }}</div>
           </div>
           <!-- DRAGGABLE LIST -->
             <draggable
@@ -82,20 +83,26 @@
             >
               <template #item="{ element }">
                 <div class="flex row draggable-item">
-                  <div class="col-2">
-                    <q-checkbox
+                  <div class="col-3">
+                    <!-- <q-checkbox
                       dense
                       checked-icon="check"
                       v-model="element.visible"
                       color="orange"
                       size="lg"
                       @update:model-value="checkVisibility($event, element, 'visible')"
-                    />
+                    /> -->
+                    <q-toggle
+                      checked-icon="check"
+                      v-model="element.visible"
+                      @update:model-value="checkVisibility($event, element, 'visible')"
+                      color="orange"
+                      size="lg"/>
                   </div>
 
-                  <div class="col-2 q-px-xs">{{ element.year }}</div>
+                  <div class="col-2 q-pl-md">{{ element.year }}</div>
 
-                  <div class="col-7 q-pl-md">
+                  <div class="col-6 q-pl-md">
                     <q-slider
                     :min="0"
                     :max="1"
@@ -470,9 +477,9 @@ div.flex-right{
 }
 .wms-layers-container{
   margin-top: 20px;
-  padding: 10px;
+  // padding: 10px;
   color: $dark-grey;
-  border: 1px solid $grey-color;
+  // border: 1px solid $grey-color;
 }
 .wms-layers-item{
   display: flex;
