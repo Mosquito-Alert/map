@@ -56,6 +56,8 @@
                     </div>
                   </div>
                 </div>
+                <!-- Not visible link. Required to export map image -->
+                <a id="image-download" download="map.png"></a>
               </div>
             <div>
             <!-- END INFO LINK -->
@@ -148,7 +150,8 @@ export default {
     'toggleLeftDrawer',
     'loadWms',
     'layerVisibleChange',
-    'reorderLayers'
+    'reorderLayers',
+    'exportImage'
   ],
   setup (props, context) {
     const $store = useStore()
@@ -317,8 +320,14 @@ export default {
       getWMS({ code: view.species })
     }
 
+    const exportImage = function () {
+      console.log('emit')
+      context.emit('exportImage', {})
+    }
+
     return {
       trans,
+      exportImage,
       selectedLayers,
       legendImageSource,
       setForm,

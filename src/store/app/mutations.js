@@ -147,3 +147,15 @@ export const setWmsProperties = (state, payload) => {
   state.currentWMSView.years[index][payload.property] = payload.value
   state.WMS[payload.species][index][payload.property] = payload.value
 }
+
+export const setWmsNumberOfVisibleLayers = (state, n) => {
+  state.wmsNumberOfVisibleLayers = n
+}
+
+export const increaseWmsNumberOfVisibleLayers = (state, n) => {
+  state.wmsNumberOfVisibleLayers += 1
+}
+
+export const decreaseWmsNumberOfVisibleLayers = (state, n) => {
+  state.wmsNumberOfVisibleLayers -= 1
+}

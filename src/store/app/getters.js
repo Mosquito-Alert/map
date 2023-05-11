@@ -180,8 +180,8 @@ export const getCurrentWMSView = state => {
   return state.currentWMSView
 }
 
-export const wmsSelectedLayers = state => {
-  return state.wmsSelectedLayers
+export const wmsNumberOfVisibleLayers = state => {
+  return state.wmsNumberOfVisibleLayers
 }
 
 export const legendData = state => {

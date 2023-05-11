@@ -12,6 +12,7 @@
         @loadWms="loadWms"
         @layerChange="layerChange"
         @reorderLayers="reorderLayers"
+        @exportImage="exportImage"
       />
 
       <q-page
@@ -246,8 +247,12 @@ export default {
       map.value.reorderLayers(payload)
     }
 
+    const exportImage = function () {
+      map.value.exportPNG()
+    }
     return {
       tabIsVisible,
+      exportImage,
       loadDrawer,
       loadWms,
       layerChange,

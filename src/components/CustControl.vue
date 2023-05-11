@@ -88,7 +88,6 @@ export default {
     display: flex;
     flex-direction: column;
     background: none;
-    // right:15px;
   }
 
   .ol-reports.ol-control button,
@@ -106,7 +105,6 @@ export default {
     cursor: pointer;
     padding: 0 0 20px 0;
     box-shadow: $box-shadow;
-    // box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   .ol-reports button:hover,
   .ol-download button:hover{

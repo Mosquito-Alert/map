@@ -50,11 +50,22 @@
         </ol-tile-layer>
 
     </ol-map>
+    <!-- DOWNLOAD BUTTON -->
+    <cust-control
+          ref="donwnloadControl"
+          icon="fa-solid fa-download"
+          class="wms ol-download ol-unselectable ol-control"
+          :class="wmsNumberOfVisibleLayers?'enabled':'disabled'"
+          title="Export map image"
+          @clicked="exportPNG"
+        >
+        </cust-control>
   </div>
 </template>
 
 <script>
 import 'vue3-openlayers/dist/vue3-openlayers.css'
+import CustControl from './CustControl'
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { transform } from 'ol/proj.js'
@@ -65,6 +76,7 @@ import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default defineComponent({
   name: 'TheMapModels',
+  components: { CustControl },
   emits: [
     'toggleLeftDrawer',
     'endShareView',
@@ -99,6 +111,11 @@ export default defineComponent({
       context.emit('toggleLeftDrawer', {})
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
+
+    const wmsNumberOfVisibleLayers = computed(() => {
+      console.log($store.getters['app/wmsNumberOfVisibleLayers'])
+      return $store.getters['app/wmsNumberOfVisibleLayers']
+    })
 
     function unfoldAttribution () {
       // attrVisible.value = !attrVisible.value
@@ -198,9 +215,14 @@ export default defineComponent({
         const layer = findLayer(layerId)
         map.value.map.removeLayer(layer)
       })
+      let nVisibles = 0
       wms.forEach((layer, index) => {
+        if (layer.visible) {
+          nVisibles += 1
+        }
         try {
           const wmsSource = new TileWMS({
+            crossOrigin: 'anonymous',
             projection: 'EPSG:3857',
             url: layer.wms_url,
             params: {
@@ -223,6 +245,7 @@ export default defineComponent({
           console.log(err)
         }
       })
+      $store.commit('app/setWmsNumberOfVisibleLayers', nVisibles)
     }
 
     const findLayer = function (id) {
@@ -236,6 +259,11 @@ export default defineComponent({
         const layer = findLayer(payload.layerId)
         if (payload.key === 'visible') {
           layer.setVisible(payload.value)
+          if (payload.value) {
+            $store.commit('app/increaseWmsNumberOfVisibleLayers')
+          } else {
+            $store.commit('app/decreaseWmsNumberOfVisibleLayers')
+          }
         } else {
           if (payload.key === 'transparency') {
             layer.setOpacity(1 - payload.value)
@@ -250,13 +278,69 @@ export default defineComponent({
       )
     }
 
+    const exportPNG = function () {
+      map.value.map.once('rendercomplete', function () {
+        const mapCanvas = document.createElement('canvas')
+        const size = map.value.map.getSize()
+        mapCanvas.width = size[0]
+        mapCanvas.height = size[1]
+        const mapContext = mapCanvas.getContext('2d')
+        Array.prototype.forEach.call(
+          map.value.map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
+          function (canvas) {
+            if (canvas.width > 0) {
+              const opacity =
+                canvas.parentNode.style.opacity || canvas.style.opacity
+              mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity)
+              let matrix
+              const transform = canvas.style.transform
+              if (transform) {
+                // Get the transform parameters from the style's transform matrix
+                matrix = transform
+                  .match(/^matrix\(([^(]*)\)$/)[1]
+                  .split(',')
+                  .map(Number)
+              } else {
+                matrix = [
+                  parseFloat(canvas.style.width) / canvas.width,
+                  0,
+                  0,
+                  parseFloat(canvas.style.height) / canvas.height,
+                  0,
+                  0
+                ]
+              }
+              // Apply the transform to the export map context
+              CanvasRenderingContext2D.prototype.setTransform.apply(
+                mapContext,
+                matrix
+              )
+              const backgroundColor = canvas.parentNode.style.backgroundColor
+              if (backgroundColor) {
+                mapContext.fillStyle = backgroundColor
+                mapContext.fillRect(0, 0, canvas.width, canvas.height)
+              }
+              mapContext.drawImage(canvas, 0, 0)
+            }
+          }
+        )
+        mapContext.globalAlpha = 1
+        mapContext.setTransform(1, 0, 0, 1, 0, 0)
+        const link = document.getElementById('image-download')
+        link.href = mapCanvas.toDataURL()
+        link.click()
+      })
+      map.value.map.renderSync()
+    }
+
     return {
       trans,
+      wmsNumberOfVisibleLayers,
       fitExtent,
       reorderLayers,
       loadWmsLayer,
       changeLayerProperty,
-      // hideSpinner,
+      exportPNG,
       baseMap,
       updateMap,
       center,
@@ -407,20 +491,12 @@ export default defineComponent({
 .drawer-handler-mobile span i{
   color: white;
 }
-.progress-bar-absolute{
-    // On top of map
-    position:absolute;
-    top:0;
-    margin: auto;
-    z-index:1;
-    // Vertically centered
-    // margin: auto;
-    // position: absolute;
-    // top: 0;
-    // left: 0;
-    // bottom: 0;
-    // right: 0;
-    // z-index: 1;
-    // width: 90%;
+.wms.ol-download{
+  bottom: 130px;
+}
+
+.wms.ol-download.ol-control button {
+  // background: $primary-button-background;
+  color: white
 }
 </style>
