@@ -1,4 +1,4 @@
-º<!--
+<!--
   THIS COMPONENT CONTAINS
   - MAIN MENU TOOLS
   - TABLE OF CONTENTS FOR MODELS
@@ -70,9 +70,9 @@
           <hr class="q-my-xl"/>
           <!-- Columns titles -->
           <div class="row">
+            <div class="col-2"></div>
+            <div class="col-7 text-center q-px-md transparency-title">{{ trans('Transparency') }}</div>
             <div class="col-3"></div>
-            <div class="col-2 q-px-md"></div>
-            <div class="col-7 text-center">{{ trans('Transparency') }}</div>
           </div>
           <!-- DRAGGABLE LIST -->
             <draggable
@@ -85,6 +85,21 @@
             >
               <template #item="{ element }">
                 <div class="flex row draggable-item">
+
+                  <div class="col-2 q-pl-sm">{{ element.year }}</div>
+
+                  <div class="col-5 q-pl-sm q-pr-xs">
+                    <q-slider
+                    :min="0"
+                    :max="1"
+                    :step="0.05"
+                    class="wms-slider"
+                    v-model="element.transparency"
+                    color="orange"
+                    @update:model-value="checkVisibility($event, element, 'transparency')"
+                    />
+                  </div>
+
                   <div class="col-3">
                     <!-- <q-checkbox
                       dense
@@ -102,21 +117,15 @@
                       size="lg"/>
                   </div>
 
-                  <div class="col-2 q-pl-md">{{ element.year }}</div>
-
-                  <div class="col-6 q-pl-md">
-                    <q-slider
-                    :min="0"
-                    :max="1"
-                    :step="0.05"
-                    v-model="element.transparency"
-                    color="orange"
-                    @update:model-value="checkVisibility($event, element, 'transparency')"
-                    />
-                  </div>
-
-                  <div class="col-1 q-px-xs">
-                    <q-icon name="more_vert" class="handle" size="1.5em"/>
+                  <div class="col-2 text-right flex justify-end">
+                    <div>
+                      <a @click.stop :href="buildDownloadUrl(element)">
+                        <i :title="trans('Download shp')" style="size:0.7em" class="fa-solid fa-download"></i>
+                      </a>
+                    </div>
+                    <div>
+                      <q-icon name="more_vert" class="handle" size="1.5em"/>
+                    </div>
                   </div>
 
                 </div>
@@ -325,8 +334,15 @@ export default {
       context.emit('exportImage', {})
     }
 
+    const buildDownloadUrl = (element) => {
+      const downLink = `${element.wms_url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${element.layer}&outputFormat=SHAPE-ZIP`
+      console.log(downLink)
+      return downLink
+      // https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert%3Astatus_2303_shp&outputFormat=SHAPE-ZIP
+    }
     return {
       trans,
+      buildDownloadUrl,
       exportImage,
       selectedLayers,
       legendImageSource,
@@ -509,7 +525,7 @@ div.flex-right{
   cursor: move;
 }
 .draggable-item{
-  padding: 0px 5px;
+  padding: 0px 0px;
   border-radius: 5px;
   background-color: $grey-color;
   margin: 3px 0px;
@@ -519,5 +535,18 @@ div.flex-right{
 }
 .legend-title{
   display: none;
+}
+.wms-slider {
+  height: 2px;
+}
+.transparency-title{
+  color: black;
+}
+.no-pad-right{
+  padding-right: 0px;
+}
+.fa-download{
+  cursor: pointer;
+  color: #ff9800 ;
 }
 </style>

@@ -51,7 +51,7 @@
 
     </ol-map>
     <!-- DOWNLOAD BUTTON -->
-    <cust-control
+    <!-- <cust-control
           ref="donwnloadControl"
           icon="fa-solid fa-download"
           class="wms ol-download ol-unselectable ol-control"
@@ -59,13 +59,13 @@
           title="Export map image"
           @clicked="exportPNG"
         >
-        </cust-control>
+        </cust-control> -->
   </div>
 </template>
 
 <script>
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-import CustControl from './CustControl'
+// import CustControl from './CustControl'
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { transform } from 'ol/proj.js'
@@ -76,7 +76,7 @@ import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default defineComponent({
   name: 'TheMapModels',
-  components: { CustControl },
+  components: { },
   emits: [
     'toggleLeftDrawer',
     'endShareView',
@@ -113,7 +113,6 @@ export default defineComponent({
     }
 
     const wmsNumberOfVisibleLayers = computed(() => {
-      console.log($store.getters['app/wmsNumberOfVisibleLayers'])
       return $store.getters['app/wmsNumberOfVisibleLayers']
     })
 
@@ -493,6 +492,7 @@ export default defineComponent({
 }
 .wms.ol-download{
   bottom: 130px;
+  background: transparent;
 }
 
 .wms.ol-download.ol-control button {
