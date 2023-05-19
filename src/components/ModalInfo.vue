@@ -167,7 +167,7 @@
                     <a id="wms_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('WMS DATA') }}
+                      {{ trans('Distribution data') }}
                     </div>
                     <p>
                       Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci nesciunt qui placeat, soluta vero ea tenetur delectus possimus, laudantium laborum ut aut hic expedita doloremque? Alias non natus quod similique ipsum labore qui porro blanditiis distinctio assumenda aliquam voluptate provident delectus eos optio voluptatum, dolor, possimus velit? Obcaecati hic doloribus accusantium? Distinctio tenetur quasi modi impedit laboriosam illo, nobis possimus voluptatum natus labore tempora amet inventore incidunt consectetur repellendus, magnam maiores dicta sunt voluptates delectus repellat rem dolore. Obcaecati, vel. Enim et animi facilis sequi dolorum nesciunt nisi, doloribus quaerat ad ratione esse obcaecati porro harum impedit laudantium dolor sint!

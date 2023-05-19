@@ -23,10 +23,10 @@
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-globe"
+        name="fa-thin fa-layer-group"
         :label="trans('Wms')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/wms"
+        link="distribution"
         item="wms"
         id="wms"
       >

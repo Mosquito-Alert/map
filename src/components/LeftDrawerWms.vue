@@ -26,7 +26,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('WMS') }}
+        {{ trans('Distribution') }}
       </div>
 
       <div>
@@ -52,7 +52,7 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('WMS info link') }}
+                      {{ trans('Distribution data') }}
                     </div>
                   </div>
                 </div>
@@ -195,8 +195,10 @@ export default {
       const layerName = data.layer
       const widthSize = 40
       const heightSize = 30
+      const fontName = 'Roboto'
+      const fontSize = '16px'
 
-      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}`
+      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName}:fontSize:${fontSize}`
     })
 
     const callFirstMapCall = function () {

@@ -22,14 +22,14 @@ const routes = [
     path: '/models/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
   },
-  // WMS TAB
+  // DISTRIBUTION TAB
   {
-    path: '/wms',
+    path: '/distribution',
     component: () => import('layouts/WMSLayout.vue')
   },
   // MODELS WITH LANG
   {
-    path: '/wms/:lang(ca|es|en)',
+    path: '/distribution/:lang(ca|es|en)',
     component: () => import('layouts/WMSLayout.vue')
   },
   // SHARE OBSERVATIONS VIEW
@@ -52,7 +52,7 @@ const routes = [
     path: '/M-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
   },
-  // SHARE WMS VIEW
+  // SHARE distribution VIEW
   {
     path: '/W-:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/WMSLayout.vue')
