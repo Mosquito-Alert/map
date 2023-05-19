@@ -24,7 +24,7 @@
 
       <fa-thin-button-router
         name="fa-thin fa-layer-group"
-        :label="trans('Wms')"
+        :label="trans('Distribution')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
         link="distribution"
         item="wms"
