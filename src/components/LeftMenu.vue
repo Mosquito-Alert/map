@@ -137,11 +137,12 @@ export default {
     }
 
     const processLogin = function () {
-      if ($store.getters['app/getAuthorized']) {
-        $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: true } })
-      } else {
-        $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
-      }
+      document.location = 'http://webserver.mosquitoalert.com/private_map'
+      // if ($store.getters['app/getAuthorized']) {
+      //   $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: true } })
+      // } else {
+      //   $store.commit('app/setModal', { id: 'login', content: { visibility: true } })
+      // }
     }
 
     const startShareView = function () {

@@ -5,7 +5,7 @@
 
 <template>
   <div class="tab-link-container" :class="isButtonDisabled?'disabled':''">
-    <router-link class="main-menu-item" :to="toLink" :class="isButtonDisabled?'disabled':''">
+    <router-link class="main-menu-item" :id="Id" :to="toLink" :class="isButtonDisabled?'disabled':''">
       <button class="fa-thin-button" :class="classProp" :title="label">
         <i :class="iconCode"></i>
       </button>
@@ -17,8 +17,12 @@
 import { computed } from 'vue'
 
 export default {
-  props: ['name', 'label', 'link', 'class', 'item'],
+  props: ['name', 'label', 'link', 'class', 'item', 'id'],
   setup (props) {
+    const Id = computed(() => {
+      return props.id
+    })
+
     const toLink = computed(() => {
       return props.link
     })
@@ -36,6 +40,7 @@ export default {
     })
 
     return {
+      Id,
       toLink,
       iconCode,
       classProp,

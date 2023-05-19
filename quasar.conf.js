@@ -103,7 +103,7 @@ module.exports = configure(function (ctx) {
 
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),
-      // you can manually specify Quasar components/directives to be available everywhere:
+      // you can manually specify Quasar components/directives to be available everywheare:
       //
       // components: [],
       // directives: [],

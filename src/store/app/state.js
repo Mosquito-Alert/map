@@ -35,8 +35,8 @@ export default function () {
     // frontendUrl = 'http://fe.example.com:8080/'
     analyticsCode = 'GTM-M5PRMJ9'
   } else {
-    backendUrl = '//sigserver4.udg.edu/apps/mosquito2_backend/'
-    frontendUrl = '//sigserver4.udg.edu/mos/spa/'
+    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
+    frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
     analyticsCode = 'GTM-M5PRMJ9'
   }
   // first language is default
@@ -126,7 +126,7 @@ export default function () {
     modelsUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    tilesUrl: '//sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
+    tilesUrl: 'https://sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
     // tilesUrl: '//localhost:8000/api/tiles',
 
     // Grid size of cell format models
