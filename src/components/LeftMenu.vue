@@ -187,7 +187,7 @@ export default {
     const wmsVisibility = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
       if (Object.keys(tabs).length) {
-        return tabs.wms.active
+        return tabs.distribution.active
       } else {
         return false
       }

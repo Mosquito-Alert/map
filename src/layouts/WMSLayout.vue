@@ -1,43 +1,25 @@
 <template>
   <div v-if="tabIsVisible">
     <q-layout
-      :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
-    >
-      <site-header v-if="!mobile" :expanded="expanded"/>
-      <left-drawer-wms v-if="loadDrawer" ref="TOC"
-        :expanded="expanded"
-        @toggleLeftDrawer="toggleLeftDrawer"
-        @startShareView="startShareView"
-        @firstMapCall="buildSession"
-        @loadWms="loadWms"
-        @layerChange="layerChange"
-        @reorderLayers="reorderLayers"
-        @exportImage="exportImage"
-      />
+      :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
+      <site-header v-if="!mobile" :expanded="expanded" />
+      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
+        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
+        @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
-      <q-page
-        class='flex'
-        :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
-      >
-        <the-map-wms ref='map'
-          init
-          :viewCode="viewCode"
-          :class="expanded?'drawer-expanded':'drawer-collapsed'"
-          @toggleLeftDrawer="toggleLeftDrawer"
-          @endShareView="endShareView"
-          @errorDownloadingModels="errorDownloadingModels"
-        />
+      <q-page class='flex'
+        :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
+        <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
+          @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
+          @errorDownloadingModels="errorDownloadingModels" />
       </q-page>
 
-      <modal-share
-        ref="shareModal"
-        :open="shareModalVisible"
-      >
+      <modal-share ref="shareModal" :open="shareModalVisible">
         <template v-slot:default>
         </template>
       </modal-share>
 
-      <modal-confirm-logout/>
+      <modal-confirm-logout />
 
       <modal-info :open="infoModalVisible" buttons="close">
       </modal-info>
@@ -45,19 +27,19 @@
       <modal-help :open="helpModalVisible" buttons="close">
       </modal-help>
 
-      <modal-wait/>
-      <modal-logos/>
-      <modal-error/>
-      <modal-cookie-settings/>
-      <modal-login/>
-      <modal-cookie-policy/>
+      <modal-wait />
+      <modal-logos />
+      <modal-error />
+      <modal-cookie-settings />
+      <modal-login />
+      <modal-cookie-policy />
 
-      <site-footer/>
-      <cookies-compliance/>
+      <site-footer />
+      <cookies-compliance />
     </q-layout>
   </div>
   <router-link v-else to="/">
-    <page-error-not-found/>
+    <page-error-not-found />
   </router-link>
 </template>
 
@@ -132,7 +114,7 @@ export default {
     const tabIsVisible = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
       if (Object.keys(tabs).length) {
-        return tabs.wms.active
+        return tabs.distribution.active
       } else {
         return true
       }
@@ -281,114 +263,130 @@ export default {
 </script>
 
 <style lang="scss">
-  .q-page.collapsed{
-    margin-left:$left-toolbar-width;
-    transition: margin-left ease 1s;
-  }
-  .q-page.expanded{
-    margin-left:$left-drawer-width;
-    transition: margin-left ease 1s;
-  }
-  .q-page {
-    position:absolute;
-    flex-direction: column;
-    height: 100%;
-    height: calc(100% - 50px);
-    // width: 100%;
-    right:0px;
-    left:0px;
-    margin-left: $left-drawer-width;
-    overflow: hidden;
-  }
-  .q-header.collapsed {
-    width: $left-toolbar-width;
-    transition: width ease 1s;
-  }
-  .q-header.expanded {
-    width: $left-drawer-width;
-    transition: width ease 1s;
-  }
-  .toc-layers.collapsed{
-    opacity:0;
-    overflow:hidden;
-    z-index: -10;
-    transition: opacity ease 1s;
-  }
+.q-page.collapsed {
+  margin-left: $left-toolbar-width;
+  transition: margin-left ease 1s;
+}
 
-  .toc-layers.expanded{
-    opacity: 1;
-    z-index: 10;
-    overflow:auto;
-    transition: opacity ease 0.6s;
-  }
- .q-drawer-left{
-    width: $left-drawer-width;
-  }
-  aside {
-    width: 350px;
-  }
-  .q-layout.collapsed aside{
-    width: $left-toolbar-width;
-    box-shadow: none;
-    transition:width ease 1s;
-  }
-  .q-layout.expanded aside{
-    width: $left-drawer-width;
-    box-shadow: none;
-    transition:width ease 1s;
-  }
-  .q-layout .q-drawer-left{
-    width: $left-drawer-width !important;
-  }
-  .q-layout.collapsed .q-drawer__content{
-    overflow-x:hidden;
-  }
-  .ma-btn::before,
-  .ma-close-btn::before{
-    box-shadow: none;
-  }
+.q-page.expanded {
+  margin-left: $left-drawer-width;
+  transition: margin-left ease 1s;
+}
 
-  button.ma-btn{
-    display: flex;
-  }
-  button.ma-btn,
-  button.ma-close-btn,
-  .ma-close-btn{
-    padding: 8px 10px;
-    border-radius: 3px;
-    background: $primary-color;
-    box-shadow: none;
-    color: white;
-    border: none;
-  }
-  button.ma-btn:hover,
-  button.ma-close-btn:hover,
-  .ma-close-btn:hover{
-    opacity:0.7;
-  }
+.q-page {
+  position: absolute;
+  flex-direction: column;
+  height: 100%;
+  height: calc(100% - 50px);
+  // width: 100%;
+  right: 0px;
+  left: 0px;
+  margin-left: $left-drawer-width;
+  overflow: hidden;
+}
 
-  // MOBILE
-  .q-page.mobile.collapsed{
-    margin-left:0;
-    transition: margin-left ease 1s;
-  }
-  .q-page.mobile.expanded{
-    margin-left:$left-drawer-width;
-    transition: margin-left ease 1s;
-  }
-  .q-layout.mobile.collapsed aside{
-      width: 0;
-      box-shadow: none;
-      transition:width ease 1s;
-    }
-  .q-layout.mobile.expanded aside{
-    width: $left-drawer-width;
-    box-shadow: none;
-    transition:width ease 1s;
-  }
+.q-header.collapsed {
+  width: $left-toolbar-width;
+  transition: width ease 1s;
+}
 
-  .q-layout.mobile.expanded aside{
-    width: 100%;
-  }
+.q-header.expanded {
+  width: $left-drawer-width;
+  transition: width ease 1s;
+}
 
+.toc-layers.collapsed {
+  opacity: 0;
+  overflow: hidden;
+  z-index: -10;
+  transition: opacity ease 1s;
+}
+
+.toc-layers.expanded {
+  opacity: 1;
+  z-index: 10;
+  overflow: auto;
+  transition: opacity ease 0.6s;
+}
+
+.q-drawer-left {
+  width: $left-drawer-width;
+}
+
+aside {
+  width: 350px;
+}
+
+.q-layout.collapsed aside {
+  width: $left-toolbar-width;
+  box-shadow: none;
+  transition: width ease 1s;
+}
+
+.q-layout.expanded aside {
+  width: $left-drawer-width;
+  box-shadow: none;
+  transition: width ease 1s;
+}
+
+.q-layout .q-drawer-left {
+  width: $left-drawer-width !important;
+}
+
+.q-layout.collapsed .q-drawer__content {
+  overflow-x: hidden;
+}
+
+.ma-btn::before,
+.ma-close-btn::before {
+  box-shadow: none;
+}
+
+button.ma-btn {
+  display: flex;
+}
+
+button.ma-btn,
+button.ma-close-btn,
+.ma-close-btn {
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: $primary-color;
+  box-shadow: none;
+  color: white;
+  border: none;
+}
+
+button.ma-btn:hover,
+button.ma-close-btn:hover,
+.ma-close-btn:hover {
+  opacity: 0.7;
+}
+
+// MOBILE
+.q-page.mobile.collapsed {
+  margin-left: 0;
+  transition: margin-left ease 1s;
+}
+
+.q-page.mobile.expanded {
+  margin-left: $left-drawer-width;
+  transition: margin-left ease 1s;
+}
+
+.q-layout.mobile.collapsed aside {
+  width: 0;
+  box-shadow: none;
+  transition: width ease 1s;
+}
+
+.q-layout.mobile.expanded aside {
+  width: $left-drawer-width;
+  box-shadow: none;
+  transition: width ease 1s;
+}
+
+.q-layout.mobile.expanded aside {
+  width: 100%;
+}
 </style>
