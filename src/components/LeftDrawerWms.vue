@@ -207,7 +207,7 @@ export default {
       const fontName = 'Roboto'
       const fontSize = '16px'
 
-      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName}:fontSize:${fontSize}`
+      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName};fontSize:${fontSize};fontAntiAliasing:false`
     })
 
     const callFirstMapCall = function () {
