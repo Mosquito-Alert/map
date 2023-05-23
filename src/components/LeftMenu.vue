@@ -187,7 +187,7 @@ export default {
     const wmsVisibility = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
       if (Object.keys(tabs).length) {
-        return tabs.distribution.active
+        return (tabs.distribution) ? tabs.distribution.active : false
       } else {
         return false
       }
@@ -196,7 +196,7 @@ export default {
     const estimationsVisibility = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
       if (Object.keys(tabs).length) {
-        return tabs.estimates.active
+        return (tabs.estimates) ? tabs.estimates.active : false
       } else {
         return false
       }
