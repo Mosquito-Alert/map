@@ -5,11 +5,16 @@
 
 <template>
   <div class="tab-link-container" :class="isButtonDisabled?'disabled':''">
-    <router-link class="main-menu-item" :id="Id" :to="toLink" :class="isButtonDisabled?'disabled':''">
+    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="toLink">
       <button class="fa-thin-button" :class="classProp" :title="label">
         <i :class="iconCode"></i>
       </button>
     </router-link>
+    <span v-else class="disabled-menu-item disabled">
+      <button class="fa-thin-button" :class="classProp" :title="label">
+        <i :class="iconCode"></i>
+      </button>
+    </span>
   </div>
 </template>
 
@@ -70,7 +75,8 @@ div.tab-link-container.disabled{
 }
 
 div.tab-link-container a.disabled {
-  pointer-events:none;
+  // cursor: not-allowed;
+  pointer-events: none;
 }
 
 a button.fa-thin-button {
@@ -113,5 +119,10 @@ border-top: 1px solid $grey-color;
 }
 .q-toolbar a.main-menu-item:nth-child(2){
 border-bottom: 1px solid $grey-color;
+}
+
+span.disabled-menu-item button{
+  width: 60px;
+  height: 64px;
 }
 </style>
