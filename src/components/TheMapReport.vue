@@ -57,7 +57,7 @@
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
-              <span v-else v-html="transrans('All years and all months')"></span>
+              <span v-else v-html="trans('All years and all months')"></span>
             </div>
 
             <div class="dates" v-if="locationName">
@@ -138,8 +138,8 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="feature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ transrans('How many bites') }}</span>:
-                      {{ transrans(feature.howMany) }}
+                    <div><span class="how-many-bites">{{ trans('How many bites') }}</span>:
+                      {{ trans(feature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.location">
@@ -151,7 +151,7 @@
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                        <span class="date">{{ transransransrans('Date') }}</span>:
+                        <span class="date">{{ trans('Date') }}</span>:
                         {{ formatData(feature) }}
                       <span class="bite-time" v-if="feature.biteTime">
                         | {{ trans(feature.biteTime) }}
@@ -161,7 +161,7 @@
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="feature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ transrans('Breeding site with water') }}</span>
+                    <div><span class="water-status">{{ trans('Breeding site with water') }}</span>
                       {{ trans(feature.withWater) }}
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                 <div class="date-wrapper" v-if="feature.note">
                     <div><i class="fa-regular fa-message"></i></div>
                     <div>
-                      <span class="date">{{ transransrans('Citizen note') }}</span>:
+                      <span class="date">{{ trans('Citizen note') }}</span>:
                       {{ feature.note }}
                     </div>
                 </div>
@@ -193,7 +193,7 @@
                 </div>
                 <div class="description-wrapper" v-if="feature.version_uuid">
                     <div><i class="fa-solid fa-eye"></i></div>
-                    <div><span class="description">{{ transrans('Observation code') }}</span>:
+                    <div><span class="description">{{ trans('Observation code') }}</span>:
                       {{ feature.version_uuid }}
                     </div>
                 </div>
