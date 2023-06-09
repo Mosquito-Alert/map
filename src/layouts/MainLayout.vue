@@ -114,6 +114,7 @@ import { useRoute } from 'vue-router'
 import moment from 'moment'
 import MSession from '../js/session.js'
 import { useCookies } from 'vue3-cookies'
+import { useQuasar } from 'quasar'
 
 export default {
   components: {
@@ -147,11 +148,14 @@ export default {
     const $store = useStore()
     const { cookies } = useCookies()
     const backend = $store.getters['app/getBackend']
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    let lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
-    // const resetTOC = function () {
-    //   map.value.initMap()
-    // }
+    const $q = useQuasar()
+    // Set default lang on calendar widget
+    if (lang === 'en') lang = 'en-US'
+    import('../../node_modules/quasar/lang/' + lang).then(({ default: messages }) => {
+      $q.lang.set(messages)
+    })
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
