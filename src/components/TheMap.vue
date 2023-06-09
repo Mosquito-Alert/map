@@ -680,10 +680,11 @@ export default defineComponent({
       const v = JSON.parse(view.view[0].view)
 
       privateView = v.privateView
-      $store.commit('map/setDefaults', {
+      $store.commit('map/setCurrents', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
+
       let d
       if (v.filters.dates.length) {
         d = v.filters.dates
@@ -825,7 +826,6 @@ export default defineComponent({
 
     // Init share view. Save data to database
     function shareView () {
-      $store.commit('map/setCenter', { center: [0, 0] })
       const samplingEffort = $store.getters['app/getLayers'].sampling_effort.sampling.active
 
       let obj = {}
@@ -970,7 +970,6 @@ export default defineComponent({
 
     // Open new window and show report
     function handleReportView (report) {
-      console.log(report.status)
       if (report.status === STATUS_CODES.OK) {
         const frontend = $store.getters['app/getFrontendUrl']
         window.open(frontend + report.code, '_bank')
@@ -1108,7 +1107,6 @@ export default defineComponent({
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
           progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          console.log(progress.value)
         }
       })
         .then((resp) => {

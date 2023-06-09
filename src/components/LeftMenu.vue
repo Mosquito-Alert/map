@@ -26,7 +26,7 @@
         name="fa-thin fa-layer-group"
         :label="trans('Distribution')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="distribution"
+        link="/distribution"
         item="wms"
         id="wms"
       >
@@ -173,8 +173,9 @@ export default {
       })
       object.classList.add('active')
       // NASTY
-      if (lang === 'en') lang = 'en-US'
-      import('quasar/lang/' + lang).then(({ default: messages }) => {
+      let qLang = lang
+      if (qLang === 'en') qLang = 'en-US'
+      import('quasar/lang/' + qLang).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }

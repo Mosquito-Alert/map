@@ -285,8 +285,9 @@ export default {
     const setLanguage = (lang) => {
       $store.dispatch('app/setInitData', lang)
       // NASTY
-      if (lang === 'en') lang = 'en-US'
-      import('quasar/lang/' + lang).then(({ default: messages }) => {
+      let qLang = lang
+      if (lang === 'en') qLang = 'en-US'
+      import('quasar/lang/' + qLang).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }

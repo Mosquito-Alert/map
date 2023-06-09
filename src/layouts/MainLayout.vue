@@ -148,12 +148,13 @@ export default {
     const $store = useStore()
     const { cookies } = useCookies()
     const backend = $store.getters['app/getBackend']
-    let lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
     const $q = useQuasar()
     // Set default lang on calendar widget
-    if (lang === 'en') lang = 'en-US'
-    import('../../node_modules/quasar/lang/' + lang).then(({ default: messages }) => {
+    let qLang = lang
+    if (lang === 'en') qLang = 'en-US'
+    import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
       $q.lang.set(messages)
     })
 
@@ -360,7 +361,6 @@ export default {
     }
 
     const timeSeriesChanged = function (date) {
-      console.log(date[0].from)
       timeseries.value.calendarDate = [{
         from: moment(date[0].from).format('YYYY/MM/DD'),
         to: moment(date[0].to).format('YYYY/MM/DD')
