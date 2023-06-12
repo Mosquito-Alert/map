@@ -155,13 +155,17 @@
                     <div class="text-subtitle1 q-my-md">
                       {{ trans('MODELED DATA') }}
                     </div>
-                    <p>{{ trans('Model maps show the probability of encountering a specific mosquito species or of receiving a mosquito bite. Probabilities are based on data submitted by citizens to Mosquito Alert. The first estimates for a month are based on observations received for that month in previous years, estimates that are updated weekly with data for the current year to readjust the values in real time.') }}</p>
+                    <p>{{ trans('Model-maps-provide-information-to-help-better-unde') }}</p>
+                    <p>{{ trans('These-estimates-are-generated-monthly-for-each-of') }}</p>
+                    <p>{{ trans('The-map-currently-shows-estimates-for-all-countrie') }}</p>
+                    <p><a href="https://mosquito-alert.github.io/global_model_estimates/">https://mosquito-alert.github.io/global_model_estimates/</a></p>
+                    <!--<p>{{ trans('Model maps show the probability of encountering a specific mosquito species or of receiving a mosquito bite. Probabilities are based on data submitted by citizens to Mosquito Alert. The first estimates for a month are based on observations received for that month in previous years, estimates that are updated weekly with data for the current year to readjust the values in real time.') }}</p>
                     <p>{{ trans('Models show the probability of encountering each of the target species: the tiger mosquito, the yellow fever mosquito, the Asian bush mosquito, the Korean mosquito, and the common house mosquito. Another model shows the probability of receiving a mosquito bite, which does not correspond to any specific mosquito species, but to all the reports of bites received, reflecting the human-mosquito interaction in the area.') }}</p>
                     <p>{{ trans('Estimates are displayed at different world’s administrative areas or boundaries depending on the zoom and the map view. Administrative areas in the database are countries and lower lever subdivisions such as provinces. At high resolution, estimates are displayed in grids of approximately 2x2 kilometers (grid of 0.05 degrees latitude by 0.05 degrees longitude). In addition to the probability of encountering a mosquito or receiving a bite, each administrative area also shows its uncertainty value.') }}</p>
                     <p>{{ trans('This calculation considers the sampling effort, considering the number of participants with the active app in each grid or area in the defined time. The probability of mosquitoes or of receiving a mosquito bite is higher in a grid in which 10 observations have been received and there are 5 participants, than in another with 10 observations and 10 participants. Modeling observations and active participants determines the value of the probability shown on the map.') }}</p>
                     <p>{{ trans('This probability has been observed to correspond to the observations of the tiger mosquito obtained by traditional surveillance methods (ovitraps), thus demonstrating that it is a good way of estimating the presence and abundance of a species.') }}</p>
                     <p class="capitalFirstLetter">{{ trans('for more information.')}}</p>
-                    <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>
+                    <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>-->
                     <q-separator size="1"/>
                     <!-- WMS INFO -->
                     <a id="wms_info" class="q-py-md"></a>
@@ -169,11 +173,17 @@
                     <div class="text-subtitle1 q-my-md">
                       {{ trans('Distribution data') }}
                     </div>
-                    <p>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci nesciunt qui placeat, soluta vero ea tenetur delectus possimus, laudantium laborum ut aut hic expedita doloremque? Alias non natus quod similique ipsum labore qui porro blanditiis distinctio assumenda aliquam voluptate provident delectus eos optio voluptatum, dolor, possimus velit? Obcaecati hic doloribus accusantium? Distinctio tenetur quasi modi impedit laboriosam illo, nobis possimus voluptatum natus labore tempora amet inventore incidunt consectetur repellendus, magnam maiores dicta sunt voluptates delectus repellat rem dolore. Obcaecati, vel. Enim et animi facilis sequi dolorum nesciunt nisi, doloribus quaerat ad ratione esse obcaecati porro harum impedit laudantium dolor sint!
-                    </p>
-                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rerum consequuntur nesciunt sed aliquam blanditiis maxime, hic necessitatibus non incidunt! Sequi totam dolores enim nemo neque vitae sunt, labore voluptate consectetur rerum? Eveniet iste iure temporibus impedit doloremque. Provident ullam sint, quisquam soluta eaque molestias et quo in corrupti iusto cumque.</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt, deleniti! Excepturi hic culpa, qui odio sunt obcaecati. Maiores obcaecati odit corporis consequuntur, itaque officiis sunt voluptate deserunt nam earum commodi.</p>
+                    <p>{{ trans('The-distribution-maps-provide-information-about-th') }}</p>
+                    <p>{{ trans('For-invasive-species-the-possible-distribution-sta') }}</p>
+                    <ul>
+                      <li>{{ trans('Red-Represent-areas-where-a-mosquito-population-is') }}</li>
+                      <li>{{ trans('Light-Yellow-Signifies-that-the-species-has-been-d') }}</li>
+                      <li>{{ trans('Dark-Yellow-Depicts-areas-where-both-the-ECDC-and') }}</li>
+                      <li>{{ trans('Dark-Blue-Indicates-regions-where-Mosquito-Alert-h') }}</li>
+                      <li>{{ trans('Light-Blue-Mark-regions-where-Mosquito-Alert-repor') }}</li>
+                    </ul>
+                    <p>{{ trans('These-maps-illustrate-the-geographical-spread-of-m') }}</p>
+                    <p>{{ trans('It-is-crucial-to-note-that-these-maps-do-not-signi') }}</p>
                 </div>
               </q-carousel-slide>
             </q-carousel>
