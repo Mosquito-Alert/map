@@ -219,7 +219,7 @@ export default function () {
         uncertaintyOpacity: 0.25,
         // Default uncertainty color
         uncertaintyColor: '#191919',
-        estimationColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+        estimationColors: ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
         modelsCsv: [],
         centroidsUrls: [],
         estimationPalettes: [
