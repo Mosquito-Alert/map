@@ -430,6 +430,12 @@ export default defineComponent({
      SEVERAL MODES APPLY BASED ON event.data properties
      */
     worker.onmessage = function (event) {
+      if (event.data) {
+        if (event.data.features) {
+          // Get extent of features and fit map view
+          fitViewToFeatures(event.data.features)
+        }
+      }
       if (event.data.dataset) {
         dataset = event.data.dataset
       }
@@ -541,6 +547,33 @@ export default defineComponent({
         if (!$store.getters['timeseries/getGraphIsVisible']) {
           spinner(false)
         }
+      }
+    }
+
+    function fitViewToFeatures (features) {
+      if (features.length) {
+        let xmin = features[0].geometry.coordinates[0]
+        let xmax = features[0].geometry.coordinates[0]
+        let ymin = features[0].geometry.coordinates[1]
+        let ymax = features[0].geometry.coordinates[1]
+
+        features.forEach(function (feature) {
+          if (feature.geometry.coordinates[0] < xmin) {
+            xmin = feature.geometry.coordinates[0]
+          }
+          if (feature.geometry.coordinates[0] > xmax) {
+            xmax = feature.geometry.coordinates[0]
+          }
+          if (feature.geometry.coordinates[1] < ymin) {
+            ymin = feature.geometry.coordinates[1]
+          }
+          if (feature.geometry.coordinates[1] > ymax) {
+            ymax = feature.geometry.coordinates[1]
+          }
+        })
+        map.value.map.getView().fit(
+          transformExtent([xmin, ymin, xmax, ymax], 'EPSG:4326', 'EPSG:3857')
+        )
       }
     }
 

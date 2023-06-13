@@ -23,6 +23,7 @@ let firstDate = '01-01-' + moment(new Date(Date.now())).format('YYYY')
 let lastDate = moment(new Date(Date.now())).format('YYYY-MM-DD')
 let loadSharedView = false
 let graphData = null
+let fitFeatures = false
 
 for (let a = initialYear; a <= currentYear; a++) {
   YEARS.push({ year: a, data: {} })
@@ -50,7 +51,7 @@ self.onmessage = async function (e) {
     }
   }
 
-  let fitFeatures = false
+  fitFeatures = false
   if (clickOnMapCluster(e.data)) {
     // Returns the zoom level to zoom in and the center.
     let z = parseInt(cluseredIndex.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
