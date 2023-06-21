@@ -18,24 +18,24 @@
         @uncertaintyColorsChanged="uncertaintyColorsChanged"
         @firstMapCall="buildSession"
       />
-
-      <q-page
-        class='flex'
-        :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
-      >
-        <the-map-models ref='map'
-          init
-          :viewCode="viewCode"
-          :class="expanded?'drawer-expanded':'drawer-collapsed'"
-          @toggleLeftDrawer="toggleLeftDrawer"
-          @workerFinishedIndexing="workerFinishedIndexing"
-          @endShareView="endShareView"
-          @setModelDate="setModelDate"
-          @loadSharedModel="loadSharedModel"
-          @errorDownloadingModels="errorDownloadingModels"
-        />
-      </q-page>
-
+      <q-page-container class="no-padding-top">
+        <q-page
+          class='flex'
+          :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
+        >
+          <the-map-models ref='map'
+            init
+            :viewCode="viewCode"
+            :class="expanded?'drawer-expanded':'drawer-collapsed'"
+            @toggleLeftDrawer="toggleLeftDrawer"
+            @workerFinishedIndexing="workerFinishedIndexing"
+            @endShareView="endShareView"
+            @setModelDate="setModelDate"
+            @loadSharedModel="loadSharedModel"
+            @errorDownloadingModels="errorDownloadingModels"
+          />
+        </q-page>
+      </q-page-container>
       <modal-share
         ref="shareModal"
         :open="shareModalVisible"
@@ -401,5 +401,7 @@ export default {
   .q-layout.mobile.expanded aside{
     width: 100%;
   }
-
+  .no-padding-top{
+    padding: 0px !important;
+  }
 </style>

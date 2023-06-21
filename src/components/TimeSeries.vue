@@ -118,7 +118,7 @@ import zoomPlugin from 'chartjs-plugin-zoom'
 import * as Hammer from 'hammerjs'
 
 window.Hammer = Hammer.default
-Chart.register(...registerables)
+// Chart.register(...registerables)
 Chart.register(zoomPlugin)
 
 export default defineComponent({

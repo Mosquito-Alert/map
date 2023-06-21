@@ -7,12 +7,14 @@
         @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
-      <q-page class='flex'
-        :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
-        <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
-          @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
-          @errorDownloadingModels="errorDownloadingModels" />
-      </q-page>
+        <q-page-container class="no-padding-top">
+          <q-page class='flex'
+            :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
+            <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
+              @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
+              @errorDownloadingModels="errorDownloadingModels" />
+          </q-page>
+        </q-page-container>
 
       <modal-share ref="shareModal" :open="shareModalVisible">
         <template v-slot:default>
@@ -389,4 +391,7 @@ button.ma-close-btn:hover,
 .q-layout.mobile.expanded aside {
   width: 100%;
 }
+.no-padding-top{
+    padding: 0px !important;
+  }
 </style>

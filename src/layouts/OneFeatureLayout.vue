@@ -3,6 +3,7 @@
     class="expanded"
     :class="mobile?'mobile':''"
   >
+  <q-page-container class="no-padding-top">
     <q-page
       class="flex expanded"
       :class="mobile?'mobile':''"
@@ -19,11 +20,12 @@
         :clickable="mobile?'true':'false'"
       />
     </q-page>
+  </q-page-container>
 
-    <modal-cookie-settings/>
-    <modal-error/>
-    <modal-cookie-policy/>
-    <cookies-compliance/>
+  <modal-cookie-settings/>
+  <modal-error/>
+  <modal-cookie-policy/>
+  <cookies-compliance/>
 
   </q-layout>
 </template>
@@ -103,4 +105,7 @@ export default {
     z-index:100;
     transform: scale(0.8);
   }
+  .no-padding-top{
+    padding: 0px !important;
+  }  
 </style>

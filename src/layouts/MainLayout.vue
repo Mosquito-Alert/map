@@ -15,30 +15,32 @@
       @startShareView="startShareView"
     />
 
-    <q-page
-      class='flex'
-      :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
-    >
-      <the-map ref='map'
-        init
-        :sharedView="viewCode"
-        :class="expanded?'drawer-expanded':'drawer-collapsed'"
-        @toggleLeftDrawer="toggleLeftDrawer"
-        @workerFinishedIndexing="workerFinishedIndexing"
-        @workerStartedIndexing="workerStartedIndexing"
-        @timeSeriesChanged="timeSeriesChanged"
-        @tagsChanged="tagsChanged"
-        @locationChanged="locationChanged"
-        @loadUserFixes="loadUserFixes"
-        @calendarClicked="calendarClicked"
-        @endShareView="endShareView"
-      />
-      <time-series
-        ref="timeseries"
-        @toggleTimeSeries='toggleGraphic'
-        @dateSelected='filterDate'
-      />
-    </q-page>
+    <q-page-container class="no-padding-top">
+      <q-page
+        class='flex'
+        :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
+      >
+        <the-map ref='map'
+          init
+          :sharedView="viewCode"
+          :class="expanded?'drawer-expanded':'drawer-collapsed'"
+          @toggleLeftDrawer="toggleLeftDrawer"
+          @workerFinishedIndexing="workerFinishedIndexing"
+          @workerStartedIndexing="workerStartedIndexing"
+          @timeSeriesChanged="timeSeriesChanged"
+          @tagsChanged="tagsChanged"
+          @locationChanged="locationChanged"
+          @loadUserFixes="loadUserFixes"
+          @calendarClicked="calendarClicked"
+          @endShareView="endShareView"
+        />
+        <time-series
+          ref="timeseries"
+          @toggleTimeSeries='toggleGraphic'
+          @dateSelected='filterDate'
+        />
+      </q-page>
+    </q-page-container>
 
     <modal-first :open="firstModalVisible" buttons="close">
     </modal-first>
@@ -148,15 +150,18 @@ export default {
     const $store = useStore()
     const { cookies } = useCookies()
     const backend = $store.getters['app/getBackend']
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-
+    let lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
     const $q = useQuasar()
+
     // Set default lang on calendar widget
-    let qLang = lang
-    if (lang === 'en') qLang = 'en-US'
-    import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
+    if (lang === 'en') lang = 'en-US'
+    import(/* @vite-ignore */`../../node_modules/quasar/lang/${lang}`).then(({ default: messages }) => {
       $q.lang.set(messages)
     })
+
+    // const resetTOC = function () {
+    //   map.value.initMap()
+    // }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -514,5 +519,7 @@ export default {
   .q-layout.mobile.expanded aside{
     width: 100%;
   }
-
+  .no-padding-top{
+    padding: 0px !important;
+  }
 </style>

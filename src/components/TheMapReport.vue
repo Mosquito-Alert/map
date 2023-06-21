@@ -1,7 +1,6 @@
 <!--
   MAP COMPONENT FOR REPORTS
 -->
-
 <template>
   <q-layout>
     <q-page-container>
@@ -267,7 +266,7 @@ export default {
     const observationNames = ref([])
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const worker = new Worker('TheReportWorker.js')
+    const worker = new Worker('/TheReportWorker.js')
     let administrativeLayer
 
     const anyFilters = ref(false)
@@ -285,9 +284,8 @@ export default {
     const setLanguage = (lang) => {
       $store.dispatch('app/setInitData', lang)
       // NASTY
-      let qLang = lang
-      if (lang === 'en') qLang = 'en-US'
-      import('quasar/lang/' + qLang).then(({ default: messages }) => {
+      if (lang === 'en') lang = 'en-US'
+      import(`../../node_modules/quasar/lang/${lang}`).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }
@@ -498,6 +496,7 @@ export default {
     }
 
     worker.onmessage = function (data) {
+      console.log('onmessage')
       const mapFeatures = data.data.map.map(f => {
         return new Feature({
           geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),

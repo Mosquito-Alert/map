@@ -131,7 +131,7 @@
 
 <script>
 import { useGtm } from '@gtm-support/vue-gtm'
-import CustControl from './CustControl'
+import CustControl from './CustControl.vue'
 import { defineComponent, computed, ref, onMounted, inject, watch } from 'vue'
 import { useStore } from 'vuex'
 import { transform, transformExtent } from 'ol/proj.js'
@@ -199,7 +199,7 @@ export default defineComponent({
     const view = ref('null')
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const worker = new Worker('TheMapWorker.js')
+    const worker = new Worker('/TheMapWorker.js')
     let selectedFeatures = []
     let spiderfiedIds = []
     let currZoom
@@ -713,10 +713,12 @@ export default defineComponent({
       const v = JSON.parse(view.view[0].view)
 
       privateView = v.privateView
-      $store.commit('map/setCurrents', {
+      console.log(v.extent)
+      $store.commit('map/setDefaults', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
+      map.value.map.getView().fit(v.extent, { minResolution: 50, nearest: false })
 
       let d
       if (v.filters.dates.length) {
@@ -1003,6 +1005,7 @@ export default defineComponent({
 
     // Open new window and show report
     function handleReportView (report) {
+      console.log(report.status)
       if (report.status === STATUS_CODES.OK) {
         const frontend = $store.getters['app/getFrontendUrl']
         window.open(frontend + report.code, '_bank')
@@ -1140,6 +1143,7 @@ export default defineComponent({
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
           progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          console.log(progress.value)
         }
       })
         .then((resp) => {

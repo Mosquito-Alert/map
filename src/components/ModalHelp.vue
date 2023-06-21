@@ -143,28 +143,28 @@ export default {
     // Define video location files for each lang
     const videosHelp = {
       ca: [
-        require('../assets/img/help/help1_ca.gif'),
-        require('../assets/img/help/help2_ca.gif'),
-        require('../assets/img/help/help3_ca.gif'),
-        require('../assets/img/help/help4_ca.gif'),
-        require('../assets/img/help/help5_ca.gif'),
-        require('../assets/img/help/help6_ca.gif')
+        new URL(`/src/assets/img//help/help1_ca.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help2_ca.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help3_ca.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help4_ca.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help5_ca.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help6_ca.gif`, import.meta.url).href
       ],
       es: [
-        require('../assets/img/help/help1_es.gif'),
-        require('../assets/img/help/help2_es.gif'),
-        require('../assets/img/help/help3_es.gif'),
-        require('../assets/img/help/help4_es.gif'),
-        require('../assets/img/help/help5_es.gif'),
-        require('../assets/img/help/help6_es.gif')
+        new URL(`/src/assets/img//help/help1_es.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help2_es.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help3_es.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help4_es.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help5_es.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help6_es.gif`, import.meta.url).href
       ],
       en: [
-        require('../assets/img/help/help1_en.gif'),
-        require('../assets/img/help/help2_en.gif'),
-        require('../assets/img/help/help3_en.gif'),
-        require('../assets/img/help/help4_en.gif'),
-        require('../assets/img/help/help5_en.gif'),
-        require('../assets/img/help/help6_en.gif')
+        new URL(`/src/assets/img//help/help1_en.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help2_en.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help3_en.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help4_en.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help5_en.gif`, import.meta.url).href,
+        new URL(`/src/assets/img//help/help6_en.gif`, import.meta.url).href
       ]
     }
 

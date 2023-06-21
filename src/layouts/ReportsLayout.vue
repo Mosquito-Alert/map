@@ -113,4 +113,7 @@ export default {
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;
   }
+  .no-padding-top{
+    padding: 0px !important;
+  }
 </style>

@@ -219,13 +219,13 @@ export default function () {
         uncertaintyOpacity: 0.25,
         // Default uncertainty color
         uncertaintyColor: '#191919',
-        estimationColors: ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
+        estimationColors: ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
         modelsCsv: [],
         centroidsUrls: [],
         estimationPalettes: [
           // DIVERGENTS
-          ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
           ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
+          ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
           ['#1b7837', '#7fbf7b', '#d9f0d3', '#e7d4e8', '#af8dc3', '#762a83'],
           ['#1a9850', '#91cf60', '#d9ef8b', '#fee08b', '#fc8d59', '#d73027'],
           // GRADIENTS
@@ -257,26 +257,27 @@ export default function () {
 
     // File locations of map selected icons
     selectedIcons: {
-      mosquito_tiger_confirmed: require('../../assets/img/marker_tiger_selected.svg'),
-      mosquito_tiger_probable: require('../../assets/img/marker_tiger_selected.svg'),
-      albopictus_cretinus: require('../../assets/img/marker_tiger_selected.svg'),
-      yellow_fever_confirmed: require('../../assets/img/marker_yellow_selected.svg'),
-      yellow_fever_probable: require('../../assets/img/marker_yellow_selected.svg'),
-      japonicus_confirmed: require('../../assets/img/marker_japonicus_selected.svg'),
-      japonicus_probable: require('../../assets/img/marker_japonicus_selected.svg'),
-      culex_confirmed: require('../../assets/img/marker_culex_selected.svg'),
-      culex_probable: require('../../assets/img/marker_culex_selected.svg'),
-      koreicus_confirmed: require('../../assets/img/marker_koreicus_selected.svg'),
-      koreicus_probable: require('../../assets/img/marker_koreicus_selected.svg'),
-      unidentified: require('../../assets/img/marker_unidentified_selected.svg'),
-      other_species: require('../../assets/img/marker_other_selected.svg'),
-      japonicus_koreicus: require('../../assets/img/marker_japonicus_koreicus_selected.svg'),
-      trash_layer: require('../../assets/img/marker_selected.svg'),
-      storm_drain_water: require('../../assets/img/storm_drain_water_selected.svg'),
-      storm_drain_dry: require('../../assets/img/storm_drain_dry_selected.svg'),
-      breeding_site_other: require('../../assets/img/breeding_other_selected.svg'),
-      breeding_site_not_yet_filtered: require('../../assets/img/breeding_not_validated_selected.svg'),
-      bite: require('../../assets/img/marker_bite_selected.svg')
+
+      mosquito_tiger_confirmed: new URL(`/src/assets/img/marker_tiger_selected.svg`, import.meta.url).href,
+      mosquito_tiger_probable: new URL(`/src/assets/img/marker_tiger_selected.svg`, import.meta.url).href,
+      albopictus_cretinus: new URL(`/src/assets/img/marker_tiger_selected.svg`, import.meta.url).href,
+      yellow_fever_confirmed: new URL(`/src/assets/img/marker_yellow_selected.svg`, import.meta.url).href,
+      yellow_fever_probable: new URL(`/src/assets/img/marker_yellow_selected.svg`, import.meta.url).href,
+      japonicus_confirmed: new URL(`/src/assets/img/marker_japonicus_selected.svg`, import.meta.url).href,
+      japonicus_probable: new URL(`/src/assets/img/marker_japonicus_selected.svg`, import.meta.url).href,
+      culex_confirmed: new URL(`/src/assets/img/marker_culex_selected.svg`, import.meta.url).href,
+      culex_probable: new URL(`/src/assets/img/marker_culex_selected.svg`, import.meta.url).href,
+      koreicus_confirmed: new URL(`/src/assets/img/marker_koreicus_selected.svg`, import.meta.url).href,
+      koreicus_probable: new URL(`/src/assets/img/marker_koreicus_selected.svg`, import.meta.url).href,
+      unidentified: new URL(`/src/assets/img/marker_unidentified_selected.svg`, import.meta.url).href,
+      other_species: new URL(`/src/assets/img/marker_other_selected.svg`, import.meta.url).href,
+      japonicus_koreicus: new URL(`/src/assets/img/marker_japonicus_koreicus_selected.svg`, import.meta.url).href,
+      trash_layer: new URL(`/src/assets/img/marker_selected.svg`, import.meta.url).href,
+      storm_drain_water: new URL(`/src/assets/img/marker_selected.svg`, import.meta.url).href,
+      storm_drain_dry: new URL(`/src/assets/img/storm_drain_dry_selected.svg`, import.meta.url).href,
+      breeding_site_other: new URL(`/src/assets/img/breeding_other_selected.svg`, import.meta.url).href,
+      breeding_site_not_yet_filtered: new URL(`/src/assets/img/breeding_not_validated_selected.svg`, import.meta.url).href,
+      bite: new URL(`/src/assets/img/marker_bite_selected.svg`, import.meta.url).href
     },
 
     // Info related with citizen observations (raw data)
@@ -290,7 +291,7 @@ export default function () {
         categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
         common_name: 'Tiger mosquito',
         scientific_name: 'Aedes albopictus',
-        icon: require('../../assets/img/marker_tiger.svg'),
+        icon: new URL(`/src/assets/img/marker_tiger.svg`, import.meta.url).href,
         color: '#4d4d4d',
         modelName: 'albopictus'
       },
@@ -298,7 +299,7 @@ export default function () {
         categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
         common_name: 'Yellow fever mosquito',
         scientific_name: 'Aedes aegypti',
-        icon: require('../../assets/img/marker_yellow.svg'),
+        icon: new URL(`/src/assets/img/marker_yellow.svg`, import.meta.url).href,
         color: '#ffdd19',
         modelName: 'aegypti'
       },
@@ -306,8 +307,8 @@ export default function () {
         categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
         common_name: 'Japonicus mosquito',
         scientific_name: 'Aedes japonicus',
-        icon: require('../../assets/img/marker_japonicus.svg'),
-        iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+        icon: new URL(`/src/assets/img/marker_japonicus.svg`, import.meta.url).href,
+        iconConflict: new URL(`/src/assets/img/marker_japonicus_koreicus.svg`, import.meta.url).href,
         color: '#49a999',
         modelName: 'japonicus'
       },
@@ -315,8 +316,8 @@ export default function () {
         categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
         common_name: 'Koreicus mosquito',
         scientific_name: 'Aedes koreicus',
-        icon: require('../../assets/img/marker_koreicus.svg'),
-        iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
+        icon: new URL(`/src/assets/img/marker_koreicus.svg`, import.meta.url).href,
+        iconConflict: new URL(`/src/assets/img/marker_japonicus_koreicus.svg`, import.meta.url).href,
         color: '#499fff',
         modelName: 'koreicus'
       },
@@ -324,14 +325,14 @@ export default function () {
         categories: ['culex_probable', 'culex_confirmed'],
         common_name: 'Common mosquito',
         scientific_name: 'Culex pipiens',
-        icon: require('../../assets/img/marker_culex.svg'),
+        icon: new URL(`/src/assets/img/marker_culex.svg`, import.meta.url).href,
         color: '#aa4499',
         modelName: 'culex',
         separator: true
       },
       bites: { // Bites
         categories: ['bite'],
-        icon: require('../../assets/img/marker_bite.svg'),
+        icon: new URL(`/src/assets/img/marker_bite.svg`, import.meta.url).href,
         faIcon: 'fa-solid fa-child-reaching bites',
         common_name: 'Bites',
         color: '#cc6677',
