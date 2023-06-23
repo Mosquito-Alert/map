@@ -70,9 +70,10 @@ self.onmessage = async function (e) {
     let openPopupId = ''
     if (e.data.spiderfyId && e.data.dataset) {
       // Sharing spiderfied view
+      console.log(e.data)
       filteredData = dataset
       filteredData = doFilters(filters, e.data.layers)
-      cluseredIndex = doClusteredIndex(filteredData)
+      cluseredIndex = await doClusteredIndex(filteredData)
       const cluster = getClusterByFeatureId(e.data)
       e.data.getClusterExpansionZoom = cluster.id
       e.data.center = cluster.geometry.coordinates
@@ -80,7 +81,6 @@ self.onmessage = async function (e) {
     }
     if (e.data.getClusterExpansionZoom) {
       // Send data to spiderfy cluster
-      console.log('do nothing')
       postMessage({
         map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
         spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
@@ -192,6 +192,7 @@ function getGraphData (e, dataset) {
 }
 
 function doClusteredIndex (data) {
+  console.log(data.length)
   return new Supercluster({
     log: DEBUG,
     radius: 10,

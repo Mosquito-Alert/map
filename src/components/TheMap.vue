@@ -483,7 +483,7 @@ export default defineComponent({
           if (event.data.openPopupId) {
             const fId = event.data.openPopupId
             const sFeature = getSpiralFeature(fId)
-            selectFeature(sFeature.value_)
+            selectFeature(sFeature.values_)
           }
         }
         features.value = []
@@ -665,6 +665,7 @@ export default defineComponent({
     }
 
     async function selectFeature (feature) {
+      console.log(feature)
       const root = appStore.getBackend
       const url = root + 'api/get_observation/' + feature.properties.id + '/'
       const titles = mapStore.getTitles
@@ -707,6 +708,10 @@ export default defineComponent({
       const v = JSON.parse(view.view[0].view)
 
       privateView = v.privateView
+      mapStore.setDefaults({
+        zoom: v.zoom,
+        center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
+      })
       mapStore.setCurrents({
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
@@ -770,7 +775,6 @@ export default defineComponent({
           dates: v.filters.dates
         })
       }
-
       if (v.popup) {
         // Disable closepopup to prevent reseting selectedId.value
         closedPopupDisable.value = true
@@ -1191,6 +1195,8 @@ export default defineComponent({
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
+              console.log(currZoom)
+              console.log(maxZoom.value)
               if (parseInt(currZoom) >= parseInt(maxZoom.value)) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {

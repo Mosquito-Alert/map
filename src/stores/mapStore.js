@@ -66,7 +66,8 @@ export const useMapStore = defineStore('map', {
       MOBILEZOOM: 1,
       length: 4
     },
-    mapDates: { from: '', to: '' }
+    mapDates: { from: '', to: '' },
+    maxZoom: 19
   }),
 
   getters: {
@@ -96,6 +97,9 @@ export const useMapStore = defineStore('map', {
     },
     getDefault (state) {
       return state.DEFAULTS
+    },
+    getMaxZoom (state) {
+      return state.maxZoom
     }
   },
 
@@ -164,6 +168,11 @@ export const useMapStore = defineStore('map', {
     setMinMaxDates (payload) {
       this.minMaxDates.min = payload.min
       this.minMaxDates.max = payload.max
+    },
+    setDefaults (payload) {
+      this.DEFAULTS.ZOOM = payload.zoom
+      this.DEFAULTS.CENTER = payload.center
+      this.DEFAULTS.MOBILEZOOM = payload.zoom
     }
   }
 })
