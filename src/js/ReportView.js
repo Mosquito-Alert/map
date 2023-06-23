@@ -39,6 +39,7 @@ export default class ReportView {
 
     // Filtering mode is always 'resetFilter'. So it applies at once when loading the view
     dataView.filters.mode = 'resetFilter'
+
     axios(this.options.url, {
       withCredentials: true,
       method: 'POST', // or 'PUT'

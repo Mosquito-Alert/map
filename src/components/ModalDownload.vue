@@ -67,13 +67,13 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close', 'startDownload'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const download = function (format) {
       // window.dataLayer.push({
       //   pageCategory: 'download-page',
@@ -83,21 +83,21 @@ export default {
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const nFeatures = computed(() => {
-      return $store.getters['app/getModals'].download.n
+      return appStore.getModals.download.n
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'download', content: { visibility: false } })
+      appStore.setModal({ id: 'download', content: { visibility: false } })
     }
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
     return {
       nFeatures,

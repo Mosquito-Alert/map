@@ -28,17 +28,17 @@
 <script>
 
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore'
 import moment from 'moment'
 
 export default {
   props: ['dateFrom', 'dateTo'],
   emits: ['calendarClicked'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const dFrom = computed(() => {

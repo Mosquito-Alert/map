@@ -22,34 +22,34 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].wait.visibility
+      return appStore.getModals.wait.visibility
     })
 
     const seamless = computed(() => {
-      return $store.getters['app/getModals'].wait.seamless
+      return appStore.getModals.wait.seamless
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const leftDrawerStatus = computed(() => {
-      return $store.getters['app/getLeftDrawerStatus']
+      return appStore.getLeftDrawerStatus
     })
 
     const diaglogClass = computed(() => {
-      return ($store.getters['app/getLeftDrawerStatus'] ? 'expanded' : '') + ' ' + (mobile.value ? 'mobile' : '')
+      return (appStore.getLeftDrawerStatus ? 'expanded' : '') + ' ' + (mobile.value ? 'mobile' : '')
     })
 
     return {

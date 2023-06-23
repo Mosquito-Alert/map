@@ -134,7 +134,7 @@
 
 <script>
 import { computed, ref, onUpdated } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   props: ['open', 'buttons'],
@@ -168,9 +168,9 @@ export default {
       ]
     }
 
-    const $store = useStore()
+    const appStore = useAppStore()
     const videos = computed(() => {
-      const lang = $store.getters['app/getLang']
+      const lang = appStore.getLang
       if (lang === 'ca') {
         return videosHelp.ca
       } else if (lang === 'es') {
@@ -182,18 +182,18 @@ export default {
 
     const slide = ref('pag_2')
     const close = function () {
-      $store.commit('app/setModal', { id: 'help', content: { visibility: false } })
+      appStore.setModal({ id: 'help', content: { visibility: false } })
     }
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
-    const layers = $store.getters['app/getLayers']
+    const layers = appStore.getLayers
 
     onUpdated(() => {
       slide.value = 'pag_1'

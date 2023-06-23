@@ -4,6 +4,21 @@ vue-chart-3 source code (v 3.1.2)
 /*
 ADAPTED SO WHEN CHART DATA IS REMOVE, CHART IS ADAPTED INSTEAD OF DESTROYED
 */
+import * as Chartjs from 'chart.js'
+import { cloneDeep, isEqual } from 'lodash-es'
+import {
+  computed,
+  defineComponent,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  ref as ref2,
+  unref,
+  shallowRef,
+  watch
+} from 'vue'
+
 const __defProp = Object.defineProperty
 const __defProps = Object.defineProperties
 const __getOwnPropDescs = Object.getOwnPropertyDescriptors
@@ -50,27 +65,11 @@ const __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b))
 // }
 
 // src/core/component.builder.ts
-import * as Chartjs from 'chart.js'
-import { cloneDeep, isEqual } from 'lodash-es'
 
 // src/utils/format.utils.ts
 function pascalCase (str) {
   return (str.match(/[a-zA-Z0-9]+/g) || []).map((w) => `${w.charAt(0).toUpperCase()}${w.slice(1)}`).join('')
 }
-
-// src/core/component.builder.ts
-import {
-  computed,
-  defineComponent,
-  h,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  ref as ref2,
-  unref,
-  shallowRef,
-  watch
-} from 'vue'
 
 const defineChartComponent = (chartName, chartType) => {
   const propsDefs = {
@@ -221,7 +220,8 @@ const defineChartComponent = (chartName, chartType) => {
         h('canvas', {
           style: {
             maxWidth: '100%',
-            maxHeight: '100%'
+            minHeight: '100%',
+            display: 'flex'
           },
           id: canvasId,
           width: props.width,
@@ -253,6 +253,7 @@ const defineChartHook = (chartType) => {
       let _a
       const chartComponentRef = _struct[CHART_REF_NAME].value
       if (chartComponentRef) {
+        // eslint-disable-next-line
         (_a = chartComponentRef == null ? void 0 : chartComponentRef.chartInstance.value) == null ? void 0 : _a.update()
       } else {
         console.warn(`No chartInstance to update (use${pascalCase(chartType)}Chart)`)

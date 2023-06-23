@@ -28,7 +28,7 @@
 </template>
 <script>
 import { ref, onMounted, computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   props: [],
@@ -36,9 +36,9 @@ export default {
   setup (props, context) {
     const tags = ref([])
     const newTag = ref()
-    const $store = useStore()
+    const appStore = useAppStore()
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     // When user cancels a tag
@@ -59,7 +59,7 @@ export default {
     */
     const addTag = function () {
       if (newTag.value.startsWith(':')) {
-        $store.commit('app/setFilteringTag', { value: true })
+        appStore.setFilteringTag({ value: true })
         // if all tags start with ':' then push it, otherwise empty array
         const onlyReports = tags.value.every(t => {
           return t.startsWith(':')
@@ -99,7 +99,7 @@ export default {
 
     // Preset default view
     onMounted(function () {
-      const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+      const defaults = JSON.parse(JSON.stringify(appStore.getDefaults))
       tags.value = defaults.hashtags
     })
 
@@ -110,7 +110,7 @@ export default {
       tags,
       deleteTag,
       addTag,
-      isFilteringTag: computed(() => $store.getters['app/isFilteringTag'])
+      isFilteringTag: computed(() => appStore.getIsFilteringTag)
     }
   }
 }

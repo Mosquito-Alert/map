@@ -145,7 +145,8 @@
 
 <script>
 import { onUpdated, defineComponent, computed, ref } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import moment from 'moment'
 import axios from 'axios'
 
@@ -153,7 +154,7 @@ export default defineComponent({
   props: ['selectedFeature'],
   emits: ['popupimageloaded', 'closePopupButton'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const mosquitoImageLoaded = ref(false)
     const imageRatio = ref('null')
     const errorLoadingImage = ref()
@@ -196,7 +197,7 @@ export default defineComponent({
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const closePopup = function () {
@@ -204,7 +205,7 @@ export default defineComponent({
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     if (mobile.value) {

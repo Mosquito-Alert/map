@@ -61,19 +61,19 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const popupContent = computed(() => {
-      return $store.getters['map/getSelectedFeature']
+      return appStore.getSelectedFeature
     })
 
     const showFooter = computed(() => {
@@ -82,11 +82,11 @@ export default defineComponent({
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const showLogos = function () {
-      $store.commit('app/setModal', {
+      appStore.setModal({
         id: 'logos',
         content: {
           visibility: true
@@ -95,7 +95,7 @@ export default defineComponent({
     }
 
     const linkLaCaixa = computed(() => {
-      const lang = $store.getters['app/getLang']
+      const lang = appStore.getLang
       return '//fundacionlacaixa.org/' + lang + '/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika'
     })
 

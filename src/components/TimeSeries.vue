@@ -43,7 +43,7 @@
                     :class="(set.opacity)?' possible':''"
                   >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
-                  {{ trans(set.label) }}
+                  {{ set.label }}
                 </div>
               </div>
             </template>
@@ -98,6 +98,7 @@
       <LineChart
         ref="chart"
         class="graph-canvas"
+        width="100%"
         :chartData="chartData"
         :height="graphicHeight"
         :options="chartOptions"
@@ -109,7 +110,9 @@
 
 <script>
 import { defineComponent, computed, ref, onUpdated, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
+import { useTimeSeriesStore } from '../stores/timeseriesStore.js'
 import { LineChart } from './VueChartJS.js'
 import { Chart, registerables } from 'chart.js'
 import 'chartjs-adapter-moment'
@@ -118,7 +121,7 @@ import zoomPlugin from 'chartjs-plugin-zoom'
 import * as Hammer from 'hammerjs'
 
 window.Hammer = Hammer.default
-// Chart.register(...registerables)
+Chart.register(...registerables)
 Chart.register(zoomPlugin)
 
 export default defineComponent({
@@ -141,13 +144,15 @@ export default defineComponent({
     const calendarBtn = ref()
     const rangeStartValue = ref(false)
     const rangeEndValue = ref(false)
-    const $store = useStore()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
+    const timeseriesStore = useTimeSeriesStore()
     let mapDatesBeforeZoom = null
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     graphicHeight.value = mobile.value ? 400 : 230
@@ -167,7 +172,7 @@ export default defineComponent({
     }
 
     const mapDates = computed(() => {
-      return $store.getters['map/getMapDates']
+      return mapStore.getMapDates
     })
 
     const timeSeriesClass = computed(() => {
@@ -180,7 +185,7 @@ export default defineComponent({
       } else {
         classes += ' no-visible'
       }
-      if ($store.getters['map/getLeftMenuToggling'] && (!$store.getters['timeseries/getGraphIsVisible'])) {
+      if (mapStore.getLeftMenuToggling && (!timeseriesStore.getGraphIsVisible)) {
         classes += ' display-none'
       }
       return classes
@@ -188,17 +193,17 @@ export default defineComponent({
 
     onMounted(function () {
       reloading.value = true
-      const defaultDates = JSON.parse(JSON.stringify($store.getters['app/getDefaults'])).dates[0]
-      $store.commit('timeseries/setAnimationOptions', {
+      const defaultDates = JSON.parse(JSON.stringify(appStore.getDefaults.dates[0]))
+      timeseriesStore.setAnimationOptions({
         onComplete: function (chart) {
           // By default chart has one label
           // If chart is really drawn (that is more than one label)
           // then reloading is true
-          if ($store.getters['timeseries/getGraphIsVisible']) {
+          if (timeseriesStore.getGraphIsVisible) {
             reloading.value = false
             spinner(false)
           }
-          if (!$store.getters['map/getIndexingOn']) {
+          if (!mapStore.getIndexingOn) {
             spinner(false)
           }
         }
@@ -209,19 +214,19 @@ export default defineComponent({
 
       let subtitle = moment(defaultDates.from, 'YYYY-MM-DD').format('DD/MM/YYYY')
       subtitle += ' - ' + moment(defaultDates.to, 'YYYY-MM-DD').format('DD/MM/YYYY')
-      $store.commit('app/setCalendarSubtitle', subtitle)
+      appStore.setCalendarSubtitle(subtitle)
 
       const d = new Date(Date.now())
       const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
       getCurrentDate.value = d.getFullYear() + '/' + monthIn2Digit
-      $store.commit('map/setMapDates', { defaultDates })
+      mapStore.setMapDates({ defaultDates })
     })
 
     function spinner (visibility = true) {
       if (visibility) {
         reloading.value = false
       }
-      $store.commit('app/setModal', {
+      appStore.setModal({
         id: 'wait',
         content: {
           visibility: visibility
@@ -231,7 +236,7 @@ export default defineComponent({
 
     onUpdated(function () {
       // Define callbacks when pan on chart starts
-      $store.commit('timeseries/setChartOnPanStart', function ({ chart }) {
+      timeseriesStore.setChartOnPanStart(function ({ chart }) {
         if (!zoomed.value && !panned.value) {
           setMapBeforeZoom()
         }
@@ -240,12 +245,12 @@ export default defineComponent({
           panned.value = true
           const labels = chart.scales.y._labelItems
           currentYTickMax = parseInt(labels[labels.length - 1].label)
-          $store.commit('timeseries/setYTickSuggetedMax', currentYTickMax)
+          timeseriesStore.setYTickSuggetedMax(currentYTickMax)
         }
       })
 
       // Define callbacks when pan on chart ends
-      $store.commit('timeseries/setChartOnPanComplete', function ({ chart }) {
+      timeseriesStore.setChartOnPanComplete(function ({ chart }) {
         if (!zoomed.value) {
           setMapBeforeZoom()
         }
@@ -261,15 +266,15 @@ export default defineComponent({
       })
 
       // Define callback when zoom on chart starts
-      $store.commit('timeseries/setChartOnZoomStart', function ({ chart }) {
-        $store.commit('timeseries/setYTickSuggetedMax', null)
+      timeseriesStore.setChartOnZoomStart(function ({ chart }) {
+        timeseriesStore.setYTickSuggetedMax(null)
         if (!zoomed.value && !panned.value) {
           setMapBeforeZoom()
         }
       })
 
       // Define callback when zoom on chart ends
-      $store.commit('timeseries/setChartOnZoomComplete', function ({ chart }) {
+      timeseriesStore.setChartOnZoomComplete(function ({ chart }) {
         zoomed.value = true
         const start = new Date(chart.boxes[4].min)
         const end = new Date(chart.boxes[4].max)
@@ -283,8 +288,8 @@ export default defineComponent({
     })
 
     const setMapBeforeZoom = function () {
-      if ($store.getters['map/getMapDates'].from !== '') {
-        mapDatesBeforeZoom = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+      if (mapStore.getMapDates.from !== '') {
+        mapDatesBeforeZoom = JSON.parse(JSON.stringify(mapStore.getMapDates))
         mapDatesBeforeZoom.from = moment(mapDatesBeforeZoom.from, 'YYYY-MM-DD').format('YYYY/MM/DD')
         mapDatesBeforeZoom.to = moment(mapDatesBeforeZoom.to, 'YYYY-MM-DD').format('YYYY/MM/DD')
       } else {
@@ -304,7 +309,7 @@ export default defineComponent({
     }
 
     const calendarSubtitle = computed(() => {
-      return $store.getters['app/getCalendarSubtitle']
+      return appStore.getCalendarSubtitle
     })
 
     const toggleTimeSeries = function () {
@@ -316,8 +321,8 @@ export default defineComponent({
     // Get Chart data from store
     const getData = () => {
       reloading.value = true
-      const rawData = $store.getters['timeseries/getDData']
-      const layers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      const rawData = timeseriesStore.getDData
+      const layers = JSON.parse(JSON.stringify(appStore.getLayers))
       const datasets = Object.keys(rawData.data).map(code => {
         const cat = Object.keys(layers).find(category => {
           return code in layers[category]
@@ -344,7 +349,7 @@ export default defineComponent({
         labels: rawData.dates,
         datasets: datasets
       }
-      moment.locale($store.getters['app/getLang'])
+      moment.locale(appStore.getLang)
       return data
     }
 
@@ -400,7 +405,7 @@ export default defineComponent({
           from: moment(day).format('YYYY-MM-DD'),
           to: moment(day).format('YYYY-MM-DD')
         }
-        $store.commit('app/setCalendarSubtitle', moment(day).format('DD/MM/YYYY'))
+        appStore.setCalendarSubtitle(moment(day).format('DD/MM/YYYY'))
       } else {
         // In some extreme cases calendarDate.value.from is null after pan on graph
         if (calendarDate.value) {
@@ -420,12 +425,12 @@ export default defineComponent({
           // Set calendar subtitle
           let subtitle = moment(calendarDate.value.from, 'YYYY/MM/DD').format('DD/MM/YYYY')
           subtitle += ' - ' + moment(calendarDate.value.to, 'YYYY/MM/DD').format('DD/MM/YYYY')
-          $store.commit('app/setCalendarSubtitle', subtitle)
+          appStore.setCalendarSubtitle(subtitle)
         }
       }
 
-      $store.commit('map/setMapDates', date)
-      $store.commit('timeseries/updateXUnits', daysInRange)
+      mapStore.setMapDates(date)
+      timeseriesStore.updateXUnits(daysInRange)
       context.emit('dateSelected', {
         type: 'date',
         data: date
@@ -433,12 +438,12 @@ export default defineComponent({
     }
 
     const chartOptions = computed(() => {
-      return $store.getters['timeseries/getChartOptions']
+      return timeseriesStore.getChartOptions
     })
 
     // Language function
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const showCalendar = function () {
@@ -701,7 +706,13 @@ export default defineComponent({
     align-items: center;
   }
   .graph-canvas{
-    flex-grow:1
+    flex-grow:1;
+    display: flex;
+    align-items:end;
+  }
+  .graph-canvas canvas[style] {
+    display: flex !important;
+    height: 100% !important;
   }
   .map-footer.mobile:not(.visible){
     // transition: max-height 1s ease;

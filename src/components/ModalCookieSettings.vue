@@ -81,14 +81,15 @@
 
 <script>
 import { computed, onMounted, ref } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { useCookies } from 'vue3-cookies'
 import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   emits: ['close'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const analyticsActivated = ref(false)
     // const gtag = inject('gtag')
     const gtm = useGtm()
@@ -102,18 +103,18 @@ export default {
     })
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].cookieSettings.visibility
+      return appStore.getModals.cookieSettings.visibility
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
+      appStore.setModal({ id: 'cookieSettings', content: { visibility: false } })
     }
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const savePreferences = function (preferences) {
@@ -130,7 +131,7 @@ export default {
       }
 
       cookies.set('cookie-comply', complied)
-      $store.commit('app/setCookiesComply', true)
+      appStore.setCookiesComply(true)
 
       // ACCEPT OR DENY ANALYTICS
       console.log(complied)
@@ -141,8 +142,6 @@ export default {
         // gtag.optOut()
         gtm.enable(false)
       }
-      console.log(gtm)
-      console.log(gtm.enabled())
       closeModal()
     }
 
@@ -151,7 +150,7 @@ export default {
     }
 
     const closeModal = function () {
-      return $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
+      return appStore.setModal({ id: 'cookieSettings', content: { visibility: false } })
     }
 
     return {

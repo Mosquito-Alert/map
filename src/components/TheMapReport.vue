@@ -1,6 +1,7 @@
 <!--
   MAP COMPONENT FOR REPORTS
 -->
+
 <template>
   <q-layout>
     <q-page-container>
@@ -228,7 +229,8 @@ import { computed, ref, onMounted, inject } from 'vue'
 import { transform, transformExtent } from 'ol/proj.js'
 import AdministrativeLayer from '../js/AdministrativeLayer'
 import FormatObservation from '../js/FormatObservation'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Polygon, MultiPolygon } from 'ol/geom'
@@ -238,7 +240,7 @@ import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
 import MSession from '../js/session.js'
-import { observations as privateLayers } from '../store/app/privateTOC'
+import { observations as privateLayers } from '../stores/app/privateTOC'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
 
@@ -249,7 +251,8 @@ export default {
   setup (props, context) {
     let mySession
     let privateReport
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const map = ref()
     const center = ref()
     const zoom = ref()
@@ -266,12 +269,12 @@ export default {
     const observationNames = ref([])
     const format = inject('ol-format')
     const geoJson = new format.GeoJSON()
-    const worker = new Worker('/TheReportWorker.js')
+    const worker = new Worker('TheReportWorker.js')
     let administrativeLayer
 
     const anyFilters = ref(false)
     const $q = useQuasar()
-    const backendUrl = $store.getters['app/getBackend']
+    const backendUrl = appStore.getBackend
 
     const reportId = computed(() => {
       return (props.report)
@@ -282,10 +285,11 @@ export default {
     })
 
     const setLanguage = (lang) => {
-      $store.dispatch('app/setInitData', lang)
+      appStore.setInitData(lang)
       // NASTY
-      if (lang === 'en') lang = 'en-US'
-      import(`../../node_modules/quasar/lang/${lang}`).then(({ default: messages }) => {
+      let qLang = lang
+      if (lang === 'en') qLang = 'en-US'
+      import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }
@@ -295,7 +299,7 @@ export default {
     }
 
     function loadReport () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      appStore.setCsrfToken(mySession.csrfToken)
       const ol = map.value.map
       const loadViewUrl = backendUrl + 'api/report/load/'
       const newView = new ReportView(ol, {
@@ -314,19 +318,19 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      const csrfToken = $store.getters['app/getCsrfToken']
+      const csrfToken = appStore.getCsrfToken
       mySession = new MSession(backendUrl, csrfToken)
       mySession.getSession(loadReport)
     })
 
     function getObservationsToLoadOnMap (viewObservations, privateReport) {
-      const possibles = $store.getters['app/getPossibleCategories']
+      const possibles = appStore.getPossibleCategories
       const observations = []
       const codes = []
-      const appLayers = JSON.parse(JSON.stringify($store.getters['app/getLayers']))
+      const appLayers = JSON.parse(JSON.stringify(appStore.getLayers))
       viewObservations.forEach(layerFilter => {
         // If user authorized add all _probable layers, otherwise remove _probable layers
-        if ($store.getters['app/getAuthorized']) {
+        if (appStore.getAuthorized) {
           if (!privateReport && possibles.includes(layerFilter.code)) {
             if (appLayers.observations[layerFilter.code].categories.indexOf('_probable') === -1) {
               const possibleCode = layerFilter.code + '_probable'
@@ -368,7 +372,7 @@ export default {
 
     function handleReportView (report) {
       if (report.status !== STATUS_CODES.OK) {
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'error',
           content: {
             visibility: true,
@@ -377,8 +381,8 @@ export default {
           }
         })
       } else {
-        if ($store.getters['app/getAuthorized']) {
-          $store.commit('app/setLayers', privateLayers)
+        if (appStore.getAuthorized) {
+          appStore.setLayers(privateLayers)
         }
         anyFilters.value = false
         privateReport = report.privateReport
@@ -387,7 +391,7 @@ export default {
         if (reportLang.value) {
           lang = reportLang.value.toLowerCase()
         } else {
-          lang = view.lang ? view.lang : $store.getters['app/getLang']
+          lang = view.lang ? view.lang : appStore.getLang
         }
         initLanguage(lang)
         center.value = view.center
@@ -397,7 +401,7 @@ export default {
         const reportObservations = cloneJson(view.filters.observations)
 
         view.filters.observations = getObservationsToLoadOnMap(reportObservations, privateReport)
-        const layers = $store.getters['app/getLayers']
+        const layers = appStore.getLayers
         // Get names from filter.observations
         observationNames.value = view.filters.observations.map(o => {
           return layers[o.type][o.code].common_name
@@ -449,8 +453,9 @@ export default {
               console.log(resp.status)
               return
             }
-            const titles = $store.getters['map/getTitles']
-            const latinNames = $store.getters['map/getLatinNames']
+            const titles = mapStore.getTitles
+            const latinNames = mapStore.getLatinNames
+            console.log(titles)
             const formated = resp.data.map(e => {
               return new FormatObservation(e, titles, latinNames).format()
             })
@@ -472,7 +477,7 @@ export default {
                 })
               }
               Feat.setGeometry(Feat.getGeometry().transform('EPSG:4326', 'EPSG:3857'))
-              const defaults = JSON.parse(JSON.stringify($store.getters['app/getDefaults']))
+              const defaults = JSON.parse(JSON.stringify(appStore.getDefaults))
               const ZIndex = parseInt(baseMap.value.tileLayer.values_.zIndex) + 1
               const fillLocationColor = defaults.fillLocationColor
               const strokeLocationColor = defaults.strokeLocationColor
@@ -496,7 +501,6 @@ export default {
     }
 
     worker.onmessage = function (data) {
-      console.log('onmessage')
       const mapFeatures = data.data.map.map(f => {
         return new Feature({
           geometry: new Point(transform(f.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')),
@@ -545,7 +549,7 @@ export default {
         // This is no cluster, just an Icon
         // When loading from shared view and popup must open, then selectedFeacture is required
         // Search inside observations layers
-        let observations = $store.getters['app/layers'].observations
+        let observations = appStore.getLayers.observations
         let observationsKeys = Object.keys(observations)
         let featureKey = observationsKeys.find(function (e) {
           return observations[e].categories.includes(feature.values_.properties.c)
@@ -553,7 +557,7 @@ export default {
 
         // If not found check on Bites
         if (!featureKey) {
-          observations = $store.getters['app/layers'].bites
+          observations = appStore.getLayers.bites
           observationsKeys = Object.keys(observations)
           featureKey = observationsKeys.find(function (e) {
             return observations[e].categories.includes(feature.values_.properties.c)
@@ -562,7 +566,7 @@ export default {
 
         // If not found check on breeding sites
         if (!featureKey) {
-          observations = $store.getters['app/layers'].breeding
+          observations = appStore.getLayers.breeding
           observationsKeys = Object.keys(observations)
           featureKey = observationsKeys.find(function (e) {
             return observations[e].categories.includes(feature.values_.properties.c)
@@ -571,7 +575,7 @@ export default {
 
         // If not found check on otherObservations
         if (!featureKey) {
-          observations = $store.getters['app/layers'].otherObservations
+          observations = appStore.getLayers.otherObservations
           observationsKeys = Object.keys(observations)
           featureKey = observationsKeys.find(function (e) {
             return observations[e].categories.includes(feature.values_.properties.c)
@@ -600,7 +604,7 @@ export default {
       }
 
       const viewLayers = []
-      const storeLayers = $store.getters['app/getLayers']
+      const storeLayers = appStore.getLayers
 
       view.filters.observations.forEach(o => {
         const categories = storeLayers[o.type][o.code].categories
@@ -631,7 +635,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const formatData = function (feature) {
@@ -667,7 +671,7 @@ export default {
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     return {

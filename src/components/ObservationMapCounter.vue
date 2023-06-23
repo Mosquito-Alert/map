@@ -21,20 +21,20 @@
 <script>
 
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   props: ['nPoints'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const visible = ref(false)
     const foldingIcon = ref('<')
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const npoints = computed(() => {

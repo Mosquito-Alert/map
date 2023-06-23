@@ -57,7 +57,9 @@
 
 <script>
 import { watch, ref, onMounted, computed } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import { useRoute } from 'vue-router'
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { transform } from 'ol/proj.js'
@@ -75,7 +77,9 @@ export default {
   components: { ObservationPopup },
   setup (props, context) {
     const progress = ref()
-    const $store = useStore()
+    // const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const route = useRoute()
     const map = ref('null')
     const view = ref('null')
@@ -100,16 +104,16 @@ export default {
     }
 
     async function selectFeature (feature) {
-      const root = $store.getters['app/getBackend']
+      const root = appStore.getBackend
       const url = root + 'api/get_observation/' + feature.properties.id + '/'
-      const titles = $store.getters['map/getTitles']
-      const latinNames = $store.getters['map/getLatinNames']
+      const titles = mapStore.getTitles
+      const latinNames = mapStore.getLatinNames
 
       // If there is no id then all info is already in feature
       if (!feature.properties.id) {
         const formated = new FormatObservation(feature.properties, titles, latinNames).format()
         formated.coordinates = feature.geometry.flatCoordinates
-        $store.commit('map/selectFeature', formated)
+        mapStore.selectFeature(formated)
         return
       }
       progress.value = 0
@@ -121,7 +125,7 @@ export default {
       }).then(resp => {
         resp.data.coordinates = feature.geometry.flatCoordinates
         const formated = new FormatObservation(resp.data, titles, latinNames).format()
-        $store.commit('map/selectFeature', formated)
+        mapStore.selectFeature(formated)
       })
     }
 
@@ -145,11 +149,11 @@ export default {
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const closePopup = function () {
-      $store.commit('map/selectFeature', {})
+      mapStore.selectFeature({})
     }
 
     // Check if popup is required
@@ -185,7 +189,7 @@ export default {
           } else {
             // Close popup if any
             selectedFeatures = []
-            $store.commit('map/selectFeature', {})
+            mapStore.selectFeature({})
           }
         })
       }
@@ -207,7 +211,7 @@ export default {
     })
 
     const popupContent = computed(() => {
-      return $store.getters['map/getSelectedFeature']
+      return mapStore.getSelectedFeature
     })
 
     watch(popupContent, (currentValue, oldValue) => {
@@ -237,7 +241,7 @@ export default {
       //   style.setImage(selectedIcon)
       //   style.setText('')
       // } else {
-      let observations = $store.getters['app/layers'].observations
+      let observations = appStore.getLayers.observations
       let observationsKeys = Object.keys(observations)
       let featureKey = observationsKeys.find(function (e) {
         return observations[e].categories.includes(feature.values_.properties.c)
@@ -245,7 +249,7 @@ export default {
 
       // If not found check on Bites
       if (!featureKey) {
-        observations = $store.getters['app/layers'].bites
+        observations = appStore.getLayers.bites
         observationsKeys = Object.keys(observations)
         featureKey = observationsKeys.find(function (e) {
           return observations[e].categories.includes(feature.values_.properties.c)
@@ -254,7 +258,7 @@ export default {
 
       // If not found check on breeding sites
       if (!featureKey) {
-        observations = $store.getters['app/layers'].breeding
+        observations = appStore.getLayers.breeding
         observationsKeys = Object.keys(observations)
         featureKey = observationsKeys.find(function (e) {
           return observations[e].categories.includes(feature.values_.properties.c)
@@ -263,7 +267,7 @@ export default {
 
       // If not found check on otherObservations
       if (!featureKey) {
-        observations = $store.getters['app/layers'].otherObservations
+        observations = appStore.getLayers.otherObservations
         observationsKeys = Object.keys(observations)
         featureKey = observationsKeys.find(function (e) {
           return observations[e].categories.includes(feature.values_.properties.c)
@@ -277,7 +281,7 @@ export default {
           iconUrl = observations[featureKey].iconConflict
         }
       } else {
-        observations = $store.getters['app/layers'].other
+        observations = appStore.getLayers.other
         iconUrl = observations.conflict.icon
       }
       const icon = new Icon({
@@ -345,16 +349,16 @@ export default {
 
     function doMapById () {
       if (openPopup.value) {
-        $store.dispatch('map/selectOneFeatureMap', observationId)
+        mapStore.selectOneFeatureMap(observationId)
       } else {
-        const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId + '/'
+        const url = appStore.getBackend + 'api/get_observation/' + observationId + '/'
         axios.get(url, {
           withCredentials: true
         })
           .then(resp => {
             console.log(resp)
             if (resp.status !== STATUS_CODES.OK) {
-              $store.commit('app/setModal', {
+              appStore.setModal({
                 id: 'error',
                 content: {
                   visibility: true,
@@ -380,7 +384,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     return {

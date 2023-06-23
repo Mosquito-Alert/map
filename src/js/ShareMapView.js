@@ -26,7 +26,6 @@ export default class ShareMapView {
   save () {
     const _this = this
     const ol = this.map
-
     const dataView = {
       center: ol.getView().getCenter(),
       zoom: ol.getView().getZoom(),

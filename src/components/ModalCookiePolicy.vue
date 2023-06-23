@@ -102,31 +102,32 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   emits: ['close', 'newReport'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].cookiePolicy.visibility
+      return appStore.getModals.cookiePolicy.visibility
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: false } })
+      appStore.setModal({ id: 'cookiePolicy', content: { visibility: false } })
     }
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const showModalCookieSettings = function () {
       close()
-      $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: true } })
+      appStore.setModal({ id: 'cookieSettings', content: { visibility: true } })
     }
 
     return {

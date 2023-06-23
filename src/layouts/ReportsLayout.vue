@@ -21,7 +21,7 @@
 <script>
 
 import { useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import TheMapReport from 'components/TheMapReport.vue'
 import ModalError from 'src/components/ModalError.vue'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
@@ -38,12 +38,13 @@ export default {
   },
   setup () {
     const route = useRoute()
-    const $store = useStore()
+    const appStore = useAppStore()
     const reportId = (route.params) ? ((route.params.report) ? route.params.report : '') : ''
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    const langCookie = appStore.getLang
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : langCookie) : langCookie
 
     if (lang) {
-      $store.dispatch('app/setInitData', lang.toLowerCase())
+      appStore.setInitData(lang.toLowerCase())
     }
 
     return {
@@ -112,8 +113,5 @@ export default {
   }
   .q-layout.collapsed .q-drawer__content{
     overflow-x:hidden;
-  }
-  .no-padding-top{
-    padding: 0px !important;
   }
 </style>

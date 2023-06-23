@@ -26,7 +26,7 @@
         name="fa-thin fa-layer-group"
         :label="trans('Distribution')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="distribution"
+        link="/distribution"
         item="wms"
         id="wms"
       >
@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { useQuasar } from 'quasar'
 import { onMounted, ref, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
@@ -122,18 +122,18 @@ export default {
 
     const $q = useQuasar()
     const { cookies } = useCookies()
-    const $store = useStore()
-    const LANGS = $store.getters['app/getAllowedLangs']
+    const appStore = useAppStore()
+    const LANGS = appStore.getAllowedLangs
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
     const showInfo = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
+      appStore.setModal({ id: 'info', content: { visibility: true } })
     }
 
     const showHelp = function () {
-      $store.commit('app/setModal', { id: 'help', content: { visibility: true } })
+      appStore.setModal({ id: 'help', content: { visibility: true } })
     }
 
     const processLogin = function () {
@@ -150,12 +150,12 @@ export default {
     }
 
     const lang = computed(() => {
-      return $store.getters['app/getLang']
+      return appStore.getLang
     })
 
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
-      const nextURL = $store.getters['app/getFrontendUrl'] + lang
+      const nextURL = appStore.getFrontend + lang
       const nextTitle = 'MosquitoAlert'
       const nextState = { additionalInformation: 'Updated the URL with JS' }
       window.history.pushState(nextState, nextTitle, nextURL)
@@ -166,26 +166,27 @@ export default {
     }
 
     const setLanguage = async function (lang, object) {
-      await $store.dispatch('app/setInitData', lang)
+      await appStore.setInitData(lang)
       cookies.set('lang', lang)
       object.parentNode.querySelectorAll('.menuItem').forEach(item => {
         item.classList.remove('active')
       })
       object.classList.add('active')
       // NASTY
-      if (lang === 'en') lang = 'en-US'
-      import(/* @vite-ignore */'../../node_modules/quasar/lang/' + lang).then(({ default: messages }) => {
+      let qLang = lang
+      if (qLang === 'en') qLang = 'en-US'
+      import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }
 
     onMounted(async function () {
-      lang.value = $store.getters['app/getLang']
+      lang.value = appStore.getLang
       context.emit('leftMenuMounted', {})
     })
 
     const wmsVisibility = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
+      const tabs = appStore.getLeftMenuTabs
       if (Object.keys(tabs).length) {
         return (tabs.distribution) ? tabs.distribution.active : false
       } else {
@@ -194,7 +195,7 @@ export default {
     })
 
     const estimationsVisibility = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
+      const tabs = appStore.getLeftMenuTabs
       if (Object.keys(tabs).length) {
         return (tabs.estimates) ? tabs.estimates.active : false
       } else {
@@ -203,15 +204,15 @@ export default {
     })
 
     const frontendUrl = computed(() => {
-      return $store.getters['app/getFrontendUrl']
+      return appStore.getFrontend
     })
 
     const linkModels = computed(() => {
-      return $store.getters['app/getFrontendUrl'] + 'models'
+      return appStore.getFrontend + 'models'
     })
 
     const loginLabel = computed(() => {
-      if ($store.getters['app/getAuthorized']) {
+      if (appStore.getAuthorized) {
         return trans('Log out')
       } else {
         return trans('Log in')

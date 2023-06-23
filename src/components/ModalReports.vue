@@ -38,14 +38,14 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { useGtm } from '@gtm-support/vue-gtm'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close', 'newReport'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     function doDataLayer (activeLayers) {
       const dict = {}
@@ -57,7 +57,7 @@ export default {
 
     const newReport = function () {
       context.emit('newReport')
-      const mapLayers = $store.getters['app/getLayers']
+      const mapLayers = appStore.getLayers
       const activeLayers = []
       for (const group in mapLayers) {
         for (const category in mapLayers[group]) {
@@ -91,13 +91,13 @@ export default {
       gtm.trackEvent(dl)
     }
 
-    const maxReports = $store.getters['app/getReportsLimit']
+    const maxReports = appStore.getReportsLimit
     const tooManyFeatures = computed(() => {
-      return ($store.getters['app/getModals'].report.n > maxReports)
+      return (appStore.getModals.report.n > maxReports)
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'report', content: { visibility: false } })
+      appStore.setModal({ id: 'report', content: { visibility: false } })
     }
 
     const hasCloseButton = computed(() => {
@@ -105,15 +105,15 @@ export default {
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const browser = computed(() => {
-      return $store.getters['app/getBrowser']
+      return appStore.getBrowser
     })
 
     return {

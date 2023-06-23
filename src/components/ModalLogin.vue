@@ -60,38 +60,38 @@
 
 <script>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   setup (props, context) {
     const username = ref('')
     const password = ref('')
-    const $store = useStore()
+    const appStore = useAppStore()
     const loginError = ref()
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].login.visibility
+      return appStore.getModals.login.visibility
     })
 
     const close = function () {
       loginError.value = false
-      $store.commit('app/setModal', { id: 'login', content: { visibility: false } })
+      appStore.setModal({ id: 'login', content: { visibility: false } })
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const onSubmit = function (evt) {
       if (username.value && password.value) {
         const controller = new AbortController()
         const { signal } = controller
-        const authenticateUrl = $store.getters['app/getAuthenticateUrl']
-        const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+        const authenticateUrl = appStore.getAuthenticateUrl
+        const registeredWeb = appStore.getRegisteredWebUrl
 
         const formData = new FormData()
         formData.append('username', username.value)

@@ -38,8 +38,8 @@
 
 <script>
 import { computed, ref } from 'vue'
-// import { inject } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import { useCookies } from 'vue3-cookies'
 import { useGtm } from '@gtm-support/vue-gtm'
@@ -49,35 +49,35 @@ export default {
   setup (props, context) {
     const cookiesSettings = ref('null')
     const analyticsActivated = ref(false)
-    const $store = useStore()
+    const appStore = useAppStore()
 
     // const gtag = inject('gtag')
     const gtm = useGtm()
     const { cookies } = useCookies()
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     // SHOW INFO IF REQUIRED
     const complyVisible = computed(() => {
-      return !$store.getters['app/getCookiesComply']
+      return !appStore.getCookiesComply
     })
 
     // OPEN COOKIE SETTINGS MODAL
     const openSettings = function () {
-      $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: true } })
+      appStore.setModal({ id: 'cookieSettings', content: { visibility: true } })
     }
 
     // OPEN COOKIE POLICY MODAL INFO
     const openPolicy = function () {
-      $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
+      appStore.setModal({ id: 'cookiePolicy', content: { visibility: true } })
     }
 
     // ACCEPT ALL COOKIES
     const acceptAll = function () {
       cookies.set('cookie-comply', 'all')
-      $store.commit('app/setCookiesComply', true)
+      appStore.setCookiesComply(true)
       // gtag.optIn()
       gtm.enable = true
     }

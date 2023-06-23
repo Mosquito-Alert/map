@@ -58,15 +58,15 @@
 
 <script>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   emits: ['close'],
   setup (props) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const hasCloseButton = computed(() => {
@@ -74,22 +74,22 @@ export default {
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].logos.visibility
+      return appStore.getModals.logos.visibility
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'logos', content: { visibility: false } })
+      appStore.setModal({ id: 'logos', content: { visibility: false } })
     }
 
     const linkLaCaixa = computed(() => {
-      const lang = $store.getters['app/getLang']
+      const lang = appStore.getLang
       return '//fundacionlacaixa.org/' + lang + '/convocatoria-caixaresearch-investigacion-salud-2019-proyecto-dengue-chikunguna-zika'
     })
-    const layers = $store.getters['app/getLayers']
+    const layers = appStore.getLayers
 
     return {
       open,

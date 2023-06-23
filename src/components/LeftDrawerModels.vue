@@ -217,7 +217,8 @@
 
 <script>
 import { watch, computed, onMounted, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import LeftMenu from 'components/LeftMenu.vue'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
@@ -249,7 +250,8 @@ export default {
     const modelDate = ref(null)
     const getLastDate = ref()
     const monthPicker = ref()
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const showLegend = ref(false)
     const disabled = ref(true)
     const disabledInfo = ref(true)
@@ -257,18 +259,18 @@ export default {
     const estimation = ref(true)
     const uncertainty = ref(true)
     const modelsCalendar = ref()
-    const backendUrl = $store.getters['app/getBackend']
+    const backendUrl = appStore.getBackend
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     // const estimationColor = ref()
     const palettes = ref(null)
-    let estimationColors = $store.getters['app/getEstimationColors']
+    let estimationColors = appStore.getEstimationColors
     const estLegendColors = ref(estimationColors)
-    const initialSeTransparency = $store.getters['app/getModelDefaults'].uncertaintyTransparency
+    const initialSeTransparency = appStore.getModelDefaults.uncertaintyTransparency
     const estimationTransparency = ref(0)
     const uncertaintyTransparency = ref(initialSeTransparency)
-    const manifestUrl = $store.getters['app/getModelsManifestUrl']
+    const manifestUrl = appStore.getModelsManifestUrl
 
     // colors for uncertainty
     const colorsTo = [
@@ -280,8 +282,8 @@ export default {
     ]
 
     onMounted(function () {
-      palettes.value = [].concat.apply([], $store.getters['app/getEstimationPalettes'])
-      const defaults = $store.getters['app/getModelDefaults']
+      palettes.value = [].concat.apply([], appStore.getEstimationPalettes)
+      const defaults = appStore.getModelDefaults
       // Check if referer is Reports map
       if (defaults.vector !== '') {
         const index = vectorOptions.value.findIndex(obj => {
@@ -355,11 +357,11 @@ export default {
 
     // Read default uncertainty color from store
     const seColor = computed(() => {
-      return $store.getters['app/getUncertaintyColor']
+      return appStore.getUncertaintyColor
     })
 
     const models = computed(() => {
-      return $store.getters['app/getModels']
+      return appStore.getModels
     })
 
     const vectorOptions = computed(() => {
@@ -374,7 +376,7 @@ export default {
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     // Called when TOC is toggled
@@ -383,7 +385,7 @@ export default {
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const dateSelected = computed(() => {
@@ -398,7 +400,7 @@ export default {
         modelDate.value = val
         inputDate.value = val
         monthPicker.value.hide()
-        $store.commit('map/setModelDate', inputDate.value)
+        mapStore.setModelDate(inputDate.value)
       }
       disabled.value = (!modelVector.value || !inputDate.value)
       if (inputDate.value) {
@@ -439,10 +441,10 @@ export default {
     // Called when apply button is clicked
     const applyfilter = async function () {
       if (inputDate.value === null || !modelVector.value) {
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
+        appStore.setModal({ id: 'error', content: { visibility: true, msg: 'Must select model first' } })
       } else {
         const parts = inputDate.value.split('/')
-        const serverModels = $store.getters['app/getModelsUrl']
+        const serverModels = appStore.getModelsUrl
         const selectedModel = modelVector.value.code
         const urls = [
           serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
@@ -460,7 +462,7 @@ export default {
           backendUrl + 'media/centroids/gadm3_centroid.json',
           backendUrl + 'media/centroids/gadm4_centroid.json'
         ]
-        const estimationPalettes = $store.getters['app/getEstimationPalettes']
+        const estimationPalettes = appStore.getEstimationPalettes
 
         // Prepare payload to update store
         const payload = {
@@ -479,7 +481,7 @@ export default {
           modelsCsv: urls,
           centroidsUrls: centroidsUrls
         }
-        $store.commit('app/setModelDefaults', payload)
+        appStore.setModelDefaults(payload)
         context.emit('loadModel', payload)
         if (mobile.value) {
           toggleLeftDrawer()
@@ -531,6 +533,7 @@ export default {
     }
 
     function hexToRgb (hex) {
+      /* eslint-disable */
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
       const c = result ? {
         r: parseInt(result[1], 16),
@@ -551,7 +554,7 @@ export default {
     const setUncertaintyColor = function (e) {
       colorPickerSe.value.hide()
       uncertaintyColor.value = e
-      $store.commit('app/setUncertaintyColor', uncertaintyColor.value)
+      appStore.setUncertaintyColor(uncertaintyColor.value)
       context.emit('uncertaintyColorsChanged')
     }
 
@@ -562,17 +565,17 @@ export default {
         idx += 1
         el = el.previousElementSibling
       }
-      const p = $store.getters['app/getEstimationPalettes']
+      const p = appStore.getEstimationPalettes
       const index = Math.floor(idx / 6)
       estimationColors = p[index]
       estLegendColors.value = estimationColors
-      $store.commit('app/setEstimationColors', estimationColors)
+      appStore.setEstimationColors(estimationColors)
       colorPickerEst.value.hide()
       context.emit('estimationColorsChanged')
     }
 
     const goInfoModal = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
+      appStore.setModal({ id: 'info', content: { visibility: true, anchor: 'modeled_info' } })
     }
 
     const startShareView = function () {

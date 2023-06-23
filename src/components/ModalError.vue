@@ -37,38 +37,39 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+// import { useStore } from 'vuex'
 
 export default {
   emits: ['close', 'newReport'],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].error.visibility
+      return appStore.getModals.error.visibility
     })
 
     const msg = computed(() => {
-      return $store.getters['app/getModals'].error.msg
+      return appStore.getModals.error.msg
     })
 
     const link = computed(() => {
-      return $store.getters['app/getModals'].error.link
+      return appStore.getModals.error.link
     })
 
     const redirection = computed(() => {
-      return $store.getters['app/getModals'].error.redirection
+      return appStore.getModals.error.redirection
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'error', content: { visibility: false } })
+      appStore.setModal({ id: 'error', content: { visibility: false } })
     }
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     return {

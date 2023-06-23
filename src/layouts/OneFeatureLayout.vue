@@ -3,7 +3,7 @@
     class="expanded"
     :class="mobile?'mobile':''"
   >
-  <q-page-container class="no-padding-top">
+  <q-page-container>
     <q-page
       class="flex expanded"
       :class="mobile?'mobile':''"
@@ -34,7 +34,9 @@
 import OneFeatureMap from 'components/OneFeatureMap.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+
 import ModalError from 'src/components/ModalError.vue'
 import ModalCookieSettings from 'src/components/ModalCookieSettings.vue'
 import ModalCookiePolicy from 'src/components/ModalCookiePolicy.vue'
@@ -51,19 +53,21 @@ export default {
   setup () {
     const route = useRoute()
     const observationId = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const $store = useStore()
+    // const $store = useStore()
+    const appStore = useAppStore()
+    const langCookie = appStore.getLang
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : langCookie) : langCookie
 
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
     if (lang) {
-      $store.dispatch('app/setInitData', lang.toLowerCase())
+      appStore.setInitData(lang.toLowerCase())
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     return {
@@ -105,7 +109,4 @@ export default {
     z-index:100;
     transform: scale(0.8);
   }
-  .no-padding-top{
-    padding: 0px !important;
-  }  
 </style>

@@ -199,16 +199,16 @@
 
 <script>
 import { computed, ref, onUpdated } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { scroll } from 'quasar'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
-    const $store = useStore()
+    const appStore = useAppStore()
     onUpdated(() => {
-      const modal = $store.getters['app/getModals'].info
+      const modal = appStore.getModals.info
       const { getScrollTarget, setVerticalScrollPosition } = scroll
       const el = document.getElementById(modal.anchor)
       if (el) {
@@ -219,22 +219,22 @@ export default {
       }
     })
     const close = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: false } })
+      appStore.setModal({ id: 'info', content: { visibility: false } })
     }
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
     const showModalCookiePolicy = function () {
       close()
-      $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
+      appStore.setModal({ id: 'cookiePolicy', content: { visibility: true } })
     }
-    const layers = $store.getters['app/getLayers']
+    const layers = appStore.getLayers
     return {
       layers,
       showModalCookiePolicy,

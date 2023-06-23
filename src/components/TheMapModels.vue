@@ -59,7 +59,8 @@
 <script>
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { defineComponent, ref, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import { transform } from 'ol/proj.js'
 import MVT from 'ol/format/MVT'
 import VectorTileLayer from 'ol/layer/VectorTile'
@@ -90,7 +91,8 @@ export default defineComponent({
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const leftDrawerIcon = ref('null')
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     let CSVS = {}
     const CENTROIDS = {}
     // let mySession
@@ -98,7 +100,7 @@ export default defineComponent({
     const GADM2 = 'gadm2'
     const GADM3 = 'gadm3'
     const GADM4 = 'gadm4'
-    const backendUrl = $store.getters['app/getBackend']
+    const backendUrl = appStore.getBackend
     let estModelLayer
     let seModelLayer
     let seModelLayer1
@@ -109,24 +111,24 @@ export default defineComponent({
     let gadm4MaxZoom
     let dataGridGeojson
     const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
-    $store.commit('map/selectFeature', {})
+    mapStore.selectFeature({})
 
     // Map general configuration
     const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
+      return mobile.value ? mapStore.getCurrents.MOBILEZOOM : mapStore.getCurrents.ZOOM
     })
 
     const center = computed(() => {
-      const center = $store.getters['map/getCurrents'].CENTER
+      const center = mapStore.getCurrents.CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
-    const properties = $store.getters['app/getModelsProperties']
-    const models = JSON.parse(JSON.stringify($store.getters['app/getModels']))
+    const properties = appStore.getModelsProperties
+    const models = JSON.parse(JSON.stringify(appStore.getModels))
     const jsonProperties = JSON.parse(JSON.stringify(properties))
 
     const toggleLeftDrawer = function () {
@@ -153,7 +155,7 @@ export default defineComponent({
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const shareViewUrl = backendUrl + 'api/view/save/'
@@ -161,14 +163,14 @@ export default defineComponent({
 
     // Call when user shares view
     function shareModelView () {
-      const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+      const modelData = JSON.parse(JSON.stringify(appStore.getModelDefaults))
       if (!modelData.vector || !modelData.year) {
         const content = {
           error: 'Share view error. No model is loaded',
           visibility: true,
           url: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })
@@ -179,7 +181,7 @@ export default defineComponent({
       // After mapview is shared then handle it
       const newView = new ShareMapView(ol, {
         viewType: 'models',
-        csrfToken: $store.getters['app/getCsrfToken'],
+        csrfToken: appStore.getCsrfToken,
         filters: {
           vector: modelData.vector,
           year: modelData.year,
@@ -189,7 +191,7 @@ export default defineComponent({
           estimationTransparency: modelData.estimationTransparency,
           uncertaintyTransparency: modelData.uncertaintyTransparency,
           uncertaintyColor: modelData.uncertaintyColor,
-          estimationColors: $store.getters['app/getEstimationColors']
+          estimationColors: appStore.getEstimationColors
         },
         url: shareViewUrl,
         callback: handleShareView
@@ -206,18 +208,18 @@ export default defineComponent({
           visibility: true,
           url: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })
       } else {
-        const frontend = $store.getters['app/getFrontendUrl']
+        const frontend = appStore.getFrontend
         content = {
-          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          url: frontend + status.code + '/' + appStore.getLang,
           visibility: true,
           error: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })
@@ -229,7 +231,7 @@ export default defineComponent({
     function loadView (viewCode) {
       const newView = new ShareMapView(map.value.map, {
         url: loadViewUrl + viewCode + '/',
-        csrfToken: $store.getters['app/getCsrfToken']
+        csrfToken: appStore.getCsrfToken
       })
       newView.load(handleLoadView)
     }
@@ -238,7 +240,7 @@ export default defineComponent({
     function handleLoadView (response) {
       // Check status response
       if (response.status !== STATUS_CODES.OK) {
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'error',
           content: {
             visibility: true,
@@ -252,7 +254,7 @@ export default defineComponent({
       console.log(d)
       context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
       const jsonView = JSON.parse(response.view[0].view)
-      $store.commit('map/setCurrents', {
+      mapStore.setCurrents({
         zoom: jsonView.zoom,
         center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
         mobilezoom: jsonView.zoom
@@ -296,7 +298,7 @@ export default defineComponent({
     }
 
     function spinner (status) {
-      $store.commit('app/setModal', {
+      appStore.setModal({
         id: 'wait',
         content: {
           visibility: status,
@@ -307,9 +309,9 @@ export default defineComponent({
 
     // Do geometry grid to show probability at bigger zooms
     const doGRID = function (data) {
-      const gridSize = $store.getters['app/getGridSize']
+      const gridSize = appStore.getGridSize
       dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
-      const estimationColors = $store.getters['app/getEstimationColors']
+      const estimationColors = appStore.getEstimationColors
       estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
         colors: estimationColors,
         rangs: RANGS,
@@ -323,7 +325,7 @@ export default defineComponent({
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
       }
-      const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
+      const seColor = appStore.getModelDefaults.uncertaintyColor
       seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
         zIndex: 16,
         color: seColor.value,
@@ -449,7 +451,7 @@ export default defineComponent({
           errMsg = err.message
         }
         spinner(false)
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: errMsg } })
+        appStore.setModal({ id: 'error', content: { visibility: true, msg: errMsg } })
       })
 
       if (connectionError) {
@@ -483,9 +485,9 @@ export default defineComponent({
       }).catch(function (err) {
         connectionError = true
         spinner(false)
-        const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
-        $store.commit('app/setErrorMessage', '')
+        const message = appStore.getErrorMessage + ' ' + err.message
+        appStore.setModal({ id: 'error', content: { visibility: true, msg: message } })
+        appStore.setErrorMessage()
       })
 
       if (connectionError) {
@@ -499,7 +501,7 @@ export default defineComponent({
       CENTROIDS.gadm3 = putDataOnCentroids(CENTROIDS.gadm3, CSVS['3'])
       CENTROIDS.gadm4 = putDataOnCentroids(CENTROIDS.gadm4, CSVS['4'])
 
-      const seColor = $store.getters['app/getUncertaintyColor']
+      const seColor = appStore.getUncertaintyColor
 
       seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
         zIndex: 15,
@@ -572,7 +574,7 @@ export default defineComponent({
 
     // General function style for probability
     const colorizeGadm = (feature, style, CSV) => {
-      const estimationColors = $store.getters['app/getEstimationColors']
+      const estimationColors = appStore.getEstimationColors
       const id = feature.properties_.id
       if (CSV[id] === undefined) {
         return null
@@ -603,7 +605,7 @@ export default defineComponent({
       })
     }
 
-    const tilesUrl = $store.getters['app/getTilesUrl']
+    const tilesUrl = appStore.getTilesUrl
 
     // Define layers for probability
     const gadm1 = new VectorTileLayer({
@@ -665,7 +667,7 @@ export default defineComponent({
     function updateMap () {
       // Save view params into store
       const newZoom = map.value.map.getView().getZoom()
-      $store.commit('map/setCurrents', {
+      mapStore.setCurrents({
         zoom: newZoom,
         center: transform(
           map.value.map.getView().getCenter(),
@@ -676,7 +678,7 @@ export default defineComponent({
 
     // Change estimation visibility
     const estimationVisibility = function (state) {
-      $store.commit('app/setModelEstimation', state)
+      appStore.setModelEstimation(state)
       gadm1.setVisible(state)
       gadm2.setVisible(state)
       gadm3.setVisible(state)
@@ -688,7 +690,7 @@ export default defineComponent({
 
     // Change uncertainty visibility
     const uncertaintyVisibility = function (state) {
-      $store.commit('app/setModelUncertainty', state)
+      appStore.setModelUncertainty(state)
       seModelLayer1.layer.setVisible(state)
       seModelLayer2.layer.setVisible(state)
       seModelLayer3.layer.setVisible(state)
@@ -733,7 +735,7 @@ export default defineComponent({
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
       }
-      const estimationColors = $store.getters['app/getEstimationColors']
+      const estimationColors = appStore.getEstimationColors
       if (dataGridGeojson) {
         estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
           colors: estimationColors,
@@ -753,7 +755,7 @@ export default defineComponent({
 
     // Redraw uncertainty. Get colors from store
     const uncertaintyRefresh = function () {
-      const seColor = $store.getters['app/getUncertaintyColor']
+      const seColor = appStore.getUncertaintyColor
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
       }
@@ -811,7 +813,7 @@ export default defineComponent({
       seModelLayer2.addLayer()
       seModelLayer3.addLayer()
       seModelLayer4.addLayer()
-      uncertaintyOpacity(1 - ($store.getters['app/getModelDefaults'].uncertaintyTransparency / 100))
+      uncertaintyOpacity(1 - (appStore.getModelDefaults.uncertaintyTransparency / 100))
     }
 
     const hideSpinner = function () {

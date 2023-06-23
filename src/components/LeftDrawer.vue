@@ -144,7 +144,7 @@
 
 <script>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import LeftMenu from 'components/LeftMenu.vue'
 import SamplingEffort from 'components/SamplingEffort.vue'
 import SearchLocation from 'components/SearchLocation.vue'
@@ -167,12 +167,12 @@ export default {
     const searchLocation = ref()
     const hashtags = ref()
     const samplingEffort = ref(null)
-    const $store = useStore()
+    const appStore = useAppStore()
 
     // Get a copy of layers from store to get categories
     const layers = computed(() => {
       // return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
-      return $store.getters['app/getLayers']
+      return appStore.getLayers
     })
 
     // Set active and inactive layers
@@ -190,7 +190,7 @@ export default {
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const mouseEnter = function (layer, event) {
@@ -204,24 +204,24 @@ export default {
     }
 
     const observations = computed(() => {
-      return $store.getters['app/layers'].observations
+      return appStore.getLayers.observations
     })
 
     const breeding = computed(() => {
-      return $store.getters['app/layers'].breeding
+      return appStore.getLayers.breeding
     })
 
     const otherObservations = computed(() => {
-      return $store.getters['app/layers'].otherObservations
+      return appStore.getLayers.otherObservations
     })
 
     const bites = computed(() => {
-      return $store.getters['app/layers'].bites
+      return appStore.getLayers.bites
     })
 
     // Language functions
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const setTags = function (tags) {

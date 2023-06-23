@@ -146,7 +146,7 @@
 
 <script>
 import { watch, computed, onMounted, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import LeftMenu from 'components/LeftMenu.vue'
 import draggable from 'vuedraggable'
 // import { wmsSelectedLayers } from 'src/store/app/getters'
@@ -163,7 +163,7 @@ export default {
     'exportImage'
   ],
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const disabled = ref(true)
     const disabledInfo = ref(true)
     const modelVector = ref()
@@ -172,11 +172,11 @@ export default {
     const selectedLayers = ref()
 
     const WMS = computed(() => {
-      return JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
+      return JSON.parse(JSON.stringify(appStore.getWmsData))
     })
 
     onMounted(function () {
-      currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
+      currentView = JSON.parse(JSON.stringify(appStore.getCurrentWMSView))
       if ('code' in currentView) {
         const index = vectorOptions.value.findIndex(obj => {
           return (obj.code === currentView.code)
@@ -198,8 +198,8 @@ export default {
 
     // // Get rid off reactiveness
     const legendImageSource = computed(() => {
-      const data = JSON.parse(JSON.stringify($store.getters['app/legendData']))
-      const lang = $store.getters['app/getLang']
+      const data = JSON.parse(JSON.stringify(appStore.legendData))
+      const lang = appStore.getLang
       const geoserverUrl = data.wms_url
       const layerName = data.layer
       const widthSize = 40
@@ -215,7 +215,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     // Called when TOC is toggled
@@ -224,7 +224,7 @@ export default {
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     // Called when model is selected
@@ -232,7 +232,7 @@ export default {
       const code = formValue.code
       selectedLayers.value = WMS.value[code]
 
-      $store.commit('app/setCurrentWMSView', {
+      appStore.setCurrentWMSView({
         code: code,
         years: JSON.parse(JSON.stringify(WMS.value[code]))
       })
@@ -240,12 +240,12 @@ export default {
     }
 
     const goInfoModal = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'wms_info' } })
+      appStore.setModal({ id: 'info', content: { visibility: true, anchor: 'wms_info' } })
     }
 
     const startShareView = function () {
       if (!modelVector.value) {
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'error',
           content: {
             visibility: true,
@@ -286,12 +286,12 @@ export default {
     const checkVisibility = function (e, layer, property) {
       const selectedSpecies = modelVector.value.code
       // WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
-      $store.commit('app/setWMSLayers', {
+      appStore.setWMSLayers({
         species: selectedSpecies,
         layers: JSON.parse(JSON.stringify(selectedLayers.value))
       })
 
-      $store.commit('app/setWmsProperties', {
+      appStore.setWmsProperties({
         id: layer.id,
         property: property,
         value: e,
@@ -307,7 +307,7 @@ export default {
 
     const reorderLayers = function () {
       const selectedSpecies = modelVector.value.code
-      $store.commit('app/setWMSLayers', {
+      appStore.setWMSLayers({
         species: selectedSpecies,
         layers: JSON.parse(JSON.stringify(selectedLayers.value))
       })
@@ -324,7 +324,7 @@ export default {
       // override wms from shared view
       WMS[view.species] = view.layers
       selectedLayers.value = view.layers
-      $store.commit('app/setWMSLayers', {
+      appStore.setWMSLayers({
         species: view.species,
         layers: view.layers
       })
@@ -338,7 +338,6 @@ export default {
 
     const buildDownloadUrl = (element) => {
       const downLink = `${element.wms_url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${element.layer}&outputFormat=SHAPE-ZIP`
-      console.log(downLink)
       return downLink
       // https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert%3Astatus_2303_shp&outputFormat=SHAPE-ZIP
     }

@@ -46,14 +46,14 @@
 <script>
 
 import { ref, computed, onUpdated } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close', 'shareView'],
   setup (props, context) {
     const copied = ref(false)
-    const $store = useStore()
+    const appStore = useAppStore()
     const viewContent = ref('')
 
     const shareView = function () {
@@ -62,18 +62,18 @@ export default {
     }
 
     onUpdated(() => {
-      if ($store.getters['app/getModals'].share.visibility) {
+      if (appStore.getModals.share.visibility) {
         shareView()
       }
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const close = function () {
       copied.value = false
-      $store.commit('app/setModal', {
+      appStore.setModal({
         id: 'share',
         content: {
           visibility: false,
@@ -84,7 +84,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const copyToClipboard = function () {

@@ -1,7 +1,7 @@
 import DataTile from 'ol/source/DataTile'
 import TileLayer from 'ol/layer/WebGLTile'
 import geojsonvt from 'geojson-vt'
-import { useStore } from 'vuex'
+import { useMapStore } from '../stores/mapStore.js'
 import axios from 'axios'
 
 export default class UserfixesLayer {
@@ -12,7 +12,7 @@ export default class UserfixesLayer {
     this.url = url
     this.tileIndex = null
     this.layer = null
-    this.$store = useStore()
+    this.mapStore = useMapStore()
   }
 
   // addAlpha (color, opacity) {
@@ -83,7 +83,7 @@ export default class UserfixesLayer {
     })
     this.layer.setZIndex(this.zIndex)
     this.map.addLayer(this.layer)
-    this.$store.commit('map/setSamplingEffortLoading', { loading: false })
+    this.mapStore.setSamplingEffortLoading({ loading: false })
   }
 
   refreshLayer () {

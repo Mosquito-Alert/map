@@ -2,6 +2,7 @@
 importScripts('supercluster.min.js')
 
 let index
+
 self.onmessage = function (e) {
   if (e.data.features) {
     const geojsonFeatures = e.data.features.map(f => {

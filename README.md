@@ -1,4 +1,4 @@
-# Quasar App (mosquito-vite)
+# Quasar App (mosquito-latest)
 
 A Quasar Project
 

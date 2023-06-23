@@ -27,40 +27,40 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
 
 export default {
   emits: ['close'],
   setup (props, context) {
-    const $store = useStore()
-    const backendUrl = $store.getters['app/getBackend']
+    const appStore = useAppStore()
+    const backendUrl = appStore.getBackend
 
     const open = computed(() => {
-      return $store.getters['app/getModals'].confirmLogout.visibility
+      return appStore.getModals.confirmLogout.visibility
     })
 
     const close = function () {
-      $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: false } })
+      appStore.setModal({ id: 'confirmLogout', content: { visibility: false } })
     }
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const logout = () => {
-      const registeredWeb = $store.getters['app/getRegisteredWebUrl']
+      const registeredWeb = appStore.getRegisteredWebUrl
       axios(backendUrl + 'api/logout/', {
         withCredentials: true
       })
         .then((resp) => {
           if (resp.status === STATUS_CODES.OK) {
             console.log(resp)
-            $store.commit('app/setAuthorized', false)
+            appStore.setAuthorized(false)
             document.location = registeredWeb
           } else {
             console.log(resp.status)

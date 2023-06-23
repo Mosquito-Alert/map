@@ -67,7 +67,8 @@
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 // import CustControl from './CustControl'
 import { defineComponent, ref, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import { transform } from 'ol/proj.js'
 import TileLayer from 'ol/layer/Tile.js'
 import TileWMS from 'ol/source/TileWMS.js'
@@ -86,25 +87,27 @@ export default defineComponent({
   setup (props, context) {
     const map = ref('null')
     const leftDrawerIcon = ref('null')
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
     const PREVIOUS_WMS = [] // keep layer Id
-    const backendUrl = $store.getters['app/getBackend']
+    const backendUrl = appStore.getBackend
 
+    mapStore.selectFeature({})
     // Map general configuration
     const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
+      return mobile.value ? mapStore.getCurrents.MOBILEZOOM : mapStore.getCurrents.ZOOM
     })
 
     const center = computed(() => {
-      const center = $store.getters['map/getCurrents'].CENTER
+      const center = mapStore.getCurrents.CENTER
       return transform(center, 'EPSG:4326', 'EPSG:3857')
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const toggleLeftDrawer = function () {
@@ -113,7 +116,7 @@ export default defineComponent({
     }
 
     const wmsNumberOfVisibleLayers = computed(() => {
-      return $store.getters['app/wmsNumberOfVisibleLayers']
+      return appStore.wmsNumberOfVisibleLayers
     })
 
     function unfoldAttribution () {
@@ -127,14 +130,14 @@ export default defineComponent({
 
     onMounted(function () {
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const currentWMSView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
+      const currentWMSView = JSON.parse(JSON.stringify(appStore.getCurrentWMSView))
       if (Object.keys(currentWMSView).length > 0) {
         loadWmsLayer(currentWMSView.years)
       }
     })
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const shareViewUrl = backendUrl + 'api/view/save/'
@@ -146,7 +149,7 @@ export default defineComponent({
       const ol = map.value.map
       const newView = new ShareMapView(ol, {
         viewType: 'wms',
-        csrfToken: $store.getters['app/getCsrfToken'],
+        csrfToken: appStore.getCsrfToken,
         species: data.species,
         layers: data.layers,
         url: shareViewUrl,
@@ -165,18 +168,18 @@ export default defineComponent({
           visibility: true,
           url: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })
       } else {
-        const frontend = $store.getters['app/getFrontendUrl']
+        const frontend = appStore.getFrontend
         content = {
-          url: frontend + status.code + '/' + $store.getters['app/getLang'],
+          url: frontend + status.code + '/' + appStore.getLang,
           visibility: true,
           error: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })
@@ -194,7 +197,7 @@ export default defineComponent({
     function updateMap () {
       // Save view params into store
       const newZoom = map.value.map.getView().getZoom()
-      $store.commit('map/setCurrents', {
+      mapStore.setCurrents({
         zoom: newZoom,
         center: transform(
           map.value.map.getView().getCenter(),
@@ -244,7 +247,7 @@ export default defineComponent({
           console.log(err)
         }
       })
-      $store.commit('app/setWmsNumberOfVisibleLayers', nVisibles)
+      appStore.setWmsNumberOfVisibleLayers(nVisibles)
     }
 
     const findLayer = function (id) {
@@ -259,9 +262,9 @@ export default defineComponent({
         if (payload.key === 'visible') {
           layer.setVisible(payload.value)
           if (payload.value) {
-            $store.commit('app/increaseWmsNumberOfVisibleLayers')
+            appStore.increaseWmsNumberOfVisibleLayers()
           } else {
-            $store.commit('app/decreaseWmsNumberOfVisibleLayers')
+            appStore.decreaseWmsNumberOfVisibleLayers()
           }
         } else {
           if (payload.key === 'transparency') {

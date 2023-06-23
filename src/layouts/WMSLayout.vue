@@ -7,14 +7,14 @@
         @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
-        <q-page-container class="no-padding-top">
-          <q-page class='flex'
-            :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
-            <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
-              @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
-              @errorDownloadingModels="errorDownloadingModels" />
-          </q-page>
-        </q-page-container>
+      <q-page-container class="no-padding-top">
+        <q-page class='flex'
+          :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
+          <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
+            @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
+            @errorDownloadingModels="errorDownloadingModels" />
+        </q-page>
+      </q-page-container>
 
       <modal-share ref="shareModal" :open="shareModalVisible">
         <template v-slot:default>
@@ -63,7 +63,8 @@ import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawerWms from 'components/LeftDrawerWms.vue'
 import TheMapWms from 'components/TheMapWms.vue'
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useTimeSeriesStore } from '../stores/timeseriesStore.js'
 import { useRoute } from 'vue-router'
 import MSession from '../js/session.js'
 import ShareMapView from '../js/ShareMapView'
@@ -96,14 +97,16 @@ export default {
     const shareModal = ref()
     const TOC = ref()
     const loadDrawer = ref(false)
-    const $store = useStore()
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    const appStore = useAppStore()
+    const timeseriesStore = useTimeSeriesStore()
+    const langCookie = appStore.getLang
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : langCookie) : langCookie
 
     async function getInitData () {
-      await $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
+      await appStore.setInitData(lang.toLocaleLowerCase())
       loadDrawer.value = true
     }
-    $store.commit('timeseries/setGraphIsVisible', false)
+    timeseriesStore.setGraphIsVisible(false)
     if (lang) {
       getInitData()
     } else {
@@ -111,10 +114,10 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
+    const backend = appStore.getBackend
 
     const tabIsVisible = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
+      const tabs = appStore.getLeftMenuTabs
       if (Object.keys(tabs).length) {
         return tabs.distribution.active
       } else {
@@ -123,35 +126,35 @@ export default {
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const expanded = ref(!mobile.value)
 
     const infoModalVisible = computed(() => {
-      return $store.getters['app/getModals'].info.visibility
+      return appStore.getModals.info.visibility
     })
 
     const helpModalVisible = computed(() => {
-      return $store.getters['app/getModals'].help.visibility
+      return appStore.getModals.help.visibility
     })
 
     const errorModalVisible = computed(() => {
-      return $store.getters['app/getModals'].error.visibility
+      return appStore.getModals.error.visibility
     })
 
     const shareModalVisible = computed(() => {
-      return $store.getters['app/getModals'].share.visibility
+      return appStore.getModals.share.visibility
     })
 
     const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession = new MSession(backend, appStore.getCsrfToken)
       mySession.getSession(buildMap)
     }
 
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
-      const backendUrl = $store.getters['app/getBackend']
+      appStore.setCsrfToken(mySession.csrfToken)
+      const backendUrl = appStore.getBackend
       const loadViewUrl = backendUrl + 'api/view/load/'
 
       // if loading previously shared view
@@ -159,7 +162,7 @@ export default {
         const wmsCode = 'W-' + viewCode
         const newView = new ShareMapView(null, {
           url: loadViewUrl + wmsCode + '/',
-          csrfToken: $store.getters['app/getCsrfToken']
+          csrfToken: appStore.getCsrfToken
         })
         newView.load(handleLoadView)
       }
@@ -171,13 +174,13 @@ export default {
         map.value.fitExtent(viewProperties.extent)
         TOC.value.setForm(viewProperties)
       } else {
-        const frontend = $store.getters['app/getFrontendUrl']
+        const frontend = appStore.getFrontend
         const content = {
-          url: frontend + data.status + '/' + $store.getters['app/getLang'],
+          url: frontend + data.status + '/' + appStore.getLang,
           visibility: true,
           error: ''
         }
-        $store.commit('app/setModal', {
+        appStore.setModal({
           id: 'share',
           content: content
         })

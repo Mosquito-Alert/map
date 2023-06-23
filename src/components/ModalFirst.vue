@@ -31,30 +31,30 @@
 
 <script>
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
 import { useCookies } from 'vue3-cookies'
 
 export default {
   props: ['open', 'buttons'],
   emits: ['close'],
   setup (props) {
-    const $store = useStore()
+    const appStore = useAppStore()
     const { cookies } = useCookies()
 
     const close = function () {
       cookies.set('ma-visited', 'yes')
-      $store.commit('app/setModal', { id: 'first', content: { visibility: false } })
+      appStore.setModal({ id: 'first', content: { visibility: false } })
     }
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
-    const layers = $store.getters['app/getLayers']
+    const layers = appStore.getLayers
     return {
       layers,
       close,

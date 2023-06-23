@@ -49,7 +49,8 @@
 </template>
 <script>
 import { ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import { mixin as VueClickAway } from 'vue3-click-away'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
@@ -67,7 +68,8 @@ export default {
     const isVisible = ref(false)
     const loading = ref(false)
     const model = ref()
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const results = ref([])
     const error = ref(false)
     let keyUpTimer = null
@@ -78,7 +80,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     const clickAway = function (event) {
@@ -97,14 +99,14 @@ export default {
 
     const search = function () {
       loading.value = true
-      const lang = $store.getters['app/getLang']
+      const lang = appStore.getLang
 
       let url = `https://nominatim.openstreetmap.org/search?q=${searchString.value}`
 
       // Set geometry simplification to 0.001 and lang preferences
       url += `&polygon_threshold=0.001&format=json&polygon_geojson=1&addressdetails=1&accept-language=${lang}`
       // Check for viewBox parameter in store
-      const viewBox = $store.getters['map/getViewbox']
+      const viewBox = mapStore.getViewbox
       if (viewBox.length) {
         url += '&viewbox=' + viewBox.join(',')
       }

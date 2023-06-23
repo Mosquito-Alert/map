@@ -111,12 +111,14 @@ import LeftDrawer from 'components/LeftDrawer.vue'
 import TheMap from 'components/TheMap.vue'
 import TimeSeries from 'components/TimeSeries.vue'
 import { computed, ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
 import MSession from '../js/session.js'
 import { useCookies } from 'vue3-cookies'
 import { useQuasar } from 'quasar'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
+import { useTimeSeriesStore } from '../stores/timeseriesStore.js'
 
 export default {
   components: {
@@ -147,21 +149,22 @@ export default {
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
+    const timeseriesStore = useTimeSeriesStore()
     const { cookies } = useCookies()
-    const backend = $store.getters['app/getBackend']
-    let lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-    const $q = useQuasar()
+    const backend = appStore.getBackend
+    const langCookie = appStore.getLang
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : langCookie) : langCookie
 
+    const $q = useQuasar()
     // Set default lang on calendar widget
-    if (lang === 'en') lang = 'en-US'
-    import(/* @vite-ignore */`../../node_modules/quasar/lang/${lang}`).then(({ default: messages }) => {
+    let qLang = lang
+    if (lang === 'en') qLang = 'en-US'
+    // eslint-disable-next-line
+    import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
       $q.lang.set(messages)
     })
-
-    // const resetTOC = function () {
-    //   map.value.initMap()
-    // }
 
     const resizeMap = function (args, mode) {
       if (args.start < args.end) {
@@ -173,12 +176,12 @@ export default {
       } else {
         // Ending resizing
         if (mode === 'timeseries') {
-          $store.commit('timeseries/setToggling', false)
-          if ($store.getters['timeseries/getGraphIsVisible']) {
-            $store.commit('timeseries/updateDataFromCache')
+          timeseriesStore.setToggling(false)
+          if (timeseriesStore.getGraphIsVisible) {
+            timeseriesStore.updateDataFromCache()
           }
         } else {
-          $store.commit('map/setLeftMenuToggling', false)
+          mapStore.setLeftMenuToggling(false)
         }
         map.value.updateMap()
         if (pendingView.value.extent !== null) {
@@ -191,11 +194,11 @@ export default {
 
     onMounted(() => {
       if (lang) {
-        $store.dispatch('app/setInitData', lang.toLowerCase())
+        appStore.setInitData(lang.toLowerCase())
         cookies.set('lang', lang.toLocaleLowerCase())
       }
-      if ($store.getters['app/getDefaults'].INFO_OPEN) {
-        $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
+      if (appStore.getDefaults.INFO_OPEN) {
+        appStore.setModal({ id: 'info', content: { visibility: true } })
       }
     })
 
@@ -204,12 +207,12 @@ export default {
     }
 
     const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession = new MSession(backend, appStore.getCsrfToken)
       mySession.getSession(buildMap)
     }
 
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      appStore.setCsrfToken(mySession.csrfToken)
       if (!viewCode) {
         map.value.firstCall()
       } else {
@@ -218,11 +221,11 @@ export default {
     }
 
     const pendingView = computed(() => {
-      return $store.getters['app/getPendingView']
+      return appStore.getPendingView
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const expanded = ref(!mobile.value)
@@ -257,7 +260,7 @@ export default {
       // }
       map.value.filterDate(payload)
       // If samplingEffort layer is active then refresh it
-      const samplingIsActive = $store.getters['app/getLayers'].sampling_effort.sampling.active
+      const samplingIsActive = appStore.getLayers.sampling_effort.sampling.active
       if (samplingIsActive) {
         let mapDate = {}
         if (payload.data.from === '') {
@@ -285,51 +288,47 @@ export default {
     }
 
     const firstModalVisible = computed(() => {
-      return $store.getters['app/getModals'].first.visibility
+      return appStore.getModals.first.visibility
     })
 
     const infoModalVisible = computed(() => {
-      return $store.getters['app/getModals'].info.visibility
+      return appStore.getModals.info.visibility
     })
 
     const helpModalVisible = computed(() => {
-      return $store.getters['app/getModals'].help.visibility
+      return appStore.getModals.help.visibility
     })
 
     const downloadModalVisible = computed(() => {
-      return $store.getters['app/getModals'].download.visibility
+      return appStore.getModals.download.visibility
     })
 
     const shareModalVisible = computed(() => {
-      return $store.getters['app/getModals'].share.visibility
+      return appStore.getModals.share.visibility
     })
 
     const reportModalVisible = computed(() => {
-      return $store.getters['app/getModals'].report.visibility
+      return appStore.getModals.report.visibility
     })
 
     const errorModalVisible = computed(() => {
-      return $store.getters['app/getModals'].error.visibility
+      return appStore.getModals.error.visibility
     })
 
-    // const frontendUrl = computed(() => {
-    //   return $store.getters['app/getFrontendUrl']
-    // })
-
     const toggleLeftDrawer = function () {
-      $store.commit('app/toggleLeftDrawerStatus')
-      $store.commit('map/setLeftMenuToggling', true)
+      appStore.toggleLeftDrawerStatus()
+      mapStore.setLeftMenuToggling(true)
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 }, 'leftDrawer')
     }
 
     const toggleGraphic = function (args) {
       map.value.closePopup()
-      $store.commit('timeseries/setToggling', true)
-      $store.commit('timeseries/setGraphIsVisible', args.isVisible)
-      if ($store.getters['timeseries/getGraphIsVisible']) {
+      timeseriesStore.setToggling(true)
+      timeseriesStore.setGraphIsVisible(args.isVisible)
+      if (timeseriesStore.getGraphIsVisible) {
         // map.value.spinner(false)
-        $store.commit('timeseries/updateDData', {
+        timeseriesStore.updateDData({
           data: [],
           dates: []
         })
@@ -338,9 +337,9 @@ export default {
     }
 
     const workerFinishedIndexing = function (payload) {
-      $store.commit('map/setIndexingOn', false)
-      if (!$store.getters['timeseries/getGraphIsVisible']) {
-        $store.commit('app/setModal', {
+      mapStore.setIndexingOn(false)
+      if (!timeseriesStore.getGraphIsVisible) {
+        appStore.setModal({
           id: 'wait',
           content: {
             visibility: false,
@@ -354,7 +353,7 @@ export default {
     }
 
     const workerStartedIndexing = function () {
-      $store.commit('map/setIndexingOn', true)
+      mapStore.setIndexingOn(true)
     }
 
     const endShareView = function (payload) {

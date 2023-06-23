@@ -25,7 +25,8 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useMapStore } from '../stores/mapStore.js'
 import { computed } from 'vue'
 
 export default {
@@ -37,37 +38,38 @@ export default {
     }
   },
   setup (props, context) {
-    const $store = useStore()
+    const appStore = useAppStore()
+    const mapStore = useMapStore()
     const isActive = computed(() => {
       // return JSON.parse(JSON.stringify($store.getters['app/getLayers']))
-      return $store.getters['app/getLayers'].sampling_effort.sampling.active
+      return appStore.getLayers.sampling_effort.sampling.active
     })
 
     const samplingEffort = computed(() => {
-      return $store.getters['app/layers'].sampling_effort.sampling
+      return appStore.getLayers.sampling_effort.sampling
     })
 
     const samplingIsActive = function () {
-      return $store.getters['map/getActiveLayers'].some(l => {
+      return mapStore.getActiveLayers.some(l => {
         return l.type === 'sampling_effort'
       })
     }
 
     const loading = computed(() => {
-      return $store.getters['map/getSamplingEffortLoading']
+      return mapStore.getSamplingEffortLoading
     })
 
     const toggleClass = () => {
-      const d = JSON.parse(JSON.stringify($store.getters['map/getMapDates']))
+      const d = JSON.parse(JSON.stringify(mapStore.getMapDates))
 
       if (isActive.value) {
-        $store.commit('app/setActiveLayer', {
+        appStore.setActiveLayer({
           type: 'sampling_effort',
           code: 'sampling',
           active: false
         })
       } else {
-        $store.commit('app/setActiveLayer', {
+        appStore.setActiveLayer({
           type: 'sampling_effort',
           code: 'sampling',
           active: true
@@ -80,7 +82,7 @@ export default {
     }
 
     const trans = function (text) {
-      return $store.getters['app/getText'](text)
+      return appStore.getText(text)
     }
 
     return {

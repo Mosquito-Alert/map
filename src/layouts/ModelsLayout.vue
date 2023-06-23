@@ -36,6 +36,7 @@
           />
         </q-page>
       </q-page-container>
+
       <modal-share
         ref="shareModal"
         :open="shareModalVisible"
@@ -86,7 +87,8 @@ import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawerModels from 'components/LeftDrawerModels.vue'
 import TheMapModels from 'components/TheMapModels.vue'
 import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '../stores/appStore.js'
+import { useTimeSeriesStore } from '../stores/timeseriesStore.js'
 import { useRoute } from 'vue-router'
 import MSession from '../js/session.js'
 
@@ -118,20 +120,22 @@ export default {
     const shareModal = ref()
     const TOC = ref()
     const timeseries = ref()
-    const $store = useStore()
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
+    const appStore = useAppStore()
+    const timeseriesStore = useTimeSeriesStore()
+    const langCookie = appStore.getLang
+    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : langCookie) : langCookie
 
-    $store.commit('timeseries/setGraphIsVisible', false)
+    timeseriesStore.setGraphIsVisible(false)
 
     if (lang) {
-      $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
+      appStore.setInitData(lang.toLocaleLowerCase())
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
+    const backend = appStore.getBackend
 
     const estimatesIsVisible = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
+      const tabs = appStore.getLeftMenuTabs
       if (Object.keys(tabs).length) {
         return tabs.estimates.active
       } else {
@@ -140,34 +144,34 @@ export default {
     })
 
     const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
+      return appStore.getIsMobile
     })
 
     const expanded = ref(!mobile.value)
 
     const infoModalVisible = computed(() => {
-      return $store.getters['app/getModals'].info.visibility
+      return appStore.getModals.info.visibility
     })
 
     const helpModalVisible = computed(() => {
-      return $store.getters['app/getModals'].help.visibility
+      return appStore.getModals.help.visibility
     })
 
     const errorModalVisible = computed(() => {
-      return $store.getters['app/getModals'].error.visibility
+      return appStore.getModals.error.visibility
     })
 
     const shareModalVisible = computed(() => {
-      return $store.getters['app/getModals'].share.visibility
+      return appStore.getModals.share.visibility
     })
 
     const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
+      mySession = new MSession(backend, appStore.getCsrfToken)
       mySession.getSession(buildMap)
     }
 
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
+      appStore.setCsrfToken(mySession.csrfToken)
       if (viewCode) {
         map.value.loadView('M-' + viewCode)
       }
@@ -223,13 +227,13 @@ export default {
     }
 
     const estimationTransparency = function (payload) {
-      $store.commit('app/setEstimationTransparency', payload.transparency)
+      appStore.setEstimationTransparency(payload.transparency)
       const t = 1 - (payload.transparency / 100)
       map.value.estimationOpacity(t)
     }
 
     const uncertaintyTransparency = function (payload) {
-      $store.commit('app/setUncertaintyTransparency', payload.transparency)
+      appStore.setUncertaintyTransparency(payload.transparency)
       const t = 1 - (payload.transparency / 100)
       map.value.uncertaintyOpacity(t)
     }
