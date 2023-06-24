@@ -145,11 +145,6 @@ export const useMapStore = defineStore('map', {
       this.mapDates.from = payload.from
       this.mapDates.to = payload.to
     },
-    setCurrents (payload) {
-      this.CURRENTS.ZOOM = payload.zoom
-      this.CURRENTS.CENTER = payload.center
-      this.CURRENTS.MOBILEZOOM = payload.zoom
-    },
     setCenter (payload) {
       this.CURRENTS.CENTER = payload.center
     },
@@ -173,6 +168,11 @@ export const useMapStore = defineStore('map', {
       this.DEFAULTS.ZOOM = payload.zoom
       this.DEFAULTS.CENTER = payload.center
       this.DEFAULTS.MOBILEZOOM = payload.zoom
+    },
+    setCurrents (payload) {
+      this.CURRENTS.ZOOM = payload.zoom
+      this.CURRENTS.CENTER = payload.center
+      this.CURRENTS.MOBILEZOOM = payload.zoom
     }
   }
 })
