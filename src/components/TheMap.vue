@@ -489,7 +489,7 @@ export default defineComponent({
             const fId = event.data.openPopupId
             const sFeature = getSpiralFeature(fId)
             // $store.dispatch('map/selectFeature', sFeature.values_)
-            selectFeature(sFeature.value_)
+            selectFeature(sFeature.values_)
           }
         }
         features.value = []
@@ -714,6 +714,10 @@ export default defineComponent({
 
       privateView = v.privateView
       $store.commit('map/setCurrents', {
+        zoom: v.zoom,
+        center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
+      })
+      $store.commit('map/setDefaults', {
         zoom: v.zoom,
         center: transform(v.center, 'EPSG:3857', 'EPSG:4326')
       })
