@@ -665,7 +665,6 @@ export default defineComponent({
     }
 
     async function selectFeature (feature) {
-      console.log(feature)
       const root = appStore.getBackend
       const url = root + 'api/get_observation/' + feature.properties.id + '/'
       const titles = mapStore.getTitles

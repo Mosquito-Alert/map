@@ -34,9 +34,7 @@ function log (text) {
 }
 
 self.onmessage = async function (e) {
-  loadSharedView = isSharingView(e.data.loadSharedView)
   if (e.data.initData) {
-    // If it is first app call 
     indexInitialMapView(e.data.data)
     return
   }
@@ -52,68 +50,36 @@ self.onmessage = async function (e) {
   }
 
   fitFeatures = false
-  if (clickOnMapCluster(e.data)) {
-    // Returns the zoom level to zoom in and the center.
-    let z = parseInt(cluseredIndex.getClusterExpansionZoom(e.data.getClusterExpansionZoom))
-    // Calculate the extent of the cluster to speed up zooming in
-    const clusterExtent = getExtent(e.data.getClusterExpansionZoom)
-    if (z >= 19) {
-      z = 19
-    }
-    postMessage({
-      expansionZoom: z,
-      center: e.data.center,
-      clusterExtent: clusterExtent
-    })
-  } else if (e.data.spiderfyCluster) {
-    // Cluster must be spiderfied
-    let openPopupId = ''
-    if (e.data.spiderfyId && e.data.dataset) {
-      // Sharing spiderfied view
-      console.log(e.data)
-      filteredData = dataset
-      filteredData = doFilters(filters, e.data.layers)
-      cluseredIndex = await doClusteredIndex(filteredData)
-      const cluster = getClusterByFeatureId(e.data)
-      e.data.getClusterExpansionZoom = cluster.id
-      e.data.center = cluster.geometry.coordinates
-      openPopupId = e.data.spiderfyId
-    }
-    if (e.data.getClusterExpansionZoom) {
-      // Send data to spiderfy cluster
-      postMessage({
-        map: cluseredIndex.getClusters(e.data.bbox, parseInt(e.data.zoom)),
-        spiderfyFeatures: cluseredIndex.getLeaves(e.data.getClusterExpansionZoom, Infinity),
-        spiderfyCluster: e.data.spiderfyCluster,
-        openPopupId: openPopupId,
-        center: e.data.center,
-        clusterId: e.data.getClusterExpansionZoom
-      })
-    } else {
-      console.log('AQUÍ QUAN ENTRA????')
-      postMessage({
-        map: cluseredIndex.getClusters(e.data.bbox, e.data.zoom),
-        spiderfyCluster: e.data.spiderfyCluster,
-        center: e.data.center
-      })
-    }
-  } else if (e.data.filters) {
-    // Do new index
-    // Get the smallest dataset (maybe featuresSet) before start filtering
-    filteredData = getDefaultData(filters, dataset)
-    // Filter observations that pass filters
-    filteredData = doFilters(filters, e.data.layers)
-    // Update filteredDataset
-    filteredDataset = filteredData
-    loadMapData(filteredData, fitFeatures, false)
-  } else if (e.data) {
-    // When map is just panned
-    if (filters.observations) {
-      grahData = getGraphData (e, filteredData)
-      postMessage({
-        timeseries: grahData
-      })
-    }
+  // if (clickOnMapCluster(e.data)) {
+  //   console.log('click on map cluster')
+  //   processClickOnMapCluster(e.data)
+  // } else if (spiderfyClusterRequired(e.data)) {
+  //   console.log('spiderfy cluster')
+  //   processSpiderfyCluster(e.data)
+  // } else if (newIndexRequired(e.data)) {
+  //   console.log('new index required')
+  //   processNewIndex(e.data)
+  // } else if (e.data) {
+  //   if (newPanRequired(e)) {
+  //     console.log('do pan')
+  //     processPan(e)
+  //   } else {
+  //     console.log('do nothing')
+  //   }
+  // }
+
+  if (newIndexRequired(e.data)) {
+    console.log('do index')
+    processNewIndex(e.data)
+  } else if (clickOnMapCluster(e.data)) {
+    console.log('click on cluster')
+    processClickOnMapCluster(e.data)
+  } else if (spiderfyClusterRequired(e.data)) {
+    console.log('spiderfy cluster')
+    processSpiderfyCluster(e.data)
+  } else if (newPanRequired(e)) {
+    console.log('do pan')
+    processPan(e)
   }
 }
 
@@ -192,7 +158,7 @@ function getGraphData (e, dataset) {
 }
 
 function doClusteredIndex (data) {
-  console.log(data.length)
+  console.log('do cluster index')
   return new Supercluster({
     log: DEBUG,
     radius: 10,
@@ -359,23 +325,11 @@ function getClusterByFeatureId (data) {
   return parent
 }
 
-function isSharingView (param) {
-  if (param){
-    return true
-  } else {
-    return false
-  }
-}
-
 // Index default map data
 function indexInitialMapView (data) {
   // Init dataset var for the rest of calls
   dataset = data.features
   loadMapData(dataset, false, true)
-}
-
-function clickOnMapCluster (param) {
-  return (param.getClusterExpansionZoom && !param.spiderfyCluster)
 }
 
 function getDefaultData (filters, dataset) {
@@ -419,4 +373,88 @@ function doFilters(filters, layers) {
     filteredData = filterLocations(filteredData, poly)
   }
   return filteredData
+}
+
+function clickOnMapCluster (param) {
+  return (param.getClusterExpansionZoom && !param.spiderfyCluster)
+}
+
+function processClickOnMapCluster(data){
+  // Returns the zoom level to zoom in and the center.
+  let z = parseInt(cluseredIndex.getClusterExpansionZoom(data.getClusterExpansionZoom))
+  // Calculate the extent of the cluster to speed up zooming in
+  const clusterExtent = getExtent(data.getClusterExpansionZoom)
+  if (z >= 19) {
+    z = 19
+  }
+  postMessage({
+    expansionZoom: z,
+    center: data.center,
+    clusterExtent: clusterExtent
+  })
+}
+function spiderfyClusterRequired(data){
+  return data.spiderfyCluster
+}
+
+async function processSpiderfyCluster (data) {
+  // Cluster must be spiderfied
+  let openPopupId = ''
+  if (data.spiderfyId && data.dataset) {
+    // Sharing spiderfied view
+    filteredData = dataset
+    filteredData = doFilters(filters, data.layers)
+    cluseredIndex = await doClusteredIndex(filteredData)
+    const cluster = getClusterByFeatureId(data)
+    data.getClusterExpansionZoom = cluster.id
+    data.center = cluster.geometry.coordinates
+    openPopupId = data.spiderfyId
+  }
+  if (data.getClusterExpansionZoom) {
+    // Send data to spiderfy cluster
+    postMessage({
+      map: cluseredIndex.getClusters(data.bbox, parseInt(data.zoom)),
+      spiderfyFeatures: cluseredIndex.getLeaves(data.getClusterExpansionZoom, Infinity),
+      spiderfyCluster: data.spiderfyCluster,
+      openPopupId: openPopupId,
+      center: data.center,
+      clusterId: data.getClusterExpansionZoom
+    })
+  } else {
+    console.log('AQUÍ QUAN ENTRA????')
+    postMessage({
+      map: cluseredIndex.getClusters(data.bbox, data.zoom),
+      spiderfyCluster: data.spiderfyCluster,
+      center: data.center
+    })
+  }
+}
+
+function newIndexRequired (data) {
+  if (!clickOnMapCluster(data) && !spiderfyClusterRequired(data)) {
+    console.log(data.filters)
+    return data.filters
+  }
+}
+
+function processNewIndex (data) {
+  // Do new index
+  // Get the smallest dataset (maybe featuresSet) before start filtering
+  filteredData = getDefaultData(filters, dataset)
+  // Filter observations that pass filters
+  filteredData = doFilters(filters, data.layers)
+  // Update filteredDataset
+  filteredDataset = filteredData
+  loadMapData(filteredData, fitFeatures, false)
+}
+
+function newPanRequired (e) {
+  return e.data && filters.observations
+}
+
+function processPan (e) {
+  grahData = getGraphData (e, filteredData)
+  postMessage({
+    timeseries: grahData
+  })
 }
