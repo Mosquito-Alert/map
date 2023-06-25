@@ -162,7 +162,7 @@ export default {
     let qLang = lang
     if (lang === 'en') qLang = 'en-US'
     // eslint-disable-next-line
-    import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
+    import(/* @vite-ignore */'../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
       $q.lang.set(messages)
     })
 

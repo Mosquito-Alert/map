@@ -708,7 +708,7 @@ export default defineComponent({
   .graph-canvas{
     flex-grow:1;
     display: flex;
-    align-items:end;
+    align-items:flex-end;
   }
   .graph-canvas canvas[style] {
     display: flex !important;

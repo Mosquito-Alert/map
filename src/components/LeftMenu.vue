@@ -175,7 +175,7 @@ export default {
       // NASTY
       let qLang = lang
       if (qLang === 'en') qLang = 'en-US'
-      import('../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
+      import(/* @vite-ignore */'../../node_modules/quasar/lang/' + qLang).then(({ default: messages }) => {
         $q.lang.set(messages)
       })
     }
