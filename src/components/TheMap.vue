@@ -22,9 +22,11 @@
 
     <!-- SHOW SELECTED DATES ON MAP -->
     <map-dates-filter
+      ref="mapDatesFilter"
       :dateFrom="mapDates.from"
       :dateTo="mapDates.to"
       @calendarClicked="calendarClicked"
+      @dateSelected='dateSelected'
     />
 
     <!-- SHOW OBSERVATIONS COUNTER -->
@@ -170,11 +172,13 @@ export default defineComponent({
     'tagsChanged',
     'locationChanged',
     'loadUserFixes',
-    'calendarClicked'
+    'calendarClicked',
+    'dateSelected'
   ],
   props: ['sharedView'],
   setup (props, context) {
     const progress = ref()
+    const mapDatesFilter = ref()
     let mySession
     let redrawRequired = false
     let privateView = false
@@ -233,6 +237,10 @@ export default defineComponent({
       mySession.getSession(loadView)
     }
 
+    const dateSelected = (e) => {
+      console.log(e)
+      context.emit('dateSelected', e)
+    }
     function loadView () {
       const ol = map.value.map
       appStore.setCsrfToken(mySession.csrfToken)
@@ -1770,9 +1778,15 @@ export default defineComponent({
       }
     }
 
+    const setCalendarValue = function (data) {
+      mapDatesFilter.value.setCalendarValue(data)
+    }
     return {
       mobile,
       spinner,
+      setCalendarValue,
+      mapDatesFilter,
+      dateSelected,
       openDownloadModal,
       openReportsModal,
       calendarClicked,

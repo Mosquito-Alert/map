@@ -31,8 +31,8 @@
           @tagsChanged="tagsChanged"
           @locationChanged="locationChanged"
           @loadUserFixes="loadUserFixes"
-          @calendarClicked="calendarClicked"
           @endShareView="endShareView"
+          @dateSelected="filterDate"
         />
         <time-series
           ref="timeseries"
@@ -255,6 +255,7 @@ export default {
     }
 
     const filterDate = function (payload) {
+      map.value.setCalendarValue(payload.data)
       // if (filteringLocations()) {
       //   TOC.value.searchLocation.loading = true
       // }
@@ -383,13 +384,8 @@ export default {
       TOC.value.toggleSamplingEffort(payload)
     }
 
-    const calendarClicked = function (e) {
-      timeseries.value.showCalendar()
-    }
-
     return {
       mobile,
-      calendarClicked,
       viewCode,
       newReport,
       expanded,

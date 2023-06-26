@@ -49,50 +49,6 @@
             </template>
           </div>
         </div>
-
-        <div>
-          <q-btn
-            ref="calendarBtn"
-            icon="event_note"
-            class="no-pointer-events calendar-button"
-          >
-            <q-popup-proxy
-              cover
-              transition-show="scale"
-              transition-hide="scale"
-            >
-            <!-- QUASAR CALENDAR -->
-              <q-date
-                navigation-min-year-month="2014/06"
-                :navigation-max-year-month="getCurrentDate"
-                v-model="calendarDate"
-                :subtitle="rangeEndValue?rangeEndValue:(rangeStartValue?rangeStartValue:calendarSubtitle)"
-                range
-                :years-in-month-view=true
-                class="calendar"
-                color="orange-4"
-                text-color="black"
-                @range-start="rangeStart"
-                @range-end="rangeEnd"
-                @update:model-value="applyButtonClass"
-              >
-                <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="trans('Select all')" class="ma-btn"
-                    flat
-                    v-close-popup
-                    @click="resetDateFilter"
-                  />
-                  <q-btn
-                    :label="trans('Apply calendar')"
-                    :class="enableButton?'ma-btn':'ma-btn disabled'"
-                    flat v-close-popup
-                    @click="datePicked"
-                  />
-                </div>
-              </q-date>
-            </q-popup-proxy>
-          </q-btn>
-        </div>
       </div>
       <!-- CHART -->
       <LineChart
@@ -389,7 +345,7 @@ export default defineComponent({
       }
     }
 
-    // Called when apply button is clicked
+    // Called when drag on graph
     const datePicked = function (event) {
       let daysInRange = 0
       let sDate
