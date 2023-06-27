@@ -23,7 +23,7 @@
       "boot/*": [
         "src/boot/*"
       ],
-      "store/*": [
+      "stores/*": [
         "src/stores/*"
       ],
       "vue$": [

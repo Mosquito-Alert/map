@@ -542,6 +542,7 @@ input{
   text-align: center;
   position: relative;
   margin: 0 auto;
+  cursor: pointer;
 }
 
 .li-item.active img{

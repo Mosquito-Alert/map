@@ -69,16 +69,12 @@ self.onmessage = async function (e) {
   // }
 
   if (newIndexRequired(e.data)) {
-    console.log('do index')
     processNewIndex(e.data)
   } else if (clickOnMapCluster(e.data)) {
-    console.log('click on cluster')
     processClickOnMapCluster(e.data)
   } else if (spiderfyClusterRequired(e.data)) {
-    console.log('spiderfy cluster')
     processSpiderfyCluster(e.data)
   } else if (newPanRequired(e)) {
-    console.log('do pan')
     processPan(e)
   }
 }
@@ -158,7 +154,6 @@ function getGraphData (e, dataset) {
 }
 
 function doClusteredIndex (data) {
-  console.log('do cluster index')
   return new Supercluster({
     log: DEBUG,
     radius: 10,
@@ -421,7 +416,6 @@ async function processSpiderfyCluster (data) {
       clusterId: data.getClusterExpansionZoom
     })
   } else {
-    console.log('AQUÍ QUAN ENTRA????')
     postMessage({
       map: cluseredIndex.getClusters(data.bbox, data.zoom),
       spiderfyCluster: data.spiderfyCluster,
@@ -432,7 +426,6 @@ async function processSpiderfyCluster (data) {
 
 function newIndexRequired (data) {
   if (!clickOnMapCluster(data) && !spiderfyClusterRequired(data)) {
-    console.log(data.filters)
     return data.filters
   }
 }

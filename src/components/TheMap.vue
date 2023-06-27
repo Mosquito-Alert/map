@@ -238,7 +238,6 @@ export default defineComponent({
     }
 
     const dateSelected = (e) => {
-      console.log(e)
       context.emit('dateSelected', e)
     }
     function loadView () {
@@ -1202,8 +1201,6 @@ export default defineComponent({
             // Check if click on cluster
             if ('cluster_id' in feature.values_.properties) {
               // check first for zoom level
-              console.log(currZoom)
-              console.log(maxZoom.value)
               if (parseInt(currZoom) >= parseInt(maxZoom.value)) {
                 if (spiderfiedCluster) {
                   if (spiderfiedCluster.values_.properties.cluster_id !== feature.values_.properties.cluster_id) {

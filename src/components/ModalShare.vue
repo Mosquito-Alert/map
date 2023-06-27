@@ -92,7 +92,11 @@ export default {
         copied.value = true
         setTimeout(hide, 3000)
         console.log(viewContent.value.url)
-        return navigator.clipboard.writeText(viewContent.value.url)
+        try {
+          return navigator.clipboard.writeText(viewContent.value.url)
+        } catch(err) {
+          console.log(err)
+        }
       }
       return Promise.reject('The Clipboard API is not available.')
     }

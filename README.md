@@ -1,4 +1,4 @@
-# Quasar App (mosquito-vite)
+# Quasar App (quasar-pinia)
 
 A Quasar Project
 
