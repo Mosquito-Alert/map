@@ -22,19 +22,11 @@
             </div>
             <a target="_blank" :href="selectedFeature.photo_url">
               <div class="img-container">
-                <!-- <q-circular-progress
-                  indeterminate
-                  v-if="loading"
-                  size="50px"
-                  color="orange"
-                  class="q-ma-md m-circular-progress text-center"
-                /> -->
                 <img v-if="!mosquitoImageLoaded" src="~/assets/img/notavailable.png">
                 <img
-                  v-if="mosquitoImageLoaded"
+                  v-else
                   :height="loading"
                   :src="imgData"
-                  @load="imageLoaded"
                   @error="errorLoading"
                 >
                 <div
@@ -190,6 +182,8 @@ export default defineComponent({
               imgData.value = base64data
               imageLoaded(base64data)
             }
+          }).catch(function () {
+            console.log('Error loading image')
           })
         }
       }
@@ -216,20 +210,22 @@ export default defineComponent({
     const imageLoaded = function (base64data) {
       const image = new Image()
       image.src = base64data
-      mosquitoImageLoaded.value = true
-      ratio.value = (image.width / image.height)
-      // Set poup class based on mobile device and image ratio
-      if (mobile.value) {
-        imageRatio.value = mobile.value ? 'mobile ' : ''
-      } else {
-        imageRatio.value = ''
-      }
-      imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
+      image.onload = function () {
+        mosquitoImageLoaded.value = true
+        ratio.value = (image.width / image.height)
+        // Set poup class based on mobile device and image ratio
+        if (mobile.value) {
+          imageRatio.value = mobile.value ? 'mobile ' : ''
+        } else {
+          imageRatio.value = ''
+        }
+        imageRatio.value += (ratio.value > 1.35) ? 'landscape' : ((ratio.value < 1.05) ? 'portrait' : 'square')
 
-      loading.value = false
-      progress.value = 0
-      errorLoadingImage.value = false
-      context.emit('popupimageloaded')
+        loading.value = false
+        progress.value = 0
+        errorLoadingImage.value = false
+        context.emit('popupimageloaded')
+      }
     }
 
     const getPopupClass = function (feature) {
