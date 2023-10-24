@@ -31,13 +31,11 @@ export default function () {
   if (process.env.DEV) {
     backendUrl = 'http://localhost:8000/'
     frontendUrl = 'http://localhost:8080/'
-    // backendUrl = 'http://be.example.com:8000/'
-    // frontendUrl = 'http://fe.example.com:8080/'
     analyticsCode = 'GTM-M5PRMJ9'
   } else {
-    backendUrl = 'https://sigserver4.udg.edu/apps/mosquito2_backend/'
-    frontendUrl = 'https://sigserver4.udg.edu/mos/spa/'
-    analyticsCode = 'GTM-M5PRMJ9'
+    backendUrl = 'https://mapapi.mosquitoalert.com/'
+    frontendUrl = 'https://map.mosquitoalert.com/'
+    analyticsCode = 'GTM-MQG3F3J'
   }
   // first language is default
   // Array order shows in page
@@ -114,19 +112,19 @@ export default function () {
     logoutUrl: '//localhost:8000/logout/',
 
     // URL of the public old web
-    authenticateUrl: 'https://sigserver4.udg.edu/apps/mosquito_tigatrapp/tigapublic/ajax_login/',
+    authenticateUrl: 'https://webserver.mosquitoalert.com/tigapublic/ajax_login/',
 
     // URL of the public old web
-    registeredWebUrl: 'https://sigserver4.udg.edu/mosquito/',
+    registeredWebUrl: 'https://webserver.mosquitoalert.com/',
 
     // URL of model_manifest.csv file. This files includes a relation of available pregenerated models
-    modelsManifestUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv',
+    modelsManifestUrl: 'https://webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/model_manifest.csv',
 
     // URL where models are available
-    modelsUrl: '//webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
+    modelsUrl: 'https://webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    tilesUrl: 'https://sigserver4.udg.edu/apps/mosquito2_backend/api/tiles',
+    tilesUrl: 'https://mapapi.mosquitoalert.com/api/tiles',
     // tilesUrl: '//localhost:8000/api/tiles',
 
     // Grid size of cell format models
