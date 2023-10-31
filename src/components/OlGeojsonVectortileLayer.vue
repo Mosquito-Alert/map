@@ -90,7 +90,7 @@ export default {
     }
 
     function loadLayer () {
-      const url = $store.getters['app/getBackend'] + 'api/userfixes/2021-01-01/2021-12-31'
+      const url = $store.getters['app/getBackend'] + 'userfixes/2021-01-01/2021-12-31'
       const layer = new VectorTileLayer({
         background: '#1a2b39'
       })

@@ -101,7 +101,7 @@ export default {
 
     async function selectFeature (feature) {
       const root = $store.getters['app/getBackend']
-      const url = root + 'api/get_observation/' + feature.properties.id + '/'
+      const url = root + 'get_observation/' + feature.properties.id + '/'
       const titles = $store.getters['map/getTitles']
       const latinNames = $store.getters['map/getLatinNames']
 
@@ -347,7 +347,7 @@ export default {
       if (openPopup.value) {
         $store.dispatch('map/selectOneFeatureMap', observationId)
       } else {
-        const url = $store.getters['app/getBackend'] + 'api/get_observation/' + observationId + '/'
+        const url = $store.getters['app/getBackend'] + 'get_observation/' + observationId + '/'
         axios.get(url, {
           withCredentials: true
         })

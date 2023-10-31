@@ -150,7 +150,7 @@ export default {
     const buildMap = function () {
       $store.commit('app/setCsrfToken', mySession.csrfToken)
       const backendUrl = $store.getters['app/getBackend']
-      const loadViewUrl = backendUrl + 'api/view/load/'
+      const loadViewUrl = backendUrl + 'view/load/'
 
       // if loading previously shared view
       if (viewCode) {

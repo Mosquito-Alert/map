@@ -283,13 +283,13 @@ export default defineComponent({
 
     // Initialize some URLS
     const backendUrl = $store.getters['app/getBackend']
-    const userfixesUrl = backendUrl + 'api/userfixes/'
-    const downloadUrl = backendUrl + 'api/downloads/'
-    const shareViewUrl = backendUrl + 'api/view/save/'
-    const reportViewUrl = backendUrl + 'api/report/save/'
-    const loadViewUrl = backendUrl + 'api/view/load/'
+    const userfixesUrl = backendUrl + 'userfixes/'
+    const downloadUrl = backendUrl + 'downloads/'
+    const shareViewUrl = backendUrl + 'view/save/'
+    const reportViewUrl = backendUrl + 'report/save/'
+    const loadViewUrl = backendUrl + 'view/load/'
     const curYear = moment(new Date(Date.now())).year()
-    const initUrl = backendUrl + 'api/get/data/' + curYear + '/'
+    const initUrl = backendUrl + 'get/data/' + curYear + '/'
     const index = YEARS.findIndex(element => {
       return element.year === curYear
     })
@@ -672,7 +672,7 @@ export default defineComponent({
 
     async function selectFeature (feature) {
       const root = $store.getters['app/getBackend']
-      const url = root + 'api/get_observation/' + feature.properties.id + '/'
+      const url = root + 'get_observation/' + feature.properties.id + '/'
       const titles = $store.getters['map/getTitles']
       const latinNames = $store.getters['map/getLatinNames']
 
@@ -1549,7 +1549,7 @@ export default defineComponent({
       progress.value = 0
       mapFilters.mode = 'resetFilter'
       const requests = missing.map((obj) => {
-        const url = backendUrl + 'api/get/data/' + obj.year + '/'
+        const url = backendUrl + 'get/data/' + obj.year + '/'
         return axios.get(url, {
           withCredentials: true,
           onDownloadProgress: (progressEvent) => {
@@ -1628,7 +1628,7 @@ export default defineComponent({
           mapFilters.mode = 'resetFilter'
           $store.commit('app/setFilteringTag', { value: true })
 
-          const url = $store.getters['app/getBackend'] + 'api/get_reports/'
+          const url = $store.getters['app/getBackend'] + 'get_reports/'
           progress.value = 0
           axios(url, {
             withCredentials: true,
@@ -1675,7 +1675,7 @@ export default defineComponent({
         } else {
           $store.commit('app/setFilteringTag', { value: true })
 
-          const url = $store.getters['app/getBackend'] + 'api/get_hashtags/'
+          const url = $store.getters['app/getBackend'] + 'get_hashtags/'
           const normalizeTags = tags.map(t => {
             return t.startsWith('#') ? t.slice(1) : t
           })

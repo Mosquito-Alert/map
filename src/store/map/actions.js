@@ -8,7 +8,7 @@ export const selectOneFeatureMap = (context, id) => {
   const root = context.rootGetters['app/getBackend']
   const titles = context.rootGetters['map/getTitles']
   const latinNames = context.rootGetters['map/getLatinNames']
-  const url = root + 'api/get_observation/' + id + '/'
+  const url = root + 'get_observation/' + id + '/'
   const $store = useStore()
 
   axios(url, {
@@ -36,7 +36,7 @@ export const selectOneFeatureMap = (context, id) => {
 
 // export const selectFeature = (context, feature) => {
 //   const root = context.rootGetters['app/getBackend']
-//   const url = root + 'api/get_observation/' + feature.properties.id + '/'
+//   const url = root + 'get_observation/' + feature.properties.id + '/'
 //   const titles = context.rootGetters['map/getTitles']
 //   const latinNames = context.rootGetters['map/getLatinNames']
 

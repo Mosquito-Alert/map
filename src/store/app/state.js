@@ -33,7 +33,7 @@ export default function () {
     frontendUrl = 'http://localhost:8080/'
     analyticsCode = 'GTM-M5PRMJ9'
   } else {
-    backendUrl = 'https://mapapi.mosquitoalert.com/'
+    backendUrl = 'https://api.mosquitoalert.com/v1/map/'
     frontendUrl = 'https://map.mosquitoalert.com/'
     analyticsCode = 'GTM-MQG3F3J'
   }
@@ -124,7 +124,7 @@ export default function () {
     modelsUrl: 'https://webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    tilesUrl: 'https://mapapi.mosquitoalert.com/api/tiles',
+    tilesUrl: 'https://api.mosquitoalert.com/v1/map/tiles',
     // tilesUrl: '//localhost:8000/api/tiles',
 
     // Grid size of cell format models

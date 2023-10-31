@@ -299,7 +299,7 @@ export default {
     function loadReport () {
       $store.commit('app/setCsrfToken', mySession.csrfToken)
       const ol = map.value.map
-      const loadViewUrl = backendUrl + 'api/report/load/'
+      const loadViewUrl = backendUrl + 'report/load/'
       const newView = new ReportView(ol, {
         url: loadViewUrl + reportId.value + '/',
         csrfToken: mySession.csrfToken
@@ -436,7 +436,7 @@ export default {
 
         // Get features as geoJson
         const reportFilters = formatParams(view)
-        const url = backendUrl + 'api/downloads/features/'
+        const url = backendUrl + 'downloads/features/'
 
         axios(url, {
           withCredentials: true,

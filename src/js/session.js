@@ -9,7 +9,7 @@ export default class MSession {
 
   getCSRF (callback) {
     const _this = this
-    axios(_this.backend + 'api/csrf/', {
+    axios(_this.backend + 'csrf/', {
       withCredentials: true
     })
       .then((resp) => {
@@ -25,7 +25,7 @@ export default class MSession {
 
   getSession (callback) {
     const _this = this
-    axios(_this.backend + 'api/session/', {
+    axios(_this.backend + 'session/', {
       withCredentials: true
     })
       .then((resp) => {

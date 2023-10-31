@@ -137,8 +137,8 @@ export default defineComponent({
       return $store.getters['app/getText'](text)
     }
 
-    const shareViewUrl = backendUrl + 'api/view/save/'
-    // const loadViewUrl = backendUrl + 'api/view/load/'
+    const shareViewUrl = backendUrl + 'view/save/'
+    // const loadViewUrl = backendUrl + 'view/load/'
 
     // Call when user shares view
     function shareWmsView (data) {
