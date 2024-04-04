@@ -4,6 +4,7 @@
 
 <template>
   <div id='mapa' class='bg-white'>
+    <div id="tooltip"></div>
     <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
@@ -22,8 +23,8 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            :multiWorld=true
-            :maxZoom=19
+            :multiWorld=false
+            :maxZoom=10
             :maxResolution=39135.75848201024
             :center='center'
             :zoom='zoom'
@@ -34,7 +35,7 @@
           :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
         >
           <div v-if="!mobile || attrVisible">
-            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            <a href="https://gadm.org/" target="_blank">© GADM</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -44,14 +45,6 @@
           >
           </div>
         </div>
-        <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
-          <ol-source-osm />
-            <!-- <ol-source-xyz
-              crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wxbHRmZXliMDlkeDNrcG40dm14OWZmNiJ9.UFRSz8T_c4riZkH3CyGgBQ' /> -->
-        </ol-tile-layer>
-
     </ol-map>
   </div>
 </template>
@@ -60,12 +53,20 @@
 import 'vue3-openlayers/dist/vue3-openlayers.css'
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { transform } from 'ol/proj.js'
+import { transform } from 'ol/proj'
 import MVT from 'ol/format/MVT'
+import { bbox } from 'ol/loadingstrategy'
+import GeoJSON from 'ol/format/GeoJSON'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
 import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill, Stroke } from 'ol/style'
+import CircleStyle from 'ol/style/Circle'
 import { Group as LayerGroup } from 'ol/layer'
+import Select from 'ol/interaction/Select'
+import { pointerMove } from 'ol/events/condition'
+import Feature from 'ol/Feature'
 import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
@@ -92,19 +93,15 @@ export default defineComponent({
     const leftDrawerIcon = ref('null')
     const $store = useStore()
     let CSVS = {}
-    const CENTROIDS = {}
     // let mySession
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const GADM3 = 'gadm3'
     const GADM4 = 'gadm4'
     const backendUrl = $store.getters['app/getBackend']
+    const gadmHoverSelect = {}
     let estModelLayer
     let seModelLayer
-    let seModelLayer1
-    let seModelLayer2
-    let seModelLayer3
-    let seModelLayer4
     let ol
     let gadm4MaxZoom
     let dataGridGeojson
@@ -150,6 +147,132 @@ export default defineComponent({
       // if (paramViewCode) {
       //   loadView(map.value.map, 'M-' + paramViewCode)
       // }
+
+      ol.on('loadstart', function () {
+        spinner(true)
+      })
+
+      ol.on('loadend', function () {
+        spinner(false)
+      })
+
+      ol.on('rendercomplete', function () {
+        spinner(false)
+      })
+
+      // Adding base layer (gadm0)
+      map.value.map.addLayer(gadm0)
+
+      // Adding gadm probability model layers.
+      map.value.map.addLayer(modelsLayerGroup)
+      // Adding centroid uncertainty layers.
+      map.value.map.addLayer(seModelsLayerGroup)
+
+      // Creating hover interaction
+      /*
+      NOTE: The style property is intentionally set to null here.
+            Since a feature can span multiple tiles, hover interactions
+            may detect only a portion of the feature. By setting the
+            style to null and styling the layer instead of the individual
+            feature, we ensure consistent rendering across all tiles
+            containing the feature, mitigating potential inconsistencies
+            in hover detection and rendering. This approach maintains visual
+            coherence while optimizing performance.
+      */
+      const hoverMove = new Select({
+        condition: pointerMove,
+        layers: baseGadmLayers,
+        style: null
+      })
+      ol.addInteraction(hoverMove)
+
+      // On hoverSelect -> view boundary with stroke
+      // When a 'select' event is triggered on the hoverMove control...
+      hoverMove.on('select', function (event) {
+        // Clear the existing selection in gadmHoverSelect object.
+        Object.keys(gadmHoverSelect).forEach(key => delete gadmHoverSelect[key])
+
+        event.selected.forEach(function (feature) {
+          // Add each selected feature to gadmHoverSelect object with its ID as the key.
+          gadmHoverSelect[feature.getId()] = feature
+        })
+
+        // Notify each selectable GADM layer that it has changed, triggering a redraw.
+        selectableGadmLayers.forEach(layer => {
+          layer.changed()
+        })
+      })
+
+      // Displaying tooltip
+      // Get tooltip element from the DOM
+      const tooltip = document.getElementById('tooltip')
+      // Variable to store the currently hovered feature
+      let currentFeature
+
+      // Function to display information about the hovered feature
+      const displayFeatureInfo = function (pixel, target) {
+        // Find the closest ancestor with the class 'ol-control', if exists
+        const feature = target.closest('.ol-control')
+          ? undefined
+          // If not within a control, find the feature at the given pixel
+          : ol.forEachFeatureAtPixel(pixel, function (feature, layer) {
+            // Check if the layer is one of the base GADM layers
+            if (baseGadmLayers.includes(layer)) {
+              return feature
+            }
+          })
+        if (feature) {
+          // Position the tooltip according to the pixel coordinates (mouse position)
+          tooltip.style.left = pixel[0] + 'px'
+          tooltip.style.top = pixel[1] + 'px'
+
+          if (feature !== currentFeature) {
+            // Get the title of the feature
+            const title = feature.get(
+              // Find the attribute keys starting with 'NAME_' and select the most detailed one (highest number)
+              feature.getKeys().filter(item => item.startsWith('NAME_')).sort((a, b) => b.localeCompare(a))[0]
+            ).trim()
+
+            // Show tooltip only if the title is not 'n.a.' (indicating no info available)
+            if (!(title.toLowerCase().startsWith('n.a.') || title.toLowerCase() === 'na')) {
+              tooltip.style.visibility = 'visible'
+              tooltip.innerText = title
+            } else {
+              tooltip.style.visibility = 'hidden'
+            }
+          }
+        } else {
+          // Hide tooltip if no feature is hovered
+          tooltip.style.visibility = 'hidden'
+        }
+
+        // Update the currentFeature variable
+        currentFeature = feature
+      }
+
+      // Add an event listener to respond to pointer movement on the map
+      ol.on('pointermove', function (evt) {
+        // Check if the pointer movement is due to dragging
+        if (evt.dragging) {
+          // If dragging, hide the tooltip and reset the currentFeature
+          tooltip.style.visibility = 'hidden'
+          currentFeature = undefined
+          return
+        }
+
+        // Get the pixel coordinates of the pointer event
+        const pixel = ol.getEventPixel(evt.originalEvent)
+
+        // Pass the pixel coordinates and the target element to displayFeatureInfo function
+        displayFeatureInfo(pixel, evt.originalEvent.target)
+      })
+
+      // Add an event listener to respond when the pointer leaves the target element
+      ol.getTargetElement().addEventListener('pointerleave', function () {
+        // Reset the currentFeature and hide the tooltip
+        currentFeature = undefined
+        tooltip.style.visibility = 'hidden'
+      })
     })
 
     const trans = function (text) {
@@ -334,27 +457,30 @@ export default defineComponent({
     }
 
     const clearModel = async function (data) {
+      // Clearing CSV data
+      CSVS = {}
+
+      // Hide model layer groups to improve performance during restyling
+      modelsLayerGroup.setVisible(false)
+      seModelsLayerGroup.setVisible(false)
+
+      // Iterate through layers in model layer groups and trigger a change event to restyle them
+      modelsLayerGroup.getLayers().forEach(layer => {
+        layer.changed()
+      })
+      seModelsLayerGroup.getLayers().forEach(layer => {
+        layer.changed()
+      })
+
+      // Remove specific layers if they exist
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
         seModelLayer = null
-      }
-      if (seModelLayer1) {
-        map.value.map.removeLayer(seModelLayer1.layer)
-      }
-      if (seModelLayer2) {
-        map.value.map.removeLayer(seModelLayer2.layer)
-      }
-      if (seModelLayer3) {
-        map.value.map.removeLayer(seModelLayer3.layer)
-      }
-      if (seModelLayer4) {
-        map.value.map.removeLayer(seModelLayer4.layer)
       }
       if (estModelLayer) {
         map.value.map.removeLayer(estModelLayer.layer)
         estModelLayer = null
       }
-      map.value.map.removeLayer(modelsLayer)
     }
 
     // function newAbortSignal (timeoutMs) {
@@ -365,15 +491,10 @@ export default defineComponent({
 
     // Get all data necessary to load a model and add layers to  map
     const loadModel = async function (data) {
-      let connectionError = false
       const process = { status: 'ok', data: {} }
-      if (estModelLayer) {
-        map.value.map.removeLayer(estModelLayer.layer)
-        estModelLayer = null
-      }
+
       clearModel()
       spinner(true)
-      CSVS = {}
       const urls = data.modelsCsv
 
       const requests = urls.map((url) => {
@@ -402,26 +523,6 @@ export default defineComponent({
             doGRID(decoded)
           }
         })
-        gadm1.getSource().refresh()
-        gadm2.getSource().refresh()
-        gadm3.getSource().refresh()
-        gadm4.getSource().refresh()
-
-        map.value.map.addLayer(modelsLayer)
-        gadm1.on('prerender', function () {
-          spinner(true)
-        })
-        gadm2.on('prerender', function () {
-          spinner(true)
-        })
-        gadm3.on('prerender', function () {
-          spinner(true)
-        })
-        gadm4.on('prerender', function () {
-          spinner(true)
-        })
-        estimationVisibility(data.estimation)
-        estimationOpacity(1 - (data.estimationTransparency / 100))
 
         // If cell layer is on
         if (urls.length > 4) {
@@ -435,13 +536,9 @@ export default defineComponent({
           gadm4MaxZoom = 19
           gadm4.setMaxZoom(gadm4MaxZoom)
         }
-        map.value.map.on('rendercomplete', function () {
-          spinner(false)
-        })
       }).catch(function (err) {
         process.status = 'error'
         process.data = err
-        connectionError = true
         let errMsg = ''
         if (err.response.status === 404) {
           errMsg = 'Model not found on Server'
@@ -450,216 +547,305 @@ export default defineComponent({
         }
         spinner(false)
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: errMsg } })
-      })
-
-      if (connectionError) {
         return false
-      }
-
-      // GET CENTROIDS GEOJSON FOR UNCERTAINTY
-      const centroidUrls = data.centroidsUrls
-      const centroidsReq = centroidUrls.map((url) => {
-        return axios.get(url, {
-          withCredentials: true,
-          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 20 seconds
-          onDownloadProgress: (progressEvent) => {
-            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          }
-        })
       })
 
-      await axios.all(centroidsReq).then((responses) => {
-        responses.forEach((resp) => {
-          if (!('gadm1' in CENTROIDS)) {
-            CENTROIDS.gadm1 = putDataOnCentroids(resp.data, CSVS['1'])
-          } else if (!('gadm2' in CENTROIDS)) {
-            CENTROIDS.gadm2 = putDataOnCentroids(resp.data, CSVS['2'])
-          } else if (!('gadm3' in CENTROIDS)) {
-            CENTROIDS.gadm3 = putDataOnCentroids(resp.data, CSVS['3'])
-          } else if (!('gadm4' in CENTROIDS)) {
-            CENTROIDS.gadm4 = putDataOnCentroids(resp.data, CSVS['4'])
-          }
-        })
-      }).catch(function (err) {
-        connectionError = true
-        spinner(false)
-        const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
-        $store.commit('app/setErrorMessage', '')
-      })
+      // Call changed() to force calling the style function again (CSVS has changed)
+      // modelsLayerGroup.getLayers().forEach(function (layer) {
+      //   layer.changed()
+      // })
+      // seModelsLayerGroup.getLayers().forEach(function (layer) {
+      //   layer.changed()
+      // })
 
-      if (connectionError) {
-        return false
-      }
+      estimationRefresh()
+      estimationVisibility(data.estimation)
+      estimationOpacity(1 - (data.estimationTransparency / 100))
 
-      // PUT DATA ON CENTROIDS AND ADD LAYERS TO MAP
-
-      CENTROIDS.gadm1 = putDataOnCentroids(CENTROIDS.gadm1, CSVS['1'])
-      CENTROIDS.gadm2 = putDataOnCentroids(CENTROIDS.gadm2, CSVS['2'])
-      CENTROIDS.gadm3 = putDataOnCentroids(CENTROIDS.gadm3, CSVS['3'])
-      CENTROIDS.gadm4 = putDataOnCentroids(CENTROIDS.gadm4, CSVS['4'])
-
-      const seColor = $store.getters['app/getUncertaintyColor']
-
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm1.minZoom - 1,
-        maxZoom: jsonProperties.gadm1.maxZoom
-      })
-
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm2.minZoom,
-        maxZoom: jsonProperties.gadm2.maxZoom
-      })
-
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm3.minZoom,
-        maxZoom: jsonProperties.gadm3.maxZoom
-      })
-
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm4.minZoom,
-        maxZoom: gadm4MaxZoom
-      })
-
-      seModelLayer1.addLayer()
-      seModelLayer2.addLayer()
-      seModelLayer3.addLayer()
-      seModelLayer4.addLayer()
+      uncertaintyRefresh()
       uncertaintyVisibility(data.uncertainty)
       uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
     }
 
-    // Filter centroids with data and add SE value from csv
-    const putDataOnCentroids = function (json, csv) {
-      const filtered = json.features.filter(f => {
-        if (f.properties.id in csv) {
-          f.properties.se = csv[f.properties.id].se
-          return f.properties.id in csv
-        } else {
-          return false
+    /**
+     * Function to create a VectorTileLayer with specified parameters.
+     * @param {number} minZoom - Minimum zoom level for the layer.
+     * @param {number} zIndex - The z-index of the layer.
+     * @param {string} tmsLayername - The name of the TMS layer.
+     * @param {string} idPropertyname - The name of the property to use as the ID.
+     * @param {number} csvIndex - Index of the CSV data.
+     * @param {boolean} triggersSpinner - Flag indicating whether to trigger spinner.
+     * @returns {VectorTileLayer} - The created VectorTileLayer.
+     */
+    function createGadmVectorTileLayer (minZoom, zIndex, tmsLayername, idPropertyname, csvIndex, triggersSpinner = true) {
+      // Get the tiles URL from the store
+      const tilesUrl = $store.getters['app/getTilesUrl']
+
+      // Create the VectorTileLayer
+      const layer = new VectorTileLayer({
+        declutter: true,
+        minZoom: minZoom,
+        zIndex: zIndex,
+        renderMode: 'hybrid',
+        source: new VectorTileSource({
+          minZoom: 2,
+          maxZoom: 7,
+          format: new MVT({
+            featureClass: Feature,
+            idProperty: idPropertyname
+          }),
+          url: tilesUrl + tmsLayername + '@EPSG:900913@pbf/{z}/{x}/{-y}.pbf'
+        }),
+        style: function (feature, resolution) {
+          const estimationColors = $store.getters['app/getEstimationColors']
+          const id = feature.getId()
+
+          // Get the data from CSV if provided and determine color based on probability
+          const dataObj = csvIndex !== undefined ? CSVS[csvIndex] : {}
+          const color = dataObj !== undefined && dataObj[id] !== undefined ? estimationColors[Math.floor(dataObj[id].prob * estimationColors.length)] : '#D9D9D9'
+
+          return new Style({
+            fill: new Fill({
+              color: color
+            }),
+            stroke: new Stroke({
+              color: '#C9C9C9',
+              width: 0.4
+            })
+          })
         }
       })
-      return {
-        type: 'FeatureCollection',
-        model: json.model,
-        features: filtered
-      }
-    }
 
-    // Function styles for probability layers based on scale
-    const colorizeGadm1 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['1'])
-    }
-    const colorizeGadm2 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['2'])
-    }
-
-    const colorizeGadm3 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['3'])
-    }
-
-    const colorizeGadm4 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['4'])
-    }
-
-    // General function style for probability
-    const colorizeGadm = (feature, style, CSV) => {
-      const estimationColors = $store.getters['app/getEstimationColors']
-      const id = feature.properties_.id
-      if (CSV[id] === undefined) {
-        return null
-      }
-      const value = CSV[id].prob
-      let c
-      if (value < RANGS[0]) {
-        c = estimationColors[0]
-      } else if (value < RANGS[1]) {
-        c = estimationColors[1]
-      } else if (value < RANGS[2]) {
-        c = estimationColors[2]
-      } else if (value < RANGS[3]) {
-        c = estimationColors[3]
-      } else if (value < RANGS[4]) {
-        c = estimationColors[4]
-      } else {
-        c = estimationColors[5]
-      }
-      style = new Fill({
-        color: c
-      })
-      return new Style({
-        fill: style,
-        stroke: new Stroke({
-          color: '#fff'
+      // Attach spinner trigger events if specified
+      if (triggersSpinner) {
+        layer.on(['change', 'prerender'], function () {
+          spinner(true)
         })
+      }
+
+      return layer
+    }
+
+    /**
+     * Function to create a VectorTileLayer for selection based on an existing GADM layer.
+     * @param {VectorTileLayer} gadmLayer - The existing GADM VectorTileLayer.
+     * @returns {VectorTileLayer} - The created VectorTileLayer for selection.
+     */
+    function createGadmSelectionVectorTileLayer (gadmLayer) {
+      return new VectorTileLayer({
+        renderMode: 'vector',
+        minZoom: gadmLayer.getMinZoom(),
+        maxZoom: gadmLayer.getMaxZoom(),
+        zIndex: gadmLayer.getZIndex(),
+        source: gadmLayer.getSource(),
+        style: function (feature, resolution) {
+          // Check if the feature's ID exists in the gadmHoverSelect object
+          if (feature.getId() in gadmHoverSelect) {
+            // If yes, return the selected style
+            return gadmSelectedStyle
+          }
+          // If not, no style is applied (feature remains unchanged)
+        }
       })
     }
 
-    const tilesUrl = $store.getters['app/getTilesUrl']
+    const upperGadmBorderStyle = new Style({
+      stroke: new Stroke({
+        color: '#B9B9B9',
+        width: 0.5
+      })
+    })
+
+    /**
+     * Function to create a VectorTileLayer for displaying the upper border of a GADM layer.
+     * @param {VectorTileLayer} gadmLayer - The GADM VectorTileLayer.
+     * @returns {VectorTileLayer} - The VectorTileLayer for displaying the upper border.
+     */
+    function createGadmUpperBorderVectorTileLayer (gadmLayer) {
+      return new VectorTileLayer({
+        renderMode: 'hybrid',
+        source: gadmLayer.getSource(), // Source inherited from the original layer
+        style: upperGadmBorderStyle
+      })
+    }
+
+    const gadmSelectedStyle = new Style({
+      stroke: new Stroke({
+        color: 'white',
+        width: 2
+      })
+    })
 
     // Define layers for probability
-    const gadm1 = new VectorTileLayer({
-      maxZoom: jsonProperties.gadm1.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm1.maxZoom + 1,
-        format: new MVT(),
-        url: tilesUrl + '/gadm1/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm1
-    })
+    const gadm0 = createGadmVectorTileLayer(
+      jsonProperties.gadm1.minZoom, // Minimum zoom level for the layer
+      0, // Z-index
+      'map_gadm:ADM_0', // Name of the TMS layer
+      'COUNTRY', // Name of the ID property (MVT)
+      undefined, // CSV index (undefined in this case)
+      false // Disable spinner triggering
+    )
+    gadm0.setBackground('#aad3df')
+    baseMap.value = gadm0
 
-    const gadm2 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm2.minZoom,
-      maxZoom: jsonProperties.gadm2.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm2.maxZoom,
-        format: new MVT(),
-        url: tilesUrl + '/gadm2/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm2
-    })
+    // GADM1
+    const gadm1 = createGadmVectorTileLayer(
+      jsonProperties.gadm1.minZoom, // Minimum zoom level for the layer
+      1, // Z-index
+      'map_gadm:ADM_1', // Name of the TMS layer
+      'GID_1', // Name of the ID property (MVT)
+      '1' // CSV index
+    )
+    const gadm1selection = createGadmSelectionVectorTileLayer(gadm1)
 
-    const gadm3 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm3.minZoom,
-      maxZoom: jsonProperties.gadm3.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm3.maxZoom - 1,
-        format: new MVT(),
-        url: tilesUrl + '/gadm3/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm3
-    })
+    // GADM2
+    const gadm2 = createGadmVectorTileLayer(
+      jsonProperties.gadm2.minZoom, // Minimum zoom level for the layer
+      2, // Z-index
+      'map_gadm:ADM_2', // Name of the TMS layer
+      'GID_2', // Name of the ID property (MVT)
+      '2' // CSV index
+    )
+    const gadm2selection = createGadmSelectionVectorTileLayer(gadm2)
 
-    const gadm4 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm4.minZoom,
-      maxZoom: jsonProperties.gadm4.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm4.maxZoom - 2,
-        format: new MVT(),
-        url: tilesUrl + '/gadm4/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm4
-    })
+    // GADM3
+    const gadm3 = createGadmVectorTileLayer(
+      jsonProperties.gadm3.minZoom, // Minimum zoom level for the layer
+      3, // Z-index
+      'map_gadm:ADM_3', // Name of the TMS layer
+      'GID_3', // Name of the ID property (MVT)
+      '3' // CSV index
+    )
+    const gadm3selection = createGadmSelectionVectorTileLayer(gadm3)
+
+    // GADM4
+    const gadm4 = createGadmVectorTileLayer(
+      jsonProperties.gadm4.minZoom, // Minimum zoom level for the layer
+      4, // Z-index
+      'map_gadm:ADM_4', // Name of the TMS layer
+      'GID_4', // Name of the ID property (MVT)
+      '4' // CSV index
+    )
+    const gadm4selection = createGadmSelectionVectorTileLayer(gadm4)
+
+    // Setting up border
+    const gadm0border = createGadmUpperBorderVectorTileLayer(gadm0)
+    gadm0border.setMinZoom(gadm1.getMinZoom())
+    gadm0border.setMaxZoom(gadm2.getMinZoom())
+    gadm0border.setZIndex(gadm1.getZIndex())
+
+    const gadm1border = createGadmUpperBorderVectorTileLayer(gadm1)
+    gadm1border.setMinZoom(gadm2.getMinZoom())
+    gadm1border.setMaxZoom(gadm3.getMinZoom())
+    gadm1border.setZIndex(gadm2.getZIndex())
+
+    const gadm2border = createGadmUpperBorderVectorTileLayer(gadm2)
+    gadm2border.setMinZoom(gadm3.getMinZoom())
+    gadm2border.setMaxZoom(gadm4.getMinZoom())
+    gadm2border.setZIndex(gadm3.getZIndex())
+
+    const gadm3border = createGadmUpperBorderVectorTileLayer(gadm3)
+    gadm3border.setMinZoom(gadm4.getMinZoom())
+    gadm3border.setZIndex(gadm4.getZIndex())
+
+    // Define arrays to hold base GADM layers, selectable GADM layers, and upper border GADM layers
+    const baseGadmLayers = [gadm1, gadm2, gadm3, gadm4]
+    const selectableGadmLayers = [gadm1selection, gadm2selection, gadm3selection, gadm4selection]
+    const upperBorderGadmLayers = [gadm0border, gadm1border, gadm2border, gadm3border]
 
     // Group previous layers as a single map layer
-    const modelsLayer = new LayerGroup({
-      layers: [gadm1, gadm2, gadm3, gadm4]
+    const modelsLayerGroup = new LayerGroup({
+      layers: [...baseGadmLayers, ...upperBorderGadmLayers, ...selectableGadmLayers],
+      visible: false // Set the layer group initially invisible
+    })
+
+    /**
+     * Create a VectorLayer for displaying SE model data.
+     * @param {VectorTileLayer} gadmLayer - The GADM VectorTileLayer.
+     * @param {string} wfsLayername - The name of the WFS layer.
+     * @param {string} idPropertyname - The name of the property to use as the ID.
+     * @param {number} csvIndex - Index of the CSV data.
+     * @returns {VectorLayer} - The created VectorLayer for SE model data.
+     */
+    function createSeModelLayer (gadmLayer, wfsLayername, idPropertyname, csvIndex) {
+      // Get the map server URL from the store
+      const mapserverUrl = $store.getters['app/getmapserverUrl']
+
+      // Create a VectorSource for SE model data only requesting for the featuring in the visible extent (bbox).
+      const seSource = new VectorSource({
+        format: new GeoJSON(),
+        loader: function (extent, resolution, projection, success, failure) {
+          const proj = projection.getCode()
+          const url = mapserverUrl + '/wfs?service=WFS&' +
+            'version=1.1.0&request=GetFeature&typeName=' + wfsLayername + '&' +
+            'outputFormat=application/json&srsname=' + proj + '&' +
+            'bbox=' + extent.join(',') + ',' + proj
+          const xhr = new XMLHttpRequest()
+          xhr.open('GET', url)
+          const onError = function () {
+            seSource.removeLoadedExtent(extent)
+            failure()
+          }
+          xhr.onerror = onError
+          xhr.onload = function () {
+            if (xhr.status === 200) {
+              const features = seSource.getFormat().readFeatures(xhr.responseText)
+              seSource.addFeatures(features)
+              success(features)
+            } else {
+              onError()
+            }
+          }
+          xhr.send()
+        },
+        strategy: bbox // Set the loading strategy to bbox
+      })
+
+      // Create and return a VectorLayer for SE model data
+      return new VectorLayer({
+        minZoom: gadmLayer.getMinZoom(),
+        maxZoom: gadmLayer.getMaxZoom(),
+        zIndex: gadmLayer.getZIndex(),
+        source: seSource,
+        style: function (feature, resolution) {
+          const seColor = $store.getters['app/getUncertaintyColor']
+          const id = feature.get(idPropertyname)
+
+          // Get data from CSV if provided, otherwise return null
+          const dataObj = csvIndex !== undefined ? CSVS[csvIndex] : {}
+          if (dataObj === undefined || dataObj[id] === undefined) {
+            return null
+          }
+          const value = dataObj[id].se
+
+          // Return a style based on the SE value
+          return new Style({
+            image: new CircleStyle({
+              // Adjust radius based on SE value
+              // There are 4 value for Uncertainty.
+              radius: 4 * (Math.floor(value * 4) + 1),
+              fill: new Fill({
+                color: seColor
+              }),
+              stroke: new Stroke({
+                color: 'white',
+                width: 1
+              })
+            })
+          })
+        }
+      })
+    }
+
+    const seModelLayer1 = createSeModelLayer(gadm1, 'map_gadm:ADM_1_CENTROID', 'GID_1', '1')
+    const seModelLayer2 = createSeModelLayer(gadm2, 'map_gadm:ADM_2_CENTROID', 'GID_2', '2')
+    const seModelLayer3 = createSeModelLayer(gadm3, 'map_gadm:ADM_3_CENTROID', 'GID_3', '3')
+    const seModelLayer4 = createSeModelLayer(gadm4, 'map_gadm:ADM_4_CENTROID', 'GID_4', '4')
+
+    // Group previous layers as a single map layer
+    const seModelsLayerGroup = new LayerGroup({
+      layers: [seModelLayer1, seModelLayer2, seModelLayer3, seModelLayer4],
+      visible: false
     })
 
     function updateMap () {
@@ -677,10 +863,7 @@ export default defineComponent({
     // Change estimation visibility
     const estimationVisibility = function (state) {
       $store.commit('app/setModelEstimation', state)
-      gadm1.setVisible(state)
-      gadm2.setVisible(state)
-      gadm3.setVisible(state)
-      gadm4.setVisible(state)
+      modelsLayerGroup.setVisible(state)
       if (estModelLayer) {
         estModelLayer.layer.setVisible(state)
       }
@@ -689,10 +872,9 @@ export default defineComponent({
     // Change uncertainty visibility
     const uncertaintyVisibility = function (state) {
       $store.commit('app/setModelUncertainty', state)
-      seModelLayer1.layer.setVisible(state)
-      seModelLayer2.layer.setVisible(state)
-      seModelLayer3.layer.setVisible(state)
-      seModelLayer4.layer.setVisible(state)
+      if (seModelsLayerGroup) {
+        seModelsLayerGroup.setVisible(state)
+      }
       if (seModelLayer) {
         seModelLayer.layer.setVisible(state)
       }
@@ -700,10 +882,7 @@ export default defineComponent({
 
     // Change estimation opacity
     const estimationOpacity = function (opacity) {
-      gadm1.setOpacity(opacity)
-      gadm2.setOpacity(opacity)
-      gadm3.setOpacity(opacity)
-      gadm4.setOpacity(opacity)
+      modelsLayerGroup.setOpacity(opacity)
       if (estModelLayer) {
         estModelLayer.layer.setOpacity(opacity)
       }
@@ -711,17 +890,8 @@ export default defineComponent({
 
     // Change uncertainty opacity
     const uncertaintyOpacity = function (opacity) {
-      if (seModelLayer1) {
-        seModelLayer1.layer.setOpacity(opacity)
-      }
-      if (seModelLayer2) {
-        seModelLayer2.layer.setOpacity(opacity)
-      }
-      if (seModelLayer3) {
-        seModelLayer3.layer.setOpacity(opacity)
-      }
-      if (seModelLayer4) {
-        seModelLayer4.layer.setOpacity(opacity)
+      if (seModelsLayerGroup) {
+        seModelsLayerGroup.setOpacity(opacity)
       }
       if (seModelLayer) {
         seModelLayer.layer.setOpacity(opacity)
@@ -745,58 +915,24 @@ export default defineComponent({
         estModelLayer.addLayer()
       }
 
-      gadm1.getSource().refresh()
-      gadm2.getSource().refresh()
-      gadm3.getSource().refresh()
-      gadm4.getSource().refresh()
+      // Notify each GADM layer that it has changed, triggering a redraw.
+      modelsLayerGroup.getLayers().forEach(function (layer) {
+        layer.changed()
+      })
     }
 
     // Redraw uncertainty. Get colors from store
     const uncertaintyRefresh = function () {
       const seColor = $store.getters['app/getUncertaintyColor']
+
+      // Notify each centroid layer that it has changed, triggering a redraw.
+      seModelsLayerGroup.getLayers().forEach(function (layer) {
+        layer.changed()
+      })
+
       if (seModelLayer) {
         map.value.map.removeLayer(seModelLayer.layer)
       }
-      if (seModelLayer1) {
-        map.value.map.removeLayer(seModelLayer1.layer)
-      }
-      if (seModelLayer2) {
-        map.value.map.removeLayer(seModelLayer2.layer)
-      }
-      if (seModelLayer3) {
-        map.value.map.removeLayer(seModelLayer3.layer)
-      }
-      if (seModelLayer4) {
-        map.value.map.removeLayer(seModelLayer4.layer)
-      }
-
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm1.minZoom,
-        maxZoom: jsonProperties.gadm1.maxZoom
-      })
-
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm2.minZoom,
-        maxZoom: jsonProperties.gadm2.maxZoom
-      })
-
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm3.minZoom,
-        maxZoom: jsonProperties.gadm3.maxZoom
-      })
-
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm4.minZoom,
-        maxZoom: gadm4MaxZoom
-      })
 
       if (gadm4MaxZoom === jsonProperties.gadm4.maxZoom) {
         seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
@@ -807,10 +943,7 @@ export default defineComponent({
         })
         seModelLayer.addLayer()
       }
-      seModelLayer1.addLayer()
-      seModelLayer2.addLayer()
-      seModelLayer3.addLayer()
-      seModelLayer4.addLayer()
+
       uncertaintyOpacity(1 - ($store.getters['app/getModelDefaults'].uncertaintyTransparency / 100))
     }
 
@@ -852,6 +985,24 @@ export default defineComponent({
     flex: 1;
     position: relative;
   }
+
+  #tooltip {
+    position: absolute;
+    display: inline-block;
+    height: auto;
+    width: auto;
+    z-index: calc(infinity);
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 5px;
+    left: 50%;
+    transform: translate(-50%, -110%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .ol-zoom {
     bottom: 25px;
   }

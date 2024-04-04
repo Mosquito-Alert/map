@@ -143,6 +143,10 @@ export const getEstimationPalettes = state => {
   return state.DEFAULTS.model.estimationPalettes
 }
 
+export const getmapserverUrl = state => {
+  return state.mapserverUrl
+}
+
 export const getTilesUrl = state => {
   return state.tilesUrl
 }

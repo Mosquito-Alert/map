@@ -124,8 +124,8 @@ export default function () {
     modelsUrl: 'https://webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    tilesUrl: 'https://api.mosquitoalert.com/v1/map/tiles',
-    // tilesUrl: '//localhost:8000/api/tiles',
+    mapserverUrl: 'https://mapserver-ifca.mosquitoalert.com/geoserver/',
+    tilesUrl: 'https://mapserver-ifca.mosquitoalert.com/geoserver/gwc/service/tms/1.0.0/',
 
     // Grid size of cell format models
     gridsize: 0.025,
@@ -138,14 +138,14 @@ export default function () {
     // Info about models.
     modelsProperties: {
       gadm0: {
-        minZoom: 0,
-        maxZoom: 0,
+        minZoom: undefined,
+        maxZoom: 2,
         id: 'ID_0', // id column name
         est: 'est', // estimation column name
         se: 'se' // uncertainty column name
       },
       gadm1: {
-        minZoom: 0,
+        minZoom: undefined,
         maxZoom: 2,
         id: 'gid_1',
         est: 'est',
@@ -208,7 +208,7 @@ export default function () {
         year: '',
         month: '',
         estimation: true,
-        uncertainty: true,
+        uncertainty: false,
         // 0 - 100 values
         estimationTransparency: 0,
         uncertaintyTransparency: 75,
@@ -217,18 +217,17 @@ export default function () {
         uncertaintyOpacity: 0.25,
         // Default uncertainty color
         uncertaintyColor: '#191919',
-        estimationColors: ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
+        estimationColors: ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
         modelsCsv: [],
-        centroidsUrls: [],
         estimationPalettes: [
+          // GRADIENTS
+          ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
+          ['#edf8e9', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c'],
           // DIVERGENTS
           ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
           ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
           ['#1b7837', '#7fbf7b', '#d9f0d3', '#e7d4e8', '#af8dc3', '#762a83'],
-          ['#1a9850', '#91cf60', '#d9ef8b', '#fee08b', '#fc8d59', '#d73027'],
-          // GRADIENTS
-          ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
-          ['#edf8e9', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c']
+          ['#1a9850', '#91cf60', '#d9ef8b', '#fee08b', '#fc8d59', '#d73027']
         ]
       }
     },

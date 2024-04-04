@@ -255,9 +255,8 @@ export default {
     const disabledInfo = ref(true)
     const modelVector = ref()
     const estimation = ref(true)
-    const uncertainty = ref(true)
+    const uncertainty = ref(false)
     const modelsCalendar = ref()
-    const backendUrl = $store.getters['app/getBackend']
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
@@ -454,12 +453,6 @@ export default {
         if (modelsManifest[selectedModel].cell === 'true') {
           urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
         }
-        const centroidsUrls = [
-          backendUrl + 'media/centroids/gadm1_centroid.json',
-          backendUrl + 'media/centroids/gadm2_centroid.json',
-          backendUrl + 'media/centroids/gadm3_centroid.json',
-          backendUrl + 'media/centroids/gadm4_centroid.json'
-        ]
         const estimationPalettes = $store.getters['app/getEstimationPalettes']
 
         // Prepare payload to update store
@@ -476,8 +469,7 @@ export default {
           uncertaintyColor: uncertaintyColor.value,
           estimationColors: estimationColors,
           estimationPalettes: estimationPalettes,
-          modelsCsv: urls,
-          centroidsUrls: centroidsUrls
+          modelsCsv: urls
         }
         $store.commit('app/setModelDefaults', payload)
         context.emit('loadModel', payload)
