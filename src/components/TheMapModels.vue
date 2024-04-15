@@ -4,7 +4,6 @@
 
 <template>
   <div id='mapa' class='bg-white'>
-    <div id="tooltip"></div>
     <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
@@ -64,9 +63,10 @@ import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill, Stroke } from 'ol/style'
 import CircleStyle from 'ol/style/Circle'
 import { Group as LayerGroup } from 'ol/layer'
-import Select from 'ol/interaction/Select'
-import { pointerMove } from 'ol/events/condition'
 import Feature from 'ol/Feature'
+import Tooltip from 'ol-ext/overlay/Tooltip'
+import Hover from 'ol-ext/interaction/Hover'
+
 import moment from 'moment'
 import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
 import GridModelLayer from '../js/GridModelLayer'
@@ -99,7 +99,7 @@ export default defineComponent({
     const GADM3 = 'gadm3'
     const GADM4 = 'gadm4'
     const backendUrl = $store.getters['app/getBackend']
-    const gadmHoverSelect = {}
+    let hoverSelectedFeatureId
     let estModelLayer
     let seModelLayer
     let ol
@@ -168,65 +168,11 @@ export default defineComponent({
       // Adding centroid uncertainty layers.
       map.value.map.addLayer(seModelsLayerGroup)
 
-      // Creating hover interaction
-      /*
-      NOTE: The style property is intentionally set to null here.
-            Since a feature can span multiple tiles, hover interactions
-            may detect only a portion of the feature. By setting the
-            style to null and styling the layer instead of the individual
-            feature, we ensure consistent rendering across all tiles
-            containing the feature, mitigating potential inconsistencies
-            in hover detection and rendering. This approach maintains visual
-            coherence while optimizing performance.
-      */
-      const hoverMove = new Select({
-        condition: pointerMove,
-        layers: baseGadmLayers,
-        style: null
-      })
-      ol.addInteraction(hoverMove)
-
-      // On hoverSelect -> view boundary with stroke
-      // When a 'select' event is triggered on the hoverMove control...
-      hoverMove.on('select', function (event) {
-        // Clear the existing selection in gadmHoverSelect object.
-        Object.keys(gadmHoverSelect).forEach(key => delete gadmHoverSelect[key])
-
-        event.selected.forEach(function (feature) {
-          // Add each selected feature to gadmHoverSelect object with its ID as the key.
-          gadmHoverSelect[feature.getId()] = feature
-        })
-
-        // Notify each selectable GADM layer that it has changed, triggering a redraw.
-        selectableGadmLayers.forEach(layer => {
-          layer.changed()
-        })
-      })
-
       // Displaying tooltip
-      // Get tooltip element from the DOM
-      const tooltip = document.getElementById('tooltip')
-      // Variable to store the currently hovered feature
-      let currentFeature
-
-      // Function to display information about the hovered feature
-      const displayFeatureInfo = function (pixel, target) {
-        // Find the closest ancestor with the class 'ol-control', if exists
-        const feature = target.closest('.ol-control')
-          ? undefined
-          // If not within a control, find the feature at the given pixel
-          : ol.forEachFeatureAtPixel(pixel, function (feature, layer) {
-            // Check if the layer is one of the base GADM layers
-            if (baseGadmLayers.includes(layer)) {
-              return feature
-            }
-          })
-        if (feature) {
-          // Position the tooltip according to the pixel coordinates (mouse position)
-          tooltip.style.left = pixel[0] + 'px'
-          tooltip.style.top = pixel[1] + 'px'
-
-          if (feature !== currentFeature) {
+      const tooltip = new Tooltip({
+        // Function to display information about the hovered feature
+        getHTML: function (feature, info) {
+          if (feature !== undefined) {
             // Get the title of the feature
             const title = feature.get(
               // Find the attribute keys starting with 'NAME_' and select the most detailed one (highest number)
@@ -235,43 +181,49 @@ export default defineComponent({
 
             // Show tooltip only if the title is not 'n.a.' (indicating no info available)
             if (!(title.toLowerCase().startsWith('n.a.') || title.toLowerCase() === 'na')) {
-              tooltip.style.visibility = 'visible'
-              tooltip.innerText = title
-            } else {
-              tooltip.style.visibility = 'hidden'
+              return title
             }
           }
-        } else {
-          // Hide tooltip if no feature is hovered
-          tooltip.style.visibility = 'hidden'
+        },
+        positioning: 'center-center',
+        offsetBox: [0, -15]
+      })
+      ol.addOverlay(tooltip)
+
+      // Creating hover interaction only for the baseGadmLayers
+      const hover = new Hover({
+        layers: baseGadmLayers
+      })
+      ol.addInteraction(hover)
+
+      hover.on('hover', function (e) {
+        tooltip.setFeature(e.feature)
+
+        const featureHasChanged = (e.feature.getId() !== hoverSelectedFeatureId)
+
+        if (featureHasChanged) {
+          // Replace hoverSelectedFeatureId
+          hoverSelectedFeatureId = e.feature.getId()
+
+          // Notify each selectable GADM layer that is has changed, triggering a redraw.
+          selectableGadmLayers.forEach(layer => {
+            layer.changed()
+          })
         }
-
-        // Update the currentFeature variable
-        currentFeature = feature
-      }
-
-      // Add an event listener to respond to pointer movement on the map
-      ol.on('pointermove', function (evt) {
-        // Check if the pointer movement is due to dragging
-        if (evt.dragging) {
-          // If dragging, hide the tooltip and reset the currentFeature
-          tooltip.style.visibility = 'hidden'
-          currentFeature = undefined
-          return
-        }
-
-        // Get the pixel coordinates of the pointer event
-        const pixel = ol.getEventPixel(evt.originalEvent)
-
-        // Pass the pixel coordinates and the target element to displayFeatureInfo function
-        displayFeatureInfo(pixel, evt.originalEvent.target)
       })
 
-      // Add an event listener to respond when the pointer leaves the target element
-      ol.getTargetElement().addEventListener('pointerleave', function () {
-        // Reset the currentFeature and hide the tooltip
-        currentFeature = undefined
-        tooltip.style.visibility = 'hidden'
+      hover.on('leave', function (e) {
+        // Hide tooltip if no feature is hovered
+        tooltip.removeFeature()
+        tooltip.hide()
+
+        // Reset hoverSelectedFeatureId
+        hoverSelectedFeatureId = undefined
+
+        // Notify each selectable GADM layer that it has changed, triggering a redraw.
+        selectableGadmLayers.forEach(layer => {
+          layer.changed()
+        })
       })
     })
 
@@ -639,8 +591,8 @@ export default defineComponent({
         zIndex: gadmLayer.getZIndex(),
         source: gadmLayer.getSource(),
         style: function (feature, resolution) {
-          // Check if the feature's ID exists in the gadmHoverSelect object
-          if (feature.getId() in gadmHoverSelect) {
+          // Check if the feature's ID exists in the hoverSelectedFeatureId object
+          if (feature.getId() === hoverSelectedFeatureId) {
             // If yes, return the selected style
             return gadmSelectedStyle
           }
@@ -985,24 +937,6 @@ export default defineComponent({
     flex: 1;
     position: relative;
   }
-
-  #tooltip {
-    position: absolute;
-    display: inline-block;
-    height: auto;
-    width: auto;
-    z-index: calc(infinity);
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 4px;
-    padding: 5px;
-    left: 50%;
-    transform: translate(-50%, -110%);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   .ol-zoom {
     bottom: 25px;
   }
