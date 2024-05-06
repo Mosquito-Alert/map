@@ -34,7 +34,8 @@
           :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
         >
           <div v-if="!mobile || attrVisible">
-            <a href="https://gadm.org/" target="_blank">© GADM</a>
+            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            | <a href="https://gadm.org/" target="_blank">© GADM</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -44,6 +45,10 @@
           >
           </div>
         </div>
+        <!-- base map -->
+        <ol-tile-layer ref='baseMap' :zIndex=0>
+          <ol-source-osm />
+        </ol-tile-layer>
     </ol-map>
   </div>
 </template>
@@ -190,13 +195,18 @@ export default defineComponent({
       })
       ol.addOverlay(tooltip)
 
-      // Creating hover interaction only for the baseGadmLayers
-      const hover = new Hover({
-        layers: baseGadmLayers
-      })
-      ol.addInteraction(hover)
+      // Add hover interaction
+      ol.addInteraction(baseGadmHoverInteraction)
 
-      hover.on('hover', function (e) {
+      baseGadmHoverInteraction.on('change:active', function (e) {
+        // hide tooltip on hover disabled.
+        if (e.target.get(e.key) === false) {
+          tooltip.hide()
+          tooltip.removeFeature()
+        }
+      })
+
+      baseGadmHoverInteraction.on('hover', function (e) {
         tooltip.setFeature(e.feature)
 
         const featureHasChanged = (e.feature.getId() !== hoverSelectedFeatureId)
@@ -212,7 +222,7 @@ export default defineComponent({
         }
       })
 
-      hover.on('leave', function (e) {
+      baseGadmHoverInteraction.on('leave', function (e) {
         // Hide tooltip if no feature is hovered
         tooltip.removeFeature()
         tooltip.hide()
@@ -261,8 +271,8 @@ export default defineComponent({
           month: modelData.month,
           estimation: modelData.estimation,
           uncertainty: modelData.uncertainty,
-          estimationTransparency: modelData.estimationTransparency,
-          uncertaintyTransparency: modelData.uncertaintyTransparency,
+          estimationOpacity: modelData.estimationOpacity,
+          uncertaintyOpacity: modelData.uncertaintyOpacity,
           uncertaintyColor: modelData.uncertaintyColor,
           estimationColors: $store.getters['app/getEstimationColors']
         },
@@ -343,8 +353,8 @@ export default defineComponent({
         month: jsonView.filters.month,
         estimation: jsonView.filters.estimation,
         uncertainty: jsonView.filters.uncertainty,
-        estimationTransparency: jsonView.filters.estimationTransparency,
-        uncertaintyTransparency: jsonView.filters.uncertaintyTransparency,
+        estimationOpacity: jsonView.filters.estimationOpacity,
+        uncertaintyOpacity: jsonView.filters.uncertaintyOpacity,
         uncertaintyColor: jsonView.filters.uncertaintyColor,
         estimationColors: jsonView.filters.estimationColors
       })
@@ -502,21 +512,13 @@ export default defineComponent({
         return false
       })
 
-      // Call changed() to force calling the style function again (CSVS has changed)
-      // modelsLayerGroup.getLayers().forEach(function (layer) {
-      //   layer.changed()
-      // })
-      // seModelsLayerGroup.getLayers().forEach(function (layer) {
-      //   layer.changed()
-      // })
-
       estimationRefresh()
       estimationVisibility(data.estimation)
-      estimationOpacity(1 - (data.estimationTransparency / 100))
+      estimationOpacity(data.estimationOpacity)
 
       uncertaintyRefresh()
       uncertaintyVisibility(data.uncertainty)
-      uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
+      uncertaintyOpacity(data.uncertaintyOpacity)
     }
 
     /**
@@ -711,6 +713,11 @@ export default defineComponent({
       visible: false // Set the layer group initially invisible
     })
 
+    // Creating hover interaction only for the baseGadmLayers
+    const baseGadmHoverInteraction = new Hover({
+      layers: baseGadmLayers
+    })
+
     /**
      * Create a VectorLayer for displaying SE model data.
      * @param {VectorTileLayer} gadmLayer - The GADM VectorTileLayer.
@@ -816,6 +823,7 @@ export default defineComponent({
     const estimationVisibility = function (state) {
       $store.commit('app/setModelEstimation', state)
       modelsLayerGroup.setVisible(state)
+      gadm0.setVisible(state)
       if (estModelLayer) {
         estModelLayer.layer.setVisible(state)
       }
@@ -835,6 +843,10 @@ export default defineComponent({
     // Change estimation opacity
     const estimationOpacity = function (opacity) {
       modelsLayerGroup.setOpacity(opacity)
+      gadm0.setOpacity(opacity)
+
+      baseGadmHoverInteraction.setActive(opacity >= 0.25)
+
       if (estModelLayer) {
         estModelLayer.layer.setOpacity(opacity)
       }
@@ -896,7 +908,7 @@ export default defineComponent({
         seModelLayer.addLayer()
       }
 
-      uncertaintyOpacity(1 - ($store.getters['app/getModelDefaults'].uncertaintyTransparency / 100))
+      uncertaintyOpacity($store.getters['app/getModelDefaults'].uncertaintyOpacity)
     }
 
     const hideSpinner = function () {

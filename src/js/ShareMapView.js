@@ -80,8 +80,8 @@ export default class ShareMapView {
       dataView.month = this.options.month
       dataView.estimation = this.options.estimation
       dataView.uncertainty = this.options.uncertainty
-      dataView.estimationTransparency = this.options.estimationTransparency
-      dataView.uncertaintyTransparency = this.options.uncertaintyTransparency
+      dataView.estimationOpacity = this.options.estimationOpacity
+      dataView.uncertaintyOpacity = this.options.uncertaintyOpacity
       dataView.uncertaintyColor = this.options.uncertaintyColor
       dataView.estimationColors = this.options.estimationColors
     } else if (this.options.viewType === 'wms') {

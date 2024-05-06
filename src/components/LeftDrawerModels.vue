@@ -26,7 +26,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Estimates') }}
+        {{ trans('Encounter probability') }}
       </div>
 
       <div>
@@ -106,11 +106,11 @@
               {{ trans('Probability') }}
             </div>
             <div class="estimation-palettes">
-              <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" />
+              <!-- <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" /> -->
               <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
             </div>
           </div>
-          <div class="flex spaceBetween">
+          <!-- <div class="flex spaceBetween">
             <div>
                 <q-popup-proxy ref="colorPickerEst" class="estimation-colors">
                       <q-color
@@ -123,7 +123,7 @@
                       />
                 </q-popup-proxy>
             </div>
-          </div>
+          </div> -->
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
             <div class="col-4 text-left">{{ trans('Low') }}</div>
@@ -131,7 +131,7 @@
             <div class="col-4 text-right">{{ trans('High') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
-          <div v-if="estimation" class="row legend-row" :style="{'opacity': 1 - (estimationTransparency/100)}">
+          <div v-if="estimation" class="row legend-row" :style="{'opacity': estimationOpacity}">
               <div class="col-2" :style="{'background-color': estLegendColors[0]}"></div>
               <div class="col-2" :style="{'background-color': estLegendColors[1]}"></div>
               <div class="col-2" :style="{'background-color': estLegendColors[2]}"></div>
@@ -139,17 +139,18 @@
               <div class="col-2" :style="{'background-color': estLegendColors[4]}"></div>
               <div class="col-2" :style="{'background-color': estLegendColors[5]}"></div>
           </div>
-          <!-- ESTIMATION TRANSPARENCY -->
+          <!-- ESTIMATION OPACITY -->
           <div class="row q-mt-lg">
-            <div v-if="estimation" class="col text-center">{{ trans('Transparency') }}</div>
+            <div v-if="estimation" class="col text-center">{{ trans('Opacity') }}</div>
           </div>
           <div v-if="estimation" class="row">
             <q-slider
               :min="0"
-              :max="100"
-              v-model="estimationTransparency"
+              :max="1"
+              :step="0.01"
+              v-model="estimationOpacity"
               color="orange"
-              @update:model-value="setEstimationTransparency"/>
+              @update:model-value="setEstimationOpacity"/>
           </div>
           <!-- UNCERTAINTY -->
           <div class="flex spaceBetween">
@@ -157,11 +158,11 @@
               {{ trans('Uncertainty') }}
             </div>
             <div>
-              <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" />
+              <!-- <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" /> -->
               <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
             </div>
           </div>
-          <div class="flex spaceBetween">
+          <!-- <div class="flex spaceBetween">
             <div>
                 <q-popup-proxy ref="colorPickerSe">
                   <q-color
@@ -175,7 +176,7 @@
                   />
                 </q-popup-proxy>
             </div>
-          </div>
+          </div> -->
           <!-- UNCERTAINTY LEGEND -->
           <div v-if="uncertainty" class="row q-mt-md">
             <div class="col-3 text-center">{{ trans('Very low') }}</div>
@@ -183,7 +184,7 @@
             <div class="col-3 text-center">{{ trans('Medium') }}</div>
             <div class="col-3 text-center">{{ trans('High') }}</div>
           </div>
-          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': 1 - (uncertaintyTransparency/100)}">
+          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': uncertaintyOpacity}">
               <div class="col-3 text-center">
                 <div class="circle very-low" :style="{ background: seColor }"></div>
               </div>
@@ -197,17 +198,18 @@
                 <div class="circle high" :style="{ background: seColor }"></div>
               </div>
           </div>
-          <!-- UNCERTAINTY TRANSPARENCY -->
+          <!-- UNCERTAINTY OPACITY -->
           <div class="row q-mt-lg">
-            <div v-if="uncertainty" class="col text-center">{{ trans('Transparency') }}</div>
+            <div v-if="uncertainty" class="col text-center">{{ trans('Opacity') }}</div>
           </div>
           <div v-if="uncertainty" class="row">
             <q-slider
               :min="0"
-              :max="100"
-              v-model="uncertaintyTransparency"
+              :max="1"
+              :step="0.01"
+              v-model="uncertaintyOpacity"
               color="orange"
-              @update:model-value="setUncertaintyTransparency"/>
+              @update:model-value="setUncertaintyOpacity"/>
           </div>
         </div>
       </div>
@@ -231,8 +233,8 @@ export default {
     'firstMapCall',
     'checkModelEstimation',
     'checkModelUncertainty',
-    'estimationTransparency',
-    'uncertaintyTransparency',
+    'estimationOpacity',
+    'uncertaintyOpacity',
     'estimationColorsChanged',
     'uncertaintyColorsChanged',
     'filterObservations',
@@ -257,16 +259,15 @@ export default {
     const estimation = ref(true)
     const uncertainty = ref(false)
     const modelsCalendar = ref()
-    // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+    const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
     const modelsManifest = {}
     const startingModelDate = ref('2014/05')
     // const estimationColor = ref()
     const palettes = ref(null)
     let estimationColors = $store.getters['app/getEstimationColors']
     const estLegendColors = ref(estimationColors)
-    const initialSeTransparency = $store.getters['app/getModelDefaults'].uncertaintyTransparency
-    const estimationTransparency = ref(0)
-    const uncertaintyTransparency = ref(initialSeTransparency)
+    const estimationOpacity = ref(defaults.estimationOpacity)
+    const uncertaintyOpacity = ref(defaults.uncertaintyOpacity)
     const manifestUrl = $store.getters['app/getModelsManifestUrl']
 
     // colors for uncertainty
@@ -291,8 +292,8 @@ export default {
         showLegend.value = true
         estimation.value = defaults.estimation
         uncertainty.value = defaults.uncertainty
-        estimationTransparency.value = defaults.estimationTransparency
-        uncertaintyTransparency.value = defaults.uncertaintyTransparency
+        estimationOpacity.value = defaults.estimationOpacity
+        uncertaintyOpacity.value = defaults.uncertaintyOpacity
         uncertaintyColor.value = defaults.uncertaintyColor
         inputDate.value = defaults.month + '/' + defaults.year
         context.emit('loadModel', defaults)
@@ -462,10 +463,8 @@ export default {
           month: parts[0],
           estimation: estimation.value,
           uncertainty: uncertainty.value,
-          estimationTransparency: estimationTransparency.value,
-          estimationOpacity: 1 - (estimationTransparency.value / 100),
-          uncertaintyTransparency: uncertaintyTransparency.value,
-          uncertaintyOpacity: 1 - (uncertaintyTransparency.value / 100),
+          estimationOpacity: estimationOpacity.value,
+          uncertaintyOpacity: uncertaintyOpacity.value,
           uncertaintyColor: uncertaintyColor.value,
           estimationColors: estimationColors,
           estimationPalettes: estimationPalettes,
@@ -506,20 +505,20 @@ export default {
       estimation.value = payload.estimation
       uncertainty.value = payload.uncertainty
       uncertaintyColor.value = payload.uncertaintyColor
-      estimationTransparency.value = payload.estimationTransparency
-      uncertaintyTransparency.value = payload.uncertaintyTransparency
+      estimationOpacity.value = payload.estimationOpacity
+      uncertaintyOpacity.value = payload.uncertaintyOpacity
       estimationColors = payload.estimationColors
       // applyfilter as a callback after modelsManifest is downloaded
       getManifest(manifestUrl, applyfilter)
     }
 
-    const setEstimationTransparency = function () {
-      // 0 - 100 slider values
-      context.emit('estimationTransparency', { transparency: estimationTransparency.value })
+    const setEstimationOpacity = function () {
+      // 0 - 1 slider values
+      context.emit('estimationOpacity', { opacity: estimationOpacity.value })
     }
 
-    const setUncertaintyTransparency = function () {
-      context.emit('uncertaintyTransparency', { transparency: uncertaintyTransparency.value })
+    const setUncertaintyOpacity = function () {
+      context.emit('uncertaintyOpacity', { opacity: uncertaintyOpacity.value })
     }
 
     function hexToRgb (hex) {
@@ -600,10 +599,10 @@ export default {
       showPicker,
       colorPickerEst,
       colorPickerSe,
-      setEstimationTransparency,
-      setUncertaintyTransparency,
-      estimationTransparency,
-      uncertaintyTransparency,
+      setEstimationOpacity,
+      setUncertaintyOpacity,
+      estimationOpacity,
+      uncertaintyOpacity,
       loadSharedModel,
       disabled,
       disabledInfo,

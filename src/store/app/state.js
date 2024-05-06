@@ -209,9 +209,6 @@ export default function () {
         month: '',
         estimation: true,
         uncertainty: false,
-        // 0 - 100 values
-        estimationTransparency: 0,
-        uncertaintyTransparency: 75,
         // 0 - 1 values
         estimationOpacity: 1,
         uncertaintyOpacity: 0.25,

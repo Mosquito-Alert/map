@@ -12,8 +12,8 @@
         @startShareView="startShareView"
         @checkModelEstimation="checkModelEstimation"
         @checkModelUncertainty="checkModelUncertainty"
-        @estimationTransparency="estimationTransparency"
-        @uncertaintyTransparency="uncertaintyTransparency"
+        @estimationOpacity="estimationOpacity"
+        @uncertaintyOpacity="uncertaintyOpacity"
         @estimationColorsChanged="estimationColorsChanged"
         @uncertaintyColorsChanged="uncertaintyColorsChanged"
         @firstMapCall="buildSession"
@@ -222,16 +222,14 @@ export default {
       map.value.uncertaintyVisibility(payload.status)
     }
 
-    const estimationTransparency = function (payload) {
-      $store.commit('app/setEstimationTransparency', payload.transparency)
-      const t = 1 - (payload.transparency / 100)
-      map.value.estimationOpacity(t)
+    const estimationOpacity = function (payload) {
+      $store.commit('app/setEstimationOpacity', payload.opacity)
+      map.value.estimationOpacity(payload.opacity)
     }
 
-    const uncertaintyTransparency = function (payload) {
-      $store.commit('app/setUncertaintyTransparency', payload.transparency)
-      const t = 1 - (payload.transparency / 100)
-      map.value.uncertaintyOpacity(t)
+    const uncertaintyOpacity = function (payload) {
+      $store.commit('app/setUncertaintyOpacity', payload.opacity)
+      map.value.uncertaintyOpacity(payload.opacity)
     }
 
     const loadSharedModel = function (payload) {
@@ -262,8 +260,8 @@ export default {
       loadSharedModel,
       checkModelEstimation,
       checkModelUncertainty,
-      estimationTransparency,
-      uncertaintyTransparency,
+      estimationOpacity,
+      uncertaintyOpacity,
       viewCode,
       mobile,
       expanded,

@@ -33,8 +33,8 @@
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-chart-scatter"
-        :label="trans('Estimates')"
+        name="fa-thin fa-chart-mixed"
+        :label="trans('Encounter probability')"
         :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
         link="/models"
         item="models"
