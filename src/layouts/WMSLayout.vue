@@ -1,17 +1,28 @@
 <template>
-  <div v-if="tabIsVisible">
+  <div>
     <q-layout
       :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
       <site-header v-if="!mobile" :expanded="expanded" />
-      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
-        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
-        @reorderLayers="reorderLayers" @exportImage="exportImage" />
+      <left-drawer-wms ref="TOC"
+        :expanded="expanded"
+        :species-code="mapSpeciesCode"
+        @toggleLeftDrawer="toggleLeftDrawer"
+        @startShareView="startShareView"
+        @speciesCodeChange="handleSpeciesCodeChange"
+        @visibilityChange="handleVisibilityChange"
+        @opacityChange="handleOpacityChange"/>
 
       <q-page class='flex'
         :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
-        <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
-          @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
-          @errorDownloadingModels="errorDownloadingModels" />
+        <the-map-wms ref='map' init
+          :species-code="mapSpeciesCode"
+          :visible="mapIsVisible"
+          :opacity="mapOpacity"
+          :lon="mapLon"
+          :lat="mapLat"
+          :zoom="mapZoom"
+          @move="handleMapChange"
+          @toggleLeftDrawer="toggleLeftDrawer"/>
       </q-page>
 
       <modal-share ref="shareModal" :open="shareModalVisible">
@@ -30,17 +41,14 @@
       <modal-wait />
       <modal-logos />
       <modal-error />
-      <modal-cookie-settings />
       <modal-login />
+      <modal-cookie-settings />
       <modal-cookie-policy />
 
       <site-footer />
       <cookies-compliance />
     </q-layout>
   </div>
-  <router-link v-else to="/">
-    <page-error-not-found />
-  </router-link>
 </template>
 
 <script>
@@ -54,19 +62,14 @@ import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalError from 'src/components/ModalError.vue'
-import PageErrorNotFound from 'src/components/PageErrorNotFound.vue'
 import ModalWait from 'src/components/ModalWait.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawerWms from 'components/LeftDrawerWms.vue'
 import TheMapWms from 'components/TheMapWms.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
-import MSession from '../js/session.js'
-import ShareMapView from '../js/ShareMapView'
-import { StatusCodes as STATUS_CODES } from 'http-status-codes'
-// import moment from 'moment'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   components: {
@@ -74,7 +77,6 @@ export default {
     ModalShare,
     ModalHelp,
     ModalError,
-    PageErrorNotFound,
     ModalLogin,
     ModalConfirmLogout,
     ModalLogos,
@@ -87,44 +89,69 @@ export default {
     ModalCookiePolicy,
     CookiesCompliance
   },
-  setup () {
-    let mySession
+  props: {
+    speciesCode: {
+      type: String
+    },
+    lang: {
+      type: String
+    }
+  },
+  setup (props) {
     const route = useRoute()
+    const router = useRouter()
+    const $store = useStore()
+
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
-    const loadDrawer = ref(false)
-    const $store = useStore()
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-
-    async function getInitData () {
-      await $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
-      loadDrawer.value = true
-    }
-    $store.commit('timeseries/setGraphIsVisible', false)
-    if (lang) {
-      getInitData()
-    } else {
-      loadDrawer.value = true
-    }
-
-    const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
-
-    const tabIsVisible = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
-      if (Object.keys(tabs).length) {
-        return tabs.distribution.active
-      } else {
-        return true
-      }
-    })
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
-
     const expanded = ref(!mobile.value)
+
+    // Map props
+    const mapSpeciesCode = ref(props.speciesCode || $store.getters['app/getEarlyWarningSpecieCode'])
+
+    const mapIsVisible = ref(true)
+    const mapOpacity = ref()
+
+    const mapLon = ref($store.getters['map/getCurrents'].CENTER[0])
+    const mapLat = ref($store.getters['map/getCurrents'].CENTER[1])
+    const mapZoom = ref(mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM)
+
+    watch(mapSpeciesCode, (newValue, oldValue) => {
+      $store.commit('app/setEarlyWarningSpecieCode', newValue)
+    })
+
+    watch([mapSpeciesCode, mapLon, mapLat, mapZoom], () => {
+      updateRouterQuery()
+    })
+
+    onMounted(() => {
+      if (props.lang) {
+        $store.dispatch('app/setInitData', props.lang.toLocaleLowerCase())
+      }
+
+      // Parse initial values from route query
+      if (route.query.lon) mapLon.value = parseFloat(route.query.lon)
+      if (route.query.lat) mapLat.value = parseFloat(route.query.lat)
+      if (route.query.zoom) mapZoom.value = parseFloat(route.query.zoom)
+    })
+
+    const updateRouterQuery = () => {
+      router.push({
+        query: {
+          lon: mapLon.value?.toFixed(5),
+          lat: mapLat.value?.toFixed(5),
+          zoom: mapZoom.value
+        },
+        params: {
+          speciesCode: mapSpeciesCode.value
+        }
+      })
+    }
 
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info.visibility
@@ -142,50 +169,6 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
-    const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
-      mySession.getSession(buildMap)
-    }
-
-    const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
-      const backendUrl = $store.getters['app/getBackend']
-      const loadViewUrl = backendUrl + 'view/load/'
-
-      // if loading previously shared view
-      if (viewCode) {
-        const wmsCode = 'W-' + viewCode
-        const newView = new ShareMapView(null, {
-          url: loadViewUrl + wmsCode + '/',
-          csrfToken: $store.getters['app/getCsrfToken']
-        })
-        newView.load(handleLoadView)
-      }
-    }
-
-    const handleLoadView = function (data) {
-      if (data.status === STATUS_CODES.OK) {
-        const viewProperties = JSON.parse(data.view[0].view)
-        map.value.fitExtent(viewProperties.extent)
-        TOC.value.setForm(viewProperties)
-      } else {
-        const frontend = $store.getters['app/getFrontendUrl']
-        const content = {
-          url: frontend + data.status + '/' + $store.getters['app/getLang'],
-          visibility: true,
-          error: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      }
-    }
-
-    const shareView = function () {
-      map.value.shareModelView()
-    }
-
     const toggleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
@@ -201,62 +184,65 @@ export default {
       }
     }
 
-    const endShareView = function (payload) {
+    const startShareView = function (data) {
+      const payload = {
+        url: new URL(route.fullPath, window.location.origin).href,
+        visibility: true,
+        error: ''
+      }
+      $store.commit('app/setModal', {
+        id: 'share',
+        content: payload
+      })
       shareModal.value.viewContent = payload
     }
 
-    const loadSharedModel = function (payload) {
-      TOC.value.loadSharedModel(payload)
+    const handleSpeciesCodeChange = (value) => {
+      mapSpeciesCode.value = value
     }
 
-    const errorDownloadingModels = function (payload) {
-      TOC.value.errorDownloadingModels(payload)
+    const handleOpacityChange = (value) => {
+      mapOpacity.value = value
     }
 
-    const startShareView = function (data) {
-      map.value.shareWmsView(data)
+    const handleVisibilityChange = (value) => {
+      mapIsVisible.value = value
     }
 
-    const loadWms = function (data) {
-      map.value.loadWmsLayer(data)
+    const handleMapChange = (newPosition) => {
+      mapLon.value = newPosition.center[0]
+      mapLat.value = newPosition.center[1]
+      mapZoom.value = newPosition.zoom
+
+      $store.commit('map/setCurrents', {
+        zoom: mapZoom.value,
+        center: [mapLon.value, mapLat.value]
+      })
     }
 
-    const layerChange = function (payload) {
-      map.value.changeLayerProperty(payload)
-    }
-
-    const reorderLayers = function (payload) {
-      map.value.reorderLayers(payload)
-    }
-
-    const exportImage = function () {
-      map.value.exportPNG()
-    }
     return {
-      tabIsVisible,
-      exportImage,
-      loadDrawer,
-      loadWms,
-      layerChange,
-      reorderLayers,
-      errorDownloadingModels,
-      loadSharedModel,
-      viewCode,
+      mapOpacity,
+      mapSpeciesCode,
+      mapIsVisible,
+      mapLon,
+      mapLat,
+      mapZoom,
       mobile,
       expanded,
       toggleLeftDrawer,
-      shareView,
+      startShareView,
+      handleSpeciesCodeChange,
+      handleOpacityChange,
+      handleVisibilityChange,
+      handleMapChange,
       shareModal,
-      endShareView,
       shareModalVisible,
       infoModalVisible,
       helpModalVisible,
       errorModalVisible,
       map,
       TOC,
-      CookiesCompliance,
-      buildSession,
-      startShareView
+      CookiesCompliance
     }
   }
 }

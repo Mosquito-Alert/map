@@ -33,43 +33,38 @@
         <div class="category-box q-my-md">
           <q-select
             :label="trans('Select species')"
-            v-model="modelVector"
-            color="orange"
-            :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
+            :label-color="localSpeciesCode?'orange':'rgba(0, 0, 0, 0.6)'"
             :options="vectorOptions"
-            :option-value="'code'"
-            :option-label="'type'"
-            @update:model-value="filterModels"
+            option-value="code"
+            option-label="label"
+            color="orange"
+            emit-value
+            map-options
+            :model-value="localSpeciesCode"
+            @update:model-value="speciesCodeUpdated"
           />
-
         </div>
-
         <q-input
-          v-if="modelVector"
-          readonly
-          class="calendar-input"
-          input-class="cursor-pointer"
           :label="trans('Month / Year')"
-          v-model="inputDate"
-          mask="##/####"
-          :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
-          ref="refInput"
-          @click="showCalendar"
+          :label-color="localDate?'orange':'rgba(0, 0, 0, 0.6)'"
+          :disable="!localSpeciesCode"
+          :model-value="localDateString"
+          readonly
         >
           <template v-slot:append>
-            <q-icon ref="modelsCalendar" name="event_note" class="models-calendar cursor-pointer" color="orange">
-              <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
+            <q-icon name="event" class="cursor-pointer" color="orange">
+              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
                 <q-date
                   :title="trans('Select model date')"
-                  :navigation-min-year-month="startingModelDate"
-                  :navigation-max-year-month="getLastDate"
-                  mask="MM/YYYY"
-                  :years-in-month-view=true
-                  emit-immediately
+                  :navigation-min-year-month="minYearMonthPickerValue"
+                  :navigation-max-year-month="maxYearMonthPickerValue"
                   default-view="Years"
-                  v-model="modelDate"
                   color="orange-4"
-                  @update:model-value="checkValue"
+                  years-in-month-view
+                  emit-immediately
+                  mask="YYYY/MM"
+                  v-model="qDateModel"
+                  @update:model-value="dateUpdated"
                 />
               </q-popup-proxy>
             </q-icon>
@@ -89,127 +84,69 @@
               </div>
             </div>
           </div>
-            <div>
-            <q-btn
-              class="ma-btn no-margin"
-              :class="(disabled)?'disabled':''"
-              @click="applyfilter">
-                {{ trans('Apply') }}
-            </q-btn>
-          </div>
         </div>
         <!-- LEGEND -->
-        <div v-if="showLegend">
-          <hr class="q-my-xl">
-          <div class="flex spaceBetween">
-            <div class="uppercase text-bold">
-              {{ trans('Probability') }}
+        <div v-if="formIsValid">
+          <hr class="q-my-lg">
+          <div class="row title-shaded-box">{{ trans('Layer controls') }}</div>
+          <div class="row shaded-box q-pa-sm">
+            <div class="col-9 q-pr-md">
+              <div class="row">
+                <q-badge :outline="!localVisible" color="orange">
+                  {{ trans('Opacity') }}
+                </q-badge>
+              </div>
+              <q-slider
+                v-model="localOpacity"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :disable="!localVisible"
+                color="orange"
+                label/>
             </div>
-            <div class="estimation-palettes">
-              <!-- <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" /> -->
-              <q-toggle checked-icon="check" v-model="estimation" @update:model-value="checkEstimation" color="orange" size="lg"/>
-            </div>
+            <q-toggle class="col" checked-icon="check" v-model="localVisible" color="orange" size="lg"/>
           </div>
-          <!-- <div class="flex spaceBetween">
-            <div>
-                <q-popup-proxy ref="colorPickerEst" class="estimation-colors">
-                      <q-color
-                        no-header
-                        no-footer
-                        default-view="palette"
-                        :palette="palettes"
-                        class="my-picker q-ma-md"
-                        @click="clickColor"
+          <!-- LEGEND + FILTERS -->
+          <div v-if="localVisible">
+            <!-- LEGEND -->
+            <div class="row justify-between q-mt-lg">
+              <span>{{ trans('Low') }}</span>
+              <span>{{ trans('Medium') }}</span>
+              <span>{{ trans('High') }}</span>
+            </div>
+            <!-- ESTIMATION LEGEND -->
+            <div class="row legend-row" :style="{'opacity': localOpacity}">
+              <div class="col" v-for="(color, index) in palette" :key="index" :style="{'background-color': color}"></div>
+            </div>
+            <!-- FILTERS -->
+            <hr class="q-my-lg">
+            <div class="row title-shaded-box">{{ trans('Filters') }}</div>
+            <div class="shaded-box ">
+              <q-list>
+                <!-- CERTAINTY FILTER -->
+                <q-item>
+                  <q-item-section avatar class="column flex-center">
+                    <q-icon name="fas fa-handshake" color="orange"/>
+                    <q-item-label class="text-grey-8">
+                      {{ trans('Certainty') }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-range
+                      v-model="localFilter.certaintyRange"
+                      :min="0.0"
+                      :max="1.0"
+                      :step="0.05"
+                      label
+                      drag-range
+                      color="orange"
+                      @change="handleFilterChange"
                       />
-                </q-popup-proxy>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
-          </div> -->
-          <!-- ESTIMATION -->
-          <div v-if="estimation" class="row">
-            <div class="col-4 text-left">{{ trans('Low') }}</div>
-            <div class="col-4 text-center">{{ trans('Medium') }}</div>
-            <div class="col-4 text-right">{{ trans('High') }}</div>
-          </div>
-          <!-- ESTIMATION LEGEND -->
-          <div v-if="estimation" class="row legend-row" :style="{'opacity': estimationOpacity}">
-              <div class="col-2" :style="{'background-color': estLegendColors[0]}"></div>
-              <div class="col-2" :style="{'background-color': estLegendColors[1]}"></div>
-              <div class="col-2" :style="{'background-color': estLegendColors[2]}"></div>
-              <div class="col-2" :style="{'background-color': estLegendColors[3]}"></div>
-              <div class="col-2" :style="{'background-color': estLegendColors[4]}"></div>
-              <div class="col-2" :style="{'background-color': estLegendColors[5]}"></div>
-          </div>
-          <!-- ESTIMATION OPACITY -->
-          <div class="row q-mt-lg">
-            <div v-if="estimation" class="col text-center">{{ trans('Opacity') }}</div>
-          </div>
-          <div v-if="estimation" class="row">
-            <q-slider
-              :min="0"
-              :max="1"
-              :step="0.01"
-              v-model="estimationOpacity"
-              color="orange"
-              @update:model-value="setEstimationOpacity"/>
-          </div>
-          <!-- UNCERTAINTY -->
-          <div class="flex spaceBetween">
-            <div class="uppercase text-bold">
-              {{ trans('Uncertainty') }}
-            </div>
-            <div>
-              <!-- <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" /> -->
-              <q-toggle checked-icon="check" v-model="uncertainty" @update:model-value="checkUncertainty" color="orange" size="lg"/>
-            </div>
-          </div>
-          <!-- <div class="flex spaceBetween">
-            <div>
-                <q-popup-proxy ref="colorPickerSe">
-                  <q-color
-                    v-model="uncertaintyColor"
-                    no-header
-                    no-footer
-                    default-view="palette"
-                    :palette="colorsTo"
-                    class="my-picker q-ma-md"
-                    @change="setUncertaintyColor"
-                  />
-                </q-popup-proxy>
-            </div>
-          </div> -->
-          <!-- UNCERTAINTY LEGEND -->
-          <div v-if="uncertainty" class="row q-mt-md">
-            <div class="col-3 text-center">{{ trans('Very low') }}</div>
-            <div class="col-3 text-center">{{ trans('Low') }}</div>
-            <div class="col-3 text-center">{{ trans('Medium') }}</div>
-            <div class="col-3 text-center">{{ trans('High') }}</div>
-          </div>
-          <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': uncertaintyOpacity}">
-              <div class="col-3 text-center">
-                <div class="circle very-low" :style="{ background: seColor }"></div>
-              </div>
-              <div class="col-3 text-center">
-                <div class="circle low" :style="{ background: seColor }"></div>
-              </div>
-              <div class="col-3 text-center">
-                <div class="circle medium" :style="{ background: seColor }"></div>
-              </div>
-              <div class="col-3 text-center">
-                <div class="circle high" :style="{ background: seColor }"></div>
-              </div>
-          </div>
-          <!-- UNCERTAINTY OPACITY -->
-          <div class="row q-mt-lg">
-            <div v-if="uncertainty" class="col text-center">{{ trans('Opacity') }}</div>
-          </div>
-          <div v-if="uncertainty" class="row">
-            <q-slider
-              :min="0"
-              :max="1"
-              :step="0.01"
-              v-model="uncertaintyOpacity"
-              color="orange"
-              @update:model-value="setUncertaintyOpacity"/>
           </div>
         </div>
       </div>
@@ -218,98 +155,149 @@
 </template>
 
 <script>
-import { watch, computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
-// import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
 
 export default {
   components: { LeftMenu },
-  props: ['expanded'],
+  props: {
+    expanded: {
+      type: Boolean,
+      default: true
+    },
+    speciesCode: {
+      type: String
+    },
+    date: {
+      type: Date,
+      validator (value) {
+        return value <= new Date()
+      }
+    },
+    opacity: {
+      type: Number,
+      default: 1
+    },
+    visible: {
+      type: Boolean,
+      default: true
+    },
+    palette: {
+      type: Array,
+      required: true
+    },
+    filters: {
+      type: Object
+    },
+    lang: {
+      type: String,
+      required: true,
+      default: 'en'
+    }
+  },
   emits: [
-    'loadModel',
-    'clearModel',
     'firstMapCall',
-    'checkModelEstimation',
-    'checkModelUncertainty',
-    'estimationOpacity',
-    'uncertaintyOpacity',
-    'estimationColorsChanged',
-    'uncertaintyColorsChanged',
-    'filterObservations',
-    'toggleLeftDrawer'
+    'toggleLeftDrawer',
+    'startShareView',
+    'speciesCodeChange',
+    'dateChange',
+    'opacityChange',
+    'visiblitiyChange',
+    'filtersChange',
+    'filtersLazyChange'
   ],
   setup (props, context) {
-    const uncertaintyColor = ref(null)
-    const colorPickerEst = ref(null)
-    const colorPickerSe = ref(null)
-    const refInput = ref(null)
-    // const inputDate = ref(null)
-    const inputDate = ref(null)
-    const legendCanvas = ref(null)
-    const modelDate = ref(null)
-    const getLastDate = ref()
-    const monthPicker = ref()
     const $store = useStore()
-    const showLegend = ref(false)
-    const disabled = ref(true)
-    const disabledInfo = ref(true)
-    const modelVector = ref()
-    const estimation = ref(true)
-    const uncertainty = ref(false)
-    const modelsCalendar = ref()
-    const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
+
+    // Ref for controlling month picker visibility
+    const qDateProxy = ref()
+
+    // Object to store models manifest
     const modelsManifest = {}
-    const startingModelDate = ref('2014/05')
-    // const estimationColor = ref()
-    const palettes = ref(null)
-    let estimationColors = $store.getters['app/getEstimationColors']
-    const estLegendColors = ref(estimationColors)
-    const estimationOpacity = ref(defaults.estimationOpacity)
-    const uncertaintyOpacity = ref(defaults.uncertaintyOpacity)
     const manifestUrl = $store.getters['app/getModelsManifestUrl']
+    const speciesModelManifest = computed(() => modelsManifest[localSpeciesCode.value])
 
-    // colors for uncertainty
-    const colorsTo = [
-      hexToRgb('#ff0000'), hexToRgb('#ff8000'), hexToRgb('#ffff00'),
-      hexToRgb('#00ff00'), hexToRgb('#00ff80'), hexToRgb('#00ff80'),
-      hexToRgb('#0080ff'), hexToRgb('#0000ff'), hexToRgb('#8000ff'),
-      hexToRgb('#ff00ff'), hexToRgb('#cdcdcd'), hexToRgb('#7f7f7f'),
-      hexToRgb('#191919'), hexToRgb('#000000')
-    ]
-
-    onMounted(function () {
-      palettes.value = [].concat.apply([], $store.getters['app/getEstimationPalettes'])
-      const defaults = $store.getters['app/getModelDefaults']
-      // Check if referer is Reports map
-      if (defaults.vector !== '') {
-        const index = vectorOptions.value.findIndex(obj => {
-          return (obj.code === defaults.vector)
-        })
-        modelVector.value = vectorOptions.value[index]
-        // Init view. Get values from store
-        showLegend.value = true
-        estimation.value = defaults.estimation
-        uncertainty.value = defaults.uncertainty
-        estimationOpacity.value = defaults.estimationOpacity
-        uncertaintyOpacity.value = defaults.uncertaintyOpacity
-        uncertaintyColor.value = defaults.uncertaintyColor
-        inputDate.value = defaults.month + '/' + defaults.year
-        context.emit('loadModel', defaults)
+    const localSpeciesCode = ref(props.speciesCode)
+    const localDate = ref(props.date)
+    const qDateModel = ref()
+    watch(localDate, (newValue, oldValue) => {
+      if (localDate.value) {
+        // Same mask as in q-date
+        qDateModel.value = localDate.value.getFullYear() + '/' + (localDate.value.getMonth() + 1).toString().padStart(2, '0')
+      } else {
+        console.log('undefined')
+        qDateModel.value = undefined
       }
 
-      const d = new Date(Date.now())
-      const monthIn2Digit = String(d.getMonth() + 1).padStart(2, '0')
-      getLastDate.value = d.getFullYear() + '/' + monthIn2Digit
-      uncertaintyColor.value = defaults.uncertaintyColor
-      // Get model manifest to activate/deactivate calendar
-      getManifest(manifestUrl)
+      context.emit('dateChange', newValue)
     })
 
-    const callFirstMapCall = function () {
-      context.emit('firstMapCall', {})
-    }
+    const localDateString = computed(() => {
+      if (localDate.value === undefined) {
+        return ''
+      }
+
+      const dateStr = localDate.value.toLocaleDateString(
+        props.lang || 'en',
+        { year: 'numeric', month: 'long' }
+      )
+
+      // Force capitalize of first letter
+      return dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
+    })
+
+    // Computed properties for setting min and max values for the year-month picker
+    const minYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.fromYear}/${speciesModelManifest.value.fromMonth}` : undefined)
+    const maxYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.toYear}/${speciesModelManifest.value.toMonth}` : undefined)
+
+    const localVisible = ref(props.visible)
+    watch(localVisible, (newValue) => {
+      context.emit('visiblitiyChange', newValue)
+    })
+    const localOpacity = ref(props.opacity)
+    watch(localOpacity, (newValue, oldValue) => {
+      context.emit('opacityChange', newValue)
+    })
+    const localFilter = ref({
+      ...{
+        certaintyRange: {
+          min: 0,
+          max: 1
+        }
+      },
+      ...props.filters
+    })
+    watch(localFilter, (newValue, oldValue) => {
+      context.emit('filtersChange', newValue)
+    })
+
+    // Computed property for checking form validity
+    const formIsValid = computed(() => {
+      // Check that both localSpeciesCode and localDate have values
+      return [localSpeciesCode.value, localDate.value].every(value => value !== undefined)
+    })
+
+    const vectorOptions = computed(() => {
+      // Code is used also for building the CSV urls paths.
+      return [
+        { code: 'albopictus', label: trans('Tiger mosquito') },
+        { code: 'aegypti', label: trans('Yellow fever mosquito') },
+        { code: 'japonicus', label: trans('Japonicus mosquito') },
+        { code: 'koreicus', label: trans('Koreicus mosquito') },
+        { code: 'culex', label: trans('Culex mosquito') },
+        { code: 'biting', label: trans('Bites') }
+      ]
+    })
+
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
+    })
+
+    onMounted(function () {
+      getManifest(manifestUrl)
+    })
 
     const getManifest = function (url, callback = false) {
       // IF modelsManifest already exists, then call callback
@@ -353,213 +341,17 @@ export default {
         })
     }
 
-    // Read default uncertainty color from store
-    const seColor = computed(() => {
-      return $store.getters['app/getUncertaintyColor']
-    })
-
-    const models = computed(() => {
-      return $store.getters['app/getModels']
-    })
-
-    const vectorOptions = computed(() => {
-      return [
-        { code: 'albopictus', type: trans('Tiger mosquito') },
-        { code: 'aegypti', type: trans('Yellow fever mosquito') },
-        { code: 'japonicus', type: trans('Japonicus mosquito') },
-        { code: 'koreicus', type: trans('Koreicus mosquito') },
-        { code: 'culex', type: trans('Culex mosquito') },
-        { code: 'biting', type: trans('Bites') }
-      ]
-    })
-
     const trans = function (text) {
       return $store.getters['app/getText'](text)
+    }
+
+    const callFirstMapCall = function () {
+      context.emit('firstMapCall', {})
     }
 
     // Called when TOC is toggled
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
-    }
-
-    const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
-    })
-
-    const dateSelected = computed(() => {
-      return modelDate.value !== null
-    })
-
-    // Called when calendar is clicked
-    const checkValue = function (val, reason, details) {
-      showLegend.value = false
-      context.emit('clearModel')
-      if (reason === 'month') {
-        modelDate.value = val
-        inputDate.value = val
-        monthPicker.value.hide()
-        $store.commit('map/setModelDate', inputDate.value)
-      }
-      disabled.value = (!modelVector.value || !inputDate.value)
-      if (inputDate.value) {
-        disabledInfo.value = false
-      }
-    }
-
-    // Called when model is selected
-    const filterModels = function () {
-      showLegend.value = false
-      context.emit('clearModel')
-
-      context.emit('filterObservations', {
-        type: modelVector.value.type,
-        code: modelVector.value.code
-      })
-
-      // Check if selected models is available. if not clear modelDate
-      // startingModelDate.value = modelsManifest[modelVector.value.code].year + '/01'
-      startingModelDate.value = modelsManifest[modelVector.value.code].fromYear + '/' + modelsManifest[modelVector.value.code].fromMonth
-      getLastDate.value = modelsManifest[modelVector.value.code].toYear + '/' + modelsManifest[modelVector.value.code].toMonth
-      if (modelDate.value) {
-        const selected = parseInt(modelDate.value.slice(-4))
-        const previous = parseInt(startingModelDate.value.substring(0, 4))
-        if (previous > selected) {
-          inputDate.value = null
-          modelDate.value = null
-        }
-      }
-
-      if (modelVector.value && inputDate.value) {
-        disabled.value = false
-      } else {
-        disabled.value = true
-      }
-    }
-
-    // Called when apply button is clicked
-    const applyfilter = async function () {
-      if (inputDate.value === null || !modelVector.value) {
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: 'Must select model first' } })
-      } else {
-        const parts = inputDate.value.split('/')
-        const serverModels = $store.getters['app/getModelsUrl']
-        const selectedModel = modelVector.value.code
-        const urls = [
-          serverModels + `gadm1/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm1_monthly.csv',
-          serverModels + `gadm2/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm2_monthly.csv',
-          serverModels + `gadm3/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm3_monthly.csv',
-          serverModels + `gadm4/${selectedModel}/${parts[1]}/${parts[0]}/` + 'gadm4_monthly.csv'
-        ]
-        // Add grid (2km x 2km) layer based on manifest
-        if (modelsManifest[selectedModel].cell === 'true') {
-          urls.push(serverModels + `sampling_cells_025/${selectedModel}/${parts[1]}/${parts[0]}/` + 'sampling_cells_025_monthly.csv')
-        }
-        const estimationPalettes = $store.getters['app/getEstimationPalettes']
-
-        // Prepare payload to update store
-        const payload = {
-          vector: selectedModel,
-          year: parts[1],
-          month: parts[0],
-          estimation: estimation.value,
-          uncertainty: uncertainty.value,
-          estimationOpacity: estimationOpacity.value,
-          uncertaintyOpacity: uncertaintyOpacity.value,
-          uncertaintyColor: uncertaintyColor.value,
-          estimationColors: estimationColors,
-          estimationPalettes: estimationPalettes,
-          modelsCsv: urls
-        }
-        $store.commit('app/setModelDefaults', payload)
-        context.emit('loadModel', payload)
-        if (mobile.value) {
-          toggleLeftDrawer()
-        }
-        disabled.value = true
-        showLegend.value = true
-      }
-    }
-
-    const showCalendar = function () {
-      modelsCalendar.value.$el.click()
-    }
-
-    const checkEstimation = function () {
-      context.emit('checkModelEstimation', { status: estimation.value })
-    }
-
-    const checkUncertainty = function () {
-      context.emit('checkModelUncertainty', { status: uncertainty.value })
-    }
-
-    const errorDownloadingModels = function () {
-      showLegend.value = false
-    }
-
-    // Update UI when loading a model from a shared view
-    const loadSharedModel = async function (payload) {
-      estLegendColors.value = payload.estimationColors
-      modelVector.value = payload.vector
-      inputDate.value = payload.month + '/' + payload.year
-      modelDate.value = inputDate.value
-      estimation.value = payload.estimation
-      uncertainty.value = payload.uncertainty
-      uncertaintyColor.value = payload.uncertaintyColor
-      estimationOpacity.value = payload.estimationOpacity
-      uncertaintyOpacity.value = payload.uncertaintyOpacity
-      estimationColors = payload.estimationColors
-      // applyfilter as a callback after modelsManifest is downloaded
-      getManifest(manifestUrl, applyfilter)
-    }
-
-    const setEstimationOpacity = function () {
-      // 0 - 1 slider values
-      context.emit('estimationOpacity', { opacity: estimationOpacity.value })
-    }
-
-    const setUncertaintyOpacity = function () {
-      context.emit('uncertaintyOpacity', { opacity: uncertaintyOpacity.value })
-    }
-
-    function hexToRgb (hex) {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-      const c = result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-      } : null
-      return c ? `rgb(${c.r},${c.g},${c.b})` : null
-    }
-
-    const showPalettes = function () {
-      colorPickerEst.value.show()
-    }
-
-    const showPicker = function () {
-      colorPickerSe.value.show()
-    }
-
-    const setUncertaintyColor = function (e) {
-      colorPickerSe.value.hide()
-      uncertaintyColor.value = e
-      $store.commit('app/setUncertaintyColor', uncertaintyColor.value)
-      context.emit('uncertaintyColorsChanged')
-    }
-
-    const clickColor = function (event) {
-      let el = event.target
-      let idx = 0
-      while (el.previousElementSibling) {
-        idx += 1
-        el = el.previousElementSibling
-      }
-      const p = $store.getters['app/getEstimationPalettes']
-      const index = Math.floor(idx / 6)
-      estimationColors = p[index]
-      estLegendColors.value = estimationColors
-      $store.commit('app/setEstimationColors', estimationColors)
-      colorPickerEst.value.hide()
-      context.emit('estimationColorsChanged')
     }
 
     const goInfoModal = function () {
@@ -570,66 +362,48 @@ export default {
       context.emit('startShareView', {})
     }
 
-    // Required to change lang on current selection
-    watch(vectorOptions, (cur, old) => {
-      if (modelVector.value) {
-        if (modelVector.value.code) {
-          const index = cur.findIndex(obj => {
-            return (obj.code === modelVector.value.code)
-          })
-          modelVector.value = cur[index]
-        }
+    // Called when calendar is clicked
+    const dateUpdated = function (val, reason, details) {
+      if (reason === 'month') {
+        localDate.value = new Date(details.year, details.month - 1)
+        // Once month is selected, hide the datePicker.
+        qDateProxy.value.hide()
       }
-    })
+    }
+
+    const speciesCodeUpdated = function (value) {
+      localSpeciesCode.value = value
+      localDate.value = undefined
+      context.emit('speciesCodeChange', value)
+    }
+
+    const handleFilterChange = (value) => {
+      // Important, do { ...localFilter.value } to avoid passing a ProxyObject.
+      context.emit('filtersLazyChange', { ...localFilter.value })
+    }
 
     return {
-      trans,
-      errorDownloadingModels,
-      goInfoModal,
-      estLegendColors,
-      clickColor,
-      estimationColors,
-      startingModelDate,
-      palettes,
-      colorsTo,
-      seColor,
-      uncertaintyColor,
-      setUncertaintyColor,
-      showPalettes,
-      showPicker,
-      colorPickerEst,
-      colorPickerSe,
-      setEstimationOpacity,
-      setUncertaintyOpacity,
-      estimationOpacity,
-      uncertaintyOpacity,
-      loadSharedModel,
-      disabled,
-      disabledInfo,
-      showLegend,
-      legendCanvas,
-      checkEstimation,
-      checkUncertainty,
-      uncertainty,
-      estimation,
-      showCalendar,
-      modelsCalendar,
-      modelVector,
-      models,
+      qDateModel,
+      qDateProxy,
+      localSpeciesCode,
+      localDate,
+      localDateString,
+      localOpacity,
+      localVisible,
+      localFilter,
+      minYearMonthPickerValue,
+      maxYearMonthPickerValue,
+      formIsValid,
       vectorOptions,
       mobile,
-      dateSelected,
-      getLastDate,
-      modelDate,
-      inputDate,
-      monthPicker,
-      checkValue,
+      trans,
+      goInfoModal,
       toggleLeftDrawer,
-      applyfilter,
-      filterModels,
-      refInput,
       callFirstMapCall,
-      startShareView
+      startShareView,
+      dateUpdated,
+      speciesCodeUpdated,
+      handleFilterChange
     }
   }
 }
@@ -672,9 +446,6 @@ export default {
   color: white !important;
 }
 
-.models-calendar{
-  font-weight: 600;
-}
 .q-header,
 .q-drawer{
   width: $left-drawer-width;
@@ -720,10 +491,6 @@ div.flex-right{
 }
 .flex{
   display:flex;
-}
-.spaceBetween{
-  justify-content: space-between;
-  align-items: center;
 }
 
 button.ma-btn{
@@ -858,5 +625,16 @@ button.ma-close-btn,
 button.ma-close-btn:hover,
 .ma-close-btn:hover{
   opacity:0.7;
+}
+.title-shaded-box{
+  font-family: 'Roboto';
+  font-weight: 700;
+  color: #666666;
+  text-transform: uppercase;
+}
+.shaded-box{
+  border-radius: 5px;
+  background-color: $grey-color;
+  margin: 3px 0px;
 }
 </style>

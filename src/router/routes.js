@@ -1,91 +1,64 @@
 
 const routes = [
-  // DEFAULT PAGE
+  // REPORT PAGE
   {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    props: { initView: false }
+    path: '/:lang(\\w{2})?/reports',
+    alias: '/:lang(\\w{2})?',
+    name: 'reports',
+    component: () => import('layouts/MainLayout.vue')
   },
-  // DEFAULT WITH LANG
+  // DISTRIBUTION WITH LANG
   {
-    path: '/:lang(ca|es|en)',
-    component: () => import('layouts/MainLayout.vue'),
-    props: { initView: false }
+    path: '/:lang(\\w{2})?/distribution',
+    redirect: { path: '/early_warning/', permanent: true }
+  },
+  // Old WMS share permalink
+  {
+    path: '/:lang(\\w{2})?/W-:code([a-zA-Z0-9]{4})',
+    redirect: { path: '/early_warning/', permanent: true }
+  },
+  // EARLY WARNING LANG
+  {
+    path: '/:lang(\\w{2})?/early_warning/:speciesCode?',
+    component: () => import('layouts/WMSLayout.vue'),
+    name: 'early_warning',
+    props: true
   },
   // MODELS TAB
   {
-    path: '/models',
-    component: () => import('layouts/ModelsLayout.vue')
+    path: '/:lang(\\w{2})?/models/:speciesCode?/:year(\\d{4})?/:month(\\d{2})?',
+    component: () => import('layouts/ModelsLayout.vue'),
+    name: 'models',
+    props: (route) => ({
+      ...route.params,
+      year: route.params.year ? parseInt(route.params.year) : undefined,
+      month: route.params.month ? parseInt(route.params.month) : undefined
+    })
   },
-  // MODELS WITH LANG
+  // Old shared model permalink
   {
-    path: '/models/:lang(ca|es|en)',
-    component: () => import('layouts/ModelsLayout.vue')
-  },
-  // DISTRIBUTION TAB
-  {
-    path: '/distribution',
-    component: () => import('layouts/WMSLayout.vue')
-  },
-  // MODELS WITH LANG
-  {
-    path: '/distribution/:lang(ca|es|en)',
-    component: () => import('layouts/WMSLayout.vue')
+    path: '/:lang(\\w{2})?/M-:code([a-zA-Z0-9]{4})',
+    redirect: { path: '/models/', permanent: true }
   },
   // SHARE OBSERVATIONS VIEW
   {
-    path: '/:code([a-zA-Z0-9]{4})',
+    path: '/:lang(\\w{2})?/:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/MainLayout.vue')
-  },
-  // SHARE OBSERVATIONS VIEW WITH LANG
-  {
-    path: '/:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/MainLayout.vue')
-  },
-  // SHARE MODELS VIEW
-  {
-    path: '/M-:code([a-zA-Z0-9]{4})',
-    component: () => import('layouts/ModelsLayout.vue')
-  },
-  // SHARE MODELS VIEW WITH LANG
-  {
-    path: '/M-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/ModelsLayout.vue')
-  },
-  // SHARE distribution VIEW
-  {
-    path: '/W-:code([a-zA-Z0-9]{4})',
-    component: () => import('layouts/WMSLayout.vue')
-  },
-  // SHARE WMS VIEW WITH LANG
-  {
-    path: '/W-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/WMSLayout.vue')
   },
   {
     // Set the accepted characters and length of reports view
-    path: '/:report([a-zA-Z0-9]{6})',
-    component: () => import('layouts/ReportsLayout.vue')
-  },
-  {
-    // Set the accepted characters and length of reports view with lang
-    path: '/:report([a-zA-Z0-9]{6})/:lang(ca|es|en)',
+    path: '/:lang(\\w{2})?/report(s)?/:report([a-zA-Z0-9]{6})',
     component: () => import('layouts/ReportsLayout.vue')
   },
   {
     // Only one feature map (by observation long id)
-    path: '/:code([-a-zA-Z0-9]{36})',
-    component: () => import('src/layouts/OneFeatureLayout.vue')
-  },
-  {
-    // Only one feature map (by observation long id) with lang
-    path: '/:code([-a-zA-Z0-9]{36})/:lang(ca|es|en)',
+    path: '/:lang(\\w{2})?/report(s)?/:code([-a-zA-Z0-9]{36})',
     component: () => import('src/layouts/OneFeatureLayout.vue')
   },
   // Always leave this as last one,
   // but you can also remove it
   {
-    path: '/:catchAll(.*)*',
+    path: '/:pathMatch(.*)',
     component: () => import('pages/Error404.vue')
   }
 ]

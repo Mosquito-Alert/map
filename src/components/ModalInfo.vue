@@ -168,10 +168,10 @@
                     <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>-->
                     <q-separator size="1"/>
                     <!-- WMS INFO -->
-                    <a id="wms_info" class="q-py-md"></a>
+                    <a id="earlyWarning_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('Distribution data') }}
+                      {{ trans('Early warning data') }}
                     </div>
                     <p>{{ trans('The-distribution-maps-provide-information-about-th') }}</p>
                     <p>{{ trans('For-invasive-species-the-possible-distribution-sta') }}</p>

@@ -16,7 +16,7 @@
                     :loadTilesWhileAnimating='true'
                     :loadTilesWhileInteracting='true'
                     style="position: relative; height: 300px; display: width:100%">
-
+                <ol-scaleline-control />
                 <ol-view ref='view'
                     :maxZoom=19
                     :maxResolution=39135.75848201024

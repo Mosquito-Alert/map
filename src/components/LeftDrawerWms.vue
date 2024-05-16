@@ -13,7 +13,7 @@
     v-touch-swipe.mouse.left="toggleLeftDrawer"
   >
     <!-- Main menu -->
-    <left-menu item="wms"
+    <left-menu item="ew"
       @leftMenuMounted="callFirstMapCall"
       @startShareView="startShareView"
     />
@@ -26,21 +26,21 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Distribution') }}
+        {{ trans('Early warning') }}
       </div>
 
       <div>
         <div class="category-box q-my-md">
           <q-select
-            ref="qSelect"
             :label="trans('Select species')"
-            v-model="modelVector"
-            color="orange"
-            :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
+            :label-color="localSpeciesCode?'orange':'rgba(0, 0, 0, 0.6)'"
             :options="vectorOptions"
-            :option-value="'code'"
-            :option-label="'type'"
-            @update:model-value="getWMS"
+            option-value="code"
+            option-label="label"
+            color="orange"
+            emit-value
+            map-options
+            v-model="localSpeciesCode"
           />
           </div>
           <!-- INFO LINK -->
@@ -52,92 +52,40 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('Distribution data') }}
+                      {{ trans('Early warning data') }}
                     </div>
                   </div>
                 </div>
-                <!-- Not visible link. Required to export map image -->
-                <a id="image-download" download="map.png"></a>
               </div>
             <div>
             <!-- END INFO LINK -->
           </div>
-
         </div>
 
-        <!-- YEARS FOR SELECTED SPECIES -->
-        <div v-if="selectedLayers" class="wms-layers-container">
-          <hr class="q-my-xl"/>
-          <!-- Columns titles -->
-          <div class="row">
-            <div class="col-2"></div>
-            <div class="col-7 text-center q-px-md transparency-title">{{ trans('Transparency') }}</div>
-            <div class="col-3"></div>
+        <!-- LAYER CONTROLS -->
+        <div v-show="localSpeciesCode">
+          <hr class="q-my-lg"/>
+          <div class="title-shaded-box">{{ trans('Layer controls') }}</div>
+          <div class="row shaded-box q-pa-sm">
+            <div class="col-9 q-pr-md">
+              <div class="row">
+                <q-badge :outline="!localVisible" color="orange">
+                  {{ trans('Opacity') }}
+                </q-badge>
+              </div>
+              <q-slider
+                v-model="localOpacity"
+                :min="0"
+                :max="1"
+                :step="0.05"
+                color="orange"
+                label
+                />
+            </div>
+            <q-toggle class="col" checked-icon="check" v-model="localVisible" color="orange" size="lg"/>
           </div>
-          <!-- DRAGGABLE LIST -->
-            <draggable
-              v-model="selectedLayers"
-              item-key="id"
-              ghost-class="ghost"
-              animation=450
-              handle=".handle"
-              @change="reorderLayers"
-            >
-              <template #item="{ element }">
-                <div class="flex row draggable-item">
-
-                  <div class="col-2 q-pl-sm">{{ element.year }}</div>
-
-                  <div class="col-5 q-pl-sm q-pr-xs">
-                    <q-slider
-                    :min="0"
-                    :max="1"
-                    :step="0.05"
-                    class="wms-slider"
-                    v-model="element.transparency"
-                    color="orange"
-                    @update:model-value="checkVisibility($event, element, 'transparency')"
-                    />
-                  </div>
-
-                  <div class="col-3">
-                    <!-- <q-checkbox
-                      dense
-                      checked-icon="check"
-                      v-model="element.visible"
-                      color="orange"
-                      size="lg"
-                      @update:model-value="checkVisibility($event, element, 'visible')"
-                    /> -->
-                    <q-toggle
-                      checked-icon="check"
-                      v-model="element.visible"
-                      @update:model-value="checkVisibility($event, element, 'visible')"
-                      color="orange"
-                      size="lg"/>
-                  </div>
-
-                  <div class="col-2 text-right flex justify-end">
-                    <div>
-                      <a @click.stop :href="buildDownloadUrl(element)">
-                        <i :title="trans('Download shp')" style="size:0.7em" class="fa-solid fa-download"></i>
-                      </a>
-                    </div>
-                    <div>
-                      <q-icon name="more_vert" class="handle" size="1.5em"/>
-                    </div>
-                  </div>
-
-                </div>
-              </template>
-            </draggable>
-        </div>
-        <!-- LEGEND -->
-        <div v-if="selectedLayers" class="wms-legend" >
-          <div class="legend-title q-mt-lg q-mb-md">{{ trans('Legend') }}</div>
-          <div class="q-mt-lg">
-            <img :src="legendImageSource">
-          </div>
+          <!-- LEGEND -->
+          <div id="legend" class="q-pt-md" style="position: relative;" :hidden="!localVisible"></div>
         </div>
       </div>
     </div>
@@ -145,71 +93,69 @@
 </template>
 
 <script>
-import { watch, computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
-import draggable from 'vuedraggable'
-// import { wmsSelectedLayers } from 'src/store/app/getters'
 
 export default {
-  components: { LeftMenu, draggable },
-  props: ['expanded'],
+  components: { LeftMenu },
+  props: {
+    expanded: {
+      type: Boolean,
+      default: true
+    },
+    speciesCode: {
+      type: String
+    },
+    opacity: {
+      type: Number,
+      default: 1
+    },
+    visible: {
+      type: Boolean,
+      default: true
+    }
+  },
   emits: [
     'firstMapCall',
     'toggleLeftDrawer',
-    'loadWms',
-    'layerVisibleChange',
-    'reorderLayers',
-    'exportImage'
+    'speciesCodeChange',
+    'opacityChange',
+    'visibilityChange'
   ],
   setup (props, context) {
     const $store = useStore()
-    const disabled = ref(true)
-    const disabledInfo = ref(true)
-    const modelVector = ref()
-    const qSelect = ref()
-    let currentView
-    const selectedLayers = ref()
 
-    const WMS = computed(() => {
-      return JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
+    const localSpeciesCode = ref(props.speciesCode)
+    watch(localSpeciesCode, (newValue) => {
+      context.emit('speciesCodeChange', newValue)
     })
 
-    onMounted(function () {
-      currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
-      if ('code' in currentView) {
-        const index = vectorOptions.value.findIndex(obj => {
-          return (obj.code === currentView.code)
-        })
-        modelVector.value = vectorOptions.value[index]
-        getWMS(currentView)
-      }
+    const localVisible = ref(props.visible)
+    watch(localVisible, (newValue) => {
+      context.emit('visibilityChange', newValue)
+    })
+
+    const localOpacity = ref(props.opacity)
+    watch(localOpacity, (newValue) => {
+      context.emit('opacityChange', newValue)
     })
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.value.tiger },
-        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.value.yellow },
-        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.value.japonicus },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.value.koreicus },
-        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.value.culex }
+        // Code is the MVT property
+        { code: 'albopictus', label: trans('Tiger mosquito') },
+        { code: 'aegypti', label: trans('Yellow fever mosquito') },
+        { code: 'japonicus', label: trans('Japonicus mosquito') },
+        { code: 'koreicus', label: trans('Koreicus mosquito') }
       ]
     })
 
-    // // Get rid off reactiveness
-    const legendImageSource = computed(() => {
-      const data = JSON.parse(JSON.stringify($store.getters['app/legendData']))
-      const lang = $store.getters['app/getLang']
-      const geoserverUrl = data.wms_url
-      const layerName = data.layer
-      const widthSize = 40
-      const heightSize = 30
-      const fontName = 'Roboto'
-      const fontSize = '16px'
-
-      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName};fontSize:${fontSize};fontAntiAliasing:false`
+    const mobile = computed(() => {
+      return $store.getters['app/getIsMobile']
     })
 
+    // Get rid off reactiveness
     const callFirstMapCall = function () {
       context.emit('firstMapCall', {})
     }
@@ -223,143 +169,36 @@ export default {
       context.emit('toggleLeftDrawer', {})
     }
 
-    const mobile = computed(() => {
-      return $store.getters['app/getIsMobile']
-    })
-
-    // Called when model is selected
-    const getWMS = function (formValue) {
-      const code = formValue.code
-      selectedLayers.value = WMS.value[code]
-
-      $store.commit('app/setCurrentWMSView', {
-        code: code,
-        years: JSON.parse(JSON.stringify(WMS.value[code]))
-      })
-      context.emit('loadWms', WMS.value[code])
-    }
-
     const goInfoModal = function () {
-      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'wms_info' } })
+      $store.commit('app/setModal', { id: 'info', content: { visibility: true, anchor: 'earlyWarning_info' } })
     }
 
     const startShareView = function () {
-      if (!modelVector.value) {
+      if (!localSpeciesCode.value) {
         $store.commit('app/setModal', {
           id: 'error',
           content: {
             visibility: true,
-            msg: 'Must select wms first'
+            msg: 'Must select a species first'
           }
         })
-        context.emit('endShareView', {
-          error: 'Shareview error. No WMS is loaded',
-          visibility: true,
-          url: ''
-        })
       } else {
-      // Prepare WMS data.
-        const layersJSON = JSON.parse(JSON.stringify(selectedLayers.value))
-        // const visibleLayers = layersJSON.filter((layer) => {
-        //   return layer.visible === true
-        // })
         const payload = {
-          species: modelVector.value.code,
-          layers: layersJSON
+          speciesCode: localSpeciesCode.value
         }
         context.emit('startShareView', payload)
       }
     }
 
-    // Required to change lang on current selection
-    watch(vectorOptions, (cur, old) => {
-      if (modelVector.value) {
-        if (modelVector.value.code) {
-          const index = cur.findIndex(obj => {
-            return (obj.code === modelVector.value.code)
-          })
-          modelVector.value = cur[index]
-        }
-      }
-    })
-
-    const checkVisibility = function (e, layer, property) {
-      const selectedSpecies = modelVector.value.code
-      // WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
-      $store.commit('app/setWMSLayers', {
-        species: selectedSpecies,
-        layers: JSON.parse(JSON.stringify(selectedLayers.value))
-      })
-
-      $store.commit('app/setWmsProperties', {
-        id: layer.id,
-        property: property,
-        value: e,
-        species: selectedSpecies
-      })
-
-      context.emit('layerChange', {
-        key: property,
-        layerId: layer.id,
-        value: e
-      })
-    }
-
-    const reorderLayers = function () {
-      const selectedSpecies = modelVector.value.code
-      $store.commit('app/setWMSLayers', {
-        species: selectedSpecies,
-        layers: JSON.parse(JSON.stringify(selectedLayers.value))
-      })
-      context.emit('reorderLayers',
-        JSON.parse(JSON.stringify(selectedLayers.value))
-      )
-    }
-
-    const setForm = function (view) {
-      const index = vectorOptions.value.findIndex(obj => {
-        return (obj.code === view.species)
-      })
-      modelVector.value = vectorOptions.value[index]
-      // override wms from shared view
-      WMS[view.species] = view.layers
-      selectedLayers.value = view.layers
-      $store.commit('app/setWMSLayers', {
-        species: view.species,
-        layers: view.layers
-      })
-      getWMS({ code: view.species })
-    }
-
-    const exportImage = function () {
-      console.log('emit')
-      context.emit('exportImage', {})
-    }
-
-    const buildDownloadUrl = (element) => {
-      const downLink = `${element.wms_url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${element.layer}&outputFormat=SHAPE-ZIP`
-      console.log(downLink)
-      return downLink
-      // https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert%3Astatus_2303_shp&outputFormat=SHAPE-ZIP
-    }
     return {
-      trans,
-      buildDownloadUrl,
-      exportImage,
-      selectedLayers,
-      legendImageSource,
-      setForm,
-      reorderLayers,
-      qSelect,
-      checkVisibility,
-      goInfoModal,
-      disabled,
-      disabledInfo,
-      modelVector,
+      localSpeciesCode,
+      localVisible,
+      localOpacity,
       vectorOptions,
       mobile,
+      trans,
+      goInfoModal,
       toggleLeftDrawer,
-      getWMS,
       callFirstMapCall,
       startShareView
     }
@@ -498,23 +337,11 @@ div.flex-right{
 }
 .toc-title-estimates{
   font-family: 'Roboto';
-  text-transform: Capitalize;
   font-weight: 700;
   color: #666666;
 }
-.wms-layers-container{
-  margin-top: 20px;
-  // padding: 10px;
-  color: $dark-grey;
-  // border: 1px solid $grey-color;
-}
-.wms-layers-item{
-  display: flex;
-  vertical-align: bottom;
-  align-content: stretch;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  margin: 3px 0px;
+.toc-title-estimates::first-letter{
+  text-transform: uppercase;
 }
 .flex-expand{
   flex-grow: 1;
@@ -526,21 +353,16 @@ div.flex-right{
   opacity:0;
   cursor: move;
 }
-.draggable-item{
+.layer-controller{
   padding: 0px 0px;
   border-radius: 5px;
   background-color: $grey-color;
   margin: 3px 0px;
 }
-.draggable-item:hover .handle{
+.layer-controller:hover .handle{
   opacity:1
 }
-.legend-title{
-  display: none;
-}
-.wms-slider {
-  height: 2px;
-}
+
 .transparency-title{
   color: black;
 }
@@ -550,5 +372,16 @@ div.flex-right{
 .fa-download{
   cursor: pointer;
   color: #ff9800 ;
+}
+.title-shaded-box{
+  font-family: 'Roboto';
+  font-weight: 700;
+  color: #666666;
+  text-transform: uppercase;
+}
+.shaded-box{
+  border-radius: 5px;
+  background-color: $grey-color;
+  margin: 3px 0px;
 }
 </style>

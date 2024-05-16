@@ -43,7 +43,7 @@
         <ol-view ref='view'
             :maxResolution=39135.75848201024
             :constrainResolution=true
-            :multiWorld=true
+            :multiWorld=false
             :maxZoom=19
             :center='center'
             :zoom='zoom' />
@@ -64,12 +64,8 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
+        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0 :preload="Infinity">
           <ol-source-osm />
-        </ol-tile-layer>
-
-        <!-- SAMPLING EFFORT -->
-        <ol-tile-layer ref='samplingEffortLayer' name="samplingEffortLayer">
         </ol-tile-layer>
 
         <!-- ADMINISTRATIVE LIMITS LAYER -->

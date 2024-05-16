@@ -4,7 +4,7 @@ export default function () {
     firstViewMap: true,
     dataset: [],
     DEFAULTS: {
-      ZOOM: 3,
+      ZOOM: 5,
       CENTER: [13.6889, 44.8409],
       MOBILEZOOM: 1,
       length: 4
@@ -13,7 +13,7 @@ export default function () {
       // CENTER: [4.848618507385254, 52.380792836403685]
     },
     CURRENTS: {
-      ZOOM: 3,
+      ZOOM: 5,
       CENTER: [13.6889, 44.8409],
       MOBILEZOOM: 1
     },

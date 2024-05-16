@@ -29,7 +29,7 @@ export default function () {
   }
 
   if (process.env.DEV) {
-    backendUrl = 'http://localhost:8000/'
+    backendUrl = 'api_v1_prod/' // See quasar.conf.js for proxy settings.
     frontendUrl = 'http://localhost:8080/'
     analyticsCode = 'GTM-M5PRMJ9'
   } else {
@@ -63,14 +63,6 @@ export default function () {
     currentUrl = currentUrl.slice(0, -1)
   }
 
-  if (langKeys.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
-    const nextURL = currentUrl + '/' + defaultLang
-    const nextTitle = 'MosquitoAlert'
-    const nextState = { additionalInformation: 'Updated the URL with JS' }
-    window.history.pushState(nextState, nextTitle, nextURL)
-    window.history.replaceState(nextState, nextTitle, nextURL)
-  }
-
   // FORCE SPANISH
   // const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
 
@@ -102,7 +94,6 @@ export default function () {
     csrfToken: null,
     authorized: false,
     errorMessage: '',
-    leftMenuTabs: {},
     wmsTabLayers: {},
     selectedWmsLayer: {},
     browser: fnBrowserDetect(),
@@ -146,28 +137,28 @@ export default function () {
       },
       gadm1: {
         minZoom: undefined,
-        maxZoom: 2,
+        maxZoom: 5,
         id: 'gid_1',
         est: 'est',
         se: 'se'
       },
       gadm2: {
-        minZoom: 2,
-        maxZoom: 4,
+        minZoom: 5,
+        maxZoom: 6,
         id: 'gid_2',
         est: 'est',
         se: 'se'
       },
       gadm3: {
-        minZoom: 4,
-        maxZoom: 6,
+        minZoom: 6,
+        maxZoom: 9,
         id: 'gid_3',
         est: 'est',
         se: 'se'
       },
       gadm4: {
-        minZoom: 6,
-        maxZoom: 9,
+        minZoom: 9,
+        maxZoom: 19,
         id: 'gid_4',
         est: 'est',
         se: 'se'
@@ -200,33 +191,7 @@ export default function () {
 
       // Colors of selected administration boundaries
       fillLocationColor: 'rgb(239, 165, 1, 0.5)',
-      strokeLocationColor: 'orange',
-
-      // Default values for selected models
-      model: {
-        vector: '',
-        year: '',
-        month: '',
-        estimation: true,
-        uncertainty: false,
-        // 0 - 1 values
-        estimationOpacity: 1,
-        uncertaintyOpacity: 0.25,
-        // Default uncertainty color
-        uncertaintyColor: '#191919',
-        estimationColors: ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
-        modelsCsv: [],
-        estimationPalettes: [
-          // GRADIENTS
-          ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
-          ['#edf8e9', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c'],
-          // DIVERGENTS
-          ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
-          ['#fde725', '#9fda3a', '#4ac16d', '#1fa187', '#277f8e', '#365c8d'],
-          ['#1b7837', '#7fbf7b', '#d9f0d3', '#e7d4e8', '#af8dc3', '#762a83'],
-          ['#1a9850', '#91cf60', '#d9ef8b', '#fee08b', '#fc8d59', '#d73027']
-        ]
-      }
+      strokeLocationColor: 'orange'
     },
     BACKEND: backendUrl,
     FRONTEND: frontendUrl,
@@ -332,25 +297,20 @@ export default function () {
         modelName: 'biting'
       }
     },
-    // WMS RELATED
-    getWmsDataFromServer: true,
-    // SAMPLE STRUCTURE FOR wmswms: {
-    // {
-
-    //   tiger: [         // For every species
-    //     {             // For every year
-    //       id: 1, wms_id: 1, wms_url: "https://montesdata.creaf.cat/geoserver/SIPAN/wms",
-    //       year: 2023, layer: "MASSA_AIGUA", visible: true, transparency: 0.0
-    //     },....
-    //   ],
-    //   yellow[
-    //     {....},
-    //     {....},
-    //   ]
-    // }
-    WMS: [],
-    currentWMSView: {},
-    wmsNumberOfVisibleLayers: 0,
-    legendData: {}
+    // Early Warning
+    earlyWarning: {
+      specieCode: undefined,
+      mapserverLayerName: 'mosquito_alert:early_warning'
+    },
+    encounterProbability: {
+      specieCode: undefined,
+      date: undefined,
+      filters: {
+        certaintyRange: {
+          min: 0,
+          max: 1
+        }
+      }
+    }
   }
 }

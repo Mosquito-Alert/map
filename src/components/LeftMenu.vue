@@ -16,27 +16,27 @@
         name="fa-thin fa-map-location-dot"
         :label="trans('Reports')"
         :class="active_item=='layers'?'active':''"
-        link="/"
+        route-name="reports"
         item="reports"
         id="reports"
       >
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-layer-group"
-        :label="trans('Distribution')"
-        :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/distribution"
-        item="wms"
-        id="wms"
+        name="fa-thin fa-triangle-exclamation"
+        :label="trans('Early warning')"
+        :class="active_item=='ew'?'active':''"
+        route-name="early_warning"
+        item="ew"
+        id="ew"
       >
       </fa-thin-button-router>
 
       <fa-thin-button-router
         name="fa-thin fa-chart-mixed"
         :label="trans('Encounter probability')"
-        :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
-        link="/models"
+        :class="active_item=='models'?'active':''"
+        route-name="models"
         item="models"
         id="estimations"
       >
@@ -69,7 +69,6 @@
         <div class="lang-wrapper">
           <div class="lang-container">
             <a v-for="item in LANGS" :key="item.code"
-              href="#"
               :id="item.code"
               class="main-menu-item"
               :class="lang==item.code?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.code, $event)" ref="item.code">
@@ -98,6 +97,7 @@ import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonRouter from 'components/FaThinButtonRouter.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import { useCookies } from 'vue3-cookies'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
@@ -124,6 +124,9 @@ export default {
     const { cookies } = useCookies()
     const $store = useStore()
     const LANGS = $store.getters['app/getAllowedLangs']
+
+    const router = useRouter()
+    const route = useRoute()
 
     const trans = function (text) {
       return $store.getters['app/getText'](text)
@@ -154,24 +157,26 @@ export default {
     })
 
     const clickLanguageSelector = (lang, event) => {
-      let object = event.target
-      const nextURL = $store.getters['app/getFrontendUrl'] + lang
-      const nextTitle = 'MosquitoAlert'
-      const nextState = { additionalInformation: 'Updated the URL with JS' }
-      window.history.pushState(nextState, nextTitle, nextURL)
-      window.history.replaceState(nextState, nextTitle, nextURL)
-
-      if (!object.classList.contains('menuItem')) object = object.parentNode
-      setLanguage(lang, object)
+      setLanguage(lang, event.target)
     }
 
     const setLanguage = async function (lang, object) {
+      router.push({
+        params: {
+          ...route.params,
+          lang: lang
+        },
+        query: route.query
+      })
+
       await $store.dispatch('app/setInitData', lang)
       cookies.set('lang', lang)
-      object.parentNode.querySelectorAll('.menuItem').forEach(item => {
-        item.classList.remove('active')
-      })
-      object.classList.add('active')
+      if (object) {
+        object.parentNode.querySelectorAll('.menuItem').forEach(item => {
+          item.classList.remove('active')
+        })
+        object.classList.add('active')
+      }
       // NASTY
       let qLang = lang
       if (qLang === 'en') qLang = 'en-US'
@@ -182,25 +187,8 @@ export default {
 
     onMounted(async function () {
       lang.value = $store.getters['app/getLang']
+      setLanguage(lang.value)
       context.emit('leftMenuMounted', {})
-    })
-
-    const wmsVisibility = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
-      if (Object.keys(tabs).length) {
-        return (tabs.distribution) ? tabs.distribution.active : false
-      } else {
-        return false
-      }
-    })
-
-    const estimationsVisibility = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
-      if (Object.keys(tabs).length) {
-        return (tabs.estimates) ? tabs.estimates.active : false
-      } else {
-        return false
-      }
     })
 
     const frontendUrl = computed(() => {
@@ -221,8 +209,6 @@ export default {
 
     return {
       trans,
-      wmsVisibility,
-      estimationsVisibility,
       loginLabel,
       lang,
       LANGS,

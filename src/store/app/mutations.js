@@ -1,5 +1,3 @@
-import { getWmsDataFromServer } from './getters'
-
 export const setErrorMessage = (state, message) => {
   state.errorMessage = message
 }
@@ -10,10 +8,6 @@ export const setCsrfToken = (state, token) => {
 
 export const setTranslations = (state, payload) => {
   state.trans = payload
-}
-
-export const setTabsVisibility = (state, payload) => {
-  state.leftMenuTabs = payload
 }
 
 export const setAuthorized = (state, payload) => {
@@ -70,34 +64,6 @@ export const setCalendarSubtitle = (state, payload) => {
   state.calendarSubtitle = payload
 }
 
-export const setModelDefaults = (state, payload) => {
-  state.DEFAULTS.model = payload
-}
-
-export const setModelEstimation = (state, payload) => {
-  state.DEFAULTS.model.estimation = payload
-}
-
-export const setModelUncertainty = (state, payload) => {
-  state.DEFAULTS.model.uncertainty = payload
-}
-
-export const setUncertaintyColor = (state, payload) => {
-  state.DEFAULTS.model.uncertaintyColor = payload
-}
-
-export const setEstimationOpacity = (state, payload) => {
-  state.DEFAULTS.model.estimationOpacity = payload
-}
-
-export const setUncertaintyOpacity = (state, payload) => {
-  state.DEFAULTS.model.uncertaintyOpacity = payload
-}
-
-export const setEstimationColors = (state, payload) => {
-  state.DEFAULTS.model.estimationColors = payload
-}
-
 export const deactivateLayerIcon = (state, payload) => {
   state.layers[payload.type][payload.code].active = false
 }
@@ -110,50 +76,19 @@ export const setActiveLayer = (state, payload) => {
   state.layers[payload.type][payload.code].active = payload.active
 }
 
-export const setWmsTabLayers = (state, payload) => {
-  state.wmsTabLayers = payload
+export const setEarlyWarningSpecieCode = (state, code) => {
+  state.earlyWarning.specieCode = code
 }
 
-export const setSelectedWmsLayers = (state, payload) => {
-  state.selectedWmsLayer = payload
+// encounterProbability
+export const setEncounterProbabilitySpecieCode = (state, value) => {
+  state.encounterProbability.specieCode = value
 }
 
-export const setWMSsetWmsData = (state, data) => {
-  if (getWmsDataFromServer) {
-    state.WMS = data
-  } else {
-    console.log('No server data allowed. Check configuration file')
-  }
+export const setEncounterProbabilityDate = (state, value) => {
+  state.encounterProbability.date = value
 }
 
-export const setLegendData = (state, payload) => {
-  state.legendData = payload
-}
-
-export const setWMSLayers = (state, payload) => {
-  state.WMS[payload.species] = payload.layers
-}
-
-export const setCurrentWMSView = (state, payload) => {
-  state.currentWMSView = payload
-}
-
-export const setWmsProperties = (state, payload) => {
-  const index = state.currentWMSView.years.findIndex((e) => {
-    return e.id === payload.id
-  })
-  state.currentWMSView.years[index][payload.property] = payload.value
-  state.WMS[payload.species][index][payload.property] = payload.value
-}
-
-export const setWmsNumberOfVisibleLayers = (state, n) => {
-  state.wmsNumberOfVisibleLayers = n
-}
-
-export const increaseWmsNumberOfVisibleLayers = (state, n) => {
-  state.wmsNumberOfVisibleLayers += 1
-}
-
-export const decreaseWmsNumberOfVisibleLayers = (state, n) => {
-  state.wmsNumberOfVisibleLayers -= 1
+export const setEncounterProbabilityFilterCertaintyRange = (state, value) => {
+  state.encounterProbability.filters.certaintyRange = value
 }

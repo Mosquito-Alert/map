@@ -1,38 +1,44 @@
 <template>
-  <div v-if="estimatesIsVisible">
+  <div>
     <q-layout
       :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
     >
       <site-header v-if="!mobile" :expanded="expanded"/>
       <left-drawer-models ref="TOC"
         :expanded="expanded"
-        @loadModel="loadModel"
-        @clearModel="clearModel"
+        :species-code="mapSpeciesCode"
+        :date="mapDate"
+        :opacity="mapOpacity"
+        :visible="mapIsVisible"
+        :palette="mapPalette"
+        :filters="mapFilters"
+        :lang="lang"
         @toggleLeftDrawer="toggleLeftDrawer"
         @startShareView="startShareView"
-        @checkModelEstimation="checkModelEstimation"
-        @checkModelUncertainty="checkModelUncertainty"
-        @estimationOpacity="estimationOpacity"
-        @uncertaintyOpacity="uncertaintyOpacity"
-        @estimationColorsChanged="estimationColorsChanged"
-        @uncertaintyColorsChanged="uncertaintyColorsChanged"
-        @firstMapCall="buildSession"
+        @speciesCodeChange="handleSpeciesCodeChange"
+        @dateChange="handleDateChange"
+        @opacityChange="handleOpacityChange"
+        @visiblitiyChange="handleVisibilityChange"
+        @filtersLazyChange="handleFiltersChange"
       />
 
       <q-page
         class='flex'
         :class="mobile?(expanded?'mobile expanded':'mobile collapsed'):(expanded?'expanded':'collapsed')"
       >
-        <the-map-models ref='map'
-          init
-          :viewCode="viewCode"
-          :class="expanded?'drawer-expanded':'drawer-collapsed'"
+        <the-map-models ref='map' init
+          :species-code="mapSpeciesCode"
+          :date="mapDate"
+          :visible="mapIsVisible"
+          :display-choropleth="mapDisplayChoropleth"
+          :opacity="mapOpacity"
+          :filters="mapFilters"
+          :palette="mapPalette"
+          :lon="mapLon"
+          :lat="mapLat"
+          :zoom="mapZoom"
+          @move="handleMapChange"
           @toggleLeftDrawer="toggleLeftDrawer"
-          @workerFinishedIndexing="workerFinishedIndexing"
-          @endShareView="endShareView"
-          @setModelDate="setModelDate"
-          @loadSharedModel="loadSharedModel"
-          @errorDownloadingModels="errorDownloadingModels"
         />
       </q-page>
 
@@ -63,9 +69,6 @@
       <cookies-compliance/>
     </q-layout>
   </div>
-  <router-link v-else to="/">
-    <page-error-not-found/>
-  </router-link>
 </template>
 
 <script>
@@ -79,18 +82,14 @@ import ModalInfo from 'src/components/ModalInfo.vue'
 import ModalShare from 'src/components/ModalShare.vue'
 import ModalHelp from 'src/components/ModalHelp.vue'
 import ModalError from 'src/components/ModalError.vue'
-import PageErrorNotFound from 'src/components/PageErrorNotFound.vue'
 import ModalWait from 'src/components/ModalWait.vue'
 import SiteHeader from 'components/SiteHeader.vue'
 import SiteFooter from 'components/SiteFooter.vue'
 import LeftDrawerModels from 'components/LeftDrawerModels.vue'
 import TheMapModels from 'components/TheMapModels.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
-import MSession from '../js/session.js'
-
-// import moment from 'moment'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   components: {
@@ -98,7 +97,6 @@ export default {
     ModalShare,
     ModalHelp,
     ModalError,
-    PageErrorNotFound,
     ModalLogin,
     ModalConfirmLogout,
     ModalLogos,
@@ -111,39 +109,100 @@ export default {
     ModalCookiePolicy,
     CookiesCompliance
   },
-  setup () {
-    let mySession
+  props: {
+    speciesCode: {
+      type: String
+    },
+    year: {
+      type: Number
+    },
+    month: {
+      type: Number
+    },
+    lang: {
+      type: String,
+      default: 'en'
+    }
+  },
+  setup (props) {
+    const router = useRouter()
     const route = useRoute()
+    const $store = useStore()
+
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
-    const timeseries = ref()
-    const $store = useStore()
-    const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
-
-    $store.commit('timeseries/setGraphIsVisible', false)
-
-    if (lang) {
-      $store.dispatch('app/setInitData', lang.toLocaleLowerCase())
-    }
-
-    const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
-
-    const estimatesIsVisible = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
-      if (Object.keys(tabs).length) {
-        return tabs.estimates.active
-      } else {
-        return true
-      }
-    })
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
-
     const expanded = ref(!mobile.value)
+
+    // Map props
+    const mapSpeciesCode = ref(props.speciesCode || $store.getters['app/getEncounterProbabilitySpecieCode'])
+    const mapDate = ref(
+      [props.year, props.month].every(item => item !== undefined)
+        ? new Date(props.year, props.month - 1)
+        : $store.getters['app/getEncounterProbabilityDate'] || undefined
+    )
+    watch(mapDate, (newValue) => {
+      $store.commit('app/setEncounterProbabilityDate', newValue)
+    })
+
+    const mapPalette = ref(['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'])
+
+    const mapIsVisible = ref(true)
+    const mapOpacity = ref(1)
+    const mapFilters = ref({
+      certaintyRange: {
+        min: route.query.min_certainty || 0,
+        max: route.query.max_certainty || 1
+      }
+    })
+
+    const mapDisplayChoropleth = computed(() => {
+      return [mapSpeciesCode.value, mapDate.value].every(item => item !== undefined)
+    })
+
+    const mapLon = ref($store.getters['map/getCurrents'].CENTER[0])
+    const mapLat = ref($store.getters['map/getCurrents'].CENTER[1])
+    const mapZoom = ref(mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM)
+
+    watch([mapSpeciesCode, mapDate, mapLon, mapLat, mapZoom, mapFilters], () => {
+      updateRouterQuery()
+    }, { deep: true })
+
+    watch(mapSpeciesCode, (newValue, oldValue) => {
+      $store.commit('app/setEncounterProbabilitySpecieCode', newValue)
+    })
+
+    onMounted(() => {
+      if (props.lang) {
+        $store.dispatch('app/setInitData', props.lang.toLocaleLowerCase())
+      }
+
+      // Parse initial values from route query
+      if (route.query.lon) mapLon.value = parseFloat(route.query.lon)
+      if (route.query.lat) mapLat.value = parseFloat(route.query.lat)
+      if (route.query.zoom) mapZoom.value = parseFloat(route.query.zoom)
+    })
+
+    const updateRouterQuery = () => {
+      router.push({
+        query: {
+          lon: mapLon.value?.toFixed(5),
+          lat: mapLat.value?.toFixed(5),
+          zoom: mapZoom.value,
+          min_certainty: mapFilters.value?.certaintyRange.min !== 0 ? mapFilters.value?.certaintyRange.min : undefined,
+          max_certainty: mapFilters.value?.certaintyRange.max !== 1 ? mapFilters.value?.certaintyRange.max : undefined
+        },
+        params: {
+          speciesCode: mapSpeciesCode.value,
+          month: (mapDate.value ? (mapDate.value.getMonth() + 1).toString().padStart(2, '0') : undefined),
+          year: mapDate.value?.getFullYear()
+        }
+      })
+    }
 
     const infoModalVisible = computed(() => {
       return $store.getters['app/getModals'].info.visibility
@@ -161,22 +220,6 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
-    const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
-      mySession.getSession(buildMap)
-    }
-
-    const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
-      if (viewCode) {
-        map.value.loadView('M-' + viewCode)
-      }
-    }
-
-    const shareView = function () {
-      map.value.shareModelView()
-    }
-
     const toggleLeftDrawer = function () {
       expanded.value = !expanded.value
       resizeMap({ start: 0, end: 400 })
@@ -192,98 +235,79 @@ export default {
       }
     }
 
-    const endShareView = function (payload) {
+    const startShareView = function () {
+      const payload = {
+        url: new URL(route.fullPath, window.location.origin).href,
+        visibility: true,
+        error: ''
+      }
+      $store.commit('app/setModal', {
+        id: 'share',
+        content: payload
+      })
       shareModal.value.viewContent = payload
     }
 
-    const workerFinishedIndexing = function (payload) {
-      if (payload.mapFilters.locations.length) {
-        TOC.value.searchLocation.loading = false
-      }
+    const handleSpeciesCodeChange = (value) => {
+      mapSpeciesCode.value = value
     }
 
-    const loadModel = function (payload) {
-      map.value.loadModel(payload)
+    const handleDateChange = (value) => {
+      mapDate.value = value
     }
 
-    const clearModel = function () {
-      map.value.clearModel()
+    const handleOpacityChange = (value) => {
+      mapOpacity.value = value
     }
 
-    const setModelDate = function (payload) {
-      TOC.value.inputDate = payload
+    const handleVisibilityChange = (value) => {
+      mapIsVisible.value = value
     }
 
-    const checkModelEstimation = function (payload) {
-      map.value.estimationVisibility(payload.status)
+    const handleFiltersChange = (value) => {
+      mapFilters.value = value
     }
 
-    const checkModelUncertainty = function (payload) {
-      map.value.uncertaintyVisibility(payload.status)
-    }
+    const handleMapChange = (newPosition) => {
+      mapLon.value = newPosition.center[0]
+      mapLat.value = newPosition.center[1]
+      mapZoom.value = newPosition.zoom
 
-    const estimationOpacity = function (payload) {
-      $store.commit('app/setEstimationOpacity', payload.opacity)
-      map.value.estimationOpacity(payload.opacity)
-    }
-
-    const uncertaintyOpacity = function (payload) {
-      $store.commit('app/setUncertaintyOpacity', payload.opacity)
-      map.value.uncertaintyOpacity(payload.opacity)
-    }
-
-    const loadSharedModel = function (payload) {
-      TOC.value.loadSharedModel(payload)
-    }
-
-    const errorDownloadingModels = function (payload) {
-      TOC.value.errorDownloadingModels(payload)
-    }
-
-    const estimationColorsChanged = function () {
-      map.value.estimationRefresh()
-    }
-
-    const uncertaintyColorsChanged = function () {
-      map.value.uncertaintyRefresh()
-    }
-
-    const startShareView = function () {
-      map.value.shareModelView()
+      $store.commit('map/setCurrents', {
+        zoom: mapZoom.value,
+        center: [mapLon.value, mapLat.value]
+      })
     }
 
     return {
-      estimatesIsVisible,
-      errorDownloadingModels,
-      estimationColorsChanged,
-      uncertaintyColorsChanged,
-      loadSharedModel,
-      checkModelEstimation,
-      checkModelUncertainty,
-      estimationOpacity,
-      uncertaintyOpacity,
-      viewCode,
-      mobile,
+      mapSpeciesCode,
+      mapDate,
+      mapOpacity,
+      mapIsVisible,
+      mapFilters,
+      mapDisplayChoropleth,
+      mapPalette,
+      mapLon,
+      mapLat,
+      mapZoom,
       expanded,
-      workerFinishedIndexing,
+      mobile,
       toggleLeftDrawer,
-      shareView,
+      startShareView,
+      handleSpeciesCodeChange,
+      handleDateChange,
+      handleOpacityChange,
+      handleVisibilityChange,
+      handleFiltersChange,
+      handleMapChange,
       shareModal,
-      endShareView,
       shareModalVisible,
       infoModalVisible,
       helpModalVisible,
       errorModalVisible,
       map,
       TOC,
-      timeseries,
-      resizeMap,
-      loadModel,
-      clearModel,
-      setModelDate,
-      CookiesCompliance,
-      buildSession,
-      startShareView
+      CookiesCompliance
     }
   }
 }

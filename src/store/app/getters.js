@@ -115,10 +115,6 @@ export const getGridSize = state => {
   return state.gridsize
 }
 
-export const getModelDefaults = state => {
-  return state.DEFAULTS.model
-}
-
 export const getAuthenticateUrl = state => {
   return state.authenticateUrl
 }
@@ -129,18 +125,6 @@ export const getLogoutUrl = state => {
 
 export const getRegisteredWebUrl = state => {
   return state.registeredWebUrl
-}
-
-export const getEstimationColors = state => {
-  return state.DEFAULTS.model.estimationColors
-}
-
-export const getUncertaintyColor = state => {
-  return state.DEFAULTS.model.uncertaintyColor
-}
-
-export const getEstimationPalettes = state => {
-  return state.DEFAULTS.model.estimationPalettes
 }
 
 export const getmapserverUrl = state => {
@@ -159,35 +143,23 @@ export const getPossibleCategories = state => {
   return state.possibleCategories
 }
 
-export const getLeftMenuTabs = state => {
-  return state.leftMenuTabs
+export const getEarlyWarningLayername = state => {
+  return state.earlyWarning.mapserverLayerName
 }
 
-export const getWmsTabLayers = state => {
-  return state.wmsTabLayers
+export const getEarlyWarningSpecieCode = state => {
+  return state.earlyWarning.specieCode
 }
 
-export const getSelectedWmsLayers = state => {
-  return state.selectedWmsLayer
+// encounterProbability
+export const getEncounterProbabilitySpecieCode = state => {
+  return state.encounterProbability.specieCode
 }
 
-export const getWmsDataFromServer = state => {
-  console.log('in getter to get ')
-  return state.getWmsDataFromServer === true
+export const getEncounterProbabilityDate = state => {
+  return state.encounterProbability.date
 }
 
-export const getWmsData = state => {
-  return state.WMS
-}
-
-export const getCurrentWMSView = state => {
-  return state.currentWMSView
-}
-
-export const wmsNumberOfVisibleLayers = state => {
-  return state.wmsNumberOfVisibleLayers
-}
-
-export const legendData = state => {
-  return state.legendData
+export const getEncounterProbabilityFilterCertaintyRange = state => {
+  return state.encounterProbability.filters.certaintyRange
 }
