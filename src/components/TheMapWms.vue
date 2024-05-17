@@ -4,7 +4,7 @@
 
 <template>
   <div id='mapa' class='bg-white'>
-    <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
+    <!-- <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/> -->
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
       @click="toggleLeftDrawer"
@@ -16,18 +16,18 @@
     <ol-map ref='map'
       :loadTilesWhileAnimating='true'
       :loadTilesWhileInteracting='true'
-      @movestart='hideSpinner'
-      @moveend='updateMap'
+      @moveend='positionChange'
       style='height:100%'>
-
         <ol-zoom-control :duration='600' />
+        <ol-scaleline-control />
         <ol-view ref='view'
-            :multiWorld=true
-            :maxZoom=19
-            :maxResolution=39135.75848201024
-            :center='center'
-            :zoom='zoom'
-            :constrainResolution='true' />
+          :center="center"
+          :maxZoom=19
+          :multiWorld=false
+          :zoom="zoom"
+          :projection="projection"
+          :constrainResolution='true'
+          />
 
         <div
           class="ol-attribution"
@@ -45,62 +45,118 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
+        <ol-tile-layer title='mapbox' :zIndex=0 :preload="Infinity">
           <ol-source-osm />
         </ol-tile-layer>
 
     </ol-map>
-    <!-- DOWNLOAD BUTTON -->
-    <!-- <cust-control
-          ref="donwnloadControl"
-          icon="fa-solid fa-download"
-          class="wms ol-download ol-unselectable ol-control"
-          :class="wmsNumberOfVisibleLayers?'enabled':'disabled'"
-          title="Export map image"
-          @clicked="exportPNG"
-        >
-        </cust-control> -->
+      <!-- DOWNLOAD BUTTON -->
+      <cust-control
+        ref="downloadControl"
+        icon="fa-solid fa-download"
+        class="ol-download ol-unselectable ol-control"
+        title="Geopackage"
+        style="bottom:180px"
+        :disabled="!speciesCode"
+        @clicked="downloadGeopackage"
+      >
+      </cust-control>
+      <!-- DOWNLOAD SCREENSHOT BUTTON -->
+      <cust-control
+        ref="screenshotControl"
+        icon="fa-solid fa-camera-viewfinder"
+        class="ol-download ol-unselectable ol-control"
+        title="Screenshot"
+        :disabled="!speciesCode"
+        @clicked="exportPNG"
+      >
+      </cust-control>
   </div>
 </template>
 
 <script>
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-// import CustControl from './CustControl'
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { transform } from 'ol/proj.js'
-import TileLayer from 'ol/layer/Tile.js'
-import TileWMS from 'ol/source/TileWMS.js'
-import ShareMapView from '../js/ShareMapView'
-import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+
+import CustControl from './CustControl'
+
+import { toLonLat, fromLonLat } from 'ol/proj.js'
+import { Group as LayerGroup } from 'ol/layer'
+import VectorTileLayer from 'ol/layer/VectorTile'
+import VectorTileSource from 'ol/source/VectorTile'
+import MVT from 'ol/format/MVT'
+import Feature from 'ol/Feature'
+import { Style, Fill, Stroke, RegularShape, Text } from 'ol/style'
+
+import Legend from 'ol-ext/legend/Legend'
+import LegendControl from 'ol-ext/control/Legend'
+import Tooltip from 'ol-ext/overlay/Tooltip'
+import Hover from 'ol-ext/interaction/Hover'
 
 export default defineComponent({
-  name: 'TheMapModels',
-  components: { },
+  name: 'TheMapEarlyWarning',
+  components: { CustControl },
   emits: [
     'toggleLeftDrawer',
-    'endShareView',
-    'loadSharedModel'
+    'move'
   ],
-  props: ['viewCode'],
+  props: ['speciesCode', 'opacity', 'visible', 'lat', 'lon', 'zoom'],
   setup (props, context) {
+    const $store = useStore()
+
     const map = ref('null')
     const leftDrawerIcon = ref('null')
-    const $store = useStore()
-    const baseMap = ref('null')
+
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
-    const PREVIOUS_WMS = [] // keep layer Id
-    const backendUrl = $store.getters['app/getBackend']
 
-    // Map general configuration
-    const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
+    const projection = ref('EPSG:3857')
+
+    // Watcher for props
+    watch(() => props.opacity, (newValue, oldValue) => {
+      statusLayerGroup.setOpacity(newValue)
+    })
+
+    watch(() => props.speciesCode, (newValue, oldValue) => {
+      loadLayer(newValue)
+    })
+
+    watch(() => props.visible, (newValue, oldValue) => {
+      statusLayerGroup.setVisible(newValue)
+    })
+
+    const hoverSelectedFeatureId = ref()
+    watch(hoverSelectedFeatureId, (newValue, oldValue) => {
+      statusSelectedLayer.changed()
+    })
+
+    // Get the tiles URL from the store
+    const tilesUrl = $store.getters['app/getTilesUrl']
+
+    const mapStyleColor = ref({
+      lowLevelStroke: '#919191',
+      highLevelStroke: '#A8A8A8',
+      background: '#aad3df', // Sea color
+      unknown: '#E1E1E1'
+    })
+
+    const choroplethData = computed(() => {
+      // Keys are the possible value of the geometry specie column.
+      return {
+        mosquito_alert: {
+          label: trans('Mosquito Alert discoveries'),
+          color: '#e34a33'
+        },
+        official: {
+          label: trans('Official data'),
+          color: '#fef0d9'
+        }
+      }
     })
 
     const center = computed(() => {
-      const center = $store.getters['map/getCurrents'].CENTER
-      return transform(center, 'EPSG:4326', 'EPSG:3857')
+      return fromLonLat([props.lon, props.lat], projection.value)
     })
 
     const mobile = computed(() => {
@@ -112,10 +168,6 @@ export default defineComponent({
       leftDrawerIcon.value = (leftDrawerIcon.value === 'keyboard_arrow_right') ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
     }
 
-    const wmsNumberOfVisibleLayers = computed(() => {
-      return $store.getters['app/wmsNumberOfVisibleLayers']
-    })
-
     function unfoldAttribution () {
       // attrVisible.value = !attrVisible.value
       // if (attrVisible.value) {
@@ -126,158 +178,273 @@ export default defineComponent({
     }
 
     onMounted(function () {
+      // Set initial value for left drawer icon
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const currentWMSView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
-      if (Object.keys(currentWMSView).length > 0) {
-        loadWmsLayer(currentWMSView.years)
+
+      // Add status layer group to the map
+      map.value.map.addLayer(statusLayerGroup)
+
+      addLegend(map.value.map)
+      addTooltip(map.value.map)
+
+      if (props.speciesCode) {
+        loadLayer(props.speciesCode)
       }
     })
+
+    const addLegend = (map) => {
+      // Create legend for the status layer group
+      const legend = new Legend({
+        title: 'Legend',
+        size: [14, 14],
+        layer: statusLayerGroup,
+        textStyle: new Text({
+          font: '14px Roboto'
+        }),
+        titleStyle: new Text({
+          font: '16px Roboto',
+          textAlign: 'center',
+          justify: 'center'
+        })
+      })
+
+      // Add legend items based on choropleth data
+      Object.entries(choroplethData.value).forEach(([colorKey, { label, color }]) => {
+        legend.addItem({
+          title: label,
+          typeGeom: 'Point',
+          style: new Style({
+            image: new RegularShape({
+              points: 4, // Rectangle
+              radius: 14,
+              angle: Math.PI / 4,
+              stroke: new Stroke({
+                color: 'gray',
+                width: 1.5
+              }),
+              fill: new Fill({
+                color: color
+              })
+            })
+          })
+        })
+      })
+
+      // Create legend control and add it to the map
+      const legendControl = new LegendControl({
+        legend: legend,
+        target: 'legend'
+      })
+      map.addControl(legendControl)
+    }
+
+    const addTooltip = (map) => {
+      // Create tooltip for displaying feature information
+      const tooltip = new Tooltip({
+        getHTML: function (feature, info) {
+          if (feature !== undefined) {
+            return feature.get('locName').trim()
+          }
+        },
+        positioning: 'center-center',
+        offsetBox: [0, -15]
+      })
+
+      // Add tooltip overlay to the map
+      map.addOverlay(tooltip)
+
+      // Add hover interaction to the status layer
+      map.addInteraction(statusLayerHoverInteraction)
+
+      // Event handler for toggling tooltip visibility
+      statusLayerHoverInteraction.on('change:active', function (e) {
+        // Hide tooltip when hover interaction is disabled
+        if (e.target.get(e.key) === false) {
+          tooltip.hide()
+          tooltip.removeFeature()
+        }
+      })
+
+      // Event handler for handling hover over features
+      statusLayerHoverInteraction.on('hover', function (e) {
+        // Set feature for tooltip display
+        tooltip.setFeature(e.feature)
+
+        // Check if the hovered feature has changed
+        const featureHasChanged = (e.feature !== hoverSelectedFeatureId.value)
+
+        // Update selected feature ID and trigger layer change
+        if (featureHasChanged) {
+          hoverSelectedFeatureId.value = e.feature.getId()
+        }
+      })
+
+      // Event handler for leaving feature hover
+      statusLayerHoverInteraction.on('leave', function (e) {
+        // Remove and hide tooltip, reset selected feature ID, trigger layer change
+        tooltip.removeFeature()
+        tooltip.hide()
+        hoverSelectedFeatureId.value = undefined
+      })
+    }
 
     const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    const shareViewUrl = backendUrl + 'view/save/'
-    // const loadViewUrl = backendUrl + 'view/load/'
-
-    // Call when user shares view
-    function shareWmsView (data) {
-      // After mapview is shared then handle it
-      const ol = map.value.map
-      const newView = new ShareMapView(ol, {
-        viewType: 'wms',
-        csrfToken: $store.getters['app/getCsrfToken'],
-        species: data.species,
-        layers: data.layers,
-        url: shareViewUrl,
-        callback: handleShareView
-      })
-      newView.save()
-    }
-
-    // Handle shared view
-    // Handle shared view
-    function handleShareView (status) {
-      let content
-      if (status.status !== STATUS_CODES.OK) {
-        content = {
-          error: status.msg,
-          visibility: true,
-          url: ''
+    function positionChange () {
+      context.emit(
+        'move',
+        {
+          center: toLonLat(
+            map.value.map.getView().getCenter(),
+            projection.value
+          ),
+          zoom: map.value.map.getView().getZoom()
         }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      } else {
-        const frontend = $store.getters['app/getFrontendUrl']
-        content = {
-          url: frontend + status.code + '/' + $store.getters['app/getLang'],
-          visibility: true,
-          error: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      }
-      context.emit('endShareView', content)
-    }
-    // Load shared view. Get data from database and then handle it
-    // function loadView (viewCode) {
-    // }
-
-    // Handle shared view
-    // function handleLoadView (response) {
-    // }
-
-    function updateMap () {
-      // Save view params into store
-      const newZoom = map.value.map.getView().getZoom()
-      $store.commit('map/setCurrents', {
-        zoom: newZoom,
-        center: transform(
-          map.value.map.getView().getCenter(),
-          'EPSG:3857', 'EPSG:4326'
-        )
-      })
-    }
-
-    const reorderLayers = function (wms) {
-      loadWmsLayer(wms)
-    }
-
-    const loadWmsLayer = function (wms) {
-      const n = wms.length
-      // Remove previous layers if any, except base layer (index = 0)
-      PREVIOUS_WMS.forEach((layerId) => {
-        const layer = findLayer(layerId)
-        map.value.map.removeLayer(layer)
-      })
-      let nVisibles = 0
-      wms.forEach((layer, index) => {
-        if (layer.visible) {
-          nVisibles += 1
-        }
-        try {
-          const wmsSource = new TileWMS({
-            crossOrigin: 'anonymous',
-            projection: 'EPSG:3857',
-            url: layer.wms_url,
-            params: {
-              LAYERS: layer.layer,
-              SRS: 'EPSG:3857'
-            }
-          })
-
-          const wmsLayer = new TileLayer({
-            visible: layer.visible,
-            source: wmsSource,
-            opacity: 1 - (layer.transparency),
-            id: layer.id,
-            zIndex: 5 * (n - index)
-          })
-          map.value.map.addLayer(wmsLayer)
-          PREVIOUS_WMS.push(layer.id)
-          // Add layer to dict to handle it from TOC
-        } catch (err) {
-          console.log(err)
-        }
-      })
-      $store.commit('app/setWmsNumberOfVisibleLayers', nVisibles)
-    }
-
-    const findLayer = function (id) {
-      return map.value.map.getLayers().array_.find((layer) => {
-        return layer.get('id') === id
-      })
-    }
-
-    const changeLayerProperty = function (payload) {
-      try {
-        const layer = findLayer(payload.layerId)
-        if (payload.key === 'visible') {
-          layer.setVisible(payload.value)
-          if (payload.value) {
-            $store.commit('app/increaseWmsNumberOfVisibleLayers')
-          } else {
-            $store.commit('app/decreaseWmsNumberOfVisibleLayers')
-          }
-        } else {
-          if (payload.key === 'transparency') {
-            layer.setOpacity(1 - payload.value)
-          }
-        }
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    const fitExtent = function (extent) {
-      map.value.map.getView().fit(extent, { minResolution: 50, nearest: false }
       )
     }
 
+    const statusLayer = new VectorTileLayer({
+      zIndex: 1,
+      source: new VectorTileSource({
+        maxZoom: 9,
+        format: new MVT({
+          featureClass: Feature,
+          idProperty: 'locCode'
+        }),
+        url: tilesUrl + $store.getters['app/getEarlyWarningLayername'] + '@EPSG:900913@pbf/{z}/{x}/{-y}.pbf'
+      }),
+      style: null,
+      properties: {
+        statusProperty: undefined,
+        getFeatureStatus: function (feature) {
+          return feature.get(this.statusProperty)
+        }
+      }
+    })
+
+    const selectedStyle = new Style({
+      stroke: new Stroke({
+        color: 'white',
+        width: 2
+      })
+    })
+
+    const statusSelectedLayer = new VectorTileLayer({
+      renderMode: 'vector',
+      minZoom: statusLayer.getMinZoom(),
+      maxZoom: statusLayer.getMaxZoom(),
+      zIndex: statusLayer.getZIndex() + 1,
+      source: statusLayer.getSource(),
+      style: function (feature, resolution) {
+        // Check if the feature's ID exists in the gadmHoverSelect object
+        if (feature.getId() === hoverSelectedFeatureId.value) {
+          // If yes, return the selected style
+          return selectedStyle
+        }
+        // If not, no style is applied (feature remains unchanged)
+      }
+    })
+
+    const upperBorderStyle = new Style({
+      stroke: new Stroke({
+        color: mapStyleColor.value.highLevelStroke,
+        width: 0.5
+      })
+    })
+
+    const upperBorderLayer = new VectorTileLayer({
+      renderMode: 'hybrid',
+      source: statusLayer.getSource(), // Source inherited from the original layer
+      style: function (feature, resolution) {
+        if (feature.get('leave') !== 1) {
+          return upperBorderStyle
+        }
+      },
+      maxZoom: 6,
+      zIndex: statusLayer.getZIndex()
+    })
+
+    // Create the VectorTileLayer
+    const gadm0 = new VectorTileLayer({
+      zIndex: 0,
+      preload: Infinity,
+      source: new VectorTileSource({
+        minZoom: 2,
+        maxZoom: 7,
+        format: new MVT({
+          idProperty: 'COUNTRY'
+        }),
+        url: tilesUrl + 'map_gadm:ADM_0' + '@EPSG:900913@pbf/{z}/{x}/{-y}.pbf'
+      }),
+      style: new Style({
+        fill: new Fill({
+          color: mapStyleColor.value.unknown
+        }),
+        stroke: new Stroke({
+          color: mapStyleColor.value.highLevelStroke,
+          width: 0.5
+        })
+      })
+    })
+    gadm0.setBackground(mapStyleColor.value.background)
+
+    const statusLayerGroup = new LayerGroup({
+      layers: [gadm0, statusLayer, upperBorderLayer, statusSelectedLayer]
+    })
+
+    const statusLayerHoverInteraction = new Hover({
+      layers: [statusLayer]
+    })
+
+    statusLayerGroup.on('change:opacity', function (e) {
+      statusLayerHoverInteraction.setActive(e.target.get(e.key) >= 0.25)
+    })
+
+    const loadLayer = function (specieCode) {
+      statusLayer.setProperties(
+        {
+          // This is for setting the MVT column to look at
+          statusProperty: specieCode
+        }
+      )
+      statusLayer.setStyle(function (feature, resolution) {
+        if (feature.get('leave') === 1) {
+          // Setting to unknown if undefined.
+          const statusValue = statusLayer.getProperties().getFeatureStatus(feature)
+          const fillColor = statusValue ? choroplethData.value[statusValue].color : mapStyleColor.value.unknown
+
+          let stroke
+          const zoomLevel = map.value.map.getView().getZoom()
+          const codeLevel = feature.get('codeLevel')
+          if ((zoomLevel >= 6 && codeLevel > 4) || codeLevel <= 4) {
+            stroke = new Stroke({
+              color: mapStyleColor.value.lowLevelStroke,
+              width: 0.25
+            })
+          } else {
+            // Polygons are not perfect and there are holes between them.
+            // Filling with the same color in order to prevent showing the
+            // base map color between the polygons.
+            stroke = new Stroke({
+              color: fillColor,
+              width: 1
+            })
+          }
+
+          return new Style({
+            fill: new Fill({
+              color: fillColor
+            }),
+            stroke: stroke
+          })
+        }
+      })
+    }
+
     const exportPNG = function () {
+      // See: https://openlayers.org/en/latest/examples/export-map.html
       map.value.map.once('rendercomplete', function () {
         const mapCanvas = document.createElement('canvas')
         const size = map.value.map.getSize()
@@ -325,28 +492,58 @@ export default defineComponent({
         )
         mapContext.globalAlpha = 1
         mapContext.setTransform(1, 0, 0, 1, 0, 0)
-        const link = document.getElementById('image-download')
+
+        const link = document.createElement('a')
         link.href = mapCanvas.toDataURL()
+        link.download = 'ma_early_warning_' + props.speciesCode + '.png'
+        link.addEventListener('click', () => {
+          link.remove() // Remove the link element after it's clicked
+        })
         link.click()
+        URL.revokeObjectURL(link.href)
       })
       map.value.map.renderSync()
     }
 
+    const downloadGeopackage = () => {
+      // See: https://gis.stackexchange.com/questions/331984/create-sql-view-in-geopackage-in-geoserver
+      const url = new URL('wfs', $store.getters['app/getmapserverUrl'])
+
+      // Define the list of properties to include in the download
+      const propertyNames = ['geom', 'cntryCode', 'cntryName', 'codeLevel', 'locCode', 'locName', props.speciesCode]
+
+      // Parameters for the request
+      const params = new URLSearchParams({
+        service: 'wfs',
+        version: '2.0.0',
+        request: 'GetFeature',
+        typeNames: $store.getters['app/getEarlyWarningLayername'],
+        outputFormat: 'geopkg',
+        propertyName: propertyNames.join(','),
+        CQL_FILTER: 'leave=1'
+      })
+
+      url.search = params.toString()
+
+      const link = document.createElement('a')
+      link.href = url.toString()
+      link.download = 'ma_early_warning_' + props.speciesCode + '.gpkg'
+      link.addEventListener('click', () => {
+        link.remove() // Remove the link element after it's clicked
+      })
+      link.click()
+      URL.revokeObjectURL(link.href)
+    }
+
     return {
+      projection,
       trans,
-      wmsNumberOfVisibleLayers,
-      fitExtent,
-      reorderLayers,
-      loadWmsLayer,
-      changeLayerProperty,
+      loadLayer,
       exportPNG,
-      baseMap,
-      updateMap,
+      downloadGeopackage,
+      positionChange,
       center,
-      zoom,
       mobile,
-      // loadView,
-      shareWmsView,
       toggleLeftDrawer,
       attrVisible,
       foldingIcon,
@@ -386,7 +583,7 @@ export default defineComponent({
   .ol-zoom button:focus,
   .ol-zoom button{
     background: $primary-button-background;
-    color: $primary-button-text;
+    color: white;
     border: none;
     width: 40px;
     height: 40px;
@@ -490,12 +687,16 @@ export default defineComponent({
 .drawer-handler-mobile span i{
   color: white;
 }
-.wms.ol-download{
+.ol-download{
   bottom: 130px;
   background: transparent;
 }
 
-.wms.ol-download.ol-control button {
+.ol-download.ol-control button i{
+  font-size: 0.8em;
+}
+
+.ol-download.ol-control button {
   // background: $primary-button-background;
   color: white
 }

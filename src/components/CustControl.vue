@@ -6,6 +6,7 @@
   <div :class="className">
     <button
       :title="trans(titleText)"
+      :disabled="isDisabled"
       @click.stop="buttonClicked"
     >
       <i :class="faIcon"></i>
@@ -18,10 +19,14 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
-  props: ['class', 'icon', 'title'],
+  props: ['class', 'icon', 'title', 'disabled'],
   emits: ['clicked'],
   setup (props, context) {
     const $store = useStore()
+    const isDisabled = computed(() => {
+      return props.disabled
+    })
+
     const className = computed(() => {
       return props.class
     })
@@ -45,6 +50,7 @@ export default {
     return {
       trans,
       className,
+      isDisabled,
       faIcon,
       titleText,
       buttonClicked

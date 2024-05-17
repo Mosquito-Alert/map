@@ -14,15 +14,7 @@ export const setTranslations = async (context) => {
     withCredentials: true
   }).then(function (resp) {
     context.commit('setTranslations', resp.data.trans)
-    context.commit('setTabsVisibility', resp.data.config.tabs)
-    context.commit('setWMSsetWmsData', resp.data.config.wms)
 
-    const key = Object.keys(resp.data.config.wms)[0]
-    const layer = resp.data.config.wms[key][0]
-    context.commit('setLegendData', {
-      wms_url: layer.wms_url,
-      layer: layer.layer
-    })
     const registered = ('registered-user' in resp.data) ? resp.data['registered-user'] : false
     context.commit('setAuthorized', registered)
   })

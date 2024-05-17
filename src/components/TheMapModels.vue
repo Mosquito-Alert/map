@@ -3,7 +3,7 @@
 -->
 
 <template>
-  <div id='mapa' class='bg-white'>
+  <div id='mapa'>
     <q-linear-progress :value="progress" color="orange" class="progress-bar-absolute"  v-if="progress>0 && progress<100"/>
     <q-btn v-if="mobile"
       class="drawer-handler-mobile"
@@ -16,18 +16,18 @@
     <ol-map ref='map'
       :loadTilesWhileAnimating='true'
       :loadTilesWhileInteracting='true'
-      @movestart='hideSpinner'
-      @moveend='updateMap'
+      @moveend="positionChange"
       style='height:100%'>
-
         <ol-zoom-control :duration='600' />
+        <ol-scaleline-control />
         <ol-view ref='view'
-            :multiWorld=true
-            :maxZoom=19
-            :maxResolution=39135.75848201024
-            :center='center'
-            :zoom='zoom'
-            :constrainResolution='true' />
+          :center="center"
+          :maxZoom=12
+          :multiWorld=false
+          :zoom="zoom"
+          :projection="projection"
+          :constrainResolution='true'
+          />
 
         <div
           class="ol-attribution"
@@ -35,6 +35,7 @@
         >
           <div v-if="!mobile || attrVisible">
             © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            | <a href="https://gadm.org/" target="_blank">© GADM</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -45,80 +46,95 @@
           </div>
         </div>
         <!-- base map -->
-        <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
+        <ol-tile-layer ref='baseMap' :zIndex=0>
           <ol-source-osm />
-            <!-- <ol-source-xyz
-              crossOrigin='anonymous'
-              url='https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwZXNiYXNlc2lndGUiLCJhIjoiY2wxbHRmZXliMDlkeDNrcG40dm14OWZmNiJ9.UFRSz8T_c4riZkH3CyGgBQ' /> -->
         </ol-tile-layer>
-
     </ol-map>
   </div>
 </template>
 
 <script>
 import 'vue3-openlayers/dist/vue3-openlayers.css'
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { transform } from 'ol/proj.js'
+import { toLonLat, fromLonLat } from 'ol/proj.js'
 import MVT from 'ol/format/MVT'
 import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
 import { Style, Fill, Stroke } from 'ol/style'
 import { Group as LayerGroup } from 'ol/layer'
-import moment from 'moment'
-import { GeojsonFromCsv } from '../js/GeojsonFromCsv.js'
-import GridModelLayer from '../js/GridModelLayer'
-import ShareMapView from '../js/ShareMapView'
-import { StatusCodes as STATUS_CODES } from 'http-status-codes'
+import Feature from 'ol/Feature'
+import Tooltip from 'ol-ext/overlay/Tooltip'
+import Hover from 'ol-ext/interaction/Hover'
+
 import axios from 'axios'
 
 export default defineComponent({
   name: 'TheMapModels',
   emits: [
     'toggleLeftDrawer',
-    'endShareView',
-    'setModelDate',
-    'loadSharedModel'
+    'move'
   ],
-  props: ['viewCode'],
+  props: ['speciesCode', 'date', 'opacity', 'visible', 'displayChoropleth', 'palette', 'filters', 'lat', 'lon', 'zoom'],
   setup (props, context) {
+    const $store = useStore()
+
     const map = ref('null')
-    const requestTimeoutMs = 20000
+    const leftDrawerIcon = ref('null')
+
     const progress = ref(0)
-    const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
-    const leftDrawerIcon = ref('null')
-    const $store = useStore()
-    let CSVS = {}
-    const CENTROIDS = {}
-    // let mySession
-    const GADM1 = 'gadm1'
-    const GADM2 = 'gadm2'
-    const GADM3 = 'gadm3'
-    const GADM4 = 'gadm4'
-    const backendUrl = $store.getters['app/getBackend']
-    let estModelLayer
-    let seModelLayer
-    let seModelLayer1
-    let seModelLayer2
-    let seModelLayer3
-    let seModelLayer4
-    let ol
-    let gadm4MaxZoom
-    let dataGridGeojson
-    const RANGS = [0.16, 0.32, 0.48, 0.65, 0.82, 1]
-    $store.commit('map/selectFeature', {})
 
-    // Map general configuration
-    const zoom = computed(() => {
-      return mobile.value ? $store.getters['map/getCurrents'].MOBILEZOOM : $store.getters['map/getCurrents'].ZOOM
+    const projection = ref('EPSG:3857')
+
+    let CSVS = {}
+
+    const hoverSelectedFeatureId = ref()
+    watch(hoverSelectedFeatureId, (newValue, oldValue) => {
+      selectableGadmLayers.forEach(function (layer) {
+        layer.changed()
+      })
     })
 
+    // Watcher for props
+    watch(() => [props.speciesCode, props.date], ([newSpeciesCode, newDate]) => {
+      if ([newSpeciesCode, newDate].every(item => item !== undefined)) {
+        loadLayer(newSpeciesCode, newDate)
+      }
+    })
+
+    watch(() => props.displayChoropleth, (newValue, oldValue) => {
+      modelsLayerGroup.setVisible(newValue && props.visible)
+    })
+
+    watch(() => props.opacity, (newValue, oldValue) => {
+      modelsLayerGroup.setOpacity(newValue)
+      gadm0.setOpacity(newValue)
+
+      // Disable hover if opacity is less than 25%
+      baseGadmHoverInteraction.setActive(newValue >= 0.25)
+    })
+
+    watch(() => props.visible, (newValue, oldValue) => {
+      modelsLayerGroup.setVisible(newValue)
+      gadm0.setVisible(newValue)
+    })
+
+    watch(() => props.filters, () => {
+      refresh()
+    }, { deep: true })
+
+    const mapStyleColor = ref({
+      lowLevelStroke: '#C9C9C9',
+      highLevelStroke: '#B9B9B9',
+      background: '#aad3df', // Sea color
+      unknown: '#E1E1E1'
+    })
+
+    // Map general configuration
     const center = computed(() => {
-      const center = $store.getters['map/getCurrents'].CENTER
-      return transform(center, 'EPSG:4326', 'EPSG:3857')
+      return fromLonLat([props.lon, props.lat], projection.value)
     })
 
     const mobile = computed(() => {
@@ -126,7 +142,6 @@ export default defineComponent({
     })
 
     const properties = $store.getters['app/getModelsProperties']
-    const models = JSON.parse(JSON.stringify($store.getters['app/getModels']))
     const jsonProperties = JSON.parse(JSON.stringify(properties))
 
     const toggleLeftDrawer = function () {
@@ -144,135 +159,97 @@ export default defineComponent({
     }
 
     onMounted(function () {
-      ol = map.value.map
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      // const paramViewCode = (props.viewCode) ? props.viewCode : null
-      // if (paramViewCode) {
-      //   loadView(map.value.map, 'M-' + paramViewCode)
-      // }
+
+      // Adding base layer (gadm0)
+      map.value.map.addLayer(gadm0)
+
+      // Adding gadm probability model layers.
+      map.value.map.addLayer(modelsLayerGroup)
+
+      addTooltip(map.value.map)
+
+      // This should be in <ol-map>, but current vue3-openlayers version
+      // does not support these events.
+      map.value.map.on('rendercomplete', () => {
+        spinner(false)
+      })
+
+      if ([props.speciesCode, props.date].every(item => item !== undefined)) {
+        loadLayer(props.speciesCode, props.date)
+      }
     })
+
+    const addTooltip = (map) => {
+      // Displaying tooltip
+      const tooltip = new Tooltip({
+        // Function to display information about the hovered feature
+        getHTML: function (feature, info) {
+          if (feature !== undefined) {
+            // Get the title of the feature
+            const title = feature.get(
+              // Find the attribute keys starting with 'NAME_' and select the most detailed one (highest number)
+              feature.getKeys().filter(item => item.startsWith('NAME_')).sort((a, b) => b.localeCompare(a))[0]
+            ).trim()
+
+            // Show tooltip only if the title is not 'n.a.' (indicating no info available)
+            if (!(title.toLowerCase().startsWith('n.a.') || title.toLowerCase() === 'na')) {
+              return title
+            }
+          }
+        },
+        positioning: 'center-center',
+        offsetBox: [0, -15]
+      })
+      map.addOverlay(tooltip)
+
+      // Add hover interaction
+      map.addInteraction(baseGadmHoverInteraction)
+
+      baseGadmHoverInteraction.on('change:active', function (e) {
+        // hide tooltip on hover disabled.
+        if (e.target.get(e.key) === false) {
+          tooltip.hide()
+          tooltip.removeFeature()
+        }
+      })
+
+      baseGadmHoverInteraction.on('hover', function (e) {
+        tooltip.setFeature(e.feature)
+
+        const featureHasChanged = (e.feature.getId() !== hoverSelectedFeatureId.value)
+
+        if (featureHasChanged) {
+          // Replace hoverSelectedFeatureId
+          hoverSelectedFeatureId.value = e.feature.getId()
+        }
+      })
+
+      baseGadmHoverInteraction.on('leave', function (e) {
+        // Hide tooltip if no feature is hovered
+        tooltip.removeFeature()
+        tooltip.hide()
+
+        // Reset hoverSelectedFeatureId
+        hoverSelectedFeatureId.value = undefined
+      })
+    }
 
     const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    const shareViewUrl = backendUrl + 'view/save/'
-    const loadViewUrl = backendUrl + 'view/load/'
-
-    // Call when user shares view
-    function shareModelView () {
-      const modelData = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
-      if (!modelData.vector || !modelData.year) {
-        const content = {
-          error: 'Share view error. No model is loaded',
-          visibility: true,
-          url: ''
+    function positionChange () {
+      context.emit(
+        'move',
+        {
+          center: toLonLat(
+            map.value.map.getView().getCenter(),
+            projection.value
+          ),
+          zoom: map.value.map.getView().getZoom()
         }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-        context.emit('endShareView', content)
-        return
-      }
-
-      // After mapview is shared then handle it
-      const newView = new ShareMapView(ol, {
-        viewType: 'models',
-        csrfToken: $store.getters['app/getCsrfToken'],
-        filters: {
-          vector: modelData.vector,
-          year: modelData.year,
-          month: modelData.month,
-          estimation: modelData.estimation,
-          uncertainty: modelData.uncertainty,
-          estimationTransparency: modelData.estimationTransparency,
-          uncertaintyTransparency: modelData.uncertaintyTransparency,
-          uncertaintyColor: modelData.uncertaintyColor,
-          estimationColors: $store.getters['app/getEstimationColors']
-        },
-        url: shareViewUrl,
-        callback: handleShareView
-      })
-      newView.save()
-    }
-
-    // Handle shared view
-    function handleShareView (status) {
-      let content
-      if (status.status !== STATUS_CODES.OK) {
-        content = {
-          error: status.msg,
-          visibility: true,
-          url: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      } else {
-        const frontend = $store.getters['app/getFrontendUrl']
-        content = {
-          url: frontend + status.code + '/' + $store.getters['app/getLang'],
-          visibility: true,
-          error: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      }
-      context.emit('endShareView', content)
-    }
-
-    // Load shared view. Get data from database and then handle it
-    function loadView (viewCode) {
-      const newView = new ShareMapView(map.value.map, {
-        url: loadViewUrl + viewCode + '/',
-        csrfToken: $store.getters['app/getCsrfToken']
-      })
-      newView.load(handleLoadView)
-    }
-
-    // Handle shared view
-    function handleLoadView (response) {
-      // Check status response
-      if (response.status !== STATUS_CODES.OK) {
-        $store.commit('app/setModal', {
-          id: 'error',
-          content: {
-            visibility: true,
-            msg: response.msg,
-            redirection: false
-          }
-        })
-        return true
-      }
-      const d = response.view[0].date
-      console.log(d)
-      context.emit('setModelDate', moment(d).startOf('year').format('MM/YYYY'))
-      const jsonView = JSON.parse(response.view[0].view)
-      $store.commit('map/setCurrents', {
-        zoom: jsonView.zoom,
-        center: transform(jsonView.center, 'EPSG:3857', 'EPSG:4326'),
-        mobilezoom: jsonView.zoom
-      })
-      // Search type from code
-      const type = Object.keys(models).find((key, index) => {
-        return (models[key].modelName === jsonView.filters.vector)
-      })
-      // Send data to layout so it udpates UI accordingly
-      context.emit('loadSharedModel', {
-        vector: { code: jsonView.filters.vector, type: trans(models[type].common_name) },
-        year: jsonView.filters.year,
-        month: jsonView.filters.month,
-        estimation: jsonView.filters.estimation,
-        uncertainty: jsonView.filters.uncertainty,
-        estimationTransparency: jsonView.filters.estimationTransparency,
-        uncertaintyTransparency: jsonView.filters.uncertaintyTransparency,
-        uncertaintyColor: jsonView.filters.uncertaintyColor,
-        estimationColors: jsonView.filters.estimationColors
-      })
+      )
     }
 
     // Turn CSV file into dict
@@ -288,7 +265,8 @@ export default defineComponent({
         const nutsId = currentLine[indexId]
         if (nutsId !== undefined) {
           const prob = currentLine[indexEst]
-          const se = currentLine[indexSe]
+          // Converting uncertainty to certainty
+          const se = 1 - currentLine[indexSe]
           dict[nutsId] = { prob, se }
         }
       }
@@ -305,81 +283,24 @@ export default defineComponent({
       })
     }
 
-    // Do geometry grid to show probability at bigger zooms
-    const doGRID = function (data) {
-      const gridSize = $store.getters['app/getGridSize']
-      dataGridGeojson = GeojsonFromCsv(data, jsonProperties.grid, gridSize)
-      const estimationColors = $store.getters['app/getEstimationColors']
-      estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-        colors: estimationColors,
-        rangs: RANGS,
-        zIndex: 15,
-        minZoom: jsonProperties.grid.minZoom,
-        maxZoom: jsonProperties.grid.maxZoom
-      })
-      estModelLayer.addLayer()
-
-      // Grid SE layer
-      if (seModelLayer) {
-        map.value.map.removeLayer(seModelLayer.layer)
-      }
-      const seColor = $store.getters['app/getModelDefaults'].uncertaintyColor
-      seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
-        zIndex: 16,
-        color: seColor.value,
-        minZoom: jsonProperties.grid.minZoom,
-        maxZoom: jsonProperties.grid.maxZoom
-      })
-      seModelLayer.addLayer()
-    }
-
-    const clearModel = async function (data) {
-      if (seModelLayer) {
-        map.value.map.removeLayer(seModelLayer.layer)
-        seModelLayer = null
-      }
-      if (seModelLayer1) {
-        map.value.map.removeLayer(seModelLayer1.layer)
-      }
-      if (seModelLayer2) {
-        map.value.map.removeLayer(seModelLayer2.layer)
-      }
-      if (seModelLayer3) {
-        map.value.map.removeLayer(seModelLayer3.layer)
-      }
-      if (seModelLayer4) {
-        map.value.map.removeLayer(seModelLayer4.layer)
-      }
-      if (estModelLayer) {
-        map.value.map.removeLayer(estModelLayer.layer)
-        estModelLayer = null
-      }
-      map.value.map.removeLayer(modelsLayer)
-    }
-
-    // function newAbortSignal (timeoutMs) {
-    //   const abortController = new AbortController()
-    //   setTimeout(abortController.abort(), timeoutMs)
-    //   return abortController.signal
-    // }
-
     // Get all data necessary to load a model and add layers to  map
-    const loadModel = async function (data) {
-      let connectionError = false
-      const process = { status: 'ok', data: {} }
-      if (estModelLayer) {
-        map.value.map.removeLayer(estModelLayer.layer)
-        estModelLayer = null
-      }
-      clearModel()
-      spinner(true)
-      CSVS = {}
-      const urls = data.modelsCsv
+    const loadLayer = async function (speciesCode, date) {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
 
+      const serverModels = $store.getters['app/getModelsUrl']
+      const urls = [
+        serverModels + `gadm1/${speciesCode}/${year}/${month}/` + 'gadm1_monthly.csv',
+        serverModels + `gadm2/${speciesCode}/${year}/${month}/` + 'gadm2_monthly.csv',
+        serverModels + `gadm3/${speciesCode}/${year}/${month}/` + 'gadm3_monthly.csv',
+        serverModels + `gadm4/${speciesCode}/${year}/${month}/` + 'gadm4_monthly.csv'
+      ]
+
+      spinner(true)
       const requests = urls.map((url) => {
         return axios.get(url, {
           // withCredentials: true,
-          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 5 seconds
+          signal: AbortSignal.timeout(20000), // Aborts request after 5 seconds
           onDownloadProgress: (progressEvent) => {
             progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           }
@@ -387,460 +308,282 @@ export default defineComponent({
       })
 
       // GET CSV DATA FILES
+      // Clear CSVS object
+      CSVS = {}
+      const process = { status: 'ok', data: {} }
       await axios.all(requests).then((responses) => {
         responses.forEach((resp) => {
           const decoded = resp.data
           if (!('1' in CSVS)) {
-            CSVS['1'] = csvJSON(decoded, GADM1)
+            CSVS['1'] = csvJSON(decoded, 'gadm1')
           } else if (!('2' in CSVS)) {
-            CSVS['2'] = csvJSON(decoded, GADM2)
+            CSVS['2'] = csvJSON(decoded, 'gadm2')
           } else if (!('3' in CSVS)) {
-            CSVS['3'] = csvJSON(decoded, GADM3)
+            CSVS['3'] = csvJSON(decoded, 'gadm3')
           } else if (!('4' in CSVS)) {
-            CSVS['4'] = csvJSON(decoded, GADM4)
-          } else if (!estModelLayer) {
-            doGRID(decoded)
+            CSVS['4'] = csvJSON(decoded, 'gadm4')
           }
-        })
-        gadm1.getSource().refresh()
-        gadm2.getSource().refresh()
-        gadm3.getSource().refresh()
-        gadm4.getSource().refresh()
-
-        map.value.map.addLayer(modelsLayer)
-        gadm1.on('prerender', function () {
-          spinner(true)
-        })
-        gadm2.on('prerender', function () {
-          spinner(true)
-        })
-        gadm3.on('prerender', function () {
-          spinner(true)
-        })
-        gadm4.on('prerender', function () {
-          spinner(true)
-        })
-        estimationVisibility(data.estimation)
-        estimationOpacity(1 - (data.estimationTransparency / 100))
-
-        // If cell layer is on
-        if (urls.length > 4) {
-          gadm4MaxZoom = jsonProperties.gadm4.maxZoom
-          gadm4.setMaxZoom(gadm4MaxZoom)
-          estModelLayer.layer.on('prerender', function () {
-            spinner(true)
-          })
-        } else {
-          // if it is not
-          gadm4MaxZoom = 19
-          gadm4.setMaxZoom(gadm4MaxZoom)
-        }
-        map.value.map.on('rendercomplete', function () {
-          spinner(false)
         })
       }).catch(function (err) {
         process.status = 'error'
         process.data = err
-        connectionError = true
         let errMsg = ''
-        if (err.response.status === 404) {
+        if (err.response?.status === 404) {
           errMsg = 'Model not found on Server'
         } else {
           errMsg = err.message
         }
         spinner(false)
         $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: errMsg } })
-      })
-
-      if (connectionError) {
         return false
-      }
-
-      // GET CENTROIDS GEOJSON FOR UNCERTAINTY
-      const centroidUrls = data.centroidsUrls
-      const centroidsReq = centroidUrls.map((url) => {
-        return axios.get(url, {
-          withCredentials: true,
-          signal: AbortSignal.timeout(requestTimeoutMs), // Aborts request after 20 seconds
-          onDownloadProgress: (progressEvent) => {
-            progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          }
-        })
       })
-
-      await axios.all(centroidsReq).then((responses) => {
-        responses.forEach((resp) => {
-          if (!('gadm1' in CENTROIDS)) {
-            CENTROIDS.gadm1 = putDataOnCentroids(resp.data, CSVS['1'])
-          } else if (!('gadm2' in CENTROIDS)) {
-            CENTROIDS.gadm2 = putDataOnCentroids(resp.data, CSVS['2'])
-          } else if (!('gadm3' in CENTROIDS)) {
-            CENTROIDS.gadm3 = putDataOnCentroids(resp.data, CSVS['3'])
-          } else if (!('gadm4' in CENTROIDS)) {
-            CENTROIDS.gadm4 = putDataOnCentroids(resp.data, CSVS['4'])
-          }
-        })
-      }).catch(function (err) {
-        connectionError = true
-        spinner(false)
-        const message = $store.getters['app/getErrorMessage'] + ' ' + err.message
-        $store.commit('app/setModal', { id: 'error', content: { visibility: true, msg: message } })
-        $store.commit('app/setErrorMessage', '')
-      })
-
-      if (connectionError) {
-        return false
-      }
-
-      // PUT DATA ON CENTROIDS AND ADD LAYERS TO MAP
-
-      CENTROIDS.gadm1 = putDataOnCentroids(CENTROIDS.gadm1, CSVS['1'])
-      CENTROIDS.gadm2 = putDataOnCentroids(CENTROIDS.gadm2, CSVS['2'])
-      CENTROIDS.gadm3 = putDataOnCentroids(CENTROIDS.gadm3, CSVS['3'])
-      CENTROIDS.gadm4 = putDataOnCentroids(CENTROIDS.gadm4, CSVS['4'])
-
-      const seColor = $store.getters['app/getUncertaintyColor']
-
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm1.minZoom - 1,
-        maxZoom: jsonProperties.gadm1.maxZoom
-      })
-
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm2.minZoom,
-        maxZoom: jsonProperties.gadm2.maxZoom
-      })
-
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm3.minZoom,
-        maxZoom: jsonProperties.gadm3.maxZoom
-      })
-
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm4.minZoom,
-        maxZoom: gadm4MaxZoom
-      })
-
-      seModelLayer1.addLayer()
-      seModelLayer2.addLayer()
-      seModelLayer3.addLayer()
-      seModelLayer4.addLayer()
-      uncertaintyVisibility(data.uncertainty)
-      uncertaintyOpacity(1 - (data.uncertaintyTransparency / 100))
+      refresh()
     }
 
-    // Filter centroids with data and add SE value from csv
-    const putDataOnCentroids = function (json, csv) {
-      const filtered = json.features.filter(f => {
-        if (f.properties.id in csv) {
-          f.properties.se = csv[f.properties.id].se
-          return f.properties.id in csv
-        } else {
-          return false
+    function getFeatureColor (feature, csvIndex) {
+      const defaultColor = mapStyleColor.value.unknown // Default color
+
+      // Get the data from CSV if provided and determine color based on probability
+      const dataObj = csvIndex !== undefined ? CSVS[csvIndex] : {}
+      const id = feature.getId()
+      if (!dataObj || dataObj[id] === undefined) {
+        // id not found in dataObj
+        return defaultColor
+      }
+
+      // Apply filters
+      if (props.filters) {
+        if (props.filters.certaintyRange) {
+          const { min, max } = props.filters.certaintyRange
+          const certainty = dataObj[id].se
+          if (certainty < min || certainty > max) {
+            // Certainty outside the filter range
+            return defaultColor
+          }
+        }
+      }
+
+      const palette = props.palette
+      const index = Math.min(
+        Math.floor(dataObj[id].prob * palette.length),
+        palette.length - 1
+      )
+
+      return palette[index]
+    }
+
+    /**
+     * Function to create a VectorTileLayer with specified parameters.
+     * @param {number} minZoom - Minimum zoom level for the layer.
+     * @param {number} zIndex - The z-index of the layer.
+     * @param {string} tmsLayername - The name of the TMS layer.
+     * @param {string} idPropertyname - The name of the property to use as the ID.
+     * @param {number} csvIndex - Index of the CSV data.
+     * @param {boolean} triggersSpinner - Flag indicating whether to trigger spinner.
+     * @returns {VectorTileLayer} - The created VectorTileLayer.
+     */
+    function createGadmVectorTileLayer (minZoom, zIndex, tmsLayername, idPropertyname, csvIndex, triggersSpinner = true) {
+      // Get the tiles URL from the store
+      const tilesUrl = $store.getters['app/getTilesUrl']
+
+      // Create the VectorTileLayer
+      const layer = new VectorTileLayer({
+        declutter: true,
+        minZoom: minZoom,
+        zIndex: zIndex,
+        renderMode: 'hybrid',
+        source: new VectorTileSource({
+          minZoom: 2,
+          maxZoom: 7,
+          format: new MVT({
+            featureClass: Feature,
+            idProperty: idPropertyname
+          }),
+          url: tilesUrl + tmsLayername + '@EPSG:900913@pbf/{z}/{x}/{-y}.pbf'
+        }),
+        style: function (feature, resolution) {
+          return new Style({
+            fill: new Fill({
+              color: getFeatureColor(feature, csvIndex)
+            }),
+            stroke: new Stroke({
+              color: mapStyleColor.value.lowLevelStroke,
+              width: 0.4
+            })
+          })
         }
       })
-      return {
-        type: 'FeatureCollection',
-        model: json.model,
-        features: filtered
-      }
-    }
 
-    // Function styles for probability layers based on scale
-    const colorizeGadm1 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['1'])
-    }
-    const colorizeGadm2 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['2'])
-    }
-
-    const colorizeGadm3 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['3'])
-    }
-
-    const colorizeGadm4 = (feature, style) => {
-      return colorizeGadm(feature, style, CSVS['4'])
-    }
-
-    // General function style for probability
-    const colorizeGadm = (feature, style, CSV) => {
-      const estimationColors = $store.getters['app/getEstimationColors']
-      const id = feature.properties_.id
-      if (CSV[id] === undefined) {
-        return null
-      }
-      const value = CSV[id].prob
-      let c
-      if (value < RANGS[0]) {
-        c = estimationColors[0]
-      } else if (value < RANGS[1]) {
-        c = estimationColors[1]
-      } else if (value < RANGS[2]) {
-        c = estimationColors[2]
-      } else if (value < RANGS[3]) {
-        c = estimationColors[3]
-      } else if (value < RANGS[4]) {
-        c = estimationColors[4]
-      } else {
-        c = estimationColors[5]
-      }
-      style = new Fill({
-        color: c
-      })
-      return new Style({
-        fill: style,
-        stroke: new Stroke({
-          color: '#fff'
+      // Attach spinner trigger events if specified
+      if (triggersSpinner) {
+        layer.on(['change', 'prerender'], function (e) {
+          spinner(true)
         })
+      }
+
+      return layer
+    }
+
+    /**
+     * Function to create a VectorTileLayer for selection based on an existing GADM layer.
+     * @param {VectorTileLayer} gadmLayer - The existing GADM VectorTileLayer.
+     * @returns {VectorTileLayer} - The created VectorTileLayer for selection.
+     */
+    function createGadmSelectionVectorTileLayer (gadmLayer) {
+      return new VectorTileLayer({
+        renderMode: 'vector',
+        minZoom: gadmLayer.getMinZoom(),
+        maxZoom: gadmLayer.getMaxZoom(),
+        zIndex: gadmLayer.getZIndex(),
+        source: gadmLayer.getSource(),
+        style: function (feature, resolution) {
+          // Check if the feature's ID exists in the hoverSelectedFeatureId object
+          if (feature.getId() === hoverSelectedFeatureId.value) {
+            // If yes, return the selected style
+            return gadmSelectedStyle
+          }
+          // If not, no style is applied (feature remains unchanged)
+        }
       })
     }
 
-    const tilesUrl = $store.getters['app/getTilesUrl']
+    const upperGadmBorderStyle = new Style({
+      stroke: new Stroke({
+        color: mapStyleColor.value.highLevelStroke,
+        width: 0.5
+      })
+    })
+
+    /**
+     * Function to create a VectorTileLayer for displaying the upper border of a GADM layer.
+     * @param {VectorTileLayer} gadmLayer - The GADM VectorTileLayer.
+     * @returns {VectorTileLayer} - The VectorTileLayer for displaying the upper border.
+     */
+    function createGadmUpperBorderVectorTileLayer (gadmLayer) {
+      return new VectorTileLayer({
+        renderMode: 'hybrid',
+        source: gadmLayer.getSource(), // Source inherited from the original layer
+        style: upperGadmBorderStyle
+      })
+    }
+
+    const gadmSelectedStyle = new Style({
+      stroke: new Stroke({
+        color: 'white',
+        width: 2
+      })
+    })
 
     // Define layers for probability
-    const gadm1 = new VectorTileLayer({
-      maxZoom: jsonProperties.gadm1.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm1.maxZoom + 1,
-        format: new MVT(),
-        url: tilesUrl + '/gadm1/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm1
-    })
+    const gadm0 = createGadmVectorTileLayer(
+      jsonProperties.gadm1.minZoom, // Minimum zoom level for the layer
+      0, // Z-index
+      'map_gadm:ADM_0', // Name of the TMS layer
+      'COUNTRY', // Name of the ID property (MVT)
+      undefined, // CSV index (undefined in this case)
+      false // Disable spinner triggering
+    )
+    gadm0.setPreload(Infinity)
+    gadm0.setBackground(mapStyleColor.value.background)
 
-    const gadm2 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm2.minZoom,
-      maxZoom: jsonProperties.gadm2.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm2.maxZoom,
-        format: new MVT(),
-        url: tilesUrl + '/gadm2/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm2
-    })
+    // GADM1
+    const gadm1 = createGadmVectorTileLayer(
+      jsonProperties.gadm1.minZoom, // Minimum zoom level for the layer
+      1, // Z-index
+      'map_gadm:ADM_1', // Name of the TMS layer
+      'GID_1', // Name of the ID property (MVT)
+      '1' // CSV index
+    )
+    const gadm1selection = createGadmSelectionVectorTileLayer(gadm1)
 
-    const gadm3 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm3.minZoom,
-      maxZoom: jsonProperties.gadm3.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm3.maxZoom - 1,
-        format: new MVT(),
-        url: tilesUrl + '/gadm3/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm3
-    })
+    // GADM2
+    const gadm2 = createGadmVectorTileLayer(
+      jsonProperties.gadm2.minZoom, // Minimum zoom level for the layer
+      2, // Z-index
+      'map_gadm:ADM_2', // Name of the TMS layer
+      'GID_2', // Name of the ID property (MVT)
+      '2' // CSV index
+    )
+    const gadm2selection = createGadmSelectionVectorTileLayer(gadm2)
 
-    const gadm4 = new VectorTileLayer({
-      minZoom: jsonProperties.gadm4.minZoom,
-      maxZoom: jsonProperties.gadm4.maxZoom,
-      declutter: true,
-      renderMode: 'hybrid',
-      source: new VectorTileSource({
-        maxZoom: jsonProperties.gadm4.maxZoom - 2,
-        format: new MVT(),
-        url: tilesUrl + '/gadm4/{z}/{x}/{y}.pbf'
-      }),
-      style: colorizeGadm4
-    })
+    // GADM3
+    const gadm3 = createGadmVectorTileLayer(
+      jsonProperties.gadm3.minZoom, // Minimum zoom level for the layer
+      3, // Z-index
+      'map_gadm:ADM_3', // Name of the TMS layer
+      'GID_3', // Name of the ID property (MVT)
+      '3' // CSV index
+    )
+    const gadm3selection = createGadmSelectionVectorTileLayer(gadm3)
+
+    // GADM4
+    const gadm4 = createGadmVectorTileLayer(
+      jsonProperties.gadm4.minZoom, // Minimum zoom level for the layer
+      4, // Z-index
+      'map_gadm:ADM_4', // Name of the TMS layer
+      'GID_4', // Name of the ID property (MVT)
+      '4' // CSV index
+    )
+    const gadm4selection = createGadmSelectionVectorTileLayer(gadm4)
+
+    // Setting up border
+    const gadm0border = createGadmUpperBorderVectorTileLayer(gadm0)
+    gadm0border.setMinZoom(gadm1.getMinZoom())
+    gadm0border.setMaxZoom(gadm2.getMinZoom())
+    gadm0border.setZIndex(gadm1.getZIndex())
+
+    const gadm1border = createGadmUpperBorderVectorTileLayer(gadm1)
+    gadm1border.setMinZoom(gadm2.getMinZoom())
+    gadm1border.setMaxZoom(gadm3.getMinZoom())
+    gadm1border.setZIndex(gadm2.getZIndex())
+
+    const gadm2border = createGadmUpperBorderVectorTileLayer(gadm2)
+    gadm2border.setMinZoom(gadm3.getMinZoom())
+    gadm2border.setMaxZoom(gadm4.getMinZoom())
+    gadm2border.setZIndex(gadm3.getZIndex())
+
+    const gadm3border = createGadmUpperBorderVectorTileLayer(gadm3)
+    gadm3border.setMinZoom(gadm4.getMinZoom())
+    gadm3border.setZIndex(gadm4.getZIndex())
+
+    // Define arrays to hold base GADM layers, selectable GADM layers, and upper border GADM layers
+    const baseGadmLayers = [gadm1, gadm2, gadm3, gadm4]
+    const selectableGadmLayers = [gadm1selection, gadm2selection, gadm3selection, gadm4selection]
+    const upperBorderGadmLayers = [gadm0border, gadm1border, gadm2border, gadm3border]
 
     // Group previous layers as a single map layer
-    const modelsLayer = new LayerGroup({
-      layers: [gadm1, gadm2, gadm3, gadm4]
+    const modelsLayerGroup = new LayerGroup({
+      layers: [...baseGadmLayers, ...upperBorderGadmLayers, ...selectableGadmLayers],
+      visible: props.displayChoropleth // Set the layer group initially invisible
     })
 
-    function updateMap () {
-      // Save view params into store
-      const newZoom = map.value.map.getView().getZoom()
-      $store.commit('map/setCurrents', {
-        zoom: newZoom,
-        center: transform(
-          map.value.map.getView().getCenter(),
-          'EPSG:3857', 'EPSG:4326'
-        )
+    // Creating hover interaction only for the baseGadmLayers
+    const baseGadmHoverInteraction = new Hover({
+      layers: baseGadmLayers
+    })
+
+    // Redraw. Get colors from store
+    const refresh = async function () {
+      // Notify each GADM layer that it has changed, triggering a redraw.
+      modelsLayerGroup.getLayers().forEach(function (layer) {
+        layer.changed()
       })
     }
 
-    // Change estimation visibility
-    const estimationVisibility = function (state) {
-      $store.commit('app/setModelEstimation', state)
-      gadm1.setVisible(state)
-      gadm2.setVisible(state)
-      gadm3.setVisible(state)
-      gadm4.setVisible(state)
-      if (estModelLayer) {
-        estModelLayer.layer.setVisible(state)
-      }
-    }
-
-    // Change uncertainty visibility
-    const uncertaintyVisibility = function (state) {
-      $store.commit('app/setModelUncertainty', state)
-      seModelLayer1.layer.setVisible(state)
-      seModelLayer2.layer.setVisible(state)
-      seModelLayer3.layer.setVisible(state)
-      seModelLayer4.layer.setVisible(state)
-      if (seModelLayer) {
-        seModelLayer.layer.setVisible(state)
-      }
-    }
-
-    // Change estimation opacity
-    const estimationOpacity = function (opacity) {
-      gadm1.setOpacity(opacity)
-      gadm2.setOpacity(opacity)
-      gadm3.setOpacity(opacity)
-      gadm4.setOpacity(opacity)
-      if (estModelLayer) {
-        estModelLayer.layer.setOpacity(opacity)
-      }
-    }
-
-    // Change uncertainty opacity
-    const uncertaintyOpacity = function (opacity) {
-      if (seModelLayer1) {
-        seModelLayer1.layer.setOpacity(opacity)
-      }
-      if (seModelLayer2) {
-        seModelLayer2.layer.setOpacity(opacity)
-      }
-      if (seModelLayer3) {
-        seModelLayer3.layer.setOpacity(opacity)
-      }
-      if (seModelLayer4) {
-        seModelLayer4.layer.setOpacity(opacity)
-      }
-      if (seModelLayer) {
-        seModelLayer.layer.setOpacity(opacity)
-      }
-    }
-
-    // Redraw estimation. Get colors from store
-    const estimationRefresh = function () {
-      if (estModelLayer) {
-        map.value.map.removeLayer(estModelLayer.layer)
-      }
-      const estimationColors = $store.getters['app/getEstimationColors']
-      if (dataGridGeojson) {
-        estModelLayer = new GridModelLayer(ol, dataGridGeojson.est, {
-          colors: estimationColors,
-          rangs: RANGS,
-          zIndex: 15,
-          minZoom: jsonProperties.grid.minZoom,
-          maxZoom: jsonProperties.grid.maxZoom
-        })
-        estModelLayer.addLayer()
-      }
-
-      gadm1.getSource().refresh()
-      gadm2.getSource().refresh()
-      gadm3.getSource().refresh()
-      gadm4.getSource().refresh()
-    }
-
-    // Redraw uncertainty. Get colors from store
-    const uncertaintyRefresh = function () {
-      const seColor = $store.getters['app/getUncertaintyColor']
-      if (seModelLayer) {
-        map.value.map.removeLayer(seModelLayer.layer)
-      }
-      if (seModelLayer1) {
-        map.value.map.removeLayer(seModelLayer1.layer)
-      }
-      if (seModelLayer2) {
-        map.value.map.removeLayer(seModelLayer2.layer)
-      }
-      if (seModelLayer3) {
-        map.value.map.removeLayer(seModelLayer3.layer)
-      }
-      if (seModelLayer4) {
-        map.value.map.removeLayer(seModelLayer4.layer)
-      }
-
-      seModelLayer1 = new GridModelLayer(ol, CENTROIDS.gadm1, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm1.minZoom,
-        maxZoom: jsonProperties.gadm1.maxZoom
-      })
-
-      seModelLayer2 = new GridModelLayer(ol, CENTROIDS.gadm2, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm2.minZoom,
-        maxZoom: jsonProperties.gadm2.maxZoom
-      })
-
-      seModelLayer3 = new GridModelLayer(ol, CENTROIDS.gadm3, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm3.minZoom,
-        maxZoom: jsonProperties.gadm3.maxZoom
-      })
-
-      seModelLayer4 = new GridModelLayer(ol, CENTROIDS.gadm4, {
-        zIndex: 15,
-        color: seColor,
-        minZoom: jsonProperties.gadm4.minZoom,
-        maxZoom: gadm4MaxZoom
-      })
-
-      if (gadm4MaxZoom === jsonProperties.gadm4.maxZoom) {
-        seModelLayer = new GridModelLayer(ol, dataGridGeojson.se, {
-          zIndex: 16,
-          color: seColor,
-          minZoom: jsonProperties.grid.minZoom,
-          maxZoom: jsonProperties.grid.maxZoom
-        })
-        seModelLayer.addLayer()
-      }
-      seModelLayer1.addLayer()
-      seModelLayer2.addLayer()
-      seModelLayer3.addLayer()
-      seModelLayer4.addLayer()
-      uncertaintyOpacity(1 - ($store.getters['app/getModelDefaults'].uncertaintyTransparency / 100))
-    }
-
-    const hideSpinner = function () {
-      spinner(false)
-    }
     return {
       trans,
-      hideSpinner,
-      uncertaintyRefresh,
-      estimationRefresh,
-      estimationVisibility,
-      uncertaintyVisibility,
-      estimationOpacity,
-      uncertaintyOpacity,
-      baseMap,
-      updateMap,
+      projection,
+      refresh,
+      positionChange,
       center,
-      zoom,
       mobile,
-      loadView,
-      shareModelView,
       toggleLeftDrawer,
       attrVisible,
       foldingIcon,
       unfoldAttribution,
       leftDrawerIcon,
       map,
-      loadModel,
-      clearModel,
+      loadLayer,
       progress
     }
   }
@@ -875,7 +618,7 @@ export default defineComponent({
   .ol-zoom button:focus,
   .ol-zoom button{
     background: $primary-button-background;
-    color: $primary-button-text;
+    color: white;
     border: none;
     width: 40px;
     height: 40px;

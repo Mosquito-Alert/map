@@ -5,7 +5,7 @@
 
 <template>
   <div class="tab-link-container" :class="isButtonDisabled?'disabled':''">
-    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="toLink">
+    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="{'name': routeName, params: {'lang': language}}">
       <button class="fa-thin-button" :class="classProp" :title="label">
         <i :class="iconCode"></i>
       </button>
@@ -20,16 +20,15 @@
 
 <script>
 import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
-  props: ['name', 'label', 'link', 'class', 'item', 'id'],
+  props: ['name', 'label', 'routeName', 'class', 'item', 'id'],
   setup (props) {
+    const $store = useStore()
+
     const Id = computed(() => {
       return props.id
-    })
-
-    const toLink = computed(() => {
-      return props.link
     })
 
     const iconCode = computed(() => {
@@ -44,12 +43,16 @@ export default {
       return props.class.toLowerCase().indexOf('disabled') > -1
     })
 
+    const language = computed(() => {
+      return $store.getters['app/getLang']
+    })
+
     return {
       Id,
-      toLink,
       iconCode,
       classProp,
-      isButtonDisabled
+      isButtonDisabled,
+      language
     }
   }
 }
