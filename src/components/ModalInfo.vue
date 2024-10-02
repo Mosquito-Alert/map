@@ -171,19 +171,9 @@
                     <a id="wms_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('Distribution data') }}
+                      {{ trans('Early Warning data') }}
                     </div>
-                    <p>{{ trans('The-distribution-maps-provide-information-about-th') }}</p>
-                    <p>{{ trans('For-invasive-species-the-possible-distribution-sta') }}</p>
-                    <ul>
-                      <li>{{ trans('Red-Represent-areas-where-a-mosquito-population-is') }}</li>
-                      <li>{{ trans('Light-Yellow-Signifies-that-the-species-has-been-d') }}</li>
-                      <li>{{ trans('Dark-Yellow-Depicts-areas-where-both-the-ECDC-and') }}</li>
-                      <li>{{ trans('Dark-Blue-Indicates-regions-where-Mosquito-Alert-h') }}</li>
-                      <li>{{ trans('Light-Blue-Mark-regions-where-Mosquito-Alert-repor') }}</li>
-                    </ul>
-                    <p>{{ trans('These-maps-illustrate-the-geographical-spread-of-m') }}</p>
-                    <p>{{ trans('It-is-crucial-to-note-that-these-maps-do-not-signi') }}</p>
+                    <p v-html="trans('early_warning_description').replace(/\n/g, '<br>')"></p>
                 </div>
               </q-carousel-slide>
             </q-carousel>

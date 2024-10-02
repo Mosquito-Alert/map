@@ -255,7 +255,7 @@ export default {
     const disabledInfo = ref(true)
     const modelVector = ref()
     const estimation = ref(true)
-    const uncertainty = ref(true)
+    const uncertainty = ref(false)
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
