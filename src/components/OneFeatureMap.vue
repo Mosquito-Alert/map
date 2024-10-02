@@ -22,8 +22,7 @@
         :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
       >
         <div v-if="!mobile || attrVisible">
-          © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
-          <!-- | © <a href="https://mapbox.com" target="_blank">Mapbox</a> -->
+          © <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>
           | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
         </div>
         <div v-if="mobile"
@@ -35,7 +34,7 @@
       </div>
       <!-- BASE LAYER -->
       <ol-tile-layer>
-          <ol-source-osm />
+        <ol-source-xyz url='https://basemaps.cartocdn.com/rastertiles/voyager_no_buildings/{z}/{x}/{y}.png' :preload="Infinity"/>
       </ol-tile-layer>
 
       <!-- OBSERVATION LAYER -->
