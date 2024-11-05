@@ -86,7 +86,7 @@
           </div>
         </div>
       </fa-thin-button-menu>
-      <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin" id="login"></fa-thin-button>
+      <!-- <fa-thin-button name="fa-thin fa-user" :label="loginLabel" @click="processLogin" id="login"></fa-thin-button>-->
     </q-toolbar>
 </template>
 
