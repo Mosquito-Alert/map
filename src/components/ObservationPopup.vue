@@ -258,10 +258,7 @@ export default defineComponent({
     const formatData = function (feature) {
       // Some locales add '.' after month, so we remove it
       if (feature.biteTime) {
-        const d = moment(feature.observation_date, 'YYYY-MM-DD').format('DD/MMM/YYYY').replace('.', '')
-        const hour = moment(feature.observation_date, 'YYYY-MM-DD').format('HH')
-        const minutes = moment(feature.observation_date, 'YYYY-MM-DD').format('MM')
-        return d + ' ' + hour + 'h:' + minutes + 'm'
+        return moment(feature.observation_date).format('lll')
       } else {
         return moment(feature.observation_date, 'YYYY-MM-DD').format('DD/MM/YYYY').replace('.', '')
       }
