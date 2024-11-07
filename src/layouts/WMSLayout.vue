@@ -3,13 +3,14 @@
     <q-layout
       :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
       <site-header v-if="!mobile" :expanded="expanded" />
-      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
-        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
+      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" :wmsUrl="wmsUrl" :layerName="layerName" @toggleLeftDrawer="toggleLeftDrawer"
+        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms"
+        @opacityChange="updateOpacity" @visibleChange="updateVisible"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
       <q-page class='flex'
         :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
-        <the-map-wms ref='map' init :viewCode="viewCode" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
+        <the-map-wms ref='map' init :viewCode="viewCode" :wmsUrl="wmsUrl" :layerName="layerName" :class="expanded ? 'drawer-expanded' : 'drawer-collapsed'"
           @toggleLeftDrawer="toggleLeftDrawer" @endShareView="endShareView"
           @errorDownloadingModels="errorDownloadingModels" />
       </q-page>
@@ -89,11 +90,14 @@ export default {
   },
   setup () {
     let mySession
+    const wmsUrl = 'https://mapserver.mosquitoalert.com/geoserver/wms'
+    const layerName = 'mosquitoalert:species_distribution'
+
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
-    const loadDrawer = ref(false)
+    const loadDrawer = ref(true)
     const $store = useStore()
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
@@ -217,12 +221,19 @@ export default {
       map.value.shareWmsView(data)
     }
 
-    const loadWms = function (data) {
-      map.value.loadWmsLayer(data)
+    const loadWms = function (fieldname) {
+      map.value.loadWmsLayer(fieldname)
     }
 
     const layerChange = function (payload) {
       map.value.changeLayerProperty(payload)
+    }
+
+    const updateOpacity = function (value) {
+      map.value.updateOpacity(value)
+    }
+    const updateVisible = function (value) {
+      map.value.updateVisible(value)
     }
 
     const reorderLayers = function (payload) {
@@ -233,11 +244,15 @@ export default {
       map.value.exportPNG()
     }
     return {
+      wmsUrl,
+      layerName,
       tabIsVisible,
       exportImage,
       loadDrawer,
       loadWms,
       layerChange,
+      updateOpacity,
+      updateVisible,
       reorderLayers,
       errorDownloadingModels,
       loadSharedModel,

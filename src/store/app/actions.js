@@ -15,7 +15,7 @@ export const setTranslations = async (context) => {
   }).then(function (resp) {
     context.commit('setTranslations', resp.data.trans)
     context.commit('setTabsVisibility', resp.data.config.tabs)
-    context.commit('setWMSsetWmsData', resp.data.config.wms)
+    // context.commit('setWMSsetWmsData', resp.data.config.wms)
 
     const key = Object.keys(resp.data.config.wms)[0]
     const layer = resp.data.config.wms[key][0]
