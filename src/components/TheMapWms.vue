@@ -22,7 +22,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            :multiWorld=true
+            :multiWorld=false
             :maxZoom=19
             :maxResolution=39135.75848201024
             :center='center'
@@ -34,7 +34,7 @@
           :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
         >
           <div v-if="!mobile || attrVisible">
-            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            © <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -46,9 +46,12 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
-          <ol-source-osm />
+          <ol-source-xyz url='https://basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png' :preload="Infinity"/>
         </ol-tile-layer>
-
+        <!-- Place labels layers -->
+        <ol-tile-layer :z-index="10">
+          <ol-source-xyz url="https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png" :preload="Infinity" :opaque="false" />
+        </ol-tile-layer>
     </ol-map>
     <!-- DOWNLOAD BUTTON -->
     <!-- <cust-control
@@ -71,8 +74,6 @@ import { useStore } from 'vuex'
 import { transform } from 'ol/proj.js'
 import TileLayer from 'ol/layer/Tile.js'
 import TileWMS from 'ol/source/TileWMS.js'
-import ShareMapView from '../js/ShareMapView'
-import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -90,8 +91,10 @@ export default defineComponent({
     const baseMap = ref('null')
     const attrVisible = ref(false)
     const foldingIcon = ref('<')
-    const PREVIOUS_WMS = [] // keep layer Id
-    const backendUrl = $store.getters['app/getBackend']
+
+    const wmsLayer = new TileLayer({
+      visible: true
+    })
 
     // Map general configuration
     const zoom = computed(() => {
@@ -127,60 +130,35 @@ export default defineComponent({
 
     onMounted(function () {
       leftDrawerIcon.value = 'keyboard_arrow_left'
-      const currentWMSView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
-      if (Object.keys(currentWMSView).length > 0) {
-        loadWmsLayer(currentWMSView.years)
-      }
+
+      map.value.map.addLayer(wmsLayer)
     })
 
     const trans = function (text) {
       return $store.getters['app/getText'](text)
     }
 
-    const shareViewUrl = backendUrl + 'view/save/'
     // const loadViewUrl = backendUrl + 'view/load/'
 
     // Call when user shares view
     function shareWmsView (data) {
-      // After mapview is shared then handle it
-      const ol = map.value.map
-      const newView = new ShareMapView(ol, {
-        viewType: 'wms',
-        csrfToken: $store.getters['app/getCsrfToken'],
-        species: data.species,
-        layers: data.layers,
-        url: shareViewUrl,
-        callback: handleShareView
-      })
-      newView.save()
+      handleShareView()
     }
 
     // Handle shared view
     // Handle shared view
-    function handleShareView (status) {
-      let content
-      if (status.status !== STATUS_CODES.OK) {
-        content = {
-          error: status.msg,
-          visibility: true,
-          url: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
-      } else {
-        const frontend = $store.getters['app/getFrontendUrl']
-        content = {
-          url: frontend + status.code + '/' + $store.getters['app/getLang'],
-          visibility: true,
-          error: ''
-        }
-        $store.commit('app/setModal', {
-          id: 'share',
-          content: content
-        })
+    function handleShareView () {
+      const frontend = $store.getters['app/getFrontendUrl']
+      const content = {
+        url: frontend + 'early_warning/' + $store.getters['app/getLang'],
+        visibility: true,
+        error: ''
       }
+      $store.commit('app/setModal', {
+        id: 'share',
+        content: content
+      })
+
       context.emit('endShareView', content)
     }
     // Load shared view. Get data from database and then handle it
@@ -204,47 +182,32 @@ export default defineComponent({
     }
 
     const reorderLayers = function (wms) {
-      loadWmsLayer(wms)
+      console.log('reorderLayers')
     }
 
-    const loadWmsLayer = function (wms) {
-      const n = wms.length
-      // Remove previous layers if any, except base layer (index = 0)
-      PREVIOUS_WMS.forEach((layerId) => {
-        const layer = findLayer(layerId)
-        map.value.map.removeLayer(layer)
-      })
-      let nVisibles = 0
-      wms.forEach((layer, index) => {
-        if (layer.visible) {
-          nVisibles += 1
+    const loadWmsLayer = function (fieldName) {
+      const wmsSource = new TileWMS({
+        crossOrigin: 'anonymous',
+        projection: 'EPSG:3857',
+        url: 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms',
+        params: {
+          LAYERS: 'mosquitoalert:early_warning',
+          SRS: 'EPSG:3857',
+          env: 'field:' + fieldName
         }
-        try {
-          const wmsSource = new TileWMS({
-            crossOrigin: 'anonymous',
-            projection: 'EPSG:3857',
-            url: layer.wms_url,
-            params: {
-              LAYERS: layer.layer,
-              SRS: 'EPSG:3857'
-            }
-          })
+      })
 
-          const wmsLayer = new TileLayer({
-            visible: layer.visible,
-            source: wmsSource,
-            opacity: 1 - (layer.transparency),
-            id: layer.id,
-            zIndex: 5 * (n - index)
-          })
-          map.value.map.addLayer(wmsLayer)
-          PREVIOUS_WMS.push(layer.id)
-          // Add layer to dict to handle it from TOC
-        } catch (err) {
-          console.log(err)
-        }
-      })
-      $store.commit('app/setWmsNumberOfVisibleLayers', nVisibles)
+      wmsLayer.setSource(wmsSource)
+
+      $store.commit('app/setWmsNumberOfVisibleLayers', 1)
+    }
+
+    const updateOpacity = function (value) {
+      wmsLayer.setOpacity(value)
+    }
+
+    const updateVisible = function (value) {
+      wmsLayer.setVisible(value)
     }
 
     const findLayer = function (id) {
@@ -339,6 +302,8 @@ export default defineComponent({
       reorderLayers,
       loadWmsLayer,
       changeLayerProperty,
+      updateOpacity,
+      updateVisible,
       exportPNG,
       baseMap,
       updateMap,

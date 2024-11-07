@@ -26,7 +26,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Distribution') }}
+        {{ trans('Early Warning') }}
       </div>
 
       <div>
@@ -52,7 +52,7 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('Distribution data') }}
+                      {{ trans('Early Warning data') }}
                     </div>
                   </div>
                 </div>
@@ -65,102 +65,69 @@
 
         </div>
 
-        <!-- YEARS FOR SELECTED SPECIES -->
-        <div v-if="selectedLayers" class="wms-layers-container">
+        <div v-if="selectedLayers">
           <hr class="q-my-xl"/>
           <!-- Columns titles -->
           <div class="row">
             <div class="col-2"></div>
-            <div class="col-7 text-center q-px-md transparency-title">{{ trans('Transparency') }}</div>
+            <div class="col-7 text-center q-px-md transparency-title">{{ trans('Opacity') }}</div>
             <div class="col-3"></div>
           </div>
-          <!-- DRAGGABLE LIST -->
-            <draggable
-              v-model="selectedLayers"
-              item-key="id"
-              ghost-class="ghost"
-              animation=450
-              handle=".handle"
-              @change="reorderLayers"
-            >
-              <template #item="{ element }">
-                <div class="flex row draggable-item">
+        <div class="flex row draggable-item justify-center">
 
-                  <div class="col-2 q-pl-sm">{{ element.year }}</div>
+          <div class="col-7 q-pl-sm q-pr-xs">
+            <q-slider
+            :min="0"
+            :max="1"
+            :step="0.05"
+            class="wms-slider"
+            v-model="localOpacity"
+            color="orange"
+            />
+          </div>
 
-                  <div class="col-5 q-pl-sm q-pr-xs">
-                    <q-slider
-                    :min="0"
-                    :max="1"
-                    :step="0.05"
-                    class="wms-slider"
-                    v-model="element.transparency"
-                    color="orange"
-                    @update:model-value="checkVisibility($event, element, 'transparency')"
-                    />
-                  </div>
+          <div class="col-3">
+            <q-toggle
+              checked-icon="check"
+              v-model="localVisible"
+              color="orange"
+              size="lg"/>
+          </div>
 
-                  <div class="col-3">
-                    <!-- <q-checkbox
-                      dense
-                      checked-icon="check"
-                      v-model="element.visible"
-                      color="orange"
-                      size="lg"
-                      @update:model-value="checkVisibility($event, element, 'visible')"
-                    /> -->
-                    <q-toggle
-                      checked-icon="check"
-                      v-model="element.visible"
-                      @update:model-value="checkVisibility($event, element, 'visible')"
-                      color="orange"
-                      size="lg"/>
-                  </div>
-
-                  <div class="col-2 text-right flex justify-end">
-                    <div>
-                      <a @click.stop :href="buildDownloadUrl(element)">
-                        <i :title="trans('Download shp')" style="size:0.7em" class="fa-solid fa-download"></i>
-                      </a>
-                    </div>
-                    <div>
-                      <q-icon name="more_vert" class="handle" size="1.5em"/>
-                    </div>
-                  </div>
-
-                </div>
-              </template>
-            </draggable>
+          <q-btn flat round color="orange" icon="fa fa-solid fa-download" size="sm" :loading="loadingDownload" @click="downloadShapefile">
+            <q-tooltip>Download shp</q-tooltip>
+          </q-btn>
         </div>
         <!-- LEGEND -->
-        <div v-if="selectedLayers" class="wms-legend" >
+        <div class="wms-legend" >
           <div class="legend-title q-mt-lg q-mb-md">{{ trans('Legend') }}</div>
           <div class="q-mt-lg">
             <img :src="legendImageSource">
           </div>
         </div>
       </div>
+      </div>
     </div>
   </q-drawer>
 </template>
 
 <script>
-import { watch, computed, onMounted, ref } from 'vue'
+import { watch, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
-import draggable from 'vuedraggable'
-// import { wmsSelectedLayers } from 'src/store/app/getters'
+import { exportFile } from 'quasar'
 
 export default {
-  components: { LeftMenu, draggable },
+  components: { LeftMenu },
   props: ['expanded'],
   emits: [
     'firstMapCall',
     'toggleLeftDrawer',
     'loadWms',
-    'layerVisibleChange',
     'reorderLayers',
-    'exportImage'
+    'exportImage',
+    'opacityChange',
+    'visibleChange'
   ],
   setup (props, context) {
     const $store = useStore()
@@ -168,40 +135,37 @@ export default {
     const disabledInfo = ref(true)
     const modelVector = ref()
     const qSelect = ref()
-    let currentView
     const selectedLayers = ref()
+    const localOpacity = ref(1.0)
+    const localVisible = ref(true)
+    const loadingDownload = ref(false)
+
+    watch(localOpacity, value => {
+      context.emit('opacityChange', value)
+    })
+
+    watch(localVisible, value => {
+      context.emit('visibleChange', value)
+    })
 
     const WMS = computed(() => {
       return JSON.parse(JSON.stringify($store.getters['app/getWmsData']))
     })
 
-    onMounted(function () {
-      currentView = JSON.parse(JSON.stringify($store.getters['app/getCurrentWMSView']))
-      if ('code' in currentView) {
-        const index = vectorOptions.value.findIndex(obj => {
-          return (obj.code === currentView.code)
-        })
-        modelVector.value = vectorOptions.value[index]
-        getWMS(currentView)
-      }
-    })
-
     const vectorOptions = computed(() => {
       return [
-        { code: 'tiger', type: trans('Tiger mosquito'), disable: !WMS.value.tiger },
-        { code: 'yellow', type: trans('Yellow fever mosquito'), disable: !WMS.value.yellow },
-        { code: 'japonicus', type: trans('Japonicus mosquito'), disable: !WMS.value.japonicus },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), disable: !WMS.value.koreicus },
-        { code: 'culex', type: trans('Culex mosquito'), disable: !WMS.value.culex }
+        { code: 'tiger', type: trans('Tiger mosquito'), wms_field: 'albopictus', disable: false },
+        { code: 'yellow', type: trans('Yellow fever mosquito'), wms_field: 'aegypti', disable: false },
+        { code: 'japonicus', type: trans('Japonicus mosquito'), wms_field: 'japonicus', disable: false },
+        { code: 'koreicus', type: trans('Koreicus mosquito'), wms_field: 'koreicus', disable: false }
       ]
     })
 
     // // Get rid off reactiveness
     const legendImageSource = computed(() => {
-      const data = JSON.parse(JSON.stringify($store.getters['app/legendData']))
       const lang = $store.getters['app/getLang']
-      const geoserverUrl = data.wms_url
-      const layerName = data.layer
+      const geoserverUrl = 'https://mapserver.mosquitoalert.com/geoserver/wms'
+      const layerName = 'mosquitoalert:early_warning'
       const widthSize = 40
       const heightSize = 30
       const fontName = 'Roboto'
@@ -229,14 +193,8 @@ export default {
 
     // Called when model is selected
     const getWMS = function (formValue) {
-      const code = formValue.code
-      selectedLayers.value = WMS.value[code]
-
-      $store.commit('app/setCurrentWMSView', {
-        code: code,
-        years: JSON.parse(JSON.stringify(WMS.value[code]))
-      })
-      context.emit('loadWms', WMS.value[code])
+      selectedLayers.value = formValue.code
+      context.emit('loadWms', formValue.wms_field)
     }
 
     const goInfoModal = function () {
@@ -249,11 +207,11 @@ export default {
           id: 'error',
           content: {
             visibility: true,
-            msg: 'Must select wms first'
+            msg: 'Must select a species first'
           }
         })
         context.emit('endShareView', {
-          error: 'Shareview error. No WMS is loaded',
+          error: 'Shareview error. No species layer is loaded',
           visibility: true,
           url: ''
         })
@@ -282,28 +240,6 @@ export default {
         }
       }
     })
-
-    const checkVisibility = function (e, layer, property) {
-      const selectedSpecies = modelVector.value.code
-      // WMS.value[selectedSpecies] = JSON.parse(JSON.stringify(selectedLayers.value))
-      $store.commit('app/setWMSLayers', {
-        species: selectedSpecies,
-        layers: JSON.parse(JSON.stringify(selectedLayers.value))
-      })
-
-      $store.commit('app/setWmsProperties', {
-        id: layer.id,
-        property: property,
-        value: e,
-        species: selectedSpecies
-      })
-
-      context.emit('layerChange', {
-        key: property,
-        layerId: layer.id,
-        value: e
-      })
-    }
 
     const reorderLayers = function () {
       const selectedSpecies = modelVector.value.code
@@ -336,22 +272,30 @@ export default {
       context.emit('exportImage', {})
     }
 
-    const buildDownloadUrl = (element) => {
-      const downLink = `${element.wms_url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${element.layer}&outputFormat=SHAPE-ZIP`
-      console.log(downLink)
-      return downLink
-      // https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert%3Astatus_2303_shp&outputFormat=SHAPE-ZIP
+    const downloadShapefile = async function () {
+      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:early_warning&outputFormat=SHAPE-ZIP'
+      loadingDownload.value = true
+      fetch(url)
+        .then(response => {
+          exportFile('early_warning.shp', response)
+        })
+        .finally(() => {
+          loadingDownload.value = false
+        })
     }
+
     return {
       trans,
-      buildDownloadUrl,
+      loadingDownload,
+      localOpacity,
+      localVisible,
+      downloadShapefile,
       exportImage,
       selectedLayers,
       legendImageSource,
       setForm,
       reorderLayers,
       qSelect,
-      checkVisibility,
       goInfoModal,
       disabled,
       disabledInfo,

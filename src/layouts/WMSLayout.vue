@@ -4,7 +4,8 @@
       :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
       <site-header v-if="!mobile" :expanded="expanded" />
       <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
-        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms" @layerChange="layerChange"
+        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms"
+        @opacityChange="updateOpacity" @visibleChange="updateVisible"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
       <q-page class='flex'
@@ -93,7 +94,7 @@ export default {
     const map = ref('null')
     const shareModal = ref()
     const TOC = ref()
-    const loadDrawer = ref(false)
+    const loadDrawer = ref(true)
     const $store = useStore()
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
@@ -217,12 +218,20 @@ export default {
       map.value.shareWmsView(data)
     }
 
-    const loadWms = function (data) {
-      map.value.loadWmsLayer(data)
+    const loadWms = function (fieldName) {
+      map.value.loadWmsLayer(fieldName)
     }
 
     const layerChange = function (payload) {
       map.value.changeLayerProperty(payload)
+    }
+
+    const updateOpacity = function (value) {
+      map.value.updateOpacity(value)
+    }
+
+    const updateVisible = function (value) {
+      map.value.updateVisible(value)
     }
 
     const reorderLayers = function (payload) {
@@ -238,6 +247,8 @@ export default {
       loadDrawer,
       loadWms,
       layerChange,
+      updateOpacity,
+      updateVisible,
       reorderLayers,
       errorDownloadingModels,
       loadSharedModel,
