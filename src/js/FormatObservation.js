@@ -48,12 +48,6 @@ export default class FormatObservation {
       this.o.biteTime = this.o.formatedResponses.biteTime
     }
 
-    const preUrl = '//webserver.mosquitoalert.com'
-    if (this.o.photo_url !== '') {
-      if (!this.o.photo_url.startsWith(preUrl)) {
-        this.o.photo_url = preUrl + this.o.photo_url
-      }
-    }
     return this.o
   }
 }
