@@ -33,7 +33,7 @@
                   v-if="!errorLoadingImage"
                   class="credits"
                 >{{ trans('Anonymous')}},
-                  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> Mosquito Alert
+                  <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a> Mosquito Alert
                 </div>
               </div>
             </a>

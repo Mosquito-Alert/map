@@ -114,7 +114,7 @@
               </div>
               <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
                 {{ trans('Anonymous')}},
-                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> Mosquito Alert
+                <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a> Mosquito Alert
               </div>
             </div>
             <div class="q-col-xl-2 col-lg-2 col-md-2 col-sm-1 col-xm-12"></div>
