@@ -22,7 +22,7 @@
 
         <ol-zoom-control :duration='600' />
         <ol-view ref='view'
-            :multiWorld=true
+            :multiWorld=false
             :maxZoom=19
             :maxResolution=39135.75848201024
             :center='center'
@@ -34,7 +34,7 @@
           :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
         >
           <div v-if="!mobile || attrVisible">
-            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            © <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -46,9 +46,12 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
-          <ol-source-osm />
+          <ol-source-xyz url='https://basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png' :preload="Infinity"/>
         </ol-tile-layer>
-
+        <!-- Place labels layers -->
+        <ol-tile-layer :z-index="10">
+          <ol-source-xyz url="https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png" :preload="Infinity" :opaque="false" />
+        </ol-tile-layer>
     </ol-map>
     <!-- DOWNLOAD BUTTON -->
     <!-- <cust-control
@@ -143,10 +146,10 @@ export default defineComponent({
 
     // Handle shared view
     // Handle shared view
-    function handleShareView (status) {
+    function handleShareView () {
       const frontend = $store.getters['app/getFrontendUrl']
       const content = {
-        url: frontend + 'species_distribution/' + $store.getters['app/getLang'],
+        url: frontend + 'early_warning/' + $store.getters['app/getLang'],
         visibility: true,
         error: ''
       }
@@ -185,20 +188,23 @@ export default defineComponent({
       const wmsSource = new TileWMS({
         crossOrigin: 'anonymous',
         projection: 'EPSG:3857',
-        url: props.wmsUrl,
+        url: 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms',
         params: {
-          LAYERS: props.layerName,
+          LAYERS: 'mosquitoalert:early_warning',
           SRS: 'EPSG:3857',
           env: 'field:' + fieldName
         }
       })
+
       wmsLayer.setSource(wmsSource)
+
       $store.commit('app/setWmsNumberOfVisibleLayers', 1)
     }
 
     const updateOpacity = function (value) {
       wmsLayer.setOpacity(value)
     }
+
     const updateVisible = function (value) {
       wmsLayer.setVisible(value)
     }

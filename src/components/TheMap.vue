@@ -43,7 +43,7 @@
         <ol-view ref='view'
             :maxResolution=39135.75848201024
             :constrainResolution=true
-            :multiWorld=true
+            :multiWorld=false
             :maxZoom=19
             :center='center'
             :zoom='zoom' />
@@ -53,7 +53,7 @@
           :class="mobile?(!attrVisible?'mobile collapsed':'mobile'):''"
         >
           <div v-if="!mobile || attrVisible">
-            © <a href="https://www.openstreetmap.org/copyright/" target="_blank">OpenStreetMap</a> contributors
+            © <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>
             | <a href="https://openlayers.org" target="_blank">OpenLayers</a>
           </div>
           <div v-if="mobile"
@@ -65,7 +65,7 @@
         </div>
         <!-- base map -->
         <ol-tile-layer ref='baseMap' title='mapbox' :zIndex=0>
-          <ol-source-osm />
+          <ol-source-xyz url='https://basemaps.cartocdn.com/rastertiles/voyager_no_buildings/{z}/{x}/{y}.png' :preload="Infinity"/>
         </ol-tile-layer>
 
         <!-- SAMPLING EFFORT -->

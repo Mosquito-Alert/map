@@ -22,14 +22,14 @@ const routes = [
     path: '/models/:lang(ca|es|en)',
     component: () => import('layouts/ModelsLayout.vue')
   },
-  // DISTRIBUTION TAB
+  // EARLY WARNING TAB
   {
-    path: '/distribution',
+    path: '/early_warning',
     component: () => import('layouts/WMSLayout.vue')
   },
   // MODELS WITH LANG
   {
-    path: '/distribution/:lang(ca|es|en)',
+    path: '/early_warning/:lang(ca|es|en)',
     component: () => import('layouts/WMSLayout.vue')
   },
   // SHARE OBSERVATIONS VIEW
