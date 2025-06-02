@@ -650,18 +650,20 @@ export default {
 
     const getValidationIcon = function (feature) {
       if (feature.validation_type === 'human') return 'fa-light fa-users'
-      else return 'fa-light fa-robot'
+      if (feature.validation_type === 'ai') return 'fa-light fa-robot'
+      return ''
     }
 
     const getValidationClass = feature => {
-      if (feature.validation_type !== 'human') return 'validation ai'
+      if (feature.validation_type === 'ai') return 'validation ai'
       if (feature.validation === 'Confirmed') return 'validation confirmed'
       else return 'validation probable'
     }
 
     const getValidationTypeTitle = function (feature) {
       if (feature.validation_type === 'human') return trans('Expert validation')
-      else return trans('AI validation')
+      if (feature.validation_type === 'ai') return trans('AI validation')
+      return ''
     }
 
     const mobile = computed(() => {
