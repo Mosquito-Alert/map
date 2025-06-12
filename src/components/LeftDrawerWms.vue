@@ -26,7 +26,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Early Warning') }}
+        {{ trans('Discoveries') }}
       </div>
 
       <div>
@@ -52,7 +52,7 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('Early Warning data') }}
+                      {{ trans('Discoveries data') }}
                     </div>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default {
     const legendImageSource = computed(() => {
       const lang = $store.getters['app/getLang']
       const geoserverUrl = 'https://mapserver.mosquitoalert.com/geoserver/wms'
-      const layerName = 'mosquitoalert:early_warning'
+      const layerName = 'mosquitoalert:discoveries'
       const widthSize = 40
       const heightSize = 30
       const fontName = 'Roboto'
@@ -275,11 +275,11 @@ export default {
     }
 
     const downloadShapefile = async function () {
-      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:early_warning&outputFormat=SHAPE-ZIP'
+      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:discoveries&outputFormat=SHAPE-ZIP'
       loadingDownload.value = true
       fetch(url)
         .then(response => {
-          exportFile('early_warning.shp', response)
+          exportFile('discoveries.shp', response)
         })
         .finally(() => {
           loadingDownload.value = false

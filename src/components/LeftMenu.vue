@@ -23,10 +23,10 @@
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-triangle-exclamation"
-        :label="trans('Early Warning')"
+        name="fa-thin fa-radar"
+        :label="trans('Discoveries')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/early_warning"
+        link="/discoveries"
         item="wms"
         id="wms"
       >

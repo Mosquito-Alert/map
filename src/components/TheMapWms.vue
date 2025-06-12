@@ -149,7 +149,7 @@ export default defineComponent({
     function handleShareView () {
       const frontend = $store.getters['app/getFrontendUrl']
       const content = {
-        url: frontend + 'early_warning/' + $store.getters['app/getLang'],
+        url: frontend + 'discoveries/' + $store.getters['app/getLang'],
         visibility: true,
         error: ''
       }
@@ -190,7 +190,7 @@ export default defineComponent({
         projection: 'EPSG:3857',
         url: 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms',
         params: {
-          LAYERS: 'mosquitoalert:early_warning',
+          LAYERS: 'mosquitoalert:discoveries',
           SRS: 'EPSG:3857',
           env: 'field:' + fieldName
         }

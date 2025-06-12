@@ -171,9 +171,9 @@
                     <a id="wms_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('Early Warning data') }}
+                      {{ trans('Discoveries data') }}
                     </div>
-                    <p v-html="trans('early_warning_description').replace(/\n/g, '<br>')"></p>
+                    <p v-html="trans('discoveries_description').replace(/\n/g, '<br>')"></p>
                 </div>
               </q-carousel-slide>
             </q-carousel>
