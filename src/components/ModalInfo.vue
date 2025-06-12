@@ -173,7 +173,7 @@
                     <div class="text-subtitle1 q-my-md">
                       {{ trans('Discoveries data') }}
                     </div>
-                    <p v-html="trans('discoveries_description').replace(/\n/g, '<br>')"></p>
+                    <p v-html="trans('discoveries_description').replace(/\\n/g, '<br>')"></p>
                 </div>
               </q-carousel-slide>
             </q-carousel>
