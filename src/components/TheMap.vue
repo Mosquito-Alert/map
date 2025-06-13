@@ -122,7 +122,7 @@
           ref="reportControl"
           icon="fa-solid fa-file-lines"
           class="ol-reports ol-unselectable ol-control"
-          title="Reports"
+          title="Observations"
           @clicked="openReportsModal"
         >
         </cust-control>

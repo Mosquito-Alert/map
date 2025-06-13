@@ -14,11 +14,11 @@
       <!-- First tab is always visible -->
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="trans('Reports')"
+        :label="trans('Observations')"
         :class="active_item=='layers'?'active':''"
         link="/"
-        item="reports"
-        id="reports"
+        item="observations"
+        id="observations"
       >
       </fa-thin-button-router>
 

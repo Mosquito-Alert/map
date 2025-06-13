@@ -27,7 +27,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
-        <div class="text-h5 toc-title-reports" v-html="trans('Reports')"></div>
+        <div class="text-h5 toc-title-reports" v-html="trans('Observations')"></div>
           <search-location
             ref="searchLocation"
             @locationSelected="locationSelected"
