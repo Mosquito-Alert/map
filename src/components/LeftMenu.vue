@@ -14,26 +14,26 @@
       <!-- First tab is always visible -->
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="trans('Reports')"
+        :label="trans('Observations')"
         :class="active_item=='layers'?'active':''"
         link="/"
-        item="reports"
-        id="reports"
+        item="observations"
+        id="observations"
       >
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-layer-group"
-        :label="trans('Distribution')"
+        name="fa-thin fa-radar"
+        :label="trans('Discoveries')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/distribution"
+        link="/discoveries"
         item="wms"
         id="wms"
       >
       </fa-thin-button-router>
 
       <fa-thin-button-router
-        name="fa-thin fa-chart-scatter"
+        name="fa-thin fa-chart-mixed"
         :label="trans('Estimates')"
         :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
         link="/models"
@@ -190,12 +190,7 @@ export default {
     })
 
     const estimationsVisibility = computed(() => {
-      const tabs = $store.getters['app/getLeftMenuTabs']
-      if (Object.keys(tabs).length) {
-        return (tabs.estimates) ? tabs.estimates.active : false
-      } else {
-        return false
-      }
+      return true
     })
 
     const frontendUrl = computed(() => {
