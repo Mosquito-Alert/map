@@ -255,7 +255,7 @@ export default {
     const disabledInfo = ref(true)
     const modelVector = ref()
     const estimation = ref(true)
-    const uncertainty = ref(true)
+    const uncertainty = ref(false)
     const modelsCalendar = ref()
     const backendUrl = $store.getters['app/getBackend']
     // const defaults = JSON.parse(JSON.stringify($store.getters['app/getModelDefaults']))
@@ -282,7 +282,7 @@ export default {
     onMounted(function () {
       palettes.value = [].concat.apply([], $store.getters['app/getEstimationPalettes'])
       const defaults = $store.getters['app/getModelDefaults']
-      // Check if referer is Reports map
+      // Check if referer is Observations map
       if (defaults.vector !== '') {
         const index = vectorOptions.value.findIndex(obj => {
           return (obj.code === defaults.vector)

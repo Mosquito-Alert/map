@@ -208,7 +208,7 @@ export default function () {
         year: '',
         month: '',
         estimation: true,
-        uncertainty: true,
+        uncertainty: false,
         // 0 - 100 values
         estimationTransparency: 0,
         uncertaintyTransparency: 75,
@@ -217,7 +217,7 @@ export default function () {
         uncertaintyOpacity: 0.25,
         // Default uncertainty color
         uncertaintyColor: '#191919',
-        estimationColors: ['#3288bd', '#99d594', '#e6f598', '#fee08b', '#fc8d59', '#d53e4f'],
+        estimationColors: ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'],
         modelsCsv: [],
         centroidsUrls: [],
         estimationPalettes: [

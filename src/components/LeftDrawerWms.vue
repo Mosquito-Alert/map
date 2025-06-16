@@ -26,7 +26,7 @@
         <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Distribution') }}
+        {{ trans('Discoveries') }}
       </div>
 
       <div>
@@ -52,7 +52,7 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('Distribution data') }}
+                      {{ trans('Discoveries data') }}
                     </div>
                   </div>
                 </div>
@@ -137,7 +137,7 @@ export default {
     const modelVector = ref()
     const qSelect = ref()
     const selectedLayers = ref()
-    const localOpacity = ref(0.7)
+    const localOpacity = ref(1.0)
     const localVisible = ref(true)
     const loadingDownload = ref(false)
 
@@ -158,20 +158,21 @@ export default {
         { code: 'tiger', type: trans('Tiger mosquito'), wms_field: 'albopictus', disable: false },
         { code: 'yellow', type: trans('Yellow fever mosquito'), wms_field: 'aegypti', disable: false },
         { code: 'japonicus', type: trans('Japonicus mosquito'), wms_field: 'japonicus', disable: false },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), wms_field: 'koreicus', disable: false },
-        { code: 'culex', type: trans('Culex mosquito'), wms_field: 'culex', disable: false }
+        { code: 'koreicus', type: trans('Koreicus mosquito'), wms_field: 'koreicus', disable: false }
       ]
     })
 
     // // Get rid off reactiveness
     const legendImageSource = computed(() => {
       const lang = $store.getters['app/getLang']
+      const geoserverUrl = 'https://mapserver.mosquitoalert.com/geoserver/wms'
+      const layerName = 'mosquitoalert:discoveries'
       const widthSize = 40
       const heightSize = 30
       const fontName = 'Roboto'
       const fontSize = '16px'
 
-      return `${props.wmsUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${props.layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName};fontSize:${fontSize};fontAntiAliasing:false`
+      return `${geoserverUrl}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${widthSize}&HEIGHT=${heightSize}&LAYER=${layerName}&LANGUAGE=${lang}&LEGEND_OPTIONS=fontName:${fontName};fontSize:${fontSize};fontAntiAliasing:false`
     })
 
     const callFirstMapCall = function () {
@@ -274,11 +275,11 @@ export default {
     }
 
     const downloadShapefile = async function () {
-      const url = `${props.wmsUrl}?service=WFS&version=1.0.0&request=GetFeature&typeName=${props.layerName}&outputFormat=SHAPE-ZIP`
+      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:discoveries&outputFormat=SHAPE-ZIP'
       loadingDownload.value = true
       fetch(url)
         .then(response => {
-          exportFile('species_distribution.shp', response)
+          exportFile('discoveries.shp', response)
         })
         .finally(() => {
           loadingDownload.value = false
@@ -287,9 +288,9 @@ export default {
 
     return {
       trans,
+      loadingDownload,
       localOpacity,
       localVisible,
-      loadingDownload,
       downloadShapefile,
       exportImage,
       selectedLayers,

@@ -3,7 +3,7 @@
     <q-layout
       :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
       <site-header v-if="!mobile" :expanded="expanded" />
-      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" :wmsUrl="wmsUrl" :layerName="layerName" @toggleLeftDrawer="toggleLeftDrawer"
+      <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
         @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms"
         @opacityChange="updateOpacity" @visibleChange="updateVisible"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
@@ -221,8 +221,8 @@ export default {
       map.value.shareWmsView(data)
     }
 
-    const loadWms = function (fieldname) {
-      map.value.loadWmsLayer(fieldname)
+    const loadWms = function (fieldName) {
+      map.value.loadWmsLayer(fieldName)
     }
 
     const layerChange = function (payload) {
@@ -232,6 +232,7 @@ export default {
     const updateOpacity = function (value) {
       map.value.updateOpacity(value)
     }
+
     const updateVisible = function (value) {
       map.value.updateVisible(value)
     }
