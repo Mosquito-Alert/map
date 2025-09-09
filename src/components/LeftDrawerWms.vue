@@ -275,15 +275,21 @@ export default {
     }
 
     const downloadShapefile = async function () {
-      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:discoveries&outputFormat=SHAPE-ZIP'
+      const url = 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=mosquitoalert:discoveries&outputFormat=SHAPE-ZIP'
       loadingDownload.value = true
-      fetch(url)
-        .then(response => {
-          exportFile('discoveries.shp', response)
-        })
-        .finally(() => {
-          loadingDownload.value = false
-        })
+
+      try {
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const blob = await response.blob()
+        exportFile('discoveries.zip', blob)
+      } catch (err) {
+        console.error('Failed to download shapefile:', err)
+      } finally {
+        loadingDownload.value = false
+      }
     }
 
     return {
