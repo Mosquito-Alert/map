@@ -1,6 +1,6 @@
 <template>
   <main class="size-screen mx-auto relative">
-    <div class="absolute h-screen w-screen" ref="mapContainer"></div>
+    <div class="map absolute h-screen w-screen" ref="mapContainer"></div>
   </main>
 </template>
 
@@ -8,8 +8,6 @@
 import maplibregl from 'maplibre-gl'
 import { cogProtocol } from '@geomatico/maplibre-cog-protocol'
 import { onMounted, onUnmounted, ref } from 'vue'
-// import { HexagonLayer, ScatterplotLayer, type Color } from 'deck.gl'
-// import { MapboxOverlay } from '@deck.gl/mapbox'
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<maplibregl.Map | null>(null)
@@ -60,45 +58,11 @@ const styleEOX = {
     position: [1.5, 90, 80],
   },
 }
-const styleCARTO = await modifyMapStyle()
 
-// const colorRange: Color[] = [
-//   [1, 152, 189],
-//   [73, 227, 206],
-//   [216, 254, 181],
-//   [254, 237, 177],
-//   [254, 173, 84],
-//   [209, 55, 78],
-// ]
-const data = 'http://localhost:5173/src/assets/observations_culicidae.geojson'
-// type DataPoint = [longitude: number, latitude: number]
-// const deckLayers = [
-//   new HexagonLayer<DataPoint>({
-//     id: 'heatmap',
-//     gpuAggregation: true,
-//     colorRange,
-//     coverage: 1,
-//     data,
-//     elevationRange: [0, 3000],
-//     elevationScale: data && data.length ? 50 : 0,
-//     extruded: true,
-//     getPosition: (d) => d,
-//     pickable: true,
-//     radius: 1000,
-//     upperPercentile: 100,
-//     material: {
-//       ambient: 0.64,
-//       diffuse: 0.6,
-//       shininess: 32,
-//       specularColor: [51, 51, 51],
-//     },
-//     transitions: {
-//       elevationScale: 3000,
-//     },
-//   }),
-// ]
+const data = 'http://localhost:5173/observations_culicidae.geojson'
 
 onMounted(async () => {
+  const styleCARTO = await modifyMapStyle()
   if (mapContainer.value) {
     maplibregl.addProtocol('cog', cogProtocol)
 
@@ -111,26 +75,6 @@ onMounted(async () => {
     })
 
     map.value.on('load', () => {
-      //   // const deckOverlay = new MapboxOverlay({
-      //   //   interleaved: true,
-      //   //   layers: deckLayers,
-      //   // })
-      //   const deckOverlay = new MapboxOverlay({
-      //     interleaved: true,
-      //     layers: [
-      //       new ScatterplotLayer({
-      //         id: 'deckgl-circle',
-      //         data: [{ position: [0.45, 51.47] }],
-      //         getPosition: (d) => d.position,
-      //         getFillColor: [255, 0, 0, 100],
-      //         getRadius: 1000,
-      //         beforeId: 'watername_ocean', // In interleaved mode render the layer under map labels
-      //       }),
-      //     ],
-      //   })
-      //   map.value.addControl(deckOverlay)
-      // })
-      // * OBSERVATION PONTS
       map.value.addSource('observationsSource', {
         type: 'geojson',
         data,
@@ -149,21 +93,6 @@ onMounted(async () => {
         },
       })
     })
-    // // * RM0
-    // map.value.on('load', () => {
-    //   map.value.addSource('cogSource', {
-    //     type: 'raster',
-    //     url: 'cog://http://localhost:8080/tiles/metricvalues/rasters/2025-09-04T00:00.tiff#color:BrewerReds3,0,6,-c',
-    //     // url: 'cog://http://localhost:8080/tiles/metricvalues/rasters/output_cog_res6_deflate_6k.tif#color:BrewerReds3,0,6,-c',
-    //     // url: 'cog://https://maplibre.org/maplibre-gl-js/docs/assets/cog.tif',
-    //     // tileSize: 256,
-    //   })
-    //   map.value.addLayer({
-    //     id: 'cogLayer',
-    //     source: 'cogSource',
-    //     type: 'raster',
-    //   })
-    // })
   }
 })
 
