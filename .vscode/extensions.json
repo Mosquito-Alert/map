@@ -1,12 +1,9 @@
 {
   "recommendations": [
+    "Vue.volar",
+    "vitest.explorer",
     "dbaeumer.vscode-eslint",
-    
-    "octref.vetur"
-  ],
-  "unwantedRecommendations": [
-    "hookyqr.beautify",
-    "dbaeumer.jshint",
-    "ms-vscode.vscode-typescript-tslint-plugin"
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode"
   ]
 }

@@ -1,12 +1,11 @@
+<script setup lang="ts"></script>
+
 <template>
   <router-view />
 </template>
 
-<script>
-import { defineComponent } from 'vue'
-// import 'vue-cookie-comply/dist/style.css'
-
-export default defineComponent({
-  name: 'App'
-})
-</script>
+<style>
+html {
+  background-color: black !important;
+}
+</style>
