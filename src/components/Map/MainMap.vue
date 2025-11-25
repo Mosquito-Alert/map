@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { MapboxOverlay } from '@deck.gl/mapbox'
-import { _GlobeView, HexagonLayer, type Color } from 'deck.gl'
+import { _GlobeView, HexagonLayer, type Color, type PickingInfo } from 'deck.gl'
 import maplibregl from 'maplibre-gl'
 import { onMounted, onUnmounted, ref } from 'vue'
 
@@ -17,7 +17,7 @@ const deckglLayers = ref<HexagonLayer<any> | null>(null)
 const styleEOX = {
   version: 8,
   projection: {
-    type: 'globe',
+    // type: 'globe',
   },
   sources: {
     satellite: {
@@ -45,6 +45,7 @@ const styleEOX = {
 }
 
 const data = 'http://localhost:5173/observations_culicidae.json'
+const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
 // const data = 'http://161.111.254.237:5173/observations_culicidae.json'
 // DECK.GL LAYERS
 const colorRange: Color[] = [
@@ -76,27 +77,72 @@ function getRadiusForZoom(zoom) {
   return 1000
 }
 
+function getTooltip({ object }: PickingInfo) {
+  if (!object) {
+    return null
+  }
+  const lat = object.position[0]
+  const lng = object.position[1]
+  const count = object.count
+
+  return `\
+    latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
+    longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}
+    ${count} Observations`
+}
+
 function updateLayers() {
   const zoom = map.value.getZoom()
   const radius = getRadiusForZoom(zoom)
 
-  deckglLayers.value.setProps({
-    layers: [
-      new HexagonLayer({
-        id: 'hex-layer',
-        data,
-        gpuAggregation: false,
-        getPosition: (d: DataPoint) => [d.point.longitude, d.point.latitude],
-        getColorWeight: 1,
-        colorAggregation: 'COUNT',
-        extruded: false,
-        radius: radius,
-        pickable: false,
-        colorRange,
-        coverage: 0.995,
-      }),
-    ],
-  })
+  if (zoom >= 12) {
+    deckglLayers.value.setProps({ layers: [] }) // Hide
+    if (!map.value.getSource('observationsSource')) {
+      map.value.addSource('observationsSource', {
+        type: 'geojson',
+        data: data_geojson,
+        // tileSize: 256,
+      })
+    }
+    if (!map.value.getLayer('observationsLayer')) {
+      map.value.addLayer({
+        id: 'observationsLayer',
+        source: 'observationsSource',
+        type: 'circle',
+        minzoom: 9,
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#FF5722',
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#FFFFFF',
+        },
+      })
+    }
+  } else {
+    deckglLayers.value.setProps({
+      layers: [
+        new HexagonLayer({
+          id: 'hex-layer',
+          data,
+          gpuAggregation: false,
+          getPosition: (d: DataPoint) => [d.point.longitude, d.point.latitude],
+          colorAggregation: 'COUNT',
+          extruded: false,
+          radius: radius,
+          pickable: true,
+          colorRange,
+          coverage: 0.995,
+        }),
+      ],
+      getTooltip,
+    })
+    if (map.value.getLayer('observationsLayer')) {
+      map.value.removeLayer('observationsLayer')
+    }
+    if (map.value.getSource('observationsSource')) {
+      map.value.removeSource('observationsSource')
+    }
+  }
 }
 
 onMounted(async () => {
@@ -116,9 +162,9 @@ onMounted(async () => {
     map.value.setStyle(styleEOX)
 
     deckglLayers.value = new MapboxOverlay({
-      views: new _GlobeView(),
-      layers: [],
       controller: false, // MapLibre handles interaction
+      layers: [],
+      getTooltip,
     })
     map.value.on('zoom', updateLayers)
 
