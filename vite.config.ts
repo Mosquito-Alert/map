@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => {
   const isDev = mode === 'development'
   return {
     server: {
+      host: true, // allows access from LAN/public IP
+      port: 5173, // or any port
+      strictPort: false, // lets Vite pick another port if needed
+      cors: true, // optional: enables CORS
       ...(isDev && {
         proxy: {
           '/api': {

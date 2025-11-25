@@ -19,9 +19,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@deck.gl/mapbox": "^9.2.2",
     "@geomatico/maplibre-cog-protocol": "^0.8.0",
     "@primeuix/themes": "^1.2.5",
     "@tailwindcss/vite": "^4.1.17",
+    "deck.gl": "^9.2.2",
     "maplibre-gl": "^5.11.0",
     "material-icons": "^1.13.14",
     "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.27",

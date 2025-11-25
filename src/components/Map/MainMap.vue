@@ -5,30 +5,15 @@
 </template>
 
 <script setup lang="ts">
+import { MapboxOverlay } from '@deck.gl/mapbox'
+import { _GlobeView, HexagonLayer, type Color } from 'deck.gl'
 import maplibregl from 'maplibre-gl'
-import { cogProtocol } from '@geomatico/maplibre-cog-protocol'
 import { onMounted, onUnmounted, ref } from 'vue'
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<maplibregl.Map | null>(null)
+const deckglLayers = ref<HexagonLayer<any> | null>(null)
 
-async function modifyMapStyle() {
-  const url = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-
-  try {
-    // Fetch and parse JSON
-    const response = await fetch(url)
-    const styleJson = await response.json()
-
-    // Modify the "type" property under sources.carto
-    styleJson.projection = { type: 'globe' }
-
-    console.log(styleJson)
-    return styleJson
-  } catch (error) {
-    console.error('Error fetching or modifying JSON:', error)
-  }
-}
 const styleEOX = {
   version: 8,
   projection: {
@@ -59,40 +44,87 @@ const styleEOX = {
   },
 }
 
-const data = 'http://localhost:5173/observations_culicidae.geojson'
+const data = 'http://localhost:5173/observations_culicidae.json'
+// const data = 'http://161.111.254.237:5173/observations_culicidae.json'
+// DECK.GL LAYERS
+const colorRange: Color[] = [
+  [1, 152, 189],
+  [73, 227, 206],
+  [216, 254, 181],
+  [254, 237, 177],
+  [254, 173, 84],
+  [209, 55, 78],
+]
+// type DataPoint = [longitude: number, latitude: number]
+type DataPoint = {
+  uuid: string
+  received_at: string
+  point: {
+    latitude: number
+    longitude: number
+  }
+}
+type PropertiesType = {
+  uuid: string
+  received_at: string
+}
+
+function getRadiusForZoom(zoom) {
+  if (zoom < 4) return 25000
+  if (zoom < 7) return 10000
+  if (zoom < 10) return 5000
+  return 1000
+}
+
+function updateLayers() {
+  const zoom = map.value.getZoom()
+  const radius = getRadiusForZoom(zoom)
+
+  deckglLayers.value.setProps({
+    layers: [
+      new HexagonLayer({
+        id: 'hex-layer',
+        data,
+        gpuAggregation: false,
+        getPosition: (d: DataPoint) => [d.point.longitude, d.point.latitude],
+        getColorWeight: 1,
+        colorAggregation: 'COUNT',
+        extruded: false,
+        radius: radius,
+        pickable: false,
+        colorRange,
+        coverage: 0.995,
+      }),
+    ],
+  })
+}
 
 onMounted(async () => {
-  const styleCARTO = await modifyMapStyle()
   if (mapContainer.value) {
-    maplibregl.addProtocol('cog', cogProtocol)
-
     map.value = new maplibregl.Map({
       container: mapContainer.value,
-      // style: styleCARTO,
-      style: styleEOX,
       center: [11.39831, 47.26244],
       zoom: 2,
     })
 
-    map.value.on('load', () => {
-      map.value.addSource('observationsSource', {
-        type: 'geojson',
-        data,
-        // tileSize: 256,
-      })
-      map.value.addLayer({
-        id: 'observationsLayer',
-        source: 'observationsSource',
-        type: 'circle',
-        minzoom: 9,
-        paint: {
-          'circle-radius': 3,
-          'circle-color': '#FF5722',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#FFFFFF',
-        },
-      })
+    // map.value.setStyle('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', {
+    //   transformStyle: (previousStyle, nextStyle) => {
+    //     nextStyle.projection = { type: 'globe' }
+    //     return nextStyle
+    //   },
+    // })
+    map.value.setStyle(styleEOX)
+
+    deckglLayers.value = new MapboxOverlay({
+      views: new _GlobeView(),
+      layers: [],
+      controller: false, // MapLibre handles interaction
     })
+    map.value.on('zoom', updateLayers)
+
+    map.value.addControl(deckglLayers.value)
+
+    updateLayers()
   }
 })
 
