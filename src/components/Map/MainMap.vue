@@ -7,14 +7,14 @@
 <script setup lang="ts">
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import { _GlobeView, HexagonLayer, type Color, type PickingInfo } from 'deck.gl'
-import maplibregl from 'maplibre-gl'
-import { onMounted, onUnmounted, ref } from 'vue'
+import maplibregl, { type StyleSpecification } from 'maplibre-gl'
+import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
 
 const mapContainer = ref<HTMLElement | null>(null)
-const map = ref<maplibregl.Map | null>(null)
-const deckglLayers = ref<HexagonLayer<any> | null>(null)
+const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
+const deckglLayers = ref<MapboxOverlay | null>(null)
 
-const styleEOX = {
+const styleEOX: StyleSpecification = {
   version: 8,
   projection: {
     // type: 'globe',
@@ -65,19 +65,15 @@ type DataPoint = {
     longitude: number
   }
 }
-type PropertiesType = {
-  uuid: string
-  received_at: string
-}
 
-function getRadiusForZoom(zoom) {
+const getRadiusForZoom = (zoom: number) => {
   if (zoom < 4) return 25000
   if (zoom < 7) return 10000
   if (zoom < 10) return 5000
   return 1000
 }
 
-function getTooltip({ object }: PickingInfo) {
+const getTooltip = ({ object }: PickingInfo) => {
   if (!object) {
     return null
   }
@@ -92,34 +88,14 @@ function getTooltip({ object }: PickingInfo) {
 }
 
 function updateLayers() {
-  const zoom = map.value.getZoom()
+  const zoom = map.value?.getZoom() || 0
   const radius = getRadiusForZoom(zoom)
 
   if (zoom >= 12) {
-    deckglLayers.value.setProps({ layers: [] }) // Hide
-    if (!map.value.getSource('observationsSource')) {
-      map.value.addSource('observationsSource', {
-        type: 'geojson',
-        data: data_geojson,
-        // tileSize: 256,
-      })
-    }
-    if (!map.value.getLayer('observationsLayer')) {
-      map.value.addLayer({
-        id: 'observationsLayer',
-        source: 'observationsSource',
-        type: 'circle',
-        minzoom: 9,
-        paint: {
-          'circle-radius': 3,
-          'circle-color': '#FF5722',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#FFFFFF',
-        },
-      })
-    }
+    deckglLayers.value?.setProps({ layers: [] }) // Hide
+    map.value?.setLayoutProperty('observationsLayer', 'visibility', 'visible')
   } else {
-    deckglLayers.value.setProps({
+    deckglLayers.value?.setProps({
       layers: [
         new HexagonLayer({
           id: 'hex-layer',
@@ -136,12 +112,7 @@ function updateLayers() {
       ],
       getTooltip,
     })
-    if (map.value.getLayer('observationsLayer')) {
-      map.value.removeLayer('observationsLayer')
-    }
-    if (map.value.getSource('observationsSource')) {
-      map.value.removeSource('observationsSource')
-    }
+    map.value?.setLayoutProperty('observationsLayer', 'visibility', 'none')
   }
 }
 
@@ -152,6 +123,8 @@ onMounted(async () => {
       center: [11.39831, 47.26244],
       zoom: 2,
     })
+    if (!map.value) return
+    map.value.setStyle(styleEOX)
 
     // map.value.setStyle('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', {
     //   transformStyle: (previousStyle, nextStyle) => {
@@ -159,18 +132,41 @@ onMounted(async () => {
     //     return nextStyle
     //   },
     // })
-    map.value.setStyle(styleEOX)
 
-    deckglLayers.value = new MapboxOverlay({
-      controller: false, // MapLibre handles interaction
-      layers: [],
-      getTooltip,
+    map.value.on('style.load', () => {
+      if (!map.value) return
+      map.value.addSource('observationsSource', {
+        type: 'geojson',
+        data: data_geojson,
+        // tileSize: 256,
+      })
+
+      map.value.addLayer({
+        id: 'observationsLayer',
+        source: 'observationsSource',
+        type: 'circle',
+        minzoom: 9,
+        layout: {
+          visibility: 'none',
+        },
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#FF5722',
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#FFFFFF',
+        },
+      })
+
+      deckglLayers.value = new MapboxOverlay({
+        layers: [],
+        getTooltip,
+      })
+      map.value.on('zoom', updateLayers)
+
+      map.value.addControl(deckglLayers.value)
+
+      updateLayers()
     })
-    map.value.on('zoom', updateLayers)
-
-    map.value.addControl(deckglLayers.value)
-
-    updateLayers()
   }
 })
 
