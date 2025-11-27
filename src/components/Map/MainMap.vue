@@ -6,7 +6,17 @@
 
 <script setup lang="ts">
 import { MapboxOverlay } from '@deck.gl/mapbox'
-import { _GlobeView, HexagonLayer, type Color, type PickingInfo } from 'deck.gl'
+import { latLngToCell } from 'h3-js'
+import {
+  _GlobeView,
+  ContourLayer,
+  GeoJsonLayer,
+  H3HexagonLayer,
+  HeatmapLayer,
+  HexagonLayer,
+  type Color,
+  type PickingInfo,
+} from 'deck.gl'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
 
@@ -16,9 +26,6 @@ const deckglLayers = ref<MapboxOverlay | null>(null)
 
 const styleEOX: StyleSpecification = {
   version: 8,
-  projection: {
-    // type: 'globe',
-  },
   sources: {
     satellite: {
       tiles: [
@@ -44,9 +51,10 @@ const styleEOX: StyleSpecification = {
   },
 }
 
-const data = 'http://localhost:5173/observations_culicidae.json'
-const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
-// const data = 'http://161.111.254.237:5173/observations_culicidae.json'
+// const data = 'http://localhost:5173/observations_culicidae.json'
+// const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
+const data_geojson = 'http://161.111.254.237:5173/observations_culicidae.geojson'
+const data = 'http://161.111.254.237:5173/observations_culicidae.json'
 // DECK.GL LAYERS
 const colorRange: Color[] = [
   [1, 152, 189],
@@ -77,14 +85,8 @@ const getTooltip = ({ object }: PickingInfo) => {
   if (!object) {
     return null
   }
-  const lat = object.position[0]
-  const lng = object.position[1]
-  const count = object.count
 
-  return `\
-    latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
-    longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}
-    ${count} Observations`
+  return `${object.count} Observations`
 }
 
 function updateLayers() {
@@ -124,16 +126,29 @@ onMounted(async () => {
       zoom: 2,
     })
     if (!map.value) return
-    map.value.setStyle(styleEOX)
+    // map.value.setStyle(styleEOX)
+    map.value.setStyle('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
+    map.value.on('styledata', () => {
+      map.value?.setProjection({ type: 'globe' })
+    })
 
-    // map.value.setStyle('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', {
-    //   transformStyle: (previousStyle, nextStyle) => {
-    //     nextStyle.projection = { type: 'globe' }
-    //     return nextStyle
-    //   },
-    // })
+    const data_objects: DataPoint[] = await fetch(data).then((resp) => resp.json())
+    const h3_resolution = 5
 
-    map.value.on('style.load', () => {
+    console.time('H3 aggregation')
+    const aggregated_data = data_objects.reduce(
+      (acc, current) => {
+        const h3_cell = latLngToCell(current.point.latitude, current.point.longitude, h3_resolution)
+        acc[h3_cell] = acc[h3_cell]
+          ? { h3_cell, count: acc[h3_cell].count + 1 }
+          : { h3_cell, count: 1 }
+        return acc
+      },
+      {} as Record<string, { h3_cell: string; count: number }>,
+    )
+    console.timeEnd('H3 aggregation')
+
+    map.value.on('load', () => {
       if (!map.value) return
       map.value.addSource('observationsSource', {
         type: 'geojson',
@@ -157,16 +172,38 @@ onMounted(async () => {
         },
       })
 
+      type DataType = {
+        h3_cell: string
+        count: number
+      }
+
       deckglLayers.value = new MapboxOverlay({
-        layers: [],
+        interleaved: true,
+        layers: [
+          new H3HexagonLayer<DataType>({
+            id: 'H3HexagonLayer',
+            data: Object.values(aggregated_data),
+
+            extruded: false,
+            getHexagon: (d) => d.h3_cell,
+            getFillColor: (d) => [255, (1 - d.count / 500) * 255, 0],
+            getElevation: (d) => d.count,
+            elevationScale: 20,
+            pickable: true,
+            parameters: {
+              depthCompare: 'always',
+              cullMode: 'back',
+            },
+          }),
+        ],
         getTooltip,
       })
-      map.value.on('zoom', updateLayers)
+      // map.value.on('zoom', updateLayers)
 
       map.value.addControl(deckglLayers.value)
-
-      updateLayers()
+      map.value.addControl(new maplibregl.NavigationControl())
     })
+    // updateLayers()
   }
 })
 
