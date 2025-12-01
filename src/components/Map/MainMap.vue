@@ -6,23 +6,29 @@
 
 <script setup lang="ts">
 import { MapboxOverlay } from '@deck.gl/mapbox'
+import { H3HexagonLayer, type PickingInfo } from 'deck.gl'
 import { latLngToCell } from 'h3-js'
-import {
-  _GlobeView,
-  ContourLayer,
-  GeoJsonLayer,
-  H3HexagonLayer,
-  HeatmapLayer,
-  HexagonLayer,
-  type Color,
-  type PickingInfo,
-} from 'deck.gl'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
 
+type DataType = {
+  hex: string
+  count: number
+}
+type DataPoint = {
+  uuid: string
+  received_at: string
+  point: {
+    latitude: number
+    longitude: number
+  }
+}
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const deckglLayers = ref<MapboxOverlay | null>(null)
+const hex_data_res6 = ref<DataType[]>([])
+const hex_data_res5 = ref<DataType[]>([])
+const hex_data_res4 = ref<DataType[]>([])
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -55,64 +61,34 @@ const styleEOX: StyleSpecification = {
 // const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
 const data_geojson = 'http://161.111.254.237:5173/observations_culicidae.geojson'
 const data = 'http://161.111.254.237:5173/observations_culicidae.json'
-// DECK.GL LAYERS
-const colorRange: Color[] = [
-  [1, 152, 189],
-  [73, 227, 206],
-  [216, 254, 181],
-  [254, 237, 177],
-  [254, 173, 84],
-  [209, 55, 78],
-]
-// type DataPoint = [longitude: number, latitude: number]
-type DataPoint = {
-  uuid: string
-  received_at: string
-  point: {
-    latitude: number
-    longitude: number
-  }
-}
 
-const getRadiusForZoom = (zoom: number) => {
-  if (zoom < 4) return 25000
-  if (zoom < 7) return 10000
-  if (zoom < 10) return 5000
-  return 1000
-}
-
-const getTooltip = ({ object }: PickingInfo) => {
-  if (!object) {
-    return null
-  }
-
-  return `${object.count} Observations`
+const getH3HexagonLayer = (res: number) => {
+  return new H3HexagonLayer<DataType>({
+    id: `H3HexagonLayer_res${res}`,
+    data: res === 6 ? hex_data_res6.value : res === 5 ? hex_data_res5.value : hex_data_res4.value,
+    extruded: false,
+    getHexagon: (d) => d.hex,
+    getFillColor: (d) => [255, (1 - d.count / 500) * 255, 0],
+    getElevation: (d) => d.count,
+    elevationScale: 20,
+    pickable: true,
+    parameters: {
+      depthCompare: 'always',
+      cullMode: 'back',
+    },
+  })
 }
 
 function updateLayers() {
   const zoom = map.value?.getZoom() || 0
-  const radius = getRadiusForZoom(zoom)
 
   if (zoom >= 12) {
     deckglLayers.value?.setProps({ layers: [] }) // Hide
     map.value?.setLayoutProperty('observationsLayer', 'visibility', 'visible')
   } else {
     deckglLayers.value?.setProps({
-      layers: [
-        new HexagonLayer({
-          id: 'hex-layer',
-          data,
-          gpuAggregation: false,
-          getPosition: (d: DataPoint) => [d.point.longitude, d.point.latitude],
-          colorAggregation: 'COUNT',
-          extruded: false,
-          radius: radius,
-          pickable: true,
-          colorRange,
-          coverage: 0.995,
-        }),
-      ],
-      getTooltip,
+      layers: [getH3HexagonLayer(zoom >= 9 ? 6 : zoom >= 6 ? 5 : 4)],
+      getTooltip: ({ object }: PickingInfo) => (!object ? null : `${object.count} Observations`),
     })
     map.value?.setLayoutProperty('observationsLayer', 'visibility', 'none')
   }
@@ -133,20 +109,23 @@ onMounted(async () => {
     })
 
     const data_objects: DataPoint[] = await fetch(data).then((resp) => resp.json())
-    const h3_resolution = 5
 
-    console.time('H3 aggregation')
-    const aggregated_data = data_objects.reduce(
-      (acc, current) => {
-        const h3_cell = latLngToCell(current.point.latitude, current.point.longitude, h3_resolution)
-        acc[h3_cell] = acc[h3_cell]
-          ? { h3_cell, count: acc[h3_cell].count + 1 }
-          : { h3_cell, count: 1 }
-        return acc
-      },
-      {} as Record<string, { h3_cell: string; count: number }>,
-    )
-    console.timeEnd('H3 aggregation')
+    const counts_res6 = new Map<string, number>()
+    const counts_res5 = new Map<string, number>()
+    const counts_res4 = new Map<string, number>()
+
+    for (const { point } of data_objects) {
+      const hex_res6 = latLngToCell(point.latitude, point.longitude, 6)
+      counts_res6.set(hex_res6, (counts_res6.get(hex_res6) ?? 0) + 1)
+      const hex_res5 = latLngToCell(point.latitude, point.longitude, 5)
+      counts_res5.set(hex_res5, (counts_res5.get(hex_res5) ?? 0) + 1)
+      const hex_res4 = latLngToCell(point.latitude, point.longitude, 4)
+      counts_res4.set(hex_res4, (counts_res4.get(hex_res4) ?? 0) + 1)
+    }
+
+    hex_data_res6.value = Array.from(counts_res6, ([hex, count]) => ({ hex, count }))
+    hex_data_res5.value = Array.from(counts_res5, ([hex, count]) => ({ hex, count }))
+    hex_data_res4.value = Array.from(counts_res4, ([hex, count]) => ({ hex, count }))
 
     map.value.on('load', () => {
       if (!map.value) return
@@ -172,38 +151,18 @@ onMounted(async () => {
         },
       })
 
-      type DataType = {
-        h3_cell: string
-        count: number
-      }
-
       deckglLayers.value = new MapboxOverlay({
         interleaved: true,
-        layers: [
-          new H3HexagonLayer<DataType>({
-            id: 'H3HexagonLayer',
-            data: Object.values(aggregated_data),
-
-            extruded: false,
-            getHexagon: (d) => d.h3_cell,
-            getFillColor: (d) => [255, (1 - d.count / 500) * 255, 0],
-            getElevation: (d) => d.count,
-            elevationScale: 20,
-            pickable: true,
-            parameters: {
-              depthCompare: 'always',
-              cullMode: 'back',
-            },
-          }),
-        ],
-        getTooltip,
+        layers: [],
+        getTooltip: ({ object }: PickingInfo) => (!object ? null : `${object.count} Observations`),
       })
-      // map.value.on('zoom', updateLayers)
 
+      updateLayers()
+
+      map.value.on('zoom', updateLayers)
       map.value.addControl(deckglLayers.value)
       map.value.addControl(new maplibregl.NavigationControl())
     })
-    // updateLayers()
   }
 })
 
