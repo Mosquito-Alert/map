@@ -5,8 +5,10 @@
 </template>
 
 <script setup lang="ts">
+import { MapInfoControl } from '@/utils/mapControls'
 import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
 
 type DataPoint = {
@@ -69,7 +71,28 @@ onMounted(async () => {
     map.value.on('styledata', () => {
       map.value?.setProjection({ type: 'globe' })
     })
-    map.value.addControl(new maplibregl.NavigationControl())
+    map.value.addControl(
+      new maplibregl.NavigationControl({
+        visualizePitch: true,
+        visualizeRoll: true,
+        showZoom: true,
+        showCompass: true,
+      }),
+      'bottom-right',
+    )
+    // Add geolocate control to the map.
+    map.value.addControl(
+      new maplibregl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true,
+        },
+        trackUserLocation: true,
+        showUserLocation: false,
+      }),
+      'bottom-right',
+    )
+    map.value.addControl(new maplibregl.FullscreenControl(), 'top-right')
+    map.value.addControl(new MapInfoControl(), 'top-right')
 
     // Function to get appropriate resolution based on zoom level
     const getResolutionForZoom = (zoom: number): number => {
@@ -82,7 +105,6 @@ onMounted(async () => {
     const processResolution = (resolution: number, data_objects: DataPoint[]) => {
       if (processedResolutions.value.has(resolution)) return
 
-      console.log(`Processing resolution ${resolution}...`)
       hex_data.value[resolution] = {}
 
       for (const { point } of data_objects) {
@@ -102,9 +124,6 @@ onMounted(async () => {
       }
 
       processedResolutions.value.add(resolution)
-      console.log(
-        `Resolution ${resolution} processed. Features: ${Object.keys(hex_data.value[resolution]).length}`,
-      )
     }
 
     // Function to add/update H3 layer for a resolution
@@ -144,13 +163,11 @@ onMounted(async () => {
             ['linear'],
             ['get', 'count'],
             0,
-            'rgba(255, 255, 204, 0.4)',
-            10,
-            'rgba(255, 220, 150, 0.6)',
+            'rgba(255, 255, 204, 0.3)',
             50,
-            'rgba(255, 150, 80, 0.7)',
+            'rgba(255, 200, 150, 0.6)',
             200,
-            'rgba(255, 80, 40, 0.8)',
+            'rgba(255, 100, 50, 0.8)',
             500,
             'rgba(204, 0, 0, 0.9)',
           ],
