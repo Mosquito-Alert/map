@@ -1,6 +1,12 @@
 <template>
   <main class="size-screen mx-auto relative">
-    <div class="map absolute h-screen w-screen" ref="mapContainer"></div>
+    <div class="map absolute h-screen w-screen" ref="mapContainer">
+      <TimeSeries
+        :dataDateCount="dataDateCount"
+        class="absolute bottom-0 left-[30%] z-10 bg-white! border-gray-700! border-1!"
+      />
+      <!-- <div class="bg-red-500 size-50 absolute bottom-0 right-0 z-10"></div> -->
+    </div>
   </main>
 </template>
 
@@ -10,6 +16,8 @@ import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import TimeSeries from './TimeSeries.vue'
+import { useMapStore } from '../../stores/mapStore'
 
 type DataPoint = {
   uuid: string
@@ -19,11 +27,15 @@ type DataPoint = {
     longitude: number
   }
 }
+
+const mapStore = useMapStore()
+
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const hex_data = ref<Record<string, any>>({})
 const dataCache = ref<DataPoint[]>([]) // Cache for lazy loading
 const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
+const dataDateCount = ref<Record<string, number>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -104,10 +116,11 @@ onMounted(async () => {
     // Function to process a specific resolution
     const processResolution = (resolution: number, data_objects: DataPoint[]) => {
       if (processedResolutions.value.has(resolution)) return
+      const aggregateByDate: boolean = Object.keys(dataDateCount.value).length == 0
 
       hex_data.value[resolution] = {}
 
-      for (const { point } of data_objects) {
+      for (const { point, received_at } of data_objects) {
         const hex = latLngToCell(point.latitude, point.longitude, resolution)
         if (!hex_data.value[resolution][hex]) {
           hex_data.value[resolution][hex] = {
@@ -120,6 +133,14 @@ onMounted(async () => {
           }
         } else {
           hex_data.value[resolution][hex].properties.count += 1
+        }
+        if (aggregateByDate) {
+          const dateKey = received_at.split('T')[0] || received_at
+          if (!dataDateCount.value[dateKey]) {
+            dataDateCount.value[dateKey] = 1
+          } else {
+            dataDateCount.value[dateKey] += 1
+          }
         }
       }
 

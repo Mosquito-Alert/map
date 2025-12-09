@@ -5,7 +5,8 @@ import { useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
-    observations: [] as Observation[],
+    observations: [] as any[],
+    near_observations: [] as Observation[],
   }),
   actions: {
     async fetchObservationsNearMe(
@@ -25,10 +26,20 @@ export const useObservationsStore = defineStore('observations', {
             : undefined,
         })
         if (response.data.results) {
-          this.observations = response.data.results
+          this.near_observations = response.data.results
         }
       } catch (error) {
         console.error('Failed to fetch observations near me:', error)
+        throw error
+      }
+    },
+    async fetchObservations() {
+      try {
+        const data = 'http://localhost:5173/observations_culicidae.json'
+        const response = await fetch(data).then((resp) => resp.json())
+        this.observations = response as any[]
+      } catch (error) {
+        console.error('Failed to fetch observations:', error)
         throw error
       }
     },

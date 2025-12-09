@@ -67,7 +67,7 @@
         <!-- TODO: Make this lazy: fetch photos on request -->
         <Carousel
           v-if="!fetchingObservations"
-          :value="observationsStore.observations"
+          :value="observationsStore.near_observations"
           :numVisible="2"
           :numScroll="1"
           :responsiveOptions="responsiveOptions"
