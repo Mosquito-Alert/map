@@ -144,6 +144,8 @@ onMounted(async () => {
         }
       }
 
+      dataDateCount.value = { ...dataDateCount.value } // Trigger reactivity
+
       processedResolutions.value.add(resolution)
     }
 
