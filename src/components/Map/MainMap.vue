@@ -1,10 +1,7 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <TimeSeries
-        :dataDateCount="dataDateCount"
-        class="absolute bottom-0 left-[30%] z-10 bg-white! border-gray-700! border-1!"
-      />
+      <TimeSeries :dataDateCount="dataDateCount" />
       <!-- <div class="bg-red-500 size-50 absolute bottom-0 right-0 z-10"></div> -->
     </div>
   </main>

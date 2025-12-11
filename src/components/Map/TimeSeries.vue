@@ -1,5 +1,24 @@
 <template>
-  <VChart class="rounded-t-lg chart h-80! w-xl!" :option="option" :loading="loading" autoresize />
+  <div class="absolute bottom-0 left-[30%] z-10">
+    <Button
+      severity="secondary"
+      size="small"
+      class="rounded-b-none px-3 py-0 flex items-center gap-2 border-gray-400 border-b-0"
+      @click="showChart = !showChart"
+    >
+      <span class="material-icons-outlined">
+        {{ showChart ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}
+      </span>
+      {{ showChart ? 'Ocultar Serie Temporal' : 'Serie Temporal' }}
+    </Button>
+    <VChart
+      v-if="showChart"
+      class="bg-white! border-gray-400! border-1! h-70! w-xl!"
+      :option="option"
+      :loading="loading"
+      autoresize
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -9,6 +28,7 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { computed, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import Button from 'primevue/button'
 
 use([LineChart, CanvasRenderer, GridComponent, DataZoomComponent])
 
@@ -17,6 +37,7 @@ const props = defineProps<{
 }>()
 
 const filledData = ref<Record<string, number>>({})
+const showChart = ref(true)
 
 const fillMissingDates = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
