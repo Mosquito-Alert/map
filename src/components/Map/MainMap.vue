@@ -1,7 +1,7 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <TimeSeries :dataDateCount="dataDateCount" />
+      <TimeSeries :dataDateAggregation="dataDateAggregation" />
       <!-- <div class="bg-red-500 size-50 absolute bottom-0 right-0 z-10"></div> -->
     </div>
   </main>
@@ -12,9 +12,10 @@ import { MapInfoControl } from '@/utils/mapControls'
 import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
 import { useMapStore } from '../../stores/mapStore'
+import { useObservationsStore } from '../../stores/observationsStore'
 
 type DataPoint = {
   uuid: string
@@ -26,13 +27,14 @@ type DataPoint = {
 }
 
 const mapStore = useMapStore()
+const observationsStore = useObservationsStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const hex_data = ref<Record<string, any>>({})
 const dataCache = ref<DataPoint[]>([]) // Cache for lazy loading
 const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
-const dataDateCount = ref<Record<string, number>>({})
+const dataDateAggregation = ref<Record<string, number>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -63,6 +65,132 @@ const styleEOX: StyleSpecification = {
 
 const data = 'http://localhost:5173/observations_culicidae.json'
 const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
+
+// Function to get appropriate resolution based on zoom level
+const getResolutionForZoom = (zoom: number): number => {
+  if (zoom <= 4) return 4
+  if (zoom <= 6) return 5
+  return 6
+}
+
+// Function to process a specific resolution
+const processResolution = (resolution: number, data_objects: DataPoint[]) => {
+  if (processedResolutions.value.has(resolution)) return
+  const aggregateByDate: boolean = Object.keys(dataDateAggregation.value).length == 0
+  const { start: startingDate, end: endingDate } = observationsStore.dateFilters
+
+  hex_data.value[resolution] = {}
+
+  for (const { point, received_at } of data_objects) {
+    if (startingDate || endingDate) {
+      const obsDate = received_at.split('T')[0] || received_at
+      if (startingDate && obsDate < startingDate) continue
+      if (endingDate && obsDate > endingDate) continue
+    }
+
+    const hex = latLngToCell(point.latitude, point.longitude, resolution)
+    if (!hex_data.value[resolution][hex]) {
+      hex_data.value[resolution][hex] = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [cellToBoundary(hex, true)],
+        },
+        properties: { hex, count: 1 },
+      }
+    } else {
+      hex_data.value[resolution][hex].properties.count += 1
+    }
+    if (aggregateByDate) {
+      const dateKey = received_at.split('T')[0] || received_at
+      if (!dataDateAggregation.value[dateKey]) {
+        dataDateAggregation.value[dateKey] = 1
+      } else {
+        dataDateAggregation.value[dateKey] += 1
+      }
+    }
+  }
+
+  dataDateAggregation.value = { ...dataDateAggregation.value } // Trigger reactivity
+
+  processedResolutions.value.add(resolution)
+}
+
+// Function to add/update H3 layer for a resolution
+const addOrUpdateH3Layer = (resolution: number) => {
+  if (!map.value || !hex_data.value[resolution]) return
+
+  const sourceId = `h3-res-${resolution}`
+  const layerId = `h3-layer-res-${resolution}`
+
+  // Remove existing source and layer if they exist
+  if (map.value.getLayer(layerId)) {
+    map.value.removeLayer(layerId)
+  }
+  if (map.value.getSource(sourceId)) {
+    map.value.removeSource(sourceId)
+  }
+
+  // Add new source and layer
+  map.value.addSource(sourceId, {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: Object.values(hex_data.value[resolution]),
+    },
+  })
+
+  map.value.addLayer({
+    id: layerId,
+    source: sourceId,
+    type: 'fill',
+    layout: {
+      visibility: 'visible',
+    },
+    paint: {
+      'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'count'],
+        0,
+        'rgba(255, 255, 204, 0.3)',
+        50,
+        'rgba(255, 200, 150, 0.6)',
+        200,
+        'rgba(255, 100, 50, 0.8)',
+        500,
+        'rgba(204, 0, 0, 0.9)',
+      ],
+      'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
+    },
+  })
+}
+
+// Function to hide all H3 layers except the target one
+const showOnlyResolution = (targetResolution: number | null) => {
+  if (!map.value) return
+
+  const allResolutions = [4, 5, 6]
+  allResolutions.forEach((res) => {
+    const layerId = `h3-layer-res-${res}`
+    if (map.value!.getLayer(layerId)) {
+      map.value!.setLayoutProperty(
+        layerId,
+        'visibility',
+        res === targetResolution ? 'visible' : 'none',
+      )
+    }
+  })
+
+  // Handle observation points
+  if (map.value.getLayer('observationsLayer')) {
+    map.value.setLayoutProperty(
+      'observationsLayer',
+      'visibility',
+      targetResolution === null ? 'visible' : 'none',
+    )
+  }
+}
 
 onMounted(async () => {
   if (mapContainer.value) {
@@ -102,125 +230,6 @@ onMounted(async () => {
     )
     map.value.addControl(new maplibregl.FullscreenControl(), 'top-right')
     map.value.addControl(new MapInfoControl(), 'top-right')
-
-    // Function to get appropriate resolution based on zoom level
-    const getResolutionForZoom = (zoom: number): number => {
-      if (zoom <= 4) return 4
-      if (zoom <= 6) return 5
-      return 6
-    }
-
-    // Function to process a specific resolution
-    const processResolution = (resolution: number, data_objects: DataPoint[]) => {
-      if (processedResolutions.value.has(resolution)) return
-      const aggregateByDate: boolean = Object.keys(dataDateCount.value).length == 0
-
-      hex_data.value[resolution] = {}
-
-      for (const { point, received_at } of data_objects) {
-        const hex = latLngToCell(point.latitude, point.longitude, resolution)
-        if (!hex_data.value[resolution][hex]) {
-          hex_data.value[resolution][hex] = {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [cellToBoundary(hex, true)],
-            },
-            properties: { hex, count: 1 },
-          }
-        } else {
-          hex_data.value[resolution][hex].properties.count += 1
-        }
-        if (aggregateByDate) {
-          const dateKey = received_at.split('T')[0] || received_at
-          if (!dataDateCount.value[dateKey]) {
-            dataDateCount.value[dateKey] = 1
-          } else {
-            dataDateCount.value[dateKey] += 1
-          }
-        }
-      }
-
-      dataDateCount.value = { ...dataDateCount.value } // Trigger reactivity
-
-      processedResolutions.value.add(resolution)
-    }
-
-    // Function to add/update H3 layer for a resolution
-    const addOrUpdateH3Layer = (resolution: number) => {
-      if (!map.value || !hex_data.value[resolution]) return
-
-      const sourceId = `h3-res-${resolution}`
-      const layerId = `h3-layer-res-${resolution}`
-
-      // Remove existing source and layer if they exist
-      if (map.value.getLayer(layerId)) {
-        map.value.removeLayer(layerId)
-      }
-      if (map.value.getSource(sourceId)) {
-        map.value.removeSource(sourceId)
-      }
-
-      // Add new source and layer
-      map.value.addSource(sourceId, {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: Object.values(hex_data.value[resolution]),
-        },
-      })
-
-      map.value.addLayer({
-        id: layerId,
-        source: sourceId,
-        type: 'fill',
-        layout: {
-          visibility: 'visible',
-        },
-        paint: {
-          'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'count'],
-            0,
-            'rgba(255, 255, 204, 0.3)',
-            50,
-            'rgba(255, 200, 150, 0.6)',
-            200,
-            'rgba(255, 100, 50, 0.8)',
-            500,
-            'rgba(204, 0, 0, 0.9)',
-          ],
-          'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
-        },
-      })
-    }
-
-    // Function to hide all H3 layers except the target one
-    const showOnlyResolution = (targetResolution: number | null) => {
-      if (!map.value) return
-
-      const allResolutions = [4, 5, 6]
-      allResolutions.forEach((res) => {
-        const layerId = `h3-layer-res-${res}`
-        if (map.value!.getLayer(layerId)) {
-          map.value!.setLayoutProperty(
-            layerId,
-            'visibility',
-            res === targetResolution ? 'visible' : 'none',
-          )
-        }
-      })
-
-      // Handle observation points
-      if (map.value.getLayer('observationsLayer')) {
-        map.value.setLayoutProperty(
-          'observationsLayer',
-          'visibility',
-          targetResolution === null ? 'visible' : 'none',
-        )
-      }
-    }
 
     // Start data loading in background
     const dataPromise = fetch(data).then((resp) => resp.json())
@@ -293,6 +302,23 @@ onMounted(async () => {
     })
   }
 })
+
+watch(
+  () => observationsStore.dateFilters,
+  () => {
+    // Clear processed resolutions to force reprocessing
+    processedResolutions.value.clear()
+    // Reprocess current zoom level
+    if (map.value) {
+      const zoom = map.value.getZoom()
+      const targetResolution = getResolutionForZoom(zoom)
+      processResolution(targetResolution, dataCache.value)
+      addOrUpdateH3Layer(targetResolution)
+      showOnlyResolution(zoom >= 10 ? null : targetResolution)
+    }
+  },
+  { deep: true },
+)
 
 onUnmounted(() => {
   if (map.value) {

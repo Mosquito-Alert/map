@@ -12,6 +12,7 @@
       {{ showChart ? 'Ocultar Serie Temporal' : 'Serie Temporal' }}
     </Button>
     <VChart
+      ref="chartRef"
       v-if="showChart"
       class="bg-white! border-gray-400! border-1! h-70! w-xl!"
       :option="option"
@@ -26,18 +27,24 @@ import { LineChart } from 'echarts/charts'
 import { DataZoomComponent, GridComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { computed, ref, watch } from 'vue'
-import VChart from 'vue-echarts'
 import Button from 'primevue/button'
+import { computed, onMounted, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
+import { useObservationsStore } from '../../stores/observationsStore'
+import { debounce } from '../../utils/debouncer'
 
 use([LineChart, CanvasRenderer, GridComponent, DataZoomComponent])
 
 const props = defineProps<{
-  dataDateCount: Record<string, number>
+  dataDateAggregation: Record<string, number>
 }>()
+
+const observationsStore = useObservationsStore()
 
 const filledData = ref<Record<string, number>>({})
 const showChart = ref(true)
+const chartRef = ref<InstanceType<typeof VChart> | null>(null)
+const zoomFiltered = ref({ start: 0, end: 100 })
 
 const fillMissingDates = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
@@ -54,8 +61,48 @@ const fillMissingDates = (data: Record<string, number>) => {
   filledData.value = result
 }
 
+const updateFilteredData = (chart: any) => {
+  const filterWindow = chart.getOption()?.dataZoom?.[0]
+  if (!filterWindow) return
+
+  const startPercent = filterWindow.start
+  const endPercent = filterWindow.end
+
+  const allDates = Object.keys(filledData.value)
+  const totalDates = allDates.length
+
+  const startIndex = Math.floor((startPercent / 100) * totalDates)
+  const endIndex = Math.ceil((endPercent / 100) * totalDates)
+
+  zoomFiltered.value = {
+    start: (startIndex / totalDates) * 100,
+    end: (endIndex / totalDates) * 100,
+  }
+
+  const filteredDates = allDates.slice(startIndex, endIndex)
+  observationsStore.dateFilters = {
+    start: filteredDates[0] as string,
+    end: filteredDates[filteredDates.length - 1] as string,
+  }
+}
+
+const debouncedUpdate = debounce(updateFilteredData, 2000)
+
+onMounted(() => {
+  const chart = chartRef.value?.chart
+
+  if (!chart) return
+
+  chart.on('dataZoom', () => {
+    debouncedUpdate(chart)
+  })
+
+  // Initialize the filtered data
+  updateFilteredData(chart)
+})
+
 watch(
-  () => props.dataDateCount,
+  () => props.dataDateAggregation,
   (newVal: Record<string, number>) => {
     if (newVal && Object.keys(newVal).length > 0) {
       fillMissingDates(newVal)
@@ -84,13 +131,15 @@ const option = computed(() => ({
   dataZoom: [
     {
       type: 'slider',
-      start: 0,
-      end: 100,
+      show: true,
+      start: zoomFiltered.value.start,
+      end: zoomFiltered.value.end,
     },
     {
       type: 'inside',
-      start: 0,
-      end: 100,
+      show: true,
+      start: zoomFiltered.value.start,
+      end: zoomFiltered.value.end,
     },
   ],
   series: [

@@ -7,6 +7,10 @@ export const useObservationsStore = defineStore('observations', {
   state: () => ({
     observations: [] as any[],
     near_observations: [] as Observation[],
+    dateFilters: {
+      start: null as string | null,
+      end: null as string | null,
+    } as { start: string | null; end: string | null },
   }),
   actions: {
     async fetchObservationsNearMe(
