@@ -2,7 +2,15 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <TimeSeries :dataDateAggregation="dataDateAggregation" />
-      <!-- <div class="bg-red-500 size-50 absolute bottom-0 right-0 z-10"></div> -->
+      <div
+        class="absolute top-0 right-15 z-10 mt-2.5 py-1 px-2 bg-gray-100 border-gray-400 border-1 rounded-md shadow-md cursor-default text-gray-700 text-sm font-medium"
+      >
+        <span class="font-semibold">{{
+          formatDate(observationsStore.dateFilters.start || '')
+        }}</span>
+        -
+        <span class="font-semibold">{{ formatDate(observationsStore.dateFilters.end || '') }}</span>
+      </div>
     </div>
   </main>
 </template>
@@ -16,6 +24,7 @@ import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
+import { formatDate } from '../../utils/date'
 
 type DataPoint = {
   uuid: string
