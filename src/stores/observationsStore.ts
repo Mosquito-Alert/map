@@ -7,7 +7,8 @@ export const useObservationsStore = defineStore('observations', {
   state: () => ({
     observations: [] as any[],
     near_observations: [] as Observation[],
-    dateFilters: {
+    datesFilterPercentage: { start: 70, end: 100 } as { start: number; end: number },
+    dateFilter: {
       start: null as string | null,
       end: null as string | null,
     } as { start: string | null; end: string | null },

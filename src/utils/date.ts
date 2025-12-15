@@ -15,3 +15,18 @@ export const formatDate = (dateString: string): string => {
   const year = date.getFullYear()
   return `${day}/${month}/${year}`
 }
+
+export const fillMissingDates = (data: Record<string, number>): Record<string, number> => {
+  const dates = Object.keys(data).sort()
+  const start = new Date(dates[0] as string)
+  const end = new Date(dates[dates.length - 1] as string)
+
+  const result: Record<string, number> = {}
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = d.toISOString().slice(0, 10)
+    result[key] = data[key] ?? 0
+  }
+
+  return result
+}
