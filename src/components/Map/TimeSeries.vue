@@ -36,12 +36,12 @@ import { debounce } from '../../utils/debouncer'
 use([LineChart, CanvasRenderer, GridComponent, DataZoomComponent])
 
 const props = defineProps<{
-  filledData: Record<string, number>
+  timeSeriesData: Record<string, number>
 }>()
 
 const observationsStore = useObservationsStore()
 
-const filledData = ref<Record<string, number>>({})
+const timeSeriesData = ref<Record<string, number>>({})
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 
@@ -55,7 +55,7 @@ const updateFilteredData = (chart: any) => {
   }
 }
 
-const debouncedUpdate = debounce(updateFilteredData, 2000)
+const debouncedUpdate = debounce(updateFilteredData, 250)
 
 onMounted(() => {
   const chart = chartRef.value?.chart
@@ -70,10 +70,18 @@ onMounted(() => {
   updateFilteredData(chart)
 })
 
+watch(
+  () => props.timeSeriesData,
+  (newData) => {
+    timeSeriesData.value = newData
+  },
+  { immediate: true },
+)
+
 const option = computed(() => ({
   xAxis: {
     type: 'category',
-    data: Object.keys(filledData.value),
+    data: Object.keys(timeSeriesData.value),
   },
   yAxis: {
     type: 'value',
@@ -103,7 +111,7 @@ const option = computed(() => ({
   ],
   series: [
     {
-      data: Object.values(filledData.value),
+      data: Object.values(timeSeriesData.value),
       type: 'line',
       showSymbol: false,
     },

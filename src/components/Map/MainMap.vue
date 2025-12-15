@@ -1,7 +1,7 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <TimeSeries :filledData="filledData" />
+      <TimeSeries :timeSeriesData="originalDateAggregationData" />
       <div
         class="absolute top-0 right-15 z-10 mt-2.5 py-1 px-2 bg-gray-100 border-gray-400 border-1 rounded-md shadow-md cursor-default text-gray-700 text-sm font-medium"
       >
@@ -40,12 +40,11 @@ const observationsStore = useObservationsStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
-const hexData = ref<Record<string, any>>({})
-const filledData = ref<Record<string, any>>({})
 const dataCache = ref<DataPoint[]>([]) // Cache for lazy loading
 const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
-const dataDateAggregation = ref<Record<string, number>>({})
-let zoomTimeoutId: ReturnType<typeof setTimeout> | null = null // Debounce zoom events
+const originalHexData = ref<Record<number, Record<string, any>>>({})
+const originalDateAggregationData = ref<Record<string, number>>({})
+const renderedHexData = ref<Record<number, Record<string, any>>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -84,12 +83,60 @@ const getResolutionForZoom = (zoom: number): number => {
   return 6
 }
 
+const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
+  if (processedResolutions.value.has(resolution)) return
+  const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
+
+  originalHexData.value[resolution] = {}
+
+  for (const { point, received_at } of data_objects) {
+    const hex = latLngToCell(point.latitude, point.longitude, resolution)
+    if (!originalHexData.value[resolution][hex]) {
+      originalHexData.value[resolution][hex] = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [cellToBoundary(hex, true)],
+        },
+        properties: { hex, count: 1, date: received_at },
+      }
+    } else {
+      originalHexData.value[resolution][hex].properties.count += 1
+    }
+    if (aggregateByDate) {
+      const dateKey = received_at.split('T')[0] || received_at
+      if (!originalDateAggregationData.value[dateKey]) {
+        originalDateAggregationData.value[dateKey] = 1
+      } else {
+        originalDateAggregationData.value[dateKey] += 1
+      }
+    }
+  }
+
+  originalDateAggregationData.value = { ...originalDateAggregationData.value } // Trigger reactivity
+  processedResolutions.value.add(resolution)
+}
+
+const fixDateAggregationData = () => {
+  const dates = Object.keys(originalDateAggregationData.value).sort()
+  const start = new Date(dates[0] as string)
+  const end = new Date(dates[dates.length - 1] as string)
+
+  const result: Record<string, number> = {}
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = d.toISOString().slice(0, 10)
+    result[key] = originalDateAggregationData.value[key] ?? 0
+  }
+
+  originalDateAggregationData.value = result
+}
+
 const updateDatesFilter = () => {
-  console.log('updateDatesFilter')
   const startPercent = observationsStore.datesFilterPercentage.start
   const endPercent = observationsStore.datesFilterPercentage.end
 
-  const allDates = Object.keys(filledData.value)
+  const allDates = Object.keys(originalDateAggregationData.value)
   const totalDates = allDates.length
 
   const startIndex = Math.floor((startPercent / 100) * totalDates)
@@ -102,72 +149,25 @@ const updateDatesFilter = () => {
   }
 }
 
-const fillMissingDates = (data: Record<string, number>) => {
-  const dates = Object.keys(data).sort()
-  const start = new Date(dates[0] as string)
-  const end = new Date(dates[dates.length - 1] as string)
+const filterData = (resolution: number) => {
+  const startingDate = observationsStore.dateFilter.start
+  const endingDate = observationsStore.dateFilter.end
 
-  const result: Record<string, number> = {}
+  renderedHexData.value[resolution] = {}
 
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().slice(0, 10)
-    result[key] = data[key] ?? 0
-  }
-
-  filledData.value = result
-}
-
-// Function to process a specific resolution
-const processResolution = (resolution: number, data_objects: DataPoint[]) => {
-  if (processedResolutions.value.has(resolution)) return
-  const aggregateByDate: boolean = Object.keys(dataDateAggregation.value).length == 0
-  const { start: startingDate, end: endingDate } = observationsStore.dateFilter
-
-  hexData.value[resolution] = {}
-  console.log('processResolution')
-
-  console.time('AAA')
-
-  for (const { point, received_at } of data_objects) {
-    if (startingDate || endingDate) {
-      const obsDate = received_at.split('T')[0] || received_at
-      if (startingDate && obsDate < startingDate) continue
-      if (endingDate && obsDate > endingDate) continue
-    }
-
-    const hex = latLngToCell(point.latitude, point.longitude, resolution)
-    if (!hexData.value[resolution][hex]) {
-      hexData.value[resolution][hex] = {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [cellToBoundary(hex, true)],
-        },
-        properties: { hex, count: 1 },
-      }
-    } else {
-      hexData.value[resolution][hex].properties.count += 1
-    }
-    if (aggregateByDate) {
-      const dateKey = received_at.split('T')[0] || received_at
-      if (!dataDateAggregation.value[dateKey]) {
-        dataDateAggregation.value[dateKey] = 1
-      } else {
-        dataDateAggregation.value[dateKey] += 1
-      }
+  for (const [hex, feature] of Object.entries(
+    originalHexData.value[resolution] as Record<string, any>,
+  )) {
+    const featureDate = feature.properties.date
+    if (featureDate >= startingDate! && featureDate <= endingDate!) {
+      renderedHexData.value[resolution][hex] = feature
     }
   }
-
-  console.timeEnd('AAA')
-
-  dataDateAggregation.value = { ...dataDateAggregation.value } // Trigger reactivity
-
-  processedResolutions.value.add(resolution)
 }
 
 // Function to add/update H3 layer for a resolution
 const addOrUpdateH3Layer = (resolution: number) => {
-  if (!map.value || !hexData.value[resolution]) return
+  if (!map.value || !renderedHexData.value[resolution]) return
 
   const sourceId = `h3-res-${resolution}`
   const layerId = `h3-layer-res-${resolution}`
@@ -185,7 +185,7 @@ const addOrUpdateH3Layer = (resolution: number) => {
     type: 'geojson',
     data: {
       type: 'FeatureCollection',
-      features: Object.values(hexData.value[resolution]),
+      features: Object.values(renderedHexData.value[resolution]),
     },
   })
 
@@ -293,9 +293,12 @@ onMounted(async () => {
       const initialZoom = map.value.getZoom()
       const initialResolution = getResolutionForZoom(initialZoom)
 
-      processResolution(initialResolution, dataCache.value)
-      fillMissingDates(dataDateAggregation.value)
+      console.time('buildOriginalData')
+      buildOriginalData(initialResolution, dataCache.value)
+      fixDateAggregationData()
       updateDatesFilter()
+      filterData(initialResolution)
+      console.timeEnd('buildOriginalData')
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
@@ -336,7 +339,9 @@ onMounted(async () => {
         } else {
           // Process resolution if not already processed
           if (!processedResolutions.value.has(targetResolution)) {
-            processResolution(targetResolution, dataCache.value)
+            buildOriginalData(targetResolution, dataCache.value)
+            fixDateAggregationData()
+            filterData(targetResolution)
             addOrUpdateH3Layer(targetResolution)
           }
 
@@ -345,14 +350,15 @@ onMounted(async () => {
         }
       }
 
+      // TODO:
       // Debounced zoom event handler to prevent multiple calls
-      const debouncedZoomChange = () => {
-        if (zoomTimeoutId) clearTimeout(zoomTimeoutId)
-        zoomTimeoutId = setTimeout(handleZoomChange, 300)
-      }
+      // const debouncedZoomChange = () => {
+      //   if (zoomTimeoutId) clearTimeout(zoomTimeoutId)
+      //   zoomTimeoutId = setTimeout(handleZoomChange, 300)
+      // }
 
       // Add zoom event listeners - only on zoomend to prevent constant processing
-      map.value.on('zoomend', debouncedZoomChange)
+      map.value.on('zoomend', handleZoomChange)
     })
   }
 })
@@ -367,10 +373,9 @@ watch(
       const zoom = map.value.getZoom()
       const targetResolution = getResolutionForZoom(zoom)
       updateDatesFilter()
-      processResolution(targetResolution, dataCache.value)
+      filterData(targetResolution)
       addOrUpdateH3Layer(targetResolution)
       showOnlyResolution(zoom >= 10 ? null : targetResolution)
-      console.log(Object.keys(filledData.value).length)
     }
   },
   { deep: true },
