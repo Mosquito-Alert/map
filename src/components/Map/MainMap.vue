@@ -85,6 +85,8 @@ const getResolutionForZoom = (zoom: number): number => {
 
 const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
   if (processedResolutions.value.has(resolution)) return
+  console.time('buildOriginalData')
+
   const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
 
   originalHexData.value[resolution] = {}
@@ -112,6 +114,8 @@ const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
       }
     }
   }
+
+  console.timeEnd('buildOriginalData')
 
   originalDateAggregationData.value = { ...originalDateAggregationData.value } // Trigger reactivity
   renderedHexData.value[resolution] = originalHexData.value[resolution] // Initialize rendered data
@@ -262,9 +266,7 @@ onMounted(async () => {
       const initialZoom = map.value.getZoom()
       const initialResolution = getResolutionForZoom(initialZoom)
 
-      console.time('buildOriginalData')
       buildOriginalData(initialResolution, dataCache.value)
-      console.timeEnd('buildOriginalData')
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
@@ -306,6 +308,7 @@ onMounted(async () => {
           // Process resolution if not already processed
           if (!processedResolutions.value.has(targetResolution)) {
             buildOriginalData(targetResolution, dataCache.value)
+            filterData(targetResolution)
             addOrUpdateH3Layer(targetResolution)
           }
 
@@ -329,7 +332,9 @@ onMounted(async () => {
 
 watch(
   () => observationsStore.dateFilter,
-  () => {
+  (newValue, oldValue) => {
+    // Skip initial assignment, because initially the dateFilter has null values and has to be computed
+    if (!oldValue.start && !oldValue.end) return
     // Clear processed resolutions to force reprocessing
     processedResolutions.value.clear()
     // Reprocess current zoom level
