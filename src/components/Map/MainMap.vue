@@ -114,39 +114,8 @@ const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
   }
 
   originalDateAggregationData.value = { ...originalDateAggregationData.value } // Trigger reactivity
+  renderedHexData.value[resolution] = originalHexData.value[resolution] // Initialize rendered data
   processedResolutions.value.add(resolution)
-}
-
-const fixDateAggregationData = () => {
-  const dates = Object.keys(originalDateAggregationData.value).sort()
-  const start = new Date(dates[0] as string)
-  const end = new Date(dates[dates.length - 1] as string)
-
-  const result: Record<string, number> = {}
-
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().slice(0, 10)
-    result[key] = originalDateAggregationData.value[key] ?? 0
-  }
-
-  originalDateAggregationData.value = result
-}
-
-const updateDatesFilter = () => {
-  const startPercent = observationsStore.datesFilterPercentage.start
-  const endPercent = observationsStore.datesFilterPercentage.end
-
-  const allDates = Object.keys(originalDateAggregationData.value)
-  const totalDates = allDates.length
-
-  const startIndex = Math.floor((startPercent / 100) * totalDates)
-  const endIndex = Math.ceil((endPercent / 100) * totalDates)
-
-  const filteredDates = allDates.slice(startIndex, endIndex)
-  observationsStore.dateFilter = {
-    start: filteredDates[0] as string,
-    end: filteredDates[filteredDates.length - 1] as string,
-  }
 }
 
 const filterData = (resolution: number) => {
@@ -295,9 +264,6 @@ onMounted(async () => {
 
       console.time('buildOriginalData')
       buildOriginalData(initialResolution, dataCache.value)
-      fixDateAggregationData()
-      updateDatesFilter()
-      filterData(initialResolution)
       console.timeEnd('buildOriginalData')
 
       // Add observation points layer for high zoom levels
@@ -340,8 +306,6 @@ onMounted(async () => {
           // Process resolution if not already processed
           if (!processedResolutions.value.has(targetResolution)) {
             buildOriginalData(targetResolution, dataCache.value)
-            fixDateAggregationData()
-            filterData(targetResolution)
             addOrUpdateH3Layer(targetResolution)
           }
 
@@ -372,7 +336,6 @@ watch(
     if (map.value) {
       const zoom = map.value.getZoom()
       const targetResolution = getResolutionForZoom(zoom)
-      updateDatesFilter()
       filterData(targetResolution)
       addOrUpdateH3Layer(targetResolution)
       showOnlyResolution(zoom >= 10 ? null : targetResolution)

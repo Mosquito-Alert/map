@@ -45,13 +45,43 @@ const timeSeriesData = ref<Record<string, number>>({})
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 
-const updateFilteredData = (chart: any) => {
+const fixDateAggregationData = (data: Record<string, number>) => {
+  const dates = Object.keys(data).sort()
+  const start = new Date(dates[0] as string)
+  const end = new Date(dates[dates.length - 1] as string)
+
+  const result: Record<string, number> = {}
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = d.toISOString().slice(0, 10)
+    result[key] = data[key] ?? 0
+  }
+
+  timeSeriesData.value = result
+}
+
+const updateFilteredData = () => {
+  const chart = chartRef.value?.chart as any
+  if (!chart) return
+
   const filterWindow = chart.getOption()?.dataZoom?.[0]
   if (!filterWindow) return
 
   observationsStore.datesFilterPercentage = {
     start: filterWindow.start,
     end: filterWindow.end,
+  }
+
+  const allDates = Object.keys(timeSeriesData.value)
+  const totalDates = allDates.length
+
+  const startIndex = Math.floor((filterWindow.start / 100) * totalDates)
+  const endIndex = Math.ceil((filterWindow.end / 100) * totalDates)
+
+  const filteredDates = allDates.slice(startIndex, endIndex)
+  observationsStore.dateFilter = {
+    start: filteredDates[0] as string,
+    end: filteredDates[filteredDates.length - 1] as string,
   }
 }
 
@@ -63,17 +93,22 @@ onMounted(() => {
   if (!chart) return
 
   chart.on('dataZoom', () => {
-    debouncedUpdate(chart)
+    debouncedUpdate()
   })
 
   // Initialize the filtered data
-  updateFilteredData(chart)
+  updateFilteredData()
 })
 
 watch(
   () => props.timeSeriesData,
   (newData) => {
-    timeSeriesData.value = newData
+    if (!timeSeriesData.value || Object.keys(timeSeriesData.value).length === 0) {
+      fixDateAggregationData(newData)
+      updateFilteredData()
+      return
+    }
+    // timeSeriesData.value = newData
   },
   { immediate: true },
 )
