@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import { LineChart } from 'echarts/charts'
-import { DataZoomComponent, GridComponent } from 'echarts/components'
+import { BarChart } from 'echarts/charts'
+import { GridComponent, BrushComponent, ToolboxComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import Button from 'primevue/button'
@@ -33,7 +33,7 @@ import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { debounce } from '../../utils/debouncer'
 
-use([LineChart, CanvasRenderer, GridComponent, DataZoomComponent])
+use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 
 const props = defineProps<{
   timeSeriesData: Record<string, number>
@@ -41,6 +41,7 @@ const props = defineProps<{
 
 const observationsStore = useObservationsStore()
 
+const originalDateLimits = ref<{ start: string; end: string } | null>(null)
 const timeSeriesData = ref<Record<string, number>>({})
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
@@ -60,28 +61,23 @@ const fixDateAggregationData = (data: Record<string, number>) => {
   timeSeriesData.value = result
 }
 
-const updateFilteredData = () => {
-  const chart = chartRef.value?.chart as any
-  if (!chart) return
+const updateFilteredData = (params: any) => {
+  const selectedIndexes = params.batch?.[0]?.selected?.[0]?.dataIndex
+  if (!selectedIndexes) return
 
-  const filterWindow = chart.getOption()?.dataZoom?.[0]
-  if (!filterWindow) return
-
-  observationsStore.datesFilterPercentage = {
-    start: filterWindow.start,
-    end: filterWindow.end,
-  }
+  const startIndex = selectedIndexes[0]
+  const endIndex = selectedIndexes[selectedIndexes.length - 1]
 
   const allDates = Object.keys(timeSeriesData.value)
-  const totalDates = allDates.length
 
-  const startIndex = Math.floor((filterWindow.start / 100) * totalDates)
-  const endIndex = Math.ceil((filterWindow.end / 100) * totalDates)
+  const startDate = allDates[startIndex]
+  const endDate = allDates[endIndex]
 
-  const filteredDates = allDates.slice(startIndex, endIndex)
+  if (!startDate || !endDate) return
+
   observationsStore.dateFilter = {
-    start: filteredDates[0] as string,
-    end: filteredDates[filteredDates.length - 1] as string,
+    start: startDate,
+    end: endDate,
   }
 }
 
@@ -92,12 +88,20 @@ onMounted(() => {
 
   if (!chart) return
 
-  chart.on('dataZoom', () => {
-    debouncedUpdate()
+  chart.on('brushSelected', (params: any) => {
+    debouncedUpdate(params)
   })
 
-  // Initialize the filtered data
-  updateFilteredData()
+  chart.on('brush', (params: any) => {
+    const areas = params.areas
+    if (areas.length === 0) {
+      // Clear date filter
+      observationsStore.dateFilter = {
+        start: originalDateLimits.value?.start ?? null,
+        end: originalDateLimits.value?.end ?? null,
+      }
+    }
+  })
 })
 
 watch(
@@ -105,10 +109,17 @@ watch(
   (newData) => {
     if (!timeSeriesData.value || Object.keys(timeSeriesData.value).length === 0) {
       fixDateAggregationData(newData)
-      updateFilteredData()
+      const allDates = Object.keys(timeSeriesData.value)
+      originalDateLimits.value = {
+        start: allDates[0] as string,
+        end: allDates[allDates.length - 1] as string,
+      }
+      observationsStore.dateFilter = {
+        start: originalDateLimits.value.start,
+        end: originalDateLimits.value.end,
+      }
       return
     }
-    // timeSeriesData.value = newData
   },
   { immediate: true },
 )
@@ -130,24 +141,29 @@ const option = computed(() => ({
     containLabel: true,
     // backgroundColor: 'rgba(0, 255, 255, 0.8)',
   },
-  dataZoom: [
-    {
-      type: 'slider',
-      show: true,
-      start: observationsStore.datesFilterPercentage.start,
-      end: observationsStore.datesFilterPercentage.end,
+  toolbox: {
+    feature: {
+      // dataZoom: {
+      //   yAxisIndex: false,
+      // },
+      brush: {
+        type: ['lineX', 'clear'],
+      },
     },
-    {
-      type: 'inside',
-      show: true,
-      start: observationsStore.datesFilterPercentage.start,
-      end: observationsStore.datesFilterPercentage.end,
+  },
+  brush: {
+    brushMode: 'single',
+    brushType: 'lineX',
+    brushStyle: {
+      borderWidth: 2,
+      color: 'rgba(0,136,212,0.15)',
+      borderColor: 'rgba(0,136,212,0.8)',
     },
-  ],
+  },
   series: [
     {
       data: Object.values(timeSeriesData.value),
-      type: 'line',
+      type: 'bar',
       showSymbol: false,
     },
   ],

@@ -328,7 +328,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => observationsStore.datesFilterPercentage,
+  () => observationsStore.dateFilter,
   () => {
     // Clear processed resolutions to force reprocessing
     processedResolutions.value.clear()
