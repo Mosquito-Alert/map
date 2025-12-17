@@ -1,36 +1,41 @@
 <template>
-  <div class="absolute bottom-0 left-[30%] z-10">
-    <div class="w-full flex items-end justify-between">
-      <Button
-        severity="secondary"
-        size="small"
-        class="px-3 py-0 bg-gray-100 border-gray-400 border-b-0 rounded-b-none"
-        @click="showChart = !showChart"
-      >
-        <span class="material-icons-outlined">
-          {{ showChart ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}
-        </span>
-        {{ showChart ? 'Ocultar Serie Temporal' : 'Serie Temporal' }}
-      </Button>
-      <div
-        class="px-3 py-0 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-b-none rounded-md cursor-default text-gray-700 text-sm font-medium"
-        v-if="showChart"
-      >
-        <span class="font-semibold">{{
-          formatDate(observationsStore.dateFilter.start || '')
-        }}</span>
+  <div class="absolute bottom-10 right-2 z-10 flex flex-col items-center">
+    <div
+      class="dates-controller inline-flex flex-nowrap items-center gap-6 px-3 py-2 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md"
+      :class="showChart ? 'mb-4' : 'mb-0'"
+    >
+      <div class="dates whitespace-nowrap">
+        <span class="font-medium">{{ formatDate(observationsStore.dateFilter.start || '') }}</span>
         -
-        <span class="font-semibold">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
+        <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
+      </div>
+      <div class="flex items-end justify-end" v-if="!showChart">
+        <Button
+          severity="secondary"
+          size="small"
+          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
+          @click="showChart = true"
+        >
+          <span class="text-gray-700 material-icons-outlined"> open_in_full </span>
+        </Button>
       </div>
     </div>
-    <VChart
-      ref="chartRef"
+    <div
+      class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg"
       v-if="showChart"
-      class="bg-white! border-gray-400! border-1! h-40! w-xl!"
-      :option="option"
-      :loading="loading"
-      autoresize
-    />
+    >
+      <div class="w-full flex items-end justify-end">
+        <Button
+          severity="secondary"
+          size="small"
+          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
+          @click="showChart = false"
+        >
+          <span class="text-gray-700 material-icons-outlined"> close_fullscreen </span>
+        </Button>
+      </div>
+      <VChart ref="chartRef" class="h-40! w-xl!" :option="option" :loading="loading" autoresize />
+    </div>
   </div>
 </template>
 
@@ -144,13 +149,14 @@ const option = computed(() => ({
   },
   yAxis: {
     type: 'value',
+    show: false,
   },
   grid: {
-    show: true,
-    left: '3%',
-    right: '4%',
-    bottom: '20%',
-    top: '5%',
+    show: false,
+    left: '7%',
+    right: '5%',
+    bottom: '15%',
+    top: '0%',
     // containLabel: true,
     // backgroundColor: 'rgba(0, 255, 255, 0.8)',
   },

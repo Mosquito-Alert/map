@@ -199,6 +199,28 @@ const showOnlyResolution = (targetResolution: number | null) => {
   }
 }
 
+// Handle zoom events for dynamic resolution switching
+const handleZoomChange = async () => {
+  if (!map.value) return
+  const zoom = map.value.getZoom()
+  const targetResolution = getResolutionForZoom(zoom)
+
+  if (zoom >= 10) {
+    // Show individual points at high zoom
+    showOnlyResolution(null)
+  } else {
+    // Process resolution if not already processed
+    if (!processedResolutions.value.has(targetResolution)) {
+      buildOriginalData(targetResolution, dataCache.value)
+      filterData(targetResolution)
+      addOrUpdateH3Layer(targetResolution)
+    }
+
+    // Show appropriate hexagon resolution
+    showOnlyResolution(targetResolution)
+  }
+}
+
 onMounted(async () => {
   if (mapContainer.value) {
     // Initialize map immediately for faster perceived load time
@@ -206,6 +228,7 @@ onMounted(async () => {
       container: mapContainer.value,
       center: [11.39831, 47.26244],
       zoom: 2,
+      // attributionControl: false,
     })
     if (!map.value) return
 
@@ -215,6 +238,7 @@ onMounted(async () => {
     map.value.on('styledata', () => {
       map.value?.setProjection({ type: 'globe' })
     })
+    map.value.addControl(new maplibregl.FullscreenControl(), 'top-right')
     map.value.addControl(
       new maplibregl.NavigationControl({
         visualizePitch: true,
@@ -222,7 +246,7 @@ onMounted(async () => {
         showZoom: true,
         showCompass: true,
       }),
-      'bottom-right',
+      'top-right',
     )
     // Add geolocate control to the map.
     map.value.addControl(
@@ -233,10 +257,15 @@ onMounted(async () => {
         trackUserLocation: true,
         showUserLocation: false,
       }),
-      'bottom-right',
+      'top-right',
     )
-    map.value.addControl(new maplibregl.FullscreenControl(), 'top-right')
     map.value.addControl(new MapInfoControl(), 'top-right')
+    // map.value.addControl(
+    //   new maplibregl.AttributionControl({
+    //     compact: true,
+    //   }),
+    //   'bottom-right',
+    // )
 
     // Start data loading in background
     const dataPromise = fetch(data).then((resp) => resp.json())
@@ -279,28 +308,6 @@ onMounted(async () => {
 
       // Add initial H3 layer
       addOrUpdateH3Layer(initialResolution)
-
-      // Handle zoom events for dynamic resolution switching
-      const handleZoomChange = async () => {
-        if (!map.value) return
-        const zoom = map.value.getZoom()
-        const targetResolution = getResolutionForZoom(zoom)
-
-        if (zoom >= 10) {
-          // Show individual points at high zoom
-          showOnlyResolution(null)
-        } else {
-          // Process resolution if not already processed
-          if (!processedResolutions.value.has(targetResolution)) {
-            buildOriginalData(targetResolution, dataCache.value)
-            filterData(targetResolution)
-            addOrUpdateH3Layer(targetResolution)
-          }
-
-          // Show appropriate hexagon resolution
-          showOnlyResolution(targetResolution)
-        }
-      }
 
       // TODO:
       // Debounced zoom event handler to prevent multiple calls
