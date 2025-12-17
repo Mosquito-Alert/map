@@ -1,16 +1,28 @@
 <template>
   <div class="absolute bottom-0 left-[30%] z-10">
-    <Button
-      severity="secondary"
-      size="small"
-      class="rounded-b-none px-3 py-0 flex items-center gap-2 border-gray-400 border-b-0"
-      @click="showChart = !showChart"
-    >
-      <span class="material-icons-outlined">
-        {{ showChart ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}
-      </span>
-      {{ showChart ? 'Ocultar Serie Temporal' : 'Serie Temporal' }}
-    </Button>
+    <div class="w-full flex items-end justify-between">
+      <Button
+        severity="secondary"
+        size="small"
+        class="px-3 py-0 bg-gray-100 border-gray-400 border-b-0 rounded-b-none"
+        @click="showChart = !showChart"
+      >
+        <span class="material-icons-outlined">
+          {{ showChart ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}
+        </span>
+        {{ showChart ? 'Ocultar Serie Temporal' : 'Serie Temporal' }}
+      </Button>
+      <div
+        class="px-3 py-0 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-b-none rounded-md cursor-default text-gray-700 text-sm font-medium"
+        v-if="showChart"
+      >
+        <span class="font-semibold">{{
+          formatDate(observationsStore.dateFilter.start || '')
+        }}</span>
+        -
+        <span class="font-semibold">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
+      </div>
+    </div>
     <VChart
       ref="chartRef"
       v-if="showChart"
@@ -32,6 +44,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { debounce } from '../../utils/debouncer'
+import { formatDate } from '../../utils/date'
 
 use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 
@@ -138,7 +151,7 @@ const option = computed(() => ({
     right: '4%',
     bottom: '20%',
     top: '5%',
-    containLabel: true,
+    // containLabel: true,
     // backgroundColor: 'rgba(0, 255, 255, 0.8)',
   },
   toolbox: {

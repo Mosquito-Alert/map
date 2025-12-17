@@ -2,15 +2,6 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <TimeSeries :timeSeriesData="originalDateAggregationData" />
-      <div
-        class="absolute top-0 right-15 z-10 mt-2.5 py-1 px-2 bg-gray-100 border-gray-400 border-1 rounded-md shadow-md cursor-default text-gray-700 text-sm font-medium"
-      >
-        <span class="font-semibold">{{
-          formatDate(observationsStore.dateFilter.start || '')
-        }}</span>
-        -
-        <span class="font-semibold">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
-      </div>
     </div>
   </main>
 </template>
@@ -22,9 +13,7 @@ import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
-import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
-import { formatDate } from '../../utils/date'
 
 type DataPoint = {
   uuid: string
@@ -35,7 +24,6 @@ type DataPoint = {
   }
 }
 
-const mapStore = useMapStore()
 const observationsStore = useObservationsStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -85,7 +73,6 @@ const getResolutionForZoom = (zoom: number): number => {
 
 const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
   if (processedResolutions.value.has(resolution)) return
-  console.time('buildOriginalData')
 
   const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
 
@@ -114,8 +101,6 @@ const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
       }
     }
   }
-
-  console.timeEnd('buildOriginalData')
 
   originalDateAggregationData.value = { ...originalDateAggregationData.value } // Trigger reactivity
   renderedHexData.value[resolution] = originalHexData.value[resolution] // Initialize rendered data
