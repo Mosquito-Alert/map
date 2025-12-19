@@ -61,6 +61,10 @@ const observationsStore = useObservationsStore()
 
 const originalDateLimits = ref<{ start: string; end: string } | null>(null)
 const timeSeriesData = ref<Record<string, number>>({})
+const timeSeriesDataMonthly = ref<{
+  months: string[]
+  values: number[]
+}>({ months: [], values: [] })
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 
@@ -79,6 +83,24 @@ const fixDateAggregationData = (data: Record<string, number>) => {
   timeSeriesData.value = result
 }
 
+const compressDataByMonth = () => {
+  const monthlyMap: Record<string, number> = {}
+
+  Object.entries(timeSeriesData.value).forEach(([date, value]) => {
+    const d = new Date(date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    monthlyMap[key] = (monthlyMap[key] || 0) + value
+  })
+
+  // Sorted result
+  const months = Object.keys(monthlyMap).sort()
+  const values = months.map((m) => monthlyMap[m] || 0)
+  timeSeriesDataMonthly.value = {
+    months: months,
+    values: values,
+  }
+}
+
 const updateFilteredData = (params: any) => {
   const selectedIndexes = params.batch?.[0]?.selected?.[0]?.dataIndex
   if (!selectedIndexes) return
@@ -86,7 +108,7 @@ const updateFilteredData = (params: any) => {
   const startIndex = selectedIndexes[0]
   const endIndex = selectedIndexes[selectedIndexes.length - 1]
 
-  const allDates = Object.keys(timeSeriesData.value)
+  const allDates = Object.values(timeSeriesDataMonthly.value.months)
 
   const startDate = allDates[startIndex]
   const endDate = allDates[endIndex]
@@ -94,8 +116,8 @@ const updateFilteredData = (params: any) => {
   if (!startDate || !endDate) return
 
   observationsStore.dateFilter = {
-    start: startDate,
-    end: endDate,
+    start: `${startDate}-01`,
+    end: `${endDate}-01`,
   }
 }
 
@@ -127,6 +149,7 @@ watch(
   (newData) => {
     if (!timeSeriesData.value || Object.keys(timeSeriesData.value).length === 0) {
       fixDateAggregationData(newData)
+      compressDataByMonth()
       const allDates = Object.keys(timeSeriesData.value)
       originalDateLimits.value = {
         start: allDates[0] as string,
@@ -145,7 +168,12 @@ watch(
 const option = computed(() => ({
   xAxis: {
     type: 'category',
-    data: Object.keys(timeSeriesData.value),
+    data: timeSeriesDataMonthly.value.months.map((m) => {
+      const [year, month] = m.split('-')
+      const date = new Date(Number(year), Number(month) - 1, 1)
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+    }),
+    // data: Object.keys(timeSeriesData.value),
   },
   yAxis: {
     type: 'value',
@@ -181,7 +209,8 @@ const option = computed(() => ({
   },
   series: [
     {
-      data: Object.values(timeSeriesData.value),
+      data: timeSeriesDataMonthly.value.values,
+      // data: Object.values(timeSeriesData.value),
       type: 'bar',
       showSymbol: false,
     },
