@@ -3,7 +3,7 @@
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-2 z-10 flex flex-row items-end">
         <TimeSeries :timeSeriesData="originalDateAggregationData" />
-        <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors" />
+        <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors[currentResolution as number]" />
       </div>
     </div>
   </main>
@@ -37,11 +37,13 @@ const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const dataCache = ref<DataPoint[]>([]) // Cache for lazy loading
 const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
+const currentResolution = ref<number | null>(null)
 const originalHexData = ref<Record<number, Record<string, any>>>({})
 const originalDateAggregationData = ref<Record<string, number>>({})
 const renderedHexData = ref<Record<number, Record<string, any>>>({})
 const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
-const mapColors = ref<Record<string, { value: number; color: string }>>({})
+const mapColors = ref<Record<number, Record<string, { value: number; color: string }>>>({}) // Color mapping for current resolution
+const renderedMapColors = ref<Record<string, { value: number; color: string }>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -143,7 +145,7 @@ const getMapColors = (resolution: number) => {
     )
     ascSortedArrHexCounts.value.sort((a, b) => a - b)
   }
-  mapColors.value = {
+  mapColors.value[resolution] = {
     '0': { value: 0, color: 'rgba(255, 255, 204, 0.2)' },
     '25': {
       value: quantile(ascSortedArrHexCounts.value, 0.25),
@@ -155,23 +157,24 @@ const getMapColors = (resolution: number) => {
   }
 
   // Ensure quantiles are different, adding small offsets if necessary
-  for (let i = 0; i < Object.keys(mapColors.value).length - 1; i++) {
-    const previousKey = i > 0 ? Object.keys(mapColors.value)[i - 1] : null
-    const currentKey = Object.keys(mapColors.value)[i] as string
+  for (let i = 0; i < Object.keys(mapColors.value[resolution]).length - 1; i++) {
+    const previousKey = i > 0 ? Object.keys(mapColors.value[resolution])[i - 1] : null
+    const currentKey = Object.keys(mapColors.value[resolution])[i] as string
     if (
       previousKey &&
-      mapColors.value[currentKey] &&
-      mapColors.value[previousKey] &&
-      mapColors.value[currentKey].value === mapColors.value[previousKey].value
+      mapColors.value[resolution][currentKey] &&
+      mapColors.value[resolution][previousKey] &&
+      mapColors.value[resolution][currentKey].value ===
+        mapColors.value[resolution][previousKey].value
     ) {
-      mapColors.value[currentKey].value += 0.1
+      mapColors.value[resolution][currentKey].value += 0.1
     }
   }
 }
 
 // Function to add/update H3 layer for a resolution
 const addOrUpdateH3Layer = (resolution: number) => {
-  if (!map.value || !renderedHexData.value[resolution]) return
+  if (!map.value || !renderedHexData.value[resolution] || !mapColors.value[resolution]) return
 
   const sourceId = `h3-res-${resolution}`
   const layerId = `h3-layer-res-${resolution}`
@@ -193,8 +196,6 @@ const addOrUpdateH3Layer = (resolution: number) => {
     },
   })
 
-  getMapColors(resolution)
-
   map.value.addLayer({
     id: layerId,
     source: sourceId,
@@ -207,16 +208,10 @@ const addOrUpdateH3Layer = (resolution: number) => {
         'interpolate',
         ['linear'],
         ['get', 'count'],
-        mapColors.value['0']?.value as number,
-        mapColors.value['0']?.color as string,
-        mapColors.value['25']?.value as number,
-        mapColors.value['25']?.color as string,
-        mapColors.value['50']?.value as number,
-        mapColors.value['50']?.color as string,
-        mapColors.value['75']?.value as number,
-        mapColors.value['75']?.color as string,
-        mapColors.value['max']?.value as number,
-        mapColors.value['max']?.color as string,
+        ...Object.entries(mapColors.value[resolution]).flatMap(([key, stop]) => [
+          stop.value as number,
+          stop.color as string,
+        ]),
       ],
       'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
     },
@@ -254,6 +249,7 @@ const handleZoomChange = async () => {
   if (!map.value) return
   const zoom = map.value.getZoom()
   const targetResolution = getResolutionForZoom(zoom)
+  currentResolution.value = targetResolution
 
   if (zoom >= 10) {
     // Show individual points at high zoom
@@ -263,6 +259,7 @@ const handleZoomChange = async () => {
     if (!processedResolutions.value.has(targetResolution)) {
       buildOriginalData(targetResolution, dataCache.value)
       filterData(targetResolution)
+      getMapColors(targetResolution)
       addOrUpdateH3Layer(targetResolution)
     }
 
@@ -329,9 +326,9 @@ onMounted(async () => {
 
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()
-      const initialResolution = getResolutionForZoom(initialZoom)
+      currentResolution.value = getResolutionForZoom(initialZoom)
 
-      buildOriginalData(initialResolution, dataCache.value)
+      buildOriginalData(currentResolution.value, dataCache.value)
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
@@ -357,8 +354,10 @@ onMounted(async () => {
         },
       })
 
+      getMapColors(currentResolution.value)
+
       // Add initial H3 layer
-      addOrUpdateH3Layer(initialResolution)
+      addOrUpdateH3Layer(currentResolution.value)
 
       // TODO:
       // Debounced zoom event handler to prevent multiple calls
@@ -383,10 +382,11 @@ watch(
     // Reprocess current zoom level
     if (map.value) {
       const zoom = map.value.getZoom()
-      const targetResolution = getResolutionForZoom(zoom)
-      filterData(targetResolution)
-      addOrUpdateH3Layer(targetResolution)
-      showOnlyResolution(zoom >= 10 ? null : targetResolution)
+      currentResolution.value = getResolutionForZoom(zoom)
+      filterData(currentResolution.value)
+      getMapColors(currentResolution.value)
+      addOrUpdateH3Layer(currentResolution.value)
+      showOnlyResolution(zoom >= 10 ? null : currentResolution.value)
     }
   },
   { deep: true },
