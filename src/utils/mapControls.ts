@@ -3,6 +3,7 @@ import MyPopup from '../components/Map/MapInfoPopup.vue'
 import PrimeVue from 'primevue/config'
 import Dialog from 'primevue/dialog'
 import type { IControl } from 'maplibre-gl'
+import { useMapStore } from '../stores/mapStore'
 
 export class MapInfoControl implements IControl {
   _container: HTMLElement | null
@@ -23,7 +24,7 @@ export class MapInfoControl implements IControl {
     this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group'
 
     const button = document.createElement('button')
-    button.className = 'flex! justify-center! items-center!'
+    button.className = 'map-info flex! justify-center! items-center!'
     button.innerHTML = '<span class="material-icons-outlined">info</span>'
     button.type = 'button'
     this._container.appendChild(button)
@@ -47,6 +48,36 @@ export class MapInfoControl implements IControl {
   onRemove() {
     this._vueInstance?.unmount()
     this._vuePopup?.remove()
+    this._container?.remove()
+  }
+}
+
+export class MapLegendControl implements IControl {
+  _container: HTMLElement | null
+
+  constructor() {
+    this._container = null
+  }
+
+  onAdd(map: any) {
+    this._container = document.createElement('div')
+    this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+
+    const button = document.createElement('button')
+    button.className = 'map-legend flex! justify-center! items-center!'
+    button.innerHTML = `<span class="material-icons-outlined">ballot</span>`
+    this._container.appendChild(button)
+
+    button.onclick = () => {
+      // Toggle the showLegend state in the map store
+      const mapStore = useMapStore()
+      mapStore.showLegend = !mapStore.showLegend
+    }
+
+    return this._container
+  }
+
+  onRemove() {
     this._container?.remove()
   }
 }

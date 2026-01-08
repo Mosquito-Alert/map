@@ -1,19 +1,25 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <TimeSeries :timeSeriesData="originalDateAggregationData" />
+      <div class="absolute bottom-10 right-2 z-10 flex flex-row items-end">
+        <TimeSeries :timeSeriesData="originalDateAggregationData" />
+        <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors" />
+      </div>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import { MapInfoControl } from '@/utils/mapControls'
+import { MapInfoControl, MapLegendControl } from '@/utils/mapControls'
 import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
+import MapLegend from './MapLegend.vue'
 import { useObservationsStore } from '../../stores/observationsStore'
+import { useMapStore } from '../../stores/mapStore'
+import { quantile } from '../../utils/utils'
 
 type DataPoint = {
   uuid: string
@@ -25,6 +31,7 @@ type DataPoint = {
 }
 
 const observationsStore = useObservationsStore()
+const mapStore = useMapStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
@@ -33,6 +40,8 @@ const processedResolutions = ref<Set<number>>(new Set()) // Track processed reso
 const originalHexData = ref<Record<number, Record<string, any>>>({})
 const originalDateAggregationData = ref<Record<string, number>>({})
 const renderedHexData = ref<Record<number, Record<string, any>>>({})
+const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
+const mapColors = ref<Record<string, { value: number; color: string }>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -74,6 +83,7 @@ const getResolutionForZoom = (zoom: number): number => {
 const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
   if (processedResolutions.value.has(resolution)) return
 
+  // Determine if we need to aggregate by date (this is done only once)
   const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
 
   originalHexData.value[resolution] = {}
@@ -112,6 +122,7 @@ const filterData = (resolution: number) => {
   const endingDate = observationsStore.dateFilter.end
 
   renderedHexData.value[resolution] = {}
+  ascSortedArrHexCounts.value = []
 
   for (const [hex, feature] of Object.entries(
     originalHexData.value[resolution] as Record<string, any>,
@@ -119,6 +130,41 @@ const filterData = (resolution: number) => {
     const featureDate = feature.properties.date
     if (featureDate >= startingDate! && featureDate <= endingDate!) {
       renderedHexData.value[resolution][hex] = feature
+    }
+  }
+}
+
+const getMapColors = (resolution: number) => {
+  if (!renderedHexData.value[resolution]) return
+
+  if (ascSortedArrHexCounts.value.length === 0) {
+    ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
+      (f: any) => f.properties.count,
+    )
+    ascSortedArrHexCounts.value.sort((a, b) => a - b)
+  }
+  mapColors.value = {
+    '0': { value: 0, color: 'rgba(255, 255, 204, 0.2)' },
+    '25': {
+      value: quantile(ascSortedArrHexCounts.value, 0.25),
+      color: 'rgba(255, 200, 150, 0.35)',
+    },
+    '50': { value: quantile(ascSortedArrHexCounts.value, 0.5), color: 'rgba(255, 100, 50, 0.5)' },
+    '75': { value: quantile(ascSortedArrHexCounts.value, 0.75), color: 'rgba(255, 50, 20, 0.7)' },
+    max: { value: quantile(ascSortedArrHexCounts.value, 0.95), color: 'rgba(204, 0, 0, 0.9)' }, // Cap at 95th percentile to avoid outliers
+  }
+
+  // Ensure quantiles are different, adding small offsets if necessary
+  for (let i = 0; i < Object.keys(mapColors.value).length - 1; i++) {
+    const previousKey = i > 0 ? Object.keys(mapColors.value)[i - 1] : null
+    const currentKey = Object.keys(mapColors.value)[i] as string
+    if (
+      previousKey &&
+      mapColors.value[currentKey] &&
+      mapColors.value[previousKey] &&
+      mapColors.value[currentKey].value === mapColors.value[previousKey].value
+    ) {
+      mapColors.value[currentKey].value += 0.1
     }
   }
 }
@@ -147,6 +193,8 @@ const addOrUpdateH3Layer = (resolution: number) => {
     },
   })
 
+  getMapColors(resolution)
+
   map.value.addLayer({
     id: layerId,
     source: sourceId,
@@ -159,14 +207,16 @@ const addOrUpdateH3Layer = (resolution: number) => {
         'interpolate',
         ['linear'],
         ['get', 'count'],
-        0,
-        'rgba(255, 255, 204, 0.3)',
-        50,
-        'rgba(255, 200, 150, 0.6)',
-        200,
-        'rgba(255, 100, 50, 0.8)',
-        500,
-        'rgba(204, 0, 0, 0.9)',
+        mapColors.value['0']?.value as number,
+        mapColors.value['0']?.color as string,
+        mapColors.value['25']?.value as number,
+        mapColors.value['25']?.color as string,
+        mapColors.value['50']?.value as number,
+        mapColors.value['50']?.color as string,
+        mapColors.value['75']?.value as number,
+        mapColors.value['75']?.color as string,
+        mapColors.value['max']?.value as number,
+        mapColors.value['max']?.color as string,
       ],
       'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
     },
@@ -259,6 +309,7 @@ onMounted(async () => {
       }),
       'top-right',
     )
+    map.value.addControl(new MapLegendControl(), 'top-right')
     map.value.addControl(new MapInfoControl(), 'top-right')
     // map.value.addControl(
     //   new maplibregl.AttributionControl({

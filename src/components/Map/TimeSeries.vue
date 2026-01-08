@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute bottom-10 right-2 z-10 flex flex-col items-center">
+  <div class="flex flex-col items-center">
     <div
       class="dates-controller inline-flex flex-nowrap items-center gap-6 px-3 py-2 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md"
       :class="showChart ? 'mb-4' : 'mb-0'"

@@ -5,6 +5,7 @@ import { cellToBoundary, latLngToCell } from 'h3-js'
 export const useMapStore = defineStore('map', {
   state: () => ({
     showDiscoveries: false,
+    showLegend: false,
     layerSelected: MosquitoLayersEnum.observations as MosquitoLayersEnum,
     variablesSelected: [] as VariablesLayersEnum[],
     hex_data: {} as Record<string, any>,
