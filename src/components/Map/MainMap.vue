@@ -43,7 +43,6 @@ const originalDateAggregationData = ref<Record<string, number>>({})
 const renderedHexData = ref<Record<number, Record<string, any>>>({})
 const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
 const mapColors = ref<Record<number, Record<string, { value: number; color: string }>>>({}) // Color mapping for current resolution
-const renderedMapColors = ref<Record<string, { value: number; color: string }>>({})
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -154,6 +153,10 @@ const getMapColors = (resolution: number) => {
     '50': { value: quantile(ascSortedArrHexCounts.value, 0.5), color: 'rgba(255, 100, 50, 0.5)' },
     '75': { value: quantile(ascSortedArrHexCounts.value, 0.75), color: 'rgba(255, 50, 20, 0.7)' },
     max: { value: quantile(ascSortedArrHexCounts.value, 0.95), color: 'rgba(204, 0, 0, 0.9)' }, // Cap at 95th percentile to avoid outliers
+    actualMax: {
+      value: ascSortedArrHexCounts.value[ascSortedArrHexCounts.value.length - 1] || 0,
+      color: 'rgba(204, 0, 0, 0.9)',
+    },
   }
 
   // Ensure quantiles are different, adding small offsets if necessary

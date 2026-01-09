@@ -22,10 +22,13 @@ const props = defineProps<{
 const mapColors = ref(props.mapColors as Record<string, { value: number; color: string }>)
 
 const gradientStyle = computed(() => {
-  const stops = Object.entries(mapColors.value).map(([key, stop]) => {
-    const percent = key === 'max' ? 100 : Number(key)
-    return `${stop.color} ${percent}%`
-  })
+  const stops = Object.entries(mapColors.value)
+    // TODO: Review which value to show in legend labels (max or actualMax)
+    .filter(([key]) => key !== 'max')
+    .map(([key, stop]) => {
+      const percent = key === 'actualMax' ? 100 : Number(key)
+      return `${stop.color} ${percent}%`
+    })
 
   return {
     background: `linear-gradient(to right, ${stops.join(', ')})`,
@@ -33,17 +36,19 @@ const gradientStyle = computed(() => {
 })
 
 const labelStops = computed(() =>
-  Object.entries(mapColors.value).map(([key, stop]) => ({
-    key,
-    value: Math.round(stop.value),
-  })),
+  Object.entries(mapColors.value)
+    // TODO: Review which value to show in legend labels (max or actualMax)
+    .filter(([key]) => key !== 'max')
+    .map(([key, stop]) => ({
+      key,
+      value: Math.round(stop.value),
+    })),
 )
 
 watch(
   () => props.mapColors,
   (newColors) => {
     mapColors.value = newColors as Record<string, { value: number; color: string }>
-    console.log('Map colors prop changed:', mapColors.value)
   },
 )
 </script>
