@@ -1,10 +1,14 @@
 <template>
-  <div class="legend w-40 h-40 ml-2 bg-white! border-gray-400! border-1! rounded-sm shadow-lg">
-    <div class="legend-title bg-gray-100! p-2">
+  <div
+    class="legend w-40 ml-2 p-2 min-w-50 bg-white! border-gray-400! border-1! rounded-sm shadow-lg"
+  >
+    <div class="legend-title bg-gray-100! mb-2">
       <h4 class="text-lg font-semibold">Leyenda</h4>
-      <div class="gradient-bar" :style="gradientStyle"></div>
+    </div>
+    <div class="legend-content h-full">
+      <div class="gradient-bar h-7 rounded border border-gray-300" :style="gradientStyle"></div>
 
-      <div class="labels">
+      <div class="labels mt-2 size-sm flex justify-between">
         <span v-for="stop in labelStops" :key="stop.key">
           {{ stop.value }}
         </span>
@@ -52,22 +56,4 @@ watch(
   },
 )
 </script>
-<style scoped>
-.legend {
-  width: 300px;
-  font-family: sans-serif;
-}
-
-.gradient-bar {
-  height: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  margin-top: 6px;
-}
-</style>
+<style scoped></style>
