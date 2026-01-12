@@ -98,9 +98,10 @@ const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
           type: 'Polygon',
           coordinates: [cellToBoundary(hex, true)],
         },
-        properties: { hex, count: 1, date: received_at },
+        properties: { hex, dates: [received_at], count: 1 },
       }
     } else {
+      originalHexData.value[resolution][hex].properties.dates.push(received_at)
       originalHexData.value[resolution][hex].properties.count += 1
     }
     if (aggregateByDate) {
@@ -128,9 +129,22 @@ const filterData = (resolution: number) => {
   for (const [hex, feature] of Object.entries(
     originalHexData.value[resolution] as Record<string, any>,
   )) {
-    const featureDate = feature.properties.date
-    if (featureDate >= startingDate! && featureDate <= endingDate!) {
-      renderedHexData.value[resolution][hex] = feature
+    const featureDates = feature.properties.dates as string[]
+    const filteredDates = featureDates.filter((dateStr) => {
+      const dateOnly = dateStr.split('T')[0] || dateStr
+      return (!startingDate || dateOnly >= startingDate) && (!endingDate || dateOnly <= endingDate)
+    })
+
+    if (filteredDates.length > 0) {
+      // Update feature with filtered dates and count
+      renderedHexData.value[resolution][hex] = {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          dates: filteredDates,
+          count: filteredDates.length,
+        },
+      }
     }
   }
 }
@@ -140,7 +154,7 @@ const getMapColors = (resolution: number) => {
 
   if (ascSortedArrHexCounts.value.length === 0) {
     ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
-      (f: any) => f.properties.count,
+      (f: any) => f.properties.dates.length,
     )
     ascSortedArrHexCounts.value.sort((a, b) => a - b)
   }
