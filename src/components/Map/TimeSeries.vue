@@ -35,6 +35,18 @@
         </Button>
       </div>
       <VChart ref="chartRef" class="h-40! w-xl!" :option="option" :loading="loading" autoresize />
+      <div class="playback">
+        <Button
+          severity="secondary"
+          size="small"
+          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
+          @click="playbackOngoing = !playbackOngoing"
+        >
+          <span class="text-gray-700 material-icons-outlined">
+            {{ playbackOngoing ? 'pause' : 'play_arrow' }}
+          </span>
+        </Button>
+      </div>
     </div>
   </div>
 </template>
@@ -67,6 +79,7 @@ const timeSeriesDataMonthly = ref<{
 }>({ months: [], values: [] })
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
+const playbackOngoing = ref(false)
 
 const fixDateAggregationData = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
@@ -123,6 +136,26 @@ const updateFilteredData = (params: any) => {
 
 const debouncedUpdate = debounce(updateFilteredData, 250)
 
+const playback = () => {
+  const endingDate = new Date(observationsStore.dateFilter.end || '')
+  let currentDate = new Date(observationsStore.dateFilter.start || '')
+
+  const interval = setInterval(() => {
+    if (currentDate > endingDate || !playbackOngoing.value) {
+      clearInterval(interval)
+      playbackOngoing.value = false
+      return
+    }
+
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+
+    observationsStore.dateFilter.end = `${year}-${month}-01`
+
+    currentDate.setMonth(currentDate.getMonth() + 1)
+  }, 500)
+}
+
 onMounted(() => {
   const chart = chartRef.value?.chart
 
@@ -130,6 +163,7 @@ onMounted(() => {
 
   chart.on('brushSelected', (params: any) => {
     debouncedUpdate(params)
+    playbackOngoing.value = false
   })
 
   chart.on('brush', (params: any) => {
@@ -140,6 +174,7 @@ onMounted(() => {
         start: originalDateLimits.value?.start ?? null,
         end: originalDateLimits.value?.end ?? null,
       }
+      playbackOngoing.value = false
     }
   })
 })
@@ -164,6 +199,12 @@ watch(
   },
   { immediate: true },
 )
+
+watch(playbackOngoing, (newValue) => {
+  if (newValue) {
+    playback()
+  }
+})
 
 const option = computed(() => ({
   xAxis: {
@@ -209,8 +250,21 @@ const option = computed(() => ({
   },
   series: [
     {
-      data: timeSeriesDataMonthly.value.values,
-      // data: Object.values(timeSeriesData.value),
+      // data: timeSeriesDataMonthly.value.values,
+      data: timeSeriesDataMonthly.value.values.map((m, index) => {
+        const [year, month] = timeSeriesDataMonthly.value.months[index]?.split('-') || []
+        const date = new Date(Number(year), Number(month) - 1, 1)
+        return {
+          value: m,
+          itemStyle: {
+            color:
+              date >= new Date(observationsStore.dateFilter.start || '') &&
+              date <= new Date(observationsStore.dateFilter.end || '')
+                ? '#4473dc'
+                : '#cfd2d7',
+          },
+        }
+      }),
       type: 'bar',
       showSymbol: false,
     },
