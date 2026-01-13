@@ -68,12 +68,16 @@
       <fa-thin-button-menu name="fa-thin fa-globe" :label="$t('lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <a v-for="(item, index) in localeOptions" :key="index"
+            <a
+              v-for="locale in $i18n.availableLocales"
+              :key="`locale-${locale}`"
               href="#"
               class="main-menu-item"
-              :class="locale === item.value?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.value, $event)" ref="item.code">
-              <span>{{ item.label }}</span>
-          </a>
+              :class="locale === $i18n.locale ? 'menuItem active' : 'menuItem'"
+              @click.prevent="clickLanguageSelector(locale)"
+            >
+              <span>{{ getLanguageName(locale) }}</span>
+            </a>
           </div>
         </div>
       </fa-thin-button-menu>
@@ -83,16 +87,15 @@
 
 <script>
 import { useStore } from 'vuex'
-import { useQuasar } from 'quasar'
-import { onMounted, computed, watch } from 'vue'
+import { useQuasar, format } from 'quasar'
+import { onMounted, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonRouter from 'components/FaThinButtonRouter.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import { useCookies } from 'vue3-cookies'
 
-import languages from 'quasar/lang/index.json'
 import { useI18n } from 'vue-i18n'
-import enabledlanguages from 'src/i18n/index.js'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
@@ -112,17 +115,13 @@ export default {
   },
   setup (props, context) {
     const $q = useQuasar()
+    const { capitalize } = format
     const { cookies } = useCookies()
     const $store = useStore()
+    const router = useRouter()
+    const route = useRoute()
 
     const { t, locale } = useI18n({ useScope: 'global' })
-
-    watch(locale, (newValue, oldValue) => {
-      // Both vue-i18n and quasar app must be set.
-      import(`../../node_modules/quasar/lang/${newValue}.js`).then(lang => {
-        $q.lang.set(lang.default)
-      })
-    })
 
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
@@ -149,26 +148,25 @@ export default {
       return $store.getters['app/getLang']
     })
 
-    const clickLanguageSelector = (lang, event) => {
-      let object = event.target
-      locale.value = lang
-      const nextURL = $store.getters['app/getFrontendUrl'] + lang
-      const nextTitle = 'MosquitoAlert'
-      const nextState = { additionalInformation: 'Updated the URL with JS' }
-      window.history.pushState(nextState, nextTitle, nextURL)
-      window.history.replaceState(nextState, nextTitle, nextURL)
+    const clickLanguageSelector = (newLocale) => {
+      if (newLocale === locale.value) return
 
-      if (!object.classList.contains('menuItem')) object = object.parentNode
-      setLanguage(lang, object)
+      // Update i18n locale
+      locale.value = newLocale
+
+      setLanguage(newLocale)
+
+      // Build new path by replacing the locale param
+      router.push({
+        name: route.name,
+        params: { ...route.params, locale: newLocale },
+        query: route.query
+      })
     }
 
-    const setLanguage = async function (lang, object) {
+    const setLanguage = async function (lang) {
       await $store.dispatch('app/setInitData', lang)
       cookies.set('lang', lang)
-      object.parentNode.querySelectorAll('.menuItem').forEach(item => {
-        item.classList.remove('active')
-      })
-      object.classList.add('active')
       // NASTY
       let qLang = lang
       if (qLang === 'en') qLang = 'en-US'
@@ -206,15 +204,17 @@ export default {
       }
     })
 
+    function getLanguageName (isoName) {
+      return capitalize(new Intl.DisplayNames([isoName], { type: 'language' }).of(isoName))
+    }
+
     return {
       wmsVisibility,
       estimationsVisibility,
       loginLabel,
       lang,
       locale,
-      localeOptions: Object.keys(enabledlanguages).map(isoName => ({
-        value: isoName, label: languages.filter(lang => lang.isoName === isoName)[0].nativeName
-      })),
+      getLanguageName,
       frontendUrl,
       linkModels,
       showInfo,

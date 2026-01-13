@@ -20,16 +20,23 @@
 
 <script>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { DEFAULT_LOCALE } from 'src/boot/i18n'
 
 export default {
   props: ['name', 'label', 'link', 'class', 'item', 'id'],
   setup (props) {
+    const { locale } = useI18n()
+
     const Id = computed(() => {
       return props.id
     })
 
+    // Compute full link with current locale
     const toLink = computed(() => {
-      return props.link
+      const currentLocale = locale.value || DEFAULT_LOCALE
+      const path = props.link.startsWith('/') ? props.link : `/${props.link}`
+      return `/${currentLocale}${path}`
     })
 
     const iconCode = computed(() => {

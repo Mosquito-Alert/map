@@ -145,7 +145,7 @@ export default defineComponent({
     function handleShareView () {
       const frontend = $store.getters['app/getFrontendUrl']
       const content = {
-        url: frontend + 'discoveries/' + $store.getters['app/getLang'],
+        url: frontend + $store.getters['app/getLang'] + 'discoveries/',
         visibility: true,
         error: ''
       }
