@@ -68,21 +68,12 @@
       <fa-thin-button-menu name="fa-thin fa-globe" :label="$t('lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <a v-for="item in LANGS" :key="item.code"
+            <a v-for="(item, index) in localeOptions" :key="index"
               href="#"
-              :id="item.code"
               class="main-menu-item"
-              :class="lang==item.code?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.code, $event)" ref="item.code">
+              :class="locale === item.value?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.value, $event)" ref="item.code">
               <span>{{ item.label }}</span>
           </a>
-
-              <!-- <div :class="lang=='es'?'menuItem active':'menuItem'" @click="clickLanguageSelector('es', $event)" ref="es">
-                <span>Castellano</span>
-              </div>
-
-              <div :class="lang=='en'?'menuItem active':'menuItem'" @click="clickLanguageSelector('en', $event)" ref="en">
-                <span>English</span>
-              </div>-->
           </div>
         </div>
       </fa-thin-button-menu>
@@ -93,11 +84,15 @@
 <script>
 import { useStore } from 'vuex'
 import { useQuasar } from 'quasar'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonRouter from 'components/FaThinButtonRouter.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import { useCookies } from 'vue3-cookies'
+
+import languages from 'quasar/lang/index.json'
+import { useI18n } from 'vue-i18n'
+import enabledlanguages from 'src/i18n/index.js'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
@@ -116,18 +111,19 @@ export default {
     }
   },
   setup (props, context) {
-    const ca = ref(null)
-    const es = ref(null)
-    const en = ref(null)
-
     const $q = useQuasar()
     const { cookies } = useCookies()
     const $store = useStore()
-    const LANGS = $store.getters['app/getAllowedLangs']
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+    const { t, locale } = useI18n({ useScope: 'global' })
+
+    watch(locale, (newValue, oldValue) => {
+      // Both vue-i18n and quasar app must be set.
+      import(`../../node_modules/quasar/lang/${newValue}.js`).then(lang => {
+        $q.lang.set(lang.default)
+      })
+    })
+
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
     }
@@ -155,6 +151,7 @@ export default {
 
     const clickLanguageSelector = (lang, event) => {
       let object = event.target
+      locale.value = lang
       const nextURL = $store.getters['app/getFrontendUrl'] + lang
       const nextTitle = 'MosquitoAlert'
       const nextState = { additionalInformation: 'Updated the URL with JS' }
@@ -203,22 +200,21 @@ export default {
 
     const loginLabel = computed(() => {
       if ($store.getters['app/getAuthorized']) {
-        return this.$t('log_out')
+        return t('log_out')
       } else {
-        return this.$t('log_in')
+        return t('log_in')
       }
     })
 
     return {
-      trans,
       wmsVisibility,
       estimationsVisibility,
       loginLabel,
       lang,
-      LANGS,
-      ca,
-      es,
-      en,
+      locale,
+      localeOptions: Object.keys(enabledlanguages).map(isoName => ({
+        value: isoName, label: languages.filter(lang => lang.isoName === isoName)[0].nativeName
+      })),
       frontendUrl,
       linkModels,
       showInfo,
