@@ -8,6 +8,10 @@ export default boot(({ app }) => {
     fallbackLocale: 'en-US',
     legacy: false,
     globalInjection: true,
+    missing: (locale, key, vm) => {
+    // Return key itself to avoid errors
+      return key
+    },
     messages
   })
 
