@@ -9,7 +9,7 @@
       v-model="newTag"
       :loading="isFilteringTag"
       color="orange"
-      :label="trans('Placeholder hashtag')"
+      :label="$t('placeholder_hashtag')"
       @keyup.enter="addTag"
     >
     </q-input>

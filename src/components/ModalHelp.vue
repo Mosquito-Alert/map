@@ -34,8 +34,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5 class="q-my-md">{{ trans('Layers selector help') }}</h5>
-                      <p>{{ trans('Selecciona las capas de información que te interese visualizar: observaciones de mosquito, picaduras, lugares de cría, otras especies y esfuerzo de muestreo.') }}</p>
+                      <h5 class="q-my-md">{{ $t('layers_selector_help') }}</h5>
+                      <p>{{ $t('selecciona_las_capas_de_informacion_que_te_interese_visualizar_observaciones_de_mosquito_picaduras_lugares_de_cria_otras_especies_y_esfuerzo_de_muestreo') }}</p>
                     </div>
                   </div>
                 </div>
@@ -49,15 +49,15 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5 class="q-my-md">{{ trans('Filters help') }}</h5>
-                      <p>{{ trans('Filtra tu selección de distintas maneras:') }}</p>
-                      <p><b>{{ trans('POR LOCALIZACIÓN') }}</b>: {{ trans('Escribe y selecciona del desplegable tu lugar de interés') }}</p>
-                      <p><b>{{ trans('POR HASHTAG') }}</b>: {{ trans('puedes usar más de una etiqueta. Se mostrarán las observaciones que contengan como mínimo una de las etiquetas utilizadas.') }}</p>
-                      <p><b>{{ trans('POR IDENTIFICADOR') }}</b>{{ trans(': escribe el identificador corto de un informe en el buscador de hashtag precedido por el símbolo :') }}</p>
-                      <p>{{ trans('Ejemplo > :6RUID. Puedes usar más de un identificador. Se mostrarán las observaciones que contengan como mínimo uno de los identificadores utilizados.') }}</p>
-                      <p><b>{{ trans('POR FECHA O RANGO DE FECHAS') }}</b>{{ trans('Los filtros aplican a todas las capas de información de las observaciones (mosquitos, lugares de cría, picaduras, otras especies). La capa “esfuerzo de muestreo” sólo puede filtrarse por fecha o rango de fecha.') }}</p>
+                      <h5 class="q-my-md">{{ $t('filters_help') }}</h5>
+                      <p>{{ $t('filtra_tu_seleccion_de_distintas_maneras') }}</p>
+                      <p><b>{{ $t('por_localizacion') }}</b>: {{ $t('escribe_y_selecciona_del_desplegable_tu_lugar_de_interes') }}</p>
+                      <p><b>{{ $t('por_hashtag') }}</b>: {{ $t('puedes_usar_mas_de_una_etiqueta_se_mostraran_las_observaciones_que_contengan_como_minimo_una_de_las_etiquetas_utilizadas') }}</p>
+                      <p><b>{{ $t('por_identificador') }}</b>{{ $t('escribe_el_identificador_corto_de_un_informe_en_el_buscador_de_hashtag_precedido_por_el_simbolo') }}</p>
+                      <p>{{ $t('ejemplo_6ruid_puedes_usar_mas_de_un_identificador_se_mostraran_las_observaciones_que_contengan_como_minimo_uno_de_los_identificadores_utilizados') }}</p>
+                      <p><b>{{ $t('por_fecha_o_rango_de_fechas') }}</b>{{ $t('los_filtros_aplican_a_todas_las_capas_de_informacion_de_las_observaciones_mosquitos_lugares_de_cria_picaduras_otras_especies_la_capa_esfuerzo_de_muestreo_solo_puede_filtrarse_por_fecha_o_rango_de_fecha') }}</p>
                       <q-separator size="1"/>
-                      <p>{{ trans('Los filtros son acumulativos, es decir, que actúan sobre el rango de datos previamente seleccionados. Por ejemplo, si filtramos mosquitos de la ciudad de Barcelona, y posteriormente buscamos un hashtag, el mapa nos devolverá solamente aquellas observaciones de la ciudad de Barcelona que tengan dicho hashtag.') }}</p>
+                      <p>{{ $t('los_filtros_son_acumulativos_es_decir_que_actuan_sobre_el_rango_de_datos_previamente_seleccionados_por_ejemplo_si_filtramos_mosquitos_de_la_ciudad_de_barcelona_y_posteriormente_buscamos_un_hashtag_el_mapa_nos_devolvera_solamente_aquellas_observaciones_de_la_ciudad_de_barcelona_que_tengan_dicho_hashtag') }}</p>
                     </div>
                   </div>
                 </div>
@@ -71,8 +71,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ trans('Download and reports help') }}</h5>
-                      <p>{{ trans('Descarga los datos seleccionados en la vista de tu mapa y genera informes html con los datos seleccionados en la vista de tu mapa.') }}</p>
+                      <h5>{{ $t('download_and_reports_help') }}</h5>
+                      <p>{{ $t('descarga_los_datos_seleccionados_en_la_vista_de_tu_mapa_y_genera_informes_html_con_los_datos_seleccionados_en_la_vista_de_tu_mapa') }}</p>
                     </div>
                   </div>
                 </div>
@@ -86,8 +86,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ trans('Graph help') }}</h5>
-                      <p>{{ trans('Consulta la información de la vista del mapa en formato de gráfico temporal') }}</p>
+                      <h5>{{ $t('graph_help') }}</h5>
+                      <p>{{ $t('consulta_la_informacion_de_la_vista_del_mapa_en_formato_de_grafico_temporal') }}</p>
                     </div>
                   </div>
                 </div>
@@ -101,8 +101,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ trans('Shareview help') }}</h5>
-                      <p>{{ trans('Comparte la vista del mapa, consulta la ayuda y la información del mapa y cambia el idioma del mapa') }}</p>
+                      <h5>{{ $t('shareview_help') }}</h5>
+                      <p>{{ $t('comparte_la_vista_del_mapa_consulta_la_ayuda_y_la_informacion_del_mapa_y_cambia_el_idioma_del_mapa') }}</p>
                     </div>
                   </div>
                 </div>
@@ -116,8 +116,8 @@
                   </div>
                   <div class="q-ml-lg text">
                     <div>
-                      <h5>{{ trans('Estimates help') }}</h5>
-                      <p>{{ trans('Consulta el grado de probabilidad e incertidumbre de encontrar una especie de mosquito concreta. Selecciona la especie que quieras consultar y el rango temporal') }}</p>
+                      <h5>{{ $t('estimates_help') }}</h5>
+                      <p>{{ $t('consulta_el_grado_de_probabilidad_e_incertidumbre_de_encontrar_una_especie_de_mosquito_concreta_selecciona_la_especie_que_quieras_consultar_y_el_rango_temporal') }}</p>
                     </div>
                   </div>
                 </div>
@@ -125,7 +125,7 @@
             </q-carousel>
         <div class="close-modal text-center">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ trans('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ $t('close') }}</button>
         </div>
       </dialog>
     </div>

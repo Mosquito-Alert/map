@@ -6,7 +6,7 @@
 
 <template>
   <ol-overlay
-      :title="trans(selectedFeature.title)"
+      :title="this.$t(selectedFeature.title)"
       :position="selectedFeature.coordinates"
       positioning="bottom-center"
       :offset="[0, -35]"
@@ -32,7 +32,7 @@
                 <div
                   v-if="!errorLoadingImage"
                   class="credits"
-                >{{ trans('Anonymous')}},
+                >{{ $t('anonymous')}},
                   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a> Mosquito Alert
                 </div>
               </div>
@@ -42,7 +42,7 @@
 
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
-              <label class="popup-title">{{ trans(selectedFeature.title) }}
+              <label class="popup-title">{{ $t(selectedFeature.title) }}
               </label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -55,24 +55,24 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="selectedFeature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ trans('How many bites') }}</span>:
-                      {{ trans(selectedFeature.howMany) }}
+                    <div><span class="how-many-bites">{{ $t('how_many_bites') }}</span>:
+                      {{ $t(selectedFeature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="selectedFeature.location">
                     <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="bite-location">{{ trans('Bite location') }}</span>:
-                      {{ trans(selectedFeature.location) }}
+                    <div><span class="bite-location">{{ $t('bite_location') }}</span>:
+                      {{ $t(selectedFeature.location) }}
                     </div>
                 </div>
 
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                      <span class="date">{{ trans('Date') }}</span>:
+                      <span class="date">{{ $t('date') }}</span>:
                       {{ formatData(selectedFeature) }}
                       <span class="bite-time" v-if="selectedFeature.biteTime">
-                        | {{ trans(selectedFeature.biteTime) }}
+                        | {{ $t(selectedFeature.biteTime) }}
                       </span>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                 <div class="date-wrapper" v-if="selectedFeature.note">
                     <div><i class="fa-regular fa-message"></i></div>
                     <div>
-                      <span class="date">{{ trans('Citizen note') }}</span>:
+                      <span class="date">{{ $t('citizen_note') }}</span>:
                       {{ selectedFeature.note }}
                     </div>
                 </div>
@@ -88,21 +88,21 @@
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="selectedFeature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ trans('Breeding site with water') }}</span>
-                      {{ trans(selectedFeature.withWater) }}
+                    <div><span class="water-status">{{ $t('breeding_site_with_water') }}</span>
+                      {{ $t(selectedFeature.withWater) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="selectedFeature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ trans('Breeding site with larva') }}</span>
-                      {{ trans(selectedFeature.withLarva) }}
+                    <div><span class="with-larva">{{ $t('breeding_site_with_larva') }}</span>
+                      {{ $t(selectedFeature.withLarva) }}
                     </div>
                 </div>
 
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="selectedFeature.edited_user_notes && selectedFeature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
-                    <div><span class="description">{{ trans('Expert note') }}</span>:
+                    <div><span class="description">{{ $t('expert_note') }}</span>:
                       {{ selectedFeature.edited_user_notes }}
                     </div>
                 </div>
@@ -119,14 +119,14 @@
                   v-if="selectedFeature.validation_type==='human' &&
                         selectedFeature.validation"
                 >
-                  {{ trans(selectedFeature.validation) }}
+                  {{ $t(selectedFeature.validation) }}
                 </span>
               </div>
             </div>
           </div>
           <div class="btn-close text-center" v-if="mobile">
             <button class="q-btn ma-btn" @click.stop="closePopup">
-              {{ trans('Close') }}
+              {{ $t('close') }}
             </button>
           </div>
         </div>
@@ -252,8 +252,8 @@ export default defineComponent({
       else return 'validation probable'
     }
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return trans('Expert validation')
-      if (feature.validation_type === 'ai') return trans('AI validation')
+      if (feature.validation_type === 'human') return this.$t('expert_validation')
+      if (feature.validation_type === 'ai') return this.$t('ai_validation')
       return ''
     }
 

@@ -14,7 +14,7 @@
       <!-- First tab is always visible -->
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="trans('Observations')"
+        :label="$t('observations')"
         :class="active_item=='layers'?'active':''"
         link="/"
         item="observations"
@@ -24,7 +24,7 @@
 
       <fa-thin-button-router
         name="fa-thin fa-radar"
-        :label="trans('Discoveries')"
+        :label="$t('discoveries')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
         link="/discoveries"
         item="wms"
@@ -34,7 +34,7 @@
 
       <fa-thin-button-router
         name="fa-thin fa-chart-mixed"
-        :label="trans('Estimates')"
+        :label="$t('estimates')"
         :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
         link="/models"
         item="models"
@@ -46,26 +46,26 @@
 
       <fa-thin-button
         name="fa-thin fa-share-nodes"
-        :label="trans('Share')"
+        :label="$t('share')"
         @click="startShareView"
         id="shareView"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
-        :label="trans('Info')"
+        :label="$t('Info')"
         @click="showInfo"
         id="showInfo"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-square-question"
-        :label="trans('Help')"
+        :label="$t('help')"
         @click="showHelp"
         id="help"
       ></fa-thin-button>
 
-      <fa-thin-button-menu name="fa-thin fa-globe" :label="trans('Lang')">
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="$t('lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
             <a v-for="item in LANGS" :key="item.code"
@@ -203,9 +203,9 @@ export default {
 
     const loginLabel = computed(() => {
       if ($store.getters['app/getAuthorized']) {
-        return trans('Log out')
+        return this.$t('log_out')
       } else {
-        return trans('Log in')
+        return this.$t('log_in')
       }
     })
 

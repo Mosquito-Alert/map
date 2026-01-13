@@ -9,7 +9,7 @@
       <div class="reference-map row">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-1 col-md-1"></div>
         <div class="col-xl-5 col-lg-5 col-md-5 col-xs-12 col-sm-5 col-md-6">
-          <h5 class="title"> {{ trans('List of observations') }} </h5>
+          <h5 class="title"> {{ $t('list_of_observations') }} </h5>
           <img style="width:100%" id="c-mapa" />
           <div id='mapa' class='bg-white'>
             <ol-map ref='map'
@@ -44,19 +44,19 @@
         </div>
 
         <div class="report-filters col-3 col-md-4 col-xs-12 col-sm-5">
-          <h6> {{ trans('Selected observations') }} </h6>
+          <h6> {{ $t('selected_observations') }} </h6>
           <div class="observations">
             <ul class="ul-filters">
-              <li v-html="trans(name)" v-for="name, index in observationNames" :key="index">
+              <li v-html="$t(name)" v-for="name, index in observationNames" :key="index">
               </li>
             </ul>
           </div>
 
-          <h6 v-if="anyFilters"> {{ trans('Filters applied') }} </h6>
+          <h6 v-if="anyFilters"> {{ $t('filters_applied') }} </h6>
           <div class="filters">
             <div>
               <span v-if="dateFrom" v-html="dateRange"></span>
-              <span v-else v-html="trans('All years and all months')"></span>
+              <span v-else v-html="$t('all_years_and_all_months')"></span>
             </div>
 
             <div class="dates" v-if="locationName">
@@ -112,7 +112,7 @@
                 >
               </div>
               <div v-if="!errorLoadingImage && feature.photo_url" class="credits">
-                {{ trans('Anonymous')}},
+                {{ $t('anonymous')}},
                 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a> Mosquito Alert
               </div>
             </div>
@@ -123,8 +123,8 @@
               <div class="q-pb-lg flex">
                   <span class="counter">{{ index + 1 }}</span>
                   <div class="report-names q-pt-sm">
-                    <span class="common-name" v-html="trans(feature.title)"></span>
-                    <span class="latin-name" v-html="trans(feature.latinName)"></span>
+                    <span class="common-name" v-html="$t(feature.title)"></span>
+                    <span class="latin-name" v-html="$t(feature.latinName)"></span>
                   </div>
               </div>
               <div :class="mobile?'q-mx-lg':'q-ml-xl'">
@@ -137,62 +137,62 @@
                 <!-- THIS ATTRIBUTE IS JUST FOR BITES -->
                 <div class="description-wrapper" v-if="feature.howMany">
                     <div><i class="fa-solid fa-child-reaching"></i></div>
-                    <div><span class="how-many-bites">{{ trans('How many bites') }}</span>:
-                      {{ trans(feature.howMany) }}
+                    <div><span class="how-many-bites">{{ $t('how_many_bites') }}</span>:
+                      {{ $t(feature.howMany) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.location">
                     <div><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="bite-location">{{ trans('Bite location') }}</span>:
-                      {{ trans(feature.location) }}
+                    <div><span class="bite-location">{{ $t('bite_location') }}</span>:
+                      {{ $t(feature.location) }}
                     </div>
                 </div>
                 <div class="date-wrapper">
                     <div><i class="fa-solid fa-calendar-days"></i></div>
                     <div>
-                        <span class="date">{{ trans('Date') }}</span>:
+                        <span class="date">{{ $t('date') }}</span>:
                         {{ formatData(feature) }}
                       <span class="bite-time" v-if="feature.biteTime">
-                        | {{ trans(feature.biteTime) }}
+                        | {{ $t(feature.biteTime) }}
                       </span>
                     </div>
                 </div>
                 <!--IF SITES, THEN SHOW OTHER ATTRIBUTES -->
                 <div class="description-wrapper" v-if="feature.withWater">
                     <div><i class="fa-solid fa-droplet"></i></div>
-                    <div><span class="water-status">{{ trans('Breeding site with water') }}</span>
-                      {{ trans(feature.withWater) }}
+                    <div><span class="water-status">{{ $t('breeding_site_with_water') }}</span>
+                      {{ $t(feature.withWater) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.withLarva">
                     <div><i class="fa-solid fa-worm"></i></div>
-                    <div><span class="with-larva">{{ trans('Breeding site with larva') }}</span>
-                      {{ trans(feature.withLarva) }}
+                    <div><span class="with-larva">{{ $t('breeding_site_with_larva') }}</span>
+                      {{ $t(feature.withLarva) }}
                     </div>
                 </div>
                 <div class="date-wrapper" v-if="feature.note">
                     <div><i class="fa-regular fa-message"></i></div>
                     <div>
-                      <span class="date">{{ trans('Citizen note') }}</span>:
+                      <span class="date">{{ $t('citizen_note') }}</span>:
                       {{ feature.note }}
                     </div>
                 </div>
                 <!-- THIS ATTRIBUTE ONLY FOR ADULTS -->
                 <div class="description-wrapper" v-if="feature.edited_user_notes && feature.type=='adult'">
                     <div><i class="fa-solid fa-message-check"></i></div>
-                    <div><span class="description">{{ trans('Expert note') }}</span>:
+                    <div><span class="description">{{ $t('expert_note') }}</span>:
                       {{ feature.edited_user_notes }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.lat && feature.lon">
                     <div><i class="fa-solid fa-location-check"></i></div>
-                    <div><span class="description">{{ trans('Coordinates (latitud, longitud)') }}</span>:
+                    <div><span class="description">{{ $t('coordinates_latitud_longitud') }}</span>:
                       {{ feature.lat.toFixed(6) }}, {{ feature.lon.toFixed(6) }}
                     </div>
                 </div>
                 <div class="description-wrapper" v-if="feature.version_uuid">
                     <div><i class="fa-solid fa-eye"></i></div>
-                    <div><span class="description">{{ trans('Observation code') }}</span>:
+                    <div><span class="description">{{ $t('observation_code') }}</span>:
                       {{ feature.version_uuid }}
                     </div>
                 </div>
@@ -207,7 +207,7 @@
                       v-if="feature.validation_type==='human' &&
                             feature.validation"
                     >
-                      {{ trans(feature.validation) }}
+                      {{ $t(feature.validation) }}
                     </span>
                   </div>
                 </div>
@@ -660,8 +660,8 @@ export default {
     }
 
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return trans('Expert validation')
-      if (feature.validation_type === 'ai') return trans('AI validation')
+      if (feature.validation_type === 'human') return this.$t('expert_validation')
+      if (feature.validation_type === 'ai') return this.$t('ai_validation')
       return ''
     }
 

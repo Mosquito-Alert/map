@@ -14,20 +14,20 @@
         <div class="text-center">
           <q-icon name="warning" color="white" size="4rem" class="text-center"/>
         </div>
-          <div class="modal-title text-center">{{ trans('Error') }}</div>
-          <p class="modal-error-message" v-html="trans(msg)"></p>
+          <div class="modal-title text-center">{{ $t('Error') }}</div>
+          <p class="modal-error-message" v-html="$t(msg)"></p>
           <div v-if="link">
-            <p>{{ trans('More info') }}</p>
+            <p>{{ $t('More info') }}</p>
             <a :href="link">{{ link }} </a>
           </div>
         <div class="buttons">
           <div class="download-buttons" v-if="redirection">
             <router-link class="main-menu-item" to="/">
-              <button @click="close" class="close">{{ trans('Close') }}</button>
+              <button @click="close" class="close">{{ $t('close') }}</button>
             </router-link>
           </div>
           <div class="download-buttons" v-else>
-             <button @click="close" class="close">{{ trans('Close') }}</button>
+             <button @click="close" class="close">{{ $t('close') }}</button>
           </div>
         </div>
       </dialog>

@@ -10,12 +10,12 @@
     <div class="dialog-share" v-if="open">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title"> {{ trans('Share modal title') }} </div>
+          <div class="modal-title"> {{ $t('share_modal_title') }} </div>
           <p v-if="viewContent.error">{{ viewContent.error }}</p>
           <div class="modal-content" v-if="viewContent.url">
             <transition name="toast">
               <div v-if="copied" class="toast-msg">
-                {{ trans('Url has been copied') }}
+                {{ $t('url_has_been_copied') }}
               </div>
             </transition>
             <div class="row q-my-lg new-url-wrapper">
@@ -35,7 +35,7 @@
           </div>
         <div class="buttons close-modal">
           <div class="download-buttons">
-            <button class="q-btn ma-share-btn" @click="close">{{ trans('Close') }}</button>
+            <button class="q-btn ma-share-btn" @click="close">{{ $t('close') }}</button>
           </div>
         </div>
       </dialog>

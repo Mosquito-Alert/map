@@ -12,7 +12,7 @@
         <div v-if="mobile">
           <div v-if="mobile" class="coordinators col-12">
             <h5 class="q-my-lg">
-                {{ trans('Mosquito Alert está coordinado por') }}:
+                {{ $t('mosquito_alert_esta_coordinado_por') }}:
             </h5>
           </div>
 
@@ -39,7 +39,7 @@
             </div>
           </div>
           <h5 class="q-my-lg text-left">
-            {{ trans('Con el apoyo de') }}:
+            {{ $t('con_el_apoyo_de') }}:
           </h5>
           <div v-if="mobile" class="col-12 text-left funded-logos">
             <a :href="linkLaCaixa" target="_blank">
@@ -49,7 +49,7 @@
 
         </div>
         <div class="download-buttons q-mt-lg">
-          <button class="q-btn ma-share-btn" @click="close">{{ trans('Close') }}</button>
+          <button class="q-btn ma-share-btn" @click="close">{{ $t('close') }}</button>
         </div>
       </dialog>
     </div>

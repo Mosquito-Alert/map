@@ -13,7 +13,7 @@
         icon="expand_less"
         class="white-text"
         :class="iconStatus"
-        :label="trans('Time series')"
+        :label="$t('time_series')"
         @click="toggleTimeSeries"
       >
 
@@ -21,16 +21,16 @@
     </div>
     <div class="body" :class="reloading?'reloading':''">
       <div v-if="reloading" id="reloading">
-        <span>{{ trans('reloading graph') }}</span>
+        <span>{{ $t('reloading_graph') }}</span>
       </div>
       <div v-if="mobile" class="flex-right" :class="zoomed?'spaceBetween':'flexRight'">
         <q-btn v-if="zoomed" class="timeseries-close ma-btn" @click="resetGraph">
           <i class="mobile reset-zoom fa-solid fa-backward q-mr-md"></i>
         </q-btn>
-        <q-btn :label="trans('Close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
+        <q-btn :label="$t('close')" class="timeseries-close ma-btn" @click="toggleTimeSeries"/>
       </div>
       <div class="legend" :class="mobile?'row mobile':'no-row'">
-        <i v-if="zoomed && !mobile" :title="trans('Reset zoom graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
+        <i v-if="zoomed && !mobile" :title="$t('reset_zoom_graph')" class="reset-zoom fa-solid fa-backward q-mr-md" @click="resetGraph"></i>
         <div :class="mobile?'col-12':''">
           <div class="flex" :class="mobile?'row':''">
             <template v-for="set in chartData.datasets" :key="set.label">
@@ -43,7 +43,7 @@
                     :class="(set.opacity)?' possible':''"
                   >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
-                  {{ trans(set.label) }}
+                  {{ $t(set.label) }}
                 </div>
               </div>
             </template>
@@ -77,13 +77,13 @@
                 @update:model-value="applyButtonClass"
               >
                 <div class="row items-center justify-end q-gutter-sm">
-                  <q-btn :label="trans('Select all')" class="ma-btn"
+                  <q-btn :label="$t('select_all')" class="ma-btn"
                     flat
                     v-close-popup
                     @click="resetDateFilter"
                   />
                   <q-btn
-                    :label="trans('Apply calendar')"
+                    :label="$t('apply_calendar')"
                     :class="enableButton?'ma-btn':'ma-btn disabled'"
                     flat v-close-popup
                     @click="datePicked"
@@ -325,7 +325,7 @@ export default defineComponent({
 
         const color = layers[cat][code].color
         const result = {
-          label: trans(layers[cat][code].common_name),
+          label: this.$t(layers[cat][code].common_name),
           borderColor: color,
           backgroundColor: color,
           fill: false,

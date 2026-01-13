@@ -7,7 +7,7 @@
       class="flex expanded"
       :class="mobile?'mobile':''"
     >
-      <div class="ma-logo" :title="trans('Mosquito Alert')">
+      <div class="ma-logo" :title="$t('Mosquito Alert')">
         <a href="//webserver.mosquitoalert.com/">
           <img src="~assets/img/logo_mosquito_alert.png">
         </a>

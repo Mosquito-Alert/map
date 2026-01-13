@@ -23,26 +23,26 @@
                 <div class="q-mt-md q-pr-md text-justify scroll">
                   <h5 class="q-my-lg">
                     <a href="#" @click.prevent="showModalCookiePolicy">
-                      {{ trans('Cookies policy') }}
+                      {{ $t('cookies_policy') }}
                     </a>
                   </h5>
                   <h5 class="q-my-lg">
-                     {{ trans('Información de los datos') }}
+                     {{ $t('informacion_de_los_datos') }}
                   </h5>
-                  <p>{{trans("El mapa contiene información de 5 especies de mosquitos vectores de enfermedades:")}} {{trans("el mosquito tigre")}} (<i>{{trans("Aedes albopictus")}}</i>), {{trans("el mosquito de la fiebre amarilla")}} (<i>{{trans("Aedes aegypti")}})</i>, {{trans("el mosquito del Japón")}} (<i>{{trans("Aedes japonicus")}}</i>), {{trans("el mosquito de Corea")}} (<i>{{trans("Aedes koreicus")}}</i>) {{trans("y el mosquito común")}} (<i>{{trans("Culex pipiens")}}</i>).</p>
-                  <p>{{ trans('Además, puedes visualizar posibles lugares de cría de estos insectos en la vía pública. Esta información se complementa con modelos de probabilidad, elaborados a partir de los datos ciudadanos y con el esfuerzo de muestreo o distribución de participantes.') }}</p>
+                  <p>{{$t("el_mapa_contiene_informacion_de_5_especies_de_mosquitos_vectores_de_enfermedades")}} {{$t("el_mosquito_tigre")}} (<i>Aedes albopictus</i>), {{$t("el_mosquito_de_la_fiebre_amarilla")}} (<i>Aedes aegypti</i>, {{$t("el_mosquito_del_japon")}} (<i>Aedes japonicus</i>), {{$t("el_mosquito_de_corea")}} (<i>Aedes koreicus</i>) {{$t("y_el_mosquito_comun")}} (<i>Culex pipiens</i>).</p>
+                  <p>{{ $t('ademas_puedes_visualizar_posibles_lugares_de_cria_de_estos_insectos_en_la_via_publica_esta_informacion_se_complementa_con_modelos_de_probabilidad_elaborados_a_partir_de_los_datos_ciudadanos_y_con_el_esfuerzo_de_muestreo_o_distribucion_de_participantes') }}</p>
                   <q-separator size="1"/>
                   <div class="text-subtitle1 q-my-md">
-                    {{ trans('DATOS NO MODELADOS') }}
+                    {{ $t('datos_no_modelados') }}
                   </div>
                   <div class="text-subtitle2 text-left q-mb-md">
-                    {{ trans("Mosquitos") }}
+                    {{ $t("mosquitos") }}
                   </div>
                   <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.tiger.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Tiger mosquito') }}</b>: {{ trans('según los expertos o los algoritmos de  Inteligencia Artificial (IA), las fotos de esta observación podrían ser de mosquito tigre')  }}(<i>Aedes albopictus</i>). {{ trans('También incluye observaciones que podrían ser o de') }} <i>Aedes albopictus</i> {{ trans('o de') }} <i>Aedes cretinus</i>; {{ trans('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ $t('tiger_mosquito') }}</b>: {{ $t('segun_los_expertos_o_los_algoritmos_de_inteligencia_artificial_ia_las_fotos_de_esta_observacion_podrian_ser_de_mosquito_tigre')  }}(<i>Aedes albopictus</i>). {{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes albopictus</i> {{ $t('o_de') }} <i>Aedes cretinus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
                       </div>
                     </div>
 
@@ -50,7 +50,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.yellow.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Yellow fever mosquito') }}</b>{{ trans(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de la fiebre amarilla') }} (<i>Aedes aegypti</i>)
+                      <div class="q-pr-md"><b>{{ $t('yellow_fever_mosquito') }}</b>{{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_de_la_fiebre_amarilla') }} (<i>Aedes aegypti</i>)
                       </div>
                     </div>
 
@@ -58,7 +58,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.japonicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Mosquito del Japón') }}</b>{{ trans(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito del Japón') }} (<i>Aedes japonicus</i>). {{ trans('También incluye observaciones que podrían ser o de') }} <i>Aedes japonicus</i> {{ trans('o de') }} <i>Aedes koreicus</i>; {{ trans('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ $t('mosquito_del_japon') }}</b>{{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_del_japon') }} (<i>Aedes japonicus</i>). {{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes japonicus</i> {{ $t('o_de') }} <i>Aedes koreicus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
                       </div>
                   </div>
 
@@ -66,7 +66,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.koreicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Mosquito del Corea') }}</b>: {{ trans('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito de Corea') }} (<i>Aedes koreicus</i>){{ trans('También incluye observaciones que podrían ser o de') }} <i>Aedes japonicus</i> {{ trans('o de') }} <i>Aedes koreicus</i>; {{ trans('en estos casos, no es posible determinar con seguridad de qué especie se trata.') }}
+                      <div class="q-pr-md"><b>{{ $t('mosquito_del_corea') }}</b>: {{ $t('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del_mosquito_de_corea') }} (<i>Aedes koreicus</i>){{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes japonicus</i> {{ $t('o_de') }} <i>Aedes koreicus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
                       </div>
                   </div>
 
@@ -74,7 +74,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.culex.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Mosquito Común') }}</b>{{ trans(': según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del mosquito común') }} (<i>Culex pipiens</i>).
+                      <div class="q-pr-md"><b>{{ $t('mosquito_comun') }}</b>{{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_comun') }} (<i>Culex pipiens</i>).
                       </div>
                   </div>
 
@@ -82,37 +82,37 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.unidentified.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ trans('Otras categorías. Mosquito no identificable:') }}</b> {{ trans('según los expertos o los algoritmos de IA, estas observaciones y sus fotos no permiten determinar ninguna especie de mosquito en concreto. También incluye observaciones enviadas como “mosquito” que no han sido evaluadas al no contener imágenes asociadas.') }}
+                      <div class="q-pr-md"><b>{{ $t('otras_categorias_mosquito_no_identificable') }}</b> {{ $t('segun_los_expertos_o_los_algoritmos_de_ia_estas_observaciones_y_sus_fotos_no_permiten_determinar_ninguna_especie_de_mosquito_en_concreto_tambien_incluye_observaciones_enviadas_como_mosquito_que_no_han_sido_evaluadas_al_no_contener_imagenes_asociadas') }}
                       </div>
                   </div>
                   <q-separator size="1"/>
                   <div class="text-subtitle2 text-left q-mb-md">
-                      {{ trans('Bites') }}
+                      {{ $t('bites') }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.bites.bite.icon" />
                       </div>
                         <div class="q-pr-md">
-                         {{ trans(' Observaciones ciudadanas de picaduras de mosquito, de cualquier especie y sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
+                         {{ $t('observaciones_ciudadanas_de_picaduras_de_mosquito_de_cualquier_especie_y_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia') }}
                         </div>
                     </div>
                     <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      {{ trans("Breeding sites") }}
+                      {{ $t("breeding_sites") }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.with_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>{{ trans('Storm_drain_water') }}</b>{{ trans(': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales con agua”) en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.')}}
+                        <div class="q-pr-md"><b>{{ $t('storm_drain_water') }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_imbornales_con_agua_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia')}}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.without_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>{{ trans("Storm_drain_dry") }}</b>: {{ trans('observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “imbornales sin agua”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.')}}
+                        <div class="q-pr-md"><b>{{ $t("storm_drain_dry") }}</b>: {{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_imbornales_con_agua_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia')}}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
@@ -120,24 +120,24 @@
                         <img :src="layers.breeding.other_water.icon" />
                       </div>
                         <div class="q-pr-md">
-                          <b> {{ trans("Unidentified mosquito") }}</b>{{ trans(': observaciones ciudadanas de posibles lugares de cría de mosquitos (identificadas por la ciudadanía como “otros tipos de lugares de cría”), en su mayoría, sin ningún tipo de validación por parte de expertos o de algoritmos de IA.') }}
+                          <b> {{ $t("unidentified_mosquito") }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_otros_tipos_de_lugares_de_cria_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia') }}
                         </div>
                     </div>
                     <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      {{ trans("Other species") }}
+                      {{ $t("other_species") }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
                         <img :src="layers.other.conflict.icon" />
                       </div>
                         <div class="q-pr-md">
-                          {{ trans('Según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser de otras especies de mosquito') }}
+                          {{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_de_otras_especies_de_mosquito') }}
                         </div>
                     </div>
                     <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      {{ trans("Sampling effort") }}
+                      {{ $t("sampling_effort") }}
 
                     </div>
                     <div class="flex text-justify q-mb-md row no-wrap">
@@ -145,7 +145,7 @@
                         <img src="~/assets/img/sampling_effort.png" />
                       </div>
                         <div class="q-pr-md">
-                          {{ trans('La capa muestra la distribución de los participantes, donde las cuadrículas más oscuras indican un mayor número de dispositivos con la app instalada o que han estado mucho tiempo en la zona. Este dato es esencial para poder elaborar modelos: sin esta información no se podría saber si hay muchos mosquitos en un área o si lo que hay es mucha participación. En ecología esta información se conoce como esfuerzo de muestreo, permitiendo corregir las observaciones para hacerlas comparables entre áreas.') }}
+                          {{ $t('la_capa_muestra_la_distribucion_de_los_participantes_donde_las_cuadriculas_mas_oscuras_indican_un_mayor_numero_de_dispositivos_con_la_app_instalada_o_que_han_estado_mucho_tiempo_en_la_zona_este_dato_es_esencial_para_poder_elaborar_modelos_sin_esta_informacion_no_se_podria_saber_si_hay_muchos_mosquitos_en_un_area_o_si_lo_que_hay_es_mucha_participacion_en_ecologia_esta_informacion_se_conoce_como_esfuerzo_de_muestreo_permitiendo_corregir_las_observaciones_para_hacerlas_comparables_entre_areas') }}
                         </div>
                     </div>
                     <q-separator size="1"/>
@@ -153,34 +153,34 @@
                     <a id="modeled_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('MODELED DATA') }}
+                      {{ $t('modeled_data') }}
                     </div>
-                    <p>{{ trans('Model-maps-provide-information-to-help-better-unde') }}</p>
-                    <p>{{ trans('These-estimates-are-generated-monthly-for-each-of') }}</p>
-                    <p>{{ trans('The-map-currently-shows-estimates-for-all-countrie') }}</p>
+                    <p>{{ $t('model_maps_provide_information_to_help_better_unde') }}</p>
+                    <p>{{ $t('these_estimates_are_generated_monthly_for_each_of') }}</p>
+                    <p>{{ $t('the_map_currently_shows_estimates_for_all_countrie') }}</p>
                     <p><a href="https://mosquito-alert.github.io/global_model_estimates/">https://mosquito-alert.github.io/global_model_estimates/</a></p>
-                    <!--<p>{{ trans('Model maps show the probability of encountering a specific mosquito species or of receiving a mosquito bite. Probabilities are based on data submitted by citizens to Mosquito Alert. The first estimates for a month are based on observations received for that month in previous years, estimates that are updated weekly with data for the current year to readjust the values in real time.') }}</p>
-                    <p>{{ trans('Models show the probability of encountering each of the target species: the tiger mosquito, the yellow fever mosquito, the Asian bush mosquito, the Korean mosquito, and the common house mosquito. Another model shows the probability of receiving a mosquito bite, which does not correspond to any specific mosquito species, but to all the reports of bites received, reflecting the human-mosquito interaction in the area.') }}</p>
-                    <p>{{ trans('Estimates are displayed at different world’s administrative areas or boundaries depending on the zoom and the map view. Administrative areas in the database are countries and lower lever subdivisions such as provinces. At high resolution, estimates are displayed in grids of approximately 2x2 kilometers (grid of 0.05 degrees latitude by 0.05 degrees longitude). In addition to the probability of encountering a mosquito or receiving a bite, each administrative area also shows its uncertainty value.') }}</p>
-                    <p>{{ trans('This calculation considers the sampling effort, considering the number of participants with the active app in each grid or area in the defined time. The probability of mosquitoes or of receiving a mosquito bite is higher in a grid in which 10 observations have been received and there are 5 participants, than in another with 10 observations and 10 participants. Modeling observations and active participants determines the value of the probability shown on the map.') }}</p>
-                    <p>{{ trans('This probability has been observed to correspond to the observations of the tiger mosquito obtained by traditional surveillance methods (ovitraps), thus demonstrating that it is a good way of estimating the presence and abundance of a species.') }}</p>
-                    <p class="capitalFirstLetter">{{ trans('for more information.')}}</p>
+                    <!--<p>{{ $t('model_maps_show_the_probability_of_encountering_a_specific_mosquito_species_or_of_receiving_a_mosquito_bite_probabilities_are_based_on_data_submitted_by_citizens_to_mosquito_alert_the_first_estimates_for_a_month_are_based_on_observations_received_for_that_month_in_previous_years_estimates_that_are_updated_weekly_with_data_for_the_current_year_to_readjust_the_values_in_real_time') }}</p>
+                    <p>{{ $t('models_show_the_probability_of_encountering_each_of_the_target_species_the_tiger_mosquito_the_yellow_fever_mosquito_the_asian_bush_mosquito_the_korean_mosquito_and_the_common_house_mosquito_another_model_shows_the_probability_of_receiving_a_mosquito_bite_which_does_not_correspond_to_any_specific_mosquito_species_but_to_all_the_reports_of_bites_received_reflecting_the_human_mosquito_interaction_in_the_area') }}</p>
+                    <p>{{ $t('estimates_are_displayed_at_different_world_s_administrative_areas_or_boundaries_depending_on_the_zoom_and_the_map_view_administrative_areas_in_the_database_are_countries_and_lower_lever_subdivisions_such_as_provinces_at_high_resolution_estimates_are_displayed_in_grids_of_approximately_2x2_kilometers_grid_of_0_05_degrees_latitude_by_0_05_degrees_longitude_in_addition_to_the_probability_of_encountering_a_mosquito_or_receiving_a_bite_each_administrative_area_also_shows_its_uncertainty_value') }}</p>
+                    <p>{{ $t('This calculation considers the sampling_effort, considering the number of participants with the active app in each grid or area in the defined time. The probability of mosquitoes or of receiving a mosquito bite is higher in a grid in which 10 observations have been received and there are 5 participants, than in another with 10 observations and 10 participants. Modeling observations and active participants determines the value of the probability shown on the map.') }}</p>
+                    <p>{{ $t('this_probability_has_been_observed_to_correspond_to_the_observations_of_the_tiger_mosquito_obtained_by_traditional_surveillance_methods_ovitraps_thus_demonstrating_that_it_is_a_good_way_of_estimating_the_presence_and_abundance_of_a_species') }}</p>
+                    <p class="capitalFirstLetter">{{ $t('for_more_information')}}</p>
                     <a target="blank" href="https://www.nature.com/articles/s41467-017-00914-9">https://www.nature.com/articles/s41467-017-00914-9</a>-->
                     <q-separator size="1"/>
                     <!-- WMS INFO -->
                     <a id="wms_info" class="q-py-md"></a>
                     <p></p>
                     <div class="text-subtitle1 q-my-md">
-                      {{ trans('Discoveries data') }}
+                      {{ $t('discoveries_data') }}
                     </div>
-                    <p v-html="trans('discoveries_description').replace(/\\n/g, '<br>')"></p>
+                    <p v-html="$t('discoveries_description').replace(/\\n/g, '<br>')"></p>
                 </div>
               </q-carousel-slide>
             </q-carousel>
 
         <div class="close-info">
           <slot name="buttons"></slot>
-          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ trans('Close') }}</button>
+          <button @click="close" v-if="hasCloseButton" class="ma-close-btn">{{ $t('close') }}</button>
         </div>
       </dialog>
     </div>

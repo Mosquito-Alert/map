@@ -24,10 +24,10 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right">
-        <q-btn :label="trans('Close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
+        <q-btn :label="$t('close')" class="ma-close-btn q-ma-md" @click="toggleLeftDrawer"/>
       </div>
       <div class="toc-card filters">
-        <div class="text-h5 toc-title-reports" v-html="trans('Observations')"></div>
+        <div class="text-h5 toc-title-reports" v-html="$t('observations')"></div>
           <search-location
             ref="searchLocation"
             @locationSelected="locationSelected"
@@ -40,7 +40,7 @@
       </div>
 
       <div class="toc-category">
-        <div class="toc-title" v-html="trans('Mosquitos')"></div>
+        <div class="toc-title" v-html="$t('mosquitos')"></div>
       </div>
 
       <div class="category-box">
@@ -53,7 +53,7 @@
               :data-code="code"
               :class="layer.active ? code +' active' : code"
             ></div>
-            <div v-text="trans(layer.common_name)" class="toc-item-name">
+            <div v-text="$t(layer.common_name)" class="toc-item-name">
             </div>
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
@@ -62,7 +62,7 @@
 
       <!-- BITES AND BREEDING SITES-->
       <div class="toc-category">
-          <div class="bites-title" v-html="trans('Breeding sites')"></div>
+          <div class="bites-title" v-html="$t('breeding_sites')"></div>
       </div>
 
       <div class="category-box bites-and-breeding">
@@ -79,14 +79,14 @@
                 >
                     <!-- <i :class="layer.faIcon"></i> -->
                 </div>
-                <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
+                <div v-text="$t(layer.common_name)" class="toc-item-name"></div>
               </div>
               <div class="separator" :class="{ 'active': layer.separator }"></div>
           </div>
       </DIV>
 
       <div class="toc-category">
-          <div class="bites-title" v-html="trans('Bites')"></div>
+          <div class="bites-title" v-html="$t('bites')"></div>
       </div>
       <div class="category-box bites-and-breeding">
           <!-- BITES -->
@@ -101,7 +101,7 @@
               >
                   <!-- <i class="fa-solid" :class="layer.faIcon"></i> -->
               </div>
-              <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
+              <div v-text="$t(layer.common_name)" class="toc-item-name"></div>
             </div>
             <div class="separator" :class="{ 'active': layer.separator }"></div>
           </div>
@@ -109,7 +109,7 @@
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="trans('Other species')"></div>
+        <div class="toc-title" v-html="$t('other_species')"></div>
       </div>
 
       <div class="category-box other-species">
@@ -121,7 +121,7 @@
               :data-code="code"
               :class="layer.active ? code +' active' : code">
             </div>
-            <div v-text="trans(layer.common_name)" class="toc-item-name"></div>
+            <div v-text="$t(layer.common_name)" class="toc-item-name"></div>
           </div>
           <div class="separator" :class="{ 'active': layer.separator }"></div>
         </div>
@@ -130,7 +130,7 @@
       <div class="fill-space"></div>
       <!-- SAMPLIING EFFORT -->
         <div class="toc-category last">
-          <div class="toc-title" v-html="trans('Sampling effort')"></div>
+          <div class="toc-title" v-html="$t('sampling_effort')"></div>
         </div>
         <div class="category-box">
           <sampling-effort ref="samplingEffort"

@@ -9,7 +9,7 @@
         <div class="flex" style="justify-content:space-between; width: 100%; align-items:center">
           <div v-if="!mobile" class="col q-my-xs">
             <div class="logo-title">
-              {{ trans('This interactive map has been funded by') }}
+              {{ $t('this_interactive_map_has_been_funded_by') }}
             </div>
             <div class="main-logo">
               <a :href="linkLaCaixa" target="_blank">
@@ -25,7 +25,7 @@
               </a>
             </div>
             <div class="about cursor-pointer" @click="showLogos">
-              {{ trans('About us') }}
+              {{ $t('about_us') }}
             </div>
           </div>
 

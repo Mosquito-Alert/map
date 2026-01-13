@@ -7,92 +7,94 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
         <div class="scroll">
-            <h4>{{ trans("Cookies policy") }}</h4>
-            <p>{{ trans('Las galletas o cookies son pequeños archivos de texto que se instalan en los equipos desde los cuales se accede a nuestro sitio web. Entre otras finalidades, las cookies registran las preferencias y los hábitos de navegación de un usuario.') }}</p>
-            <p>{{ trans('Se asocian al usuario y a su equipo, pero no proporcionan datos directamente identificativos. Algunas cookies, por ejemplo las que permiten elaborar estadísticas o anuncios, necesitan el consentimiento del usuario de nuestro sitio web. En cambio otras cookies, las de carácter técnico o las necesarias para ofrecer un servicio solicitado por el usuario, son imprescindibles para el funcionamiento del sitio.') }}</p>
-            <p>{{ trans('Las cookies se pueden clasificar según su vigencia, quien las gestiona o su finalidad.') }}</p>
-            <h5>{{ trans('Según la vigencia')}} </h5>
+            <h4>{{ $t("cookies_policy") }}</h4>
+            <p>{{ $t('las_galletas_o_cookies_son_pequenos_archivos_de_texto_que_se_instalan_en_los_equipos_desde_los_cuales_se_accede_a_nuestro_sitio_web_entre_otras_finalidades_las_cookies_registran_las_preferencias_y_los_habitos_de_navegacion_de_un_usuario') }}</p>
+            <p>{{ $t('se_asocian_al_usuario_y_a_su_equipo_pero_no_proporcionan_datos_directamente_identificativos_algunas_cookies_por_ejemplo_las_que_permiten_elaborar_estadisticas_o_anuncios_necesitan_el_consentimiento_del_usuario_de_nuestro_sitio_web_en_cambio_otras_cookies_las_de_caracter_tecnico_o_las_necesarias_para_ofrecer_un_servicio_solicitado_por_el_usuario_son_imprescindibles_para_el_funcionamiento_del_sitio') }}</p>
+            <p>{{ $t('las_cookies_se_pueden_clasificar_segun_su_vigencia_quien_las_gestiona_o_su_finalidad') }}</p>
+            <h5>{{ $t('segun_la_vigencia')}} </h5>
               <ul>
-                <li>{{ trans('De sesión: son temporales y quedan en el archivo de galletas de vuestro navegador hasta el momento que abandonáis el sitio web') }}</li>
-                <li>{{ trans('Persistentes: quedan almacenadas y el sitio web les lee cada vez que hacéis una visita') }}</li>
+                <li>{{ $t('de_sesion_son_temporales_y_quedan_en_el_archivo_de_galletas_de_vuestro_navegador_hasta_el_momento_que_abandonais_el_sitio_web') }}</li>
+                <li>{{ $t('persistentes_quedan_almacenadas_y_el_sitio_web_les_lee_cada_vez_que_haceis_una_visita') }}</li>
               </ul>
 
-            <h5>{{ trans('Según quién las gestione') }}</h5>
+            <h5>{{ $t('segun_quien_las_gestione') }}</h5>
             <ul>
-              <li>{{ trans('Propias: son las propias del titular del sitio web desde lo que se prestan los servicios al usuario') }}</li>
-              <li>{{ trans('De terceros: se envían al usuario por parte de uno tercero, diferente al titular del lugar') }}</li>
+              <li>{{ $t('propias_son_las_propias_del_titular_del_sitio_web_desde_lo_que_se_prestan_los_servicios_al_usuario') }}</li>
+              <li>{{ $t('de_terceros_se_envian_al_usuario_por_parte_de_uno_tercero_diferente_al_titular_del_lugar') }}</li>
             </ul>
 
-            <h5>{{ trans('Según la finalidad') }}</h5>
+            <h5>{{ $t('segun_la_finalidad') }}</h5>
             <ul>
-              <li>{{ trans('Necesarias') }}: {{ trans('las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web') }}</li>
-              <li>{{ trans('Técnicas') }}: {{ trans('las que permiten controlar el tráfico y comunicación de datos, identificar la sesión y acceder a páginas de acceso restringido, entre otros') }}</li>
-              <li>{{ trans('Analíticas') }}: {{ trans('proporcionan información estadística y permiten mejorar los servicios') }}</li>
+              <li>{{ $t('necesarias') }}: {{ $t('las_imprescindibles_para_facilitar_vuestra_conexion_no_hay_opcion_de_inhabilitarlas_dado_que_son_las_necesarias_por_el_funcionamiento_del_sitio_web') }}</li>
+              <li>{{ $t('tecnicas') }}: {{ $t('las_que_permiten_controlar_el_trafico_y_comunicacion_de_datos_identificar_la_sesion_y_acceder_a_paginas_de_acceso_restringido_entre_otros') }}</li>
+              <li>{{ $t('analiticas') }}: {{ $t('proporcionan_informacion_estadistica_y_permiten_mejorar_los_servicios') }}</li>
             </ul>
 
-          <h5>{{ trans('Listado de cookies utilizadas') }}</h5>
-          <p>{{ trans('En la web de Mosquito Alert utilizamos una única cookie de tipo técnico y las cookies de Google Analytics') }}</p>
-          <p>{{ trans('Las cookies de Google Analytics, permiten analizar estadísticamente la información a que acceden los usuarios de nuestro lugar. Los datos recopilados pueden incluir la actividad del navegador del usuario cuando nos visita, la ruta que siguen los usuarios en nuestro lugar, información del proveedor de servicios de Internet del visitante, el número a veces que los usuarios acceden al lugar y el comportamiento de los usuarios en nuestro lugar (páginas que ha visitado, formularios que se han completado y similares)') }}</p>
+          <h5>{{ $t('listado_de_cookies_utilizadas') }}</h5>
+          <p>{{ $t('en_la_web_de_mosquito_alert_utilizamos_una_unica_cookie_de_tipo_tecnico_y_las_cookies_de_google_analytics') }}</p>
+          <p>{{ $t('las_cookies_de_google_analytics_permiten_analizar_estadisticamente_la_informacion_a_que_acceden_los_usuarios_de_nuestro_lugar_los_datos_recopilados_pueden_incluir_la_actividad_del_navegador_del_usuario_cuando_nos_visita_la_ruta_que_siguen_los_usuarios_en_nuestro_lugar_informacion_del_proveedor_de_servicios_de_internet_del_visitante_el_numero_a_veces_que_los_usuarios_acceden_al_lugar_y_el_comportamiento_de_los_usuarios_en_nuestro_lugar_paginas_que_ha_visitado_formularios_que_se_han_completado_y_similares') }}</p>
 
-          <p>{{ trans('Puedes obtener más información sobre Google Analytics a') }} <a href="//www.google.com/analytics/">www.google.com/analytics/</a>. {{ trans('Para controlar la recopilación de datos con finalidades analíticas por parte de Google Analytics, puedes ir a') }} <a href="//tools.google.com/dlpage/gaoptout?hl=en">https://tools.google.com/dlpage/gaoptout?hl=en</a></p>
+          <p>{{ $t('puedes_obtener_mas_informacion_sobre_google_analytics_a') }} <a href="//www.google.com/analytics/">www.google.com/analytics/</a>.
+             <!-- {{ $t('Para controlar la recopilación de datos con finalidades analiticas por parte de Google Analytics, puedes ir a') }} -->
+              <a href="//tools.google.com/dlpage/gaoptout?hl=en">https://tools.google.com/dlpage/gaoptout?hl=en</a></p>
 
-          <p>{{ trans('A continuación mostramos una tabla con las cookies utilizadas. Para cada cookie incluimos los siguientes atributos: finalidad, proveedor, nombre de la cookie, gestión, vigencia y función') }}</p>
+          <p>{{ $t('a_continuacion_mostramos_una_tabla_con_las_cookies_utilizadas_para_cada_cookie_incluimos_los_siguientes_atributos_finalidad_proveedor_nombre_de_la_cookie_gestion_vigencia_y_funcion') }}</p>
           <table class="cookies-list">
             <tr>
-              <th>{{ trans('Finalidad') }}</th>
-              <th>{{ trans('Proveedor') }}</th>
-              <th>{{ trans('Nombre de la cookie') }}</th>
-              <th>{{ trans('Gestión') }}</th>
-              <th>{{ trans('Vigencia') }}</th>
-              <th>{{ trans('Función')}} </th>
+              <th>{{ $t('finalidad') }}</th>
+              <th>{{ $t('proveedor') }}</th>
+              <th>{{ $t('nombre_de_la_cookie') }}</th>
+              <th>{{ $t('gestion') }}</th>
+              <th>{{ $t('vigencia') }}</th>
+              <th>{{ $t('funcion')}} </th>
             </tr>
             <tr>
-              <td>{{ trans('Necesarias') }}</td>
-              <td>{{ trans('MOSQQUITO ALERT') }}</td>
+              <td>{{ $t('necesarias') }}</td>
+              <td>{{ $t('mosqquito_alert') }}</td>
               <td>ma-visited</td>
-              <td>{{ trans('Propia') }}</td>
-              <td>{{ trans('Persistente') }}</td>
-              <td>{{ trans('Mostrar la ventana informativa solo en la primera visita') }}</td>
+              <td>{{ $t('propia') }}</td>
+              <td>{{ $t('persistente') }}</td>
+              <td>{{ $t('mostrar_la_ventana_informativa_solo_en_la_primera_visita') }}</td>
             </tr>
             <tr>
-              <td>{{ trans('Necesarias') }}</td>
-              <td>{{ trans('MOSQQUITO ALERT') }}</td>
+              <td>{{ $t('necesarias') }}</td>
+              <td>{{ $t('mosqquito_alert') }}</td>
               <td>lang</td>
-              <td>{{ trans('Propia') }}</td>
-              <td>{{ trans('Persistente') }}</td>
-              <td>{{ trans('Permite recordar el idioma seleccionado con anterioridad') }}</td>
+              <td>{{ $t('propia') }}</td>
+              <td>{{ $t('persistente') }}</td>
+              <td>{{ $t('permite_recordar_el_idioma_seleccionado_con_anterioridad') }}</td>
             </tr>
             <tr>
-              <td>{{ trans('Necesarias') }}</td>
-              <td>{{ trans('MOSQQUITO ALERT') }}</td>
+              <td>{{ $t('necesarias') }}</td>
+              <td>{{ $t('mosqquito_alert') }}</td>
               <td>cookie-comply</td>
-              <td>{{ trans('Propia') }}</td>
-              <td>{{ trans('Persistente') }}</td>
-              <td>{{ trans('Permite recordar las cookies aceptadas con anterioridad') }}</td>
+              <td>{{ $t('propia') }}</td>
+              <td>{{ $t('persistente') }}</td>
+              <td>{{ $t('permite_recordar_las_cookies_aceptadas_con_anterioridad') }}</td>
             </tr>
             <tr>
-              <td>{{ trans('Analíticas') }}</td>
+              <td>{{ $t('analiticas') }}</td>
               <td>Google</td>
               <td>_ga</td>
-              <td>{{ trans('terceros') }}</td>
-              <td>{{ trans('2 años') }}</td>
-              <td rowspan="2">{{ trans('Registra una identificación única que se utiliza para generar datos estadísticos sobre cómo se utiliza el visitante el sitio web') }}</td>
+              <td>{{ $t('terceros') }}</td>
+              <td>{{ $t('2_anos') }}</td>
+              <td rowspan="2">{{ $t('registra_una_identificacion_unica_que_se_utiliza_para_generar_datos_estadisticos_sobre_como_se_utiliza_el_visitante_el_sitio_web') }}</td>
             </tr>
             <tr>
-              <td>{{ trans('Analíticas') }}</td>
+              <td>{{ $t('analiticas') }}</td>
               <td>Google</td>
               <td>_ga_ZLD12V4W3V</td>
-              <td>{{ trans('terceros') }}</td>
-              <td>{{ trans('1 año') }}</td>
+              <td>{{ $t('terceros') }}</td>
+              <td>{{ $t('1_ano') }}</td>
             </tr>
           </table>
         </div>
         <div class="buttons">
           <div class="download-buttons">
             <button @click="showModalCookieSettings" class="ma-btn">
-              {{ trans('Manage cookies') }}
+              {{ $t('manage_cookies') }}
             </button>
-            <button @click="close" class="ma-btn">{{ trans('Close') }}</button>
+            <button @click="close" class="ma-btn">{{ $t('close') }}</button>
           </div>
         </div>
       </dialog>

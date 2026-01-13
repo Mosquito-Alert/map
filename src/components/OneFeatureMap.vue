@@ -1,5 +1,5 @@
 <template>
-  <div v-if="observationId" class="ma-logo" :title="trans('Mosquito Alert')">
+  <div v-if="observationId" class="ma-logo" :title="$t('Mosquito Alert')">
     <a href="//webserver.mosquitoalert.com/">
       <img src="~assets/img/logo_mosquito_alert.png">
     </a>

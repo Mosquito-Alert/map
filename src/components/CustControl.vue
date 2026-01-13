@@ -5,7 +5,7 @@
 <template>
   <div :class="className">
     <button
-      :title="trans(titleText)"
+      :title="$t(titleText)"
       @click.stop="buttonClicked"
     >
       <i :class="faIcon"></i>

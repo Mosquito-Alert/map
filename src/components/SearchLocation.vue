@@ -9,7 +9,7 @@
       <q-input
         ref="inputLocation"
         v-model="searchString"
-        :label="error?trans('No results found'):trans('Placeholder location')"
+        :label="error?$t('no_results_found'):$t('placeholder_location')"
         :color="(filterIsActive && loading)?'white':'orange'"
         class="search-location"
         :loading="loading"

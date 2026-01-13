@@ -445,7 +445,7 @@ export default defineComponent({
         connectionError = true
         let errMsg = ''
         if (err.response.status === 404) {
-          errMsg = 'Model not found on Server'
+          errMsg = 'model_not_found_on_server'
         } else {
           errMsg = err.message
         }

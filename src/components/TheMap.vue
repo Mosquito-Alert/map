@@ -112,7 +112,7 @@
           ref="donwnloadControl"
           icon="fa-solid fa-download"
           class="ol-download ol-unselectable ol-control"
-          title="Download"
+          title="download"
           @clicked="openDownloadModal"
         >
         </cust-control>
@@ -122,7 +122,7 @@
           ref="reportControl"
           icon="fa-solid fa-file-lines"
           class="ol-reports ol-unselectable ol-control"
-          title="Observations"
+          title="observations"
           @clicked="openReportsModal"
         >
         </cust-control>

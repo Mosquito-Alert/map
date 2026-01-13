@@ -11,17 +11,17 @@
     <div class="dialog modal-download" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ trans('Download') }}</div>
-          <p>{{ trans('Only data displayed in the current map view will be downloaded. Verify your current active layers, temporal filters and zoom.') }}</p>
-          <p>{{ trans('Once verified, press the download button.') }}</p>
+          <div class="modal-title">{{ $t('download') }}</div>
+          <p>{{ $t('only_data_displayed_in_the_current_map_view_will_be_downloaded_verify_your_current_active_layers_temporal_filters_and_zoom') }}</p>
+          <p>{{ $t('once_verified_press_the_download_button') }}</p>
           <p>
-            {{ trans('For the Mosquito Alert complete dataset, with advanced options, go to Mosquito Alert portal:') }}
-            <a :href="trans('Mosquito portal URL')" target="_blank">
-            {{ trans('Mosquito portal URL') }}
+            {{ $t('for_the_mosquito_alert_complete_dataset_with_advanced_options_go_to_mosquito_alert_portal') }}
+            <a :href="$t('mosquito_portal_url')" target="_blank">
+            {{ $t('mosquito_portal_url') }}
             </a>
           </p>
         <div class="error-message" v-if="!nFeatures">
-          {{ trans('No features to download') }}
+          {{ $t('no_features_to_download') }}
         </div>
         <div class="buttons">
           <div class="modal-content download-buttons flex">
@@ -35,7 +35,7 @@
               >
               <span class="no-pointer-events">
                 <i class="fa-solid fa-download no-pointer-events"></i>
-                {{ trans('Download geopackage') }}
+                {{ $t('download_geopackage') }}
               </span>
             </button>
             </div>
@@ -49,13 +49,13 @@
               >
                 <span class="no-pointer-events">
                   <i class="fa-solid fa-download no-pointer-events"></i>
-                  {{ trans('Download excel') }}
+                  {{ $t('download_excel') }}
               </span>
               </button>
             </div>
 
             <div>
-              <button @click="close" class="ma-btn">{{ trans('Close') }}</button>
+              <button @click="close" class="ma-btn">{{ $t('close') }}</button>
             </div>
           </div>
 

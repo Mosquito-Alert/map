@@ -45,7 +45,7 @@ export default {
       if (props.dateFrom !== undefined && props.dateTo !== undefined) {
         return (props.dateFrom !== props.dateTo) ? moment(props.dateFrom, 'YYYY-MM-DD').format('DD/MM/YYYY') : ''
       } else {
-        return trans('Loading...')
+        return this.$t('loading')
       }
     })
 

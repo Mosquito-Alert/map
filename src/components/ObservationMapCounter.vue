@@ -9,7 +9,7 @@
     <div v-if="!mobile || visible"
       class="counter-label"
       :class="mobile?'mobile':''"
-      v-html="trans('Shown points')">
+      v-html="$t('shown_points')">
       </div>
     <div v-if="mobile"
       class="unfold"
