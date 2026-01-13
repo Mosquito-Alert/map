@@ -1,12 +1,15 @@
 import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
+import { useCookies } from 'vue3-cookies'
 
-export const DEFAULT_LOCALE = 'en'
+const { cookies } = useCookies()
+
+export const DEFAULT_LOCALE = cookies.get('lang') || 'en'
 
 export const i18n = createI18n({
   locale: DEFAULT_LOCALE,
-  fallbackLocale: DEFAULT_LOCALE,
+  fallbackLocale: 'en',
   legacy: false,
   globalInjection: true,
   missing: (locale, key, vm) => {
