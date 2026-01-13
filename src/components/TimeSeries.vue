@@ -116,6 +116,7 @@ import 'chartjs-adapter-moment'
 import moment from 'moment'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import * as Hammer from 'hammerjs'
+import { useI18n } from 'vue-i18n'
 
 window.Hammer = Hammer.default
 Chart.register(...registerables)
@@ -142,6 +143,7 @@ export default defineComponent({
     const rangeStartValue = ref(false)
     const rangeEndValue = ref(false)
     const $store = useStore()
+    const { t } = useI18n()
     const timeIsVisible = ref(props.timeSeriesVisible)
     const iconStatus = ref('null')
     let mapDatesBeforeZoom = null
@@ -325,7 +327,7 @@ export default defineComponent({
 
         const color = layers[cat][code].color
         const result = {
-          label: this.$t(layers[cat][code].common_name),
+          label: t(layers[cat][code].common_name),
           borderColor: color,
           backgroundColor: color,
           fill: false,
