@@ -27,6 +27,7 @@
     "quasar": "^2.0.0",
     "vue-cookie-comply": "^0.0.3",
     "vue-gtag": "^2.0.1",
+    "vue-i18n": "^11.2.8",
     "vue3-click-away": "^1.2.4",
     "vue3-cookies": "^1.0.6",
     "vue3-openlayers": "^0.1.54",
