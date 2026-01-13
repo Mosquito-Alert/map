@@ -1,17 +1,32 @@
 
-import { DEFAULT_LOCALE } from 'src/boot/i18n'
+import { DEFAULT_LOCALE, i18n } from 'src/boot/i18n'
 
 const routes = [
   // Redirect any path missing locale to /en/{path}
   {
     path: '/:pathMatch(.*)*',
     beforeEnter: (to, from, next) => {
-      // Check if the path already starts with a valid locale
-      if (/^\/(ca|es|en)(\/|$)/.test(to.path)) {
-        next() // already has a locale, continue normally
-      } else {
-        next(`/${DEFAULT_LOCALE}${to.fullPath}`) // prepend /en
+      const LOCALES = i18n.global.availableLocales
+      const pathParts = to.path.split('/').filter(Boolean) // split and remove empty parts
+
+      // Check if first part is a locale
+      if (LOCALES.includes(pathParts[0])) {
+        next() // already has locale at start, continue
+        return
       }
+
+      // Check if last part is a locale
+      const lastPart = pathParts[pathParts.length - 1]
+      if (LOCALES.includes(lastPart)) {
+        // Move locale from end to start
+        pathParts.pop() // remove from end
+        pathParts.unshift(lastPart) // add at start
+        next('/' + pathParts.join('/'))
+        return
+      }
+
+      // No locale found, prepend default
+      next(`/${DEFAULT_LOCALE}${to.fullPath}`)
     }
   },
   // Root locale routes
