@@ -43,7 +43,7 @@
                     :class="(set.opacity)?' possible':''"
                   >
                   <i  v-if="set.faIcon" class="symbol" :class="set.faIcon"></i>
-                  {{ $t(set.label) }}
+                  {{ set?.label ? $t(set.label) : '' }}
                 </div>
               </div>
             </template>
