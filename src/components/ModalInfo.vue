@@ -66,7 +66,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.koreicus.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ $t('mosquito_del_corea') }}</b>: {{ $t('según los expertos o los algoritmos de IA, las fotos de esta observación podrían ser del_mosquito_de_corea') }} (<i>Aedes koreicus</i>){{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes japonicus</i> {{ $t('o_de') }} <i>Aedes koreicus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
+                      <div class="q-pr-md"><b>{{ $t('mosquito_del_corea') }}</b>: {{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_de_corea') }} (<i>Aedes koreicus</i>){{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes japonicus</i> {{ $t('o_de') }} <i>Aedes koreicus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
                       </div>
                   </div>
 
