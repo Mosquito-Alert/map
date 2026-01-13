@@ -7,7 +7,7 @@ export const observations = {
   observations: { // Mosquito observations
     tiger: {
       categories: ['mosquito_tiger_confirmed', 'mosquito_tiger_probable', 'albopictus_cretinus'],
-      common_name: 'Tiger mosquito',
+      common_name: 'tiger_mosquito',
       scientific_name: 'Aedes albopictus',
       icon: require('../../assets/img/marker_tiger.svg'),
       iconConflict: require('../../assets/img/marker_tiger_cretinus.svg'),
@@ -16,7 +16,7 @@ export const observations = {
     },
     yellow: {
       categories: ['yellow_fever_confirmed', 'yellow_fever_probable'],
-      common_name: 'Yellow fever mosquito',
+      common_name: 'yellow_fever_mosquito',
       scientific_name: 'Aedes aegypti',
       icon: require('../../assets/img/marker_yellow.svg'),
       color: '#ffdd19',
@@ -24,7 +24,7 @@ export const observations = {
     },
     japonicus: {
       categories: ['japonicus_confirmed', 'japonicus_probable', 'japonicus_koreicus'],
-      common_name: 'Japonicus mosquito',
+      common_name: 'japonicus_mosquito',
       scientific_name: 'Aedes japonicus',
       icon: require('../../assets/img/marker_japonicus.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
@@ -33,7 +33,7 @@ export const observations = {
     },
     koreicus: {
       categories: ['koreicus_confirmed', 'koreicus_probable', 'japonicus_koreicus'],
-      common_name: 'Koreicus mosquito',
+      common_name: 'koreicus_mosquito',
       scientific_name: 'Aedes koreicus',
       icon: require('../../assets/img/marker_koreicus.svg'),
       iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
@@ -42,7 +42,7 @@ export const observations = {
     },
     culex: {
       categories: ['culex_confirmed', 'culex_probable'],
-      common_name: 'Culex mosquito',
+      common_name: 'culex_mosquito',
       scientific_name: 'Culex pipiens',
       icon: require('../../assets/img/marker_culex.svg'),
       color: '#aa4499',
@@ -51,7 +51,7 @@ export const observations = {
     },
     unidentified: {
       categories: ['unidentified'],
-      common_name: 'Unidentified mosquito',
+      common_name: 'unidentified_mosquito',
       icon: require('../../assets/img/marker_unidentified.svg'),
       color: '#c0c0c0',
       active: false
@@ -60,7 +60,7 @@ export const observations = {
   otherObservations: {
     other: {
       categories: ['other_species'],
-      common_name: 'Other species',
+      common_name: 'others_mosquito',
       icon: require('../../assets/img/marker_other.svg'),
       color: '#c0c0c0',
       active: false
@@ -71,7 +71,7 @@ export const observations = {
       categories: ['bite'],
       icon: require('../../assets/img/marker_bite.svg'),
       faIcon: 'fa-solid fa-child-reaching bites',
-      common_name: 'Bites',
+      common_name: 'bites',
       color: '#cc6677',
       active: false
     }
@@ -81,7 +81,7 @@ export const observations = {
       categories: ['storm_drain_water'],
       icon: require('../../assets/img/storm_drain_water.svg'),
       faIcon: 'fa-solid fa-droplet breeding',
-      common_name: 'Stormdrain with water',
+      common_name: 'storm_drain_water',
       color: '#1072ad',
       active: false
     },
@@ -89,7 +89,7 @@ export const observations = {
       categories: ['storm_drain_dry'],
       icon: require('../../assets/img/storm_drain_dry.svg'),
       faIcon: 'fa-solid fa-droplet-slash breeding',
-      common_name: 'Stormdrain without water',
+      common_name: 'storm_drain_dry',
       color: '#1072ad',
       active: false
     },
@@ -97,7 +97,7 @@ export const observations = {
       categories: ['breeding_site_other'],
       icon: require('../../assets/img/breeding_other.svg'),
       faIcon: 'fa-light fa-dharmachakra breeding',
-      common_name: 'Breeding site other',
+      common_name: 'breeding_site_other',
       color: '#1072ad',
       active: false
     }
