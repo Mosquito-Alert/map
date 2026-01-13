@@ -46,6 +46,18 @@
             {{ playbackOngoing ? 'pause' : 'play_arrow' }}
           </span>
         </Button>
+        <!-- Only show the replay button when playback is paused -->
+        <Button
+          v-if="playbackCurrentDate"
+          severity="secondary"
+          size="small"
+          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
+          @click="replay()"
+        >
+          <span class="text-gray-700 material-icons-outlined">
+            {{ 'replay' }}
+          </span>
+        </Button>
       </div>
     </div>
   </div>
@@ -82,6 +94,7 @@ const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const playbackOngoing = ref(false)
 const playbackCurrentDate = ref<Date | null>(null)
 const playbackOriginalDateLimits = ref<{ start: string; end: string } | null>(null)
+const playbackInterval = ref<number | undefined>(undefined)
 
 const fixDateAggregationData = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
@@ -150,16 +163,16 @@ const playback = () => {
   )
   let currentDate = new Date(playbackCurrentDate.value || observationsStore.dateFilter.start || '')
 
-  const interval = setInterval(() => {
+  playbackInterval.value = setInterval(() => {
     if (currentDate > endingDate) {
-      clearInterval(interval)
+      clearInterval(playbackInterval.value)
       playbackOngoing.value = false
       playbackCurrentDate.value = null
       playbackOriginalDateLimits.value = null
       return
     }
     if (!playbackOngoing.value) {
-      clearInterval(interval)
+      clearInterval(playbackInterval.value)
       return
     }
 
@@ -171,6 +184,19 @@ const playback = () => {
 
     currentDate.setMonth(currentDate.getMonth() + 1)
   }, 500)
+}
+
+const replay = () => {
+  playbackInterval.value && clearInterval(playbackInterval.value)
+  playbackOngoing.value = false
+  if (playbackOriginalDateLimits.value) {
+    observationsStore.dateFilter.start = playbackOriginalDateLimits.value.start
+    observationsStore.dateFilter.end = playbackOriginalDateLimits.value.end
+    playbackCurrentDate.value = null
+    playbackOriginalDateLimits.value = null
+    playbackOngoing.value = true
+    playback()
+  }
 }
 
 onMounted(() => {
