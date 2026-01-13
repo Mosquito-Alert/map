@@ -219,11 +219,6 @@ export default {
       return $store.getters['app/layers'].bites
     })
 
-    // Language functions
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const setTags = function (tags) {
       hashtags.value.setTags(tags)
     }
@@ -306,8 +301,7 @@ export default {
       mouseOut,
       locationSelected,
       locationCleared,
-      toggleSamplingEffort,
-      trans
+      toggleSamplingEffort
     }
   }
 }

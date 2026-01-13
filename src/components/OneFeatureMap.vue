@@ -378,12 +378,7 @@ export default {
       }
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     return {
-      trans,
       observationId,
       mobile,
       attrVisible,

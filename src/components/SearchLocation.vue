@@ -77,10 +77,6 @@ export default {
       searchString.value = v
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const clickAway = function (event) {
       if (!inputLocation.value.$el.contains(event.target)) {
         hideResults()
@@ -185,7 +181,6 @@ export default {
     }
 
     return {
-      trans,
       throttle,
       error,
       searchString,

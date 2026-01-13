@@ -55,10 +55,6 @@ export default {
     const gtm = useGtm()
     const { cookies } = useCookies()
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     // SHOW INFO IF REQUIRED
     const complyVisible = computed(() => {
       return !$store.getters['app/getCookiesComply']
@@ -83,7 +79,6 @@ export default {
     }
 
     return {
-      trans,
       cookiesSettings,
       acceptAll,
       openSettings,

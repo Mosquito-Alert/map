@@ -201,10 +201,6 @@ export default defineComponent({
       context.emit('closePopupButton')
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     if (mobile.value) {
       imageRatio.value = mobile.value ? 'mobile landscape' : ''
     } else {
@@ -276,7 +272,6 @@ export default defineComponent({
     }
 
     return {
-      trans,
       mosquitoImageLoaded,
       ratio,
       mobile,

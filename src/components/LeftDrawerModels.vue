@@ -376,10 +376,6 @@ export default {
       ]
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     // Called when TOC is toggled
     const toggleLeftDrawer = function () {
       context.emit('toggleLeftDrawer', {})
@@ -595,7 +591,6 @@ export default {
     })
 
     return {
-      trans,
       errorDownloadingModels,
       goInfoModal,
       estLegendColors,

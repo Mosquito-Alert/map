@@ -73,10 +73,6 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const open = computed(() => {
       return $store.getters['app/getModals'].logos.visibility
     })
@@ -98,7 +94,6 @@ export default {
       layers,
       hasCloseButton,
       mobile,
-      trans,
       slide: ref('pag_1')
     }
   }

@@ -28,7 +28,6 @@
 <script>
 
 import { computed } from 'vue'
-import { useStore } from 'vuex'
 import moment from 'moment'
 import { useI18n } from 'vue-i18n'
 
@@ -36,12 +35,7 @@ export default {
   props: ['dateFrom', 'dateTo'],
   emits: ['calendarClicked'],
   setup (props, context) {
-    const $store = useStore()
     const { t } = useI18n()
-
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     const dFrom = computed(() => {
       if (props.dateFrom !== undefined && props.dateTo !== undefined) {
@@ -64,7 +58,6 @@ export default {
     }
 
     return {
-      trans,
       dFrom,
       dTo,
       calendarClicked

@@ -73,6 +73,7 @@ import GridModelLayer from '../js/GridModelLayer'
 import ShareMapView from '../js/ShareMapView'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'TheMapModels',
@@ -84,6 +85,8 @@ export default defineComponent({
   ],
   props: ['viewCode'],
   setup (props, context) {
+    const { t } = useI18n()
+
     const map = ref('null')
     const requestTimeoutMs = 20000
     const progress = ref(0)
@@ -152,10 +155,6 @@ export default defineComponent({
       //   loadView(map.value.map, 'M-' + paramViewCode)
       // }
     })
-
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     const shareViewUrl = backendUrl + 'view/save/'
     const loadViewUrl = backendUrl + 'view/load/'
@@ -264,7 +263,7 @@ export default defineComponent({
       })
       // Send data to layout so it udpates UI accordingly
       context.emit('loadSharedModel', {
-        vector: { code: jsonView.filters.vector, type: trans(models[type].common_name) },
+        vector: { code: jsonView.filters.vector, type: t(models[type].common_name) },
         year: jsonView.filters.year,
         month: jsonView.filters.month,
         estimation: jsonView.filters.estimation,
@@ -820,7 +819,6 @@ export default defineComponent({
       spinner(false)
     }
     return {
-      trans,
       hideSpinner,
       uncertaintyRefresh,
       estimationRefresh,

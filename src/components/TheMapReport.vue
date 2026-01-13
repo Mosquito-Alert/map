@@ -632,10 +632,6 @@ export default {
       return params
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const formatData = function (feature) {
       // Some locales add '.' after month, so we remove it
       if (feature.biteTime) {
@@ -672,7 +668,6 @@ export default {
     })
 
     return {
-      trans,
       mobile,
       errorLoading,
       getValidationClass,

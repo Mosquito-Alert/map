@@ -33,10 +33,6 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const npoints = computed(() => {
       // Format number
       if (parseInt(props.nPoints) > 0) {
@@ -54,7 +50,6 @@ export default {
       }
     }
     return {
-      trans,
       visible,
       unfold,
       foldingIcon,

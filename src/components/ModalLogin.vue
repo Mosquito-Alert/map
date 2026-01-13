@@ -82,10 +82,6 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const onSubmit = function (evt) {
       if (username.value && password.value) {
         const controller = new AbortController()
@@ -126,8 +122,7 @@ export default {
       mobile,
       open,
       close,
-      loginError,
-      trans
+      loginError
     }
   }
 }

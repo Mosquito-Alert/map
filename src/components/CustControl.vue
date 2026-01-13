@@ -15,13 +15,11 @@
 
 <script>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
 
 export default {
   props: ['class', 'icon', 'title'],
   emits: ['clicked'],
   setup (props, context) {
-    const $store = useStore()
     const className = computed(() => {
       return props.class
     })
@@ -38,12 +36,7 @@ export default {
       context.emit('clicked')
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     return {
-      trans,
       className,
       faIcon,
       titleText,

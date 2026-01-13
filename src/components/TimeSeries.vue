@@ -436,11 +436,6 @@ export default defineComponent({
       return $store.getters['timeseries/getChartOptions']
     })
 
-    // Language function
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const showCalendar = function () {
       calendarBtn.value.$el.click()
     }
@@ -460,7 +455,6 @@ export default defineComponent({
     }
 
     return {
-      trans,
       enableButton,
       applyButtonClass,
       reloading,

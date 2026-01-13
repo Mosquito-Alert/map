@@ -217,9 +217,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+
     const showModalCookiePolicy = function () {
       close()
       $store.commit('app/setModal', { id: 'cookiePolicy', content: { visibility: true } })
@@ -231,7 +229,6 @@ export default {
       close,
       hasCloseButton,
       mobile,
-      trans,
       slide: ref('pag_1')
     }
   }

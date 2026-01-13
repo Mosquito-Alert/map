@@ -81,10 +81,6 @@ export default defineComponent({
       return (!mobile.value || Object.keys(popupContent).length !== 0)
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const showLogos = function () {
       $store.commit('app/setModal', {
         id: 'logos',
@@ -100,7 +96,6 @@ export default defineComponent({
     })
 
     return {
-      trans,
       linkLaCaixa,
       showLogos,
       mobile,

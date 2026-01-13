@@ -104,10 +104,6 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -122,8 +118,7 @@ export default {
       tooManyFeatures,
       newReport,
       close,
-      hasCloseButton,
-      trans
+      hasCloseButton
     }
   }
 }

@@ -190,9 +190,7 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+
     const layers = $store.getters['app/getLayers']
 
     onUpdated(() => {
@@ -205,7 +203,6 @@ export default {
       close,
       hasCloseButton,
       mobile,
-      trans,
       slide
     }
   }

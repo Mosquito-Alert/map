@@ -60,12 +60,7 @@ export default {
       return $store.getters['app/getIsMobile']
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     return {
-      trans,
       mobile,
       observationId
     }

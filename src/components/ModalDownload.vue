@@ -96,16 +96,13 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+
     return {
       nFeatures,
       mobile,
       download,
       close,
-      hasCloseButton,
-      trans
+      hasCloseButton
     }
   }
 }

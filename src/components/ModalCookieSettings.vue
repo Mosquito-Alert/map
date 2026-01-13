@@ -108,9 +108,6 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
     }
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -162,8 +159,7 @@ export default {
       open,
       close,
       savePreferences,
-      onAccept,
-      trans
+      onAccept
     }
   }
 }

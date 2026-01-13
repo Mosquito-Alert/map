@@ -83,10 +83,6 @@ export default {
       })
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const copyToClipboard = function () {
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
         copied.value = true
@@ -107,8 +103,7 @@ export default {
       copied,
       viewContent,
       shareView,
-      close,
-      trans
+      close
     }
   }
 }

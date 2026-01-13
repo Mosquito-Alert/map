@@ -79,17 +79,12 @@ export default {
       })
     }
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     return {
       loading,
       samplingIsActive,
       samplingEffort,
       toggleClass,
-      isActive,
-      trans
+      isActive
     }
   }
 }

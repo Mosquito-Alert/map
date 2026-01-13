@@ -133,10 +133,6 @@ export default defineComponent({
       map.value.map.addLayer(wmsLayer)
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     // const loadViewUrl = backendUrl + 'view/load/'
 
     // Call when user shares view
@@ -295,7 +291,6 @@ export default defineComponent({
     }
 
     return {
-      trans,
       wmsNumberOfVisibleLayers,
       fitExtent,
       reorderLayers,

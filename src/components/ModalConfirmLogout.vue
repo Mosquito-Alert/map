@@ -44,9 +44,6 @@ export default {
     const close = function () {
       $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: false } })
     }
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
@@ -72,8 +69,7 @@ export default {
       mobile,
       logout,
       open,
-      close,
-      trans
+      close
     }
   }
 }
