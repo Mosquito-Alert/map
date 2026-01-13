@@ -221,6 +221,7 @@ import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: { LeftMenu },
@@ -239,6 +240,8 @@ export default {
     'toggleLeftDrawer'
   ],
   setup (props, context) {
+    const { t } = useI18n()
+
     const uncertaintyColor = ref(null)
     const colorPickerEst = ref(null)
     const colorPickerSe = ref(null)
@@ -364,12 +367,12 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'albopictus', type: this.$t('tiger_mosquito') },
-        { code: 'aegypti', type: this.$t('yellow_fever_mosquito') },
-        { code: 'japonicus', type: this.$t('japonicus_mosquito') },
-        { code: 'koreicus', type: this.$t('koreicus_mosquito') },
-        { code: 'culex', type: this.$t('culex_mosquito') },
-        { code: 'biting', type: this.$t('bites') }
+        { code: 'albopictus', type: t('tiger_mosquito') },
+        { code: 'aegypti', type: t('yellow_fever_mosquito') },
+        { code: 'japonicus', type: t('japonicus_mosquito') },
+        { code: 'koreicus', type: t('koreicus_mosquito') },
+        { code: 'culex', type: t('culex_mosquito') },
+        { code: 'biting', type: t('bites') }
       ]
     })
 

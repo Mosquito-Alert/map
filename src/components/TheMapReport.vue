@@ -241,6 +241,7 @@ import MSession from '../js/session.js'
 import { observations as privateLayers } from '../store/app/privateTOC'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'TheMapReport',
@@ -250,6 +251,7 @@ export default {
     let mySession
     let privateReport
     const $store = useStore()
+    const { t } = useI18n()
     const map = ref()
     const center = ref()
     const zoom = ref()
@@ -660,8 +662,8 @@ export default {
     }
 
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return this.$t('expert_validation')
-      if (feature.validation_type === 'ai') return this.$t('ai_validation')
+      if (feature.validation_type === 'human') return t('expert_validation')
+      if (feature.validation_type === 'ai') return t('ai_validation')
       return ''
     }
 

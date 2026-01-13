@@ -6,7 +6,7 @@
 
 <template>
   <ol-overlay
-      :title="this.$t(selectedFeature.title)"
+      :title="selectedFeature?.title ? $t(selectedFeature.title) : ''"
       :position="selectedFeature.coordinates"
       positioning="bottom-center"
       :offset="[0, -35]"
@@ -42,7 +42,8 @@
 
           <div class="info" :class="selectedFeature.type==='adult'?'info-validation':'info-no-validation'">
             <div class="scroll" :class="mobile?'q-px-md':''">
-              <label class="popup-title">{{ $t(selectedFeature.title) }}
+              <label class="popup-title">
+                {{ selectedFeature?.title ? $t(selectedFeature.title) : '' }}
               </label>
               <p class="latin-name">{{ selectedFeature.latinName }}</p>
               <div>
@@ -140,12 +141,15 @@ import { onUpdated, defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   props: ['selectedFeature'],
   emits: ['popupimageloaded', 'closePopupButton'],
   setup (props, context) {
     const $store = useStore()
+    const { t } = useI18n()
+
     const mosquitoImageLoaded = ref(false)
     const imageRatio = ref('null')
     const errorLoadingImage = ref()
@@ -252,8 +256,8 @@ export default defineComponent({
       else return 'validation probable'
     }
     const getValidationTypeTitle = function (feature) {
-      if (feature.validation_type === 'human') return this.$t('expert_validation')
-      if (feature.validation_type === 'ai') return this.$t('ai_validation')
+      if (feature.validation_type === 'human') return t('expert_validation')
+      if (feature.validation_type === 'ai') return t('ai_validation')
       return ''
     }
 

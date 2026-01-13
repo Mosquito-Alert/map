@@ -117,6 +117,7 @@ import { watch, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 import { exportFile } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: { LeftMenu },
@@ -132,6 +133,8 @@ export default {
   ],
   setup (props, context) {
     const $store = useStore()
+    const { t } = useI18n()
+
     const disabled = ref(true)
     const disabledInfo = ref(true)
     const modelVector = ref()
@@ -155,10 +158,10 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'tiger', type: this.$t('tiger_mosquito'), wms_field: 'albopictus', disable: false },
-        { code: 'yellow', type: this.$t('yellow_fever_mosquito'), wms_field: 'aegypti', disable: false },
-        { code: 'japonicus', type: this.$t('japonicus_mosquito'), wms_field: 'japonicus', disable: false },
-        { code: 'koreicus', type: this.$t('koreicus_mosquito'), wms_field: 'koreicus', disable: false }
+        { code: 'tiger', type: t('tiger_mosquito'), wms_field: 'albopictus', disable: false },
+        { code: 'yellow', type: t('yellow_fever_mosquito'), wms_field: 'aegypti', disable: false },
+        { code: 'japonicus', type: t('japonicus_mosquito'), wms_field: 'japonicus', disable: false },
+        { code: 'koreicus', type: t('koreicus_mosquito'), wms_field: 'koreicus', disable: false }
       ]
     })
 
