@@ -80,6 +80,8 @@ const timeSeriesDataMonthly = ref<{
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const playbackOngoing = ref(false)
+const playbackCurrentDate = ref<Date | null>(null)
+const playbackOriginalDateLimits = ref<{ start: string; end: string } | null>(null)
 
 const fixDateAggregationData = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
@@ -137,13 +139,27 @@ const updateFilteredData = (params: any) => {
 const debouncedUpdate = debounce(updateFilteredData, 250)
 
 const playback = () => {
-  const endingDate = new Date(observationsStore.dateFilter.end || '')
-  let currentDate = new Date(observationsStore.dateFilter.start || '')
+  if (!playbackOriginalDateLimits.value) {
+    playbackOriginalDateLimits.value = {
+      start: observationsStore.dateFilter.start || '',
+      end: observationsStore.dateFilter.end || '',
+    }
+  }
+  const endingDate = new Date(
+    playbackOriginalDateLimits.value?.end || observationsStore.dateFilter.end || '',
+  )
+  let currentDate = new Date(playbackCurrentDate.value || observationsStore.dateFilter.start || '')
 
   const interval = setInterval(() => {
-    if (currentDate > endingDate || !playbackOngoing.value) {
+    if (currentDate > endingDate) {
       clearInterval(interval)
       playbackOngoing.value = false
+      playbackCurrentDate.value = null
+      playbackOriginalDateLimits.value = null
+      return
+    }
+    if (!playbackOngoing.value) {
+      clearInterval(interval)
       return
     }
 
@@ -151,6 +167,7 @@ const playback = () => {
     const month = String(currentDate.getMonth() + 1).padStart(2, '0')
 
     observationsStore.dateFilter.end = `${year}-${month}-01`
+    playbackCurrentDate.value = currentDate
 
     currentDate.setMonth(currentDate.getMonth() + 1)
   }, 500)
@@ -164,6 +181,8 @@ onMounted(() => {
   chart.on('brushSelected', (params: any) => {
     debouncedUpdate(params)
     playbackOngoing.value = false
+    playbackCurrentDate.value = null
+    playbackOriginalDateLimits.value = null
   })
 
   chart.on('brush', (params: any) => {
@@ -175,6 +194,8 @@ onMounted(() => {
         end: originalDateLimits.value?.end ?? null,
       }
       playbackOngoing.value = false
+      playbackCurrentDate.value = null
+      playbackOriginalDateLimits.value = null
     }
   })
 })
