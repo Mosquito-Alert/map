@@ -448,9 +448,11 @@ div.flex-right{
 }
 .toc-title-estimates{
   font-family: 'Roboto';
-  text-transform: Capitalize;
   font-weight: 700;
   color: #666666;
+}
+.toc-title-estimates::first-letter{
+  text-transform: uppercase;
 }
 .wms-layers-container{
   margin-top: 20px;
