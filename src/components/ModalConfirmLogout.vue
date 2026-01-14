@@ -12,13 +12,13 @@
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
         <div class="row content-center">
-          <h5 class="text-h5 text-orange q-my-md">{{ trans('Confirm Logout Title') }}</h5>
+          <h5 class="text-h5 text-orange q-my-md">{{ $t('confirm_logout_title') }}</h5>
         </div>
-          <!-- <p v-html="trans('Confirm Logout Message')"></p> -->
+          <!-- <p v-html="$t('confirm_logout_message')"></p> -->
 
           <div class="logout row">
-            <button class="logout q-mt-md" @click="logout">{{ trans('Confirm Logout') }}</button>
-            <button class="logout q-mt-xs" @click="close">{{ trans('Cancel') }}</button>
+            <button class="logout q-mt-md" @click="logout">{{ $t('confirm_logout') }}</button>
+            <button class="logout q-mt-xs" @click="close">{{ $t('Cancel') }}</button>
           </div>
       </dialog>
     </div>
@@ -43,9 +43,6 @@ export default {
 
     const close = function () {
       $store.commit('app/setModal', { id: 'confirmLogout', content: { visibility: false } })
-    }
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
     }
 
     const mobile = computed(() => {
@@ -72,8 +69,7 @@ export default {
       mobile,
       logout,
       open,
-      close,
-      trans
+      close
     }
   }
 }

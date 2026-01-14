@@ -14,9 +14,9 @@
       <!-- First tab is always visible -->
       <fa-thin-button-router
         name="fa-thin fa-map-location-dot"
-        :label="trans('Observations')"
+        :label="$t('observations')"
         :class="active_item=='layers'?'active':''"
-        link="/"
+        routeName="reports"
         item="observations"
         id="observations"
       >
@@ -24,9 +24,9 @@
 
       <fa-thin-button-router
         name="fa-thin fa-radar"
-        :label="trans('Discoveries')"
+        :label="$t('discoveries')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/discoveries"
+        routeName="discoveries"
         item="wms"
         id="wms"
       >
@@ -34,9 +34,9 @@
 
       <fa-thin-button-router
         name="fa-thin fa-chart-mixed"
-        :label="trans('Estimates')"
+        :label="$t('estimates')"
         :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
-        link="/models"
+        routeName="models"
         item="models"
         id="estimations"
       >
@@ -46,43 +46,38 @@
 
       <fa-thin-button
         name="fa-thin fa-share-nodes"
-        :label="trans('Share')"
+        :label="$t('share')"
         @click="startShareView"
         id="shareView"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-circle-info"
-        :label="trans('Info')"
+        :label="$t('Info')"
         @click="showInfo"
         id="showInfo"
       ></fa-thin-button>
 
       <fa-thin-button
         name="fa-thin fa-square-question"
-        :label="trans('Help')"
+        :label="$t('help')"
         @click="showHelp"
         id="help"
       ></fa-thin-button>
 
-      <fa-thin-button-menu name="fa-thin fa-globe" :label="trans('Lang')">
+      <fa-thin-button-menu name="fa-thin fa-globe" :label="$t('lang')">
         <div class="lang-wrapper">
           <div class="lang-container">
-            <a v-for="item in LANGS" :key="item.code"
+            <a
+              v-for="locale in $i18n.availableLocales"
+              :key="`locale-${locale}`"
               href="#"
-              :id="item.code"
               class="main-menu-item"
-              :class="lang==item.code?'menuItem active':'menuItem'" @click.prevent="clickLanguageSelector(item.code, $event)" ref="item.code">
-              <span>{{ item.label }}</span>
-          </a>
-
-              <!-- <div :class="lang=='es'?'menuItem active':'menuItem'" @click="clickLanguageSelector('es', $event)" ref="es">
-                <span>Castellano</span>
-              </div>
-
-              <div :class="lang=='en'?'menuItem active':'menuItem'" @click="clickLanguageSelector('en', $event)" ref="en">
-                <span>English</span>
-              </div>-->
+              :class="locale === $i18n.locale ? 'menuItem active' : 'menuItem'"
+              @click.prevent="clickLanguageSelector(locale)"
+            >
+              <span>{{ getLanguageName(locale) }}</span>
+            </a>
           </div>
         </div>
       </fa-thin-button-menu>
@@ -92,12 +87,15 @@
 
 <script>
 import { useStore } from 'vuex'
-import { useQuasar } from 'quasar'
-import { onMounted, ref, computed } from 'vue'
+import { useQuasar, format } from 'quasar'
+import { onMounted, computed } from 'vue'
 import FaThinButton from 'components/FaThinButton.vue'
 import FaThinButtonRouter from 'components/FaThinButtonRouter.vue'
 import FaThinButtonMenu from 'components/FaThinButtonMenu.vue'
 import { useCookies } from 'vue3-cookies'
+
+import { useI18n } from 'vue-i18n'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   components: { FaThinButton, FaThinButtonRouter, FaThinButtonMenu },
@@ -116,18 +114,15 @@ export default {
     }
   },
   setup (props, context) {
-    const ca = ref(null)
-    const es = ref(null)
-    const en = ref(null)
-
     const $q = useQuasar()
+    const { capitalize } = format
     const { cookies } = useCookies()
     const $store = useStore()
-    const LANGS = $store.getters['app/getAllowedLangs']
+    const router = useRouter()
+    const route = useRoute()
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+    const { t, locale } = useI18n({ useScope: 'global' })
+
     const showInfo = function () {
       $store.commit('app/setModal', { id: 'info', content: { visibility: true } })
     }
@@ -153,25 +148,25 @@ export default {
       return $store.getters['app/getLang']
     })
 
-    const clickLanguageSelector = (lang, event) => {
-      let object = event.target
-      const nextURL = $store.getters['app/getFrontendUrl'] + lang
-      const nextTitle = 'MosquitoAlert'
-      const nextState = { additionalInformation: 'Updated the URL with JS' }
-      window.history.pushState(nextState, nextTitle, nextURL)
-      window.history.replaceState(nextState, nextTitle, nextURL)
+    const clickLanguageSelector = (newLocale) => {
+      if (newLocale === locale.value) return
 
-      if (!object.classList.contains('menuItem')) object = object.parentNode
-      setLanguage(lang, object)
+      // Update i18n locale
+      locale.value = newLocale
+
+      setLanguage(newLocale)
+
+      // Build new path by replacing the locale param
+      router.push({
+        name: route.name,
+        params: { ...route.params, locale: newLocale },
+        query: route.query
+      })
     }
 
-    const setLanguage = async function (lang, object) {
+    const setLanguage = async function (lang) {
       await $store.dispatch('app/setInitData', lang)
       cookies.set('lang', lang)
-      object.parentNode.querySelectorAll('.menuItem').forEach(item => {
-        item.classList.remove('active')
-      })
-      object.classList.add('active')
       // NASTY
       let qLang = lang
       if (qLang === 'en') qLang = 'en-US'
@@ -203,22 +198,23 @@ export default {
 
     const loginLabel = computed(() => {
       if ($store.getters['app/getAuthorized']) {
-        return trans('Log out')
+        return t('log_out')
       } else {
-        return trans('Log in')
+        return t('log_in')
       }
     })
 
+    function getLanguageName (isoName) {
+      return capitalize(new Intl.DisplayNames([isoName], { type: 'language' }).of(isoName))
+    }
+
     return {
-      trans,
       wmsVisibility,
       estimationsVisibility,
       loginLabel,
       lang,
-      LANGS,
-      ca,
-      es,
-      en,
+      locale,
+      getLanguageName,
       frontendUrl,
       linkModels,
       showInfo,

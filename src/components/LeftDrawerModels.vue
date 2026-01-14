@@ -23,16 +23,16 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right q-ma-md">
-        <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
+        <q-btn :label="$t('close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Estimates') }}
+        {{ $t('estimates') }}
       </div>
 
       <div>
         <div class="category-box q-my-md">
           <q-select
-            :label="trans('Select species')"
+            :label="$t('select_species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -49,7 +49,7 @@
           readonly
           class="calendar-input"
           input-class="cursor-pointer"
-          :label="trans('Month / Year')"
+          :label="$t('month_year')"
           v-model="inputDate"
           mask="##/####"
           :label-color="dateSelected?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -60,7 +60,7 @@
             <q-icon ref="modelsCalendar" name="event_note" class="models-calendar cursor-pointer" color="orange">
               <q-popup-proxy ref="monthPicker" transition-show="scale" transition-hide="scale">
                 <q-date
-                  :title="trans('Select model date')"
+                  :title="$t('select_model_date')"
                   :navigation-min-year-month="startingModelDate"
                   :navigation-max-year-month="getLastDate"
                   mask="MM/YYYY"
@@ -84,7 +84,7 @@
                   <i class="fa-thin fa-circle-info"></i>
                 </div>
                 <div class="q-ml-xs lower-case capitalFirstLetter">
-                  {{ trans('MODELED DATA') }}
+                  {{ $t('modeled_data') }}
                 </div>
               </div>
             </div>
@@ -94,7 +94,7 @@
               class="ma-btn no-margin"
               :class="(disabled)?'disabled':''"
               @click="applyfilter">
-                {{ trans('Apply') }}
+                {{ $t('apply') }}
             </q-btn>
           </div>
         </div>
@@ -103,7 +103,7 @@
           <hr class="q-my-xl">
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ trans('Probability') }}
+              {{ $t('probability') }}
             </div>
             <div class="estimation-palettes">
               <q-icon v-if="estimation" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPalettes" />
@@ -126,9 +126,9 @@
           </div>
           <!-- ESTIMATION -->
           <div v-if="estimation" class="row">
-            <div class="col-4 text-left">{{ trans('Low') }}</div>
-            <div class="col-4 text-center">{{ trans('Medium') }}</div>
-            <div class="col-4 text-right">{{ trans('High') }}</div>
+            <div class="col-4 text-left">{{ $t('low') }}</div>
+            <div class="col-4 text-center">{{ $t('medium') }}</div>
+            <div class="col-4 text-right">{{ $t('high') }}</div>
           </div>
           <!-- ESTIMATION LEGEND -->
           <div v-if="estimation" class="row legend-row" :style="{'opacity': 1 - (estimationTransparency/100)}">
@@ -141,7 +141,7 @@
           </div>
           <!-- ESTIMATION TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="estimation" class="col text-center">{{ trans('Transparency') }}</div>
+            <div v-if="estimation" class="col text-center">{{ $t('transparency') }}</div>
           </div>
           <div v-if="estimation" class="row">
             <q-slider
@@ -154,7 +154,7 @@
           <!-- UNCERTAINTY -->
           <div class="flex spaceBetween">
             <div class="uppercase text-bold">
-              {{ trans('Uncertainty') }}
+              {{ $t('uncertainty') }}
             </div>
             <div>
               <q-icon v-if="uncertainty" name="palette" class="text-orange cursor-pointer" size="2em" @click="showPicker" />
@@ -178,10 +178,10 @@
           </div>
           <!-- UNCERTAINTY LEGEND -->
           <div v-if="uncertainty" class="row q-mt-md">
-            <div class="col-3 text-center">{{ trans('Very low') }}</div>
-            <div class="col-3 text-center">{{ trans('Low') }}</div>
-            <div class="col-3 text-center">{{ trans('Medium') }}</div>
-            <div class="col-3 text-center">{{ trans('High') }}</div>
+            <div class="col-3 text-center">{{ $t('very_low') }}</div>
+            <div class="col-3 text-center">{{ $t('low') }}</div>
+            <div class="col-3 text-center">{{ $t('medium') }}</div>
+            <div class="col-3 text-center">{{ $t('high') }}</div>
           </div>
           <div v-if="uncertainty" class="row q-mt-sm alignt-items-centered" :style="{'opacity': 1 - (uncertaintyTransparency/100)}">
               <div class="col-3 text-center">
@@ -199,7 +199,7 @@
           </div>
           <!-- UNCERTAINTY TRANSPARENCY -->
           <div class="row q-mt-lg">
-            <div v-if="uncertainty" class="col text-center">{{ trans('Transparency') }}</div>
+            <div v-if="uncertainty" class="col text-center">{{ $t('transparency') }}</div>
           </div>
           <div v-if="uncertainty" class="row">
             <q-slider
@@ -221,6 +221,7 @@ import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 // import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: { LeftMenu },
@@ -239,6 +240,8 @@ export default {
     'toggleLeftDrawer'
   ],
   setup (props, context) {
+    const { t } = useI18n()
+
     const uncertaintyColor = ref(null)
     const colorPickerEst = ref(null)
     const colorPickerSe = ref(null)
@@ -364,18 +367,14 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'albopictus', type: trans('Tiger mosquito') },
-        { code: 'aegypti', type: trans('Yellow fever mosquito') },
-        { code: 'japonicus', type: trans('Japonicus mosquito') },
-        { code: 'koreicus', type: trans('Koreicus mosquito') },
-        { code: 'culex', type: trans('Culex mosquito') },
-        { code: 'biting', type: trans('Bites') }
+        { code: 'albopictus', type: t('Tiger mosquito') },
+        { code: 'aegypti', type: t('Yellow fever mosquito') },
+        { code: 'japonicus', type: t('Japonicus mosquito') },
+        { code: 'koreicus', type: t('Koreicus mosquito') },
+        { code: 'culex', type: t('Culex mosquito') },
+        { code: 'biting', type: t('Bites') }
       ]
     })
-
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     // Called when TOC is toggled
     const toggleLeftDrawer = function () {
@@ -592,7 +591,6 @@ export default {
     })
 
     return {
-      trans,
       errorDownloadingModels,
       goInfoModal,
       estLegendColors,

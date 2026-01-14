@@ -23,17 +23,17 @@
       :class="expanded?'expanded':'collapsed'"
     >
       <div v-if="mobile" class="text-right q-ma-md">
-        <q-btn :label="trans('Close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
+        <q-btn :label="$t('close')" class="ma-close-btn" @click="toggleLeftDrawer"/>
       </div>
       <div class="text-h5 toc-title-estimates">
-        {{ trans('Discoveries') }}
+        {{ $t('discoveries') }}
       </div>
 
       <div>
         <div class="category-box q-my-md">
           <q-select
             ref="qSelect"
-            :label="trans('Select species')"
+            :label="$t('select_species')"
             v-model="modelVector"
             color="orange"
             :label-color="modelVector?'orange':'rgba(0, 0, 0, 0.6)'"
@@ -52,7 +52,7 @@
                       <i class="fa-thin fa-circle-info"></i>
                     </div>
                     <div class="q-ml-xs">
-                      {{ trans('Discoveries data') }}
+                      {{ $t('discoveries_data') }}
                     </div>
                   </div>
                 </div>
@@ -71,7 +71,7 @@
           <!-- Columns titles -->
           <div class="row">
             <div class="col-2"></div>
-            <div class="col-7 text-center q-px-md transparency-title">{{ trans('Opacity') }}</div>
+            <div class="col-7 text-center q-px-md transparency-title">{{ $t('opacity') }}</div>
             <div class="col-3"></div>
           </div>
           <!-- DRAGGABLE LIST -->
@@ -101,7 +101,7 @@
           </div>
         <!-- LEGEND -->
         <div class="wms-legend" >
-          <div class="legend-title q-mt-lg q-mb-md">{{ trans('Legend') }}</div>
+          <div class="legend-title q-mt-lg q-mb-md">{{ $t('legend') }}</div>
           <div class="q-mt-lg">
             <img :src="legendImageSource">
           </div>
@@ -117,6 +117,7 @@ import { watch, computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import LeftMenu from 'components/LeftMenu.vue'
 import { exportFile } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: { LeftMenu },
@@ -132,6 +133,8 @@ export default {
   ],
   setup (props, context) {
     const $store = useStore()
+    const { t } = useI18n()
+
     const disabled = ref(true)
     const disabledInfo = ref(true)
     const modelVector = ref()
@@ -155,10 +158,10 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'tiger', type: trans('Tiger mosquito'), wms_field: 'albopictus', disable: false },
-        { code: 'yellow', type: trans('Yellow fever mosquito'), wms_field: 'aegypti', disable: false },
-        { code: 'japonicus', type: trans('Japonicus mosquito'), wms_field: 'japonicus', disable: false },
-        { code: 'koreicus', type: trans('Koreicus mosquito'), wms_field: 'koreicus', disable: false }
+        { code: 'tiger', type: t('Tiger mosquito'), wms_field: 'albopictus', disable: false },
+        { code: 'yellow', type: t('Yellow fever mosquito'), wms_field: 'aegypti', disable: false },
+        { code: 'japonicus', type: t('Japonicus mosquito'), wms_field: 'japonicus', disable: false },
+        { code: 'koreicus', type: t('Koreicus mosquito'), wms_field: 'koreicus', disable: false }
       ]
     })
 
@@ -177,10 +180,6 @@ export default {
 
     const callFirstMapCall = function () {
       context.emit('firstMapCall', {})
-    }
-
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
     }
 
     // Called when TOC is toggled
@@ -293,7 +292,6 @@ export default {
     }
 
     return {
-      trans,
       loadingDownload,
       localOpacity,
       localVisible,

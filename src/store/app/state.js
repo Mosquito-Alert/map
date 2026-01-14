@@ -57,23 +57,6 @@ export default function () {
     defaultLang = cookies.get('lang')
   }
 
-  // Add default lang to browser URL
-  let currentUrl = document.location.toString()
-  if (currentUrl.slice(-1) === '/') {
-    currentUrl = currentUrl.slice(0, -1)
-  }
-
-  if (langKeys.indexOf(currentUrl.toLowerCase().slice(-2)) === -1) {
-    const nextURL = currentUrl + '/' + defaultLang
-    const nextTitle = 'MosquitoAlert'
-    const nextState = { additionalInformation: 'Updated the URL with JS' }
-    window.history.pushState(nextState, nextTitle, nextURL)
-    window.history.replaceState(nextState, nextTitle, nextURL)
-  }
-
-  // FORCE SPANISH
-  // const defaultLang = (allowedLangs.includes(browserLang)) ? 'es' : allowedLangs[0]
-
   function getCurrentYearDates () {
     return {
       from: moment(new Date(Date.now())).startOf('year').format('YYYY-MM-DD'),
@@ -320,7 +303,7 @@ export default function () {
       },
       culex: {
         categories: ['culex_probable', 'culex_confirmed'],
-        common_name: 'Common mosquito',
+        common_name: 'Culex mosquito',
         scientific_name: 'Culex pipiens',
         icon: require('../../assets/img/marker_culex.svg'),
         color: '#aa4499',

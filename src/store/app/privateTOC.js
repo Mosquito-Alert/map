@@ -104,7 +104,7 @@ export const observations = {
     },
     not_yet_validated: {
       categories: ['not_yet_validated'],
-      common_name: 'No validat',
+      common_name: 'not_yet_validated',
       icon: require('../../assets/img/marker_not_yet_validated.svg'),
       color: '#c0c0c0'
     }
@@ -157,7 +157,7 @@ export const observations = {
       categories: ['breeding_site_not_yet_filtered'],
       icon: require('../../assets/img/breeding_not_validated.svg'),
       faIcon: 'fa-solid fa-droplet-degree breeding',
-      common_name: 'Breeding not validated',
+      common_name: 'not_yet_validated',
       color: '#1072ad',
       active: false
     }

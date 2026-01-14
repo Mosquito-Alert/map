@@ -60,7 +60,7 @@ export const observations = {
   otherObservations: {
     other: {
       categories: ['other_species'],
-      common_name: 'Other species',
+      common_name: 'Others_mosquito',
       icon: require('../../assets/img/marker_other.svg'),
       color: '#c0c0c0',
       active: false
@@ -89,7 +89,7 @@ export const observations = {
       categories: ['storm_drain_dry'],
       icon: require('../../assets/img/storm_drain_dry.svg'),
       faIcon: 'fa-solid fa-droplet-slash breeding',
-      common_name: 'Stormdrain without water',
+      common_name: 'storm_drain_dry',
       color: '#1072ad',
       active: false
     },

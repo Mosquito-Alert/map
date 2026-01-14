@@ -17,13 +17,13 @@
             <div>
               <div class="row cookies-selector">
                   <div class="col-10">
-                    <h5>{{ trans('Necesarias') }}</h5>
+                    <h5>{{ $t('necesarias') }}</h5>
                   </div>
                   <div class="col-2">
                     <q-toggle
                       disable
                       v-model="onValue"
-                      :title="trans('Is required')"
+                      :title="$t('is_required')"
                       size="lg"
                       checked-icon="check"
                       color="orange"/>
@@ -31,15 +31,15 @@
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>{{ trans("las imprescindibles para facilitar vuestra conexión. No hay opción de inhabilitarlas, dado que son las necesarias por el funcionamiento del sitio web") }}</p>
+                  <p>{{ $t("las_imprescindibles_para_facilitar_vuestra_conexion_no_hay_opcion_de_inhabilitarlas_dado_que_son_las_necesarias_por_el_funcionamiento_del_sitio_web") }}</p>
                 </div>
               </div>
 
               <div class="row cookies-selector">
-                  <div class="col-10"><h5>{{ trans('Analíticas') }}</h5></div>
+                  <div class="col-10"><h5>{{ $t('analiticas') }}</h5></div>
                   <div class="col-2">
                     <q-toggle
-                      :title="trans('Analytics tooltip')"
+                      :title="$t('analytics_tooltip')"
                       v-model="analyticsActivated"
                       size="lg"
                       checked-icon="check"
@@ -48,7 +48,7 @@
               </div>
               <div class="row">
                 <div class="col-12">
-                  <p>{{ trans('proporcionan información estadística y permiten mejorar los servicios') }}</p>
+                  <p>{{ $t('proporcionan_informacion_estadistica_y_permiten_mejorar_los_servicios') }}</p>
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@
                   class="ma-btn"
                   @click="savePreferences('all')"
                 >
-                  {{ trans('Accept all') }}
+                  {{ $t('accept_all') }}
                 </button>
               </div>
               <div class="">
@@ -69,7 +69,7 @@
                   @click="savePreferences('custom')"
                   class="ma-btn close"
                 >
-                  {{ trans('Save and close') }}
+                  {{ $t('save_and_close') }}
                 </button>
               </div>
             </div>
@@ -108,9 +108,6 @@ export default {
 
     const close = function () {
       $store.commit('app/setModal', { id: 'cookieSettings', content: { visibility: false } })
-    }
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
     }
 
     const mobile = computed(() => {
@@ -164,8 +161,7 @@ export default {
       open,
       close,
       savePreferences,
-      onAccept,
-      trans
+      onAccept
     }
   }
 }

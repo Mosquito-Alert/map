@@ -12,16 +12,16 @@
       <dialog open class="modal-first q-pa-xl q-pb-sm" :class="mobile?'mobile':''">
         <slot></slot>
           <img src="~assets/img/mosquitoalert_logo.png" class="q-mb-lg">
-          <p>{{ trans('Check the') }} <b>{{ trans('data on mosquitoes, breeding places and bites') }}</b> {{ trans('sent by citizens, through the Mosquito Alert app.') }} {{ trans('Part of this data has been validated by entomology professionals or by Artificial Intelligence (AI) algorithms. You will also find data modeled from the original data.') }}</p>
+          <p>{{ $t('check_the') }} <b>{{ $t('data_on_mosquitoes_breeding_places_and_bites') }}</b> {{ $t('sent_by_citizens_through_the_mosquito_alert_app') }} {{ $t('part_of_this_data_has_been_validated_by_entomology_professionals_or_by_artificial_intelligence_ai_algorithms_you_will_also_find_data_modeled_from_the_original_data') }}</p>
 
-          <p> {{ trans('You can ') }} <b>{{ trans('view, filter and download data') }}</b>, {{ trans("among other functions") }}. {{ trans('Use the Help') }} <i class="fa-thin fa-square-question"></i> {{ trans('and Info') }} <i class="fa-thin fa-circle-info"></i> {{ trans('for more information.') }}</p>
+          <p> {{ $t('you_can ') }} <b>{{ $t('view_filter_and_download_data') }}</b>, {{ $t("among_other_functions") }}. {{ $t('use_the_help') }} <i class="fa-thin fa-square-question"></i> {{ $t('and_info') }} <i class="fa-thin fa-circle-info"></i> {{ $t('for_more_information') }}</p>
           <p>
-            {{ trans('If you want the complete Mosquito Alert data set, with advanced documentation and download options, go to the Mosquito Alert Data Portal:') }} <a href="http://www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal" target="_blank">www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal</a></p>
-          <p> {{ trans('You can also consult the Mosquito Alert website: ') }} <a href="http://www.mosquitoalert.com" target="_blank">www.mosquitoalert.com</a></p>
+            {{ $t('if_you_want_the_complete_mosquito_alert_data_set_with_advanced_documentation_and_download_options_go_to_the_mosquito_alert_data_portal') }} <a href="http://www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal" target="_blank">www.mosquitoalert.com/en/access-to-mosquito-alert-data-portal</a></p>
+          <p> {{ $t('you_can_also_consult_the_Mosquito_Alert_website') }} <a href="http://www.mosquitoalert.com" target="_blank">www.mosquitoalert.com</a></p>
 
           <div class="row text-center">
             <div class="col">
-              <button @click="close" class="ma-close-btn">{{ trans('Close') }}</button>
+              <button @click="close" class="ma-close-btn">{{ $t('close') }}</button>
             </div>
           </div>
       </dialog>
@@ -51,16 +51,13 @@ export default {
     const hasCloseButton = computed(() => {
       return props.buttons.split(',').includes('close')
     })
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
+
     const layers = $store.getters['app/getLayers']
     return {
       layers,
       close,
       hasCloseButton,
       mobile,
-      trans,
       slide: ref('pag_1')
     }
   }

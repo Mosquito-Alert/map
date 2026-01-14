@@ -9,7 +9,7 @@
       v-model="newTag"
       :loading="isFilteringTag"
       color="orange"
-      :label="trans('Placeholder hashtag')"
+      :label="$t('placeholder_hashtag')"
       @keyup.enter="addTag"
     >
     </q-input>
@@ -37,9 +37,6 @@ export default {
     const tags = ref([])
     const newTag = ref()
     const $store = useStore()
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
 
     // When user cancels a tag
     const deleteTag = function (tag) {
@@ -104,7 +101,6 @@ export default {
     })
 
     return {
-      trans,
       setTags,
       newTag,
       tags,

@@ -10,24 +10,24 @@
     <div class="dialog modal-reports" v-if="open" @click="close">
       <dialog open :class="mobile?'mobile':''">
         <slot></slot>
-          <div class="modal-title">{{ trans('Reports modal title') }}</div>
-          <p>{{ trans('Report with the observations displayed in the current map view (maximum: 300 observations)') }}</p>
-          <p>{{ trans('Verify this by looking at the map point counter') }}</p>
+          <div class="modal-title">{{ $t('reports_modal_title') }}</div>
+          <p>{{ $t('report_with_the_observations_displayed_in_the_current_map_view_maximum_300_observations') }}</p>
+          <p>{{ $t('verify_this_by_looking_at_the_map_point_counter') }}</p>
           <p class="popup-blocking-warning" v-if="browser==='safari'">
-            {{ trans('If you are using Safari, please Check that your pop-up windows block is not blocking the list of observations') }}
+            {{ $t('if_you_are_using_safari_please_check_that_your_pop_up_windows_block_is_not_blocking_the_list_of_observations') }}
           </p>
         <div class="error-message" v-if="tooManyFeatures">
-          {{ trans('Reports limit exceeded') }}
+          {{ $t('reports_limit_exceeded') }}
         </div>
         <div class="modal-close buttons">
           <div class="report-buttons flex">
             <div>
               <button v-if="!tooManyFeatures" class="gtm-report-detailed ma-btn q-mr-sm" @click="newReport">
-                {{ trans('Continue') }}
+                {{ $t('continue') }}
               </button>
             </div>
             <div>
-              <button @click="close" class="ma-btn q-ml-sm">{{ trans('Close') }}</button>
+              <button @click="close" class="ma-btn q-ml-sm">{{ $t('close') }}</button>
             </div>
           </div>
         </div>
@@ -104,10 +104,6 @@ export default {
       return props.buttons.split(',').includes('close')
     })
 
-    const trans = function (text) {
-      return $store.getters['app/getText'](text)
-    }
-
     const mobile = computed(() => {
       return $store.getters['app/getIsMobile']
     })
@@ -122,8 +118,7 @@ export default {
       tooManyFeatures,
       newReport,
       close,
-      hasCloseButton,
-      trans
+      hasCloseButton
     }
   }
 }

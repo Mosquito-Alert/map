@@ -8,10 +8,6 @@ export const setCsrfToken = (state, token) => {
   state.csrfToken = token
 }
 
-export const setTranslations = (state, payload) => {
-  state.trans = payload
-}
-
 export const setTabsVisibility = (state, payload) => {
   state.leftMenuTabs = payload
 }

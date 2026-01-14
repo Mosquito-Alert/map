@@ -1,85 +1,78 @@
 
+import { DEFAULT_LOCALE, i18n } from 'src/boot/i18n'
+
 const routes = [
-  // DEFAULT PAGE
+  // Redirect any path missing locale to /en/{path}
   {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    props: { initView: false }
+    path: '/:pathMatch(.*)*',
+    beforeEnter: (to, from, next) => {
+      const LOCALES = i18n.global.availableLocales
+      const pathParts = to.path.split('/').filter(Boolean) // split and remove empty parts
+
+      // Check if first part is a locale
+      if (LOCALES.includes(pathParts[0])) {
+        next() // already has locale at start, continue
+        return
+      }
+
+      // Check if last part is a locale
+      const lastPart = pathParts[pathParts.length - 1]
+      if (LOCALES.includes(lastPart)) {
+        // Move locale from end to start
+        pathParts.pop() // remove from end
+        pathParts.unshift(lastPart) // add at start
+        next('/' + pathParts.join('/'))
+        return
+      }
+
+      // No locale found, prepend default
+      next(`/${DEFAULT_LOCALE}${to.fullPath}`)
+    }
   },
-  // DEFAULT WITH LANG
+  // Root locale routes
   {
-    path: '/:lang(ca|es|en)',
-    component: () => import('layouts/MainLayout.vue'),
-    props: { initView: false }
+    path: '/:locale(ca|es|en)',
+    name: 'reports',
+    component: () => import('layouts/MainLayout.vue')
   },
-  // MODELS TAB
   {
-    path: '/models',
+    path: '/:locale(ca|es|en)/models',
+    name: 'models',
     component: () => import('layouts/ModelsLayout.vue')
   },
-  // MODELS WITH LANG
   {
-    path: '/models/:lang(ca|es|en)',
-    component: () => import('layouts/ModelsLayout.vue')
-  },
-  // DISCOVERIES TAB
-  {
-    path: '/discoveries',
+    path: '/:locale(ca|es|en)/discoveries',
+    name: 'discoveries',
     component: () => import('layouts/WMSLayout.vue')
   },
-  // DISCOVERIES WITH LANG
-  {
-    path: '/discoveries/:lang(ca|es|en)',
-    component: () => import('layouts/WMSLayout.vue')
-  },
+
   // SHARE OBSERVATIONS VIEW
   {
-    path: '/:code([a-zA-Z0-9]{4})',
+    path: '/:locale(ca|es|en)/:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/MainLayout.vue')
   },
-  // SHARE OBSERVATIONS VIEW WITH LANG
-  {
-    path: '/:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/MainLayout.vue')
-  },
+
   // SHARE MODELS VIEW
   {
-    path: '/M-:code([a-zA-Z0-9]{4})',
+    path: '/:locale(ca|es|en)/M-:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/ModelsLayout.vue')
   },
-  // SHARE MODELS VIEW WITH LANG
-  {
-    path: '/M-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/ModelsLayout.vue')
-  },
+
   // SHARE distribution VIEW
   {
-    path: '/W-:code([a-zA-Z0-9]{4})',
+    path: '/:locale(ca|es|en)/W-:code([a-zA-Z0-9]{4})',
     component: () => import('layouts/WMSLayout.vue')
   },
-  // SHARE WMS VIEW WITH LANG
+
+  // Reports view
   {
-    path: '/W-:code([a-zA-Z0-9]{4})/:lang(ca|es|en)',
-    component: () => import('layouts/WMSLayout.vue')
-  },
-  {
-    // Set the accepted characters and length of reports view
-    path: '/:report([a-zA-Z0-9]{6})',
+    path: '/:locale(ca|es|en)/:report([a-zA-Z0-9]{6})',
     component: () => import('layouts/ReportsLayout.vue')
   },
+
+  // Only one feature map (by observation long id)
   {
-    // Set the accepted characters and length of reports view with lang
-    path: '/:report([a-zA-Z0-9]{6})/:lang(ca|es|en)',
-    component: () => import('layouts/ReportsLayout.vue')
-  },
-  {
-    // Only one feature map (by observation long id)
-    path: '/:code([-a-zA-Z0-9]{36})',
-    component: () => import('src/layouts/OneFeatureLayout.vue')
-  },
-  {
-    // Only one feature map (by observation long id) with lang
-    path: '/:code([-a-zA-Z0-9]{36})/:lang(ca|es|en)',
+    path: '/:locale(ca|es|en)/:code([-a-zA-Z0-9]{36})',
     component: () => import('src/layouts/OneFeatureLayout.vue')
   },
   // Always leave this as last one,

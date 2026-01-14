@@ -5,7 +5,7 @@
 
 <template>
   <div class="tab-link-container" :class="isButtonDisabled?'disabled':''">
-    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="toLink">
+    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="{'name': routeName, params: {'lang': $i18n.locale}}">
       <button class="fa-thin-button" :class="classProp" :title="label">
         <i :class="iconCode"></i>
       </button>
@@ -22,14 +22,10 @@
 import { computed } from 'vue'
 
 export default {
-  props: ['name', 'label', 'link', 'class', 'item', 'id'],
+  props: ['name', 'label', 'routeName', 'class', 'item', 'id'],
   setup (props) {
     const Id = computed(() => {
       return props.id
-    })
-
-    const toLink = computed(() => {
-      return props.link
     })
 
     const iconCode = computed(() => {
@@ -46,7 +42,6 @@ export default {
 
     return {
       Id,
-      toLink,
       iconCode,
       classProp,
       isButtonDisabled
