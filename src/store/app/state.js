@@ -6,6 +6,7 @@ import { defaultObservations, observations as publicLayers } from './publicTOC'
 export default function () {
   let backendUrl = ''
   let frontendUrl = ''
+  let tilesUrl = ''
   let analyticsCode
   const { cookies } = useCookies()
   // const transparency = 'aa'
@@ -29,12 +30,14 @@ export default function () {
   }
 
   if (process.env.DEV) {
-    backendUrl = 'http://localhost:8000/'
+    backendUrl = 'api_v1_prod/' // See quasar.conf.js for proxy settings.
     frontendUrl = 'http://localhost:8080/'
+    tilesUrl = 'api_v1_prod/tiles'
     analyticsCode = 'GTM-M5PRMJ9'
   } else {
     backendUrl = 'https://api.mosquitoalert.com/v1/map/'
     frontendUrl = 'https://map.mosquitoalert.com/'
+    tilesUrl = 'https://api.mosquitoalert.com/v1/map/tiles'
     analyticsCode = 'GTM-MQG3F3J'
   }
   // first language is default
@@ -107,7 +110,7 @@ export default function () {
     modelsUrl: 'https://webserver.mosquitoalert.com/static/models/global_minimal_model_estimates/',
 
     // URL of vector tiles
-    tilesUrl: 'https://api.mosquitoalert.com/v1/map/tiles',
+    tilesUrl: tilesUrl,
     // tilesUrl: '//localhost:8000/api/tiles',
 
     // Grid size of cell format models
