@@ -58,6 +58,31 @@
             {{ 'replay' }}
           </span>
         </Button>
+        <div>
+          <Button
+            type="button"
+            @click="(event) => menu.toggle(event)"
+            severity="secondary"
+            size="small"
+            class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
+            aria-haspopup="true"
+            aria-controls="overlay_menu"
+          >
+            <span class="text-gray-700 material-icons-outlined">
+              {{ 'speed' }}
+            </span>
+          </Button>
+          <Menu ref="menu" id="overlay_menu" :model="playbackMenuItems" :popup="true">
+            <template #item="{ item }">
+              <div class="flex items-center gap-2 px-2 py-1">
+                <span class="material-icons-outlined text-sm w-4">
+                  {{ item.isActive ? 'check' : '' }}
+                </span>
+                <span>{{ item.label }}</span>
+              </div>
+            </template>
+          </Menu>
+        </div>
       </div>
     </div>
   </div>
@@ -69,6 +94,7 @@ import { GridComponent, BrushComponent, ToolboxComponent } from 'echarts/compone
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import Button from 'primevue/button'
+import Menu from 'primevue/menu'
 import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
@@ -81,7 +107,14 @@ const props = defineProps<{
   timeSeriesData: Record<string, number>
 }>()
 
+type PlaybackSpeed = {
+  label: string
+  value: number
+}
+
 const observationsStore = useObservationsStore()
+
+const menu = ref()
 
 const originalDateLimits = ref<{ start: string; end: string } | null>(null)
 const timeSeriesData = ref<Record<string, number>>({})
@@ -95,6 +128,25 @@ const playbackOngoing = ref(false)
 const playbackCurrentDate = ref<Date | null>(null)
 const playbackOriginalDateLimits = ref<{ start: string; end: string } | null>(null)
 const playbackInterval = ref<number | undefined>(undefined)
+const playbackSpeedOptions: PlaybackSpeed[] = [
+  { label: '0.5x', value: 1000 },
+  { label: '0.75x', value: 666 },
+  { label: '1.0x', value: 500 },
+  { label: '1.5x', value: 333 },
+  { label: '2.0x', value: 250 },
+]
+const playbackSpeed = ref<PlaybackSpeed>(
+  playbackSpeedOptions.find((opt) => opt.label === '1.0x') as PlaybackSpeed,
+)
+const playbackMenuItems = computed(() =>
+  playbackSpeedOptions.map((opt) => ({
+    label: opt.label,
+    isActive: playbackSpeed.value.label === opt.label,
+    command: () => {
+      playbackSpeed.value = opt
+    },
+  })),
+)
 
 const fixDateAggregationData = (data: Record<string, number>) => {
   const dates = Object.keys(data).sort()
@@ -183,7 +235,7 @@ const playback = () => {
     playbackCurrentDate.value = currentDate
 
     currentDate.setMonth(currentDate.getMonth() + 1)
-  }, 500)
+  }, playbackSpeed.value.value)
 }
 
 const replay = () => {
