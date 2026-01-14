@@ -12,10 +12,6 @@ export const i18n = createI18n({
   fallbackLocale: 'en',
   legacy: false,
   globalInjection: true,
-  missing: (locale, key, vm) => {
-  // Return key itself to avoid errors
-    return key
-  },
   messages
 })
 
