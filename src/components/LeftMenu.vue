@@ -16,7 +16,7 @@
         name="fa-thin fa-map-location-dot"
         :label="$t('observations')"
         :class="active_item=='layers'?'active':''"
-        link="/"
+        routeName="reports"
         item="observations"
         id="observations"
       >
@@ -26,7 +26,7 @@
         name="fa-thin fa-radar"
         :label="$t('discoveries')"
         :class="(wmsVisibility?(active_item=='wms'?'active':''):'disabled')"
-        link="/discoveries"
+        routeName="discoveries"
         item="wms"
         id="wms"
       >
@@ -36,7 +36,7 @@
         name="fa-thin fa-chart-mixed"
         :label="$t('estimates')"
         :class="(estimationsVisibility?(active_item=='models'?'active':''):'disabled')"
-        link="/models"
+        routeName="models"
         item="models"
         id="estimations"
       >

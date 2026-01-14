@@ -32,14 +32,17 @@ const routes = [
   // Root locale routes
   {
     path: '/:locale(ca|es|en)',
+    name: 'reports',
     component: () => import('layouts/MainLayout.vue')
   },
   {
     path: '/:locale(ca|es|en)/models',
+    name: 'models',
     component: () => import('layouts/ModelsLayout.vue')
   },
   {
     path: '/:locale(ca|es|en)/discoveries',
+    name: 'discoveries',
     component: () => import('layouts/WMSLayout.vue')
   },
 

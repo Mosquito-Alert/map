@@ -5,7 +5,7 @@
 
 <template>
   <div class="tab-link-container" :class="isButtonDisabled?'disabled':''">
-    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="toLink">
+    <router-link v-if="!isButtonDisabled" class="main-menu-item" :id="Id" :to="{'name': routeName, params: {'lang': $i18n.locale}}">
       <button class="fa-thin-button" :class="classProp" :title="label">
         <i :class="iconCode"></i>
       </button>
@@ -20,23 +20,12 @@
 
 <script>
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { DEFAULT_LOCALE } from 'src/boot/i18n'
 
 export default {
-  props: ['name', 'label', 'link', 'class', 'item', 'id'],
+  props: ['name', 'label', 'routeName', 'class', 'item', 'id'],
   setup (props) {
-    const { locale } = useI18n()
-
     const Id = computed(() => {
       return props.id
-    })
-
-    // Compute full link with current locale
-    const toLink = computed(() => {
-      const currentLocale = locale.value || DEFAULT_LOCALE
-      const path = props.link.startsWith('/') ? props.link : `/${props.link}`
-      return `/${currentLocale}${path}`
     })
 
     const iconCode = computed(() => {
@@ -53,7 +42,6 @@ export default {
 
     return {
       Id,
-      toLink,
       iconCode,
       classProp,
       isButtonDisabled
