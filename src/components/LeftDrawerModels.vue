@@ -845,9 +845,11 @@ input:checked + .cookie-comply-slider{
 }
 .toc-title-estimates{
   font-family: 'Roboto';
-  text-transform: Capitalize;
   font-weight: 700;
   color: #666666;
+}
+.toc-title-estimates::first-letter{
+  text-transform: uppercase;
 }
 .ma-close-btn::before{
   box-shadow: none;

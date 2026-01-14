@@ -388,9 +388,11 @@ export default {
 
 .toc-title-reports{
   font-family: 'Roboto';
-  text-transform: Capitalize;
   font-weight: 700;
   color: #666666;
+}
+.toc-title-reports::first-letter{
+  text-transform: uppercase;
 }
 .toc-title{
   font-family: 'Roboto';
