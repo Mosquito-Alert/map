@@ -35,12 +35,13 @@
         </Button>
       </div>
       <VChart ref="chartRef" class="h-40! w-xl!" :option="option" :loading="loading" autoresize />
-      <div class="playback">
+      <div class="playback flex items-center justify-center gap-2 p-2">
         <Button
           severity="secondary"
           size="small"
           class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
           @click="playbackOngoing = !playbackOngoing"
+          v-tooltip.top="playbackOngoing ? 'Pause playback' : 'Start playback'"
         >
           <span class="text-gray-700 material-icons-outlined">
             {{ playbackOngoing ? 'pause' : 'play_arrow' }}
@@ -53,6 +54,7 @@
           size="small"
           class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
           @click="replay()"
+          v-tooltip.top="'Replay from start'"
         >
           <span class="text-gray-700 material-icons-outlined">
             {{ 'replay' }}
@@ -67,6 +69,7 @@
             class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
             aria-haspopup="true"
             aria-controls="overlay_menu"
+            v-tooltip.top="'Playback speed'"
           >
             <span class="text-gray-700 material-icons-outlined">
               {{ 'speed' }}
