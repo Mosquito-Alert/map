@@ -269,7 +269,7 @@ export default function () {
     models: {
       tiger: {
         categories: ['mosquito_tiger_probable', 'mosquito_tiger_confirmed'],
-        common_name: 'tiger_mosquito',
+        common_name: 'Tiger mosquito',
         scientific_name: 'Aedes albopictus',
         icon: require('../../assets/img/marker_tiger.svg'),
         color: '#4d4d4d',
@@ -277,7 +277,7 @@ export default function () {
       },
       yellow: {
         categories: ['yellow_fever_probable', 'yellow_fever_confirmed'],
-        common_name: 'yellow_fever_mosquito',
+        common_name: 'Yellow fever mosquito',
         scientific_name: 'Aedes aegypti',
         icon: require('../../assets/img/marker_yellow.svg'),
         color: '#ffdd19',
@@ -285,7 +285,7 @@ export default function () {
       },
       japonicus: {
         categories: ['japonicus_probable', 'japonicus_confirmed', 'japonicus_koreicus'],
-        common_name: 'japonicus_mosquito',
+        common_name: 'Japonicus mosquito',
         scientific_name: 'Aedes japonicus',
         icon: require('../../assets/img/marker_japonicus.svg'),
         iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
@@ -294,7 +294,7 @@ export default function () {
       },
       koreicus: {
         categories: ['koreicus_probable', 'koreicus_confirmed', 'japonicus_koreicus'],
-        common_name: 'koreicus_mosquito',
+        common_name: 'Koreicus mosquito',
         scientific_name: 'Aedes koreicus',
         icon: require('../../assets/img/marker_koreicus.svg'),
         iconConflict: require('../../assets/img/marker_japonicus_koreicus.svg'),
@@ -303,7 +303,7 @@ export default function () {
       },
       culex: {
         categories: ['culex_probable', 'culex_confirmed'],
-        common_name: 'culex_mosquito',
+        common_name: 'Culex mosquito',
         scientific_name: 'Culex pipiens',
         icon: require('../../assets/img/marker_culex.svg'),
         color: '#aa4499',
@@ -314,7 +314,7 @@ export default function () {
         categories: ['bite'],
         icon: require('../../assets/img/marker_bite.svg'),
         faIcon: 'fa-solid fa-child-reaching bites',
-        common_name: 'bites',
+        common_name: 'Bites',
         color: '#cc6677',
         modelName: 'biting'
       }

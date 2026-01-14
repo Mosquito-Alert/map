@@ -367,12 +367,12 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'albopictus', type: t('tiger_mosquito') },
-        { code: 'aegypti', type: t('yellow_fever_mosquito') },
-        { code: 'japonicus', type: t('japonicus_mosquito') },
-        { code: 'koreicus', type: t('koreicus_mosquito') },
-        { code: 'culex', type: t('culex_mosquito') },
-        { code: 'biting', type: t('bites') }
+        { code: 'albopictus', type: t('Tiger mosquito') },
+        { code: 'aegypti', type: t('Yellow fever mosquito') },
+        { code: 'japonicus', type: t('Japonicus mosquito') },
+        { code: 'koreicus', type: t('Koreicus mosquito') },
+        { code: 'culex', type: t('Culex mosquito') },
+        { code: 'biting', type: t('Bites') }
       ]
     })
 

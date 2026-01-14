@@ -42,7 +42,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.tiger.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ $t('tiger_mosquito') }}</b>: {{ $t('segun_los_expertos_o_los_algoritmos_de_inteligencia_artificial_ia_las_fotos_de_esta_observacion_podrian_ser_de_mosquito_tigre')  }}(<i>Aedes albopictus</i>). {{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes albopictus</i> {{ $t('o_de') }} <i>Aedes cretinus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
+                      <div class="q-pr-md"><b>{{ $t('Tiger mosquito') }}</b>: {{ $t('segun_los_expertos_o_los_algoritmos_de_inteligencia_artificial_ia_las_fotos_de_esta_observacion_podrian_ser_de_mosquito_tigre')  }}(<i>Aedes albopictus</i>). {{ $t('tambien_incluye_observaciones_que_podrian_ser_o_de') }} <i>Aedes albopictus</i> {{ $t('o_de') }} <i>Aedes cretinus</i>; {{ $t('en_estos_casos_no_es_posible_determinar_con_seguridad_de_que_especie_se_trata') }}
                       </div>
                     </div>
 
@@ -50,7 +50,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.observations.yellow.icon" />
                       </div>
-                      <div class="q-pr-md"><b>{{ $t('yellow_fever_mosquito') }}</b>{{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_de_la_fiebre_amarilla') }} (<i>Aedes aegypti</i>)
+                      <div class="q-pr-md"><b>{{ $t('Yellow fever mosquito') }}</b>{{ $t('segun_los_expertos_o_los_algoritmos_de_ia_las_fotos_de_esta_observacion_podrian_ser_del_mosquito_de_la_fiebre_amarilla') }} (<i>Aedes aegypti</i>)
                       </div>
                     </div>
 
@@ -87,7 +87,7 @@
                   </div>
                   <q-separator size="1"/>
                   <div class="text-subtitle2 text-left q-mb-md">
-                      {{ $t('bites') }}
+                      {{ $t('Bites') }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">
@@ -105,7 +105,7 @@
                       <div class="help-icon q-pr-md">
                         <img :src="layers.breeding.with_water.icon" />
                       </div>
-                        <div class="q-pr-md"><b>{{ $t('storm_drain_water') }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_imbornales_con_agua_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia')}}
+                        <div class="q-pr-md"><b>{{ $t('Stormdrain with water') }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_imbornales_con_agua_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia')}}
                         </div>
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
@@ -120,12 +120,12 @@
                         <img :src="layers.breeding.other_water.icon" />
                       </div>
                         <div class="q-pr-md">
-                          <b> {{ $t("unidentified_mosquito") }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_otros_tipos_de_lugares_de_cria_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia') }}
+                          <b> {{ $t("Unidentified mosquito") }}</b>{{ $t('observaciones_ciudadanas_de_posibles_lugares_de_cria_de_mosquitos_identificadas_por_la_ciudadania_como_otros_tipos_de_lugares_de_cria_en_su_mayoria_sin_ningun_tipo_de_validacion_por_parte_de_expertos_o_de_algoritmos_de_ia') }}
                         </div>
                     </div>
                     <q-separator size="1"/>
                     <div class="text-subtitle2 text-left q-mb-md">
-                      {{ $t("other_species") }}
+                      {{ $t("Other species") }}
                     </div>
                     <div class="text-justify q-mb-md row no-wrap">
                       <div class="help-icon q-pr-md">

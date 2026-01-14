@@ -86,7 +86,7 @@
       </DIV>
 
       <div class="toc-category">
-          <div class="bites-title" v-html="$t('bites')"></div>
+          <div class="bites-title" v-html="$t('Bites')"></div>
       </div>
       <div class="category-box bites-and-breeding">
           <!-- BITES -->
@@ -109,7 +109,7 @@
 
       <!-- OTHER OBSERVATIONS -->
       <div class="toc-category">
-        <div class="toc-title" v-html="$t('other_species')"></div>
+        <div class="toc-title" v-html="$t('Other species')"></div>
       </div>
 
       <div class="category-box other-species">

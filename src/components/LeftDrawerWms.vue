@@ -158,10 +158,10 @@ export default {
 
     const vectorOptions = computed(() => {
       return [
-        { code: 'tiger', type: t('tiger_mosquito'), wms_field: 'albopictus', disable: false },
-        { code: 'yellow', type: t('yellow_fever_mosquito'), wms_field: 'aegypti', disable: false },
-        { code: 'japonicus', type: t('japonicus_mosquito'), wms_field: 'japonicus', disable: false },
-        { code: 'koreicus', type: t('koreicus_mosquito'), wms_field: 'koreicus', disable: false }
+        { code: 'tiger', type: t('Tiger mosquito'), wms_field: 'albopictus', disable: false },
+        { code: 'yellow', type: t('Yellow fever mosquito'), wms_field: 'aegypti', disable: false },
+        { code: 'japonicus', type: t('Japonicus mosquito'), wms_field: 'japonicus', disable: false },
+        { code: 'koreicus', type: t('Koreicus mosquito'), wms_field: 'koreicus', disable: false }
       ]
     })
 
