@@ -21,21 +21,20 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
 
-type DataPoint = {
-  uuid: string
-  received_at: string
-  point: {
-    latitude: number
-    longitude: number
+type ObservationFeatureCollection = GeoJSON.FeatureCollection<
+  GeoJSON.Point,
+  {
+    uuid: string
+    received_at: string
   }
-}
+>
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
-const dataCache = ref<DataPoint[]>([]) // Cache for lazy loading
+const geojsonCache = ref<ObservationFeatureCollection | null>(null)
 const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
 const currentResolution = ref<number | null>(null)
 const originalHexData = ref<Record<number, Record<string, any>>>({})
@@ -71,7 +70,6 @@ const styleEOX: StyleSpecification = {
   },
 }
 
-const data = 'http://localhost:5173/observations_culicidae.json'
 const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
 
 // Function to get appropriate resolution based on zoom level
@@ -81,7 +79,7 @@ const getResolutionForZoom = (zoom: number): number => {
   return 6
 }
 
-const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
+const buildOriginalData = (resolution: number, featureCollection: ObservationFeatureCollection) => {
   if (processedResolutions.value.has(resolution)) return
 
   // Determine if we need to aggregate by date (this is done only once)
@@ -89,8 +87,11 @@ const buildOriginalData = (resolution: number, data_objects: DataPoint[]) => {
 
   originalHexData.value[resolution] = {}
 
-  for (const { point, received_at } of data_objects) {
-    const hex = latLngToCell(point.latitude, point.longitude, resolution)
+  for (const feature of featureCollection.features) {
+    const [lng, lat] = feature.geometry.coordinates as [number, number]
+    const received_at = feature.properties.received_at
+
+    const hex = latLngToCell(lat, lng, resolution)
     if (!originalHexData.value[resolution][hex]) {
       originalHexData.value[resolution][hex] = {
         type: 'Feature',
@@ -274,7 +275,7 @@ const handleZoomChange = async () => {
   } else {
     // Process resolution if not already processed
     if (!processedResolutions.value.has(targetResolution)) {
-      buildOriginalData(targetResolution, dataCache.value)
+      buildOriginalData(targetResolution, geojsonCache.value as ObservationFeatureCollection)
       filterData(targetResolution)
       getMapColors(targetResolution)
       addOrUpdateH3Layer(targetResolution)
@@ -333,24 +334,24 @@ onMounted(async () => {
     // )
 
     // Start data loading in background
-    const dataPromise = fetch(data).then((resp) => resp.json())
+    const geojsonPromise = fetch(data_geojson).then((r) => r.json())
 
     map.value.on('load', async () => {
       if (!map.value) return
 
       // Load and cache data
-      dataCache.value = await dataPromise
+      geojsonCache.value = await geojsonPromise
 
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()
       currentResolution.value = getResolutionForZoom(initialZoom)
 
-      buildOriginalData(currentResolution.value, dataCache.value)
+      buildOriginalData(currentResolution.value, geojsonCache.value as ObservationFeatureCollection)
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
         type: 'geojson',
-        data: data_geojson,
+        data: geojsonCache.value as GeoJSON.FeatureCollection,
         buffer: 0,
         maxzoom: 14,
       })
