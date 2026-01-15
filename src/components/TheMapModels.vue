@@ -97,7 +97,6 @@ export default defineComponent({
     const $store = useStore()
     let CSVS = {}
     const CENTROIDS = {}
-    // let mySession
     const GADM1 = 'gadm1'
     const GADM2 = 'gadm2'
     const GADM3 = 'gadm3'

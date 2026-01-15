@@ -16,7 +16,7 @@
         @uncertaintyTransparency="uncertaintyTransparency"
         @estimationColorsChanged="estimationColorsChanged"
         @uncertaintyColorsChanged="uncertaintyColorsChanged"
-        @firstMapCall="buildSession"
+        @firstMapCall="buildMap"
       />
 
       <q-page
@@ -88,7 +88,6 @@ import TheMapModels from 'components/TheMapModels.vue'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import MSession from '../js/session.js'
 
 // import moment from 'moment'
 
@@ -112,7 +111,6 @@ export default {
     CookiesCompliance
   },
   setup () {
-    let mySession
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
@@ -128,7 +126,6 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
 
     const estimatesIsVisible = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
@@ -161,13 +158,7 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
-    const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
-      mySession.getSession(buildMap)
-    }
-
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
       if (viewCode) {
         map.value.loadView('M-' + viewCode)
       }
@@ -284,7 +275,7 @@ export default {
       clearModel,
       setModelDate,
       CookiesCompliance,
-      buildSession,
+      buildMap,
       startShareView
     }
   }

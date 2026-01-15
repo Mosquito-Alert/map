@@ -4,7 +4,7 @@
       :class="mobile ? (expanded ? 'mobile expanded' : 'mobile collapsed') : (expanded ? 'expanded' : 'collapsed')">
       <site-header v-if="!mobile" :expanded="expanded" />
       <left-drawer-wms v-if="loadDrawer" ref="TOC" :expanded="expanded" @toggleLeftDrawer="toggleLeftDrawer"
-        @startShareView="startShareView" @firstMapCall="buildSession" @loadWms="loadWms"
+        @startShareView="startShareView" @firstMapCall="buildMap" @loadWms="loadWms"
         @opacityChange="updateOpacity" @visibleChange="updateVisible"
         @reorderLayers="reorderLayers" @exportImage="exportImage" />
 
@@ -64,7 +64,6 @@ import TheMapWms from 'components/TheMapWms.vue'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import MSession from '../js/session.js'
 import ShareMapView from '../js/ShareMapView'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 // import moment from 'moment'
@@ -89,7 +88,6 @@ export default {
     CookiesCompliance
   },
   setup () {
-    let mySession
     const wmsUrl = 'https://mapserver.mosquitoalert.com/geoserver/wms'
     const layerName = 'mosquitoalert:species_distribution'
 
@@ -113,7 +111,6 @@ export default {
     }
 
     const viewCode = (route.params) ? ((route.params.code) ? route.params.code : '') : ''
-    const backend = $store.getters['app/getBackend']
 
     const tabIsVisible = computed(() => {
       const tabs = $store.getters['app/getLeftMenuTabs']
@@ -146,13 +143,7 @@ export default {
       return $store.getters['app/getModals'].share.visibility
     })
 
-    const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
-      mySession.getSession(buildMap)
-    }
-
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const backendUrl = $store.getters['app/getBackend']
       const loadViewUrl = backendUrl + 'view/load/'
 
@@ -161,7 +152,7 @@ export default {
         const wmsCode = 'W-' + viewCode
         const newView = new ShareMapView(null, {
           url: loadViewUrl + wmsCode + '/',
-          csrfToken: $store.getters['app/getCsrfToken']
+          csrfToken: ''
         })
         newView.load(handleLoadView)
       }
@@ -271,7 +262,7 @@ export default {
       map,
       TOC,
       CookiesCompliance,
-      buildSession,
+      buildMap,
       startShareView
     }
   }

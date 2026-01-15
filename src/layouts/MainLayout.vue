@@ -11,7 +11,7 @@
       @clearLocations="clearLocations"
       @filterTags="filterTags"
       @toggleLeftDrawer="toggleLeftDrawer"
-      @firstMapCall="buildSession"
+      @firstMapCall="buildMap"
       @startShareView="startShareView"
     />
 
@@ -112,7 +112,6 @@ import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
-import MSession from '../js/session.js'
 import { useCookies } from 'vue3-cookies'
 import { useQuasar } from 'quasar'
 
@@ -139,7 +138,6 @@ export default {
     CookiesCompliance
   },
   setup () {
-    let mySession
     const route = useRoute()
     const map = ref('null')
     const shareModal = ref()
@@ -147,7 +145,6 @@ export default {
     const timeseries = ref()
     const $store = useStore()
     const { cookies } = useCookies()
-    const backend = $store.getters['app/getBackend']
     const lang = (route.params) ? ((route.params.lang) ? route.params.lang : '') : ''
 
     const $q = useQuasar()
@@ -198,17 +195,11 @@ export default {
       map.value.shareView()
     }
 
-    const buildSession = function () {
-      mySession = new MSession(backend, $store.getters['app/getCsrfToken'])
-      mySession.getSession(buildMap)
-    }
-
     const buildMap = function () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
       if (!viewCode) {
         map.value.firstCall()
       } else {
-        map.value.preLoadView(viewCode)
+        map.value.loadView(viewCode)
       }
     }
 
@@ -418,7 +409,7 @@ export default {
       resizeMap,
       shareModal,
       loadUserFixes,
-      buildSession,
+      buildMap,
       // resetTOC,
       startShareView
     }

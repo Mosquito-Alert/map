@@ -148,7 +148,6 @@ import spiderfyPoints from '../js/Spiral'
 import UserfixesLayer from '../js/UserfixesLayer'
 import ShareMapView from '../js/ShareMapView'
 import ReportView from '../js/ReportView'
-import MSession from '../js/session'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
 import FormatObservation from '../js/FormatObservation'
@@ -171,7 +170,6 @@ export default defineComponent({
   props: ['sharedView'],
   setup (props, context) {
     const progress = ref()
-    let mySession
     let redrawRequired = false
     let privateView = false
     let spiderfyId = ''
@@ -214,26 +212,17 @@ export default defineComponent({
     const currentYear = new Date(Date.now()).getFullYear()
     let firstDate = new Date(Date.now())
     let lastDate = new Date(Date.now())
-    let viewCode = null
     // const { cookies } = useCookies()
 
     for (let a = initialYear; a <= currentYear; a++) {
       YEARS.push({ year: a, data: {} })
     }
 
-    function preLoadView (code) {
-      viewCode = code
-      const csrfToken = $store.getters['app/getCsrfToken']
-      mySession = new MSession(backendUrl, csrfToken)
-      mySession.getSession(loadView)
-    }
-
-    function loadView () {
+    function loadView (code) {
       const ol = map.value.map
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const newView = new ShareMapView(ol, {
-        url: loadViewUrl + viewCode + '/',
-        csrfToken: $store.getters['app/getCsrfToken']
+        url: loadViewUrl + code + '/',
+        csrfToken: ''
       })
       newView.load(handleLoadView)
     }
@@ -1827,7 +1816,7 @@ export default defineComponent({
       fillLocationColor,
       strokeLocationColor,
       firstCall,
-      preLoadView,
+      loadView,
       initMap,
       progress
     }

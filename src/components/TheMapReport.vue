@@ -237,7 +237,6 @@ import { Circle, Fill, Stroke, Icon, Text } from 'ol/style'
 import ReportView from '../js/ReportView'
 import MapToCanvas from '../js/MapToCanvas'
 import { useQuasar } from 'quasar'
-import MSession from '../js/session.js'
 import { observations as privateLayers } from '../store/app/privateTOC'
 import { StatusCodes as STATUS_CODES } from 'http-status-codes'
 import axios from 'axios'
@@ -248,7 +247,6 @@ export default {
   props: ['report', 'reportLang'],
   components: { OneFeatureMap },
   setup (props, context) {
-    let mySession
     let privateReport
     const $store = useStore()
     const { t } = useI18n()
@@ -298,12 +296,11 @@ export default {
     }
 
     function loadReport () {
-      $store.commit('app/setCsrfToken', mySession.csrfToken)
       const ol = map.value.map
       const loadViewUrl = backendUrl + 'report/load/'
       const newView = new ReportView(ol, {
         url: loadViewUrl + reportId.value + '/',
-        csrfToken: mySession.csrfToken
+        csrfToken: ''
       })
 
       newView.load(handleReportView)
@@ -317,9 +314,7 @@ export default {
           document.getElementById('mapa').remove()
         }
       })
-      const csrfToken = $store.getters['app/getCsrfToken']
-      mySession = new MSession(backendUrl, csrfToken)
-      mySession.getSession(loadReport)
+      loadReport()
     })
 
     function getObservationsToLoadOnMap (viewObservations, privateReport) {
@@ -444,7 +439,7 @@ export default {
           method: 'POST', // or 'PUT'
           data: JSON.stringify(reportFilters),
           headers: {
-            'X-CSRFToken': mySession.csrfToken
+            'X-CSRFToken': ''
           }
         })
           .then(resp => {
