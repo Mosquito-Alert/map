@@ -391,9 +391,10 @@ onMounted(async () => {
 
 watch(
   () => observationsStore.dateFilter,
-  (newValue, oldValue) => {
+  ({ start, end }, oldValue) => {
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
     if (!oldValue.start && !oldValue.end) return
+
     // Clear processed resolutions to force reprocessing
     processedResolutions.value.clear()
     // Reprocess current zoom level
@@ -404,6 +405,13 @@ watch(
       getMapColors(currentResolution.value)
       addOrUpdateH3Layer(currentResolution.value)
       showOnlyResolution(zoom >= 10 ? null : currentResolution.value)
+      if (start && end) {
+        map.value?.setFilter('observationsLayer', [
+          'all',
+          ['>=', ['get', 'received_at'], start],
+          ['<=', ['get', 'received_at'], end],
+        ])
+      }
     }
   },
   { deep: true },
