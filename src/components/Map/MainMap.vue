@@ -26,6 +26,7 @@ type ObservationFeatureCollection = GeoJSON.FeatureCollection<
   {
     uuid: string
     received_at: string
+    ts?: number
   }
 >
 
@@ -79,7 +80,8 @@ const getResolutionForZoom = (zoom: number): number => {
   return 6
 }
 
-const buildOriginalData = (resolution: number, featureCollection: ObservationFeatureCollection) => {
+const buildOriginalData = () => {
+  const resolution = currentResolution.value as number
   if (processedResolutions.value.has(resolution)) return
 
   // Determine if we need to aggregate by date (this is done only once)
@@ -87,9 +89,18 @@ const buildOriginalData = (resolution: number, featureCollection: ObservationFea
 
   originalHexData.value[resolution] = {}
 
-  for (const feature of featureCollection.features) {
+  for (const index in geojsonCache.value!.features) {
+    const feature = geojsonCache.value!.features[
+      index
+    ] as ObservationFeatureCollection['features'][0]
     const [lng, lat] = feature.geometry.coordinates as [number, number]
-    const received_at = feature.properties.received_at
+    const receivedAt = feature.properties.received_at
+    let ts = feature.properties.ts
+
+    if (ts === undefined) {
+      ts = Date.parse(receivedAt)
+      feature.properties.ts = ts
+    }
 
     const hex = latLngToCell(lat, lng, resolution)
     if (!originalHexData.value[resolution][hex]) {
@@ -99,14 +110,14 @@ const buildOriginalData = (resolution: number, featureCollection: ObservationFea
           type: 'Polygon',
           coordinates: [cellToBoundary(hex, true)],
         },
-        properties: { hex, dates: [received_at], count: 1 },
+        properties: { hex, dates: [ts], count: 1 },
       }
     } else {
-      originalHexData.value[resolution][hex].properties.dates.push(received_at)
+      originalHexData.value[resolution][hex].properties.dates.push(ts)
       originalHexData.value[resolution][hex].properties.count += 1
     }
     if (aggregateByDate) {
-      const dateKey = received_at.split('T')[0] || received_at
+      const dateKey = receivedAt.split('T')[0] || receivedAt
       if (!originalDateAggregationData.value[dateKey]) {
         originalDateAggregationData.value[dateKey] = 1
       } else {
@@ -120,9 +131,10 @@ const buildOriginalData = (resolution: number, featureCollection: ObservationFea
   processedResolutions.value.add(resolution)
 }
 
-const filterData = (resolution: number) => {
-  const startingDate = observationsStore.dateFilter.start
-  const endingDate = observationsStore.dateFilter.end
+const filterData = () => {
+  const resolution = currentResolution.value as number
+  const startingDate = Date.parse(observationsStore.dateFilter.start || '')
+  const endingDate = Date.parse(observationsStore.dateFilter.end || '')
 
   renderedHexData.value[resolution] = {}
   ascSortedArrHexCounts.value = []
@@ -130,10 +142,9 @@ const filterData = (resolution: number) => {
   for (const [hex, feature] of Object.entries(
     originalHexData.value[resolution] as Record<string, any>,
   )) {
-    const featureDates = feature.properties.dates as string[]
-    const filteredDates = featureDates.filter((dateStr) => {
-      const dateOnly = dateStr.split('T')[0] || dateStr
-      return (!startingDate || dateOnly >= startingDate) && (!endingDate || dateOnly <= endingDate)
+    const featureDates = feature.properties.dates as number[]
+    const filteredDates = featureDates.filter((date) => {
+      return (!startingDate || date >= startingDate) && (!endingDate || date <= endingDate)
     })
 
     if (filteredDates.length > 0) {
@@ -150,7 +161,8 @@ const filterData = (resolution: number) => {
   }
 }
 
-const getMapColors = (resolution: number) => {
+const getMapColors = () => {
+  const resolution = currentResolution.value as number
   if (!renderedHexData.value[resolution]) return
 
   if (ascSortedArrHexCounts.value.length === 0) {
@@ -191,7 +203,8 @@ const getMapColors = (resolution: number) => {
 }
 
 // Function to add/update H3 layer for a resolution
-const addOrUpdateH3Layer = (resolution: number) => {
+const addOrUpdateH3Layer = () => {
+  const resolution = currentResolution.value as number
   if (!map.value || !renderedHexData.value[resolution] || !mapColors.value[resolution]) return
 
   const sourceId = `h3-res-${resolution}`
@@ -275,10 +288,10 @@ const handleZoomChange = async () => {
   } else {
     // Process resolution if not already processed
     if (!processedResolutions.value.has(targetResolution)) {
-      buildOriginalData(targetResolution, geojsonCache.value as ObservationFeatureCollection)
-      filterData(targetResolution)
-      getMapColors(targetResolution)
-      addOrUpdateH3Layer(targetResolution)
+      buildOriginalData()
+      filterData()
+      getMapColors()
+      addOrUpdateH3Layer()
     }
 
     // Show appropriate hexagon resolution
@@ -346,7 +359,7 @@ onMounted(async () => {
       const initialZoom = map.value.getZoom()
       currentResolution.value = getResolutionForZoom(initialZoom)
 
-      buildOriginalData(currentResolution.value, geojsonCache.value as ObservationFeatureCollection)
+      buildOriginalData()
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
@@ -372,10 +385,10 @@ onMounted(async () => {
         },
       })
 
-      getMapColors(currentResolution.value)
+      getMapColors()
 
       // Add initial H3 layer
-      addOrUpdateH3Layer(currentResolution.value)
+      addOrUpdateH3Layer()
 
       // TODO:
       // Debounced zoom event handler to prevent multiple calls
@@ -402,15 +415,17 @@ watch(
     if (map.value) {
       const zoom = map.value.getZoom()
       currentResolution.value = getResolutionForZoom(zoom)
-      filterData(currentResolution.value)
-      getMapColors(currentResolution.value)
-      addOrUpdateH3Layer(currentResolution.value)
+      filterData()
+      getMapColors()
+      addOrUpdateH3Layer()
       showOnlyResolution(zoom >= 10 ? null : currentResolution.value)
       if (start && end) {
+        const startTs = Date.parse(start)
+        const endTs = Date.parse(end)
         map.value?.setFilter('observationsLayer', [
           'all',
-          ['>=', ['get', 'received_at'], start],
-          ['<=', ['get', 'received_at'], end],
+          ['>=', ['get', 'ts'], startTs],
+          ['<=', ['get', 'ts'], endTs],
         ])
       }
     }
