@@ -133,8 +133,13 @@ const buildOriginalData = () => {
 
 const filterData = () => {
   const resolution = currentResolution.value as number
-  const startingDate = Date.parse(observationsStore.dateFilter.start || '')
-  const endingDate = Date.parse(observationsStore.dateFilter.end || '')
+  const startingDate = observationsStore.dateFilter.start
+    ? Date.parse(observationsStore.dateFilter.start)
+    : -Infinity
+
+  const endingDate = observationsStore.dateFilter.end
+    ? Date.parse(observationsStore.dateFilter.end)
+    : Infinity
 
   renderedHexData.value[resolution] = {}
   ascSortedArrHexCounts.value = []
