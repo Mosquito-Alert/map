@@ -85,6 +85,7 @@ const getResolutionForZoom = (zoom: number): number => {
 
 const buildOriginalData = () => {
   const resolution = currentResolution.value as number
+  console.log('Building original data for resolution:', resolution)
   if (!geojsonCache.value) return
 
   if (!processedResolutions.value.has(resolution)) {
@@ -306,25 +307,36 @@ const showOnlyResolution = (targetResolution: number | null) => {
 // Handle zoom events for dynamic resolution switching
 const handleZoomChange = async () => {
   if (!map.value) return
+
   const zoom = map.value.getZoom()
   const targetResolution = getResolutionForZoom(zoom)
-  currentResolution.value = targetResolution
 
   if (zoom >= 10) {
-    // Show individual points at high zoom
     showOnlyResolution(null)
-  } else {
-    // Process resolution if not already processed
-    if (!processedResolutions.value.has(targetResolution)) {
-      buildOriginalData()
-      filterData()
-      getMapColors()
-      addOrUpdateH3Layer()
-    }
-
-    // Show appropriate hexagon resolution
-    showOnlyResolution(targetResolution)
+    return
   }
+
+  // Skip everything if resolution did not change
+  if (currentResolution.value === targetResolution) {
+    showOnlyResolution(currentResolution.value)
+    return
+  }
+
+  // Resolution actually changed
+  currentResolution.value = targetResolution
+
+  // Build original data ONLY if missing
+  if (!processedResolutions.value.has(targetResolution)) {
+    buildOriginalData()
+  }
+
+  // Always filter + recolor + render
+  filterData()
+  getMapColors()
+  addOrUpdateH3Layer()
+
+  // Show appropriate hexagon resolution
+  showOnlyResolution(targetResolution)
 }
 
 onMounted(async () => {
