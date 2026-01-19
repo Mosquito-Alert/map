@@ -131,12 +131,13 @@ const playbackOngoing = ref(false)
 const playbackCurrentDate = ref<Date | null>(null)
 const playbackOriginalDateLimits = ref<{ start: string; end: string } | null>(null)
 const playbackInterval = ref<number | undefined>(undefined)
+const _basePlaybackSpeed = 500 // 1x speed = 500ms per month
 const playbackSpeedOptions: PlaybackSpeed[] = [
-  { label: '0.5x', value: 1000 },
-  { label: '0.75x', value: 666 },
-  { label: '1.0x', value: 500 },
-  { label: '1.5x', value: 333 },
-  { label: '2.0x', value: 250 },
+  { label: '0.5x', value: _basePlaybackSpeed / 0.5 },
+  { label: '0.75x', value: _basePlaybackSpeed / 0.75 },
+  { label: '1.0x', value: _basePlaybackSpeed },
+  { label: '1.5x', value: _basePlaybackSpeed / 1.5 },
+  { label: '2.0x', value: _basePlaybackSpeed / 2.0 },
 ]
 const playbackSpeed = ref<PlaybackSpeed>(
   playbackSpeedOptions.find((opt) => opt.label === '1.0x') as PlaybackSpeed,
@@ -152,15 +153,23 @@ const playbackMenuItems = computed(() =>
 )
 
 const fixDateAggregationData = (data: Record<string, number>) => {
-  const dates = Object.keys(data).sort()
-  const start = new Date(dates[0] as string)
-  const end = new Date(dates[dates.length - 1] as string)
+  const timestamps = Object.keys(data)
+    .map(Number)
+    .sort((a, b) => a - b)
 
+  if (!timestamps.length) {
+    timeSeriesData.value = {}
+    return
+  }
+
+  const dayMs = 24 * 60 * 60 * 1000
+  const start = timestamps[0] as number
+  const end = timestamps[timestamps.length - 1] as number
   const result: Record<string, number> = {}
 
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().slice(0, 10)
-    result[key] = data[key] ?? 0
+  for (let ts = start; ts <= end; ts += dayMs) {
+    const key = new Date(ts).toISOString().slice(0, 10)
+    result[key] = data[ts] ?? 0
   }
 
   timeSeriesData.value = result

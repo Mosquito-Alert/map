@@ -27,8 +27,11 @@ type ObservationFeatureCollection = GeoJSON.FeatureCollection<
     uuid: string
     received_at: string
     ts?: number
+    day?: number
   }
 >
+
+const DAY_MS = 86_400_000 // Number of milliseconds in a day
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -82,64 +85,83 @@ const getResolutionForZoom = (zoom: number): number => {
 
 const buildOriginalData = () => {
   const resolution = currentResolution.value as number
-  if (processedResolutions.value.has(resolution)) return
+  if (!geojsonCache.value) return
 
-  // Determine if we need to aggregate by date (this is done only once)
-  const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
+  if (!processedResolutions.value.has(resolution)) {
+    // Determine if we need to aggregate by date (this is done only once)
+    const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
 
-  originalHexData.value[resolution] = {}
+    originalHexData.value[resolution] = {}
 
-  for (const index in geojsonCache.value!.features) {
-    const feature = geojsonCache.value!.features[
-      index
-    ] as ObservationFeatureCollection['features'][0]
-    const [lng, lat] = feature.geometry.coordinates as [number, number]
-    const receivedAt = feature.properties.received_at
-    let ts = feature.properties.ts
+    for (const feature of geojsonCache.value!.features) {
+      const [lng, lat] = feature.geometry.coordinates as [number, number]
+      const receivedAt = feature.properties.received_at
 
-    if (ts === undefined) {
-      ts = Date.parse(receivedAt)
-      feature.properties.ts = ts
-    }
+      // ------------------------------------------------
+      // Timestamp + day precomputation (ONCE)
+      // ------------------------------------------------
+      let ts = feature.properties.ts
+      let day = feature.properties.day
 
-    const hex = latLngToCell(lat, lng, resolution)
-    if (!originalHexData.value[resolution][hex]) {
-      originalHexData.value[resolution][hex] = {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [cellToBoundary(hex, true)],
-        },
-        properties: { hex, dates: [ts], count: 1 },
+      if (ts === undefined || day === undefined) {
+        ts = Date.parse(receivedAt)
+        day = ts - (ts % DAY_MS)
+        feature.properties.ts = ts
+        feature.properties.day = day
       }
-    } else {
-      originalHexData.value[resolution][hex].properties.dates.push(ts)
-      originalHexData.value[resolution][hex].properties.count += 1
+
+      // ------------------------------------------------
+      // H3 aggregation
+      // ------------------------------------------------
+      const hex = latLngToCell(lat, lng, resolution)
+      let hexFeature = originalHexData.value[resolution][hex]
+
+      if (!hexFeature) {
+        hexFeature = originalHexData.value[resolution][hex] = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [cellToBoundary(hex, true)],
+          },
+          properties: {
+            hex,
+            countsByDay: new Map<number, number>(),
+            count: 0,
+          },
+        }
+      }
+
+      // ------------------------------------------------
+      // Per-hex histogram update
+      // ------------------------------------------------
+      const countsByDay = hexFeature.properties.countsByDay
+      countsByDay.set(day, (countsByDay.get(day) ?? 0) + 1)
+      hexFeature.properties.count += 1
+
+      //  ------------------------------------------------
+      // Global date aggregation (once)
+      // ------------------------------------------------
+      if (aggregateByDate) {
+        originalDateAggregationData.value[day] = (originalDateAggregationData.value[day] ?? 0) + 1
+      }
     }
+
+    // Trigger reactivity once
     if (aggregateByDate) {
-      const dateKey = receivedAt.split('T')[0] || receivedAt
-      if (!originalDateAggregationData.value[dateKey]) {
-        originalDateAggregationData.value[dateKey] = 1
-      } else {
-        originalDateAggregationData.value[dateKey] += 1
-      }
+      originalDateAggregationData.value = { ...originalDateAggregationData.value }
     }
+    processedResolutions.value.add(resolution)
   }
 
-  originalDateAggregationData.value = { ...originalDateAggregationData.value } // Trigger reactivity
-  renderedHexData.value[resolution] = originalHexData.value[resolution] // Initialize rendered data
-  processedResolutions.value.add(resolution)
+  // Initialize rendered data
+  renderedHexData.value[resolution] = originalHexData.value[resolution] as Record<string, any>
 }
 
 const filterData = () => {
   const resolution = currentResolution.value as number
-  const startingDate = observationsStore.dateFilter.start
-    ? Date.parse(observationsStore.dateFilter.start)
-    : -Infinity
-
-  const endingDate = observationsStore.dateFilter.end
-    ? Date.parse(observationsStore.dateFilter.end)
-    : Infinity
+  const { start, end } = observationsStore.dateFilter
+  const startingDate = start ? Date.parse(start) : -Infinity
+  const endingDate = end ? Date.parse(end) : Infinity
 
   renderedHexData.value[resolution] = {}
   ascSortedArrHexCounts.value = []
@@ -147,19 +169,20 @@ const filterData = () => {
   for (const [hex, feature] of Object.entries(
     originalHexData.value[resolution] as Record<string, any>,
   )) {
-    const featureDates = feature.properties.dates as number[]
-    const filteredDates = featureDates.filter((date) => {
-      return (!startingDate || date >= startingDate) && (!endingDate || date <= endingDate)
-    })
+    let count = 0
 
-    if (filteredDates.length > 0) {
-      // Update feature with filtered dates and count
+    for (const [day, c] of feature.properties.countsByDay) {
+      if (day >= startingDate && day <= endingDate) {
+        count += c
+      }
+    }
+
+    if (count > 0) {
       renderedHexData.value[resolution][hex] = {
         ...feature,
         properties: {
           ...feature.properties,
-          dates: filteredDates,
-          count: filteredDates.length,
+          count,
         },
       }
     }
@@ -172,7 +195,7 @@ const getMapColors = () => {
 
   if (ascSortedArrHexCounts.value.length === 0) {
     ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
-      (f: any) => f.properties.dates.length,
+      (f: any) => f.properties.count,
     )
     ascSortedArrHexCounts.value.sort((a, b) => a - b)
   }
