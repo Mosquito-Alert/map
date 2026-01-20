@@ -234,48 +234,64 @@ const getMapColors = () => {
 // Function to add/update H3 layer for a resolution
 const addOrUpdateH3Layer = () => {
   const resolution = currentResolution.value as number
-  if (!map.value || !renderedHexData.value[resolution] || !mapColors.value[resolution]) return
+  const mapInstance = map.value
+
+  if (!mapInstance) return
+  const dataForRes = renderedHexData.value[resolution]
+  const colorsForRes = mapColors.value[resolution]
+
+  if (!dataForRes || !colorsForRes) return
 
   const sourceId = `h3-res-${resolution}`
   const layerId = `h3-layer-res-${resolution}`
 
-  // Remove existing source and layer if they exist
-  if (map.value.getLayer(layerId)) {
-    map.value.removeLayer(layerId)
-  }
-  if (map.value.getSource(sourceId)) {
-    map.value.removeSource(sourceId)
+  const featureCollection: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    features: Object.values(dataForRes),
   }
 
-  // Add new source and layer
-  map.value.addSource(sourceId, {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features: Object.values(renderedHexData.value[resolution]),
-    },
-  })
+  // --------------------------------------------------
+  // Source: create once, then update via setData()
+  // --------------------------------------------------
+  const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
 
-  map.value.addLayer({
-    id: layerId,
-    source: sourceId,
-    type: 'fill',
-    layout: {
-      visibility: 'visible',
-    },
-    paint: {
-      'fill-color': [
-        'interpolate',
-        ['linear'],
-        ['get', 'count'],
-        ...Object.entries(mapColors.value[resolution]).flatMap(([key, stop]) => [
-          stop.value as number,
-          stop.color as string,
-        ]),
-      ],
-      'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
-    },
-  })
+  if (existingSource) {
+    existingSource.setData(featureCollection)
+  } else {
+    mapInstance.addSource(sourceId, {
+      type: 'geojson',
+      data: featureCollection,
+    })
+  }
+
+  // --------------------------------------------------
+  // Layer: create once
+  // --------------------------------------------------
+  if (!mapInstance.getLayer(layerId)) {
+    mapInstance.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'fill',
+      layout: {
+        visibility: 'visible',
+      },
+      paint: {
+        'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
+      },
+    })
+  }
+
+  // --------------------------------------------------
+  // Paint: update color stops dynamically
+  // --------------------------------------------------
+  const colorStops = Object.values(colorsForRes).flatMap((stop) => [stop.value, stop.color])
+
+  mapInstance.setPaintProperty(layerId, 'fill-color', [
+    'interpolate',
+    ['linear'],
+    ['get', 'count'],
+    ...colorStops,
+  ])
 }
 
 // Function to hide all H3 layers except the target one
