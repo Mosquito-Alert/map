@@ -39,7 +39,6 @@ const mapStore = useMapStore()
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const geojsonCache = ref<ObservationFeatureCollection | null>(null)
-const processedResolutions = ref<Set<number>>(new Set()) // Track processed resolutions
 const currentResolution = ref<number | null>(null)
 const originalHexData = ref<Record<number, Record<string, any>>>({})
 const originalDateAggregationData = ref<Record<string, number>>({})
@@ -88,7 +87,7 @@ const buildOriginalData = () => {
   console.log('Building original data for resolution:', resolution)
   if (!geojsonCache.value) return
 
-  if (!processedResolutions.value.has(resolution)) {
+  if (!originalHexData.value[resolution]) {
     // Determine if we need to aggregate by date (this is done only once)
     const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
 
@@ -151,7 +150,6 @@ const buildOriginalData = () => {
     if (aggregateByDate) {
       originalDateAggregationData.value = { ...originalDateAggregationData.value }
     }
-    processedResolutions.value.add(resolution)
   }
 
   // Initialize rendered data
@@ -342,7 +340,7 @@ const handleZoomChange = async () => {
   currentResolution.value = targetResolution
 
   // Build original data ONLY if missing
-  if (!processedResolutions.value.has(targetResolution)) {
+  if (!originalHexData.value[targetResolution]) {
     buildOriginalData()
   }
 
@@ -465,8 +463,6 @@ watch(
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
     if (!oldValue.start && !oldValue.end) return
 
-    // Clear processed resolutions to force reprocessing
-    processedResolutions.value.clear()
     // Reprocess current zoom level
     if (map.value) {
       const zoom = map.value.getZoom()
