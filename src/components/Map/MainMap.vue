@@ -14,7 +14,7 @@ import { MapInfoControl, MapLegendControl } from '@/utils/mapControls'
 import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
 import MapLegend from './MapLegend.vue'
 import { useObservationsStore } from '../../stores/observationsStore'
@@ -119,10 +119,11 @@ const buildOriginalData = () => {
       if (!hexFeature) {
         hexFeature = originalHexData.value[resolution][hex] = {
           type: 'Feature',
-          geometry: {
+          // The geometry is marked as raw to avoid deep reactivity overhead, since the geometries are never modified
+          geometry: markRaw({
             type: 'Polygon',
             coordinates: [cellToBoundary(hex, true)],
-          },
+          }),
           properties: {
             hex,
             countsByDay: new Map<number, number>(),
@@ -154,6 +155,10 @@ const buildOriginalData = () => {
 
   // Initialize rendered data
   renderedHexData.value[resolution] = originalHexData.value[resolution] as Record<string, any>
+
+  // The originalHexData is never modified after this point, only derived data (renderedHexData) is changed.
+  // So we can mark it as raw to avoid deep reactivity overhead.
+  originalHexData.value[resolution] = markRaw(originalHexData.value[resolution])
 }
 
 const filterData = () => {
@@ -245,7 +250,8 @@ const addOrUpdateH3Layer = () => {
 
   const featureCollection: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
-    features: Object.values(dataForRes),
+    // Maplibre does not need reactivity inside features, so we can mark them as raw to optimize performance
+    features: markRaw(Object.values(dataForRes)),
   }
 
   // --------------------------------------------------
@@ -406,8 +412,8 @@ onMounted(async () => {
     map.value.on('load', async () => {
       if (!map.value) return
 
-      // Load and cache data
-      geojsonCache.value = await geojsonPromise
+      // Load and cache data. Mark as raw to avoid deep reactivity overhead. This object is never modified.
+      geojsonCache.value = markRaw(await geojsonPromise)
 
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()
