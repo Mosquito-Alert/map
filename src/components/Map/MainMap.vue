@@ -183,11 +183,9 @@ const filterData = () => {
 
     if (count > 0) {
       renderedHexData.value[resolution][hex] = {
-        ...feature,
-        properties: {
-          ...feature.properties,
-          count,
-        },
+        type: 'Feature',
+        geometry: feature.geometry,
+        properties: { hex, count },
       }
     }
   }
