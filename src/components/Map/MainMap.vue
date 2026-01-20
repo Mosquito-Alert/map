@@ -20,6 +20,7 @@ import MapLegend from './MapLegend.vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
+import { debounce } from '../../utils/debouncer'
 
 type ObservationFeatureCollection = GeoJSON.FeatureCollection<
   GeoJSON.Point,
@@ -448,15 +449,11 @@ onMounted(async () => {
       // Add initial H3 layer
       addOrUpdateH3Layer()
 
-      // TODO:
       // Debounced zoom event handler to prevent multiple calls
-      // const debouncedZoomChange = () => {
-      //   if (zoomTimeoutId) clearTimeout(zoomTimeoutId)
-      //   zoomTimeoutId = setTimeout(handleZoomChange, 300)
-      // }
+      const handleZoomChangeDebounced = debounce(handleZoomChange, 50)
 
       // Add zoom event listeners - only on zoomend to prevent constant processing
-      map.value.on('zoomend', handleZoomChange)
+      map.value.on('zoomend', handleZoomChangeDebounced)
     })
   }
 })
