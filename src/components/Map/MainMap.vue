@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
 import { MapInfoControl, MapLegendControl } from '@/utils/mapControls'
-import { cellToBoundary, latLngToCell } from 'h3-js'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
@@ -21,6 +20,32 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
 import { debounce } from '../../utils/debouncer'
+import { MessageType } from '../../workers/h3Aggregation.worker'
+
+const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
+  type: 'module',
+})
+
+worker.onmessage = (e) => {
+  const msg = e.data
+
+  if (msg.type === MessageType.BUILT) {
+    originalHexData.value[msg.resolution] = msg.originalHexData
+    originalDateAggregationData.value = { ...msg.dateAggregation }
+    filterData()
+  }
+
+  if (msg.type === MessageType.FILTERED) {
+    renderedHexData.value[msg.resolution] = Object.fromEntries(
+      msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
+    )
+
+    ascSortedArrHexCounts.value = msg.counts
+    getMapColors()
+    addOrUpdateH3Layer()
+    showOnlyResolution(currentResolution.value)
+  }
+}
 
 type ObservationFeatureCollection = GeoJSON.FeatureCollection<
   GeoJSON.Point,
@@ -84,112 +109,22 @@ const getResolutionForZoom = (zoom: number): number => {
 }
 
 const buildOriginalData = () => {
-  const resolution = currentResolution.value as number
-  console.log('Building original data for resolution:', resolution)
-  if (!geojsonCache.value) return
-
-  if (!originalHexData.value[resolution]) {
-    // Determine if we need to aggregate by date (this is done only once)
-    const aggregateByDate: boolean = Object.keys(originalDateAggregationData.value).length == 0
-
-    originalHexData.value[resolution] = {}
-
-    for (const feature of geojsonCache.value!.features) {
-      const [lng, lat] = feature.geometry.coordinates as [number, number]
-      const receivedAt = feature.properties.received_at
-
-      // ------------------------------------------------
-      // Timestamp + day precomputation (ONCE)
-      // ------------------------------------------------
-      let ts = feature.properties.ts
-      let day = feature.properties.day
-
-      if (ts === undefined || day === undefined) {
-        ts = Date.parse(receivedAt)
-        day = ts - (ts % DAY_MS)
-        feature.properties.ts = ts
-        feature.properties.day = day
-      }
-
-      // ------------------------------------------------
-      // H3 aggregation
-      // ------------------------------------------------
-      const hex = latLngToCell(lat, lng, resolution)
-      let hexFeature = originalHexData.value[resolution][hex]
-
-      if (!hexFeature) {
-        hexFeature = originalHexData.value[resolution][hex] = {
-          type: 'Feature',
-          // The geometry is marked as raw to avoid deep reactivity overhead, since the geometries are never modified
-          geometry: markRaw({
-            type: 'Polygon',
-            coordinates: [cellToBoundary(hex, true)],
-          }),
-          properties: {
-            hex,
-            countsByDay: new Map<number, number>(),
-            count: 0,
-          },
-        }
-      }
-
-      // ------------------------------------------------
-      // Per-hex histogram update
-      // ------------------------------------------------
-      const countsByDay = hexFeature.properties.countsByDay
-      countsByDay.set(day, (countsByDay.get(day) ?? 0) + 1)
-      hexFeature.properties.count += 1
-
-      //  ------------------------------------------------
-      // Global date aggregation (once)
-      // ------------------------------------------------
-      if (aggregateByDate) {
-        originalDateAggregationData.value[day] = (originalDateAggregationData.value[day] ?? 0) + 1
-      }
-    }
-
-    // Trigger reactivity once
-    if (aggregateByDate) {
-      originalDateAggregationData.value = { ...originalDateAggregationData.value }
-    }
-  }
-
-  // Initialize rendered data
-  renderedHexData.value[resolution] = originalHexData.value[resolution] as Record<string, any>
-
-  // The originalHexData is never modified after this point, only derived data (renderedHexData) is changed.
-  // So we can mark it as raw to avoid deep reactivity overhead.
-  originalHexData.value[resolution] = markRaw(originalHexData.value[resolution])
+  worker.postMessage({
+    type: MessageType.BUILD_ORIGINAL,
+    features: geojsonCache.value?.features,
+    resolution: currentResolution.value,
+  })
 }
 
 const filterData = () => {
-  const resolution = currentResolution.value as number
   const { start, end } = observationsStore.dateFilter
-  const startingDate = start ? Date.parse(start) : -Infinity
-  const endingDate = end ? Date.parse(end) : Infinity
 
-  renderedHexData.value[resolution] = {}
-  ascSortedArrHexCounts.value = []
-
-  for (const [hex, feature] of Object.entries(
-    originalHexData.value[resolution] as Record<string, any>,
-  )) {
-    let count = 0
-
-    for (const [day, c] of feature.properties.countsByDay) {
-      if (day >= startingDate && day <= endingDate) {
-        count += c
-      }
-    }
-
-    if (count > 0) {
-      renderedHexData.value[resolution][hex] = {
-        type: 'Feature',
-        geometry: feature.geometry,
-        properties: { hex, count },
-      }
-    }
-  }
+  worker.postMessage({
+    type: MessageType.FILTER,
+    resolution: currentResolution.value,
+    start: start ? Date.parse(start) : -Infinity,
+    end: end ? Date.parse(end) : Infinity,
+  })
 }
 
 const getMapColors = () => {
