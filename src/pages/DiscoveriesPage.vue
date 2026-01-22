@@ -32,9 +32,9 @@ import { useQuasar, exportFile } from 'quasar'
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import axios from 'axios'
 
 import { useMapUiStore } from 'src/stores/mapUI';
+import { mapserver } from 'boot/axios'
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
@@ -107,8 +107,8 @@ export default {
     async function downloadFile()  {
       downloadProgress.value.loading = true;
       downloadProgress.value.percentage = 0;
-      const url = new URL('https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/ows');
-      const urlParams = new URLSearchParams({
+
+      const params = {
         service: 'WFS',
         version: '1.0.0',
         request: 'GetFeature',
@@ -116,11 +116,11 @@ export default {
         outputFormat: 'SHAPE-ZIP',
         cql_filter: `${selectedSpeciesCode.value} IS NOT NULL`,
         propertyName: `fid,geom,cntryCode,cntryName,codeLevel,locCode,locName,${selectedSpeciesCode.value}`
-      });
-      url.search = urlParams.toString();
+      };
 
       try {
-        const response = await axios.get(url.toString(), {
+        const response = await mapserver.get('ows', {
+          params,
           responseType: 'blob',
           onDownloadProgress: (event) => {
             if (event.total) {

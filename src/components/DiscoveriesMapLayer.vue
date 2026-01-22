@@ -1,15 +1,7 @@
 <template>
 
-  <!-- <ol-vector-tile-layer ref="layerRef" :visible="visible" :opacity="opacity">
-    <ol-source-vector-tile
-      url="https://mapserver.mosquitoalert.com/geoserver/gwc/service/tms/1.0.0/mosquitoalert:discoveries@EPSG:900913@pbf/{z}/{x}/{-y}.pbf"
-      :format="mvtFormat" :maxZoom="9">
-      <ol-style :overrideStyleFunction="styleFn"></ol-style>
-    </ol-source-vector-tile>
-  </ol-vector-tile-layer> -->
-
   <ol-tile-layer :opacity="opacity" :visible="visible">
-    <ol-source-tile-wms ref="sourceRef" url="https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms"
+    <ol-source-tile-wms ref="sourceRef" :url="mapserver.getUri({url: 'wms'})"
       layers="mosquitoalert:discoveries" serverType="geoserver" :params="{
         'env': `field:${speciesCode}`,
       }" />
@@ -28,6 +20,8 @@ import { Style, Fill, Stroke, RegularShape, Text } from 'ol/style'
 
 import Legend from 'ol-ext/legend/Legend'
 import LegendControl from 'ol-ext/control/Legend'
+
+import { mapserver } from 'boot/axios'
 
 const choroplethData = {
   // Keys are the possible value of the geometry specie column.
@@ -148,6 +142,7 @@ export default {
       layerRef,
       sourceRef,
       mvtFormat,
+      mapserver,
       styleFn(feature: Feature) {
         if (feature.get('leave') === 1) {
           // Setting to unknown if undefined.

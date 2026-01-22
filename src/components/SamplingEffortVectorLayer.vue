@@ -14,6 +14,8 @@ import GeoJSON from 'ol/format/GeoJSON'
 import { Fill, Stroke, Style } from 'ol/style';
 import { computed } from 'vue';
 
+import { mapserver } from 'boot/axios'
+
 const props = defineProps<{
   visible: boolean,
   fromDate: Date | undefined,
@@ -23,25 +25,21 @@ const props = defineProps<{
 const geoJson = new GeoJSON();
 
 const computedUrl = computed(() => {
-  const wfsUrl = new URL('https://mapserver.mosquitoalert.com/geoserver/wfs')
-
   const viewParams = {
     fromDate: props.fromDate ? props.fromDate.toISOString().split('T')[0] : undefined,
     toDate: props.toDate ? props.toDate.toISOString().split('T')[0] : undefined,
   }
 
-  const params = new URLSearchParams({
+  const params = {
     service: 'wfs',
     version: '2.0.0',
     request: 'GetFeature',
     typeNames: 'mosquitoalert:sampling_effort',
     outputFormat: 'application/json',
     viewparams: Object.entries(viewParams).filter(([, value]) => value !== undefined).map(([key, value]) => `${key}:${value}`).join(';'),
-  })
+  }
 
-  wfsUrl.search = params.toString()
-
-  return wfsUrl.toString()
+  return mapserver.getUri({url: 'wfs', params })
 })
 
 const featureStyle = (feature: Feature) => {

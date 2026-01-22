@@ -9,8 +9,8 @@ import axios from "axios";
 // for each client)
 const api = axios.create({ baseURL: "https://api.mosquitoalert.com/v1/" });
 const cdn = axios.create({ baseURL: "https://webserver.mosquitoalert.com/" });
-const wfs = axios.create({
-  baseURL: "https://mapserver.mosquitoalert.com/geoserver/wfs",
+const mapserver = axios.create({
+  baseURL: "https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/",
 });
 
 export default boot(({ app }) => {
@@ -28,9 +28,9 @@ export default boot(({ app }) => {
   // ^ ^ ^ this will allow you to use this.$cdn(for Vue Options API form)
   //       so you can easily perform requests against your app's CDN
 
-  app.config.globalProperties.$wfs = wfs;
-  // ^ ^ ^ this will allow you to use this.$wfs(for Vue Options API form)
+  app.config.globalProperties.$mapserver = mapserver;
+  // ^ ^ ^ this will allow you to use this.$mapserver(for Vue Options API form)
   //       so you can easily perform requests against your app's WFS server
 });
 
-export { api, cdn, wfs };
+export { api, cdn, mapserver };

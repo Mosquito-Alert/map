@@ -231,7 +231,7 @@
 
 import { useQuasar, colors } from 'quasar'
 import { inject, ref, watch, computed } from 'vue'
-import { wfs, cdn } from 'boot/axios'
+import { mapserver, cdn } from 'boot/axios'
 
 import { fromLonLat } from 'ol/proj'
 // import GeoJSON from 'ol/format/GeoJSON'
@@ -273,7 +273,7 @@ export default {
       try {
         // const geoJson = new GeoJSON()
 
-        const response = await wfs.get('', {
+        const response = await mapserver.get('ows', {
           params: {
             version: '2.0.0',
             request: 'GetFeature',
