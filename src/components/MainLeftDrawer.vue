@@ -18,9 +18,9 @@
             {{ $t('discoveries') }}
           </q-tooltip>
         </q-route-tab>
-        <q-route-tab icon="fa fat fa-chart-mixed" active-class="bg-white" :to="{ 'name': 'encounter_probability' }">
+        <q-route-tab icon="fa fat fa-chart-mixed" active-class="bg-white" :to="{ 'name': 'models' }">
           <q-tooltip anchor="center right" self="center left" class="text-capitalize">
-            {{ $t('encounter_probability') }}
+            {{ $t('exposure_risk') }}
           </q-tooltip>
         </q-route-tab>
       </q-tabs>

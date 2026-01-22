@@ -18,9 +18,9 @@ const routes: RouteRecordRaw[] = [
         props: true,
       },
       {
-        path: 'encounter_probability/:speciesCode?/:date?',
-        name: 'encounter_probability',
-        component: () => import('pages/EncounterProbabilityPage.vue'),
+        path: 'models/:speciesCode?/:date?',
+        name: 'models',
+        component: () => import('pages/ExposureRiskPage.vue'),
         // props: true
       },
     ],

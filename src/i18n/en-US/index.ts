@@ -3,7 +3,7 @@ export default {
   url_copied: "URL copied to clipboard",
   reports: 'Reports',
   discoveries: 'Discoveries',
-  encounter_probability: 'Encounter Probability',
+  exposure_risk: 'Exposure Risk',
   layers: 'Layers',
   download_all_data: 'Download all data',
   mosquitoes: 'Mosquitoes',

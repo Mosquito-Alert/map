@@ -3,7 +3,7 @@ export default {
   url_copied: 'URL copiat al porta-retalls',
   reports: 'Informes',
   discoveries: 'Descobriments',
-  encounter_probability: 'Probabilitat de trobada',
+  exposure_risk: "Risc d'exposició",
   layers: 'Capes',
   download_all_data: 'Descarregar totes les dades',
   mosquitoes: 'Mosquits',
@@ -27,5 +27,5 @@ export default {
   date: 'Date',
   today: 'Today',
   this_month: 'This month',
-  this_year: 'This year',
+  this_year: 'This year'
 };

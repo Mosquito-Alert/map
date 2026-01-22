@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer title="Encounter Probability">
+  <inner-drawer :title="$t('exposure_risk')">
     <q-select label="Select species" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
       :options="vectorOptions" option-value="code" option-label="label" color="primary" emit-value map-options
       v-model="selectedSpeciesCode" @update:model-value="selectedDate = undefined" />
@@ -78,7 +78,7 @@
     </div>
   </inner-drawer>
 
-  <EncounterProbabilityMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="1"
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="1"
     :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
     :palette="palette" :filters="localFilter" />
 </template>
@@ -94,7 +94,7 @@ import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 import { useMapUiStore } from 'src/stores/mapUI';
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
-import EncounterProbabilityMapLayer from 'src/components/EncounterProbabilityMapLayer.vue'
+import ExposureRiskMapLayer from 'src/components/ExposureRiskMapLayer.vue'
 
 interface ModelEntry {
   fromYear: string;
@@ -105,10 +105,10 @@ interface ModelEntry {
 }
 
 export default {
-  name: 'EncounterProbability',
+  name: 'ExposureRiskPage',
   components: {
     InnerDrawer,
-    EncounterProbabilityMapLayer
+    ExposureRiskMapLayer
   },
   props: {
     speciesCode: {
