@@ -1,5 +1,5 @@
 <template>
-  <GadmVectorTileLayer ref="layerRef" :level="level" :visible="visible" :opacity="opacity">
+  <GadmVectorTileLayer ref="layerRef" :level="level" :visible="visible" :opacity="opacity" v-bind="{ ...(minZoom !== undefined && { minZoom }), ...(maxZoom !== undefined && { maxZoom }) }">
     <ol-style :overrideStyleFunction="styleFn"></ol-style>
   </GadmVectorTileLayer>
 </template>
@@ -49,6 +49,12 @@ export default {
       type: Boolean,
       default: true
     },
+    minZoom: {
+      type: Number
+    },
+    maxZoom: {
+      type: Number
+    },
     filters: {
       type: Object
     }
@@ -76,8 +82,10 @@ export default {
     })
 
     function getFeatureColor(feature: Feature) {
+      // NOTE: if every start using geoserver
+      // const id = feature.getId()
       // Get the data from CSV if provided and determine color based on probability
-      const id = feature.getId()
+      const id = feature.getProperties()['id']
       if (id === undefined || dataObj[id] === undefined) {
         // id not found in dataObj
         return

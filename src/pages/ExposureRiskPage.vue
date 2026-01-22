@@ -80,6 +80,15 @@
   <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="1"
     :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
     :palette="palette" :filters="localFilter" />
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="2"
+    :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
+    :palette="palette" :filters="localFilter" />
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="3" :min-zoom="7"
+    :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
+    :palette="palette" :filters="localFilter" />
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="4" :min-zoom="10"
+    :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
+    :palette="palette" :filters="localFilter" />
 </template>
 
 <script lang="ts">
