@@ -1,0 +1,408 @@
+<template>
+  <inner-drawer :title="$t('reports')" header-height="78.5px" width="300px">
+    <q-list separator>
+      <q-item-label header class="row q-px-none">
+        <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
+
+        <q-space />
+
+        <q-btn-group flat stretch class="bg-grey-3">
+          <q-btn text-color="grey-14" icon="fa fat fa-info" size="xs" />
+          <q-btn-dropdown class='q-px-sm' text-color="grey-14" icon="fa fat fa-download" size="xs"
+            menu-self="top middle">
+            <q-list class="column flex-center q-pt-sm">
+              <!-- <q-toggle :label="$t('download_all_data')" /> -->
+              <q-btn color="transparent" unelevated class="absolute-top-right" padding="xs" :ripple=false
+                href="https://creativecommons.org/publicdomain/zero/1.0/" size="xs">
+                <q-icon name="fa fa-brands fa-creative-commons" color="grey-7" />
+                <q-icon name="fa fa-brands fa-creative-commons-zero" color="grey-7" />
+              </q-btn>
+              <q-btn-group class="q-mt-sm">
+                <q-btn stretch unelevated label="CSV" color="primary" />
+                <q-btn stretch unelevated label="Geopackage" color="primary" />
+              </q-btn-group>
+            </q-list>
+          </q-btn-dropdown>
+        </q-btn-group>
+
+      </q-item-label>
+      <!-- MOSQUITO SELECTION -->
+      <q-expansion-item dense expand-separator header-class="q-px-none">
+        <template v-slot:header>
+          <q-item-section avatar>
+            <q-avatar icon="fa fat fa-mosquito" />
+          </q-item-section>
+
+          <q-item-section class="text-capitalize">
+            {{ $t('mosquitoes') }}
+          </q-item-section>
+
+          <q-item-section side v-if="mosquitoSelected.length">
+            <q-badge rounded color="grey-3" text-color="grey-14" :label="mosquitoSelected.length" />
+          </q-item-section>
+        </template>
+        <q-card>
+          <q-card-section class="column">
+            <div class="row">
+              <q-chip v-for="(item, index) in mosquitoLayers" :key="index" v-model:selected="item.enabled"
+                class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+                :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
+            </div>
+            <q-separator inset />
+            <div class='row'>
+              <q-chip v-for="(item, index) in otherSpeciesLayers" :key="index" v-model:selected="item.enabled"
+                class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+                :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-expansion-item>
+      <!-- BREEDING SITES -->
+      <q-expansion-item dense expand-separator header-class="q-px-none">
+        <template v-slot:header>
+          <q-item-section avatar>
+            <q-avatar icon="fa fat fa-water" />
+          </q-item-section>
+
+          <q-item-section class="text-capitalize">
+            {{ $t('breeding_sites') }}
+          </q-item-section>
+
+          <q-item-section side v-if="breedingSitesSelected.length">
+            <q-badge rounded color="grey-3" text-color="grey-14" :label="breedingSitesSelected.length" />
+          </q-item-section>
+        </template>
+        <q-card>
+          <q-card-section>
+            <q-chip v-for="(item, index) in breedingSiteLayers" :key="index" v-model:selected="item.enabled"
+              class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+              :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
+          </q-card-section>
+        </q-card>
+      </q-expansion-item>
+      <!-- BITES -->
+      <q-item dense class="q-px-none" :active="bitesEnabled" active-class="text-bites">
+        <q-item-section avatar>
+          <q-avatar icon="fa fat fa-star-of-life" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label class="text-capitalize">
+            {{ $t('bites') }}
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section side>
+          <q-toggle v-model='bitesEnabled' color="bites" class="cursor-pointer" />
+        </q-item-section>
+      </q-item>
+      <!-- SAMPLING EFFORT -->
+      <q-item dense class="q-px-none" :active="samplingEffortEnabled" active-class="text-sampling-effort">
+        <q-item-section avatar>
+          <q-avatar icon="fa fa-duotone fa-grid-4" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label class="text-capitalize">
+            {{ $t('sampling_effort') }}
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section side>
+          <q-toggle v-model='samplingEffortEnabled' color="sampling-effort" class="cursor-pointer" />
+        </q-item-section>
+      </q-item>
+    </q-list>
+    <!-- FILTERS -->
+    <q-separator class="q-my-lg" />
+    <p class="text-weight-light text-uppercase text-grey-7 q-px-none">{{ $t('filters') }}</p>
+    <q-list separator class="bg-grey-3 rounded-borders">
+      <!-- DATE FILTER -->
+      <q-item dense>
+        <q-item-section avatar>
+          <q-icon name="fa fat fa-calendar-days" />
+        </q-item-section>
+
+        <q-item-section>
+          <DateRangePickerWithPresets v-model="selectedDateRange" :max-date="new Date()"
+            :min-date="new Date('2014/06/01')" />
+        </q-item-section>
+      </q-item>
+      <!-- TAGS FILTER -->
+      <q-expansion-item dense expand-separator>
+        <template v-slot:header>
+          <q-item-section avatar>
+            <q-avatar icon="fa fat fa-tags" />
+          </q-item-section>
+
+          <q-item-section class="text-capitalize">
+            {{ $t('tags') }}
+          </q-item-section>
+
+          <q-item-section side v-if="tagsSelected.length">
+            <q-badge rounded color="grey-4" text-color="grey-14" :label="tagsSelected.length" />
+          </q-item-section>
+        </template>
+        <q-card class="bg-grey-1">
+          <q-card-section>
+            <q-chip removable :label="tag" color="primary" text-color="white" icon="fa fat fa-tag"
+              v-for="tag, index in tagsSelected" :key="index" @remove="deleteTag(index)" />
+            <q-btn round unelevated color="grey-4" text-color="grey-14" size="sm" icon="fa fat fa-plus">
+              <q-popup-proxy ref="qPopupTag" class="q-pa-sm">
+                <q-input ref="qInputTag" dense autofocus v-model="inputTagText" :label="$t('new_tag')"
+                  @keyup.enter="addTag" prefix="#" :rules="[val => (val && val.length > 0) || 'Field is required']">
+                  <template v-slot:before>
+                    <q-icon name="fa fat fa-tag" />
+                  </template>
+                  <template v-slot:append>
+                    <q-btn round dense flat icon="add" @click="addTag" />
+                  </template>
+                </q-input>
+              </q-popup-proxy>
+            </q-btn>
+          </q-card-section>
+        </q-card>
+      </q-expansion-item>
+    </q-list>
+
+  </inner-drawer>
+
+</template>
+
+<script lang="ts">
+
+// import { date } from 'quasar'
+import { ref, computed, watch, onMounted } from 'vue'
+// import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { useI18n } from "vue-i18n"
+
+import InnerDrawer from 'src/components/InnerDrawer.vue'
+import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPresets.vue'
+import type { DateRange } from 'src/types/date'
+// import { watchEffect } from 'vue'
+
+export default {
+  components: {
+    InnerDrawer,
+    DateRangePickerWithPresets
+  },
+  emits: [
+    'update-layers:mosquitoes',
+    'update-layers:breeding-sites',
+    'update-layers:bites',
+    'update-layers:sampling-effort',
+    'update-filters:tags',
+    'update-filters:date'
+  ],
+  setup(props, { emit }) {
+    const { t } = useI18n()
+    const route = useRoute()
+    // const router = useRouter()
+
+    // LAYERS
+    const mosquitoLayers = ref({
+      albopictus: {
+        name: ref(t('tiger_mosquito')),
+        enabled: false,
+        color: 'albopictus',
+        icon: "fa fa-location-dot"
+      },
+      aegypti: {
+        name: ref(t('yellow_fever_mosquito')),
+        enabled: false,
+        color: 'aegypti',
+        icon: "fa fa-location-dot"
+      },
+      japonicus: {
+        name: ref(t('asian_bush_mosquito')),
+        enabled: false,
+        color: 'japonicus',
+        icon: "fa fa-location-dot"
+      },
+      koreicus: {
+        name: ref(t('korean_mosquito')),
+        enabled: false,
+        color: 'koreicus',
+        icon: "fa fa-location-dot"
+      },
+      culex: {
+        name: ref(t('common_mosquito')),
+        enabled: false,
+        color: 'culex',
+        icon: "fa fa-location-dot"
+      }
+    })
+
+    const otherSpeciesLayers = ref({
+      unidentified: {
+        name: ref(t('unidentified_mosquito')),
+        enabled: false,
+        color: 'unidentified-mosquito',
+        icon: 'fa fa-location-question'
+      },
+      other: {
+        name: ref(t('other_species')),
+        enabled: false,
+        color: 'other-species',
+        icon: 'fa fa-location-pin'
+      }
+    })
+
+    const mosquitoSelected = computed(() => {
+      const layers = { ...mosquitoLayers.value, ...otherSpeciesLayers.value }
+      return (Object.keys(layers) as Array<keyof typeof layers>).filter(key => layers[key].enabled)
+    })
+    watch(mosquitoSelected, (newValue) => {
+      emit('update-layers:mosquitoes', newValue)
+    })
+
+    const breedingSiteLayers = ref({
+      stormDrainWater: {
+        name: ref(t('storm_drain_water')),
+        enabled: false,
+        color: 'breeding-site',
+        icon: 'fa fa-droplet'
+      },
+      stormDrainDry: {
+        name: ref(t('storm_drain_dry')),
+        enabled: false,
+        color: 'breeding-site',
+        icon: 'fa fa-droplet-slash'
+      },
+      other: {
+        name: ref(t('other_sites')),
+        enabled: false,
+        color: 'breeding-site',
+        icon: 'fa fa-tank-water'
+      }
+    })
+
+    const breedingSitesSelected = computed(() => {
+      return (Object.keys(breedingSiteLayers.value) as Array<keyof typeof breedingSiteLayers.value>).filter(key => breedingSiteLayers.value[key].enabled)
+    })
+    watch(breedingSitesSelected, (newValue) => {
+      emit('update-layers:breeding-sites', newValue)
+    })
+
+    const bitesEnabled = ref(false)
+    watch(bitesEnabled, (newValue) => {
+      emit('update-layers:bites', newValue)
+    })
+    const samplingEffortEnabled = ref(false)
+    watch(samplingEffortEnabled, (newValue) => {
+      emit('update-layers:sampling-effort', newValue)
+    })
+
+    // FILTERS
+    // const selectedDateRange = ref<DateRange>({ 'from': null, 'to': null })
+    const selectedDateRange = ref<DateRange>({
+      from: new Date(new Date().getFullYear(), 0, 1), // January 1st of current year
+      to: new Date() // today
+    });
+    watch(selectedDateRange, (newValue) => {
+      emit('update-filters:date', newValue)
+    })
+
+    const qPopupTag = ref()
+    const qInputTag = ref()
+    const inputTagText = ref()
+    const tagsSelected = ref<string[]>([])
+    watch(tagsSelected, (newValue) => {
+      emit('update-filters:tags', newValue)
+    }, { deep: true })
+
+
+    onMounted(() => {
+      // Init mosquito layer depending on the route query params
+      // const mosquitoLayersToEnable = route.query.mosquitoes?.split(',')
+      // if (mosquitoLayersToEnable !== undefined) {
+      //   Object.keys(mosquitoLayers.value).forEach(key => {
+      //     mosquitoLayers.value[key].enabled = mosquitoLayersToEnable.includes(key)
+      //   })
+      // }
+
+      // Init breeding sites layer depending on the route query params
+      // const breedingSitesLayersToEnable = route.query.breeding_sites?.split(',')
+      // if (breedingSitesLayersToEnable !== undefined) {
+      //   Object.keys(breedingSiteLayers.value).forEach(key => {
+      //     breedingSiteLayers.value[key].enabled = breedingSitesLayersToEnable.includes(key)
+      //   })
+      // }
+
+      // Init bites layer depending on the route query params
+      if (route.query.bites !== undefined) {
+        bitesEnabled.value = route.query.bites === 'true'
+      }
+
+      // Init sampling effort layer depending on the route query params
+      if (route.query.sampling_effort !== undefined) {
+        samplingEffortEnabled.value = route.query.sampling_effort === 'true'
+      }
+
+      // Init date filter
+      // if (route.query.from !== undefined) {
+      //   selectedDateRange.value = {
+      //     'from': new Date(route.query.from),
+      //     'to': new Date(route.query.to || date.formatDate(new Date(), 'YYYY/MM/DD'))
+      //   }
+      // }
+
+      // Init tags filter
+      // const tagsToEnable = route.query.tags?.split(',')
+      // if (tagsToEnable !== undefined) {
+      //   tagsSelected.value = tagsToEnable
+      // }
+    })
+
+    // watchEffect(() => {
+    //   router.push({
+    //     ...route,
+    //     params: {
+    //       ...route.params
+    //     },
+    //     query: {
+    //       ...route.query,
+    //       ...{
+    //         mosquitoes: mosquitoSelected.value.join(',') || undefined,
+    //         breeding_sites: breedingSitesSelected.value?.join(',') || undefined,
+    //         bites: bitesEnabled.value || undefined,
+    //         sampling_effort: samplingEffortEnabled.value || undefined,
+    //         from: date.formatDate(selectedDateRange.value?.from, 'YYYY/MM/DD') || undefined,
+    //         to: date.formatDate(selectedDateRange.value?.to, 'YYYY/MM/DD') || undefined,
+    //         tags: tagsSelected.value?.join(',') || undefined
+    //       }
+    //     }
+    //   })
+    // })
+
+    return {
+      mosquitoLayers,
+      otherSpeciesLayers,
+      breedingSiteLayers,
+      selectedDateRange,
+      mosquitoSelected,
+      breedingSitesSelected,
+      bitesEnabled,
+      samplingEffortEnabled,
+      qPopupTag,
+      qInputTag,
+      tagsSelected,
+      inputTagText,
+      addTag() {
+        qInputTag.value.validate()
+
+        if (!qInputTag.value.hasError) {
+          tagsSelected.value.push(inputTagText.value)
+          inputTagText.value = undefined
+          qPopupTag.value.hide()
+        }
+      },
+      deleteTag(index: number) {
+        tagsSelected.value.splice(index, 1)
+      }
+    }
+  }
+}
+
+</script>

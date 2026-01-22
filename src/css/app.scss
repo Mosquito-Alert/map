@@ -1,3 +1,75 @@
-html, body, #map{
-    height: 100%;
+// app global css in SCSS form
+
+// Mosquitoes colors
+.text-albopictus {
+  color: $grey-7 !important;
+}
+.bg-albopictus {
+  background: $grey-7 !important;
+}
+
+.text-aegypti {
+  color: $lime-8 !important;
+}
+.bg-aegypti {
+  background: $lime-8 !important;
+}
+
+.text-japonicus {
+  color: $green-6 !important;
+}
+.bg-japonicus {
+  background: $green-6 !important;
+}
+
+.text-koreicus {
+  color: $indigo-6 !important;
+}
+.bg-koreicus {
+  background: $indigo-6 !important;
+}
+
+.text-culex {
+  color: $purple-6 !important;
+}
+.bg-culex {
+  background: $purple-6 !important;
+}
+
+.text-unidentified-mosquito {
+  color: $grey-5 !important;
+}
+.bg-unidentified-mosquito {
+  background: $grey-5 !important;
+}
+
+.text-other-species {
+  color: $grey-3 !important;
+}
+.bg-other-species {
+  background: $grey-3 !important;
+}
+
+// Breeding sites colors
+.text-breeding-site {
+  color: $blue-6 !important;
+}
+.bg-breeding-site {
+  background: $blue-6 !important;
+}
+
+// Bites colors
+.text-bites {
+  color: $red-6 !important;
+}
+.bg-bites {
+  background: $red-6 !important;
+}
+
+// Sampling effort colors
+.text-sampling-effort {
+  color: $brown-6 !important;
+}
+.bg-sampling-effort {
+  background: $brown-6 !important;
 }
