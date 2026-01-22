@@ -13,9 +13,9 @@
             {{ $t('reports') }}
           </q-tooltip>
         </q-route-tab>
-        <q-route-tab icon="fa fat fa-triangle-exclamation" active-class="bg-white" :to="{ 'name': 'early_warning' }">
+        <q-route-tab icon="fa fat fa-radar" active-class="bg-white" :to="{ 'name': 'discoveries' }">
           <q-tooltip anchor="center right" self="center left" class="text-capitalize">
-            {{ $t('early_warning') }}
+            {{ $t('discoveries') }}
           </q-tooltip>
         </q-route-tab>
         <q-route-tab icon="fa fat fa-chart-mixed" active-class="bg-white" :to="{ 'name': 'encounter_probability' }">

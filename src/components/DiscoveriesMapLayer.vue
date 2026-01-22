@@ -65,7 +65,7 @@ export default {
       idProperty: 'locCode'
     })
 
-    // Create legend for the early warning layer
+    // Create legend for the discoveries layer
     const legend = new Legend({
       title: 'Legend',
       size: [14, 14],

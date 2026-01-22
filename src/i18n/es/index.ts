@@ -2,7 +2,7 @@ export default {
   footer_collaborators_note: 'Este mapa interactivo ha sido financiado por',
   url_copied: 'URL copiada al portapapeles',
   reports: 'Informes',
-  early_warning: 'Detección temprana',
+  discoveries: 'Descubrimientos',
   encounter_probability: 'Probabilidad de encuentro',
   layers: 'Capas',
   download_all_data: 'Descargar todos los datos',

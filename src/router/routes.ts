@@ -12,9 +12,9 @@ const routes: RouteRecordRaw[] = [
         props: true,
       },
       {
-        path: 'early_warning/:speciesCode?',
-        name: 'early_warning',
-        component: () => import('pages/EarlyWarningPage.vue'),
+        path: 'discoveries/:speciesCode?',
+        name: 'discoveries',
+        component: () => import('pages/DiscoveriesPage.vue'),
         props: true,
       },
       {

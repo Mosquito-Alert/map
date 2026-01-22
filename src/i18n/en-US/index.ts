@@ -2,7 +2,7 @@ export default {
   footer_collaborators_note: 'This interactive map has been funded by',
   url_copied: "URL copied to clipboard",
   reports: 'Reports',
-  early_warning: 'Early Warning',
+  discoveries: 'Discoveries',
   encounter_probability: 'Encounter Probability',
   layers: 'Layers',
   download_all_data: 'Download all data',

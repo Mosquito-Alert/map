@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer title="Early Warning">
+  <inner-drawer :title="$t('discoveries')">
     <q-select label="Select species" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
       :options="vectorOptions" option-value="code" option-label="label" color="primary" emit-value map-options
       v-model="selectedSpeciesCode" />
@@ -23,7 +23,7 @@
     </div>
   </inner-drawer>
   <!-- MAP LAYER -->
-  <early-warning-map-layer v-if="selectedSpeciesCode" :species-code="selectedSpeciesCode" :visible="visibleLayer"
+  <DiscoveriesMapLayer v-if="selectedSpeciesCode" :species-code="selectedSpeciesCode" :visible="visibleLayer"
     :opacity="opacityLayer" />
 </template>
 
@@ -33,13 +33,13 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
-import EarlyWarningMapLayer from 'src/components/EarlyWarningMapLayer.vue'
+import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
 
 export default {
-  name: 'EarlyWarningPage',
+  name: 'DiscoveriesPage',
   components: {
     InnerDrawer,
-    EarlyWarningMapLayer
+    DiscoveriesMapLayer
   },
   props: {
     speciesCode: {
