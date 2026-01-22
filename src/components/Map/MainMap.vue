@@ -32,7 +32,7 @@ worker.onmessage = (e) => {
   if (msg.type === MessageType.BUILT) {
     originalHexData.value[msg.resolution] = msg.originalHexData
     originalDateAggregationData.value = { ...msg.dateAggregation }
-    filterData()
+    // filterData()
   }
 
   if (msg.type === MessageType.FILTERED) {
@@ -43,7 +43,7 @@ worker.onmessage = (e) => {
     ascSortedArrHexCounts.value = msg.counts
     getMapColors()
     addOrUpdateH3Layer()
-    showOnlyResolution(currentResolution.value)
+    showOnlyResolution()
   }
 }
 
@@ -56,8 +56,6 @@ type ObservationFeatureCollection = GeoJSON.FeatureCollection<
     day?: number
   }
 >
-
-const DAY_MS = 86_400_000 // Number of milliseconds in a day
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -131,6 +129,8 @@ const getMapColors = () => {
   const resolution = currentResolution.value as number
   if (!renderedHexData.value[resolution]) return
 
+  console.log('Calculating map colors for resolution:', resolution)
+
   if (ascSortedArrHexCounts.value.length === 0) {
     ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
       (f: any) => f.properties.count,
@@ -174,6 +174,8 @@ const addOrUpdateH3Layer = () => {
   const mapInstance = map.value
 
   if (!mapInstance) return
+
+  console.log('Adding/updating H3 layer for resolution:', resolution)
   const dataForRes = renderedHexData.value[resolution]
   const colorsForRes = mapColors.value[resolution]
 
@@ -233,18 +235,19 @@ const addOrUpdateH3Layer = () => {
 }
 
 // Function to hide all H3 layers except the target one
-const showOnlyResolution = (targetResolution: number | null) => {
+const showOnlyResolution = () => {
   if (!map.value) return
+
+  const zoom = map.value.getZoom()
+  const resolution = zoom >= 10 ? null : currentResolution.value
+
+  console.log('Showing only resolution:', resolution)
 
   const allResolutions = [4, 5, 6]
   allResolutions.forEach((res) => {
     const layerId = `h3-layer-res-${res}`
     if (map.value!.getLayer(layerId)) {
-      map.value!.setLayoutProperty(
-        layerId,
-        'visibility',
-        res === targetResolution ? 'visible' : 'none',
-      )
+      map.value!.setLayoutProperty(layerId, 'visibility', res === resolution ? 'visible' : 'none')
     }
   })
 
@@ -253,7 +256,7 @@ const showOnlyResolution = (targetResolution: number | null) => {
     map.value.setLayoutProperty(
       'observationsLayer',
       'visibility',
-      targetResolution === null ? 'visible' : 'none',
+      resolution === null ? 'visible' : 'none',
     )
   }
 }
@@ -265,14 +268,9 @@ const handleZoomChange = async () => {
   const zoom = map.value.getZoom()
   const targetResolution = getResolutionForZoom(zoom)
 
-  if (zoom >= 10) {
-    showOnlyResolution(null)
-    return
-  }
-
-  // Skip everything if resolution did not change
-  if (currentResolution.value === targetResolution) {
-    showOnlyResolution(currentResolution.value)
+  // Skip everything if resolution did not change or zoom is high enough
+  if (zoom >= 10 || currentResolution.value === targetResolution) {
+    showOnlyResolution()
     return
   }
 
@@ -290,7 +288,7 @@ const handleZoomChange = async () => {
   addOrUpdateH3Layer()
 
   // Show appropriate hexagon resolution
-  showOnlyResolution(targetResolution)
+  showOnlyResolution()
 }
 
 onMounted(async () => {
@@ -354,6 +352,7 @@ onMounted(async () => {
       currentResolution.value = getResolutionForZoom(initialZoom)
 
       buildOriginalData()
+      filterData()
 
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
@@ -406,14 +405,14 @@ watch(
       filterData()
       getMapColors()
       addOrUpdateH3Layer()
-      showOnlyResolution(zoom >= 10 ? null : currentResolution.value)
+      showOnlyResolution()
       if (start && end) {
-        const startTs = Date.parse(start)
-        const endTs = Date.parse(end)
+        // const startTs = Date.parse(start)
+        // const endTs = Date.parse(end)
         map.value?.setFilter('observationsLayer', [
           'all',
-          ['>=', ['get', 'ts'], startTs],
-          ['<=', ['get', 'ts'], endTs],
+          ['>=', ['get', 'received_at'], start],
+          ['<=', ['get', 'received_at'], end],
         ])
       }
     }
