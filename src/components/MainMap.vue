@@ -5,7 +5,7 @@
     @moveend="updateRoute">
     <ol-view :projection="projection" :constrainResolution='true' :maxZoom=17 :center="center" :zoom="zoom" />
 
-    <ol-tile-layer>
+    <ol-tile-layer ref="basemapRef">
       <!-- <ol-source-osm :preload="Infinity" /> -->
       <ol-source-xyz :url="basemapLayerUrl" :preload="Infinity" :attributions-collapsible="false"
         attributions="© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>" />
@@ -30,10 +30,13 @@
 
 <script lang="ts">
 
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { toLonLat, fromLonLat } from 'ol/proj.js'
+import Colorize from 'ol-ext/filter/Colorize'
+
+import { useMapUiStore } from 'src/stores/mapUI';
 
 export default {
   props: {
@@ -51,8 +54,11 @@ export default {
     const route = useRoute()
     const router = useRouter()
 
+    const mapUi = useMapUiStore();
+
     // Map
     const mapRef = ref()
+    const basemapRef = ref()
     const projection = ref('EPSG:3857')
 
     const center = ref(
@@ -62,8 +68,24 @@ export default {
       )
     )
     const zoom = ref(parseFloat(String(route.query.zoom || 0)))
+
+    const grayscaleFilter = new Colorize({operation: 'grayscale'});
+
+    onMounted(() => {
+      basemapRef.value.tileLayer.addFilter(grayscaleFilter);
+    });
+
+    watch(
+      () => mapUi.grayscaleBasemap,
+      (newVal) => {
+        grayscaleFilter.setActive(newVal)
+      },
+      { immediate: true }
+    )
+
     return {
       mapRef,
+      basemapRef,
       projection,
       center,
       zoom,

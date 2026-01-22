@@ -88,8 +88,10 @@
 import { useQuasar, date } from 'quasar'
 import { cdn } from 'boot/axios'
 
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 // import { useRouter, useRoute } from 'vue-router'
+
+import { useMapUiStore } from 'src/stores/mapUI';
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import EncounterProbabilityMapLayer from 'src/components/EncounterProbabilityMapLayer.vue'
@@ -125,6 +127,8 @@ export default {
   setup(props) {
     // const route = useRoute()
     // const router = useRouter()
+
+    const mapUi = useMapUiStore();
 
     const $q = useQuasar()
     // Ref for controlling month picker visibility
@@ -194,6 +198,7 @@ export default {
     })
 
     onMounted(() => {
+      mapUi.setGrayscale(true);
       cdn.get('static/models/global_minimal_model_estimates/model_manifest.csv')
         .then((resp) => {
           // Read csv manifest
@@ -231,6 +236,10 @@ export default {
             icon: 'report_problem'
           })
         })
+    })
+
+    onUnmounted(() => {
+      mapUi.setGrayscale(false);
     })
 
     // watchEffect(() => {

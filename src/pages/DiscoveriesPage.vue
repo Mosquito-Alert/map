@@ -29,8 +29,10 @@
 
 <script lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useMapUiStore } from 'src/stores/mapUI';
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
@@ -49,6 +51,8 @@ export default {
   setup(props) {
     const route = useRoute()
     const router = useRouter()
+
+    const mapUi = useMapUiStore();
 
     const selectedSpeciesCode = ref(props.speciesCode)
     const vectorOptions = computed(() => {
@@ -72,6 +76,14 @@ export default {
           speciesCode: newValue
         }
       })
+    })
+
+    onMounted(() => {
+      mapUi.setGrayscale(true);
+    })
+
+    onUnmounted(() => {
+      mapUi.setGrayscale(false);
     })
 
     return {
