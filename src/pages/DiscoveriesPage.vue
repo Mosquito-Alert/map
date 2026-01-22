@@ -10,7 +10,7 @@
         <q-space />
         <q-btn-group flat stretch class="bg-grey-1">
           <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
-          <q-btn icon="fa fat fa-download" size="xs" />
+          <q-btn :loading="downloadProgress.loading" :percentage="downloadProgress.percentage" icon="fa fat fa-download" size="xs" @click="downloadFile()"/>
         </q-btn-group>
       </div>
       <div class="row bg-grey-3 rounded-borders q-pa-sm">
@@ -28,10 +28,11 @@
 </template>
 
 <script lang="ts">
-import { useQuasar } from 'quasar'
+import { useQuasar, exportFile } from 'quasar'
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
@@ -57,6 +58,11 @@ export default {
     const router = useRouter()
 
     const mapUi = useMapUiStore();
+
+    const downloadProgress = ref({
+      loading: false,
+      percentage: 0
+    })
 
     const selectedSpeciesCode = ref(props.speciesCode)
     const vectorOptions = computed(() => {
@@ -98,12 +104,46 @@ export default {
       })
     }
 
+    async function downloadFile()  {
+      downloadProgress.value.loading = true;
+      downloadProgress.value.percentage = 0;
+      const url = new URL('https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/ows');
+      const urlParams = new URLSearchParams({
+        service: 'WFS',
+        version: '1.0.0',
+        request: 'GetFeature',
+        typeName: 'mosquitoalert:discoveries',
+        outputFormat: 'SHAPE-ZIP',
+        cql_filter: `${selectedSpeciesCode.value} IS NOT NULL`,
+        propertyName: `fid,geom,cntryCode,cntryName,codeLevel,locCode,locName,${selectedSpeciesCode.value}`
+      });
+      url.search = urlParams.toString();
+
+      try {
+        const response = await axios.get(url.toString(), {
+          responseType: 'blob',
+          onDownloadProgress: (event) => {
+            if (event.total) {
+              downloadProgress.value.percentage = Math.round((event.loaded * 100) / event.total);
+            }
+          }
+        });
+        exportFile(`discoveries_${selectedSpeciesCode.value}.zip`, response.data, { mimeType: 'application/zip' });
+        downloadProgress.value.percentage = 100
+      } finally {
+        downloadProgress.value.loading = false;
+        downloadProgress.value.percentage = 0;
+      }
+    }
+
     return {
       selectedSpeciesCode,
       vectorOptions,
       visibleLayer,
       opacityLayer,
-      showInfoDialog
+      downloadProgress,
+      showInfoDialog,
+      downloadFile
     }
   }
 }
