@@ -9,7 +9,7 @@
         <span class="text-weight-light text-uppercase text-grey-7">Layer Controls</span>
         <q-space />
         <q-btn-group flat stretch class="bg-grey-1">
-          <q-btn icon="fa fat fa-info" size="xs" />
+          <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
           <q-btn icon="fa fat fa-download" size="xs" />
         </q-btn-group>
       </div>
@@ -28,9 +28,10 @@
 </template>
 
 <script lang="ts">
-
+import { useQuasar } from 'quasar'
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
@@ -49,6 +50,9 @@ export default {
     }
   },
   setup(props) {
+    const $q = useQuasar()
+    const { t } = useI18n()
+
     const route = useRoute()
     const router = useRouter()
 
@@ -86,11 +90,20 @@ export default {
       mapUi.setGrayscale(false);
     })
 
+    function showInfoDialog() {
+      $q.dialog({
+        title: t('information'),
+        message: t('discoveries_layer_info').replace(/\\n/g, '<br>'),
+        html: true
+      })
+    }
+
     return {
       selectedSpeciesCode,
       vectorOptions,
       visibleLayer,
-      opacityLayer
+      opacityLayer,
+      showInfoDialog
     }
   }
 }

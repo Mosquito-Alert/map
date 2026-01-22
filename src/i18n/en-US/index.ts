@@ -26,5 +26,8 @@ export default {
   date: 'Date',
   today: 'Today',
   this_month: 'This month',
-  this_year: 'This year'
+  this_year: 'This year',
+  information: 'Information',
+  discoveries_layer_info: "The Mosquito Alert Discovery Map is a dynamic tool that showcases the power of citizen science in detecting mosquito species across Europe and beyond. By visualizing observations submitted through the Mosquito Alert platform, the map offers timely insights that complement official surveillance efforts and contribute to the early detection of mosquito-borne disease risks.\\n\\nIn Europe, the map uses official data from the European Centre for Disease Prevention and Control (ECDC) at the NUTS3 level as a reference framework. In Spain, municipal-level data from the Center for Coordination of Health Alerts and Emergencies (CCAES) serves as the benchmark for this analysis. These authoritative sources provide a foundation against which citizen-reported discoveries can be compared.\\n\\nThe map’s legend clearly distinguishes between two types of data: yellow areas (indicate regions with officially recognized mosquito presence) and red areas (highlight locations where Mosquito Alert participants have reported mosquito species that are not yet reflected in official records).\\n\\nBy spotlighting these community-driven discoveries, the map reveals potential gaps in surveillance and underscores the value of real-time, ground-level data. It empowers citizens, researchers, and public health officials to work together in identifying emerging risks, informing response strategies, and refining monitoring systems.\\n\\nThe Mosquito Alert Discovery Map exemplifies how open, participatory science can enhance public health infrastructure and foster a shared responsibility in managing vector-borne disease threats.",
+
 }
