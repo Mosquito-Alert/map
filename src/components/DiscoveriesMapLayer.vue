@@ -9,7 +9,7 @@
   </ol-vector-tile-layer> -->
 
   <ol-tile-layer :opacity="opacity" :visible="visible">
-    <ol-source-tile-wms url="https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms"
+    <ol-source-tile-wms ref="sourceRef" url="https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms"
       layers="mosquitoalert:discoveries" serverType="geoserver" :params="{
         'env': `field:${speciesCode}`,
       }" />
@@ -19,7 +19,7 @@
 
 <script lang="ts">
 
-import { ref, watchEffect, inject, onMounted, onUnmounted } from 'vue'
+import { ref, watchEffect, watch, inject, onMounted, onUnmounted } from 'vue'
 
 import MVT from 'ol/format/MVT'
 import type Feature from 'ol/Feature'
@@ -58,6 +58,7 @@ export default {
   setup(props) {
 
     const layerRef = ref()
+    const sourceRef = ref()
     const map = inject<Map | undefined>("map");
 
     const mvtFormat = new MVT({
@@ -126,6 +127,15 @@ export default {
       layerRef.value.vectorTileLayer.changed()
     })
 
+    watch(() => props.speciesCode, () => {
+      if (sourceRef.value === undefined) {
+        return
+      }
+      sourceRef.value.source.updateParams({
+        'env': `field:${props.speciesCode}`,
+      })
+    })
+
     onMounted(() => {
       map?.addControl(legendControl)
     })
@@ -136,6 +146,7 @@ export default {
 
     return {
       layerRef,
+      sourceRef,
       mvtFormat,
       styleFn(feature: Feature) {
         if (feature.get('leave') === 1) {
