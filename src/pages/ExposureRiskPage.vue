@@ -24,7 +24,7 @@
           <span class="text-weight-light text-uppercase text-grey-7">Layer Controls</span>
           <q-space />
           <q-btn-group flat stretch class="bg-grey-1">
-            <q-btn icon="fa fat fa-info" size="xs" />
+            <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
             <q-btn icon="fa fat fa-download" size="xs" />
           </q-btn-group>
         </div>
@@ -86,6 +86,7 @@
 <script lang="ts">
 
 import { useQuasar, date } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { cdn } from 'boot/axios'
 
 import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
@@ -131,6 +132,7 @@ export default {
     const mapUi = useMapUiStore();
 
     const $q = useQuasar()
+    const { t } = useI18n()
     // Ref for controlling month picker visibility
     const qDateProxy = ref()
 
@@ -242,6 +244,15 @@ export default {
       mapUi.setGrayscale(false);
     })
 
+    function showInfoDialog() {
+      $q.dialog({
+        title: t('information'),
+        message: t('models_layer_info').replace(/\\n/g, '<br>'),
+        html: true,
+        style: 'width: min(100%, 800px);',
+      })
+    }
+
     // watchEffect(() => {
     //   const newParams = [selectedSpeciesCode, selectedDate].every(item => item.value !== undefined) ?
     //     {
@@ -277,6 +288,7 @@ export default {
       opacityLayer,
       palette,
       localFilter,
+      showInfoDialog,
       dateUpdated(val: unknown, reason: string, details: { year: number; month: number }) {
         // Called when calendar is clicked
         if (reason === 'month') {
