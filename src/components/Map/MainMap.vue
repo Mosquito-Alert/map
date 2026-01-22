@@ -32,7 +32,6 @@ worker.onmessage = (e) => {
   if (msg.type === MessageType.BUILT) {
     originalHexData.value[msg.resolution] = msg.originalHexData
     originalDateAggregationData.value = { ...msg.dateAggregation }
-    // filterData()
   }
 
   if (msg.type === MessageType.FILTERED) {
@@ -129,8 +128,6 @@ const getMapColors = () => {
   const resolution = currentResolution.value as number
   if (!renderedHexData.value[resolution]) return
 
-  console.log('Calculating map colors for resolution:', resolution)
-
   if (ascSortedArrHexCounts.value.length === 0) {
     ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
       (f: any) => f.properties.count,
@@ -175,7 +172,6 @@ const addOrUpdateH3Layer = () => {
 
   if (!mapInstance) return
 
-  console.log('Adding/updating H3 layer for resolution:', resolution)
   const dataForRes = renderedHexData.value[resolution]
   const colorsForRes = mapColors.value[resolution]
 
@@ -240,8 +236,6 @@ const showOnlyResolution = () => {
 
   const zoom = map.value.getZoom()
   const resolution = zoom >= 10 ? null : currentResolution.value
-
-  console.log('Showing only resolution:', resolution)
 
   const allResolutions = [4, 5, 6]
   allResolutions.forEach((res) => {
@@ -390,6 +384,10 @@ onMounted(async () => {
       map.value.on('zoomend', handleZoomChangeDebounced)
     })
   }
+})
+
+onUnmounted(() => {
+  worker.terminate()
 })
 
 watch(
