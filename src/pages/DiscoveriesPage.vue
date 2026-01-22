@@ -100,7 +100,8 @@ export default {
       $q.dialog({
         title: t('information'),
         message: t('discoveries_layer_info').replace(/\\n/g, '<br>'),
-        html: true
+        html: true,
+        style: 'width: min(100%, 800px);',
       })
     }
 
