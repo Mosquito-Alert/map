@@ -25,7 +25,6 @@
           <q-space />
           <q-btn-group flat stretch class="bg-grey-1">
             <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
-            <q-btn icon="fa fat fa-download" size="xs" />
           </q-btn-group>
         </div>
         <div class="row bg-grey-3 rounded-borders q-pa-sm">
