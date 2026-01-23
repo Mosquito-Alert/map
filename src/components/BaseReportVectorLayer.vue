@@ -31,7 +31,8 @@ const props = withDefaults(defineProps<{
 
 // There's a bug on visible change doing nothing in webgl: https://github.com/MelihAltintas/vue3-openlayers/issues/355
 watch(() => props.visible, (newValue) => {
-  layerRef.value!.webglVectorLayer.setVisible(newValue === true)
+  if (!layerRef.value) return
+  layerRef.value.webglVectorLayer.setVisible(newValue === true)
 })
 
 const styleVariables = computed(() => {
@@ -41,8 +42,9 @@ const styleVariables = computed(() => {
   }
 })
 watch(styleVariables, (newValue) => {
-  Object.assign(layerRef.value!.webglVectorLayer.get('style').variables, newValue)
-  layerRef.value!.webglVectorLayer.changed()
+  if (!layerRef.value) return
+  Object.assign(layerRef.value.webglVectorLayer.get('style').variables, newValue)
+  layerRef.value.webglVectorLayer.changed()
 })
 const style = {
   'variables': styleVariables.value,

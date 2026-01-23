@@ -302,6 +302,9 @@ export default {
     });
     watch(selectedDateRange, (newValue) => {
       emit('update-filters:date', newValue)
+    }, {
+      immediate: true,
+      deep: true
     })
 
     const qPopupTag = ref()
