@@ -29,6 +29,6 @@ const computedUrl = computed(() => {
   if (props.tags && props.tags.length > 0) {
     props.tags.forEach(tag => params.append('tags', tag))
   }
-  return `/api_v1/bites/geo/?${params.toString()}`
+  return `/api/bites/geo/?format=geojson&${params.toString()}`
 })
 </script>

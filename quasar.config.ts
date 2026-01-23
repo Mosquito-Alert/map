@@ -12,7 +12,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers'],
+    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers', 'api'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['fa.css', 'app.scss'],
@@ -101,11 +101,11 @@ export default defineConfig((ctx) => {
       open: true, // opens browser window automatically
       proxy: {
         // proxy /api to backend
-        '/api_v1': {
+        '/api': {
           target: 'https://apidev.mosquitoalert.com/v1',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api_v1/, ''),
+          rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
     },

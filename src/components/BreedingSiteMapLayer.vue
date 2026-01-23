@@ -21,6 +21,6 @@ const props = defineProps<{
 }>()
 
 const computedUrl = computed(() => {
-  return `/api_v1/breeding-sites/geo/?site_type=${props.siteType}` + (props.hasWater !== undefined ? `&has_water=${props.hasWater}` : '')
+  return `/api/breeding-sites/geo/?format=geojson&site_type=${props.siteType}` + (props.hasWater !== undefined ? `&has_water=${props.hasWater}` : '')
 })
 </script>

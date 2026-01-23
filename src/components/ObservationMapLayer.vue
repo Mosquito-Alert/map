@@ -16,6 +16,6 @@ const props = defineProps<{
 }>()
 
 const computedUrl = computed(() => {
-  return `/api_v1/observations/geo/?identification_taxon_ids=${props.taxon_id ?? 'null'}`
+  return `/api/observations/geo/?format=geojson&identification_taxon_ids=${props.taxon_id ?? 'null'}`
 })
 </script>
