@@ -20,7 +20,8 @@
           </q-item-section>
 
           <q-item-section side v-if="mosquitoSelected.length">
-            <q-btn flat round icon="fa fat fa-download" size="sm"
+            <q-btn flat round icon="fa fat fa-download" size="sm" :loading="downloadProgress.observations.loading"
+              :percentage="downloadProgress.observations.percentage"
               @click.stop="showDownloadLicenseDialog(downloadObservations)" />
           </q-item-section>
         </template>
@@ -56,7 +57,8 @@
           </q-item-section>
 
           <q-item-section side v-if="breedingSitesSelected.length">
-            <q-btn flat round icon="fa fat fa-download" size="sm"
+            <q-btn flat round icon="fa fat fa-download" size="sm" :loading="downloadProgress.breedingSites.loading"
+              :percentage="downloadProgress.breedingSites.percentage"
               @click.stop="showDownloadLicenseDialog(downloadBreedingSites)" />
           </q-item-section>
         </template>
@@ -83,6 +85,7 @@
         <q-item-section side>
           <div class="row items-center">
             <q-btn v-if="bitesEnabled" flat round icon="fa fat fa-download" size="sm"
+              :loading="downloadProgress.bites.loading" :percentage="downloadProgress.bites.percentage"
               @click="showDownloadLicenseDialog(downloadBites)" />
             <q-toggle v-model='bitesEnabled' color="bites" />
           </div>
@@ -176,7 +179,7 @@ import type { DateRange } from 'src/types/date'
 // import { watchEffect } from 'vue'
 
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
-import type { AxiosResponse } from 'axios'
+import type { AxiosResponse, AxiosProgressEvent } from 'axios'
 
 export default {
   components: {
@@ -309,33 +312,85 @@ export default {
       emit('update-filters:tags', newValue)
     }, { deep: true })
 
+    const downloadProgress = ref({
+      bites: {
+        loading: false,
+        percentage: 0
+      },
+      observations: {
+        loading: false,
+        percentage: 0
+      },
+      breedingSites: {
+        loading: false,
+        percentage: 0
+      }
+    })
     async function downloadBites() {
+      downloadProgress.value.bites.loading = true;
+      downloadProgress.value.bites.percentage = 0;
+
       await bitesApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }, {
+        onDownloadProgress: (event: AxiosProgressEvent) => {
+          if (event.total) {
+            downloadProgress.value.bites.percentage = Math.round((event.loaded * 100) / event.total);
+          }
+        }
       }).then((response: AxiosResponse) => {
         exportFile('bites.csv', response.data, 'text/csv')
+        downloadProgress.value.bites.percentage = 100
+      }).finally(() => {
+        downloadProgress.value.bites.loading = false;
+        downloadProgress.value.bites.percentage = 0;
       })
     }
 
     async function downloadObservations() {
+      downloadProgress.value.observations.loading = true;
+      downloadProgress.value.observations.percentage = 0;
+
       await observationsApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }, {
+        onDownloadProgress: (event: AxiosProgressEvent) => {
+          if (event.total) {
+            downloadProgress.value.observations.percentage = Math.round((event.loaded * 100) / event.total);
+          }
+        }
       }).then((response: AxiosResponse) => {
         exportFile('observations.csv', response.data, 'text/csv')
+        downloadProgress.value.observations.percentage = 100
+      }).finally(() => {
+        downloadProgress.value.observations.loading = false;
+        downloadProgress.value.observations.percentage = 0;
       })
     }
 
     async function downloadBreedingSites() {
+      downloadProgress.value.breedingSites.loading = true;
+      downloadProgress.value.breedingSites.percentage = 0;
       await breedingSitesApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }, {
+        onDownloadProgress: (event: AxiosProgressEvent) => {
+          if (event.total) {
+            downloadProgress.value.breedingSites.percentage = Math.round((event.loaded * 100) / event.total);
+          }
+        }
       }).then((response: AxiosResponse) => {
         exportFile('breeding_sites.csv', response.data, 'text/csv')
+        downloadProgress.value.breedingSites.percentage = 100
+      }).finally(() => {
+        downloadProgress.value.breedingSites.loading = false;
+        downloadProgress.value.breedingSites.percentage = 0;
       })
     }
 
@@ -438,6 +493,7 @@ export default {
       qInputTag,
       tagsSelected,
       inputTagText,
+      downloadProgress,
       showDownloadLicenseDialog,
       downloadBites,
       downloadObservations,
