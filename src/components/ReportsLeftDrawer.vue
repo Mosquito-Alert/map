@@ -164,7 +164,7 @@
 <script lang="ts">
 
 // import { date } from 'quasar'
-import { useQuasar } from 'quasar'
+import { useQuasar, exportFile } from 'quasar'
 import { ref, computed, watch, onMounted } from 'vue'
 // import { useRoute, useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
@@ -174,6 +174,9 @@ import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPresets.vue'
 import type { DateRange } from 'src/types/date'
 // import { watchEffect } from 'vue'
+
+import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
+import type { AxiosResponse } from 'axios'
 
 export default {
   components: {
@@ -306,19 +309,37 @@ export default {
       emit('update-filters:tags', newValue)
     }, { deep: true })
 
-    function downloadBites() {
-      console.log('Downloading bites data...')
+    async function downloadBites() {
+      await bitesApi.list({
+        format: 'csv',
+        receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }).then((response: AxiosResponse) => {
+        exportFile('bites.csv', response.data, 'text/csv')
+      })
     }
 
-    function downloadObservations() {
-      console.log('Downloading observations data...')
+    async function downloadObservations() {
+      await observationsApi.list({
+        format: 'csv',
+        receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }).then((response: AxiosResponse) => {
+        exportFile('observations.csv', response.data, 'text/csv')
+      })
     }
 
-    function downloadBreedingSites() {
-      console.log('Downloading breeding sites data...')
+    async function downloadBreedingSites() {
+      await breedingSitesApi.list({
+        format: 'csv',
+        receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+      }).then((response: AxiosResponse) => {
+        exportFile('breeding_sites.csv', response.data, 'text/csv')
+      })
     }
 
-    function showDownloadLicenseDialog(callback?: () => void) {
+    function showDownloadLicenseDialog(callback?: () => Promise<void>) {
       $q.dialog({
         title: t('data_license'),
         message: t('data_license_description').replace(/\\n/g, '<br>'),
@@ -336,7 +357,7 @@ export default {
         persistent: true
       }).onOk(() => {
         if (callback) {
-          callback();
+          void callback();
         }
       });
     }
