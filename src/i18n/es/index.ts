@@ -6,7 +6,10 @@ export default {
   exposure_risk: 'Riesgo de exposición',
   layers: 'Capas',
   search: 'Buscar localización',
-  download_all_data: 'Descargar todos los datos',
+  data_license: 'Licencia de los datos',
+  data_license_description:
+    "Todos los datos descargados de esta plataforma están bajo la licencia Creative Commons Zero (CC0).\\n\\nEste conjunto de datos se ha creado gracias al esfuerzo del equipo de Mosquito Alert y sus colaboradores, así como de los miles de científicos ciudadanos que han dedicado su energía y han contribuido con informes a la plataforma. Le solicitamos que cite la información de la comunidad de Mosquito Alert si utiliza estos datos en alguna publicación o si los comparte con otros. Ejemplo: 'Conjunto de datos de Mosquito Alert (www.mosquitoalert.com), descargado del mapa público de Mosquito Alert en https://map.mosquitoalert.com; [especificar fecha de descarga]. CC0'.\\n\\nAl descargar los datos, acepta cumplir con los términos de esta licencia.",
+  i_understand_and_accept_license: 'Entiendo y acepto la licencia',
   mosquitoes: 'Mosquitos',
   // Not translated yet
   tiger_mosquito: 'Tiger mosquito',

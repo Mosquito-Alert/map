@@ -6,7 +6,10 @@ export default {
   exposure_risk: 'Exposure Risk',
   search: 'Search location',
   layers: 'Layers',
-  download_all_data: 'Download all data',
+  data_license: 'Data license',
+  data_license_description:
+    "All data downloaded from this platform is licensed under the Creative Commons Zero (CC0) license.\\n\\nThis dataset has been created through the efforts of the Mosquito Alert team and collaborators, and the thousands of citizen scientists who have volunteered their energy and contributed reports on the Mosquito Alert platform. We ask that you give attribution to the Mosquito Alert Community if you use this data in any publications or if you share it with others. Example: 'Mosquito Alert dataset (www.mosquitoalert.com), downloaded from the public Mosquito Alert online map at https://map.mosquitoalert.com; [specify download date]. CC0.'\\n\\nBy downloading the data, you agree to comply with the terms of this license.",
+  i_understand_and_accept_license: 'I understand and accept license',
   mosquitoes: 'Mosquitoes',
   tiger_mosquito: 'Tiger mosquito',
   yellow_fever_mosquito: 'Yellow fever mosquito',

@@ -3,28 +3,6 @@
     <q-list separator>
       <q-item-label header class="row q-px-none">
         <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
-
-        <q-space />
-
-        <q-btn-group flat stretch class="bg-grey-3">
-          <q-btn text-color="grey-14" icon="fa fat fa-info" size="xs" />
-          <q-btn-dropdown class='q-px-sm' text-color="grey-14" icon="fa fat fa-download" size="xs"
-            menu-self="top middle">
-            <q-list class="column flex-center q-pt-sm">
-              <!-- <q-toggle :label="$t('download_all_data')" /> -->
-              <q-btn color="transparent" unelevated class="absolute-top-right" padding="xs" :ripple=false
-                href="https://creativecommons.org/publicdomain/zero/1.0/" size="xs">
-                <q-icon name="fa fa-brands fa-creative-commons" color="grey-7" />
-                <q-icon name="fa fa-brands fa-creative-commons-zero" color="grey-7" />
-              </q-btn>
-              <q-btn-group class="q-mt-sm">
-                <q-btn stretch unelevated label="CSV" color="primary" />
-                <q-btn stretch unelevated label="Geopackage" color="primary" />
-              </q-btn-group>
-            </q-list>
-          </q-btn-dropdown>
-        </q-btn-group>
-
       </q-item-label>
       <!-- MOSQUITO SELECTION -->
       <q-expansion-item dense expand-separator header-class="q-px-none">
@@ -34,11 +12,16 @@
           </q-item-section>
 
           <q-item-section class="text-capitalize">
-            {{ $t('mosquitoes') }}
+            <div class="row items-center">
+              {{ $t('mosquitoes') }}
+              <q-badge v-if="mosquitoSelected.length" rounded class="q-ml-sm" color="grey-3" text-color="grey-14"
+                :label="mosquitoSelected.length" />
+            </div>
           </q-item-section>
 
           <q-item-section side v-if="mosquitoSelected.length">
-            <q-badge rounded color="grey-3" text-color="grey-14" :label="mosquitoSelected.length" />
+            <q-btn flat round icon="fa fat fa-download" size="sm"
+              @click.stop="showDownloadLicenseDialog(downloadObservations)" />
           </q-item-section>
         </template>
         <q-card>
@@ -65,11 +48,16 @@
           </q-item-section>
 
           <q-item-section class="text-capitalize">
-            {{ $t('breeding_sites') }}
+            <div class="row items-center">
+              {{ $t('breeding_sites') }}
+              <q-badge v-if="breedingSitesSelected.length" rounded class="q-ml-sm" color="grey-3" text-color="grey-14"
+                :label="breedingSitesSelected.length" />
+            </div>
           </q-item-section>
 
           <q-item-section side v-if="breedingSitesSelected.length">
-            <q-badge rounded color="grey-3" text-color="grey-14" :label="breedingSitesSelected.length" />
+            <q-btn flat round icon="fa fat fa-download" size="sm"
+              @click.stop="showDownloadLicenseDialog(downloadBreedingSites)" />
           </q-item-section>
         </template>
         <q-card>
@@ -93,7 +81,11 @@
         </q-item-section>
 
         <q-item-section side>
-          <q-toggle v-model='bitesEnabled' color="bites" class="cursor-pointer" />
+          <div class="row items-center">
+            <q-btn v-if="bitesEnabled" flat round icon="fa fat fa-download" size="sm"
+              @click="showDownloadLicenseDialog(downloadBites)" />
+            <q-toggle v-model='bitesEnabled' color="bites" />
+          </div>
         </q-item-section>
       </q-item>
       <!-- SAMPLING EFFORT -->
@@ -109,7 +101,7 @@
         </q-item-section>
 
         <q-item-section side>
-          <q-toggle v-model='samplingEffortEnabled' color="sampling-effort" class="cursor-pointer" />
+          <q-toggle v-model='samplingEffortEnabled' color="sampling-effort" />
         </q-item-section>
       </q-item>
     </q-list>
@@ -172,6 +164,7 @@
 <script lang="ts">
 
 // import { date } from 'quasar'
+import { useQuasar } from 'quasar'
 import { ref, computed, watch, onMounted } from 'vue'
 // import { useRoute, useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
@@ -196,6 +189,7 @@ export default {
     'update-filters:date'
   ],
   setup(props, { emit }) {
+    const $q = useQuasar()
     const { t } = useI18n()
     const route = useRoute()
     // const router = useRouter()
@@ -312,6 +306,40 @@ export default {
       emit('update-filters:tags', newValue)
     }, { deep: true })
 
+    function downloadBites() {
+      console.log('Downloading bites data...')
+    }
+
+    function downloadObservations() {
+      console.log('Downloading observations data...')
+    }
+
+    function downloadBreedingSites() {
+      console.log('Downloading breeding sites data...')
+    }
+
+    function showDownloadLicenseDialog(callback?: () => void) {
+      $q.dialog({
+        title: t('data_license'),
+        message: t('data_license_description').replace(/\\n/g, '<br>'),
+        html: true,
+        style: 'width: min(100%, 800px);',
+        options: {
+          type: 'checkbox',
+          model: [],
+          isValid: model => model.includes('accept'),
+          items: [
+            { label: t('i_understand_and_accept_license'), value: 'accept', color: 'primary' },
+          ]
+        },
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        if (callback) {
+          callback();
+        }
+      });
+    }
 
     onMounted(() => {
       // Init mosquito layer depending on the route query params
@@ -389,6 +417,10 @@ export default {
       qInputTag,
       tagsSelected,
       inputTagText,
+      showDownloadLicenseDialog,
+      downloadBites,
+      downloadObservations,
+      downloadBreedingSites,
       addTag() {
         qInputTag.value.validate()
 

@@ -6,7 +6,10 @@ export default {
   exposure_risk: "Risc d'exposició",
   search: 'Cerca localització',
   layers: 'Capes',
-  download_all_data: 'Descarregar totes les dades',
+  data_license: 'Llicència de les dades',
+  data_license_description:
+    "Totes les dades descarregades d'aquesta plataforma tenen la llicència Creative Commons Zero (CC0).\\n\\nAquest conjunt de dades s'ha creat gràcies als esforços de l'equip i els col·laboradors de Mosquito Alert, i dels milers de ciutadans científics que han dedicat la seva energia i han contribuït amb informes a la plataforma Mosquito Alert. Us demanem que doneu crèdit a la comunitat Mosquito Alert si utilitzeu aquestes dades en alguna publicació o si les compartiu amb altres persones. Exemple: 'Conjunt de dades de Mosquito Alert (www.mosquitoalert.com), descarregat del mapa públic en línia de Mosquito Alert a https://map.mosquitoalert.com; [especifiqueu la data de descàrrega]. CC0.'\\n\\nEn descarregar les dades, accepteu complir els termes d'aquesta llicència.",
+  i_understand_and_accept_license: 'Entenc i accepto la llicència',
   mosquitoes: 'Mosquits',
   // Not translated yet
   tiger_mosquito: 'Tiger mosquito',
