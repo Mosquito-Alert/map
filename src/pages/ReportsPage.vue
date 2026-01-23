@@ -15,13 +15,42 @@
   <!-- <ReportsAnalyticsDrawer v-if="!featureId" :visible="numReportLayers !== 0" :features="visibleFeatures" /> -->
   <!-- <ReportsFeatureDetail :feature-id="featureId" :key="featureId" @update:featureId="handleSelectedFeatureIdUpdate" /> -->
 
-  <ol-search-control :collapsed="false" :maxHistory="10" />
+
+  <Teleport v-if="!!selectedLocationPolygon" defer to=".ol-overlaycontainer-stopevent">
+    <q-chip :model-value="!!selectedLocationPolygon" removable clickable class="ol-search all-pointer-events"
+      color="primary" text-color="white" icon="location_on" :label="selectedLocationName"
+      @remove="selectedLocationPolygon = null" />
+  </Teleport>
+
+  <ol-vector-layer :visible="true" :opacity="1">
+    <ol-source-vector>
+      <ol-feature v-if="!!selectedLocationPolygon">
+        <ol-geom-polygon v-if="selectedLocationIsPolygon" :coordinates="selectedLocationPolygon.getCoordinates()" />
+        <ol-geom-multi-polygon v-else-if="selectedLocationIsMultiPolygon"
+          :coordinates="selectedLocationPolygon.getCoordinates()" />
+        <ol-style>
+          <ol-style-stroke :color="colors.getPaletteColor('primary')" :width="2" />
+          <ol-style-fill :color="colors.getPaletteColor('primary') + '33'" />
+        </ol-style>
+      </ol-feature>
+    </ol-source-vector>
+  </ol-vector-layer>
+
 </template>
 
 <script lang="ts">
+import { colors } from 'quasar'
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n';
+
+import type Map from "ol/Map";
+import GeoJSON from 'ol/format/GeoJSON'
+import Polygon from 'ol/geom/Polygon';
+import MultiPolygon from 'ol/geom/MultiPolygon';
+import SearchNominatim from 'ol-ext/control/SearchNominatim'
+import type { SearchEvent } from 'ol-ext/control/Search';
 
 import ReportLeftDrawer from 'src/components/ReportsLeftDrawer.vue'
 import ReportsMapLayer from 'src/components/ReportsMapLayer.vue'
@@ -47,7 +76,9 @@ export default {
   setup(props) {
     const route = useRoute()
     const router = useRouter()
-    // const map = inject<Map>("map")
+    const { t, locale } = useI18n();
+
+    const map = inject<Map>("map")
 
     const mosquitoLayers = ref<string[]>([])
     const breedingSitesLayers = ref<string[]>([])
@@ -64,6 +95,65 @@ export default {
 
     const visibleFeatures = ref([])
     const layerRef = ref()
+
+    const selectedLocationPolygon = ref<Polygon | MultiPolygon | null>()
+    const selectedLocationName = ref<string>()
+    const selectedLocationIsPolygon = computed(() => selectedLocationPolygon.value instanceof Polygon);
+    const selectedLocationIsMultiPolygon = computed(() => selectedLocationPolygon.value instanceof MultiPolygon);
+
+    const geoJson = new GeoJSON()
+    const searchControl = new SearchNominatim({
+      polygon: true,
+      maxItems: 10,
+      maxHistory: -1,
+      title: t('search'),
+      placeholder: t('search') + '...',
+      typing: 500,
+      collapsed: false,
+      noCollapse: true,
+      zoomOnSelect: 11,
+      onselect: (e: SearchEvent) => {
+        const geometry = geoJson.readGeometry(
+          e.search.geojson,
+          {
+            dataProjection: 'EPSG:4326',
+            featureProjection: map!.getView().getProjection()
+          }
+        );
+        selectedLocationName.value = e.search.name;
+        if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
+          selectedLocationPolygon.value = geometry;
+        } else {
+          selectedLocationPolygon.value = null;
+        }
+      }
+    })
+    // Disable attribution copy
+    searchControl.set('copy', '')
+    // Overwrite requestData to add 'accept-language' header.
+    // See: https://github.com/Viglino/ol-ext/issues/559
+    searchControl.requestData = function (s) {
+      const data = SearchNominatim.prototype.requestData.call(this, s);
+      data['accept-language'] = locale.value;
+      data['polygon_threshold'] = 0.001;
+      return data
+    }
+
+    watch(selectedLocationPolygon, (newValue) => {
+      if (!newValue) {
+        map?.addControl(searchControl)
+      } else {
+        map?.removeControl(searchControl)
+      }
+    })
+
+    onMounted(() => {
+      map?.addControl(searchControl)
+    })
+
+    onUnmounted(() => {
+      map?.removeControl(searchControl)
+    })
 
     const featureId = ref(props.uuid)
     watch(featureId, async (newValue) => {
@@ -105,6 +195,11 @@ export default {
       layerRef,
       visibleFeatures,
       featureId,
+      selectedLocationPolygon,
+      selectedLocationName,
+      selectedLocationIsPolygon,
+      selectedLocationIsMultiPolygon,
+      colors,
       handleMosquitoesLayerUpdate(value: string[]) {
         mosquitoLayers.value = value
       },
@@ -132,3 +227,9 @@ export default {
 }
 
 </script>
+
+<style lang="scss">
+.ol-search.searching:before {
+  background: var(--q-primary);
+}
+</style>
