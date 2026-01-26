@@ -60,6 +60,8 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
     const buildOriginalFeatures: boolean = Object.keys(features).length === 0
 
     for (const observation of observations) {
+      const lng = observation.point.longitude as number
+      const lat = observation.point.latitude as number
       // ------------------------------------------------
       // Timestamp + day precomputation (ONCE)
       // ------------------------------------------------
@@ -77,7 +79,7 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [observation.lng as number, observation.lat as number],
+            coordinates: [lng, lat],
           },
           properties: {
             ts: observation.ts,
@@ -91,8 +93,6 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
       // ------------------------------------------------
       // H3 aggregation
       // ------------------------------------------------
-      const lng = observation.point.longitude as number
-      const lat = observation.point.latitude as number
       const hex = latLngToCell(lat, lng, resolution)
 
       let hexFeature = originalHexData[resolution]?.[hex] as HexStore[number][string] | undefined
