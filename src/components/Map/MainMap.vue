@@ -13,7 +13,7 @@
 import { MapInfoControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { markRaw, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from 'vue'
 import TimeSeries from './TimeSeries.vue'
 import MapLegend from './MapLegend.vue'
 import { useObservationsStore } from '../../stores/observationsStore'
@@ -32,14 +32,33 @@ worker.onmessage = (e) => {
   if (msg.type === MessageType.BUILT) {
     originalHexData.value[msg.resolution] = msg.originalHexData
     originalDateAggregationData.value = { ...msg.dateAggregation }
+    if (!geojsonCache.value) {
+      geojsonCache.value = {
+        type: 'FeatureCollection',
+        features: markRaw(msg.features),
+      } as ObservationFeatureCollection
+      // map.value?.getSource('observationsSource')?.setData(geojsonCache.value)
+
+      // const source = map.value?.getSource('observationsSource') as
+      //   | maplibregl.GeoJSONSource
+      //   | undefined
+      // if (source) {
+      //   source.setData(geojsonCache.value)
+      // }
+    }
   }
 
   if (msg.type === MessageType.FILTERED) {
-    renderedHexData.value[msg.resolution] = Object.fromEntries(
-      msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
+    renderedHexData.value[msg.resolution] = { ...msg.featureCollection.features }
+
+    Object.fromEntries(
+      msg.featureCollection.features.map((f: any) => [f.properties.hex, markRaw(f)]),
     )
 
-    ascSortedArrHexCounts.value = msg.counts
+    console.log('main ← receive', performance.now()) // DELETE:
+    // console.log('Filtered data received for resolution', msg.resolution)
+
+    // ascSortedArrHexCounts.value = msg.counts
     getMapColors()
     addOrUpdateH3Layer()
     showOnlyResolution()
@@ -96,8 +115,6 @@ const styleEOX: StyleSpecification = {
   },
 }
 
-const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
-
 // Function to get appropriate resolution based on zoom level
 const getResolutionForZoom = (zoom: number): number => {
   if (zoom <= 4) return 4
@@ -108,13 +125,15 @@ const getResolutionForZoom = (zoom: number): number => {
 const buildOriginalData = () => {
   worker.postMessage({
     type: MessageType.BUILD_ORIGINAL,
-    features: geojsonCache.value?.features,
+    observations: toRaw(observationsStore.observations),
     resolution: currentResolution.value,
   })
 }
 
 const filterData = () => {
   const { start, end } = observationsStore.dateFilter
+
+  console.log('main → send', performance.now()) // DELETE:
 
   worker.postMessage({
     type: MessageType.FILTER,
@@ -127,6 +146,8 @@ const filterData = () => {
 const getMapColors = () => {
   const resolution = currentResolution.value as number
   if (!renderedHexData.value[resolution]) return
+
+  console.log('Calculating map colors for resolution', resolution)
 
   if (ascSortedArrHexCounts.value.length === 0) {
     ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
@@ -171,6 +192,8 @@ const addOrUpdateH3Layer = () => {
   const mapInstance = map.value
 
   if (!mapInstance) return
+
+  console.log('Adding/updating H3 layer for resolution', resolution)
 
   const dataForRes = renderedHexData.value[resolution]
   const colorsForRes = mapColors.value[resolution]
@@ -234,6 +257,8 @@ const addOrUpdateH3Layer = () => {
 const showOnlyResolution = () => {
   if (!map.value) return
 
+  console.log('Showing only resolution layer for', currentResolution.value)
+
   const zoom = map.value.getZoom()
   const resolution = zoom >= 10 ? null : currentResolution.value
 
@@ -252,6 +277,7 @@ const showOnlyResolution = () => {
       'visibility',
       resolution === null ? 'visible' : 'none',
     )
+    console.log(map.value?.getSource('observationsSource')?.serialize()) // DELETE:
   }
 }
 
@@ -333,13 +359,15 @@ onMounted(async () => {
     // )
 
     // Start data loading in background
-    const geojsonPromise = fetch(data_geojson).then((r) => r.json())
+    const observationsPromise = observationsStore.fetchObservations().then(() => {
+      return observationsStore.observations
+    })
 
     map.value.on('load', async () => {
       if (!map.value) return
 
       // Load and cache data. Mark as raw to avoid deep reactivity overhead. This object is never modified.
-      geojsonCache.value = markRaw(await geojsonPromise)
+      await observationsPromise
 
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()
@@ -351,7 +379,13 @@ onMounted(async () => {
       // Add observation points layer for high zoom levels
       map.value.addSource('observationsSource', {
         type: 'geojson',
-        data: geojsonCache.value as GeoJSON.FeatureCollection,
+        data: geojsonCache.value
+          ? geojsonCache.value
+          : ({
+              type: 'FeatureCollection',
+              features: [],
+            } as GeoJSON.FeatureCollection),
+        // data: geojsonCache.value as GeoJSON.FeatureCollection,
         buffer: 0,
         maxzoom: 14,
       })
@@ -405,17 +439,32 @@ watch(
       addOrUpdateH3Layer()
       showOnlyResolution()
       if (start && end) {
-        // const startTs = Date.parse(start)
-        // const endTs = Date.parse(end)
+        const startTs = Date.parse(start)
+        const endTs = Date.parse(end)
         map.value?.setFilter('observationsLayer', [
           'all',
-          ['>=', ['get', 'received_at'], start],
-          ['<=', ['get', 'received_at'], end],
+          ['>=', ['get', 'ts'], startTs],
+          ['<=', ['get', 'ts'], endTs],
         ])
       }
     }
   },
   { deep: true },
+)
+
+watch(
+  () => geojsonCache.value,
+  (newVal) => {
+    if (newVal && map.value) {
+      const source = map.value.getSource('observationsSource') as
+        | maplibregl.GeoJSONSource
+        | undefined
+      if (source) {
+        source.setData(newVal)
+      }
+    }
+  },
+  { deep: true }, // CHECK:
 )
 
 onUnmounted(() => {

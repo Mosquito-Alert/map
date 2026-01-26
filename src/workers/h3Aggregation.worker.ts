@@ -15,7 +15,8 @@ export enum MessageType {
 type WorkerMessage =
   | {
       type: MessageType.BUILD_ORIGINAL
-      features: GeoJSON.Feature<GeoJSON.Point>[]
+      // features: GeoJSON.Feature<GeoJSON.Point>[]
+      observations: any[]
       resolution: number
     }
   | {
@@ -43,32 +44,55 @@ type HexStore = Record<
 
 const originalHexData: HexStore = {}
 let dateAggregation: Record<number, number> = {}
+let features = [] as GeoJSON.Feature<GeoJSON.Point>[]
 
 self.onmessage = (e: MessageEvent<WorkerMessage>) => {
   const msg = e.data
 
   if (msg.type === MessageType.BUILD_ORIGINAL) {
-    const { features, resolution } = msg
+    const { observations, resolution } = msg
 
     console.log('Building original data for resolution:', resolution)
 
     if (originalHexData[resolution]) return
 
     const aggregateByDate = Object.keys(dateAggregation).length === 0
+    const buildOriginalFeatures: boolean = Object.keys(features).length === 0
 
-    for (const feature of features) {
+    for (const observation of observations) {
       // ------------------------------------------------
       // Timestamp + day precomputation (ONCE)
       // ------------------------------------------------
-      const ts = feature.properties?.ts || Date.parse(feature.properties?.received_at)
-      const day = feature.properties?.day || ts - (ts % DAY_MS)
-      feature.properties!.ts = ts
-      feature.properties!.day = day
+      const ts = observation.ts || Date.parse(observation.received_at)
+      const day = observation.day || ts - (ts % DAY_MS)
+      observation.ts = ts
+      observation.day = day
+
+      // ------------------------------------------------
+      // Build original features list (ONCE)
+      // ------------------------------------------------
+      if (buildOriginalFeatures) {
+        const feature: GeoJSON.Feature<GeoJSON.Point> = {
+          // id: observation.uuid,
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [observation.lng as number, observation.lat as number],
+          },
+          properties: {
+            ts: observation.ts,
+            day: observation.day,
+            received_at: observation.received_at,
+          },
+        }
+        features.push(feature)
+      }
 
       // ------------------------------------------------
       // H3 aggregation
       // ------------------------------------------------
-      const [lng, lat] = feature.geometry.coordinates as [number, number]
+      const lng = observation.point.longitude as number
+      const lat = observation.point.latitude as number
       const hex = latLngToCell(lat, lng, resolution)
 
       let hexFeature = originalHexData[resolution]?.[hex] as HexStore[number][string] | undefined
@@ -112,13 +136,16 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
       resolution,
       originalHexData: originalHexData[resolution],
       dateAggregation,
+      features,
     })
   }
 
   if (msg.type === MessageType.FILTER) {
     const { resolution, start, end } = msg
 
-    console.log('Filtering data for resolution:', resolution)
+    console.log('worker ← receive', performance.now()) // DELETE:
+
+    // console.log('Filtering data for resolution:', resolution)
 
     const source = originalHexData[resolution]
     if (!source) return
@@ -143,6 +170,9 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
     }
 
     counts.sort((a, b) => a - b)
+
+    // console.log('Filtered features count:', features.length)
+    console.log('worker → send', performance.now()) // DELETE:
 
     postMessage({
       type: MessageType.FILTERED,

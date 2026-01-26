@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import type { Observation } from 'mosquito-alert'
-import { observationsApi } from '../services/apiService'
+import { observationsApi, bitesApi } from '../services/apiService'
 import { useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
-    observations: [] as any[],
+    observations: {} as any,
     near_observations: [] as Observation[],
     dateFilter: {
       start: null as string | null,
@@ -39,9 +39,17 @@ export const useObservationsStore = defineStore('observations', {
     },
     async fetchObservations() {
       try {
-        const data = 'http://localhost:5173/observations_culicidae.json'
+        const data = 'http://localhost:5173/observations.json'
         const response = await fetch(data).then((resp) => resp.json())
-        this.observations = response as any[]
+        if (response) {
+          this.observations = response as any
+        }
+
+        // const response = await observationsApi.geoList({})
+        // console.log(response) // DELETE:
+        // if (response.data) {
+        //   this.observations = response.data as any
+        // }
       } catch (error) {
         console.error('Failed to fetch observations:', error)
         throw error
