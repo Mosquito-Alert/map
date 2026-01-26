@@ -70,9 +70,9 @@ const taxonScientificName = computed(() => {
 
 const title = computed(() => {
   if (!hasTaxon.value) {
-    return 'Not identified';
+    return t('unidentified_mosquito');
   }
-  return taxonCommonName.value || taxonScientificName.value || 'Not identified';
+  return taxonCommonName.value || taxonScientificName.value || t('unidentified_mosquito');
 });
 
 const subtitle = computed(() => {
