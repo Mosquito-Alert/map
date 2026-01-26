@@ -80,7 +80,7 @@ const subtitle = computed(() => {
     return undefined;
   }
 
-  if (!title.value) {
+  if (!title.value || !taxonCommonName.value) {
     return undefined;
   }
   return taxonScientificName.value;
