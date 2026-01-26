@@ -1,5 +1,6 @@
 <template>
-  <BaseReportVectorLayer :url="computedUrl" :color="color" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+  <BaseReportVectorLayer type="observation" :url="computedUrl" :color="color" :visible="visible" :fromDate="fromDate"
+    :toDate="toDate" />
 </template>
 
 <script setup lang="ts">

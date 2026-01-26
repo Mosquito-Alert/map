@@ -10,11 +10,11 @@
     :storm-drain-water="breedingSitesLayers.includes('stormDrainWater')"
     :storm-drain-dry="breedingSitesLayers.includes('stormDrainDry')" :other-site="breedingSitesLayers.includes('other')"
     :bites="biteLayer" :tags="tags" :from-date="fromDate" :to-date="toDate"
-    @update:selectedFeatureId="handleSelectedFeatureIdUpdate" />
+    @update:selectedFeature="handleSelectedFeatureUpdate" />
   <SamplingEffortVectorLayer :visible="samplingEffortLayer" :from-date="fromDate" :to-date="toDate" />
-  <!-- <ReportsAnalyticsDrawer v-if="!featureId" :visible="numReportLayers !== 0" :features="visibleFeatures" /> -->
-  <!-- <ReportsFeatureDetail :feature-id="featureId" :key="featureId" @update:featureId="handleSelectedFeatureIdUpdate" /> -->
-
+  <!-- <ReportsAnalyticsDrawer v-if="!selectedReportUuid" :visible="numReportLayers !== 0" :features="visibleFeatures" /> -->
+  <ReportsFeatureDetail v-if="selectedReportUuid" :report-uuid="selectedReportUuid" :report-type="selectedReportType!"
+    :key="selectedReportUuid" @close="selectedReportUuid = undefined" />
 
   <Teleport v-if="!!selectedLocationPolygon" defer to=".ol-overlaycontainer-stopevent">
     <q-chip :model-value="!!selectedLocationPolygon" removable clickable class="ol-search all-pointer-events"
@@ -56,16 +56,17 @@ import ReportLeftDrawer from 'src/components/ReportsLeftDrawer.vue'
 import ReportsMapLayer from 'src/components/ReportsMapLayer.vue'
 import SamplingEffortVectorLayer from 'src/components/SamplingEffortVectorLayer.vue'
 // import ReportsAnalyticsDrawer from 'src/components/ReportsAnalyticsDrawer.vue'
-// import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
+import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
 // import type { Map } from 'ol'
 import type { DateRange } from 'src/types/date'
+import type { ReportType } from 'src/types/reportType';
 
 export default {
   components: {
     ReportLeftDrawer,
     ReportsMapLayer,
     // ReportsAnalyticsDrawer,
-    // ReportsFeatureDetail,
+    ReportsFeatureDetail,
     SamplingEffortVectorLayer
   },
   props: {
@@ -155,8 +156,9 @@ export default {
       map?.removeControl(searchControl)
     })
 
-    const featureId = ref(props.uuid)
-    watch(featureId, async (newValue) => {
+    const selectedReportUuid = ref(props.uuid)
+    const selectedReportType = ref<ReportType>()
+    watch(selectedReportUuid, async (newValue) => {
       if (route.params.uuid === newValue) return
 
       await router.replace({
@@ -194,7 +196,8 @@ export default {
       toDate,
       layerRef,
       visibleFeatures,
-      featureId,
+      selectedReportUuid,
+      selectedReportType,
       selectedLocationPolygon,
       selectedLocationName,
       selectedLocationIsPolygon,
@@ -219,8 +222,9 @@ export default {
         fromDate.value = value.from
         toDate.value = value.to
       },
-      handleSelectedFeatureIdUpdate(value: string | undefined) {
-        featureId.value = value
+      handleSelectedFeatureUpdate(value: { id: string; type: ReportType } | undefined) {
+        selectedReportUuid.value = value?.id
+        selectedReportType.value = value?.type
       }
     }
   }

@@ -1,6 +1,6 @@
 <template>
-  <BaseReportVectorLayer :url="computedUrl" :color="colors.getPaletteColor('breeding-site')" :visible="visible"
-    :fromDate="fromDate" :toDate="toDate" />
+  <BaseReportVectorLayer type="breeding_site" :url="computedUrl" :color="colors.getPaletteColor('breeding-site')"
+    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">

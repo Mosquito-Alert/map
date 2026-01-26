@@ -1,3 +1,5 @@
+import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mosquito-alert';
+
 export default {
   footer_collaborators_note: 'This interactive map has been funded by',
   url_copied: 'URL copied to clipboard',
@@ -11,6 +13,10 @@ export default {
     "All data downloaded from this platform is licensed under the Creative Commons Zero (CC0) license.\\n\\nThis dataset has been created through the efforts of the Mosquito Alert team and collaborators, and the thousands of citizen scientists who have volunteered their energy and contributed reports on the Mosquito Alert platform. We ask that you give attribution to the Mosquito Alert Community if you use this data in any publications or if you share it with others. Example: 'Mosquito Alert dataset (www.mosquitoalert.com), downloaded from the public Mosquito Alert online map at https://map.mosquitoalert.com; [specify download date]. CC0.'\\n\\nBy downloading the data, you agree to comply with the terms of this license.",
   i_understand_and_accept_license: 'I understand and accept license',
   mosquitoes: 'Mosquitoes',
+  yes: 'Yes',
+  no: 'No',
+  has_water: 'Does it have water?',
+  has_larvae: 'Does it have larvae?',
   tiger_mosquito: 'Tiger mosquito',
   yellow_fever_mosquito: 'Yellow fever mosquito',
   asian_bush_mosquito: 'Asian bush mosquito',
@@ -36,4 +42,19 @@ export default {
     'The Mosquito Alert Discovery Map is a dynamic tool that showcases the power of citizen science in detecting mosquito species across Europe and beyond. By visualizing observations submitted through the Mosquito Alert platform, the map offers timely insights that complement official surveillance efforts and contribute to the early detection of mosquito-borne disease risks.\\n\\nIn Europe, the map uses official data from the European Centre for Disease Prevention and Control (ECDC) at the NUTS3 level as a reference framework. In Spain, municipal-level data from the Center for Coordination of Health Alerts and Emergencies (CCAES) serves as the benchmark for this analysis. These authoritative sources provide a foundation against which citizen-reported discoveries can be compared.\\n\\nThe map’s legend clearly distinguishes between two types of data: yellow areas (indicate regions with officially recognized mosquito presence) and red areas (highlight locations where Mosquito Alert participants have reported mosquito species that are not yet reflected in official records).\\n\\nBy spotlighting these community-driven discoveries, the map reveals potential gaps in surveillance and underscores the value of real-time, ground-level data. It empowers citizens, researchers, and public health officials to work together in identifying emerging risks, informing response strategies, and refining monitoring systems.\\n\\nThe Mosquito Alert Discovery Map exemplifies how open, participatory science can enhance public health infrastructure and foster a shared responsibility in managing vector-borne disease threats.',
   models_layer_info:
     "Model maps provide information to help better understand the places and times at which people are more likely to encounter one of the target mosquito species or to be bitten by a mosquito. The models estimate the probability of at least one valid report being sent through Mosquito Alert from each area during a given month. These estimates are based on statistical models that account for a number of different environmental and social variables, including weather, land cover, and participants’ sampling effort. This last variable is important because we want to know whether low reporting from a given place reflects low numbers of the given target species’ or simply low numbers of citizen scientists participating at that point. Model estimates are made holding sampling effort constant, meaning that we are estimating the probability we would expect to see if Mosquito Alert participants were all putting the same effort into searching for and reporting target species at all times and places. We limit estimates of the target mosquito species to those areas in which the species has already been confirmed as present by the ECDC and/or Mosquito Alert (see the distribution maps).\\n\\nThese estimates are generated monthly for each of the smallest administrative units on the map (in most countries these are municipalities). The estimates for each new month are available a few days after that month ends. When you zoom out from the smallest administrative units, the map aggregates them into larger units. Relative uncertainty of the estimates is shown based on the size of the circles drawn on top of the map, but these circles can be made more transparent or switched off if they get in the way. You can also choose the color palette that you like best.\\n\\nThe map currently shows estimates for all countries that are part of the European Environmental Agency because this is where we have the most data so far, but Mosquito Alert is increasingly being used in many other parts of the world and the model estimates will soon be expanded to include these as well. More information, as well as access to the estimates themselves, can be found at: <a href='https://labs.mosquitoalert.com/global_model_estimates/'>https://labs.mosquitoalert.com/global_model_estimates/</a>",
+  [BreedingSiteSiteType.Basin]: 'Basin',
+  [BreedingSiteSiteType.Bucket]: 'Bucket',
+  [BreedingSiteSiteType.Fountain]: 'Fountain',
+  [BreedingSiteSiteType.StormDrain]: 'Storm drain',
+  [BreedingSiteSiteType.SmallContainer]: 'Small Container',
+  [BreedingSiteSiteType.Well]: 'Well',
+  [BreedingSiteSiteType.Other]: 'Other',
+  [BiteEventEnvironment.Indoors]: 'Indoors',
+  [BiteEventEnvironment.Outdoors]: 'Outdoors',
+  [BiteEventEnvironment.Vehicle]: 'In a vehicle',
+  [BiteEventMoment.Now]: 'Now',
+  [BiteEventMoment.LastMorning]: 'Last morning',
+  [BiteEventMoment.LastMidday]: 'Last midday',
+  [BiteEventMoment.LastAfternoon]: 'Last afternoon',
+  [BiteEventMoment.LastNight]: 'Last night',
 };

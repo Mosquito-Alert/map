@@ -1,5 +1,5 @@
 <template>
-  <BaseReportVectorLayer :url="computedUrl" :color="colors.getPaletteColor('bites')" :visible="visible"
+  <BaseReportVectorLayer type="bite" :url="computedUrl" :color="colors.getPaletteColor('bites')" :visible="visible"
     :fromDate="fromDate" :toDate="toDate" />
 </template>
 

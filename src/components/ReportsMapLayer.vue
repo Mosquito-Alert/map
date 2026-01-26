@@ -44,9 +44,10 @@ import BreedingSiteMapLayer from './BreedingSiteMapLayer.vue';
 
 import { BreedingSiteSiteType } from 'mosquito-alert';
 import type { Layer } from 'ol/layer';
+import type { ReportType } from 'src/types/reportType';
 
 const emit = defineEmits<{
-  (e: 'update:selectedFeatureId', value: string | undefined): void;
+  (e: 'update:selectedFeature', payload: { id: string; type: ReportType } | undefined): void;
 }>()
 
 withDefaults(defineProps<{
@@ -98,8 +99,15 @@ function featureHovered(event: SelectEvent) {
 }
 
 function featureClicked(event: SelectEvent) {
-  const selectedFeatureId = event.selected?.[0]?.getId() as string | undefined;
-  emit('update:selectedFeatureId', selectedFeatureId);
+  const selectedFeatureId = event.selected?.[0]?.getId();
+  if (!selectedFeatureId) {
+    emit('update:selectedFeature', undefined);
+    return;
+  }
+  emit('update:selectedFeature', {
+    id: selectedFeatureId as string,
+    type: event.selected?.[0]?.get('type') as ReportType
+  });
 }
 
 </script>

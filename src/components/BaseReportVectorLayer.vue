@@ -14,6 +14,8 @@ import type { Layer } from "ol/layer";
 
 import GeoJSON from 'ol/format/GeoJSON'
 
+import type { ReportType } from 'src/types/reportType';
+
 // const layerRef = ref()
 const layerRef = ref<{ webglVectorLayer: Layer }>();
 
@@ -23,6 +25,7 @@ const props = withDefaults(defineProps<{
   url: string;
   color: string;
   visible: boolean;
+  type: ReportType
   fromDate: Date | undefined;
   toDate: Date | undefined;
 }>(), {
@@ -88,6 +91,7 @@ function onAddFeature(event: VectorSourceEvent) {
   feature.set('hover', 0)
   feature.set('timestamp', new Date(feature.getProperties().received_at).getTime())
   feature.set('color', props.color)
+  feature.set('type', props.type)
 }
 
 onBeforeUnmount(() => {

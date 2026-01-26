@@ -1,3 +1,5 @@
+import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mosquito-alert';
+
 export default {
   footer_collaborators_note: 'Este mapa interactivo ha sido financiado por',
   url_copied: 'URL copiada al portapapeles',
@@ -11,6 +13,10 @@ export default {
     "Todos los datos descargados de esta plataforma están bajo la licencia Creative Commons Zero (CC0).\\n\\nEste conjunto de datos se ha creado gracias al esfuerzo del equipo de Mosquito Alert y sus colaboradores, así como de los miles de científicos ciudadanos que han dedicado su energía y han contribuido con informes a la plataforma. Le solicitamos que cite la información de la comunidad de Mosquito Alert si utiliza estos datos en alguna publicación o si los comparte con otros. Ejemplo: 'Conjunto de datos de Mosquito Alert (www.mosquitoalert.com), descargado del mapa público de Mosquito Alert en https://map.mosquitoalert.com; [especificar fecha de descarga]. CC0'.\\n\\nAl descargar los datos, acepta cumplir con los términos de esta licencia.",
   i_understand_and_accept_license: 'Entiendo y acepto la licencia',
   mosquitoes: 'Mosquitos',
+  yes: 'Sí',
+  no: 'No',
+  has_water: '¿Tiene agua?',
+  has_larvae: '¿Tiene larvas?',
   // Not translated yet
   tiger_mosquito: 'Tiger mosquito',
   yellow_fever_mosquito: 'Yellow fever mosquito',
@@ -23,7 +29,7 @@ export default {
   storm_drain_water: 'Storm drain with water',
   storm_drain_dry: 'Storm drain without water',
   other_sites: 'Others',
-  bites: 'Bites',
+  bites: 'Picaduras',
   sampling_effort: 'Sampling effort',
   filters: 'Filters',
   tags: 'Tags',
@@ -37,4 +43,19 @@ export default {
     'El mapa de descubrimientos de Mosquito Alert es una herramienta dinámica que muestra el poder de la ciencia ciudadana para detectar especies de mosquitos en Europa y el resto del mundo. Al visualizar las observaciones enviadas a través de la plataforma Mosquito Alert, el mapa ofrece información oportuna que complementa las iniciativas oficiales de vigilancia y contribuye a la detección temprana de riesgos de enfermedades transmitidas por mosquitos.\\n\\nEn Europa, el mapa utiliza datos oficiales del Centro Europeo para la Prevención y el Control de Enfermedades (ECDC) a nivel NUTS3 como marco de referencia. En España, los datos municipales del Centro de Coordinación de Alertas y Emergencias Sanitarias (CCAES) sirven como referencia para este análisis. Estas fuentes fidedignas proporcionan una base para comparar los descubrimientos reportados por los ciudadanos.\\n\\nLa leyenda del mapa distingue claramente entre dos tipos de datos: áreas amarillas (indican regiones con presencia de mosquitos oficialmente reconocida) y áreas rojas (resaltan lugares donde los usuarios de Mosquito Alert han reportado especies de mosquitos que aún no figuran en los registros oficiales).\\n\\nAl destacar estos descubrimientos impulsados ​​por la comunidad, el mapa revela posibles brechas en la vigilancia y subraya el valor de los datos locales en tiempo real. Permite a los ciudadanos, investigadores y funcionarios de salud pública colaborar para identificar riesgos emergentes, fundamentar estrategias de respuesta y perfeccionar los sistemas de monitoreo.\\n\\nEl Mapa de Descubrimientos de Mosquito Alert ejemplifica cómo la ciencia abierta y participativa puede mejorar la infraestructura de salud pública y fomentar una responsabilidad compartida en la gestión de las amenazas de enfermedades transmitidas por vectores.',
   models_layer_info:
     "Los mapas de modelos proporcionan información que ayuda a comprender mejor en qué lugares y momentos tienen las personas más probabilidades de encontrarse con una de las especies de mosquito de interés o de recibir una picadura. Los modelos estiman cuán probable es que, en cada área y durante un mes específico, se envíe al menos un informe válido de una especie o picadura a través de Mosquito Alert. Estas estimaciones se derivan de modelos estadísticos que consideran múltiples factores ambientales y sociales: variables climáticas, la cobertura del suelo y el esfuerzo de muestreo. Esta última variable es importante para determinar si un bajo número de informes en una zona se debe a un bajo número de mosquitos o una baja presencia de ciudadanos participando con Mosquito Alert. En los modelos se asume que todos los participantes de Mosquito Alert dedican la misma cantidad de esfuerzo en buscar e informar sobre los mosquitos en todos los momentos y lugares. Sin embargo, las estimaciones de los modelos para las especies de mosquitos se han limitado a aquellas áreas donde ECDC y/o Mosquito Alert han confirmado previamente la presencia de cada especie (ver mapas de distribución).\\n\\nCada mes, se generan estimaciones para las divisiones administrativas más pequeñas representadas en el mapa, que en la mayoría de los países son los municipios. Unos días después del final de cada mes, estarán disponibles las estimaciones para el mes finalizado. Al alejar la vista en el mapa, las pequeñas divisiones administrativas y sus estimaciones se agrupan en unidades más grandes (p.e. provincias y comunidades). El mapa también incluye la incertidumbre relativa de las estimaciones representadas. La incertidumbre viene indicada por el tamaño de los círculos en cada una de las divisiones administrativas visualizadas. Estos círculos pueden hacerse más o menos transparentes así como desactivarse. Las estimaciones también pueden personalizarse con diferentes paletas de colores para una mejor visualización.\\n\\nActualmente, los modelos muestran estimaciones para todos los países que son miembros de la Agencia Ambiental Europea, pues es donde se han recopilado la mayoría de los datos hasta la fecha. Sin embargo, Mosquito Alert se está utilizando cada vez más en diferentes partes del mundo y se planea ampliar las estimaciones del modelo en el futuro para incluir aquellas áreas donde haya suficiente participación para realizar los cálculos necesarios. Para obtener más información sobre los modelos o para acceder directamente a las estimaciones, puedes visitar: <a href='https://labs.mosquitoalert.com/global_model_estimates/'>https://labs.mosquitoalert.com/global_model_estimates/</a>",
+  [BreedingSiteSiteType.Basin]: 'Balsa',
+  [BreedingSiteSiteType.Bucket]: 'Cubo',
+  [BreedingSiteSiteType.Fountain]: 'Fuente',
+  [BreedingSiteSiteType.StormDrain]: 'Imbornal',
+  [BreedingSiteSiteType.SmallContainer]: 'Recipiente pequeño',
+  [BreedingSiteSiteType.Well]: 'Pozo',
+  [BreedingSiteSiteType.Other]: 'Otros',
+  [BiteEventEnvironment.Indoors]: 'En el interior',
+  [BiteEventEnvironment.Outdoors]: 'En el exterior',
+  [BiteEventEnvironment.Vehicle]: 'En un vehículo',
+  [BiteEventMoment.Now]: 'Ahora',
+  [BiteEventMoment.LastMorning]: 'La pasada mañana',
+  [BiteEventMoment.LastMidday]: 'El pasado mediodía',
+  [BiteEventMoment.LastAfternoon]: 'La pasada tarde',
+  [BiteEventMoment.LastNight]: 'La pasada noche',
 };
