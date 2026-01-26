@@ -21,6 +21,24 @@ const props = defineProps<{
 }>()
 
 const computedUrl = computed(() => {
-  return `/api/breeding-sites/geo/?format=geojson&site_type=${props.siteType}` + (props.hasWater !== undefined ? `&has_water=${props.hasWater}` : '')
+  const params = new URLSearchParams()
+
+  if (props.fromDate) {
+    params.append('received_at_after', props.fromDate.toISOString())
+  }
+  if (props.toDate) {
+    params.append('received_at_before', props.toDate.toISOString())
+  }
+
+  if (props.tags && props.tags.length > 0) {
+    props.tags.forEach(tag => params.append('tags', tag))
+  }
+
+  params.append('site_type', props.siteType)
+  if (props.hasWater !== undefined) {
+    params.append('has_water', String(props.hasWater))
+  }
+
+  return `/api/breeding-sites/geo/?format=geojson&${params.toString()}`
 })
 </script>
