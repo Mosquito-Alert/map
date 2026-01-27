@@ -2,18 +2,21 @@
   <!-- Creating a layer to make it easier to detect the layers that are hoverable/selectable -->
   <ol-layer-group ref="layerGroupRef">
     <!-- Mosquito Layers -->
-    <ObservationMapLayer :visible="albopictus" taxon_id="112" :color="colors.getPaletteColor('albopictus')"
+    <ObservationMapLayer :visible="albopictus" :taxon_ids="[112]" :color="colors.getPaletteColor('albopictus')"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="aegypti" taxon_id="113" :color="colors.getPaletteColor('aegypti')"
+    <ObservationMapLayer :visible="aegypti" :taxon_ids="[113]" :color="colors.getPaletteColor('aegypti')"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="japonicus" taxon_id="114" :color="colors.getPaletteColor('japonicus')"
+    <ObservationMapLayer :visible="japonicus" :taxon_ids="[114]" :color="colors.getPaletteColor('japonicus')"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="koreicus" taxon_id="115" :color="colors.getPaletteColor('koreicus')"
+    <ObservationMapLayer :visible="koreicus" :taxon_ids="[115]" :color="colors.getPaletteColor('koreicus')"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="culex" taxon_id="10" :color="colors.getPaletteColor('culex')" :from-date="fromDate"
-      :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="unidentifiedMosquito" :taxon_id="null"
+    <ObservationMapLayer :visible="culex" :taxon_ids="[10]" :color="colors.getPaletteColor('culex')"
+      :from-date="fromDate" :to-date="toDate" :tags="tags" />
+    <ObservationMapLayer :visible="unidentifiedMosquito" :taxon_ids="null"
       :color="colors.getPaletteColor('unidentified-mosquito')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
+
+    <ObservationMapLayer :visible="otherSpecies" :taxon_ids="[112, 113, 114, 115, 10, null]" negate
+      :color="colors.getPaletteColor('other-species')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
 
     <!-- Breeding sites Layers -->
     <BreedingSiteMapLayer :visible="stormDrainWater" :siteType="BreedingSiteSiteType.StormDrain" :hasWater="true"
@@ -57,6 +60,7 @@ withDefaults(defineProps<{
   koreicus?: boolean,
   culex?: boolean,
   unidentifiedMosquito?: boolean,
+  otherSpecies?: boolean,
   bites?: boolean
   stormDrainWater?: boolean,
   stormDrainDry?: boolean,
