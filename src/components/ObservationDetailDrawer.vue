@@ -2,19 +2,27 @@
   <BaseReportDetailDrawer :report="observation" :photoUrls="observation.photos.map(photo => photo.url)" :title="title"
     :subtitle="subtitle" :extra-items="extraItems" @close="$emit('close')">
     <template v-if="observation.identification?.result?.is_high_confidence" #header-icons>
-      <q-icon name="fa fa-badge-check" color="white">
+      <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
+        name="fa fa-badge-check" color="white">
         <q-tooltip anchor="top middle" self="center middle">
           Confirmed by the experts
         </q-tooltip>
       </q-icon>
+      <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Ai"
+        name="fa fa-microchip-ai" color="white">
+        <q-tooltip anchor="top middle" self="center middle">
+          Identified by AI model
+        </q-tooltip>
+      </q-icon>
     </template>
-    <template v-if="observation.identification?.result" #extraTab>
+    <template v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert" #extraTab>
       <q-tab name="review" label="Review" />
     </template>
-    <template v-if="observation.identification?.result" #extraTabPanel>
+    <template v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
+      #extraTabPanel>
       <q-tab-panel name="review">
         <q-card flat>
-          <q-item v-if="observation.identification?.result?.source == 'expert'">
+          <q-item>
             <q-item-section avatar>
               <q-avatar icon="fa fa-light fa-users" color="grey-3" />
             </q-item-section>
@@ -46,6 +54,7 @@
 
 <script setup lang="ts">
 import type { Observation } from 'mosquito-alert';
+import { IdentificationTaskResultSource } from 'mosquito-alert';
 import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
