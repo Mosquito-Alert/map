@@ -31,7 +31,7 @@ const computedUrl = computed(() => {
   }
 
   if (props.tags && props.tags.length > 0) {
-    props.tags.forEach(tag => params.append('tags', tag))
+    params.append('tags', props.tags.join(','))
   }
 
   params.append('site_type', props.siteType)
