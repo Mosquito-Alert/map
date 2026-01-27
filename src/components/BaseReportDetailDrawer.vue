@@ -18,7 +18,9 @@
         <!-- <q-skeleton type='text' width="48%" /> -->
         <div class="row items-center">
           <span class="text-h6 q-py-none q-pr-sm">{{ title }}</span>
-          <slot name="header-icons"></slot>
+          <div class="row items-center q-gutter-x-xs">
+            <slot name="header-icons"></slot>
+          </div>
         </div>
         <span class="text-caption text-italic q-py-none row">{{ subtitle }}</span>
       </div>
