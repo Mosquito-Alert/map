@@ -24,6 +24,9 @@
 
     <q-img style='z-index: 1' class='absolute-bottom q-mb-sm mobile-only' position="calc(50% - 11px) center"
       fit='contain' src="img/mosquitoalert_horizontal.png" height="30px" />
+
+    <q-spinner v-if="showSpinner" style='z-index: 1' class="absolute-center" size="5em" :thickness="2"
+      color="primary" />
   </ol-map>
 
 </template>
@@ -61,6 +64,8 @@ export default {
     const basemapRef = ref()
     const projection = ref('EPSG:3857')
 
+    const showSpinner = ref(true)
+
     const center = ref(
       fromLonLat(
         [parseFloat(String(route.query?.lon ?? 0)), parseFloat(String(route.query?.lat ?? 0))],
@@ -69,10 +74,16 @@ export default {
     )
     const zoom = ref(parseFloat(String(route.query.zoom || 0)))
 
-    const grayscaleFilter = new Colorize({operation: 'grayscale'});
+    const grayscaleFilter = new Colorize({ operation: 'grayscale' });
 
     onMounted(() => {
       basemapRef.value.tileLayer.addFilter(grayscaleFilter);
+      mapRef.value.map.on('loadstart', () => {
+        showSpinner.value = true
+      });
+      mapRef.value.map.on('loadend', () => {
+        showSpinner.value = false
+      })
     });
 
     watch(
@@ -89,6 +100,7 @@ export default {
       projection,
       center,
       zoom,
+      showSpinner,
       async updateRoute() {
         const center = toLonLat(
           mapRef.value.map.getView().getCenter(),
