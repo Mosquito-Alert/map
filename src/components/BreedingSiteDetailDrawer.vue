@@ -23,7 +23,7 @@ const extraItems = computed(() => {
     value: t('has_water') + ' ' + (props.breedingSite.has_water ? t('yes') : t('no')),
   });
   items.push({
-    icon: 'fa-hand-dots',
+    icon: 'fa-up-to-dotted-line',
     value: t('has_larvae') + ' ' + (props.breedingSite.has_larvae ? t('yes') : t('no')),
   });
   return items;
