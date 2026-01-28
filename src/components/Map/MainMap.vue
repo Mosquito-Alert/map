@@ -21,6 +21,7 @@ import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
 import { debounce } from '../../utils/debouncer'
 import { MessageType } from '../../workers/h3Aggregation.worker'
+import { observationsApi } from '../../services/apiService'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -95,8 +96,6 @@ const styleEOX: StyleSpecification = {
     position: [1.5, 90, 80],
   },
 }
-
-const data_geojson = 'http://localhost:5173/observations_culicidae.geojson'
 
 // Function to get appropriate resolution based on zoom level
 const getResolutionForZoom = (zoom: number): number => {
@@ -333,13 +332,13 @@ onMounted(async () => {
     // )
 
     // Start data loading in background
-    const geojsonPromise = fetch(data_geojson).then((r) => r.json())
+    const observationsPromise = observationsStore.fetchObservations()
 
     map.value.on('load', async () => {
       if (!map.value) return
 
       // Load and cache data. Mark as raw to avoid deep reactivity overhead. This object is never modified.
-      geojsonCache.value = markRaw(await geojsonPromise)
+      geojsonCache.value = markRaw(await observationsPromise)
 
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()

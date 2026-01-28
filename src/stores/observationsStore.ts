@@ -5,7 +5,7 @@ import { useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
-    observations: [] as any[],
+    // observations: {} as any,
     near_observations: [] as Observation[],
     dateFilter: {
       start: null as string | null,
@@ -26,7 +26,7 @@ export const useObservationsStore = defineStore('observations', {
           pageSize: numberOfObservations,
           hasPhotos: true,
           identificationTaxonIds: taxaStore.taxonSelected
-            ? [taxaStore.taxonSelected.id]
+            ? [`${taxaStore.taxonSelected.id}`]
             : undefined,
         })
         if (response.data.results) {
@@ -39,9 +39,14 @@ export const useObservationsStore = defineStore('observations', {
     },
     async fetchObservations() {
       try {
-        const data = 'http://localhost:5173/observations_culicidae.json'
-        const response = await fetch(data).then((resp) => resp.json())
-        this.observations = response as any[]
+        const response = await observationsApi.geoList({
+          format: 'geojson',
+          identificationTaxonIds: ['7'], // Example taxon ID
+          identificationTaxonIdsLookup: 'is_tree_of',
+        })
+        if (response.data) {
+          return response.data as any
+        }
       } catch (error) {
         console.error('Failed to fetch observations:', error)
         throw error
