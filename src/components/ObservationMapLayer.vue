@@ -1,14 +1,16 @@
 <template>
-  <BaseReportVectorLayer type="observation" :url="computedUrl" :color="color" :visible="visible" :fromDate="fromDate"
-    :toDate="toDate" />
+  <BaseReportVectorLayer ref="layerRef" type="observation" :fetchReports="fetchObservations" :color="color"
+    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { observationsApi } from 'src/boot/api';
+import type { ObservationGeoModel } from 'mosquito-alert';
+import { ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
-  taxon_ids: (number | null)[] | null,
+  taxon_ids: (number | null)[],
   negate?: boolean,
   color: string,
   visible: boolean,
@@ -19,32 +21,25 @@ const props = withDefaults(defineProps<{
   negate: false,
 })
 
-const computedUrl = computed(() => {
-  const params = new URLSearchParams()
+const layerRef = ref<{ refresh: () => void }>();
 
-  if (props.fromDate) {
-    params.append('received_at_after', props.fromDate.toISOString())
-  }
-  if (props.toDate) {
-    params.append('received_at_before', props.toDate.toISOString())
-  }
+watch(
+  () => [props.taxon_ids, props.tags, props.fromDate, props.toDate],
+  () => {
+    layerRef.value?.refresh();
+  },
+  { deep: true }
+);
 
-  if (props.tags && props.tags.length > 0) {
-    params.append('tags', props.tags.join(','))
-  }
+const fetchObservations = async (): Promise<ObservationGeoModel[]> => {
+  const response = await observationsApi.geoList({
+    identificationTaxonIds: props.taxon_ids?.map(String) || undefined,
+    negateIdentificationTaxonIds: props.negate || undefined,
+    receivedAtAfter: props.fromDate?.toISOString() || undefined,
+    receivedAtBefore: props.toDate?.toISOString() || undefined,
+    tags: props.tags?.length ? props.tags : undefined,
+  });
 
-  if (props.taxon_ids) {
-    props.taxon_ids.forEach(id => {
-      params.append('identification_taxon_ids', String(id));
-    });
-  } else {
-    params.append('identification_taxon_ids', 'null')
-  }
-
-  if (props.negate) {
-    params.append('negate_identification_taxon_ids', 'true')
-  }
-
-  return `/api/observations/geo/?format=geojson&${params.toString()}`
-})
+  return response.data;
+}
 </script>

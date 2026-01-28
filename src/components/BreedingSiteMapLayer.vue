@@ -1,15 +1,16 @@
 <template>
-  <BaseReportVectorLayer type="breeding_site" :url="computedUrl" :color="colors.getPaletteColor('breeding-site')"
-    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+  <BaseReportVectorLayer ref="layerRef" type="breeding_site" :fetchReports="fetchBreedingSites"
+    :color="colors.getPaletteColor('breeding-site')" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { breedingSitesApi } from 'src/boot/api';
 
 import { colors } from 'quasar'
 
-import type { BreedingSiteSiteType } from 'mosquito-alert';
+import type { BreedingSiteSiteType, BreedingSiteGeoModel } from 'mosquito-alert';
 
 const props = withDefaults(defineProps<{
   visible: boolean
@@ -22,28 +23,24 @@ const props = withDefaults(defineProps<{
   hasWater: undefined,
 })
 
-const computedUrl = computed(() => {
-  const params = new URLSearchParams()
+const layerRef = ref<{ refresh: () => void }>();
 
-  if (props.fromDate) {
-    params.append('received_at_after', props.fromDate.toISOString())
-  }
-  if (props.toDate) {
-    params.append('received_at_before', props.toDate.toISOString())
-  }
+watch(
+  () => [props.siteTypes, props.hasWater, props.tags, props.fromDate, props.toDate],
+  () => {
+    layerRef.value?.refresh();
+  },
+  { deep: true }
+);
 
-  if (props.tags && props.tags.length > 0) {
-    params.append('tags', props.tags.join(','))
-  }
-
-  for (const siteType of props.siteTypes) {
-    params.append('site_type', siteType)
-  }
-
-  if (props.hasWater !== undefined) {
-    params.append('has_water', String(props.hasWater))
-  }
-
-  return `/api/breeding-sites/geo/?format=geojson&${params.toString()}`
-})
+const fetchBreedingSites = async (): Promise<BreedingSiteGeoModel[]> => {
+  const response = await breedingSitesApi.geoList({
+    hasWater: props.hasWater,
+    siteType: props.siteTypes,
+    receivedAtAfter: props.fromDate?.toISOString() || undefined,
+    receivedAtBefore: props.toDate?.toISOString() || undefined,
+    tags: props.tags?.length ? props.tags : undefined,
+  });
+  return response.data;
+};
 </script>

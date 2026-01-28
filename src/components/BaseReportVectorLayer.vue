@@ -1,7 +1,7 @@
 <template>
 
   <ol-webgl-vector-layer ref="layerRef" :visible="visible" :styles="style">
-    <ol-source-vector :url="url" :format="geoJson" @addfeature="onAddFeature" />
+    <ol-source-vector ref="sourceRef" :loader="loader" @addfeature="onAddFeature" />
   </ol-webgl-vector-layer>
 
 </template>
@@ -9,20 +9,31 @@
 <script setup lang="ts">
 
 import { computed, ref, watch, onBeforeUnmount } from 'vue'
-import type { VectorSourceEvent } from 'ol/source/Vector';
-import type { Layer } from "ol/layer";
 
-import GeoJSON from 'ol/format/GeoJSON'
+import { Feature } from 'ol';
+import type { Layer } from "ol/layer";
+import type { VectorSourceEvent } from 'ol/source/Vector';
+import { Point } from 'ol/geom';
+import type { Projection } from 'ol/proj';
+import { get as getProjection } from 'ol/proj';
 
 import type { ReportType } from 'src/types/reportType';
+import type VectorSource from 'ol/source/Vector';
 
-// const layerRef = ref()
 const layerRef = ref<{ webglVectorLayer: Layer }>();
+const sourceRef = ref<{ source: VectorSource }>();
 
-const geoJson = new GeoJSON()
+export interface GeoReport {
+  uuid: string;
+  received_at: string;
+  point: {
+    latitude: number;
+    longitude: number;
+  }
+}
 
 const props = withDefaults(defineProps<{
-  url: string;
+  fetchReports?: () => Promise<GeoReport[]>;
   color: string;
   visible: boolean;
   type: ReportType
@@ -31,6 +42,39 @@ const props = withDefaults(defineProps<{
 }>(), {
   visible: true
 })
+
+const loader = async function (extend: number[], resolution: number, projection: Projection, success: (features: Feature[]) => void, failure: () => void) {
+  const featureProjection = getProjection('EPSG:4326')!;
+
+  try {
+    const response = await props.fetchReports!();
+    const features = response.map((report) => {
+      const feature = new Feature();
+      const point = new Point([report.point.longitude, report.point.latitude]);
+      point.transform(featureProjection, projection);
+      feature.setGeometry(point)
+      feature.setId(report.uuid);
+      feature.setProperties({
+        received_at: report.received_at,
+      });
+      return feature;
+    })
+
+    sourceRef.value?.source.addFeatures(features);
+    success(features);
+  } catch (error) {
+    console.error('Failed to fetch geo reports:', error);
+    failure();
+  }
+};
+
+const refresh = function () {
+  sourceRef.value?.source.refresh();
+}
+
+defineExpose({
+  refresh
+});
 
 // There's a bug on visible change doing nothing in webgl: https://github.com/MelihAltintas/vue3-openlayers/issues/355
 watch(() => props.visible, (newValue) => {

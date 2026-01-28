@@ -1,13 +1,14 @@
 <template>
-  <BaseReportVectorLayer type="bite" :url="computedUrl" :color="colors.getPaletteColor('bites')" :visible="visible"
-    :fromDate="fromDate" :toDate="toDate" />
+  <BaseReportVectorLayer ref="layerRef" type="bite" :fetchReports="fetchBites" :color="colors.getPaletteColor('bites')"
+    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 import { colors } from 'quasar'
 import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
-
+import { bitesApi } from 'src/boot/api';
+import type { BiteGeoModel } from 'mosquito-alert';
 
 const props = defineProps<{
   visible: boolean,
@@ -16,19 +17,21 @@ const props = defineProps<{
   tags: string[] | undefined
 }>()
 
-const computedUrl = computed(() => {
-  const params = new URLSearchParams()
+const layerRef = ref<{ refresh: () => void }>();
 
-  if (props.fromDate) {
-    params.append('received_at_after', props.fromDate.toISOString())
-  }
-  if (props.toDate) {
-    params.append('received_at_before', props.toDate.toISOString())
-  }
-
-  if (props.tags && props.tags.length > 0) {
-    params.append('tags', props.tags.join(','))
-  }
-  return `/api/bites/geo/?format=geojson&${params.toString()}`
-})
+watch(
+  () => [props.tags, props.fromDate, props.toDate],
+  () => {
+    layerRef.value?.refresh();
+  },
+  { deep: true }
+);
+const fetchBites = async (): Promise<BiteGeoModel[]> => {
+  const response = await bitesApi.geoList({
+    receivedAtAfter: props.fromDate?.toISOString() || undefined,
+    receivedAtBefore: props.toDate?.toISOString() || undefined,
+    tags: props.tags?.length ? props.tags : undefined,
+  });
+  return response.data;
+};
 </script>
