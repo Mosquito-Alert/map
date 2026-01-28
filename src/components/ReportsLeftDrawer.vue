@@ -178,6 +178,10 @@ import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPreset
 import type { DateRange } from 'src/types/date'
 // import { watchEffect } from 'vue'
 
+import GeoJSON from 'ol/format/GeoJSON'
+import type Polygon from 'ol/geom/Polygon';
+import type MultiPolygon from 'ol/geom/MultiPolygon';
+
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
 import type { AxiosResponse, AxiosProgressEvent } from 'axios'
 
@@ -194,6 +198,12 @@ export default {
     'update-filters:tags',
     'update-filters:date'
   ],
+  props: {
+    selectedLocationPolygon: {
+      type: Object as () => Polygon | MultiPolygon | null,
+      default: null
+    }
+  },
   setup(props, { emit }) {
     const $q = useQuasar()
     const { t } = useI18n()
@@ -336,7 +346,13 @@ export default {
       await bitesApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
-        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        withinGeom: props.selectedLocationPolygon
+          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          }))
+          : undefined
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {
@@ -359,7 +375,13 @@ export default {
       await observationsApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
-        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        withinGeom: props.selectedLocationPolygon
+          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          }))
+          : undefined
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {
@@ -381,7 +403,13 @@ export default {
       await breedingSitesApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
-        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined
+        receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        withinGeom: props.selectedLocationPolygon
+          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          }))
+          : undefined
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {

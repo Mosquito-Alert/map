@@ -1,5 +1,6 @@
 <template>
-  <ReportLeftDrawer @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
+  <ReportLeftDrawer :selectedLocationPolygon="selectedLocationPolygon"
+    @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
     @update-layers:breeding-sites="handleBreedingSitesLayerUpdate" @update-layers:bites="handleBitesLayerUpdate"
     @update-layers:sampling-effort="handleSamplingEffortLayerUpdate" @update-filters:tags="handleTagsUpdate"
     @update-filters:date="handleDateUpdate" />
