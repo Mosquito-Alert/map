@@ -6,8 +6,8 @@ export const mosquitoTaxonIds = {
   japonicus: [114],
   koreicus: [115],
   culex: [10],
-  undefined: [null],
-  otherSpecies: [112, 113, 114, 115, 10, null], // This will be negated
+  unidentified: [null],
+  other: [112, 113, 114, 115, 10, null], // This will be negated
 };
 
 export const breedingSiteTypes = {

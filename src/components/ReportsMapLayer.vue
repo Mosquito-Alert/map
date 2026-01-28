@@ -12,10 +12,10 @@
       :color="colors.getPaletteColor('koreicus')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
     <ObservationMapLayer :visible="culex" :taxon_ids="mosquitoTaxonIds.culex" :color="colors.getPaletteColor('culex')"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <ObservationMapLayer :visible="unidentifiedMosquito" :taxon_ids="mosquitoTaxonIds.undefined"
+    <ObservationMapLayer :visible="unidentifiedMosquito" :taxon_ids="mosquitoTaxonIds.unidentified"
       :color="colors.getPaletteColor('unidentified-mosquito')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
 
-    <ObservationMapLayer :visible="otherSpecies" :taxon_ids="mosquitoTaxonIds.otherSpecies" negate
+    <ObservationMapLayer :visible="otherSpecies" :taxon_ids="mosquitoTaxonIds.other" negate
       :color="colors.getPaletteColor('other-species')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
 
     <!-- Breeding sites Layers -->

@@ -183,6 +183,7 @@ import type Polygon from 'ol/geom/Polygon';
 import type MultiPolygon from 'ol/geom/MultiPolygon';
 
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
+import { mosquitoTaxonIds } from 'src/utils/constants';
 import type { AxiosResponse, AxiosProgressEvent } from 'axios'
 
 export default {
@@ -372,8 +373,12 @@ export default {
       downloadProgress.value.observations.loading = true;
       downloadProgress.value.observations.percentage = 0;
 
+      const taxonIds = mosquitoSelected.value == Object.keys(mosquitoLayers.value) ? undefined :
+        mosquitoSelected.value.map(key => mosquitoTaxonIds[key]).flat();
+
       await observationsApi.list({
         format: 'csv',
+        identificationTaxonIds: taxonIds?.length ? taxonIds.map(String) : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
         withinGeom: props.selectedLocationPolygon
