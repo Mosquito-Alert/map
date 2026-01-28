@@ -45,9 +45,9 @@ import ObservationMapLayer from './ObservationMapLayer.vue';
 import BiteMapLayer from './BiteMapLayer.vue';
 import BreedingSiteMapLayer from './BreedingSiteMapLayer.vue';
 
-import { BreedingSiteSiteType } from 'mosquito-alert';
 import type { Layer } from 'ol/layer';
 import type { ReportType } from 'src/types/reportType';
+import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
 
 
 const emit = defineEmits<{
@@ -91,24 +91,6 @@ const hoverCondition = selectConditions.pointerMove;
 const clickCondition = selectConditions.click
 function selectInteractionFilter(feature: Feature, layer: Layer) {
   return layerGroupRef.value?.layerGroup.getLayersArray().includes(layer);
-}
-
-// NOTE: this is important since there's a watch in ObservationMapLayer that
-// listens to taxon_ids changes to refresh the layer. Needs a shallowRef in order
-// not to detect fake changes. [112] !== [112]
-const mosquitoTaxonIds = {
-  albopictus: [112],
-  aegypti: [113],
-  japonicus: [114],
-  koreicus: [115],
-  culex: [10],
-  undefined: [null],
-  otherSpecies: [112, 113, 114, 115, 10, null] // This will be negated
-}
-
-const breedingSiteTypes = {
-  stormDrain: [BreedingSiteSiteType.StormDrain],
-  other: [BreedingSiteSiteType.Other, BreedingSiteSiteType.Basin, BreedingSiteSiteType.Bucket, BreedingSiteSiteType.Fountain, BreedingSiteSiteType.SmallContainer, BreedingSiteSiteType.Well]
 }
 
 function featureHovered(event: SelectEvent) {
