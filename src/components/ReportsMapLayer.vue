@@ -19,12 +19,13 @@
       :color="colors.getPaletteColor('other-species')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
 
     <!-- Breeding sites Layers -->
-    <BreedingSiteMapLayer :visible="stormDrainWater" :siteType="BreedingSiteSiteType.StormDrain" :hasWater="true"
+    <BreedingSiteMapLayer :visible="stormDrainWater" :siteTypes="[BreedingSiteSiteType.StormDrain]" :hasWater="true"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <BreedingSiteMapLayer :visible="stormDrainDry" :siteType="BreedingSiteSiteType.StormDrain" :hasWater="false"
+    <BreedingSiteMapLayer :visible="stormDrainDry" :siteTypes="[BreedingSiteSiteType.StormDrain]" :hasWater="false"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
-    <BreedingSiteMapLayer :visible="otherSite" :siteType="BreedingSiteSiteType.Other" :from-date="fromDate"
-      :to-date="toDate" :tags="tags" />
+    <BreedingSiteMapLayer :visible="otherSite"
+      :siteTypes="[BreedingSiteSiteType.Other, BreedingSiteSiteType.Basin, BreedingSiteSiteType.Bucket, BreedingSiteSiteType.Fountain, BreedingSiteSiteType.SmallContainer, BreedingSiteSiteType.Well]"
+      :from-date="fromDate" :to-date="toDate" :tags="tags" />
     <!-- Bite Layer -->
     <BiteMapLayer :visible="bites" :from-date="fromDate" :to-date="toDate" :tags="tags" />
   </ol-layer-group>

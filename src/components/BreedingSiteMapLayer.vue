@@ -11,14 +11,16 @@ import { colors } from 'quasar'
 
 import type { BreedingSiteSiteType } from 'mosquito-alert';
 
-const props = defineProps<{
-  visible: boolean,
-  siteType: BreedingSiteSiteType,
-  hasWater?: boolean,
-  fromDate: Date | undefined,
-  toDate: Date | undefined,
+const props = withDefaults(defineProps<{
+  visible: boolean
+  siteTypes: BreedingSiteSiteType[]
+  hasWater?: boolean
+  fromDate: Date | undefined
+  toDate: Date | undefined
   tags: string[] | undefined
-}>()
+}>(), {
+  hasWater: undefined,
+})
 
 const computedUrl = computed(() => {
   const params = new URLSearchParams()
@@ -34,7 +36,10 @@ const computedUrl = computed(() => {
     params.append('tags', props.tags.join(','))
   }
 
-  params.append('site_type', props.siteType)
+  for (const siteType of props.siteTypes) {
+    params.append('site_type', siteType)
+  }
+
   if (props.hasWater !== undefined) {
     params.append('has_water', String(props.hasWater))
   }
