@@ -4,14 +4,14 @@
       :class="['col-12', `col-${breakpoint}`, 'absolute-left', 'inner-drawer', { 'inner-drawer-collapsed': drawerCollapsed }]"
       :style="{ 'min-width': width, 'z-index': 10 }">
       <div :class="['full-height', 'bg-white', { 'shadow-3': !drawerCollapsed }]" style="transform: translateX(0px);">
-        <div class="flex q-pa-sm bg-primary text-white items-center" :style="{ 'height': headerHeight }">
+        <div class="flex q-pa-sm q-px-md bg-primary text-white items-center" :style="{ 'height': headerHeight }">
           <span class="text-capitalize text-h4">{{ title }}</span>
         </div>
         <div :class="[`lt-${breakpoint}`, 'self-start', 'q-ma-sm', 'absolute-top-right']">
           <q-btn outline round color='white' icon="fa fat fa-xmark" size="sm"
             @click="drawerCollapsed = !drawerCollapsed" />
         </div>
-        <q-scroll-area class="q-pa-sm" :style="{ height: `calc(100% - ${headerHeight})` }">
+        <q-scroll-area class="q-pa-sm q-px-md" :style="{ height: `calc(100% - ${headerHeight})` }">
           <slot></slot>
         </q-scroll-area>
       </div>
