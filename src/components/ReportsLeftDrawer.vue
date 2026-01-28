@@ -348,6 +348,7 @@ export default {
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        tags: tagsSelected.value.length ? tagsSelected.value : undefined,
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
@@ -381,6 +382,7 @@ export default {
         identificationTaxonIds: taxonIds?.length ? taxonIds.map(String) : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        tags: tagsSelected.value.length ? tagsSelected.value : undefined,
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
@@ -422,6 +424,7 @@ export default {
         siteType: breedingSiteTypesSelected.length ? breedingSiteTypesSelected : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
+        tags: tagsSelected.value.length ? tagsSelected.value : undefined,
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
