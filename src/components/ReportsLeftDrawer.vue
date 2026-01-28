@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer :title="$t('reports')" header-height="78.5px" width="300px">
+  <inner-drawer :title="$t('reports')" header-height="78.5px" width="400px">
     <q-list separator>
       <q-item-label header class="row q-px-none">
         <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
