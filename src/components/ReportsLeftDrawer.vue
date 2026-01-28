@@ -183,7 +183,7 @@ import type Polygon from 'ol/geom/Polygon';
 import type MultiPolygon from 'ol/geom/MultiPolygon';
 
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
-import { mosquitoTaxonIds } from 'src/utils/constants';
+import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
 import type { AxiosResponse, AxiosProgressEvent } from 'axios'
 
 export default {
@@ -405,8 +405,21 @@ export default {
     async function downloadBreedingSites() {
       downloadProgress.value.breedingSites.loading = true;
       downloadProgress.value.breedingSites.percentage = 0;
+
+      const breedingSiteTypesSelected = breedingSitesSelected.value.map(key => {
+        if (key === 'stormDrainWater') {
+          return breedingSiteTypes.stormDrain;
+        } else if (key === 'stormDrainDry') {
+          return breedingSiteTypes.stormDrain;
+        } else if (key === 'other') {
+          return breedingSiteTypes.other;
+        }
+        return [];
+      }).flat();
+
       await breedingSitesApi.list({
         format: 'csv',
+        siteType: breedingSiteTypesSelected.length ? breedingSiteTypesSelected : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
         withinGeom: props.selectedLocationPolygon
