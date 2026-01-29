@@ -1,5 +1,5 @@
-import { boot } from "quasar/wrappers";
-import axios from "axios";
+import { boot } from 'quasar/wrappers';
+import axios from 'axios';
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -7,10 +7,9 @@ import axios from "axios";
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: "https://api.mosquitoalert.com/v1/" });
-const cdn = axios.create({ baseURL: "https://webserver.mosquitoalert.com/" });
+const cdn = axios.create({ baseURL: 'https://webserver.mosquitoalert.com/' });
 const mapserver = axios.create({
-  baseURL: "https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/",
+  baseURL: 'https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/',
 });
 
 export default boot(({ app }) => {
@@ -19,10 +18,6 @@ export default boot(({ app }) => {
   app.config.globalProperties.$axios = axios;
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
   //       so you won't necessarily have to import axios in each vue file
-
-  app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
 
   app.config.globalProperties.$cdn = cdn;
   // ^ ^ ^ this will allow you to use this.$cdn(for Vue Options API form)
