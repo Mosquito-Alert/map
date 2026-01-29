@@ -168,7 +168,7 @@
 
 // import { date } from 'quasar'
 import { useQuasar, exportFile } from 'quasar'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, inject } from 'vue'
 // import { useRoute, useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { useI18n } from "vue-i18n"
@@ -178,6 +178,7 @@ import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPreset
 import type { DateRange } from 'src/types/date'
 // import { watchEffect } from 'vue'
 
+import type { Map } from 'ol'
 import GeoJSON from 'ol/format/GeoJSON'
 import type Polygon from 'ol/geom/Polygon';
 import type MultiPolygon from 'ol/geom/MultiPolygon';
@@ -210,6 +211,8 @@ export default {
     const { t } = useI18n()
     const route = useRoute()
     // const router = useRouter()
+
+    const map = inject<Map>('map')
 
     // LAYERS
     const mosquitoLayers = ref({
@@ -352,7 +355,7 @@ export default {
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
-            featureProjection: 'EPSG:3857'
+            featureProjection: map!.getView().getProjection()
           }))
           : undefined
       }, {
@@ -386,7 +389,7 @@ export default {
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
-            featureProjection: 'EPSG:3857'
+            featureProjection: map!.getView().getProjection()
           }))
           : undefined
       }, {
@@ -428,7 +431,7 @@ export default {
         withinGeom: props.selectedLocationPolygon
           ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
             dataProjection: 'EPSG:4326',
-            featureProjection: 'EPSG:3857'
+            featureProjection: map!.getView().getProjection()
           }))
           : undefined
       }, {
