@@ -190,7 +190,7 @@ export default {
         visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
       })
     }
-    const debouncedUpdate = debounce(updateVisibleFeatures, 300)
+    const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
 
     onMounted(() => {
       map?.on('moveend', debouncedUpdate)
