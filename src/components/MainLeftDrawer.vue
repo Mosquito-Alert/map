@@ -45,6 +45,7 @@
 <script lang="ts">
 
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 
 import LanguageSwitcher from 'src/components/LanguageSwitcher.vue'
 import ShareButton from 'src/components/ShareButton.vue'
@@ -56,7 +57,9 @@ export default {
   },
   setup() {
 
-    const drawerVisible = ref(true)
+    const $q = useQuasar()
+
+    const drawerVisible = ref(!$q.platform.is.mobile)
 
     return {
       drawerVisible,
