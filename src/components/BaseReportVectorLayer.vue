@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 
 import { Feature } from 'ol';
 import type { Layer } from "ol/layer";
@@ -37,8 +37,6 @@ const props = withDefaults(defineProps<{
   color: string;
   visible: boolean;
   type: ReportType
-  fromDate: Date | undefined;
-  toDate: Date | undefined;
 }>(), {
   visible: true
 })
@@ -82,20 +80,7 @@ watch(() => props.visible, (newValue) => {
   layerRef.value.webglVectorLayer.setVisible(newValue === true)
 })
 
-const styleVariables = computed(() => {
-  return {
-    'fromDate': props.fromDate?.getTime() || -Infinity,
-    'toDate': props.toDate?.getTime() || Infinity
-  }
-})
-watch(styleVariables, (newValue) => {
-  if (!layerRef.value) return
-  Object.assign(layerRef.value.webglVectorLayer.get('style').variables, newValue)
-  layerRef.value.webglVectorLayer.changed()
-})
 const style = {
-  'variables': styleVariables.value,
-  'filter': ['between', ['get', 'timestamp'], ['var', 'fromDate'], ['var', 'toDate']],
   "circle-fill-color": ['get', 'color'],
   'circle-radius': [
     'match',
@@ -133,7 +118,6 @@ function onAddFeature(event: VectorSourceEvent) {
   const feature = event.feature
   if (!feature) return
   feature.set('hover', 0)
-  feature.set('timestamp', new Date(feature.getProperties().received_at).getTime())
   feature.set('color', props.color)
   feature.set('type', props.type)
 }

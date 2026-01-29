@@ -1,6 +1,6 @@
 <template>
   <BaseReportVectorLayer ref="layerRef" :type="ReportType.Bite" :fetchReports="fetchBites"
-    :color="colors.getPaletteColor('bites')" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+    :color="colors.getPaletteColor('bites')" :visible="visible" />
 </template>
 
 <script setup lang="ts">

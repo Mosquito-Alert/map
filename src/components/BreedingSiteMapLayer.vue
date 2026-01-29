@@ -1,6 +1,6 @@
 <template>
   <BaseReportVectorLayer ref="layerRef" :type="ReportType.BreedingSite" :fetchReports="fetchBreedingSites"
-    :color="colors.getPaletteColor('breeding-site')" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+    :color="colors.getPaletteColor('breeding-site')" :visible="visible" />
 </template>
 
 <script setup lang="ts">

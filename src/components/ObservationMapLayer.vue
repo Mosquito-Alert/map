@@ -1,6 +1,6 @@
 <template>
   <BaseReportVectorLayer ref="layerRef" :type="ReportType.Observation" :fetchReports="fetchObservations" :color="color"
-    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+    :visible="visible" />
 </template>
 
 <script setup lang="ts">
