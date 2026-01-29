@@ -48,6 +48,8 @@ import BreedingSiteMapLayer from './BreedingSiteMapLayer.vue';
 import type { Layer } from 'ol/layer';
 import type { ReportType } from 'src/types/reportType';
 import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
+import type VectorSource from 'ol/source/Vector';
+import type { Extent } from 'ol/extent';
 
 
 const emit = defineEmits<{
@@ -114,5 +116,22 @@ function featureClicked(event: SelectEvent) {
     type: event.selected?.[0]?.get('type') as ReportType
   });
 }
+
+function getFeaturesInExtent(extent: Extent): Feature[] {
+  // See: https://github.com/openlayers/openlayers/pull/14712
+  const features: Feature[] = [];
+  layerGroupRef.value?.layerGroup.getLayersArray().forEach(layer => {
+    if (!layer.getVisible()) return;
+    const source = layer.getSource() as VectorSource;
+    const layerFeatures = source.getFeaturesInExtent(extent);
+    for (const f of layerFeatures) features.push(f);
+  })
+
+  return features;
+}
+
+defineExpose({
+  getFeaturesInExtent
+});
 
 </script>

@@ -13,7 +13,8 @@
     :bites="biteLayer" :tags="tags" :from-date="fromDate" :to-date="toDate"
     @update:selectedFeature="handleSelectedFeatureUpdate" />
   <SamplingEffortVectorLayer :visible="samplingEffortLayer" :from-date="fromDate" :to-date="toDate" />
-  <!-- <ReportsAnalyticsDrawer v-if="!selectedReportUuid" :visible="numReportLayers !== 0" :features="visibleFeatures" /> -->
+
+  <ReportsAnalyticsDrawer v-model="analyticsDrawerVisible" v-if="showAnalyticsDrawer" :features="visibleFeatures" />
   <ReportsFeatureDetail v-if="selectedReportUuid" :report-uuid="selectedReportUuid" :report-type="selectedReportType!"
     :key="selectedReportUuid" @close="selectedReportUuid = undefined" />
 
@@ -45,6 +46,7 @@ import { colors } from 'quasar'
 import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n';
+import debounce from 'debounce';
 
 import type Map from "ol/Map";
 import GeoJSON from 'ol/format/GeoJSON'
@@ -56,9 +58,8 @@ import type { SearchEvent } from 'ol-ext/control/Search';
 import ReportLeftDrawer from 'src/components/ReportsLeftDrawer.vue'
 import ReportsMapLayer from 'src/components/ReportsMapLayer.vue'
 import SamplingEffortVectorLayer from 'src/components/SamplingEffortVectorLayer.vue'
-// import ReportsAnalyticsDrawer from 'src/components/ReportsAnalyticsDrawer.vue'
+import ReportsAnalyticsDrawer from 'src/components/ReportsAnalyticsDrawer.vue'
 import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
-// import type { Map } from 'ol'
 import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
 
@@ -66,7 +67,7 @@ export default {
   components: {
     ReportLeftDrawer,
     ReportsMapLayer,
-    // ReportsAnalyticsDrawer,
+    ReportsAnalyticsDrawer,
     ReportsFeatureDetail,
     SamplingEffortVectorLayer
   },
@@ -97,6 +98,8 @@ export default {
 
     const visibleFeatures = ref([])
     const layerRef = ref()
+
+    const analyticsDrawerVisible = ref(true)
 
     const selectedLocationPolygon = ref<Polygon | MultiPolygon | null>()
     const selectedLocationName = ref<string>()
@@ -171,32 +174,44 @@ export default {
       })
     })
 
-    // function updateVisibleFeatures() {
-    //   // Get the current extent of the map view
-    //   const extent = map?.getView().calculateExtent(map?.getSize())
+    const showAnalyticsDrawer = computed(() => !selectedReportUuid.value && numReportLayers.value > 0)
 
-    //   visibleFeatures.value = layerRef.value.getFeaturesInExtent(extent)
-    // }
+    watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
+      updateVisibleFeatures()
+    })
 
-    // onMounted(() => {
-    //   map?.on('moveend', updateVisibleFeatures)
-    // })
+    function updateVisibleFeatures() {
+      if (!showAnalyticsDrawer.value || !analyticsDrawerVisible.value) return
 
-    // onUnmounted(() => {
-    //   map?.un('moveend', updateVisibleFeatures)
-    // })
+      // Get the current extent of the map view
+      const extent = map?.getView().calculateExtent(map?.getSize())
+      // Run feature fetching asynchronously
+      requestIdleCallback(() => {
+        visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
+      })
+    }
+    const debouncedUpdate = debounce(updateVisibleFeatures, 300)
+
+    onMounted(() => {
+      map?.on('moveend', debouncedUpdate)
+    })
+
+    onUnmounted(() => {
+      map?.un('moveend', debouncedUpdate)
+    })
 
     return {
       mosquitoLayers,
       breedingSitesLayers,
       biteLayer,
-      numReportLayers,
       samplingEffortLayer,
       tags,
       fromDate,
       toDate,
       layerRef,
       visibleFeatures,
+      showAnalyticsDrawer,
+      analyticsDrawerVisible,
       selectedReportUuid,
       selectedReportType,
       selectedLocationPolygon,
