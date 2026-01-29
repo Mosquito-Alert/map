@@ -12,7 +12,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers', 'api'],
+    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers', 'api', 'analytics'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['fa.css', 'app.scss'],
