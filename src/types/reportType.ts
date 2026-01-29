@@ -1,1 +1,5 @@
-export type ReportType = 'bite' | 'observation' | 'breeding_site';
+export enum ReportType {
+  Bite = 'bite',
+  Observation = 'observation',
+  BreedingSite = 'breeding_site',
+}

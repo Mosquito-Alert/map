@@ -1,10 +1,11 @@
 <template>
-  <BaseReportVectorLayer ref="layerRef" type="observation" :fetchReports="fetchObservations" :color="color"
+  <BaseReportVectorLayer ref="layerRef" :type="ReportType.Observation" :fetchReports="fetchObservations" :color="color"
     :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">
 import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { ReportType } from 'src/types/reportType';
 import { observationsApi } from 'src/boot/api';
 import type { ObservationGeoModel } from 'mosquito-alert';
 import { ref, watch } from 'vue';

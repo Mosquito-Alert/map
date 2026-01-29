@@ -11,11 +11,12 @@
     </ol-source-vector>
   </ol-vector-layer>
 
-  <ObservationDetailDrawer v-if="report && props.reportType === 'observation'" :observation="report as Observation"
-    @close="emit('close')" />
-  <BreedingSiteDetailDrawer v-else-if="report && props.reportType === 'breeding_site'"
+  <ObservationDetailDrawer v-if="report && props.reportType === ReportType.Observation"
+    :observation="report as Observation" @close="emit('close')" />
+  <BreedingSiteDetailDrawer v-else-if="report && props.reportType === ReportType.BreedingSite"
     :breedingSite="report as BreedingSite" @close="emit('close')" />
-  <BiteDetailDrawer v-else-if="report && props.reportType === 'bite'" :bite="report as Bite" @close="emit('close')" />
+  <BiteDetailDrawer v-else-if="report && props.reportType === ReportType.Bite" :bite="report as Bite"
+    @close="emit('close')" />
 </template>
 
 <script setup lang="ts">
@@ -32,7 +33,7 @@ import { observationsApi, bitesApi, breedingSitesApi } from 'src/boot/api';
 import ObservationDetailDrawer from './ObservationDetailDrawer.vue';
 import BiteDetailDrawer from './BiteDetailDrawer.vue';
 import BreedingSiteDetailDrawer from './BreedingSiteDetailDrawer.vue';
-import type { ReportType } from 'src/types/reportType';
+import { ReportType } from 'src/types/reportType';
 
 const emit = defineEmits<{
   (event: 'close'): void;
@@ -50,13 +51,13 @@ const report = ref<Observation | Bite | BreedingSite | null>(null)
 watch(() => [props.reportUuid, props.reportType], async ([newUuid, newType]) => {
   if (newUuid !== undefined) {
     switch (newType) {
-      case 'observation':
+      case ReportType.Observation:
         await observationsApi.retrieve({ uuid: newUuid }).then((response) => report.value = response.data)
         break
-      case 'breeding_site':
+      case ReportType.BreedingSite:
         await breedingSitesApi.retrieve({ uuid: newUuid }).then((response) => report.value = response.data)
         break
-      case 'bite':
+      case ReportType.Bite:
         await bitesApi.retrieve({ uuid: newUuid }).then((response) => report.value = response.data)
         break
     }

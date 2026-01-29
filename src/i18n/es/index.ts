@@ -1,4 +1,5 @@
 import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mosquito-alert';
+import { ReportType } from 'src/types/reportType';
 
 export default {
   footer_collaborators_note: 'Este mapa interactivo ha sido financiado por',
@@ -58,4 +59,7 @@ export default {
   [BiteEventMoment.LastMidday]: 'El pasado mediodía',
   [BiteEventMoment.LastAfternoon]: 'La pasada tarde',
   [BiteEventMoment.LastNight]: 'La pasada noche',
+  [ReportType.Bite]: 'Picadura',
+  [ReportType.Observation]: 'Observación',
+  [ReportType.BreedingSite]: 'Lugar de cría',
 };

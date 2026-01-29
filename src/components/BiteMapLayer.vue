@@ -1,6 +1,6 @@
 <template>
-  <BaseReportVectorLayer ref="layerRef" type="bite" :fetchReports="fetchBites" :color="colors.getPaletteColor('bites')"
-    :visible="visible" :fromDate="fromDate" :toDate="toDate" />
+  <BaseReportVectorLayer ref="layerRef" :type="ReportType.Bite" :fetchReports="fetchBites"
+    :color="colors.getPaletteColor('bites')" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
 <script setup lang="ts">
@@ -9,6 +9,7 @@ import { colors } from 'quasar'
 import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
 import { bitesApi } from 'src/boot/api';
 import type { BiteGeoModel } from 'mosquito-alert';
+import { ReportType } from 'src/types/reportType';
 
 const props = defineProps<{
   visible: boolean,

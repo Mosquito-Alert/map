@@ -1,5 +1,5 @@
 <template>
-  <BaseReportVectorLayer ref="layerRef" type="breeding_site" :fetchReports="fetchBreedingSites"
+  <BaseReportVectorLayer ref="layerRef" :type="ReportType.BreedingSite" :fetchReports="fetchBreedingSites"
     :color="colors.getPaletteColor('breeding-site')" :visible="visible" :fromDate="fromDate" :toDate="toDate" />
 </template>
 
@@ -11,6 +11,7 @@ import { breedingSitesApi } from 'src/boot/api';
 import { colors } from 'quasar'
 
 import type { BreedingSiteSiteType, BreedingSiteGeoModel } from 'mosquito-alert';
+import { ReportType } from 'src/types/reportType';
 
 const props = withDefaults(defineProps<{
   visible: boolean
