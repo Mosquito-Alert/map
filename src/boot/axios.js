@@ -28,4 +28,4 @@ export default boot(({ app }) => {
   //       so you can easily perform requests against your app's WFS server
 });
 
-export { api, cdn, mapserver };
+export { cdn, mapserver };
