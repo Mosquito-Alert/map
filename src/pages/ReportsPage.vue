@@ -151,6 +151,8 @@ const toDate = computed<Date | undefined>({
   },
 })
 
+const nominatimPlaceId = useRouteQuery('place_id', '', { transform: Number })
+
 const map = inject<Map>("map")
 
 const numReportLayers = computed(() => {
@@ -192,6 +194,7 @@ const searchControl = new SearchNominatim({
       map!.getView().getProjection(),
       e.search.name
     );
+    nominatimPlaceId.value = e.search.place_id.toString();
   }
 })
 // Disable attribution copy
@@ -213,8 +216,33 @@ watch(() => boundaryStore.getPolygon, (newValue) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   map?.addControl(searchControl)
+
+  if (nominatimPlaceId.value) {
+    const url = new URL('https://nominatim.openstreetmap.org/details.php')
+    const urlparams = new URLSearchParams({
+      place_id: nominatimPlaceId.value.toString(),
+      polygon_geojson: '1',
+      'accept-language': locale.value,
+      polygon_threshold: '0.001'
+    })
+    url.search = urlparams.toString()
+    await fetch(url.toString()).then(res => res.json()).then(data => {
+      const geometry = geoJson.readGeometry(
+        data.geometry,
+        {
+          dataProjection: 'EPSG:4326',
+          featureProjection: map!.getView().getProjection()
+        }
+      );
+      boundaryStore.setPolygon(
+        geometry as Polygon | MultiPolygon,
+        map!.getView().getProjection(),
+        data.localname
+      );
+    });
+  }
 })
 
 onUnmounted(() => {
