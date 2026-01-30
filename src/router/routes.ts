@@ -4,6 +4,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    redirect: '/reports',
     children: [
       {
         path: 'reports/:uuid?',
