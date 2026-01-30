@@ -21,7 +21,6 @@ const routes: RouteRecordRaw[] = [
         path: 'models/:speciesCode?/:date?',
         name: 'models',
         component: () => import('pages/ExposureRiskPage.vue'),
-        // props: true
       },
     ],
   },

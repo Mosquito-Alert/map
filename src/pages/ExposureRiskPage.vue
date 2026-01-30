@@ -77,12 +77,12 @@
     </div>
   </inner-drawer>
 
-  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="1"
-    :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
-    :palette="palette" :filters="localFilter" />
-  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="2"
-    :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
-    :palette="palette" :filters="localFilter" />
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="1" :visible="visibleLayer"
+    :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate" :palette="palette"
+    :filters="localFilter" />
+  <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="2" :visible="visibleLayer"
+    :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate" :palette="palette"
+    :filters="localFilter" />
   <ExposureRiskMapLayer v-if="formIsValid && selectedSpeciesCode && selectedDate" :level="3" :min-zoom="7"
     :visible="visibleLayer" :opacity="opacityLayer" :species-code="selectedSpeciesCode" :date="selectedDate"
     :palette="palette" :filters="localFilter" />
@@ -91,14 +91,14 @@
     :palette="palette" :filters="localFilter" />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 
 import { useQuasar, date } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { cdn } from 'boot/axios'
 
-import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
-// import { useRouter, useRoute } from 'vue-router'
+import { computed, ref, onMounted, watch, onUnmounted, reactive } from 'vue'
+import { useRouteQuery, useRouteParams } from '@vueuse/router'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
@@ -113,199 +113,150 @@ interface ModelEntry {
   cell: string;
 }
 
-export default {
-  name: 'ExposureRiskPage',
-  components: {
-    InnerDrawer,
-    ExposureRiskMapLayer
+const selectedSpeciesCode = useRouteParams('speciesCode', '', { transform: String })
+const selectedDate = useRouteParams('date', undefined, {
+  transform: {
+    get: (v: string) => v ? new Date(v) : undefined,
+    set: (v: Date | undefined) => v ? date.formatDate(v, 'YYYY-MM') : ''
+  }
+})
+
+const certaintyMin = useRouteQuery('certainty_min', '0', { transform: Number })
+const certaintyMax = useRouteQuery('certainty_max', '1', { transform: Number })
+
+const mapUi = useMapUiStore();
+
+const $q = useQuasar()
+const { t } = useI18n()
+// Ref for controlling month picker visibility
+const qDateProxy = ref()
+
+const palette = ref(['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'])
+
+// Object to store models manifest
+const modelsManifest: Record<string, ModelEntry> = {}
+const speciesModelManifest = computed(() => {
+  const code = selectedSpeciesCode.value;
+  return code ? modelsManifest[code] : undefined;
+});
+
+const qDateModel = ref()
+watch(selectedDate, (newValue,) => {
+  if (selectedDate.value) {
+    // Same mask as in q-date
+    qDateModel.value = date.formatDate(newValue, qDateProxy.value.mask)
+  } else {
+    qDateModel.value = undefined
+  }
+})
+
+const selectedDateString = computed(() => {
+  return selectedDate.value?.toLocaleDateString(
+    $q.lang.isoName || 'en',
+    { year: 'numeric', month: 'long' }
+  )
+})
+
+// Computed properties for setting min and max values for the year-month picker
+const minYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.fromYear}/${speciesModelManifest.value.fromMonth}` : undefined)
+const maxYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.toYear}/${speciesModelManifest.value.toMonth}` : undefined)
+
+// Computed property for checking form validity
+const formIsValid = computed(() => {
+  // Check that both selectedSpeciesCode and selectedDate have values
+  return [selectedSpeciesCode.value, selectedDate.value].every(value => value !== undefined)
+})
+
+const visibleLayer = ref(true)
+const opacityLayer = ref(1)
+
+const localFilter = reactive({
+  certaintyRange: {
+    min: certaintyMin.value,
+    max: certaintyMax.value
+  }
+})
+watch(
+  () => localFilter.certaintyRange,
+  (newRange) => {
+    certaintyMin.value = newRange.min
+    certaintyMax.value = newRange.max
   },
-  props: {
-    speciesCode: {
-      type: String
-    },
-    date: {
-      type: Date,
-      validator(value: Date) {
-        return value <= new Date()
-      }
-    },
-    filters: {
-      type: Object
-    }
-  },
-  setup(props) {
-    // const route = useRoute()
-    // const router = useRouter()
+  { deep: true }
+)
 
-    const mapUi = useMapUiStore();
+const vectorOptions = computed(() => {
+  return [
+    // Code is used also for building the CSV urls paths.
+    { code: 'albopictus', label: 'Tiger mosquito' },
+    { code: 'aegypti', label: 'Yellow fever mosquito' },
+    { code: 'japonicus', label: 'Japonicus mosquito' },
+    { code: 'koreicus', label: 'Koreicus mosquito' },
+    { code: 'culex', label: 'Culex mosquito' },
+    { code: 'biting', label: 'Bites' }
+  ]
+})
 
-    const $q = useQuasar()
-    const { t } = useI18n()
-    // Ref for controlling month picker visibility
-    const qDateProxy = ref()
-
-    const palette = ref(['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000'])
-
-    // Object to store models manifest
-    const modelsManifest: Record<string, ModelEntry> = {}
-    const speciesModelManifest = computed(() => {
-      const code = selectedSpeciesCode.value;
-      return code ? modelsManifest[code] : undefined;
-    });
-
-    const selectedSpeciesCode = ref<string | undefined>(props.speciesCode)
-    const selectedDate = ref(props.date)
-    const qDateModel = ref()
-    watch(selectedDate, (newValue,) => {
-      if (selectedDate.value) {
-        // Same mask as in q-date
-        qDateModel.value = date.formatDate(newValue, qDateProxy.value.mask)
-      } else {
-        qDateModel.value = undefined
-      }
-    })
-
-    const selectedDateString = computed(() => {
-      return selectedDate.value?.toLocaleDateString(
-        $q.lang.isoName || 'en',
-        { year: 'numeric', month: 'long' }
-      )
-    })
-
-    // Computed properties for setting min and max values for the year-month picker
-    const minYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.fromYear}/${speciesModelManifest.value.fromMonth}` : undefined)
-    const maxYearMonthPickerValue = computed(() => speciesModelManifest.value ? `${speciesModelManifest.value.toYear}/${speciesModelManifest.value.toMonth}` : undefined)
-
-    // Computed property for checking form validity
-    const formIsValid = computed(() => {
-      // Check that both selectedSpeciesCode and selectedDate have values
-      return [selectedSpeciesCode.value, selectedDate.value].every(value => value !== undefined)
-    })
-
-    const visibleLayer = ref(true)
-    const opacityLayer = ref(1)
-
-    const localFilter = ref({
-      ...{
-        certaintyRange: {
-          min: 0,
-          max: 1
+onMounted(() => {
+  mapUi.setGrayscale(true);
+  cdn.get('static/models/global_minimal_model_estimates/model_manifest.csv')
+    .then((resp) => {
+      // Read csv manifest
+      const lines = resp.data.split(/\r?\n/)
+      const headers = lines[0].toLowerCase().split(',')
+      const targetIdx = headers.indexOf('target')
+      const fromIdx = headers.indexOf('from')
+      const toIdx = headers.indexOf('to')
+      const cellIdx = headers.indexOf('cell')
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i] === '') break
+        const currentLine = lines[i].split(',')
+        const target = currentLine[targetIdx].toLowerCase()
+        const from = currentLine[fromIdx].toLowerCase().split('-')
+        const to = currentLine[toIdx].toLowerCase().split('-')
+        const cell = currentLine[cellIdx].toLowerCase()
+        let cellValue = 'true'
+        if (cell !== '') {
+          cellValue = currentLine[cellIdx].toLowerCase()
         }
-      },
-      ...props.filters
+        modelsManifest[target] = {
+          fromYear: from[0],
+          fromMonth: from[1].padStart(2, '0'),
+          toYear: to[0],
+          toMonth: to[1].padStart(2, '0'),
+          cell: cellValue
+        }
+      }
     })
-
-    const vectorOptions = computed(() => {
-      return [
-        // Code is used also for building the CSV urls paths.
-        { code: 'albopictus', label: 'Tiger mosquito' },
-        { code: 'aegypti', label: 'Yellow fever mosquito' },
-        { code: 'japonicus', label: 'Japonicus mosquito' },
-        { code: 'koreicus', label: 'Koreicus mosquito' },
-        { code: 'culex', label: 'Culex mosquito' },
-        { code: 'biting', label: 'Bites' }
-      ]
-    })
-
-    onMounted(() => {
-      mapUi.setGrayscale(true);
-      cdn.get('static/models/global_minimal_model_estimates/model_manifest.csv')
-        .then((resp) => {
-          // Read csv manifest
-          const lines = resp.data.split(/\r?\n/)
-          const headers = lines[0].toLowerCase().split(',')
-          const targetIdx = headers.indexOf('target')
-          const fromIdx = headers.indexOf('from')
-          const toIdx = headers.indexOf('to')
-          const cellIdx = headers.indexOf('cell')
-          for (let i = 1; i < lines.length; i++) {
-            if (lines[i] === '') break
-            const currentLine = lines[i].split(',')
-            const target = currentLine[targetIdx].toLowerCase()
-            const from = currentLine[fromIdx].toLowerCase().split('-')
-            const to = currentLine[toIdx].toLowerCase().split('-')
-            const cell = currentLine[cellIdx].toLowerCase()
-            let cellValue = 'true'
-            if (cell !== '') {
-              cellValue = currentLine[cellIdx].toLowerCase()
-            }
-            modelsManifest[target] = {
-              fromYear: from[0],
-              fromMonth: from[1].padStart(2, '0'),
-              toYear: to[0],
-              toMonth: to[1].padStart(2, '0'),
-              cell: cellValue
-            }
-          }
-        })
-        .catch(() => {
-          $q.notify({
-            color: 'negative',
-            position: 'bottom',
-            message: 'Loading failed',
-            icon: 'report_problem'
-          })
-        })
-    })
-
-    onUnmounted(() => {
-      mapUi.setGrayscale(false);
-    })
-
-    function showInfoDialog() {
-      $q.dialog({
-        title: t('information'),
-        message: t('models_layer_info').replace(/\\n/g, '<br>'),
-        html: true,
-        style: 'width: min(100%, 800px);',
+    .catch(() => {
+      $q.notify({
+        color: 'negative',
+        position: 'bottom',
+        message: 'Loading failed',
+        icon: 'report_problem'
       })
-    }
+    })
+})
 
-    // watchEffect(() => {
-    //   const newParams = [selectedSpeciesCode, selectedDate].every(item => item.value !== undefined) ?
-    //     {
-    //       speciesCode: selectedSpeciesCode.value,
-    //       date: date.formatDate(selectedDate.value, 'YYYY-MM-DD')
-    //     } : {}
+onUnmounted(() => {
+  mapUi.setGrayscale(false);
+})
 
-    //   router.push({
-    //     ...route,
-    //     params: newParams,
-    //     query: {
-    //       ...route.query,
-    //       ...{
-    //         certainty_min: localFilter.value.certaintyRange.min > 0 ? localFilter.value.certaintyRange.min : undefined,
-    //         certainty_max: localFilter.value.certaintyRange.max < 1 ? localFilter.value.certaintyRange.max : undefined
+function showInfoDialog() {
+  $q.dialog({
+    title: t('information'),
+    message: t('models_layer_info').replace(/\\n/g, '<br>'),
+    html: true,
+    style: 'width: min(100%, 800px);',
+  })
+}
 
-    //       }
-    //     }
-    //   })
-    // })
-
-    return {
-      selectedSpeciesCode,
-      vectorOptions,
-      qDateModel,
-      selectedDateString,
-      selectedDate,
-      qDateProxy,
-      minYearMonthPickerValue,
-      maxYearMonthPickerValue,
-      formIsValid,
-      visibleLayer,
-      opacityLayer,
-      palette,
-      localFilter,
-      showInfoDialog,
-      dateUpdated(val: unknown, reason: string, details: { year: number; month: number }) {
-        // Called when calendar is clicked
-        if (reason === 'month') {
-          selectedDate.value = new Date(details.year, details.month - 1)
-          // Once month is selected, hide the datePicker.
-          qDateProxy.value.hide()
-        }
-      }
-    }
+function dateUpdated(val: unknown, reason: string, details: { year: number; month: number }) {
+  // Called when calendar is clicked
+  if (reason === 'month') {
+    selectedDate.value = new Date(details.year, details.month - 1)
+    // Once month is selected, hide the datePicker.
+    qDateProxy.value.hide()
   }
 }
 </script>
