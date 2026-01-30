@@ -1,9 +1,9 @@
 <template>
 
   <!-- MAP -->
-  <ol-map ref='mapRef' class="absolute-full" :loadTilesWhileAnimating='true' :loadTilesWhileInteracting='true'
-    @moveend="updateRoute">
-    <ol-view :projection="projection" :constrainResolution='true' :maxZoom=17 :center="center" :zoom="zoom" />
+  <ol-map ref='mapRef' class="absolute-full" :loadTilesWhileAnimating='true' :loadTilesWhileInteracting='true'>
+    <ol-view :projection="projection" :constrainResolution='true' :maxZoom=17 :center="center" :zoom="localZoom"
+      @change:center="setCenter($event.target.getCenter())" @change:resolution="zoom = $event.target.getZoom()" />
 
     <ol-tile-layer ref="basemapRef">
       <!-- <ol-source-osm :preload="Infinity" /> -->
@@ -34,7 +34,8 @@
 <script lang="ts">
 
 import { onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+
+import { useRouteQuery } from '@vueuse/router'
 
 import { toLonLat, fromLonLat } from 'ol/proj.js'
 import Colorize from 'ol-ext/filter/Colorize'
@@ -53,10 +54,6 @@ export default {
     },
   },
   setup() {
-
-    const route = useRoute()
-    const router = useRouter()
-
     const mapUi = useMapUiStore();
 
     // Map
@@ -64,15 +61,34 @@ export default {
     const basemapRef = ref()
     const projection = ref('EPSG:3857')
 
+    const latitude = useRouteQuery('lat', '0', {
+      transform: {
+        get: (v: string) => Number(v),
+        set: (v: number) => v.toFixed(5).toString()
+      }
+    })
+    const longitude = useRouteQuery('lon', '0', {
+      transform: {
+        get: (v: string) => Number(v),
+        set: (v: number) => v.toFixed(5).toString()
+      }
+    })
+    const zoom = useRouteQuery('zoom', '3.00', {
+      transform: {
+        get: (v: string) => Number(v),
+        set: (v: number) => v.toFixed(2).toString()
+      }
+    })
+    const localZoom = ref(zoom.value)
+
     const showSpinner = ref(true)
 
-    const center = ref(
-      fromLonLat(
-        [parseFloat(String(route.query?.lon ?? 0)), parseFloat(String(route.query?.lat ?? 0))],
-        projection.value
-      )
-    )
-    const zoom = ref(parseFloat(String(route.query.zoom || 0)))
+    const center = ref(fromLonLat([longitude.value, latitude.value], projection.value))
+    const setCenter = (value: [number, number]) => {
+      const [lon, lat] = toLonLat(value, projection.value) as [number, number]
+      longitude.value = lon
+      latitude.value = lat
+    }
 
     const grayscaleFilter = new Colorize({ operation: 'grayscale' });
 
@@ -99,27 +115,10 @@ export default {
       basemapRef,
       projection,
       center,
+      setCenter,
+      localZoom,
       zoom,
       showSpinner,
-      async updateRoute() {
-        const center = toLonLat(
-          mapRef.value.map.getView().getCenter(),
-          mapRef.value.map.getView().getProjection()
-        )
-
-        await router.push({
-          ...route,
-          // params: {
-          //   ...route.params
-          // },
-          query: {
-            ...route.query,
-            lon: center[0]?.toFixed(5),
-            lat: center[1]?.toFixed(5),
-            zoom: mapRef.value.map.getView().getZoom().toFixed(2)
-          }
-        })
-      },
       updateSize() {
         mapRef.value.updateSize()
       }

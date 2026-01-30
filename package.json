@@ -17,6 +17,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "@takuma-ru/vue-swipe-modal": "^5.0.5",
+    "@vueuse/router": "^14.1.0",
     "axios": "^1.2.1",
     "debounce": "^3.0.0",
     "echarts": "^5.5.0",
