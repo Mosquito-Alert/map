@@ -37,7 +37,7 @@
 
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { colors } from 'quasar'
 
 import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
@@ -61,187 +61,157 @@ import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
 import { useBoundaryStore } from 'src/stores/boundaryStore';
 
-export default {
-  components: {
-    ReportLeftDrawer,
-    ReportsMapLayer,
-    ReportsAnalyticsDrawer,
-    ReportsFeatureDetail,
-    SamplingEffortVectorLayer
-  },
-  props: {
-    uuid: {
-      type: String
-    }
-  },
-  setup(props) {
-    const route = useRoute()
-    const router = useRouter()
-    const { t, locale } = useI18n();
+const props = defineProps<{
+  uuid?: string
+}>()
 
-    const boundaryStore = useBoundaryStore();
+const route = useRoute()
+const router = useRouter()
+const { t, locale } = useI18n();
 
-    const map = inject<Map>("map")
+const boundaryStore = useBoundaryStore();
 
-    const mosquitoLayers = ref<string[]>([])
-    const breedingSitesLayers = ref<string[]>([])
-    const biteLayer = ref(false)
+const map = inject<Map>("map")
 
-    const numReportLayers = computed(() => {
-      return mosquitoLayers.value.length + breedingSitesLayers.value.length + (biteLayer.value ? 1 : 0)
-    })
+const mosquitoLayers = ref<string[]>([])
+const breedingSitesLayers = ref<string[]>([])
+const biteLayer = ref(false)
 
-    const samplingEffortLayer = ref(false)
-    const tags = ref<string[]>([])
-    const fromDate = ref()
-    const toDate = ref()
+const numReportLayers = computed(() => {
+  return mosquitoLayers.value.length + breedingSitesLayers.value.length + (biteLayer.value ? 1 : 0)
+})
 
-    const visibleFeatures = ref([])
-    const layerRef = ref()
+const samplingEffortLayer = ref(false)
+const tags = ref<string[]>([])
+const fromDate = ref()
+const toDate = ref()
 
-    const analyticsDrawerVisible = ref(true)
+const visibleFeatures = ref([])
+const layerRef = ref()
 
-    const geometryComponent = computed(() => {
-      if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon';
-      if (boundaryStore.getPolygon instanceof MultiPolygon) return 'ol-geom-multi-polygon';
-      return null; // fallback if needed
-    });
+const analyticsDrawerVisible = ref(true)
 
-    const geoJson = new GeoJSON()
-    const searchControl = new SearchNominatim({
-      polygon: true,
-      maxItems: 10,
-      maxHistory: -1,
-      title: t('search'),
-      placeholder: t('search') + '...',
-      typing: 500,
-      collapsed: false,
-      noCollapse: true,
-      zoomOnSelect: 11,
-      onselect: (e: SearchEvent) => {
-        const geometry = geoJson.readGeometry(
-          e.search.geojson,
-          {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map!.getView().getProjection()
-          }
-        );
-        boundaryStore.setPolygon(
-          geometry as Polygon | MultiPolygon,
-          map!.getView().getProjection(),
-          e.search.name
-        );
+const geometryComponent = computed(() => {
+  if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon';
+  if (boundaryStore.getPolygon instanceof MultiPolygon) return 'ol-geom-multi-polygon';
+  return null; // fallback if needed
+});
+
+const geoJson = new GeoJSON()
+const searchControl = new SearchNominatim({
+  polygon: true,
+  maxItems: 10,
+  maxHistory: -1,
+  title: t('search'),
+  placeholder: t('search') + '...',
+  typing: 500,
+  collapsed: false,
+  noCollapse: true,
+  zoomOnSelect: 11,
+  onselect: (e: SearchEvent) => {
+    const geometry = geoJson.readGeometry(
+      e.search.geojson,
+      {
+        dataProjection: 'EPSG:4326',
+        featureProjection: map!.getView().getProjection()
       }
-    })
-    // Disable attribution copy
-    searchControl.set('copy', '')
-    // Overwrite requestData to add 'accept-language' header.
-    // See: https://github.com/Viglino/ol-ext/issues/559
-    searchControl.requestData = function (s) {
-      const data = SearchNominatim.prototype.requestData.call(this, s);
-      data['accept-language'] = locale.value;
-      data['polygon_threshold'] = 0.001;
-      return data
-    }
-
-    watch(() => boundaryStore.getPolygon, (newValue) => {
-      if (!newValue) {
-        map?.addControl(searchControl)
-      } else {
-        map?.removeControl(searchControl)
-      }
-    });
-
-    onMounted(() => {
-      map?.addControl(searchControl)
-    })
-
-    onUnmounted(() => {
-      map?.removeControl(searchControl)
-    })
-
-    const selectedReportUuid = ref(props.uuid)
-    const selectedReportType = ref<ReportType>()
-    watch(selectedReportUuid, async (newValue) => {
-      if (route.params.uuid === newValue) return
-
-      await router.replace({
-        name: route.name!,
-        params: {
-          ...route.params,
-          ...(newValue ? { uuid: newValue } : {})
-        }
-      })
-    })
-
-    const showAnalyticsDrawer = computed(() => !selectedReportUuid.value && numReportLayers.value > 0)
-
-    watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
-      updateVisibleFeatures()
-    })
-
-    function updateVisibleFeatures() {
-      if (!showAnalyticsDrawer.value || !analyticsDrawerVisible.value) return
-
-      // Get the current extent of the map view
-      const extent = map?.getView().calculateExtent(map?.getSize())
-      // Run feature fetching asynchronously
-      requestIdleCallback(() => {
-        visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
-      })
-    }
-    const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
-
-    onMounted(() => {
-      map?.on('moveend', debouncedUpdate)
-    })
-
-    onUnmounted(() => {
-      map?.un('moveend', debouncedUpdate)
-    })
-
-    return {
-      mosquitoLayers,
-      breedingSitesLayers,
-      biteLayer,
-      samplingEffortLayer,
-      tags,
-      fromDate,
-      toDate,
-      layerRef,
-      visibleFeatures,
-      showAnalyticsDrawer,
-      analyticsDrawerVisible,
-      selectedReportUuid,
-      selectedReportType,
-      boundaryStore,
-      geometryComponent,
-      colors,
-      handleMosquitoesLayerUpdate(value: string[]) {
-        mosquitoLayers.value = value
-      },
-      handleBreedingSitesLayerUpdate(value: string[]) {
-        breedingSitesLayers.value = value
-      },
-      handleBitesLayerUpdate(value: boolean) {
-        biteLayer.value = value
-      },
-      handleSamplingEffortLayerUpdate(value: boolean) {
-        samplingEffortLayer.value = value
-      },
-      handleTagsUpdate(value: string[]) {
-        tags.value = value
-      },
-      handleDateUpdate(value: DateRange) {
-        fromDate.value = value.from
-        toDate.value = value.to
-      },
-      handleSelectedFeatureUpdate(value: { id: string; type: ReportType } | undefined) {
-        selectedReportUuid.value = value?.id
-        selectedReportType.value = value?.type
-      }
-    }
+    );
+    boundaryStore.setPolygon(
+      geometry as Polygon | MultiPolygon,
+      map!.getView().getProjection(),
+      e.search.name
+    );
   }
+})
+// Disable attribution copy
+searchControl.set('copy', '')
+// Overwrite requestData to add 'accept-language' header.
+// See: https://github.com/Viglino/ol-ext/issues/559
+searchControl.requestData = function (s) {
+  const data = SearchNominatim.prototype.requestData.call(this, s);
+  data['accept-language'] = locale.value;
+  data['polygon_threshold'] = 0.001;
+  return data
+}
+
+watch(() => boundaryStore.getPolygon, (newValue) => {
+  if (!newValue) {
+    map?.addControl(searchControl)
+  } else {
+    map?.removeControl(searchControl)
+  }
+});
+
+onMounted(() => {
+  map?.addControl(searchControl)
+})
+
+onUnmounted(() => {
+  map?.removeControl(searchControl)
+})
+
+const selectedReportUuid = ref(props.uuid)
+const selectedReportType = ref<ReportType>()
+watch(selectedReportUuid, async (newValue) => {
+  if (route.params.uuid === newValue) return
+
+  await router.replace({
+    name: route.name!,
+    params: {
+      ...route.params,
+      ...(newValue ? { uuid: newValue } : {})
+    }
+  })
+})
+
+const showAnalyticsDrawer = computed(() => !selectedReportUuid.value && numReportLayers.value > 0)
+
+watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
+  updateVisibleFeatures()
+})
+
+function updateVisibleFeatures() {
+  if (!showAnalyticsDrawer.value || !analyticsDrawerVisible.value) return
+
+  // Get the current extent of the map view
+  const extent = map?.getView().calculateExtent(map?.getSize())
+  // Run feature fetching asynchronously
+  requestIdleCallback(() => {
+    visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
+  })
+}
+const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
+
+onMounted(() => {
+  map?.on('moveend', debouncedUpdate)
+})
+
+onUnmounted(() => {
+  map?.un('moveend', debouncedUpdate)
+})
+
+function handleMosquitoesLayerUpdate(value: string[]) {
+  mosquitoLayers.value = value
+}
+function handleBreedingSitesLayerUpdate(value: string[]) {
+  breedingSitesLayers.value = value
+}
+function handleBitesLayerUpdate(value: boolean) {
+  biteLayer.value = value
+}
+function handleSamplingEffortLayerUpdate(value: boolean) {
+  samplingEffortLayer.value = value
+}
+function handleTagsUpdate(value: string[]) {
+  tags.value = value
+}
+function handleDateUpdate(value: DateRange) {
+  fromDate.value = value.from
+  toDate.value = value.to
+}
+function handleSelectedFeatureUpdate(value: { id: string; type: ReportType } | undefined) {
+  selectedReportUuid.value = value?.id
+  selectedReportType.value = value?.type
 }
 
 </script>
