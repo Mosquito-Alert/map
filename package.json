@@ -26,7 +26,7 @@
     "h3-js": "^4.3.0",
     "maplibre-gl": "^5.11.0",
     "material-icons": "^1.13.14",
-    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#27863cfd55585fd30788ae24885195b69f4a0da6",
+    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#bb497a3e341985d5df42b4d49edcf61c922df909",
     "pinia": "^3.0.3",
     "primevue": "^4.4.1",
     "tailwindcss": "^4.1.17",
