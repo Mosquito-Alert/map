@@ -15,7 +15,6 @@ const routes: RouteRecordRaw[] = [
         path: 'discoveries/:speciesCode?',
         name: 'discoveries',
         component: () => import('pages/DiscoveriesPage.vue'),
-        props: true,
       },
       {
         path: 'models/:speciesCode?/:date?',

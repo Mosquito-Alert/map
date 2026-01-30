@@ -30,8 +30,8 @@
 
 <script setup lang="ts">
 import { useQuasar, exportFile } from 'quasar'
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRouteParams } from '@vueuse/router';
 import { useI18n } from 'vue-i18n'
 
 import { useMapUiStore } from 'src/stores/mapUI';
@@ -40,15 +40,10 @@ import { mapserver } from 'boot/axios'
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
 
-const props = defineProps<{
-  speciesCode?: string
-}>()
+const selectedSpeciesCode = useRouteParams('speciesCode', '', { transform: String })
 
 const $q = useQuasar()
 const { t } = useI18n()
-
-const route = useRoute()
-const router = useRouter()
 
 const mapUi = useMapUiStore();
 
@@ -57,7 +52,6 @@ const downloadProgress = ref({
   percentage: 0
 })
 
-const selectedSpeciesCode = ref(props.speciesCode)
 const vectorOptions = computed(() => {
   return [
     // Code is the MVT property
@@ -70,16 +64,6 @@ const vectorOptions = computed(() => {
 
 const visibleLayer = ref(true)
 const opacityLayer = ref(1)
-
-watch(selectedSpeciesCode, async (newValue,) => {
-  await router.push({
-    name: route.name!,
-    params: {
-      ...route.params,
-      speciesCode: newValue
-    }
-  })
-})
 
 onMounted(() => {
   mapUi.setGrayscale(true);
