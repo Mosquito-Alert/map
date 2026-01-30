@@ -10,7 +10,8 @@
         <q-space />
         <q-btn-group flat stretch class="bg-grey-1">
           <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
-          <q-btn :loading="downloadProgress.loading" :percentage="downloadProgress.percentage" icon="fa fat fa-download" size="xs" @click="downloadFile()"/>
+          <q-btn :loading="downloadProgress.loading" :percentage="downloadProgress.percentage" icon="fa fat fa-download"
+            size="xs" @click="downloadFile()" />
         </q-btn-group>
       </div>
       <div class="row bg-grey-3 rounded-borders q-pa-sm">
@@ -27,7 +28,7 @@
     :opacity="opacityLayer" />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useQuasar, exportFile } from 'quasar'
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -39,113 +40,93 @@ import { mapserver } from 'boot/axios'
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
 
-export default {
-  name: 'DiscoveriesPage',
-  components: {
-    InnerDrawer,
-    DiscoveriesMapLayer
-  },
-  props: {
-    speciesCode: {
-      type: String
+const props = defineProps<{
+  speciesCode?: string
+}>()
+
+const $q = useQuasar()
+const { t } = useI18n()
+
+const route = useRoute()
+const router = useRouter()
+
+const mapUi = useMapUiStore();
+
+const downloadProgress = ref({
+  loading: false,
+  percentage: 0
+})
+
+const selectedSpeciesCode = ref(props.speciesCode)
+const vectorOptions = computed(() => {
+  return [
+    // Code is the MVT property
+    { code: 'albopictus', label: 'Tiger mosquito' },
+    { code: 'aegypti', label: 'Yellow fever mosquito' },
+    { code: 'japonicus', label: 'Japonicus mosquito' },
+    { code: 'koreicus', label: 'Koreicus mosquito' }
+  ]
+})
+
+const visibleLayer = ref(true)
+const opacityLayer = ref(1)
+
+watch(selectedSpeciesCode, async (newValue,) => {
+  await router.push({
+    name: route.name!,
+    params: {
+      ...route.params,
+      speciesCode: newValue
     }
-  },
-  setup(props) {
-    const $q = useQuasar()
-    const { t } = useI18n()
+  })
+})
 
-    const route = useRoute()
-    const router = useRouter()
+onMounted(() => {
+  mapUi.setGrayscale(true);
+})
 
-    const mapUi = useMapUiStore();
+onUnmounted(() => {
+  mapUi.setGrayscale(false);
+})
 
-    const downloadProgress = ref({
-      loading: false,
-      percentage: 0
-    })
+function showInfoDialog() {
+  $q.dialog({
+    title: t('information'),
+    message: t('discoveries_layer_info').replace(/\\n/g, '<br>'),
+    html: true,
+    style: 'width: min(100%, 800px);',
+  })
+}
 
-    const selectedSpeciesCode = ref(props.speciesCode)
-    const vectorOptions = computed(() => {
-      return [
-        // Code is the MVT property
-        { code: 'albopictus', label: 'Tiger mosquito' },
-        { code: 'aegypti', label: 'Yellow fever mosquito' },
-        { code: 'japonicus', label: 'Japonicus mosquito' },
-        { code: 'koreicus', label: 'Koreicus mosquito' }
-      ]
-    })
+async function downloadFile() {
+  downloadProgress.value.loading = true;
+  downloadProgress.value.percentage = 0;
 
-    const visibleLayer = ref(true)
-    const opacityLayer = ref(1)
+  const params = {
+    service: 'WFS',
+    version: '1.0.0',
+    request: 'GetFeature',
+    typeName: 'mosquitoalert:discoveries',
+    outputFormat: 'SHAPE-ZIP',
+    cql_filter: `${selectedSpeciesCode.value} IS NOT NULL`,
+    propertyName: `fid,geom,cntryCode,cntryName,codeLevel,locCode,locName,${selectedSpeciesCode.value}`
+  };
 
-    watch(selectedSpeciesCode, async (newValue,) => {
-      await router.push({
-        name: route.name!,
-        params: {
-          ...route.params,
-          speciesCode: newValue
+  try {
+    const response = await mapserver.get('ows', {
+      params,
+      responseType: 'blob',
+      onDownloadProgress: (event) => {
+        if (event.total) {
+          downloadProgress.value.percentage = Math.round((event.loaded * 100) / event.total);
         }
-      })
-    })
-
-    onMounted(() => {
-      mapUi.setGrayscale(true);
-    })
-
-    onUnmounted(() => {
-      mapUi.setGrayscale(false);
-    })
-
-    function showInfoDialog() {
-      $q.dialog({
-        title: t('information'),
-        message: t('discoveries_layer_info').replace(/\\n/g, '<br>'),
-        html: true,
-        style: 'width: min(100%, 800px);',
-      })
-    }
-
-    async function downloadFile()  {
-      downloadProgress.value.loading = true;
-      downloadProgress.value.percentage = 0;
-
-      const params = {
-        service: 'WFS',
-        version: '1.0.0',
-        request: 'GetFeature',
-        typeName: 'mosquitoalert:discoveries',
-        outputFormat: 'SHAPE-ZIP',
-        cql_filter: `${selectedSpeciesCode.value} IS NOT NULL`,
-        propertyName: `fid,geom,cntryCode,cntryName,codeLevel,locCode,locName,${selectedSpeciesCode.value}`
-      };
-
-      try {
-        const response = await mapserver.get('ows', {
-          params,
-          responseType: 'blob',
-          onDownloadProgress: (event) => {
-            if (event.total) {
-              downloadProgress.value.percentage = Math.round((event.loaded * 100) / event.total);
-            }
-          }
-        });
-        exportFile(`discoveries_${selectedSpeciesCode.value}.zip`, response.data, { mimeType: 'application/zip' });
-        downloadProgress.value.percentage = 100
-      } finally {
-        downloadProgress.value.loading = false;
-        downloadProgress.value.percentage = 0;
       }
-    }
-
-    return {
-      selectedSpeciesCode,
-      vectorOptions,
-      visibleLayer,
-      opacityLayer,
-      downloadProgress,
-      showInfoDialog,
-      downloadFile
-    }
+    });
+    exportFile(`discoveries_${selectedSpeciesCode.value}.zip`, response.data, { mimeType: 'application/zip' });
+    downloadProgress.value.percentage = 100
+  } finally {
+    downloadProgress.value.loading = false;
+    downloadProgress.value.percentage = 0;
   }
 }
 </script>
