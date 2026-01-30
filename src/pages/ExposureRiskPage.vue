@@ -114,11 +114,22 @@ interface ModelEntry {
 }
 
 const selectedSpeciesCode = useRouteParams('speciesCode', '', { transform: String })
-const selectedDate = useRouteParams('date', undefined, {
-  transform: {
-    get: (v: string) => v ? new Date(v) : undefined,
-    set: (v: Date | undefined) => v ? date.formatDate(v, 'YYYY-MM') : ''
-  }
+
+// Treat dates from useRouteParams. See: https://github.com/vueuse/vueuse/issues/2663#issuecomment-1952493495
+// In JS [] === [] is false, and vue watch detect changes everytime.
+const selectedDateQuery = useRouteParams<string>('date', '');
+const selectedDate = computed<Date | undefined>({
+  get() {
+    if (!selectedDateQuery.value) return undefined;
+    return date.extractDate(selectedDateQuery.value, 'YYYY-MM');
+  },
+  set(val: Date | undefined) {
+    if (!val) {
+      selectedDateQuery.value = '';
+      return;
+    }
+    selectedDateQuery.value = date.formatDate(val, 'YYYY-MM');
+  },
 })
 
 const certaintyMin = useRouteQuery('certainty_min', '0', { transform: Number })
