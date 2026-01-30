@@ -29,7 +29,6 @@ watch(
   () => {
     layerRef.value?.refresh();
   },
-  { deep: true }
 );
 const fetchBites = async (): Promise<BiteGeoModel[]> => {
   const selectedBoundary = await boundaryStore.getTemporalBoundary();

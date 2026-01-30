@@ -34,7 +34,6 @@ watch(
   () => {
     layerRef.value?.refresh();
   },
-  { deep: true }
 );
 
 const fetchBreedingSites = async (): Promise<BreedingSiteGeoModel[]> => {

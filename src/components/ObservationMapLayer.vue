@@ -33,7 +33,6 @@ watch(
   () => {
     layerRef.value?.refresh();
   },
-  { deep: true }
 );
 
 const fetchObservations = async (): Promise<ObservationGeoModel[]> => {
