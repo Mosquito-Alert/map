@@ -1,4 +1,7 @@
+import { ReportType } from 'src/types/reportType';
 import type { RouteRecordRaw } from 'vue-router';
+
+const reportTypeRegex = Object.values(ReportType).join('|');
 
 const routes: RouteRecordRaw[] = [
   {
@@ -7,7 +10,20 @@ const routes: RouteRecordRaw[] = [
     redirect: '/reports',
     children: [
       {
-        path: 'reports/:reportType?/:uuid?',
+        path: 'reports/:uuid([0-9a-fA-F-]{36})',
+        name: 'reportsByUuid',
+        redirect: (to) => {
+          return {
+            name: 'reports',
+            params: {
+              reportType: ReportType.Observation,
+              uuid: to.params.uuid,
+            },
+          };
+        },
+      },
+      {
+        path: `reports/:reportType(${reportTypeRegex})?/:uuid([0-9a-fA-F-]{36})?`,
         name: 'reports',
         component: () => import('pages/ReportsPage.vue'),
       },
