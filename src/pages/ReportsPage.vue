@@ -1,5 +1,7 @@
 <template>
-  <ReportLeftDrawer @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
+  <ReportLeftDrawer :enabled-mosquitoes="mosquitoLayers" :enabled-breeding-sites="breedingSitesLayers"
+    :enabled-bites="biteLayer" :enabled-sampling-effort="samplingEffortLayer" :from-date="fromDate" :to-date="toDate"
+    :tags="tags" @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
     @update-layers:breeding-sites="handleBreedingSitesLayerUpdate" @update-layers:bites="handleBitesLayerUpdate"
     @update-layers:sampling-effort="handleSamplingEffortLayerUpdate" @update-filters:tags="handleTagsUpdate"
     @update-filters:date="handleDateUpdate" />
@@ -15,7 +17,7 @@
 
   <ReportsAnalyticsDrawer v-model="analyticsDrawerVisible" v-if="showAnalyticsDrawer" :features="visibleFeatures" />
   <ReportsFeatureDetail v-if="selectedReportUuid" :report-uuid="selectedReportUuid" :report-type="selectedReportType!"
-    :key="selectedReportUuid" @close="selectedReportUuid = undefined" />
+    :key="selectedReportUuid" @close="selectedReportUuid = undefined; selectedReportType = undefined" />
 
   <Teleport v-if="!!boundaryStore.getPolygon" defer to=".ol-overlaycontainer-stopevent">
     <q-chip :model-value="!!boundaryStore.getPolygon" removable clickable class="ol-search all-pointer-events"
@@ -38,10 +40,10 @@
 </template>
 
 <script setup lang="ts">
-import { colors } from 'quasar'
+import { colors, date } from 'quasar'
 
 import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouteParams, useRouteQuery } from '@vueuse/router';
 import { useI18n } from 'vue-i18n';
 import debounce from 'debounce';
 
@@ -61,30 +63,99 @@ import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
 import { useBoundaryStore } from 'src/stores/boundaryStore';
 
-const props = defineProps<{
-  uuid?: string
-}>()
-
-const route = useRoute()
-const router = useRouter()
 const { t, locale } = useI18n();
-
 const boundaryStore = useBoundaryStore();
 
-const map = inject<Map>("map")
+const selectedReportUuid = useRouteParams<string | undefined>('uuid', undefined, {
+  transform: {
+    get: (v) => (!v || v === '' ? undefined : v),
+    set: (v) => (!v || v === '' ? '' : v)
+  }
+})
+const selectedReportType = useRouteParams<ReportType | undefined>('reportType', undefined, {
+  transform: {
+    get: (v) => (!v ? undefined : v),
+    set: (v) => (!v ? '' as ReportType : v)
+  }
+})
 
-const mosquitoLayers = ref<string[]>([])
-const breedingSitesLayers = ref<string[]>([])
-const biteLayer = ref(false)
+const mosquitoLayers = useRouteQuery('mosquitoes', '', {
+  transform: {
+    get: (v: string) => v ? v.split(',') : [],
+    set: v => v.join(','),
+  },
+})
+
+const breedingSitesLayers = useRouteQuery('breeding_sites', '', {
+  transform: {
+    get: (v: string) => v ? v.split(',') : [],
+    set: v => v.join(','),
+  },
+})
+
+const biteLayer = useRouteQuery('bites', 'false', {
+  transform: {
+    get: (v: string) => v === 'true',
+    set: v => v ? 'true' : 'false',
+  },
+})
+
+const samplingEffortLayer = useRouteQuery('sampling_effort', 'false', {
+  transform: {
+    get: (v: string) => v === 'true',
+    set: v => v ? 'true' : 'false',
+  },
+})
+
+const tagsQuery = useRouteQuery<string>('tags', '');
+const tags = computed<string[]>({
+  get() {
+    return tagsQuery.value ? tagsQuery.value.split(',') : [];
+  },
+  set(v) {
+    tagsQuery.value = v.join(',');
+  },
+});
+
+// Treat dates from useRouteQuery. See: https://github.com/vueuse/vueuse/issues/2663#issuecomment-1952493495
+// In JS [] === [] is false, and vue watch detect changes everytime.
+const fromDateQuery = useRouteQuery<string>('from', '');
+const fromDate = computed<Date | undefined>({
+  get() {
+    if (!fromDateQuery.value) return undefined;
+    return date.extractDate(fromDateQuery.value, 'YYYY-MM-DD');
+  },
+  set(val: Date | undefined) {
+    if (!val) {
+      fromDateQuery.value = '';
+      return;
+    }
+    fromDateQuery.value = date.formatDate(val, 'YYYY-MM-DD');
+  },
+})
+
+// Treat dates from useRouteQuery. See: https://github.com/vueuse/vueuse/issues/2663#issuecomment-1952493495
+// In JS [] === [] is false, and vue watch detect changes everytime.
+const toDateQuery = useRouteQuery<string>('to', '');
+const toDate = computed<Date | undefined>({
+  get() {
+    if (!toDateQuery.value) return undefined;
+    return date.extractDate(toDateQuery.value, 'YYYY-MM-DD');
+  },
+  set(val: Date | undefined) {
+    if (!val) {
+      toDateQuery.value = '';
+      return;
+    }
+    toDateQuery.value = date.formatDate(val, 'YYYY-MM-DD');
+  },
+})
+
+const map = inject<Map>("map")
 
 const numReportLayers = computed(() => {
   return mosquitoLayers.value.length + breedingSitesLayers.value.length + (biteLayer.value ? 1 : 0)
 })
-
-const samplingEffortLayer = ref(false)
-const tags = ref<string[]>([])
-const fromDate = ref()
-const toDate = ref()
 
 const visibleFeatures = ref([])
 const layerRef = ref()
@@ -150,20 +221,6 @@ onUnmounted(() => {
   map?.removeControl(searchControl)
 })
 
-const selectedReportUuid = ref(props.uuid)
-const selectedReportType = ref<ReportType>()
-watch(selectedReportUuid, async (newValue) => {
-  if (route.params.uuid === newValue) return
-
-  await router.replace({
-    name: route.name!,
-    params: {
-      ...route.params,
-      ...(newValue ? { uuid: newValue } : {})
-    }
-  })
-})
-
 const showAnalyticsDrawer = computed(() => !selectedReportUuid.value && numReportLayers.value > 0)
 
 watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
@@ -206,12 +263,12 @@ function handleTagsUpdate(value: string[]) {
   tags.value = value
 }
 function handleDateUpdate(value: DateRange) {
-  fromDate.value = value.from
-  toDate.value = value.to
+  fromDate.value = value.from ?? undefined
+  toDate.value = value.to ?? undefined
 }
 function handleSelectedFeatureUpdate(value: { id: string; type: ReportType } | undefined) {
-  selectedReportUuid.value = value?.id
-  selectedReportType.value = value?.type
+  selectedReportUuid.value = value?.id ?? undefined
+  selectedReportType.value = value?.type ?? undefined
 }
 
 </script>

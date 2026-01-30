@@ -7,10 +7,9 @@ const routes: RouteRecordRaw[] = [
     redirect: '/reports',
     children: [
       {
-        path: 'reports/:uuid?',
+        path: 'reports/:reportType?/:uuid?',
         name: 'reports',
         component: () => import('pages/ReportsPage.vue'),
-        props: true,
       },
       {
         path: 'discoveries/:speciesCode?',

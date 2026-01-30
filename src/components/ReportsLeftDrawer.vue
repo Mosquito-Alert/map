@@ -166,17 +166,13 @@
 
 <script lang="ts">
 
-// import { date } from 'quasar'
 import { useQuasar, exportFile } from 'quasar'
-import { ref, computed, watch, onMounted } from 'vue'
-// import { useRoute, useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from "vue-i18n"
 
 import InnerDrawer from 'src/components/InnerDrawer.vue'
 import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPresets.vue'
 import type { DateRange } from 'src/types/date'
-// import { watchEffect } from 'vue'
 
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
 import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
@@ -196,11 +192,46 @@ export default {
     'update-filters:tags',
     'update-filters:date'
   ],
+  props: {
+    enabledMosquitoes: {
+      type: Array as () => string[],
+      required: false,
+      default: () => []
+    },
+    enabledBites: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    enabledBreedingSites: {
+      type: Array as () => string[],
+      required: false,
+      default: () => []
+    },
+    enabledSamplingEffort: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    fromDate: {
+      type: Date,
+      required: false,
+      default: null
+    },
+    toDate: {
+      type: Date,
+      required: false,
+      default: null
+    },
+    tags: {
+      type: Array as () => string[],
+      required: false,
+      default: () => []
+    },
+  },
   setup(props, { emit }) {
     const $q = useQuasar()
     const { t } = useI18n()
-    const route = useRoute()
-    // const router = useRouter()
 
     const boundaryStore = useBoundaryStore();
 
@@ -208,31 +239,31 @@ export default {
     const mosquitoLayers = ref({
       albopictus: {
         name: ref(t('tiger_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('albopictus') || false,
         color: 'albopictus',
         icon: "fa fa-location-dot"
       },
       aegypti: {
         name: ref(t('yellow_fever_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('aegypti') || false,
         color: 'aegypti',
         icon: "fa fa-location-dot"
       },
       japonicus: {
         name: ref(t('asian_bush_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('japonicus') || false,
         color: 'japonicus',
         icon: "fa fa-location-dot"
       },
       koreicus: {
         name: ref(t('korean_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('koreicus') || false,
         color: 'koreicus',
         icon: "fa fa-location-dot"
       },
       culex: {
         name: ref(t('common_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('culex') || false,
         color: 'culex',
         icon: "fa fa-location-dot"
       }
@@ -241,13 +272,13 @@ export default {
     const otherSpeciesLayers = ref({
       unidentified: {
         name: ref(t('unidentified_mosquito')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('unidentified') || false,
         color: 'unidentified-mosquito',
         icon: 'fa fa-location-question'
       },
       other: {
         name: ref(t('other_species')),
-        enabled: false,
+        enabled: props.enabledMosquitoes?.includes('other') || false,
         color: 'other-species',
         icon: 'fa fa-location-pin'
       }
@@ -264,19 +295,19 @@ export default {
     const breedingSiteLayers = ref({
       stormDrainWater: {
         name: ref(t('storm_drain_water')),
-        enabled: false,
+        enabled: props.enabledBreedingSites?.includes('stormDrainWater') || false,
         color: 'breeding-site',
         icon: 'fa fa-droplet'
       },
       stormDrainDry: {
         name: ref(t('storm_drain_dry')),
-        enabled: false,
+        enabled: props.enabledBreedingSites?.includes('stormDrainDry') || false,
         color: 'breeding-site',
         icon: 'fa fa-droplet-slash'
       },
       other: {
         name: ref(t('other_sites')),
-        enabled: false,
+        enabled: props.enabledBreedingSites?.includes('other') || false,
         color: 'breeding-site',
         icon: 'fa fa-tank-water'
       }
@@ -289,20 +320,19 @@ export default {
       emit('update-layers:breeding-sites', newValue)
     })
 
-    const bitesEnabled = ref(false)
+    const bitesEnabled = ref(props.enabledBites)
     watch(bitesEnabled, (newValue) => {
       emit('update-layers:bites', newValue)
     })
-    const samplingEffortEnabled = ref(false)
+    const samplingEffortEnabled = ref(props.enabledSamplingEffort)
     watch(samplingEffortEnabled, (newValue) => {
       emit('update-layers:sampling-effort', newValue)
     })
 
     // FILTERS
-    // const selectedDateRange = ref<DateRange>({ 'from': null, 'to': null })
     const selectedDateRange = ref<DateRange>({
-      from: new Date(new Date().getFullYear(), 0, 1), // January 1st of current year
-      to: new Date() // today
+      from: props.fromDate,
+      to: props.toDate
     });
     watch(selectedDateRange, (newValue) => {
       emit('update-filters:date', newValue)
@@ -314,7 +344,7 @@ export default {
     const qPopupTag = ref()
     const qInputTag = ref()
     const inputTagText = ref()
-    const tagsSelected = ref<string[]>([])
+    const tagsSelected = ref<string[]>(props.tags || [])
     watch(tagsSelected, (newValue) => {
       emit('update-filters:tags', newValue)
     }, { deep: true })
@@ -452,69 +482,6 @@ export default {
         }
       });
     }
-
-    onMounted(() => {
-      // Init mosquito layer depending on the route query params
-      // const mosquitoLayersToEnable = route.query.mosquitoes?.split(',')
-      // if (mosquitoLayersToEnable !== undefined) {
-      //   Object.keys(mosquitoLayers.value).forEach(key => {
-      //     mosquitoLayers.value[key].enabled = mosquitoLayersToEnable.includes(key)
-      //   })
-      // }
-
-      // Init breeding sites layer depending on the route query params
-      // const breedingSitesLayersToEnable = route.query.breeding_sites?.split(',')
-      // if (breedingSitesLayersToEnable !== undefined) {
-      //   Object.keys(breedingSiteLayers.value).forEach(key => {
-      //     breedingSiteLayers.value[key].enabled = breedingSitesLayersToEnable.includes(key)
-      //   })
-      // }
-
-      // Init bites layer depending on the route query params
-      if (route.query.bites !== undefined) {
-        bitesEnabled.value = route.query.bites === 'true'
-      }
-
-      // Init sampling effort layer depending on the route query params
-      if (route.query.sampling_effort !== undefined) {
-        samplingEffortEnabled.value = route.query.sampling_effort === 'true'
-      }
-
-      // Init date filter
-      // if (route.query.from !== undefined) {
-      //   selectedDateRange.value = {
-      //     'from': new Date(route.query.from),
-      //     'to': new Date(route.query.to || date.formatDate(new Date(), 'YYYY/MM/DD'))
-      //   }
-      // }
-
-      // Init tags filter
-      // const tagsToEnable = route.query.tags?.split(',')
-      // if (tagsToEnable !== undefined) {
-      //   tagsSelected.value = tagsToEnable
-      // }
-    })
-
-    // watchEffect(() => {
-    //   router.push({
-    //     ...route,
-    //     params: {
-    //       ...route.params
-    //     },
-    //     query: {
-    //       ...route.query,
-    //       ...{
-    //         mosquitoes: mosquitoSelected.value.join(',') || undefined,
-    //         breeding_sites: breedingSitesSelected.value?.join(',') || undefined,
-    //         bites: bitesEnabled.value || undefined,
-    //         sampling_effort: samplingEffortEnabled.value || undefined,
-    //         from: date.formatDate(selectedDateRange.value?.from, 'YYYY/MM/DD') || undefined,
-    //         to: date.formatDate(selectedDateRange.value?.to, 'YYYY/MM/DD') || undefined,
-    //         tags: tagsSelected.value?.join(',') || undefined
-    //       }
-    //     }
-    //   })
-    // })
 
     return {
       mosquitoLayers,
