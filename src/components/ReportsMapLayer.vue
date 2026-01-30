@@ -17,7 +17,6 @@
 
     <ObservationMapLayer :visible="otherSpecies" :taxon_ids="mosquitoTaxonIds.other" negate
       :color="colors.getPaletteColor('other-species')" :from-date="fromDate" :to-date="toDate" :tags="tags" />
-
     <!-- Breeding sites Layers -->
     <BreedingSiteMapLayer :visible="stormDrainWater" :siteTypes="breedingSiteTypes.stormDrain" :hasWater="true"
       :from-date="fromDate" :to-date="toDate" :tags="tags" />
@@ -71,7 +70,7 @@ withDefaults(defineProps<{
   samplingEffort?: boolean,
   tags?: string[],
   fromDate?: Date,
-  toDate?: Date
+  toDate?: Date,
 }>(), {
   albopictus: false,
   aegypti: false,

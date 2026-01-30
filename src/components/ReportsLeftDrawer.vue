@@ -168,7 +168,7 @@
 
 // import { date } from 'quasar'
 import { useQuasar, exportFile } from 'quasar'
-import { ref, computed, watch, onMounted, inject } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 // import { useRoute, useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { useI18n } from "vue-i18n"
@@ -178,14 +178,10 @@ import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPreset
 import type { DateRange } from 'src/types/date'
 // import { watchEffect } from 'vue'
 
-import type { Map } from 'ol'
-import GeoJSON from 'ol/format/GeoJSON'
-import type Polygon from 'ol/geom/Polygon';
-import type MultiPolygon from 'ol/geom/MultiPolygon';
-
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'
 import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
 import type { AxiosResponse, AxiosProgressEvent } from 'axios'
+import { useBoundaryStore } from 'src/stores/boundaryStore'
 
 export default {
   components: {
@@ -200,19 +196,13 @@ export default {
     'update-filters:tags',
     'update-filters:date'
   ],
-  props: {
-    selectedLocationPolygon: {
-      type: Object as () => Polygon | MultiPolygon | null,
-      default: null
-    }
-  },
   setup(props, { emit }) {
     const $q = useQuasar()
     const { t } = useI18n()
     const route = useRoute()
     // const router = useRouter()
 
-    const map = inject<Map>('map')
+    const boundaryStore = useBoundaryStore();
 
     // LAYERS
     const mosquitoLayers = ref({
@@ -347,17 +337,14 @@ export default {
       downloadProgress.value.bites.loading = true;
       downloadProgress.value.bites.percentage = 0;
 
+      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+
       await bitesApi.list({
         format: 'csv',
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
         tags: tagsSelected.value.length ? tagsSelected.value : undefined,
-        withinGeom: props.selectedLocationPolygon
-          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map!.getView().getProjection()
-          }))
-          : undefined
+        boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {
@@ -380,18 +367,15 @@ export default {
       const taxonIds = mosquitoSelected.value == Object.keys(mosquitoLayers.value) ? undefined :
         mosquitoSelected.value.map(key => mosquitoTaxonIds[key]).flat();
 
+      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+
       await observationsApi.list({
         format: 'csv',
         identificationTaxonIds: taxonIds?.length ? taxonIds.map(String) : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
         tags: tagsSelected.value.length ? tagsSelected.value : undefined,
-        withinGeom: props.selectedLocationPolygon
-          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map!.getView().getProjection()
-          }))
-          : undefined
+        boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {
@@ -422,18 +406,15 @@ export default {
         return [];
       }).flat();
 
+      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+
       await breedingSitesApi.list({
         format: 'csv',
         siteType: breedingSiteTypesSelected.length ? breedingSiteTypesSelected : undefined,
         receivedAtAfter: selectedDateRange.value.from ? selectedDateRange.value.from.toISOString() : undefined,
         receivedAtBefore: selectedDateRange.value.to ? selectedDateRange.value.to.toISOString() : undefined,
         tags: tagsSelected.value.length ? tagsSelected.value : undefined,
-        withinGeom: props.selectedLocationPolygon
-          ? JSON.stringify(new GeoJSON().writeGeometryObject(props.selectedLocationPolygon, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map!.getView().getProjection()
-          }))
-          : undefined
+        boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
       }, {
         onDownloadProgress: (event: AxiosProgressEvent) => {
           if (event.total) {

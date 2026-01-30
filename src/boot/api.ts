@@ -7,6 +7,7 @@ import {
   BreedingSitesApi,
   ObservationsApi,
   TaxaApi,
+  BoundariesApi,
 } from 'mosquito-alert';
 
 const apiConfig = new Configuration({
@@ -19,6 +20,7 @@ const taxaApi = new TaxaApi(apiConfig, undefined, axiosInstance);
 const bitesApi = new BitesApi(apiConfig, undefined, axiosInstance);
 const breedingSitesApi = new BreedingSitesApi(apiConfig, undefined, axiosInstance);
 const observationsApi = new ObservationsApi(apiConfig, undefined, axiosInstance);
+const boundariesApi = new BoundariesApi(apiConfig, undefined, axiosInstance);
 
 export default boot(({ app }) => {
   const i18n = app.config.globalProperties.$i18n;
@@ -39,7 +41,8 @@ export default boot(({ app }) => {
     bitesApi,
     breedingSitesApi,
     observationsApi,
+    boundariesApi,
   };
 });
 
-export { taxaApi, bitesApi, breedingSitesApi, observationsApi };
+export { taxaApi, bitesApi, breedingSitesApi, observationsApi, boundariesApi };

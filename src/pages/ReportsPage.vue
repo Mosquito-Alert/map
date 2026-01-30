@@ -1,6 +1,5 @@
 <template>
-  <ReportLeftDrawer :selectedLocationPolygon="selectedLocationPolygon"
-    @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
+  <ReportLeftDrawer @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
     @update-layers:breeding-sites="handleBreedingSitesLayerUpdate" @update-layers:bites="handleBitesLayerUpdate"
     @update-layers:sampling-effort="handleSamplingEffortLayerUpdate" @update-filters:tags="handleTagsUpdate"
     @update-filters:date="handleDateUpdate" />
@@ -18,18 +17,16 @@
   <ReportsFeatureDetail v-if="selectedReportUuid" :report-uuid="selectedReportUuid" :report-type="selectedReportType!"
     :key="selectedReportUuid" @close="selectedReportUuid = undefined" />
 
-  <Teleport v-if="!!selectedLocationPolygon" defer to=".ol-overlaycontainer-stopevent">
-    <q-chip :model-value="!!selectedLocationPolygon" removable clickable class="ol-search all-pointer-events"
-      color="primary" text-color="white" icon="location_on" :label="selectedLocationName"
-      @remove="selectedLocationPolygon = null" />
+  <Teleport v-if="!!boundaryStore.getPolygon" defer to=".ol-overlaycontainer-stopevent">
+    <q-chip :model-value="!!boundaryStore.getPolygon" removable clickable class="ol-search all-pointer-events"
+      color="primary" text-color="white" icon="location_on" :label="boundaryStore.getBoundaryName || ''"
+      @remove="boundaryStore.setPolygon(null)" />
   </Teleport>
 
   <ol-vector-layer :visible="true" :opacity="1">
     <ol-source-vector>
-      <ol-feature v-if="!!selectedLocationPolygon">
-        <ol-geom-polygon v-if="selectedLocationIsPolygon" :coordinates="selectedLocationPolygon.getCoordinates()" />
-        <ol-geom-multi-polygon v-else-if="selectedLocationIsMultiPolygon"
-          :coordinates="selectedLocationPolygon.getCoordinates()" />
+      <ol-feature v-if="!!boundaryStore.getPolygon">
+        <component :is="geometryComponent" :coordinates="boundaryStore.getPolygon.getCoordinates()" />
         <ol-style>
           <ol-style-stroke :color="colors.getPaletteColor('primary')" :width="2" />
           <ol-style-fill :color="colors.getPaletteColor('primary') + '33'" />
@@ -62,6 +59,7 @@ import ReportsAnalyticsDrawer from 'src/components/ReportsAnalyticsDrawer.vue'
 import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
 import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
+import { useBoundaryStore } from 'src/stores/boundaryStore';
 
 export default {
   components: {
@@ -80,6 +78,8 @@ export default {
     const route = useRoute()
     const router = useRouter()
     const { t, locale } = useI18n();
+
+    const boundaryStore = useBoundaryStore();
 
     const map = inject<Map>("map")
 
@@ -101,10 +101,11 @@ export default {
 
     const analyticsDrawerVisible = ref(true)
 
-    const selectedLocationPolygon = ref<Polygon | MultiPolygon | null>()
-    const selectedLocationName = ref<string>()
-    const selectedLocationIsPolygon = computed(() => selectedLocationPolygon.value instanceof Polygon);
-    const selectedLocationIsMultiPolygon = computed(() => selectedLocationPolygon.value instanceof MultiPolygon);
+    const geometryComponent = computed(() => {
+      if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon';
+      if (boundaryStore.getPolygon instanceof MultiPolygon) return 'ol-geom-multi-polygon';
+      return null; // fallback if needed
+    });
 
     const geoJson = new GeoJSON()
     const searchControl = new SearchNominatim({
@@ -125,12 +126,11 @@ export default {
             featureProjection: map!.getView().getProjection()
           }
         );
-        selectedLocationName.value = e.search.name;
-        if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
-          selectedLocationPolygon.value = geometry;
-        } else {
-          selectedLocationPolygon.value = null;
-        }
+        boundaryStore.setPolygon(
+          geometry as Polygon | MultiPolygon,
+          map!.getView().getProjection(),
+          e.search.name
+        );
       }
     })
     // Disable attribution copy
@@ -144,13 +144,13 @@ export default {
       return data
     }
 
-    watch(selectedLocationPolygon, (newValue) => {
+    watch(() => boundaryStore.getPolygon, (newValue) => {
       if (!newValue) {
         map?.addControl(searchControl)
       } else {
         map?.removeControl(searchControl)
       }
-    })
+    });
 
     onMounted(() => {
       map?.addControl(searchControl)
@@ -214,10 +214,8 @@ export default {
       analyticsDrawerVisible,
       selectedReportUuid,
       selectedReportType,
-      selectedLocationPolygon,
-      selectedLocationName,
-      selectedLocationIsPolygon,
-      selectedLocationIsMultiPolygon,
+      boundaryStore,
+      geometryComponent,
       colors,
       handleMosquitoesLayerUpdate(value: string[]) {
         mosquitoLayers.value = value
