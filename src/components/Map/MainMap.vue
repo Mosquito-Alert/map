@@ -1,7 +1,7 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <div class="absolute bottom-10 right-2 z-10 flex flex-row items-end">
+      <div class="absolute bottom-10 right-2 z-10 flex flex-row items-end pointer-events-none">
         <TimeSeries :timeSeriesData="originalDateAggregationData" />
         <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors[currentResolution as number]" />
       </div>
@@ -21,7 +21,6 @@ import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
 import { debounce } from '../../utils/debouncer'
 import { MessageType } from '../../workers/h3Aggregation.worker'
-import { observationsApi } from '../../services/apiService'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',

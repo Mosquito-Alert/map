@@ -1,11 +1,12 @@
 <template>
   <ScrollPanel
     :pt="{
-      barY: 'bg-gray-300 ',
+      barY: 'bg-gray-300',
       root: 'overflow-y-auto',
+      content: 'mb-0 !pb-0 !',
     }"
   >
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col space-y-2">
       <TaxonSelector v-if="!taxaStore.taxonSelected" />
       <MosquitoDetail v-else />
       <VariablesLayers />

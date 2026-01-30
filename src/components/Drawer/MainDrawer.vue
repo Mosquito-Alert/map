@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 h-[calc(100vh-2rem)] sm:w-[30%] mx-auto px-4 my-4"
+    class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[30%] mx-auto pl-4 mt-4"
   >
     <Summary />
     <SelectButton
@@ -28,7 +28,7 @@
         </div>
       </template>
     </SelectButton>
-    <ScrollableDrawer />
+    <ScrollableDrawer class="overflow-y-auto flex-1 mb-0 p-0" />
   </aside>
 </template>
 <script lang="ts" setup>

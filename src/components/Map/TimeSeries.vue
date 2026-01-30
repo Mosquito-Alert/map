@@ -4,7 +4,7 @@
       class="dates-controller inline-flex flex-nowrap items-center gap-6 px-3 py-2 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md"
       :class="showChart ? 'mb-4' : 'mb-0'"
     >
-      <div class="dates whitespace-nowrap">
+      <div class="dates whitespace-nowrap pointer-events-auto">
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.start || '') }}</span>
         -
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
@@ -21,7 +21,7 @@
       </div>
     </div>
     <div
-      class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg"
+      class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto"
       v-if="showChart"
     >
       <div class="w-full flex items-end justify-end">
