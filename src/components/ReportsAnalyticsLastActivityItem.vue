@@ -14,7 +14,7 @@
         <span v-if="report" class="q-pr-xs">{{ title }}</span>
         <q-skeleton v-else type="text" width="65%" />
       </q-item-label>
-      <q-item-label caption lines="2">
+      <q-item-label v-if="report?.location?.display_name !== null" caption lines="2">
         <div class="row items-center no-wrap">
           <q-icon class="q-pr-xs" name="fa fa-light fa-location-pin" />
           <span class="col-auto" v-if="report">{{ report?.location.display_name?.split(',')[0] }}</span>
