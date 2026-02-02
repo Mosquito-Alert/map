@@ -61,7 +61,7 @@ export default {
     const basemapRef = ref()
     const projection = ref('EPSG:3857')
 
-    const latitude = useRouteQuery('lat', '0', {
+    const latitude = useRouteQuery('lat', '42', {
       transform: {
         get: (v: string) => Number(v),
         set: (v: number) => v.toFixed(5).toString()
@@ -73,7 +73,7 @@ export default {
         set: (v: number) => v.toFixed(5).toString()
       }
     })
-    const zoom = useRouteQuery('zoom', '3.00', {
+    const zoom = useRouteQuery('zoom', '4.00', {
       transform: {
         get: (v: string) => Number(v),
         set: (v: number) => v.toFixed(2).toString()
