@@ -28,8 +28,8 @@
     <BiteMapLayer :visible="bites" :from-date="fromDate" :to-date="toDate" :tags="tags" />
   </ol-layer-group>
 
-  <ol-interaction-select @select="featureHovered" :condition="hoverCondition" :filter="selectInteractionFilter" />
-  <ol-interaction-select @select="featureClicked" :condition="clickCondition" :filter="selectInteractionFilter" />
+  <ol-interaction-select @select="handleFeatureHovered" :condition="hoverCondition" :filter="selectInteractionFilter" />
+  <ol-interaction-select @select="handleFeatureClicked" :condition="clickCondition" :filter="selectInteractionFilter" />
 </template>
 
 <script setup lang="ts">
@@ -93,7 +93,7 @@ function selectInteractionFilter(feature: Feature, layer: Layer) {
   return layerGroupRef.value?.layerGroup.getLayersArray().includes(layer);
 }
 
-function featureHovered(event: SelectEvent) {
+function handleFeatureHovered(event: SelectEvent) {
   event.selected.forEach(feature => {
     feature.set('hover', 1)
   })
@@ -103,7 +103,7 @@ function featureHovered(event: SelectEvent) {
 
 }
 
-async function featureClicked(event: SelectEvent) {
+async function handleFeatureClicked(event: SelectEvent) {
   const selectedFeature = event.selected?.[0] as Feature | null;
   if (!selectedFeature) {
     reportMapStore.selectedReport = null;
