@@ -2,7 +2,7 @@
 
   <!-- MAP -->
   <ol-map ref='mapRef' class="absolute-full" :loadTilesWhileAnimating='true' :loadTilesWhileInteracting='true'>
-    <ol-view :projection="projection" :constrainResolution='true' :maxZoom=17 :center="center" :zoom="localZoom"
+    <ol-view :projection="projection" :constrainResolution='true' :maxZoom=24 :center="center" :zoom="localZoom"
       @change:center="setCenter($event.target.getCenter())" @change:resolution="zoom = $event.target.getZoom()" />
 
     <ol-tile-layer ref="basemapRef">
