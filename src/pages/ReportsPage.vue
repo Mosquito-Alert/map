@@ -175,6 +175,9 @@ const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
 
 onMounted(() => {
   map?.on('moveend', debouncedUpdate)
+  if (mosquitoLayers.value.length == 0) {
+    mosquitoLayers.value = ['albopictus', 'culex']
+  }
 })
 
 onUnmounted(() => {
