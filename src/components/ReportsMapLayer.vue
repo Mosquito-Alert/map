@@ -28,8 +28,10 @@
     <BiteMapLayer :visible="bites" :from-date="fromDate" :to-date="toDate" :tags="tags" />
   </ol-layer-group>
 
-  <ol-interaction-select @select="handleFeatureHovered" :condition="hoverCondition" :filter="selectInteractionFilter" />
-  <ol-interaction-select @select="handleFeatureClicked" :condition="clickCondition" :filter="selectInteractionFilter" />
+  <ol-interaction-select @select="handleFeatureHovered" :condition="hoverCondition" :filter="selectInteractionFilter"
+    :hitTolerance="50" />
+  <ol-interaction-select @select="handleFeatureClicked" :condition="clickCondition" :filter="selectInteractionFilter"
+    :hitTolerance="50" />
 </template>
 
 <script setup lang="ts">
