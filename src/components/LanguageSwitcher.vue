@@ -15,6 +15,7 @@
 
 import { useQuasar } from 'quasar'
 import languages from 'quasar/lang/index.json'
+import { useRouteParams } from '@vueuse/router';
 
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -25,10 +26,22 @@ export default {
     const $q = useQuasar()
     const { locale } = useI18n({ useScope: 'global' })
 
+    const localeQuery = useRouteParams<string>('locale')
+    watch(localeQuery, (newValue) => {
+      if (!newValue) {
+        newValue = 'en-US'
+      }
+      if (newValue && newValue in enabledLanguages && locale.value !== newValue) {
+        locale.value = newValue as keyof typeof enabledLanguages
+      }
+    }, { immediate: true })
+
     watch(locale, async (newValue,) => {
       // Both vue-i18n and quasar app must be set.
       await import(`../../node_modules/quasar/lang/${newValue}.js`).then(lang => {
         $q.lang.set(lang.default)
+        $q.cookies.set('language', newValue, { path: '/', secure: false })
+        localeQuery.value = newValue
       })
     })
 

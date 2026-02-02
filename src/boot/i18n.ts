@@ -1,8 +1,10 @@
 import { defineBoot } from '#q-app/wrappers';
-import { Lang } from 'quasar';
+import { Lang, Cookies } from 'quasar';
 import { createI18n } from 'vue-i18n';
 
 import messages from 'src/i18n';
+
+export const DEFAULT_LOCALE = Cookies.get('language') || Lang.getLocale() || 'en-US';
 
 export type MessageLanguages = keyof typeof messages;
 // Type-define 'en-US' as the master schema for the resource
@@ -22,15 +24,15 @@ declare module 'vue-i18n' {
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
-export default defineBoot(({ app }) => {
-  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: Lang.getLocale() || 'en-US',
-    fallbackLocale: 'en-US',
-    globalInjection: true,
-    legacy: false,
-    messages,
-  });
+export const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
+  locale: DEFAULT_LOCALE,
+  fallbackLocale: 'en-US',
+  globalInjection: true,
+  legacy: false,
+  messages,
+});
 
+export default defineBoot(({ app }) => {
   // Set i18n instance on app
   app.use(i18n);
 });
