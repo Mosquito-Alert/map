@@ -1,5 +1,5 @@
 <template>
-  <q-drawer :model-value="visibleLocal" side='right' class="column full-height"
+  <q-drawer :model-value="visibleLocal" behavior="desktop" side='right' class="column full-height"
     style="overflow-x: hidden; height: 300px" :width="width">
     <q-scroll-area class="col q-pa-sm">
       <h6 class="text-primary text-capitalize q-my-sm">Summary</h6>

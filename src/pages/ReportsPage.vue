@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { date } from 'quasar'
+import { date, useQuasar } from 'quasar'
 
 import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useRouteParams, useRouteQuery } from '@vueuse/router';
@@ -41,6 +41,8 @@ import LocationSearchBar from 'src/components/LocationSearchBar.vue';
 import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
 import { useReportMapStore } from 'src/stores/reportMapStore';
+
+const $q = useQuasar()
 
 const reportMapStore = useReportMapStore();
 
@@ -151,7 +153,7 @@ const numReportLayers = computed(() => {
 const visibleFeatures = ref([])
 const layerRef = ref()
 
-const analyticsDrawerVisible = ref(true)
+const analyticsDrawerVisible = ref(!$q.platform.is.mobile)
 
 const showAnalyticsDrawer = computed(() => !reportMapStore.selectedReport && numReportLayers.value > 0)
 
