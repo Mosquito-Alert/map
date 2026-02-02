@@ -15,7 +15,10 @@ const routes: RouteRecordRaw[] = [
       const pathParts = to.path.split('/').filter(Boolean); // split and remove empty parts
 
       // Check if first part is a locale
-      const firstPart = pathParts[0];
+      let firstPart = pathParts[0];
+      if (firstPart === 'en') {
+        firstPart = 'en-US';
+      }
       if (firstPart && LOCALES.includes(firstPart as (typeof LOCALES)[number])) {
         next(); // already has locale at start, continue
         return;
