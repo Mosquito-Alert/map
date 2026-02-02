@@ -5,18 +5,18 @@
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
         name="fa fa-badge-check" color="white">
         <q-tooltip anchor="top middle" self="center middle">
-          Confirmed by the experts
+          {{ $t('expert_confirmed') }}
         </q-tooltip>
       </q-icon>
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Ai"
         name="fa fa-microchip-ai" color="white">
         <q-tooltip anchor="top middle" self="center middle">
-          Identified by AI model
+          {{ $t('ai_identified') }}
         </q-tooltip>
       </q-icon>
     </template>
     <template v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert" #extraTab>
-      <q-tab name="review" label="Review" />
+      <q-tab name="review" :label="$t('review')" />
     </template>
     <template v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
       #extraTabPanel>
@@ -28,16 +28,16 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                Experts community
+                {{ $t('expert_community') }}
               </q-item-label>
               <q-item-label caption>
-                Project member
+                {{ $t('project_member') }}
               </q-item-label>
             </q-item-section>
           </q-item>
           <q-card-section>
             <div class="row q-mb-sm">
-              <span class="text-body2 text-uppercase text-grey-7">Confidence level:</span>
+              <span class="text-body2 text-uppercase text-grey-7">{{ $t('confidence_level') }}:</span>
               <q-rating :model-value="observation.identification?.result?.is_high_confidence ? 3 : 2" :max='3' readonly
                 color="primary" icon="fa fa-light fa-circle-check" size="xs" class="q-ml-xs" />
             </div>

@@ -1,14 +1,16 @@
 <template>
   <inner-drawer :title="$t('exposure_risk')">
-    <q-select label="Select species" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
-      :options="vectorOptions" option-value="code" option-label="label" color="primary" emit-value map-options
-      v-model="selectedSpeciesCode" @update:model-value="selectedDate = undefined" />
-    <q-input label="Month / Year" class='text-capitalize' :label-color="selectedDate ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
-      :disable="!selectedSpeciesCode" :model-value="selectedDateString" readonly>
+    <q-select :key="$i18n.locale" :label="$t('select_species')"
+      :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'" :options="vectorOptions" option-value="code"
+      option-label="label" color="primary" emit-value map-options v-model="selectedSpeciesCode"
+      @update:model-value="selectedDate = undefined" />
+    <q-input :label="$t('month') + ' / ' + $t('year')" class='text-capitalize'
+      :label-color="selectedDate ? 'primary' : 'rgba(0, 0, 0, 0.6)'" :disable="!selectedSpeciesCode"
+      :model-value="selectedDateString" readonly>
       <template v-slot:append>
         <q-icon name="event" class="cursor-pointer" color="primary">
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-            <q-date title="Select model date" :navigation-min-year-month="minYearMonthPickerValue"
+            <q-date :title="$t('select_month')" :navigation-min-year-month="minYearMonthPickerValue"
               :navigation-max-year-month="maxYearMonthPickerValue" default-view="Years" color="primary"
               years-in-month-view emit-immediately mask="YYYY/MM" v-model="qDateModel"
               @update:model-value="dateUpdated" />
@@ -21,7 +23,7 @@
       <!-- LAYER CONTROLS -->
       <div v-show="selectedSpeciesCode" class="q-mt-xl">
         <div class="row">
-          <span class="text-weight-light text-uppercase text-grey-7">Layer Controls</span>
+          <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layer_controls') }}</span>
           <q-space />
           <q-btn-group flat stretch class="bg-grey-1">
             <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
@@ -29,7 +31,7 @@
         </div>
         <div class="row bg-grey-3 rounded-borders q-pa-sm">
           <div class="col-9">
-            <q-badge :outline="!visibleLayer" color="primary" label="Opacity" />
+            <q-badge :outline="!visibleLayer" color="primary" :label="$t('opacity')" />
             <q-slider v-model="opacityLayer" :min="0" :max="1" :step="0.05" color="primaray" label />
           </div>
           <q-toggle v-model="visibleLayer" class="col" checked-icon="check" color="primaray" size="lg" />
@@ -41,9 +43,9 @@
         <div class="q-ma-xs">
           <!-- LABELS -->
           <div class="row justify-between q-mt-lg">
-            <span>Low</span>
-            <span>Medium</span>
-            <span>High</span>
+            <span>{{ $t('low') }}</span>
+            <span>{{ $t('medium') }}</span>
+            <span>{{ $t('high') }}</span>
           </div>
           <!-- PALETTE -->
           <div class="row" :style="{ 'opacity': opacityLayer, 'height': '25px' }">
@@ -54,7 +56,7 @@
         <!-- FILTERS -->
         <q-separator class='q-my-lg' inset />
         <div>
-          <span class="text-weight-light text-uppercase text-grey-7">Filters</span>
+          <span class="text-weight-light text-uppercase text-grey-7">{{ $t('filters') }}</span>
           <div class="bg-grey-3 rounded-borders">
             <q-list>
               <!-- CERTAINTY FILTER -->
@@ -62,7 +64,7 @@
                 <q-item-section avatar class="column flex-center">
                   <q-icon name="fas fa-handshake" color="primary" />
                   <q-item-label class="text-grey-8">
-                    Certainty
+                    {{ $t('certainty') }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section>
@@ -199,12 +201,12 @@ watch(
 const vectorOptions = computed(() => {
   return [
     // Code is used also for building the CSV urls paths.
-    { code: 'albopictus', label: 'Tiger mosquito' },
-    { code: 'aegypti', label: 'Yellow fever mosquito' },
-    { code: 'japonicus', label: 'Japonicus mosquito' },
-    { code: 'koreicus', label: 'Koreicus mosquito' },
-    { code: 'culex', label: 'Culex mosquito' },
-    { code: 'biting', label: 'Bites' }
+    { code: 'albopictus', label: t('tiger_mosquito') },
+    { code: 'aegypti', label: t('yellow_fever_mosquito') },
+    { code: 'japonicus', label: t('asian_bush_mosquito') },
+    { code: 'koreicus', label: t('korean_mosquito') },
+    { code: 'culex', label: t('common_mosquito') },
+    { code: 'biting', label: t('bites') }
   ]
 })
 

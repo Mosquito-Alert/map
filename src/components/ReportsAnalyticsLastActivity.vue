@@ -1,6 +1,6 @@
 <template>
   <q-expansion-item v-if="lastFeatureIds.length !== 0" default-opened
-    header-class="text-h6 text-primary text-capitalize" label="Recent activity">
+    header-class="text-h6 text-primary text-capitalize" :label="$t('recent_activity')">
     <q-card flat>
       <q-virtual-scroll style="max-height: 200px; overflow-x: hidden" virtual-scroll-slice-size="4"
         virtual-scroll-item-size="56" :items-size="lastFeatureIds.length"

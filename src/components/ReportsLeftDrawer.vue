@@ -29,13 +29,13 @@
           <q-card-section class="column">
             <div class="row">
               <q-chip v-for="(item, index) in mosquitoLayers" :key="index" v-model:selected="item.enabled"
-                class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+                class="no-shadow" :label="$t(item.name_key)" :color="item.enabled ? item.color : 'grey-3'"
                 :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
             </div>
             <q-separator inset />
             <div class='row'>
               <q-chip v-for="(item, index) in otherSpeciesLayers" :key="index" v-model:selected="item.enabled"
-                class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+                class="no-shadow" :label="$t(item.name_key)" :color="item.enabled ? item.color : 'grey-3'"
                 :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
             </div>
           </q-card-section>
@@ -65,7 +65,7 @@
         <q-card>
           <q-card-section>
             <q-chip v-for="(item, index) in breedingSiteLayers" :key="index" v-model:selected="item.enabled"
-              class="no-shadow" :label="item.name" :color="item.enabled ? item.color : 'grey-3'"
+              class="no-shadow" :label="$t(item.name_key)" :color="item.enabled ? item.color : 'grey-3'"
               :text-color="item.enabled ? 'white' : 'grey-14'" :icon-selected="item.icon" />
           </q-card-section>
         </q-card>
@@ -238,31 +238,31 @@ export default {
     // LAYERS
     const mosquitoLayers = ref({
       albopictus: {
-        name: ref(t('tiger_mosquito')),
+        name_key: 'tiger_mosquito',
         enabled: props.enabledMosquitoes?.includes('albopictus') || false,
         color: 'albopictus',
         icon: "fa fa-location-dot"
       },
       aegypti: {
-        name: ref(t('yellow_fever_mosquito')),
+        name_key: 'yellow_fever_mosquito',
         enabled: props.enabledMosquitoes?.includes('aegypti') || false,
         color: 'aegypti',
         icon: "fa fa-location-dot"
       },
       japonicus: {
-        name: ref(t('asian_bush_mosquito')),
+        name_key: 'asian_bush_mosquito',
         enabled: props.enabledMosquitoes?.includes('japonicus') || false,
         color: 'japonicus',
         icon: "fa fa-location-dot"
       },
       koreicus: {
-        name: ref(t('korean_mosquito')),
+        name_key: 'korean_mosquito',
         enabled: props.enabledMosquitoes?.includes('koreicus') || false,
         color: 'koreicus',
         icon: "fa fa-location-dot"
       },
       culex: {
-        name: ref(t('common_mosquito')),
+        name_key: 'common_mosquito',
         enabled: props.enabledMosquitoes?.includes('culex') || false,
         color: 'culex',
         icon: "fa fa-location-dot"
@@ -271,13 +271,13 @@ export default {
 
     const otherSpeciesLayers = ref({
       unidentified: {
-        name: ref(t('unidentified_mosquito')),
+        name_key: 'unidentified_mosquito',
         enabled: props.enabledMosquitoes?.includes('unidentified') || false,
         color: 'unidentified-mosquito',
         icon: 'fa fa-location-question'
       },
       other: {
-        name: ref(t('other_species')),
+        name_key: 'other_species',
         enabled: props.enabledMosquitoes?.includes('other') || false,
         color: 'other-species',
         icon: 'fa fa-location-pin'
@@ -294,19 +294,19 @@ export default {
 
     const breedingSiteLayers = ref({
       stormDrainWater: {
-        name: ref(t('storm_drain_water')),
+        name_key: 'storm_drain_water',
         enabled: props.enabledBreedingSites?.includes('stormDrainWater') || false,
         color: 'breeding-site',
         icon: 'fa fa-droplet'
       },
       stormDrainDry: {
-        name: ref(t('storm_drain_dry')),
+        name_key: 'storm_drain_dry',
         enabled: props.enabledBreedingSites?.includes('stormDrainDry') || false,
         color: 'breeding-site',
         icon: 'fa fa-droplet-slash'
       },
       other: {
-        name: ref(t('other_sites')),
+        name_key: 'other_sites',
         enabled: props.enabledBreedingSites?.includes('other') || false,
         color: 'breeding-site',
         icon: 'fa fa-tank-water'

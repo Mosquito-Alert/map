@@ -1,12 +1,12 @@
 <template>
   <inner-drawer :title="$t('discoveries')">
-    <q-select label="Select species" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
+    <q-select :label="$t('select_species')" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
       :options="vectorOptions" option-value="code" option-label="label" color="primary" emit-value map-options
       v-model="selectedSpeciesCode" />
     <!-- LAYER CONTROLS -->
     <div v-show="selectedSpeciesCode" class="q-mt-xl">
       <div class="row">
-        <span class="text-weight-light text-uppercase text-grey-7">Layer Controls</span>
+        <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layer_controls') }}</span>
         <q-space />
         <q-btn-group flat stretch class="bg-grey-1">
           <q-btn icon="fa fat fa-info" size="xs" @click="showInfoDialog()" />
@@ -16,7 +16,7 @@
       </div>
       <div class="row bg-grey-3 rounded-borders q-pa-sm">
         <div class="col-9">
-          <q-badge :outline="!visibleLayer" color="primary" label="Opacity" />
+          <q-badge :outline="!visibleLayer" color="primary" :label="$t('opacity')" />
           <q-slider v-model="opacityLayer" :min="0" :max="1" :step="0.05" color="primaray" label />
         </div>
         <q-toggle v-model="visibleLayer" class="col" checked-icon="check" color="primaray" size="lg" />
@@ -55,10 +55,10 @@ const downloadProgress = ref({
 const vectorOptions = computed(() => {
   return [
     // Code is the MVT property
-    { code: 'albopictus', label: 'Tiger mosquito' },
-    { code: 'aegypti', label: 'Yellow fever mosquito' },
-    { code: 'japonicus', label: 'Japonicus mosquito' },
-    { code: 'koreicus', label: 'Koreicus mosquito' }
+    { code: 'albopictus', label: t('tiger_mosquito') },
+    { code: 'aegypti', label: t('yellow_fever_mosquito') },
+    { code: 'japonicus', label: t('asian_bush_mosquito') },
+    { code: 'koreicus', label: t('korean_mosquito') }
   ]
 })
 

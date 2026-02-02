@@ -2,10 +2,10 @@
   <q-drawer :model-value="visibleLocal" behavior="desktop" side='right' class="column full-height"
     style="overflow-x: hidden; height: 300px" :width="width">
     <q-scroll-area class="col q-pa-sm">
-      <h6 class="text-primary text-capitalize q-my-sm">Summary</h6>
+      <h6 class="text-primary text-capitalize q-my-sm">{{ $t('summary') }}</h6>
       <div class="column q-pa-xs">
         <div class="row text-uppercase">
-          <span class="text-grey">Total reports</span>
+          <span class="text-grey">{{ $t('total_reports') }}</span>
           <q-space />
           <span class="text-bold">{{ numFeatures }}</span>
         </div>
