@@ -78,6 +78,9 @@ const mosquitoLayers = useRouteQuery('mosquitoes', '', {
     set: v => v.join(','),
   },
 })
+if (mosquitoLayers.value.length == 0) {
+  mosquitoLayers.value = ['albopictus', 'culex']
+}
 
 const breedingSitesLayers = useRouteQuery('breeding_sites', '', {
   transform: {
@@ -175,9 +178,6 @@ const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
 
 onMounted(() => {
   map?.on('moveend', debouncedUpdate)
-  if (mosquitoLayers.value.length == 0) {
-    mosquitoLayers.value = ['albopictus', 'culex']
-  }
 })
 
 onUnmounted(() => {
