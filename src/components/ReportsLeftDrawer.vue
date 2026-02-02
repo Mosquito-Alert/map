@@ -130,7 +130,7 @@
             <q-avatar icon="fa fat fa-tags" />
           </q-item-section>
 
-          <q-item-section class="text-capitalize">
+          <q-item-section class="text-capitalize text-grey-14">
             {{ $t('tags') }}
           </q-item-section>
 
