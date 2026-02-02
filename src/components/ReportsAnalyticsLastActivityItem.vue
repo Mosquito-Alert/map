@@ -1,6 +1,6 @@
 <template>
   <q-item v-if="feature" clickable v-ripple @mouseenter="hover = true" @mouseleave="hover = false"
-    :to="{ 'name': 'reports', 'params': { 'uuid': report?.uuid } }">
+    @click="reportMapStore.selectedReport = report">
     <q-item-section avatar>
       <q-avatar v-if="report" rounded color="grey-3">
         <span v-if="isBite">{{ (report as Bite).counts.total }}</span>
@@ -41,15 +41,17 @@ import { watch } from 'vue'
 import type { Feature } from 'ol';
 import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api';
-import { ReportType } from 'src/types/reportType';
+import { type Report, ReportType } from 'src/types/reportType';
+import { useReportMapStore } from 'src/stores/reportMapStore';
 
 const { t } = useI18n();
+const reportMapStore = useReportMapStore();
 
 const props = defineProps<{
   feature: Feature
 }>()
 
-const report = ref<Bite | BreedingSite | Observation>();
+const report = ref<Report | null>(null);
 
 const hover = ref(false)
 
@@ -98,22 +100,28 @@ const title = computed(() => {
 })
 
 const isBite = computed(() => {
-  return props.feature.get('type') === ReportType.Bite;
+  return report.value?.type === ReportType.Bite;
 })
 
 const fetchData = async () => {
   try {
     const uuid = props.feature.getId() as string
     switch (props.feature.get('type')) {
-      case ReportType.Bite:
-        await bitesApi.retrieve({ uuid: uuid }).then((response) => report.value = response.data)
+      case ReportType.Bite: {
+        const bite = await bitesApi.retrieve({ uuid: uuid }).then((response) => response.data)
+        report.value = { ...bite, type: ReportType.Bite }
         break
-      case ReportType.BreedingSite:
-        await breedingSitesApi.retrieve({ uuid: uuid }).then((response) => report.value = response.data)
+      }
+      case ReportType.BreedingSite: {
+        const breedingSite = await breedingSitesApi.retrieve({ uuid: uuid }).then((response) => response.data)
+        report.value = { ...breedingSite, type: ReportType.BreedingSite }
         break
-      case ReportType.Observation:
-        await observationsApi.retrieve({ uuid: uuid }).then((response) => report.value = response.data)
+      }
+      case ReportType.Observation: {
+        const observation = await observationsApi.retrieve({ uuid: uuid }).then((response) => response.data)
+        report.value = { ...observation, type: ReportType.Observation }
         break
+      }
     }
   } catch (error) {
     console.log(error)

@@ -11,13 +11,12 @@
     :unidentified-mosquito="mosquitoLayers.includes('unidentified')" :other-species="mosquitoLayers.includes('other')"
     :storm-drain-water="breedingSitesLayers.includes('stormDrainWater')"
     :storm-drain-dry="breedingSitesLayers.includes('stormDrainDry')" :other-site="breedingSitesLayers.includes('other')"
-    :bites="biteLayer" :tags="tags" :from-date="fromDate" :to-date="toDate"
-    @update:selectedFeature="handleSelectedFeatureUpdate" />
+    :bites="biteLayer" :tags="tags" :from-date="fromDate" :to-date="toDate" />
   <SamplingEffortVectorLayer :visible="samplingEffortLayer" :from-date="fromDate" :to-date="toDate" />
 
   <ReportsAnalyticsDrawer v-model="analyticsDrawerVisible" v-if="showAnalyticsDrawer" :features="visibleFeatures" />
-  <ReportsFeatureDetail v-if="selectedReportUuid" :report-uuid="selectedReportUuid" :report-type="selectedReportType!"
-    :key="selectedReportUuid" @close="selectedReportUuid = undefined; selectedReportType = undefined" />
+  <ReportsFeatureDetail v-if="reportMapStore.selectedReport" :report="reportMapStore.selectedReport"
+    @close="reportMapStore.selectedReport = null" />
 
   <Teleport v-if="!!boundaryStore.getPolygon" defer to=".ol-overlaycontainer-stopevent">
     <q-chip :model-value="!!boundaryStore.getPolygon" removable clickable class="ol-search all-pointer-events"
@@ -62,9 +61,11 @@ import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
 import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';
 import { useBoundaryStore } from 'src/stores/boundaryStore';
+import { useReportMapStore } from 'src/stores/reportMapStore';
 
 const { t, locale } = useI18n();
 const boundaryStore = useBoundaryStore();
+const reportMapStore = useReportMapStore();
 
 const selectedReportUuid = useRouteParams<string | undefined>('uuid', undefined, {
   transform: {
@@ -78,6 +79,19 @@ const selectedReportType = useRouteParams<ReportType | undefined>('reportType', 
     set: (v) => (!v ? '' as ReportType : v)
   }
 })
+watch(() => reportMapStore.selectedReport, (newValue) => {
+  selectedReportUuid.value = newValue?.uuid ?? undefined
+  selectedReportType.value = newValue?.type ?? undefined
+})
+watch(
+  () => [selectedReportUuid.value, selectedReportType.value],
+  async ([uuid, type]) => {
+    if (uuid && type) {
+      await reportMapStore.setSelectedReport({ uuid, type: type as ReportType })
+    }
+  },
+  { immediate: true }
+)
 
 const mosquitoLayers = useRouteQuery('mosquitoes', '', {
   transform: {
@@ -249,7 +263,7 @@ onUnmounted(() => {
   map?.removeControl(searchControl)
 })
 
-const showAnalyticsDrawer = computed(() => !selectedReportUuid.value && numReportLayers.value > 0)
+const showAnalyticsDrawer = computed(() => !reportMapStore.selectedReport && numReportLayers.value > 0)
 
 watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
   updateVisibleFeatures()
@@ -293,10 +307,6 @@ function handleTagsUpdate(value: string[]) {
 function handleDateUpdate(value: DateRange) {
   fromDate.value = value.from ?? undefined
   toDate.value = value.to ?? undefined
-}
-function handleSelectedFeatureUpdate(value: { id: string; type: ReportType } | undefined) {
-  selectedReportUuid.value = value?.id ?? undefined
-  selectedReportType.value = value?.type ?? undefined
 }
 
 </script>

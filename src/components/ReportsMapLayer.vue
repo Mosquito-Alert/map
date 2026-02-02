@@ -44,16 +44,15 @@ import ObservationMapLayer from './ObservationMapLayer.vue';
 import BiteMapLayer from './BiteMapLayer.vue';
 import BreedingSiteMapLayer from './BreedingSiteMapLayer.vue';
 
+import { useReportMapStore } from 'src/stores/reportMapStore';
+
 import type { Layer } from 'ol/layer';
 import type { ReportType } from 'src/types/reportType';
 import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
 import type VectorSource from 'ol/source/Vector';
 import type { Extent } from 'ol/extent';
 
-
-const emit = defineEmits<{
-  (e: 'update:selectedFeature', payload: { id: string; type: ReportType } | undefined): void;
-}>()
+const reportMapStore = useReportMapStore();
 
 withDefaults(defineProps<{
   albopictus?: boolean,
@@ -104,15 +103,15 @@ function featureHovered(event: SelectEvent) {
 
 }
 
-function featureClicked(event: SelectEvent) {
-  const selectedFeatureId = event.selected?.[0]?.getId();
-  if (!selectedFeatureId) {
-    emit('update:selectedFeature', undefined);
+async function featureClicked(event: SelectEvent) {
+  const selectedFeature = event.selected?.[0] as Feature | null;
+  if (!selectedFeature) {
+    reportMapStore.selectedReport = null;
     return;
   }
-  emit('update:selectedFeature', {
-    id: selectedFeatureId as string,
-    type: event.selected?.[0]?.get('type') as ReportType
+  await reportMapStore.setSelectedReport({
+    uuid: selectedFeature.getId() as string,
+    type: selectedFeature.get('type') as ReportType
   });
 }
 
