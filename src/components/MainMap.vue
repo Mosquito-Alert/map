@@ -23,7 +23,7 @@
     <ol-fullscreen-control v-if="$q.platform.is.desktop" />
 
     <q-img style='z-index: 1' class='absolute-bottom q-mb-sm mobile-only' position="calc(50% - 11px) center"
-      fit='contain' src="img/mosquitoalert_horizontal.png" height="30px" />
+      fit='contain' src="/img/mosquitoalert_horizontal.png" height="30px" />
 
     <q-spinner v-if="showSpinner" style='z-index: 1' class="absolute-center" size="5em" :thickness="2"
       color="primary" />
