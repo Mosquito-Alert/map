@@ -1,10 +1,10 @@
 import { defineBoot } from '#q-app/wrappers';
-import { Lang, Cookies } from 'quasar';
+import { Cookies } from 'quasar';
 import { createI18n } from 'vue-i18n';
 
 import messages from 'src/i18n';
 
-export const DEFAULT_LOCALE = Cookies.get('language') || Lang.getLocale() || 'en-US';
+export const DEFAULT_LOCALE = Cookies.get('language') || 'en-US';
 
 export type MessageLanguages = keyof typeof messages;
 // Type-define 'en-US' as the master schema for the resource
