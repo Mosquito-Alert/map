@@ -1,5 +1,5 @@
 <template>
-  <ol-vector-layer ref="layerRef" :visible="visible">
+  <ol-vector-layer :visible="visible">
     <ol-source-vector :url="computedUrl" :format="geoJson">
       <ol-style :overrideStyleFunction="featureStyle"></ol-style>
     </ol-source-vector>
@@ -39,7 +39,7 @@ const computedUrl = computed(() => {
     viewparams: Object.entries(viewParams).filter(([, value]) => value !== undefined).map(([key, value]) => `${key}:${value}`).join(';'),
   }
 
-  return mapserver.getUri({url: 'wfs', params })
+  return mapserver.getUri({ url: 'wfs', params })
 })
 
 const featureStyle = (feature: Feature) => {
