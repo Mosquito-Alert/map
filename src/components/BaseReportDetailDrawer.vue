@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-drawer show-if-above side="right" class="column full-height no-wrap" :width="350">
+    <q-drawer show-if-above behavior="desktop" side="right" class="column full-height no-wrap" :width="350">
       <q-btn unelevated round class="q-ma-sm absolute-top-right z-top" color='grey-3' text-color='grey-14'
         icon="fa fat fa-xmark" size="xs" @click="emit('close')" />
       <q-carousel v-if="photoUrls?.length" animated v-model="slide" :arrows="photoUrls?.length > 1"
