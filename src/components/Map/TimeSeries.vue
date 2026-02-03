@@ -9,7 +9,7 @@
         -
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
       </div>
-      <div class="flex items-end justify-end" v-if="!showChart">
+      <div class="flex items-end justify-end pointer-events-auto" v-if="!showChart">
         <Button
           severity="secondary"
           size="small"
