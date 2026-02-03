@@ -1,23 +1,23 @@
 <template>
-  <div class="basemap-selector flex flex-row-reverse! bg-gray-200" @mouseleave="hideStyleOptions">
-    <div
+  <div
+    class="maplibregl-ctrl maplibregl-ctrl-group basemap-selector flex flex-row-reverse! bg-transparent! border-0! shadow-none!"
+  >
+    <button
+      class="bg-white! rounded-sm!"
       :class="{
-        'm-1 ml-2 border-2 border-amber-500': showLayerStyleSelector,
+        'ml-3': showLayerStyleSelector,
       }"
+      @click="showLayerStyleSelector = !showLayerStyleSelector"
     >
       <div
         class="basemap-selector-button flex! justify-center! items-center! size-7.5"
-        :class="{
-          'size-9': showLayerStyleSelector,
-        }"
         v-tooltip.bottom="mapStore.baselayer.name"
-        @mouseover="showStyleOptions"
       >
-        <img :src="mapStore.baselayer.image" alt="Basemap" class="basemap-icon" />
+        <span class="material-icons-outlined"> layers </span>
       </div>
-    </div>
+    </button>
     <div
-      class="basemap-selector-options bg-inherit p-1 flex flex-row-reverse!"
+      class="basemap-selector-options bg-gray-200! p-1 flex flex-row-reverse! rounded-sm border-1 border-gray-400 shadow-lg"
       v-if="showLayerStyleSelector"
     >
       <div
@@ -29,9 +29,9 @@
         <div
           class="basemap-selector-button flex! justify-center! items-center! size-7.5 cursor-pointer border-1"
           :class="{
-            ' size-9': showLayerStyleSelector,
+            'size-9': showLayerStyleSelector,
+            'border-2 border-amber-500': basemap.id === mapStore.baselayer.id,
           }"
-          v-if="basemap.id !== mapStore.baselayer.id"
         >
           <img :src="basemap.image" :alt="basemap.name" class="basemap-icon-option" />
         </div>
@@ -55,23 +55,9 @@ const props = defineProps<{
 
 const showLayerStyleSelector = ref(false)
 
-const hideStyleOptions = () => {
-  showLayerStyleSelector.value = false
-}
-
-const showStyleOptions = () => {
-  console.log('Showing basemap styles')
-  showLayerStyleSelector.value = true
-}
-
 const selectBasemap = (basemap: BasemapType) => {
   // @ts-ignore // FIXME:
   mapStore.baselayer = basemap
   showLayerStyleSelector.value = false
 }
-
-onMounted(() => {
-  // DELETE:
-  console.log('Basemap options on mounted:', props.options)
-})
 </script>

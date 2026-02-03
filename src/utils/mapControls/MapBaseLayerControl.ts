@@ -23,7 +23,6 @@ export class MapBaseLayerControl implements IControl {
   constructor(options: MapLibreBasemapsControlOptions) {
     this._options = options
     this._container = document.createElement('div')
-    this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group bg-green-500!'
   }
 
   onAdd(map: maplibregl.Map): HTMLElement {
