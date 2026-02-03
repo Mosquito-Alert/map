@@ -1,5 +1,5 @@
 <template>
-  <v-chart style="height: 400px" :option="option" />
+  <v-chart class="chart" :option="option" autoresize />
 </template>
 
 <script setup lang="ts">
@@ -87,3 +87,11 @@ const option = computed(() => {
 })
 
 </script>
+
+<style scoped>
+.chart {
+  width: 100%;
+  height: 40vh;
+  min-height: 250px;
+}
+</style>

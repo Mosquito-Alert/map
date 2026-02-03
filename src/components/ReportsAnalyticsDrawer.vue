@@ -1,21 +1,28 @@
 <template>
-  <q-drawer :model-value="visibleLocal" behavior="desktop" side='right' class="column full-height"
-    style="overflow-x: hidden; height: 300px" :width="width">
-    <q-scroll-area class="col q-pa-sm">
-      <h6 class="text-primary text-capitalize q-my-sm">{{ $t('summary') }}</h6>
-      <div class="column q-pa-xs">
-        <div class="row text-uppercase">
-          <span class="text-grey">{{ $t('total_reports') }}</span>
-          <q-space />
-          <span class="text-bold">{{ numFeatures }}</span>
+  <q-drawer :model-value="visibleLocal" behavior="desktop" side='right' class="column full-height no-scroll"
+    :width="width">
+    <!-- Top content -->
+    <div class="col q-pa-sm">
+      <!-- Header -->
+      <div>
+        <h6 class="text-primary text-capitalize q-my-sm">{{ $t('summary') }}</h6>
+        <div class="column q-pa-xs">
+          <div class="row text-uppercase">
+            <span class="text-grey">{{ $t('total_reports') }}</span>
+            <q-space />
+            <span class="text-bold">{{ numFeatures }}</span>
+          </div>
         </div>
       </div>
+      <!-- Charts -->
       <ReportsAnalyticsPieChart :features="features" />
       <ReportsAnalyticsBarChart :features="features" :min-date="fromDate" :max-date="toDate" />
-    </q-scroll-area>
-    <!-- <q-space /> -->
-    <q-separator v-if="features?.length" spaced="sm" class="full-width" />
-    <ReportsAnalyticsLastActivity :features="features" />
+    </div>
+    <div v-if="features?.length" class="col-auto">
+      <q-separator spaced="sm" class="full-width" />
+      <ReportsAnalyticsLastActivity :features="features" />
+    </div>
+
 
     <div class="absolute" style="top: 78.5px; left: -17px">
       <q-btn dense round unelevated class="absolute" color="primary" icon="chevron_right"
