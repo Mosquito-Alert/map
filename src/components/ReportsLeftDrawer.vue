@@ -5,7 +5,7 @@
         <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
       </q-item-label>
       <!-- MOSQUITO SELECTION -->
-      <q-expansion-item dense expand-separator header-class="q-px-none">
+      <q-expansion-item :model-value="mosquitoSelected.length > 0" dense expand-separator header-class="q-px-none">
         <template v-slot:header>
           <q-item-section avatar>
             <q-avatar icon="fa fat fa-mosquito" />
@@ -42,7 +42,7 @@
         </q-card>
       </q-expansion-item>
       <!-- BREEDING SITES -->
-      <q-expansion-item dense expand-separator header-class="q-px-none">
+      <q-expansion-item :model-value="breedingSitesSelected.length > 0" dense expand-separator header-class="q-px-none">
         <template v-slot:header>
           <q-item-section avatar>
             <q-avatar icon="fa fat fa-water" />
