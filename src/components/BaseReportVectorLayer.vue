@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<{
   visible: true
 })
 
-const loader = async function (extend: number[], resolution: number, projection: Projection, success: (features: Feature[]) => void, failure: () => void) {
+const loader = async function (extent: number[], resolution: number, projection: Projection, success: (features: Feature[]) => void, failure: () => void) {
   const featureProjection = getProjection('EPSG:4326')!;
 
   try {
