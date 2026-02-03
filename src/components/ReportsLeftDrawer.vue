@@ -114,7 +114,7 @@
     <q-list separator class="bg-grey-3 rounded-borders">
       <!-- DATE FILTER -->
       <q-item dense>
-        <q-item-section avatar>
+        <q-item-section avatar class="items-center">
           <q-icon name="fa fat fa-calendar-days" />
         </q-item-section>
 
