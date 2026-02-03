@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-drawer show-if-above behavior="desktop" side="right" class="column full-height no-wrap" :width="350">
+    <q-drawer show-if-above behavior="desktop" side="right" class="column full-height no-wrap" :width="drawerWidth">
       <q-btn unelevated round class="q-ma-sm absolute-top-right z-top" color='grey-3' text-color='grey-14'
         icon="fa fat fa-xmark" size="xs" @click="emit('close')" />
       <q-carousel v-if="photoUrls?.length" animated v-model="slide" :arrows="photoUrls?.length > 1"
@@ -88,10 +88,12 @@
 
 <script setup lang="ts">
 
-import { date } from 'quasar'
-import { ref } from 'vue'
+import { date, useQuasar } from 'quasar'
+import { ref, computed } from 'vue'
 
 import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
+
+const $q = useQuasar();
 
 const emit = defineEmits<{
   (event: 'close'): void;
@@ -107,5 +109,11 @@ defineProps<{
 
 const tab = ref('overview');
 const slide = ref(0);
+
+const drawerWidth = computed(() => {
+  return $q.screen.width <= $q.screen.sizes.sm
+    ? $q.screen.width
+    : 350 // default desktop width
+})
 
 </script>
