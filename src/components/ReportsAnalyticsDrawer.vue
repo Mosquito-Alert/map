@@ -1,6 +1,6 @@
 <template>
-  <q-drawer :model-value="visibleLocal" behavior="desktop" side='right' class="column full-height no-scroll"
-    :width="width">
+  <q-drawer :overlay="$q.platform.is.mobile" :model-value="visibleLocal" behavior="desktop" side='right'
+    class="column full-height no-scroll" :width="drawerWidth">
     <!-- Top content -->
     <div class="col q-pa-sm">
       <!-- Header -->
@@ -12,6 +12,9 @@
             <q-space />
             <span class="text-bold">{{ numFeatures }}</span>
           </div>
+        </div>
+        <div :class="[`lt-${breakpoint}`, 'self-start', 'q-ma-sm', 'absolute-top-right']">
+          <q-btn outline round color='primary' icon="fa fat fa-xmark" size="sm" @click="toggleVisible(false)" />
         </div>
       </div>
       <!-- Charts -->
@@ -30,7 +33,8 @@
     </div>
   </q-drawer>
 
-  <div v-if="!visibleLocal" class="absolute-right q-px-sm" style="z-index: 1; top: 78.5px">
+  <div v-if="!visibleLocal" :class="[visibleLocal ? `gt-${breakpoint}` : '', 'absolute-right', 'q-px-sm']"
+    style="z-index: 1; top: 78.5px">
     <q-btn dense round unelevated color="primary" icon="chevron_left" @click="toggleVisible(true)" />
   </div>
 
@@ -38,6 +42,8 @@
 
 <script setup lang="ts">
 
+import type { Screen } from 'quasar';
+import { useQuasar } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import type { Feature } from 'ol';
 
@@ -50,10 +56,20 @@ const props = withDefaults(defineProps<{
   width?: number,
   features?: Feature[],
   fromDate?: Date,
-  toDate?: Date
+  toDate?: Date,
+  breakpoint?: keyof Screen["sizes"]
 }>(), {
   modelValue: true,
   width: 300,
+  breakpoint: 'sm'
+})
+
+const $q = useQuasar();
+
+const drawerWidth = computed(() => {
+  return $q.screen.width <= $q.screen.sizes[props.breakpoint]
+    ? $q.screen.width
+    : props.width
 })
 
 const emit = defineEmits<{

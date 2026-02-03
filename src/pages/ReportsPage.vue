@@ -160,7 +160,7 @@ const analyticsDrawerVisible = ref(!$q.platform.is.mobile)
 
 const showAnalyticsDrawer = computed(() => !reportMapStore.selectedReport && numReportLayers.value > 0)
 
-watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value], () => {
+watch(() => [mosquitoLayers.value, breedingSitesLayers.value, biteLayer.value, tags.value, fromDate.value, toDate.value, analyticsDrawerVisible.value], () => {
   updateVisibleFeatures()
 })
 
