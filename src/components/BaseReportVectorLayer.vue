@@ -19,18 +19,12 @@ import { get as getProjection } from 'ol/proj';
 
 import type { ReportType } from 'src/types/reportType';
 import type VectorSource from 'ol/source/Vector';
+import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert';
 
 const layerRef = ref<{ webglVectorLayer: Layer }>();
 const sourceRef = ref<{ source: VectorSource }>();
 
-export interface GeoReport {
-  uuid: string;
-  received_at: string;
-  point: {
-    latitude: number;
-    longitude: number;
-  }
-}
+export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel;
 
 const props = withDefaults(defineProps<{
   fetchReports?: () => Promise<GeoReport[]>;
