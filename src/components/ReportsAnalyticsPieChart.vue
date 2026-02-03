@@ -29,7 +29,7 @@ const data = computed<PieDataItemOption[]>(() => {
   return Object.values(props.features.reduce((acc, obj) => {
     const key = t(obj.get('type') as string);
     if (!acc[key]) {
-      acc[key] = { name: key, value: 0, itemStyle: { color: obj.get('color') } }
+      acc[key] = { name: key, value: 0, itemStyle: { color: obj.get('type_color') } }
     }
     acc[key].value = (acc[key].value as number) + 1;
     return acc;

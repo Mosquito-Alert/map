@@ -8,6 +8,7 @@
 
 <script setup lang="ts">
 
+import { colors } from 'quasar'
 import { ref, watch, onBeforeUnmount } from 'vue'
 
 import { Feature } from 'ol';
@@ -17,7 +18,7 @@ import { Point } from 'ol/geom';
 import type { Projection } from 'ol/proj';
 import { get as getProjection } from 'ol/proj';
 
-import type { ReportType } from 'src/types/reportType';
+import { ReportType } from 'src/types/reportType';
 import type VectorSource from 'ol/source/Vector';
 import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert';
 
@@ -113,6 +114,8 @@ function onAddFeature(event: VectorSourceEvent) {
   if (!feature) return
   feature.set('hover', 0)
   feature.set('color', props.color)
+  const typeColor = props.type == ReportType.Observation ? colors.getPaletteColor('primary') : props.color
+  feature.set('type_color', typeColor)
   feature.set('type', props.type)
 }
 
