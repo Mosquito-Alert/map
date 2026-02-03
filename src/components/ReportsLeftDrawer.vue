@@ -100,6 +100,8 @@
         <q-item-section>
           <q-item-label class="text-capitalize">
             {{ $t('sampling_effort') }}
+            <q-btn flat round icon="fa fat fa-circle-info" size="sm" class="q-ml-sm" color="grey-7"
+              @click="showSamplingEffortInfoDialog()" />
           </q-item-label>
         </q-item-section>
 
@@ -491,6 +493,13 @@ export default {
       });
     }
 
+    function showSamplingEffortInfoDialog() {
+      $q.dialog({
+        title: t('sampling_effort'),
+        message: t('sampling_effort_info'),
+      })
+    }
+
     return {
       mosquitoLayers,
       otherSpeciesLayers,
@@ -510,6 +519,7 @@ export default {
       downloadBites,
       downloadObservations,
       downloadBreedingSites,
+      showSamplingEffortInfoDialog,
       addTag() {
         qInputTag.value.validate()
 
