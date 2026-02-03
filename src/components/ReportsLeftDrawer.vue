@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer :title="$t('reports')" header-height="78.5px" width="400px">
+  <inner-drawer :title="$t('reports')" :init-collapsed="initCollapsed" header-height="78.5px" width="400px">
     <q-list separator>
       <q-item-label header class="row q-px-none">
         <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
@@ -324,6 +324,14 @@ export default {
     watch(bitesEnabled, (newValue) => {
       emit('update-layers:bites', newValue)
     })
+    const initCollapsed = computed(() => {
+      return $q.platform.is.mobile && (
+        mosquitoSelected.value.length > 0 ||
+        breedingSitesSelected.value.length > 0 ||
+        bitesEnabled.value
+      )
+    })
+
     const samplingEffortEnabled = ref(props.enabledSamplingEffort)
     watch(samplingEffortEnabled, (newValue) => {
       emit('update-layers:sampling-effort', newValue)
@@ -491,6 +499,7 @@ export default {
       mosquitoSelected,
       breedingSitesSelected,
       bitesEnabled,
+      initCollapsed,
       samplingEffortEnabled,
       qPopupTag,
       qInputTag,

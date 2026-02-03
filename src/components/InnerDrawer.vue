@@ -49,10 +49,14 @@ export default {
       validator: function (value: string) {
         return ['xs', 'sm', 'md', 'lg', 'xl'].includes(value)
       }
+    },
+    initCollapsed: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props) {
-    const drawerCollapsed = ref(false)
+    const drawerCollapsed = ref(props.initCollapsed)
 
     const map = inject<Map>('map')
 

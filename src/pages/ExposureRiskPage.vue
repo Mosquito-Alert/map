@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer :title="$t('exposure_risk')">
+  <inner-drawer :title="$t('exposure_risk')" :init-collapsed="$q.platform.is.mobile && formIsValid">
     <q-select :key="$i18n.locale" :label="$t('select_species')"
       :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'" :options="vectorOptions" option-value="code"
       option-label="label" color="primary" emit-value map-options v-model="selectedSpeciesCode"

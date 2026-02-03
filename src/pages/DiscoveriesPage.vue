@@ -1,5 +1,5 @@
 <template>
-  <inner-drawer :title="$t('discoveries')">
+  <inner-drawer :title="$t('discoveries')" :init-collapsed="$q.platform.is.mobile && !!selectedSpeciesCode">
     <q-select :label="$t('select_species')" :label-color="selectedSpeciesCode ? 'primary' : 'rgba(0, 0, 0, 0.6)'"
       :options="vectorOptions" option-value="code" option-label="label" color="primary" emit-value map-options
       v-model="selectedSpeciesCode" />
