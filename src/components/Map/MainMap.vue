@@ -10,22 +10,22 @@
 </template>
 
 <script setup lang="ts">
-import { MapBaseLayerControl, MapInfoControl, MapLegendControl } from '@/utils/mapControls'
+import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
-import TimeSeries from './TimeSeries.vue'
-import MapLegend from './MapLegend.vue'
-import { useObservationsStore } from '../../stores/observationsStore'
 import { useMapStore } from '../../stores/mapStore'
-import { quantile } from '../../utils/utils'
+import { useObservationsStore } from '../../stores/observationsStore'
+import { useUIStore } from '../../stores/uiStore'
 import { debounce } from '../../utils/debouncer'
-import { MessageType } from '../../workers/h3Aggregation.worker'
 import type {
   BasemapType,
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
-import { useUIStore } from '../../stores/uiStore'
+import { quantile } from '../../utils/utils'
+import { MessageType } from '../../workers/h3Aggregation.worker'
+import MapLegend from './MapLegend.vue'
+import TimeSeries from './TimeSeries.vue'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -48,6 +48,7 @@ worker.onmessage = (e) => {
     getMapColors()
     addOrUpdateH3Layer()
     showOnlyResolution()
+    observationsStore.dataProcessed = true
   }
 }
 

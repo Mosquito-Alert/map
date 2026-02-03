@@ -13,7 +13,14 @@
         class="basemap-selector-button flex! justify-center! items-center! size-7.5"
         v-tooltip.bottom="mapStore.baselayer.name"
       >
-        <span class="material-icons-outlined"> layers </span>
+        <span
+          class="material-icons-outlined"
+          :class="{
+            'text-amber-500': showLayerStyleSelector,
+          }"
+        >
+          layers
+        </span>
       </div>
     </button>
     <div

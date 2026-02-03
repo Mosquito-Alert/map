@@ -32,8 +32,6 @@ export class MapBaseLayerControl implements IControl {
     map.on('load', () => {
       this._app = createApp(MapBaseLayerSelector, { options: this._options })
       this._app.directive('tooltip', Tooltip)
-      console.log('options:')
-      console.log(this._options)
       this._app.mount(mountPoint)
     })
 

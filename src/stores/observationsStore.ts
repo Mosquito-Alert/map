@@ -6,6 +6,7 @@ import { useTaxaStore } from './taxaStore'
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
     // observations: {} as any,
+    dataProcessed: false,
     near_observations: [] as Observation[],
     dateFilter: {
       start: null as string | null,
