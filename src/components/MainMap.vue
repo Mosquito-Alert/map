@@ -13,7 +13,7 @@
 
     <slot></slot>
 
-    <ol-tile-layer :z-index="10">
+    <ol-tile-layer :visible="labelsLayerVisible" :z-index="10">
       <!-- <ol-source-osm :preload="Infinity" /> -->
       <ol-source-xyz :url="labelsLayerUrl" :preload="Infinity" :opaque="false" />
     </ol-tile-layer>
@@ -21,6 +21,8 @@
     <ol-zoom-control />
     <ol-scaleline-control :min-width="50" />
     <ol-fullscreen-control v-if="$q.platform.is.desktop" />
+    <ol-toggle-control html="T" :className="`ol-toggle-label-layer${!labelsLayerVisible ? ' ol-disabled' : ''}`"
+      title="Toggle place names" :onToggle="() => labelsLayerVisible = !labelsLayerVisible" />
 
     <q-img style='z-index: 1' class='absolute-bottom q-mb-sm mobile-only' position="calc(50% - 11px) center"
       fit='contain' src="/img/mosquitoalert_horizontal.png" height="30px" />
@@ -91,6 +93,7 @@ export default {
     }
 
     const grayscaleFilter = new Colorize({ operation: 'grayscale' });
+    const labelsLayerVisible = ref(true);
 
     onMounted(() => {
       basemapRef.value.tileLayer.addFilter(grayscaleFilter);
@@ -119,6 +122,7 @@ export default {
       localZoom,
       zoom,
       showSpinner,
+      labelsLayerVisible,
       updateSize() {
         mapRef.value.updateSize()
       }
@@ -186,6 +190,24 @@ export default {
   left: unset;
   bottom: 2em;
   right: .2em;
+}
+
+.ol-toggle-label-layer {
+  top: unset;
+  left: unset;
+  bottom: 6em;
+  right: .2em;
+}
+
+/* Button inside disabled div */
+.ol-toggle-label-layer.ol-disabled button {
+  /* gray button background */
+  opacity: 0.8;
+  background-color: #ccc;
+  /* gray text */
+  color: #666;
+  /* optional border styling */
+  border: 1px solid #999;
 }
 
 .ol-scale-line {
