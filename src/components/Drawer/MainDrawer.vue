@@ -33,10 +33,12 @@
 </template>
 <script lang="ts" setup>
 import { SelectButton } from 'primevue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import ScrollableDrawer from './ScrollableDrawer.vue'
 import Summary from './SummaryLocation.vue'
+import { useUIStore } from '../../stores/uiStore'
 
+const uiStore = useUIStore()
 const activeTabClass = 'text-gray-700 font-semibold'
 const inactiveTabClass = 'text-gray-400'
 
@@ -46,4 +48,12 @@ const tabs = ref({
 })
 const activeTab = ref(tabs.value.explore.value)
 const options = Object.values(tabs.value)
+
+// Record drawer width in the store to adjust map padding
+onMounted(() => {
+  uiStore.drawerWidth = document.querySelector('aside')?.clientWidth || 0
+})
+window.addEventListener('resize', () => {
+  uiStore.drawerWidth = document.querySelector('aside')?.clientWidth || 0
+})
 </script>

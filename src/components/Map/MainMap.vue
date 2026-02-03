@@ -25,6 +25,7 @@ import type {
   BasemapType,
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
+import { useUIStore } from '../../stores/uiStore'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -62,6 +63,7 @@ type ObservationFeatureCollection = GeoJSON.FeatureCollection<
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
+const uiStore = useUIStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
@@ -134,6 +136,17 @@ const basemapOptions: MapLibreBasemapsControlOptions = {
   ],
   initialBasemap: 'carto-positron',
 }
+
+const pushMapPaddingUpdate = debounce(() => {
+  if (map.value) {
+    map.value.easeTo({
+      padding: {
+        left: uiStore.drawerWidth / 2 || 0,
+      },
+      duration: 100, // In ms, CSS transition duration property for the sidebar matches this value
+    })
+  }
+}, 100)
 
 // Function to get appropriate resolution based on zoom level
 const getResolutionForZoom = (zoom: number): number => {
@@ -332,6 +345,7 @@ onMounted(async () => {
       // attributionControl: false,
     })
     if (!map.value) return
+    pushMapPaddingUpdate()
 
     mapStore.baselayer =
       // @ts-ignore // FIXME:
@@ -341,7 +355,6 @@ onMounted(async () => {
     map.value.on('styledata', () => {
       map.value?.setProjection({ type: 'globe' })
     })
-    map.value.addControl(new maplibregl.FullscreenControl(), 'top-right')
     map.value.addControl(
       new maplibregl.NavigationControl({
         visualizePitch: true,
@@ -364,7 +377,7 @@ onMounted(async () => {
     )
     map.value.addControl(new MapLegendControl(), 'top-right')
     map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
-    map.value.addControl(new MapInfoControl(), 'top-right')
+    // map.value.addControl(new MapInfoControl(), 'top-right')
     // map.value.addControl(
     //   new maplibregl.AttributionControl({
     //     compact: true,
@@ -463,6 +476,15 @@ watch(
   (newBaselayer, oldBaselayer) => {
     if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id) {
       map.value.setStyle(newBaselayer.url)
+    }
+  },
+)
+
+watch(
+  () => uiStore.drawerWidth,
+  (newWidth, oldWidth) => {
+    if (map.value && newWidth !== oldWidth) {
+      pushMapPaddingUpdate()
     }
   },
 )
