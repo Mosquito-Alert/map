@@ -1,11 +1,13 @@
+import { cellToBoundary, latLngToCell } from 'h3-js'
 import { defineStore } from 'pinia'
 import { MosquitoLayersEnum, VariablesLayersEnum } from '../utils/constants'
-import { cellToBoundary, latLngToCell } from 'h3-js'
+import type { BasemapType } from '../utils/mapControls/MapBaseLayerControl'
 
 export const useMapStore = defineStore('map', {
   state: () => ({
     showDiscoveries: false,
     showLegend: false,
+    baselayer: {} as BasemapType,
     layerSelected: MosquitoLayersEnum.observations as MosquitoLayersEnum,
     variablesSelected: [] as VariablesLayersEnum[],
     hex_data: {} as Record<string, any>,

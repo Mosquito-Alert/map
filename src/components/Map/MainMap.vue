@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { MapInfoControl, MapLegendControl } from '@/utils/mapControls'
+import { MapBaseLayerControl, MapInfoControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
@@ -21,6 +21,10 @@ import { useMapStore } from '../../stores/mapStore'
 import { quantile } from '../../utils/utils'
 import { debounce } from '../../utils/debouncer'
 import { MessageType } from '../../workers/h3Aggregation.worker'
+import type {
+  BasemapType,
+  MapLibreBasemapsControlOptions,
+} from '../../utils/mapControls/MapBaseLayerControl'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -94,6 +98,41 @@ const styleEOX: StyleSpecification = {
     anchor: 'map',
     position: [1.5, 90, 80],
   },
+} as StyleSpecification
+
+// Define map styles
+const basemapOptions: MapLibreBasemapsControlOptions = {
+  basemaps: [
+    {
+      id: 'carto-positron',
+      url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      image: 'https://carto.com/help/images/building-maps/basemaps/positron_labels.png',
+      name: 'Carto Positron',
+    },
+    {
+      id: 'carto-dark',
+      url: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      image: 'https://carto.com/help/images/building-maps/basemaps/dark_labels.png',
+      name: 'Carto Dark',
+    },
+    {
+      id: 'carto-voyager',
+      url: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+      image: 'https://carto.com/help/images/building-maps/basemaps/voyager_labels.png',
+      name: 'Carto Voyager',
+    },
+    {
+      id: 'eox-satellite',
+      url: styleEOX,
+      image:
+        (styleEOX?.sources?.satellite as any).tiles[0] // FIXME: any type
+          ?.replace('{x}', '0')
+          .replace('{y}', '0')
+          .replace('{z}', '1') || '',
+      name: 'EOX Satellite',
+    },
+  ],
+  initialBasemap: 'carto-positron',
 }
 
 // Function to get appropriate resolution based on zoom level
@@ -294,9 +333,11 @@ onMounted(async () => {
     })
     if (!map.value) return
 
-    // map.value.setStyle(styleEOX)
-    // map.value.setStyle('https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json')
-    map.value.setStyle('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
+    mapStore.baselayer =
+      // @ts-ignore // FIXME:
+      basemapOptions?.basemaps.find((b) => b.id === basemapOptions?.initialBasemap) ||
+      (basemapOptions.basemaps[0] as BasemapType)
+    map.value.setStyle(mapStore.baselayer?.url || '')
     map.value.on('styledata', () => {
       map.value?.setProjection({ type: 'globe' })
     })
@@ -322,6 +363,7 @@ onMounted(async () => {
       'top-right',
     )
     map.value.addControl(new MapLegendControl(), 'top-right')
+    map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     map.value.addControl(new MapInfoControl(), 'top-right')
     // map.value.addControl(
     //   new maplibregl.AttributionControl({
@@ -414,6 +456,15 @@ watch(
     }
   },
   { deep: true },
+)
+
+watch(
+  () => mapStore.baselayer,
+  (newBaselayer, oldBaselayer) => {
+    if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id) {
+      map.value.setStyle(newBaselayer.url)
+    }
+  },
 )
 
 onUnmounted(() => {
