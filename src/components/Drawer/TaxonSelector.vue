@@ -8,7 +8,9 @@
         :onLabel="taxon.name"
         :offLabel="taxon.name"
         :modelValue="taxaStore.taxonSelected?.id === taxon.id"
-        @update:modelValue="(value) => (taxaStore.taxonSelected = value ? taxon : null)"
+        @update:modelValue="
+          (value) => (taxaStore.taxonSelected = value ? taxon : (culicidaeTaxon as Taxon))
+        "
         size="small"
         class="italic bg-gray-200 mx-1 my-1 rounded-xl text-gray-700"
       >
@@ -34,7 +36,7 @@ import type { TreeNode } from 'primevue/treenode'
 import TreeSelect from 'primevue/treeselect'
 import { computed, onMounted, ref } from 'vue'
 
-import { useTaxaStore } from '../../stores/taxaStore'
+import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import CardDrawer from './CardDrawer.vue'
 
 const loading = ref<boolean>(false)
@@ -62,20 +64,20 @@ const fetchTaxaTree = async () => {
 
 const selectTaxonFromTree = (value: Record<number, boolean> | null) => {
   if (!value) {
-    taxaStore.taxonSelected = null
+    taxaStore.taxonSelected = culicidaeTaxon as Taxon
     return
   }
 
   const taxonId = Object.keys(value)[0]
   if (!taxonId) {
-    taxaStore.taxonSelected = null
+    taxaStore.taxonSelected = culicidaeTaxon as Taxon
     return
   }
   const node = findNodeByKey(nodes.value, taxonId.toString())
   if (node && node.data) {
     taxaStore.taxonSelected = node.data as Taxon
   } else {
-    taxaStore.taxonSelected = null
+    taxaStore.taxonSelected = culicidaeTaxon as Taxon
   }
 }
 

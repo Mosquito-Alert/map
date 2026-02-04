@@ -24,7 +24,7 @@
             aria-label="Close"
             variant="text"
             severity="secondary"
-            @click="() => (taxaStore.taxonSelected = null)"
+            @click="() => (taxaStore.taxonSelected = culicidaeTaxon as Taxon)"
           >
             <span class="material-icons-outlined"> close </span>
           </Button>
@@ -150,10 +150,11 @@ import { summary as wikipediaSummary } from 'wikipedia'
 
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
-import { useTaxaStore } from '../../stores/taxaStore'
+import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { daysSince } from '../../utils/date'
 import CardDrawer from './CardDrawer.vue'
 import { mosquitoLayers } from '../../utils/constants'
+import type { Taxon } from 'mosquito-alert'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Observation } from 'mosquito-alert'
 import { observationsApi } from '../services/apiService'
-import { useTaxaStore } from './taxaStore'
+import { culicidaeTaxon, useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
@@ -26,9 +26,7 @@ export const useObservationsStore = defineStore('observations', {
         const response = await observationsApi.list({
           pageSize: numberOfObservations,
           hasPhotos: true,
-          identificationTaxonIds: taxaStore.taxonSelected
-            ? [`${taxaStore.taxonSelected.id}`]
-            : undefined,
+          identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
         })
         if (response.data.results) {
           this.near_observations = response.data.results
@@ -39,10 +37,11 @@ export const useObservationsStore = defineStore('observations', {
       }
     },
     async fetchObservations() {
+      const taxaStore = useTaxaStore()
       try {
         const response = await observationsApi.geoList({
           format: 'geojson',
-          identificationTaxonIds: ['7'], // Example taxon ID
+          identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
           identificationTaxonIdsLookup: 'is_tree_of',
         })
         if (response.data) {

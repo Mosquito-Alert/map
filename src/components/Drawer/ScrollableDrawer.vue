@@ -7,7 +7,7 @@
     }"
   >
     <div class="flex flex-col space-y-2">
-      <TaxonSelector v-if="!taxaStore.taxonSelected" />
+      <TaxonSelector v-if="taxaStore.taxonSelected.id === culicidaeTaxon.id" />
       <MosquitoDetail v-else />
       <VariablesLayers />
       <OtherObservations />
@@ -18,7 +18,7 @@
 import ScrollPanel from 'primevue/scrollpanel'
 import VariablesLayers from './VariablesLayers.vue'
 import OtherObservations from './OtherObservations.vue'
-import { useTaxaStore } from '../../stores/taxaStore'
+import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import MosquitoDetail from './MosquitoDetail.vue'
 import TaxonSelector from './TaxonSelector.vue'
 

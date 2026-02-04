@@ -30,44 +30,15 @@ import { MessageType } from '../../workers/h3Aggregation.worker'
 import MapLegend from './MapLegend.vue'
 import TimeSeries from './TimeSeries.vue'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
+import { useTaxaStore } from '../../stores/taxaStore'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
 })
 
-worker.onmessage = (e) => {
-  const msg = e.data
-
-  if (msg.type === MessageType.BUILT) {
-    originalHexData.value[msg.resolution] = msg.originalHexData
-    originalDateAggregationData.value = { ...msg.dateAggregation }
-  }
-
-  if (msg.type === MessageType.FILTERED) {
-    renderedHexData.value[msg.resolution] = Object.fromEntries(
-      msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
-    )
-
-    ascSortedArrHexCounts.value = msg.counts
-    getMapColors()
-    addOrUpdateH3Layer()
-    showOnlyResolution()
-    observationsStore.dataProcessed = true
-  }
-}
-
-type ObservationFeatureCollection = GeoJSON.FeatureCollection<
-  GeoJSON.Point,
-  {
-    uuid: string
-    received_at: string
-    ts?: number
-    day?: number
-  }
->
-
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
+const taxaStore = useTaxaStore()
 const uiStore = useUIStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -141,6 +112,37 @@ const basemapOptions: MapLibreBasemapsControlOptions = {
   ],
   initialBasemap: 'carto-positron',
 }
+
+worker.onmessage = (e) => {
+  const msg = e.data
+
+  if (msg.type === MessageType.BUILT) {
+    originalHexData.value[msg.resolution] = msg.originalHexData
+    originalDateAggregationData.value = { ...msg.dateAggregation }
+  }
+
+  if (msg.type === MessageType.FILTERED) {
+    renderedHexData.value[msg.resolution] = Object.fromEntries(
+      msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
+    )
+
+    ascSortedArrHexCounts.value = msg.counts
+    getMapColors()
+    addOrUpdateH3Layer()
+    showOnlyResolution()
+    observationsStore.dataProcessed = true
+  }
+}
+
+type ObservationFeatureCollection = GeoJSON.FeatureCollection<
+  GeoJSON.Point,
+  {
+    uuid: string
+    received_at: string
+    ts?: number
+    day?: number
+  }
+>
 
 const pushMapPaddingUpdate = debounce(() => {
   if (map.value) {

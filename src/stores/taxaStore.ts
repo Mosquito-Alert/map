@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { taxaApi } from '@/services/apiService'
 import type { Taxon, TaxonTreeNode } from 'mosquito-alert'
 
+export const culicidaeTaxon = { id: 7, name: 'Culicidae', italicize: false }
+
 export const useTaxaStore = defineStore('taxa', {
   state: () => ({
     taxaTree: null as TaxonTreeNode | null,
@@ -12,13 +14,12 @@ export const useTaxaStore = defineStore('taxa', {
       { id: 115, name: 'Aedes koreicus', italicize: true },
       { id: 10, name: 'Culex', italicize: true },
     ] as Taxon[],
-    taxonSelected: null as Taxon | null,
+    taxonSelected: culicidaeTaxon as Taxon,
   }),
   actions: {
     async fetchCulicidaeTaxaTree() {
-      const culicidaeId = 7
       try {
-        const response = await taxaApi.treeRetrieve({ id: culicidaeId })
+        const response = await taxaApi.treeRetrieve({ id: culicidaeTaxon.id })
         this.taxaTree = response.data
       } catch (error) {
         console.error('Failed to fetch Culicidae taxa tree:', error)
