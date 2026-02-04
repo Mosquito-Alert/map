@@ -16,8 +16,8 @@ export class MapGlobeControl implements IControl {
     this._button = document.createElement('button')
     this._button.className = 'map-globe-switch font-semibold opacity-50! cursor-not-allowed!'
     this._button.innerHTML = `3D`
-    this._button.setAttribute('aria-label', 'Toggle 2D / 3D')
-    this._button.title = 'Toggle 2D / 3D'
+    this._button.setAttribute('aria-label', 'Toggle Globe View')
+    this._button.title = 'Toggle Globe View'
     this._button.disabled = true
 
     this._button.onclick = () => {

@@ -264,7 +264,7 @@ const addOrUpdateH3Layer = () => {
         visibility: 'visible',
       },
       paint: {
-        'fill-outline-color': 'rgba(255, 255, 255, 0.2)',
+        'fill-outline-color': 'rgba(255, 255, 255, 0)',
       },
     })
   }
@@ -481,6 +481,10 @@ watch(
   (newBaselayer, oldBaselayer) => {
     if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id) {
       map.value.setStyle(newBaselayer.url)
+      map.value.once('style.load', () => {
+        addOrUpdateH3Layer()
+        showOnlyResolution()
+      })
     }
   },
 )
