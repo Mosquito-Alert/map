@@ -26,6 +26,7 @@ import { quantile } from '../../utils/utils'
 import { MessageType } from '../../workers/h3Aggregation.worker'
 import MapLegend from './MapLegend.vue'
 import TimeSeries from './TimeSeries.vue'
+import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -378,6 +379,7 @@ onMounted(async () => {
     )
     map.value.addControl(new MapLegendControl(), 'top-right')
     map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
+    map.value.addControl(new MapGlobeControl(), 'top-right')
     // map.value.addControl(new MapInfoControl(), 'top-right')
     // map.value.addControl(
     //   new maplibregl.AttributionControl({
@@ -391,6 +393,8 @@ onMounted(async () => {
 
     map.value.on('load', async () => {
       if (!map.value) return
+
+      mapStore.mapLoaded = true
 
       // Load and cache data. Mark as raw to avoid deep reactivity overhead. This object is never modified.
       geojsonCache.value = markRaw(await observationsPromise)

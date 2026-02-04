@@ -1,18 +1,23 @@
 <template>
   <div
-    class="maplibregl-ctrl maplibregl-ctrl-group basemap-selector flex flex-row-reverse! bg-transparent! border-0! shadow-none!"
+    class="maplibregl-ctrl maplibregl-ctrl-group basemap-selector flex flex-row-reverse! border-0! shadow-none!"
+    :class="{
+      'bg-transparent!': showLayerStyleSelector,
+    }"
   >
     <button
-      class="bg-white! rounded-sm!"
+      class="rounded-sm!"
       :class="{
         'ml-3': showLayerStyleSelector,
+        'bg-transparent! opacity-50! cursor-not-allowed!': !mapStore.mapLoaded,
+        'bg-white! ': mapStore.mapLoaded,
       }"
+      :disabled="!mapStore.mapLoaded"
+      title="Select baselayer"
+      aria-label="Select baselayer"
       @click="showLayerStyleSelector = !showLayerStyleSelector"
     >
-      <div
-        class="basemap-selector-button flex! justify-center! items-center! size-7.5"
-        v-tooltip.bottom="mapStore.baselayer.name"
-      >
+      <div class="basemap-selector-button flex! justify-center! items-center! size-7.5">
         <span
           class="material-icons-outlined"
           :class="{

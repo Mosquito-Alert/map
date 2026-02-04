@@ -29,11 +29,9 @@ export class MapBaseLayerControl implements IControl {
     const mountPoint = document.createElement('div')
     this._container.appendChild(mountPoint)
 
-    map.on('load', () => {
-      this._app = createApp(MapBaseLayerSelector, { options: this._options })
-      this._app.directive('tooltip', Tooltip)
-      this._app.mount(mountPoint)
-    })
+    this._app = createApp(MapBaseLayerSelector, { options: this._options })
+    this._app.directive('tooltip', Tooltip)
+    this._app.mount(mountPoint)
 
     return this._container
   }

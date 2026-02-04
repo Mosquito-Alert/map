@@ -20,6 +20,8 @@ export class MapLegendControl implements IControl {
     this._button.className =
       'map-legend flex! justify-center! items-center! opacity-50! cursor-not-allowed!'
     this._button.innerHTML = `<span class="material-icons-outlined">ballot</span>`
+    this._button.setAttribute('aria-label', 'Toggle Legend')
+    this._button.title = 'Toggle Legend'
     this._button.disabled = !observationsStore.dataProcessed
 
     this._button.onclick = () => {
