@@ -307,6 +307,36 @@ const showOnlyResolution = () => {
   }
 }
 
+const addObservationLayers = () => {
+  if (!map.value || !geojsonCache.value) return
+
+  // Observations
+  if (!map.value.getSource('observationsSource')) {
+    map.value.addSource('observationsSource', {
+      type: 'geojson',
+      data: geojsonCache.value as GeoJSON.FeatureCollection,
+      buffer: 0,
+      maxzoom: 14,
+    })
+  }
+
+  if (!map.value.getLayer('observationsLayer')) {
+    map.value.addLayer({
+      id: 'observationsLayer',
+      source: 'observationsSource',
+      type: 'circle',
+      minzoom: 10,
+      layout: { visibility: 'none' },
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 3, 18, 10],
+        'circle-color': '#FF5722',
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#FFFFFF',
+      },
+    })
+  }
+}
+
 // Handle zoom events for dynamic resolution switching
 const handleZoomChange = async () => {
   if (!map.value) return
@@ -354,7 +384,7 @@ onMounted(async () => {
       basemapOptions?.basemaps.find((b) => b.id === basemapOptions?.initialBasemap) ||
       (basemapOptions.basemaps[0] as BasemapType)
     map.value.setStyle(mapStore.baselayer?.url || '')
-    map.value.on('styledata', () => {
+    map.value.on('style.load', () => {
       map.value?.setProjection({ type: 'globe' })
     })
     map.value.addControl(
@@ -407,28 +437,7 @@ onMounted(async () => {
       filterData()
 
       // Add observation points layer for high zoom levels
-      map.value.addSource('observationsSource', {
-        type: 'geojson',
-        data: geojsonCache.value as GeoJSON.FeatureCollection,
-        buffer: 0,
-        maxzoom: 14,
-      })
-
-      map.value.addLayer({
-        id: 'observationsLayer',
-        source: 'observationsSource',
-        type: 'circle',
-        minzoom: 10,
-        layout: {
-          visibility: 'none',
-        },
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 3, 18, 10],
-          'circle-color': '#FF5722',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#FFFFFF',
-        },
-      })
+      addObservationLayers()
 
       getMapColors()
 
@@ -482,6 +491,7 @@ watch(
     if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id) {
       map.value.setStyle(newBaselayer.url)
       map.value.once('style.load', () => {
+        addObservationLayers()
         addOrUpdateH3Layer()
         showOnlyResolution()
       })
