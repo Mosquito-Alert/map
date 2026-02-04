@@ -1,8 +1,11 @@
 <template>
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
-      <div class="absolute bottom-10 right-2 z-10 flex flex-row items-end pointer-events-none">
-        <TimeSeries :timeSeriesData="originalDateAggregationData" />
+      <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
+        <TimeSeries
+          :timeSeriesData="originalDateAggregationData"
+          v-if="observationsStore.dataProcessed"
+        />
         <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors[currentResolution as number]" />
       </div>
     </div>
@@ -408,8 +411,8 @@ onMounted(async () => {
       'top-right',
     )
     map.value.addControl(new MapLegendControl(), 'top-right')
-    map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     map.value.addControl(new MapGlobeControl(), 'top-right')
+    map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     // map.value.addControl(new MapInfoControl(), 'top-right')
     // map.value.addControl(
     //   new maplibregl.AttributionControl({
