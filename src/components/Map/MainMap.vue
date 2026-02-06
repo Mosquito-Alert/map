@@ -33,7 +33,7 @@ import { MessageType } from '../../workers/h3Aggregation.worker'
 import MapLegend from './MapLegend.vue'
 import TimeSeries from './TimeSeries.vue'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
-import { useTaxaStore } from '../../stores/taxaStore'
+import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -55,6 +55,7 @@ const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts fo
 const mapColors = ref<
   Record<number, Record<number, Record<string, { value: number; color: string }>>>
 >({}) // Color mapping for current resolution
+const observationsFilters = ref<Record<string, any>>({}) // Filters for observation points layer
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -490,6 +491,14 @@ watch(
     getMapColors()
     // Add initial H3 layer
     addOrUpdateH3Layer()
+    // Filter observation points
+    if (map.value) {
+      if (newTaxon.id !== culicidaeTaxon.id) {
+        observationsFilters.value['taxon'] = ['==', ['get', 'identification_taxon_id'], newTaxon.id]
+      } else {
+        delete observationsFilters.value['taxon']
+      }
+    }
   },
 )
 
@@ -507,15 +516,27 @@ watch(
       getMapColors()
       addOrUpdateH3Layer()
       showOnlyResolution()
-      if (start && end) {
-        // const startTs = Date.parse(start)
-        // const endTs = Date.parse(end)
-        map.value?.setFilter('observationsLayer', [
-          'all',
-          ['>=', ['get', 'received_at'], start],
-          ['<=', ['get', 'received_at'], end],
-        ])
+      if (start) {
+        observationsFilters.value['start'] = ['>=', ['get', 'received_at'], start]
+      } else {
+        delete observationsFilters.value['start']
       }
+      if (end) {
+        observationsFilters.value['end'] = ['<=', ['get', 'received_at'], end]
+      } else {
+        delete observationsFilters.value['end']
+      }
+    }
+  },
+  { deep: true },
+)
+
+watch(
+  () => observationsFilters.value,
+  (newFilters) => {
+    if (map.value) {
+      const filters = Object.values(newFilters)
+      map.value.setFilter('observationsLayer', ['all', ...filters])
     }
   },
   { deep: true },
