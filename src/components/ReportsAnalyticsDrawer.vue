@@ -60,7 +60,7 @@ const props = withDefaults(defineProps<{
   breakpoint?: keyof Screen["sizes"]
 }>(), {
   modelValue: true,
-  width: 300,
+  width: 350,
   breakpoint: 'sm'
 })
 
