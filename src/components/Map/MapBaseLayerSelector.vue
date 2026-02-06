@@ -6,7 +6,7 @@
     }"
   >
     <button
-      class="rounded-sm!"
+      class="rounded-sm! shadow-[0_0_2px_2px_rgba(0,0,0,0.1)]!"
       :class="{
         'ml-3': showLayerStyleSelector,
         'bg-transparent! opacity-50! cursor-not-allowed!': !mapStore.mapLoaded,
