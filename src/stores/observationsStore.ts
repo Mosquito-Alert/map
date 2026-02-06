@@ -22,7 +22,6 @@ export const useObservationsStore = defineStore('observations', {
       try {
         const taxaStore = useTaxaStore()
         // TODO: Implement latitude and longitude ordering when supported by the API
-        // TODO: Filter by species
         const response = await observationsApi.list({
           pageSize: numberOfObservations,
           hasPhotos: true,

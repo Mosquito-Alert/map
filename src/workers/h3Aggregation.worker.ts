@@ -17,44 +17,59 @@ type WorkerMessage =
       type: MessageType.BUILD_ORIGINAL
       features: GeoJSON.Feature<GeoJSON.Point>[]
       resolution: number
+      selectedTaxonId: number
     }
   | {
       type: MessageType.FILTER
       resolution: number
+      selectedTaxonId: number
       start: number
       end: number
     }
 
 type HexStore = Record<
-  number,
+  number, // taxonomic id
   Record<
-    string,
-    {
-      type: string
-      geometry: GeoJSON.Polygon
-      properties: {
-        hex: string
-        countsByDay: Map<number, number>
-        count: number
+    number, // resolution
+    Record<
+      string, // hex
+      {
+        type: string
+        geometry: GeoJSON.Polygon
+        properties: {
+          hex: string
+          countsByDay: Map<number, number>
+          count: number
+        }
       }
-    }
+    >
   >
 >
 
 const originalHexData: HexStore = {}
-let dateAggregation: Record<number, number> = {}
+let dateAggregation: Record<number, Record<number, number>> = {}
 
 self.onmessage = (e: MessageEvent<WorkerMessage>) => {
   const msg = e.data
 
   if (msg.type === MessageType.BUILD_ORIGINAL) {
-    const { features, resolution } = msg
+    const { features, resolution, selectedTaxonId } = msg
 
-    console.log('Building original data for resolution:', resolution)
+    console.log(
+      'Building original data for resolution:',
+      resolution,
+      ' and taxon id:',
+      selectedTaxonId,
+    )
 
-    if (originalHexData[resolution]) return
+    if (originalHexData[selectedTaxonId]?.[resolution]) return
 
-    const aggregateByDate = Object.keys(dateAggregation).length === 0
+    originalHexData[selectedTaxonId] = originalHexData[selectedTaxonId] || {}
+
+    const aggregateByDate = Object.keys(dateAggregation?.[selectedTaxonId] ?? {}).length === 0
+    if (aggregateByDate) {
+      dateAggregation[selectedTaxonId] = {}
+    }
 
     for (const feature of features) {
       // ------------------------------------------------
@@ -71,7 +86,9 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
       const [lng, lat] = feature.geometry.coordinates as [number, number]
       const hex = latLngToCell(lat, lng, resolution)
 
-      let hexFeature = originalHexData[resolution]?.[hex] as HexStore[number][string] | undefined
+      let hexFeature = originalHexData[selectedTaxonId][resolution]?.[hex] as
+        | HexStore[number][number][string]
+        | undefined
       if (!hexFeature) {
         hexFeature = {
           type: 'Feature',
@@ -87,8 +104,8 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
         }
       }
 
-      if (!originalHexData[resolution]) {
-        originalHexData[resolution] = {}
+      if (!originalHexData[selectedTaxonId][resolution]) {
+        originalHexData[selectedTaxonId][resolution] = {}
       }
 
       // ------------------------------------------------
@@ -102,25 +119,25 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
       // Global date aggregation (once)
       // ------------------------------------------------
       if (aggregateByDate) {
-        dateAggregation[day] = (dateAggregation[day] ?? 0) + 1
+        dateAggregation[selectedTaxonId]![day] = (dateAggregation[selectedTaxonId]![day] ?? 0) + 1
       }
-      originalHexData[resolution][hex] = hexFeature
+      originalHexData[selectedTaxonId][resolution]![hex] = hexFeature
     }
 
     postMessage({
       type: MessageType.BUILT,
       resolution,
-      originalHexData: originalHexData[resolution],
-      dateAggregation,
+      originalHexData: originalHexData[selectedTaxonId][resolution]!,
+      dateAggregation: dateAggregation[selectedTaxonId]!,
     })
   }
 
   if (msg.type === MessageType.FILTER) {
-    const { resolution, start, end } = msg
+    const { resolution, start, end, selectedTaxonId } = msg
 
     console.log('Filtering data for resolution:', resolution)
 
-    const source = originalHexData[resolution]
+    const source = originalHexData[selectedTaxonId]?.[resolution]
     if (!source) return
 
     const features: GeoJSON.Feature<GeoJSON.Polygon>[] = []

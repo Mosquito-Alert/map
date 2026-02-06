@@ -3,10 +3,13 @@
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
         <TimeSeries
-          :timeSeriesData="originalDateAggregationData"
+          :timeSeriesData="originalDateAggregationData[taxaStore.taxonSelected.id]!"
           v-if="observationsStore.dataProcessed"
         />
-        <MapLegend v-if="mapStore.showLegend" :mapColors="mapColors[currentResolution as number]" />
+        <MapLegend
+          v-if="mapStore.showLegend"
+          :mapColors="mapColors[taxaStore.taxonSelected.id]![currentResolution as number]"
+        />
       </div>
     </div>
   </main>
@@ -45,11 +48,13 @@ const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const geojsonCache = ref<ObservationFeatureCollection | null>(null)
 const currentResolution = ref<number | null>(null)
-const originalHexData = ref<Record<number, Record<string, any>>>({})
-const originalDateAggregationData = ref<Record<string, number>>({})
-const renderedHexData = ref<Record<number, Record<string, any>>>({})
+const originalHexData = ref<Record<number, Record<number, Record<string, any>>>>({})
+const originalDateAggregationData = ref<Record<number, Record<string, number>>>({})
+const renderedHexData = ref<Record<number, Record<number, Record<string, any>>>>({})
 const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
-const mapColors = ref<Record<number, Record<string, { value: number; color: string }>>>({}) // Color mapping for current resolution
+const mapColors = ref<
+  Record<number, Record<number, Record<string, { value: number; color: string }>>>
+>({}) // Color mapping for current resolution
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -115,14 +120,19 @@ const basemapOptions: MapLibreBasemapsControlOptions = {
 
 worker.onmessage = (e) => {
   const msg = e.data
+  const taxonSelectedId = taxaStore.taxonSelected.id as number
 
   if (msg.type === MessageType.BUILT) {
-    originalHexData.value[msg.resolution] = msg.originalHexData
-    originalDateAggregationData.value = { ...msg.dateAggregation }
+    // originalHexData.value[taxonSelectedId][msg.resolution] = msg.originalHexData
+    originalHexData.value[taxonSelectedId] = originalHexData.value[taxonSelectedId] || {}
+    originalHexData.value[taxonSelectedId][msg.resolution] = msg.originalHexData
+
+    originalDateAggregationData.value[taxonSelectedId] = { ...msg.dateAggregation }
   }
 
   if (msg.type === MessageType.FILTERED) {
-    renderedHexData.value[msg.resolution] = Object.fromEntries(
+    renderedHexData.value[taxonSelectedId] = renderedHexData.value[taxonSelectedId] || {}
+    renderedHexData.value[taxonSelectedId][msg.resolution] = Object.fromEntries(
       msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
     )
 
@@ -167,6 +177,7 @@ const buildOriginalData = () => {
     type: MessageType.BUILD_ORIGINAL,
     features: geojsonCache.value?.features,
     resolution: currentResolution.value,
+    selectedTaxonId: taxaStore.taxonSelected.id,
   })
 }
 
@@ -176,22 +187,25 @@ const filterData = () => {
   worker.postMessage({
     type: MessageType.FILTER,
     resolution: currentResolution.value,
+    selectedTaxonId: taxaStore.taxonSelected.id,
     start: start ? Date.parse(start) : -Infinity,
     end: end ? Date.parse(end) : Infinity,
   })
 }
 
 const getMapColors = () => {
+  const taxonSelectedId = taxaStore.taxonSelected.id as number
   const resolution = currentResolution.value as number
-  if (!renderedHexData.value[resolution]) return
+  if (!renderedHexData.value[taxonSelectedId]?.[resolution]) return
 
   if (ascSortedArrHexCounts.value.length === 0) {
-    ascSortedArrHexCounts.value = Object.values(renderedHexData.value[resolution]).map(
-      (f: any) => f.properties.count,
-    )
+    ascSortedArrHexCounts.value = Object.values(
+      renderedHexData.value[taxonSelectedId][resolution],
+    ).map((f: any) => f.properties.count)
     ascSortedArrHexCounts.value.sort((a, b) => a - b)
   }
-  mapColors.value[resolution] = {
+  mapColors.value[taxonSelectedId] = mapColors.value[taxonSelectedId] || {}
+  mapColors.value[taxonSelectedId][resolution] = {
     '0': { value: 0, color: 'rgba(255, 255, 204, 0.2)' },
     '25': {
       value: quantile(ascSortedArrHexCounts.value, 0.25),
@@ -207,30 +221,32 @@ const getMapColors = () => {
   }
 
   // Ensure quantiles are different, adding small offsets if necessary
-  for (let i = 0; i < Object.keys(mapColors.value[resolution]).length - 1; i++) {
-    const previousKey = i > 0 ? Object.keys(mapColors.value[resolution])[i - 1] : null
-    const currentKey = Object.keys(mapColors.value[resolution])[i] as string
+  for (let i = 0; i < Object.keys(mapColors.value[taxonSelectedId]![resolution]).length - 1; i++) {
+    const previousKey =
+      i > 0 ? Object.keys(mapColors.value[taxonSelectedId]![resolution])[i - 1] : null
+    const currentKey = Object.keys(mapColors.value[taxonSelectedId]![resolution])[i] as string
     if (
       previousKey &&
-      mapColors.value[resolution][currentKey] &&
-      mapColors.value[resolution][previousKey] &&
-      mapColors.value[resolution][currentKey].value ===
-        mapColors.value[resolution][previousKey].value
+      mapColors.value[taxonSelectedId]![resolution][currentKey] &&
+      mapColors.value[taxonSelectedId]![resolution][previousKey] &&
+      mapColors.value[taxonSelectedId]![resolution][currentKey].value ===
+        mapColors.value[taxonSelectedId]![resolution][previousKey].value
     ) {
-      mapColors.value[resolution][currentKey].value += 0.1
+      mapColors.value[taxonSelectedId]![resolution][currentKey].value += 0.1
     }
   }
 }
 
 // Function to add/update H3 layer for a resolution
 const addOrUpdateH3Layer = () => {
+  const taxonSelectedId = taxaStore.taxonSelected.id as number
   const resolution = currentResolution.value as number
   const mapInstance = map.value
 
   if (!mapInstance) return
 
-  const dataForRes = renderedHexData.value[resolution]
-  const colorsForRes = mapColors.value[resolution]
+  const dataForRes = renderedHexData.value[taxonSelectedId]?.[resolution]
+  const colorsForRes = mapColors.value[taxonSelectedId]?.[resolution]
 
   if (!dataForRes || !colorsForRes) return
 
@@ -359,7 +375,7 @@ const handleZoomChange = async () => {
   currentResolution.value = targetResolution
 
   // Build original data ONLY if missing
-  if (!originalHexData.value[targetResolution]) {
+  if (!originalHexData.value[taxaStore.taxonSelected.id]?.[targetResolution]) {
     buildOriginalData()
   }
 
@@ -463,6 +479,21 @@ onUnmounted(() => {
 })
 
 watch(
+  () => taxaStore.taxonSelected,
+  async (newTaxon, oldTaxon) => {
+    if (!oldTaxon || newTaxon === oldTaxon) return
+    geojsonCache.value = markRaw(await observationsStore.fetchObservations())
+    buildOriginalData()
+    filterData()
+    // Add observation points layer for high zoom levels
+    addObservationLayers()
+    getMapColors()
+    // Add initial H3 layer
+    addOrUpdateH3Layer()
+  },
+)
+
+watch(
   () => observationsStore.dateFilter,
   ({ start, end }, oldValue) => {
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
@@ -493,7 +524,7 @@ watch(
 watch(
   () => mapStore.baselayer,
   (newBaselayer, oldBaselayer) => {
-    if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id) {
+    if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id && !oldBaselayer) {
       map.value.setStyle(newBaselayer.url)
       map.value.once('style.load', () => {
         addObservationLayers()
