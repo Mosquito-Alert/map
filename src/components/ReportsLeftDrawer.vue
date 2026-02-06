@@ -5,7 +5,7 @@
         <span class="text-weight-light text-uppercase text-grey-7">{{ $t('layers') }}</span>
       </q-item-label>
       <!-- MOSQUITO SELECTION -->
-      <q-expansion-item :model-value="mosquitoSelected.length > 0" dense expand-separator header-class="q-px-none">
+      <q-expansion-item :model-value="mosquitoSectionIsExpanded" dense expand-separator header-class="q-px-none">
         <template v-slot:header>
           <q-item-section avatar>
             <q-avatar icon="fa fat fa-mosquito" />
@@ -42,7 +42,7 @@
         </q-card>
       </q-expansion-item>
       <!-- BREEDING SITES -->
-      <q-expansion-item :model-value="breedingSitesSelected.length > 0" dense expand-separator header-class="q-px-none">
+      <q-expansion-item :model-value="breedingSitesSectionIsExpanded" dense expand-separator header-class="q-px-none">
         <template v-slot:header>
           <q-item-section avatar>
             <q-avatar icon="fa fat fa-water" />
@@ -293,6 +293,8 @@ export default {
       emit('update-layers:mosquitoes', newValue)
     })
 
+    const mosquitoSectionIsExpanded = ref(mosquitoSelected.value.length > 0)
+
     const breedingSiteLayers = ref({
       stormDrainWater: {
         name_key: 'storm_drain_water',
@@ -320,6 +322,8 @@ export default {
     watch(breedingSitesSelected, (newValue) => {
       emit('update-layers:breeding-sites', newValue)
     })
+
+    const breedingSitesSectionIsExpanded = ref(breedingSitesSelected.value.length > 0)
 
     const bitesEnabled = ref(props.enabledBites)
     watch(bitesEnabled, (newValue) => {
@@ -511,11 +515,13 @@ export default {
 
     return {
       mosquitoLayers,
+      mosquitoSectionIsExpanded,
       otherSpeciesLayers,
       breedingSiteLayers,
       selectedDateRange,
       mosquitoSelected,
       breedingSitesSelected,
+      breedingSitesSectionIsExpanded,
       bitesEnabled,
       initCollapsed,
       samplingEffortEnabled,
