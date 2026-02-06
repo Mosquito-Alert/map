@@ -3,7 +3,7 @@
     <q-card-section class="q-py-sm">
       <div class="text-h6 text-primary">{{ $t('recent_activity') }}</div>
     </q-card-section>
-    <q-virtual-scroll style="max-height: 200px; overflow-x: hidden" virtual-scroll-slice-size="4"
+    <q-virtual-scroll style="max-height: 25vh; overflow-x: hidden" virtual-scroll-slice-size="4"
       virtual-scroll-item-size="56" :items-size="lastFeatureIds.length"
       :items-fn="(from, size) => { return lastFeatureIds.slice(from, from + size) }" v-slot="{ item }">
       <ReportsAnalyticsLastActivityItem :key="item" :feature="features?.find((feature) => feature.getId() === item)!" />
