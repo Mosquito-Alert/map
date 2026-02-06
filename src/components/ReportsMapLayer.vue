@@ -39,6 +39,7 @@ import { colors } from 'quasar'
 import { ref, inject } from 'vue';
 
 import type { Feature } from 'ol';
+import type Map from "ol/Map";
 import type { SelectEvent } from 'ol/interaction/Select';
 import type LayerGroup from 'ol/layer/Group';
 
@@ -87,6 +88,7 @@ withDefaults(defineProps<{
 })
 
 const layerGroupRef = ref<{ layerGroup: LayerGroup }>();
+const map = inject<Map>('map')
 
 const selectConditions = inject("ol-selectconditions");
 const hoverCondition = selectConditions.pointerMove;
@@ -103,6 +105,9 @@ function handleFeatureHovered(event: SelectEvent) {
     feature.set('hover', 0)
   })
 
+  if (!map) return;
+  const element = map.getTargetElement();
+  element.style.cursor = event.selected.length ? 'pointer' : '';
 }
 
 async function handleFeatureClicked(event: SelectEvent) {
