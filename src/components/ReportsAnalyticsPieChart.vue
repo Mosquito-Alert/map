@@ -7,18 +7,15 @@ import VChart from "vue-echarts"
 
 import { use } from 'echarts/core'
 import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
+import { TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { PieDataItemOption } from "echarts/types/src/chart/pie/PieSeries.js"
 
-use([TooltipComponent, LegendComponent, PieChart, CanvasRenderer])
+use([TooltipComponent, PieChart, CanvasRenderer])
 
 import { computed } from 'vue'
-import { useI18n } from "vue-i18n"
 import type { Feature } from "ol"
 import type { CallbackDataParams } from "echarts/types/dist/shared"
-
-const { t } = useI18n();
 
 const props = defineProps<{
   features?: Feature[]
@@ -27,9 +24,9 @@ const props = defineProps<{
 const data = computed<PieDataItemOption[]>(() => {
   if (!props.features) return []
   return Object.values(props.features.reduce((acc, obj) => {
-    const key = t(obj.get('type') as string);
+    const key = obj.get('color') as string;
     if (!acc[key]) {
-      acc[key] = { name: key, value: 0, itemStyle: { color: obj.get('type_color') } }
+      acc[key] = { value: 0, itemStyle: { color: obj.get('color') } }
     }
     acc[key].value = (acc[key].value as number) + 1;
     return acc;
@@ -37,10 +34,6 @@ const data = computed<PieDataItemOption[]>(() => {
 })
 
 const option = computed(() => ({
-  legend: {
-    bottom: '5%',
-    left: 'center'
-  },
   series: [
     {
       type: 'pie',
