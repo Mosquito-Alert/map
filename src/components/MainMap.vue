@@ -93,7 +93,7 @@ export default {
     }
 
     const grayscaleFilter = new Colorize({ operation: 'grayscale' });
-    const labelsLayerVisible = ref(true);
+    const labelsLayerVisible = ref(false);
 
     onMounted(() => {
       basemapRef.value.tileLayer.addFilter(grayscaleFilter);
