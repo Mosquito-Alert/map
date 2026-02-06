@@ -25,6 +25,7 @@
           </div>
           <q-separator vertical />
           <q-date class='no-shadow' :model-value="localDate" range minimal color="primary" :options="optionsFn"
+            :navigation-min-year-month="minYearMonth" :navigation-max-year-month="maxYearMonth"
             @update:model-value="handleDatePick">
             <div class="row items-center justify-end">
               <q-btn v-close-popup color="primary" flat>{{ $q.lang.label.close }}</q-btn>
@@ -96,6 +97,8 @@ export default {
 
     return {
       date,
+      minYearMonth: props.minDate ? date.formatDate(props.minDate, 'YYYY/MM') : undefined,
+      maxYearMonth: props.maxDate ? date.formatDate(props.maxDate, 'YYYY/MM') : undefined,
       localDate,
       formatedDateRange,
       optionsFn(dateString: string) {
