@@ -1,6 +1,10 @@
 <template>
-  <BaseReportDetailDrawer :report="observation" :photoUrls="observation.photos.map(photo => photo.url)"
-    :title="titleWithStyle" :subtitle="subtitleWithStyle" :extra-items="extraItems" @close="$emit('close')">
+  <BaseReportDetailDrawer :report="observation" :title="titleWithStyle" :subtitle="subtitleWithStyle"
+    :extra-items="extraItems" @close="$emit('close')">
+    <template #header>
+      <PhotoSliderHeader v-if="observation.photos.length > 0"
+        :photo-urls="observation.photos.map(photo => photo.url)" />
+    </template>
     <template v-if="observation.identification?.result?.is_high_confidence" #header-icons>
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
         name="fa fa-badge-check" color="white">
@@ -56,6 +60,7 @@
 import type { Observation } from 'mosquito-alert';
 import { IdentificationTaskResultSource } from 'mosquito-alert';
 import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
+import PhotoSliderHeader from 'src/components/PhotoSliderHeader.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { TextWithStyle } from 'src/types/utils';

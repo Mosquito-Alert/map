@@ -3,16 +3,7 @@
     <q-drawer show-if-above behavior="desktop" side="right" class="column full-height no-wrap" :width="drawerWidth">
       <q-btn unelevated round class="q-ma-sm absolute-top-right z-top" color='grey-3' text-color='grey-14'
         icon="fa fat fa-xmark" size="xs" @click="emit('close')" />
-      <q-carousel v-if="photoUrls?.length" animated v-model="slide" :arrows="photoUrls?.length > 1"
-        :navigation="photoUrls?.length > 1" infinite height="250px">
-        <q-carousel-slide v-for="(photoUrl, index) in photoUrls" :key="index" :name="index" :img-src="photoUrl">
-          <q-btn class="absolute-bottom-right all-pointer-events cursor-pointer q-ma-xs" color="grey-14" unelevated
-            padding="xs" :ripple=false target="_blank" href="https://creativecommons.org/licenses/by/4.0/" size="xs">
-            <q-icon name="fa fa-brands fa-creative-commons" color="grey-4" />
-            <q-icon name="fa fa-brands fa-creative-commons-by" color="grey-4" />
-          </q-btn>
-        </q-carousel-slide>
-      </q-carousel>
+      <slot name="header"></slot>
       <div class="bg-primary items-center q-px-sm q-py-xs text-white relative-coordinates">
         <!-- <q-skeleton class='full-width q-pa-none' type='text' /> -->
         <!-- <q-skeleton type='text' width="48%" /> -->
@@ -104,14 +95,12 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   report: Observation | Bite | BreedingSite;
-  photoUrls?: string[];
   title: string | TextWithStyle;
   subtitle?: string | TextWithStyle;
   extraItems?: { icon: string; value: string }[];
 }>();
 
 const tab = ref('overview');
-const slide = ref(0);
 
 const drawerWidth = computed(() => {
   return $q.screen.width <= $q.screen.sizes.sm

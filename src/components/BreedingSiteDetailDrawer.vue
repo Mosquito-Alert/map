@@ -1,11 +1,17 @@
 <template>
-  <BaseReportDetailDrawer :report="breedingSite" :photoUrls="breedingSite.photos.map(photo => photo.url)"
-    :title="$t(breedingSite.site_type)" :extra-items="extraItems" @close="$emit('close')" />
+  <BaseReportDetailDrawer :report="breedingSite" :title="$t(breedingSite.site_type)" :extra-items="extraItems"
+    @close="$emit('close')">
+    <template #header>
+      <PhotoSliderHeader v-if="breedingSite.photos.length > 0"
+        :photo-urls="breedingSite.photos.map(photo => photo.url)" />
+    </template>
+  </BaseReportDetailDrawer>
 </template>
 
 <script setup lang="ts">
 import type { BreedingSite } from 'mosquito-alert';
 import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
+import PhotoSliderHeader from 'src/components/PhotoSliderHeader.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
