@@ -168,7 +168,9 @@ function updateVisibleFeatures() {
   if (!showAnalyticsDrawer.value || !analyticsDrawerVisible.value) return
 
   // Get the current extent of the map view
-  const extent = map?.getView().calculateExtent(map?.getSize())
+  const view = map?.getView();
+  if (!view) return;
+  const extent = view.calculateExtent(map!.getSize());
   // Run feature fetching asynchronously
   requestIdleCallback(() => {
     visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
@@ -203,7 +205,9 @@ function handleTagsUpdate(value: string[]) {
 function handleDateUpdate(value: DateRange) {
   fromDate.value = value.from ?? undefined
   toDate.value = value.to ?? undefined
-  reportMapStore.selectedReport = null
+  if (reportMapStore.selectedReport) {
+    reportMapStore.selectedReport = null
+  }
 }
 
 </script>
