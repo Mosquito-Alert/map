@@ -198,10 +198,12 @@ function handleSamplingEffortLayerUpdate(value: boolean) {
 }
 function handleTagsUpdate(value: string[]) {
   tags.value = value
+  reportMapStore.selectedReport = null
 }
 function handleDateUpdate(value: DateRange) {
   fromDate.value = value.from ?? undefined
   toDate.value = value.to ?? undefined
+  reportMapStore.selectedReport = null
 }
 
 </script>
