@@ -2,7 +2,7 @@
   <Teleport v-if="!!boundaryStore.getPolygon" defer to=".ol-overlaycontainer-stopevent">
     <q-chip :model-value="!!boundaryStore.getPolygon" removable clickable class="ol-search all-pointer-events"
       color="primary" text-color="white" icon="location_on" :label="boundaryStore.getBoundaryName || ''"
-      @remove="boundaryStore.setPolygon(null)" />
+      @remove="boundaryStore.setPolygon(null); nominatimPlaceId = undefined" />
   </Teleport>
 
   <ol-vector-layer :visible="true" :opacity="1">
@@ -39,7 +39,7 @@ const boundaryStore = useBoundaryStore();
 
 const map = inject<Map>("map")
 
-const nominatimPlaceId = useRouteQuery('place_id', '', { transform: Number })
+const nominatimPlaceId = useRouteQuery<number | undefined>('place_id', undefined)
 
 const geometryComponent = computed(() => {
   if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon';
