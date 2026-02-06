@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <!-- Base body image -->
-    <q-img src="/src/assets/img/ic_full_body_off.webp" fit="contain" :height="height + 'px'">
+    <q-img src="/img/ic_full_body_off.webp" fit="contain" :height="height + 'px'">
       <!-- Body part overlays -->
       <div v-for="part in bodyParts.filter(part => part.count !== undefined && part.count > 0)" :key="part.name" :style="{
         ...getOverlayStyle(part),
