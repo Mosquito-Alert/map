@@ -17,12 +17,14 @@
         <!-- <q-skeleton class='full-width q-pa-none' type='text' /> -->
         <!-- <q-skeleton type='text' width="48%" /> -->
         <div class="row items-center">
-          <span class="text-h6 q-py-none q-pr-sm">{{ title }}</span>
+          <span :class="[titleClass, 'text-h6 q-py-none q-pr-sm']">
+            {{ titleLocal }}
+          </span>
           <div class="row items-center q-gutter-x-xs">
             <slot name="header-icons"></slot>
           </div>
         </div>
-        <span class="text-caption text-italic q-py-none row">{{ subtitle }}</span>
+        <span :class="[subtitleClass, 'text-caption q-py-none row']">{{ subtitleLocal }}</span>
       </div>
       <q-tabs v-model="tab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify"
         narrow-indicator>
@@ -92,6 +94,7 @@ import { date, useQuasar } from 'quasar'
 import { ref, computed } from 'vue'
 
 import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
+import type { TextWithStyle } from 'src/types/utils';
 
 const $q = useQuasar();
 
@@ -99,11 +102,11 @@ const emit = defineEmits<{
   (event: 'close'): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
   report: Observation | Bite | BreedingSite;
   photoUrls?: string[];
-  title: string;
-  subtitle?: string;
+  title: string | TextWithStyle;
+  subtitle?: string | TextWithStyle;
   extraItems?: { icon: string; value: string }[];
 }>();
 
@@ -114,6 +117,31 @@ const drawerWidth = computed(() => {
   return $q.screen.width <= $q.screen.sizes.sm
     ? $q.screen.width
     : 350 // default desktop width
+})
+
+// Title value and class
+const titleLocal = computed(() => {
+  return typeof props.title === 'string' ? props.title : props.title.value;
+})
+
+const titleClass = computed(() => {
+  if (typeof props.title !== 'string' && props.title.italicize) {
+    return 'text-italic';
+  }
+  return '';
+});
+
+// Subtitle value and class
+const subtitleLocal = computed(() => {
+  if (!props.subtitle) return '';
+  return typeof props.subtitle === 'string' ? props.subtitle : props.subtitle.value;
+})
+
+const subtitleClass = computed(() => {
+  if (props.subtitle && typeof props.subtitle !== 'string' && props.subtitle.italicize) {
+    return 'text-italic';
+  }
+  return '';
 })
 
 </script>

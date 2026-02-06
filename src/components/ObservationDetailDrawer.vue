@@ -1,6 +1,6 @@
 <template>
-  <BaseReportDetailDrawer :report="observation" :photoUrls="observation.photos.map(photo => photo.url)" :title="title"
-    :subtitle="subtitle" :extra-items="extraItems" @close="$emit('close')">
+  <BaseReportDetailDrawer :report="observation" :photoUrls="observation.photos.map(photo => photo.url)"
+    :title="titleWithStyle" :subtitle="subtitleWithStyle" :extra-items="extraItems" @close="$emit('close')">
     <template v-if="observation.identification?.result?.is_high_confidence" #header-icons>
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
         name="fa fa-badge-check" color="white">
@@ -58,6 +58,7 @@ import { IdentificationTaskResultSource } from 'mosquito-alert';
 import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { TextWithStyle } from 'src/types/utils';
 
 const { t } = useI18n();
 
@@ -77,22 +78,37 @@ const taxonScientificName = computed(() => {
   return props.observation.identification?.result?.taxon?.name;
 });
 
-const title = computed(() => {
+const taxonItalicize = computed(() => {
+  return props.observation.identification?.result?.taxon?.italicize ?? false;
+})
+
+const titleWithStyle = computed<TextWithStyle>(() => {
   if (!hasTaxon.value) {
-    return t('unidentified_mosquito');
+    return { value: t('unidentified_mosquito'), italicize: false };
   }
-  return taxonCommonName.value || taxonScientificName.value || t('unidentified_mosquito');
+  if (taxonCommonName.value) {
+    return { value: taxonCommonName.value, italicize: false };
+  } else if (taxonScientificName.value) {
+    return { value: taxonScientificName.value, italicize: taxonItalicize.value };
+  }
+  return { value: t('unidentified_mosquito'), italicize: false };
 });
 
-const subtitle = computed(() => {
+const subtitleWithStyle = computed<TextWithStyle | undefined>(() => {
   if (!hasTaxon.value) {
     return undefined;
   }
 
-  if (!title.value || !taxonCommonName.value) {
+  if (!titleWithStyle.value.value || !taxonCommonName.value) {
     return undefined;
   }
-  return taxonScientificName.value;
+  if (!taxonScientificName.value) {
+    return undefined;
+  }
+  return {
+    value: taxonScientificName.value,
+    italicize: taxonItalicize.value,
+  };
 });
 
 const extraItems = computed(() => {

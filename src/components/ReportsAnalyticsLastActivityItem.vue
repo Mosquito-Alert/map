@@ -11,7 +11,9 @@
 
     <q-item-section>
       <q-item-label>
-        <span v-if="report" class="q-pr-xs">{{ title }}</span>
+        <span v-if="report" :class="['q-pr-xs', { 'text-italic': titleWithStyle.italicize }]">
+          {{ titleWithStyle.value }}
+        </span>
         <q-skeleton v-else type="text" width="65%" />
       </q-item-label>
       <q-item-label v-if="report?.location?.display_name !== null" caption lines="2">
@@ -43,6 +45,7 @@ import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api';
 import { type Report, ReportType } from 'src/types/reportType';
 import { useReportMapStore } from 'src/stores/reportMapStore';
+import type { TextWithStyle } from 'src/types/utils';
 
 const { t } = useI18n();
 const reportMapStore = useReportMapStore();
@@ -72,30 +75,37 @@ const photoUrl = computed(() => {
   return undefined
 })
 
-const title = computed(() => {
-  if (!report.value) return ''
+const titleWithStyle = computed<TextWithStyle>(() => {
+  if (!report.value) return { value: '', italicize: false }
 
   switch (props.feature.get('type')) {
     case ReportType.Bite: {
       const bite = report.value as Bite
-      return bite.counts.total + " " + t('bites')
+      const title = bite.counts.total + " " + t('bites')
+      return { value: title, italicize: false }
     }
     case ReportType.BreedingSite: {
       const breedingSite = report.value as BreedingSite
-      return t(breedingSite.site_type)
+      return { value: t(breedingSite.site_type), italicize: false }
     }
     case ReportType.Observation: {
       const observation = report.value as Observation
       const hasTaxon = observation.identification?.result?.taxon !== undefined
       if (!hasTaxon) {
-        return t('unidentified_mosquito');
+        return { value: t('unidentified_mosquito'), italicize: false }
       }
-      const taxonCommonName = observation.identification?.result?.taxon?.common_name;
-      const taxonScientificName = observation.identification?.result?.taxon?.name;
-      return taxonCommonName || taxonScientificName || t('unidentified_mosquito');
+      const taxon = observation.identification?.result?.taxon
+      const taxonCommonName = taxon?.common_name;
+      const taxonScientificName = taxon?.name;
+      if (taxonCommonName) {
+        return { value: taxonCommonName, italicize: false }
+      } else if (taxonScientificName) {
+        return { value: taxonScientificName, italicize: taxon.italicize }
+      }
+      return { value: t('unidentified_mosquito'), italicize: false }
     }
     default:
-      return ''
+      return { value: '', italicize: false }
   }
 })
 
