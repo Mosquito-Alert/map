@@ -121,8 +121,7 @@
         </q-item-section>
 
         <q-item-section>
-          <DateRangePickerWithPresets v-model="selectedDateRange" :max-date="new Date()"
-            :min-date="new Date('2014/06/01')" />
+          <DateRangePickerWithPresets v-model="selectedDateRange" :max-date="new Date()" :min-date="defaultFrom" />
         </q-item-section>
       </q-item>
       <!-- TAGS FILTER -->
@@ -340,12 +339,22 @@ export default {
     })
 
     // FILTERS
+    const defaultFrom = new Date('2014-01-01');
+    const defaultTo = new Date();
     const selectedDateRange = ref<DateRange>({
-      from: props.fromDate,
-      to: props.toDate
+      from: props.fromDate || defaultFrom,
+      to: props.toDate || defaultTo
     });
     watch(selectedDateRange, (newValue) => {
-      emit('update-filters:date', newValue)
+      // If either bound is missing, reset to defaults
+      if (!newValue.from || !newValue.to) {
+        selectedDateRange.value = {
+          from: defaultFrom,
+          to: defaultTo
+        };
+        return;
+      }
+      emit('update-filters:date', selectedDateRange.value)
     }, {
       immediate: true,
       deep: true
@@ -512,6 +521,7 @@ export default {
       samplingEffortEnabled,
       qPopupTag,
       qInputTag,
+      defaultFrom,
       tagsSelected,
       inputTagText,
       downloadProgress,
