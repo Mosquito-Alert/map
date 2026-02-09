@@ -6,21 +6,21 @@ import type { Polygon, MultiPolygon } from 'ol/geom';
 import type { Projection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 
-import type { TemporalBoundary } from 'mosquito-alert';
+import type { TemporaryBoundary } from 'mosquito-alert';
 
 import { boundariesApi } from 'src/boot/api';
 
-interface TemporalBoundaryWithExpiry extends TemporalBoundary {
+interface TemporaryBoundaryWithExpiry extends TemporaryBoundary {
   expires_at: Date;
 }
 
 export const useBoundaryStore = defineStore('boundary', () => {
-  const temporalBoundary = ref<TemporalBoundaryWithExpiry | null>(null);
+  const temporaryBoundary = ref<TemporaryBoundaryWithExpiry | null>(null);
   const feature = ref<Feature<Polygon | MultiPolygon> | null>(null);
 
   const geojsonFormatter = new GeoJSON();
 
-  async function createTemporalBoundary(): Promise<TemporalBoundaryWithExpiry | null> {
+  async function createTemporaryBoundary(): Promise<TemporaryBoundaryWithExpiry | null> {
     if (!feature.value) return null;
 
     try {
@@ -30,34 +30,34 @@ export const useBoundaryStore = defineStore('boundary', () => {
         ? geometry.clone().transform(projection, 'EPSG:4326')
         : geometry;
       const geojson = geojsonFormatter.writeGeometryObject(transformed);
-      const response = await boundariesApi.createTemporal({
-        temporalBoundaryRequest: {
+      const response = await boundariesApi.createTemporary({
+        temporaryBoundaryRequest: {
           geojson: geojson,
         },
       });
 
-      const boundary: TemporalBoundaryWithExpiry = {
+      const boundary: TemporaryBoundaryWithExpiry = {
         ...response.data,
         expires_at: new Date(new Date().getTime() + response.data.expires_in * 1000),
       };
 
-      temporalBoundary.value = boundary;
+      temporaryBoundary.value = boundary;
       // Refresh slightly before expiration
       return boundary;
     } catch (err) {
-      console.error('Failed to create temporal boundary', err);
-      temporalBoundary.value = null;
+      console.error('Failed to create temporary boundary', err);
+      temporaryBoundary.value = null;
       return null;
     }
   }
 
   // Lazy getter: renew if expired
-  async function getTemporalBoundary(): Promise<TemporalBoundaryWithExpiry | null> {
+  async function getTemporaryBoundary(): Promise<TemporaryBoundaryWithExpiry | null> {
     const now = new Date();
-    if (!temporalBoundary.value || temporalBoundary.value.expires_at < now) {
-      return await createTemporalBoundary();
+    if (!temporaryBoundary.value || temporaryBoundary.value.expires_at < now) {
+      return await createTemporaryBoundary();
     }
-    return temporalBoundary.value;
+    return temporaryBoundary.value;
   }
 
   function setPolygon(newPolygon: null): void;
@@ -68,7 +68,7 @@ export const useBoundaryStore = defineStore('boundary', () => {
     name?: string,
   ) {
     // Invalidate existing boundary
-    temporalBoundary.value = null;
+    temporaryBoundary.value = null;
 
     if (!newPolygon) {
       feature.value = null;
@@ -88,5 +88,5 @@ export const useBoundaryStore = defineStore('boundary', () => {
     feature.value ? (feature.value.get('name') as string | null) : null,
   );
 
-  return { getPolygon, getBoundaryName, setPolygon, getTemporalBoundary };
+  return { getPolygon, getBoundaryName, setPolygon, getTemporaryBoundary };
 });

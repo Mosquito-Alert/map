@@ -390,7 +390,7 @@ export default {
       downloadProgress.value.bites.loading = true;
       downloadProgress.value.bites.percentage = 0;
 
-      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+      const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
       await bitesApi.list({
         format: 'csv',
@@ -420,7 +420,7 @@ export default {
       const taxonIds = mosquitoSelected.value == Object.keys(mosquitoLayers.value) ? undefined :
         mosquitoSelected.value.map(key => mosquitoTaxonIds[key]).flat();
 
-      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+      const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
       await observationsApi.list({
         format: 'csv',
@@ -459,7 +459,7 @@ export default {
         return [];
       }).flat();
 
-      const selectedBoundary = await boundaryStore.getTemporalBoundary();
+      const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
       await breedingSitesApi.list({
         format: 'csv',

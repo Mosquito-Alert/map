@@ -36,7 +36,7 @@ watch(
 );
 
 const fetchObservations = async (): Promise<ObservationGeoModel[]> => {
-  const selectedBoundary = await boundaryStore.getTemporalBoundary();
+  const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
   const response = await observationsApi.geoList({
     identificationTaxonIds: props.taxon_ids?.map(String) || undefined,

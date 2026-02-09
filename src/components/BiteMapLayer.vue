@@ -31,7 +31,7 @@ watch(
   },
 );
 const fetchBites = async (): Promise<BiteGeoModel[]> => {
-  const selectedBoundary = await boundaryStore.getTemporalBoundary();
+  const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
   const response = await bitesApi.geoList({
     receivedAtAfter: props.fromDate?.toISOString() || undefined,

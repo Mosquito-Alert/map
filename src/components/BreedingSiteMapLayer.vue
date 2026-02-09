@@ -37,7 +37,7 @@ watch(
 );
 
 const fetchBreedingSites = async (): Promise<BreedingSiteGeoModel[]> => {
-  const selectedBoundary = await boundaryStore.getTemporalBoundary();
+  const selectedBoundary = await boundaryStore.getTemporaryBoundary();
 
   const response = await breedingSitesApi.geoList({
     hasWater: props.hasWater,
