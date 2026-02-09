@@ -28,18 +28,18 @@ const props = withDefaults(defineProps<{
 
 // All readonly body parts with their bite counts
 const bodyParts = reactive([
-  { name: "head", count: props.bite.counts.head, left: 0.49, top: 0.125, width: 0.15, height: 0.15 },
-  { name: "chest", count: props.bite.counts.chest, left: 0.49, top: 0.32, width: 0.15, height: 0.15 },
-  { name: "leftHand", count: props.bite.counts.left_arm, left: 0.3, top: 0.39, width: 0.15, height: 0.15 },
-  { name: "rightHand", count: props.bite.counts.right_arm, left: 0.68, top: 0.39, width: 0.15, height: 0.15 },
-  { name: "leftLeg", count: props.bite.counts.left_leg, left: 0.4, top: 0.70, width: 0.15, height: 0.15 },
-  { name: "rightLeg", count: props.bite.counts.right_leg, left: 0.58, top: 0.70, width: 0.15, height: 0.15 },
+  { name: "head", count: props.bite.counts.head, left: 0.448, top: 0.125, width: 0.15, height: 0.15 },
+  { name: "chest", count: props.bite.counts.chest, left: 0.448, top: 0.32, width: 0.15, height: 0.15 },
+  { name: "leftHand", count: props.bite.counts.left_arm, left: 0.28, top: 0.39, width: 0.15, height: 0.15 },
+  { name: "rightHand", count: props.bite.counts.right_arm, left: 0.62, top: 0.39, width: 0.15, height: 0.15 },
+  { name: "leftLeg", count: props.bite.counts.left_leg, left: 0.37, top: 0.70, width: 0.15, height: 0.15 },
+  { name: "rightLeg", count: props.bite.counts.right_leg, left: 0.525, top: 0.70, width: 0.15, height: 0.15 },
 ]);
 
 function getOverlayStyle(part: { left: number; top: number; width: number; height: number }) {
   return {
-    left: `${part.left * 320}px`,
-    top: `${part.top * props.height}px`,
+    left: `${part.left * 100}%`,
+    top: `${part.top * 100}%`,
   };
 }
 </script>
