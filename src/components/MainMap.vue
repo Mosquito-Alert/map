@@ -20,9 +20,13 @@
 
     <ol-zoom-control />
     <ol-scaleline-control :min-width="50" />
-    <ol-fullscreen-control v-if="$q.platform.is.desktop" />
-    <ol-toggle-control html="T" :className="`ol-toggle-label-layer${!labelsLayerVisible ? ' ol-disabled' : ''}`"
-      title="Toggle place names" :onToggle="() => labelsLayerVisible = !labelsLayerVisible" />
+    <ol-toggle-control ref="labelsToggleRef" html="T"
+      :className="`ol-toggle-label-layer ${!labelsLayerVisible ? 'ol-disabled' : ''}`"
+      :onToggle="() => labelsLayerVisible = !labelsLayerVisible" />
+    <q-tooltip v-if="labelsToggleHasInit" v-model="labelsToggleShow" target=".ol-toggle-label-layer"
+      anchor="center left" self="center right">
+      {{ $t('toggle_map_labels') }}
+    </q-tooltip>
 
     <q-img style='z-index: 1' class='absolute-bottom q-mb-sm mobile-only' position="calc(50% - 11px) center"
       fit='contain' src="/img/mosquitoalert_horizontal.png" height="30px" />
@@ -94,6 +98,9 @@ export default {
 
     const grayscaleFilter = new Colorize({ operation: 'grayscale' });
     const labelsLayerVisible = ref(false);
+    const labelsToggleRef = ref()
+    const labelsToggleHasInit = ref(false)
+    const labelsToggleShow = ref(true)
 
     onMounted(() => {
       basemapRef.value.tileLayer.addFilter(grayscaleFilter);
@@ -103,6 +110,9 @@ export default {
       mapRef.value.map.on('loadend', () => {
         showSpinner.value = false
       })
+
+      const control = labelsToggleRef.value?.control
+      labelsToggleHasInit.value = !!control
     });
 
     watch(
@@ -123,6 +133,9 @@ export default {
       zoom,
       showSpinner,
       labelsLayerVisible,
+      labelsToggleRef,
+      labelsToggleHasInit,
+      labelsToggleShow,
       updateSize() {
         mapRef.value.updateSize()
       }
@@ -193,10 +206,9 @@ export default {
 }
 
 .ol-toggle-label-layer {
-  top: unset;
   left: unset;
-  bottom: 6em;
-  right: .2em;
+  top: 0.5em;
+  right: .5em;
 }
 
 /* Button inside disabled div */
