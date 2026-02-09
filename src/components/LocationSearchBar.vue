@@ -84,6 +84,10 @@ searchControl.requestData = function (s) {
   data['polygon_threshold'] = 0.001;
   return data
 }
+searchControl.getTitle = function (f) {
+  // @ts-expect-error: 'f' may not have display_name according to TypeScript types
+  return f.display_name;
+};
 
 watch(() => boundaryStore.getPolygon, (newValue) => {
   if (!newValue) {
