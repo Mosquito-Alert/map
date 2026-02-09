@@ -3,7 +3,7 @@
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
         <TimeSeries
-          :timeSeriesData="originalDateAggregationData[taxaStore.taxonSelected.id]!"
+          :timeSeriesData="renderedOriginalDateAggregationData"
           v-if="observationsStore.dataProcessed"
         />
         <MapLegend
@@ -19,7 +19,7 @@
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch, computed } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { useUIStore } from '../../stores/uiStore'
@@ -48,12 +48,12 @@ const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
 const geojsonCache = ref<ObservationFeatureCollection | null>(null)
 const currentResolution = ref<number | null>(null)
-const originalHexData = ref<Record<number, Record<number, Record<string, any>>>>({})
-const originalDateAggregationData = ref<Record<number, Record<string, number>>>({})
-const renderedHexData = ref<Record<number, Record<number, Record<string, any>>>>({})
+const originalHexData = ref<Record<number, Record<number, Record<string, any>>>>({}) // taxonId -> resolution -> hex -> feature
+const originalDateAggregationData = ref<Record<number, Record<string, number>>>({}) // taxonId -> date -> count
+const renderedHexData = ref<Record<number, Record<number, Record<string, any>>>>({}) // taxonId -> resolution -> hex -> feature (after filtering)
 const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
 const mapColors = ref<
-  Record<number, Record<number, Record<string, { value: number; color: string }>>>
+  Record<number, Record<number, Record<string, { value: number; color: string }>>> // taxonId -> resolution -> quantile -> { value, color }
 >({}) // Color mapping for current resolution
 const observationsFilters = ref<Record<string, any>>({}) // Filters for observation points layer
 
@@ -83,6 +83,11 @@ const styleEOX: StyleSpecification = {
     position: [1.5, 90, 80],
   },
 } as StyleSpecification
+
+const renderedOriginalDateAggregationData = computed<Record<string, number>>(() => {
+  const taxonSelectedId = taxaStore.taxonSelected.id as number
+  return originalDateAggregationData.value[taxonSelectedId] || {}
+})
 
 // Define map styles
 const basemapOptions: MapLibreBasemapsControlOptions = {

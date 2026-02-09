@@ -103,11 +103,16 @@ import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { debounce } from '../../utils/debouncer'
 import { formatDate } from '../../utils/date'
+import { useTaxaStore } from '../../stores/taxaStore'
 
 use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 
 const props = defineProps<{
-  timeSeriesData: Record<string, number>
+  // timeSeriesData: Record<
+  //   number, // taxonId
+  //   Record<string, number> // date (YYYY-MM-DD) -> count
+  // >
+  timeSeriesData: Record<string, number> // date (YYYY-MM-DD) -> count
 }>()
 
 type PlaybackSpeed = {
@@ -116,11 +121,12 @@ type PlaybackSpeed = {
 }
 
 const observationsStore = useObservationsStore()
+const taxaStore = useTaxaStore()
 
 const menu = ref()
 
 const originalDateLimits = ref<{ start: string; end: string } | null>(null)
-const timeSeriesData = ref<Record<string, number>>({})
+const timeSeriesDataLocal = ref<Record<string, number>>({}) //  date -> count
 const timeSeriesDataMonthly = ref<{
   months: string[]
   values: number[]
@@ -158,7 +164,7 @@ const fixDateAggregationData = (data: Record<string, number>) => {
     .sort((a, b) => a - b)
 
   if (!timestamps.length) {
-    timeSeriesData.value = {}
+    timeSeriesDataLocal.value = {}
     return
   }
 
@@ -172,13 +178,13 @@ const fixDateAggregationData = (data: Record<string, number>) => {
     result[key] = data[ts] ?? 0
   }
 
-  timeSeriesData.value = result
+  timeSeriesDataLocal.value = result
 }
 
 const compressDataByMonth = () => {
   const monthlyMap: Record<string, number> = {}
 
-  Object.entries(timeSeriesData.value).forEach(([date, value]) => {
+  Object.entries(timeSeriesDataLocal.value).forEach(([date, value]) => {
     const d = new Date(date)
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     monthlyMap[key] = (monthlyMap[key] || 0) + value
@@ -293,19 +299,17 @@ onMounted(() => {
 watch(
   () => props.timeSeriesData,
   (newData) => {
-    if (!timeSeriesData.value || Object.keys(timeSeriesData.value).length === 0) {
-      fixDateAggregationData(newData)
-      compressDataByMonth()
-      const allDates = Object.keys(timeSeriesData.value)
-      originalDateLimits.value = {
-        start: allDates[0] as string,
-        end: allDates[allDates.length - 1] as string,
-      }
-      observationsStore.dateFilter = {
-        start: originalDateLimits.value.start,
-        end: originalDateLimits.value.end,
-      }
-      return
+    if (Object.keys(newData).length === 0) return
+    fixDateAggregationData(newData)
+    compressDataByMonth()
+    const allDates = Object.keys(timeSeriesDataLocal.value)
+    originalDateLimits.value = {
+      start: allDates[0] as string,
+      end: allDates[allDates.length - 1] as string,
+    }
+    observationsStore.dateFilter = {
+      start: originalDateLimits.value.start,
+      end: originalDateLimits.value.end,
     }
   },
   { immediate: true },
@@ -325,7 +329,6 @@ const option = computed(() => ({
       const date = new Date(Number(year), Number(month) - 1, 1)
       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
     }),
-    // data: Object.keys(timeSeriesData.value),
   },
   yAxis: {
     type: 'value',
@@ -361,7 +364,6 @@ const option = computed(() => ({
   },
   series: [
     {
-      // data: timeSeriesDataMonthly.value.values,
       data: timeSeriesDataMonthly.value.values.map((m, index) => {
         const [year, month] = timeSeriesDataMonthly.value.months[index]?.split('-') || []
         const date = new Date(Number(year), Number(month) - 1, 1)
