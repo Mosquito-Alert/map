@@ -103,15 +103,10 @@ import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { debounce } from '../../utils/debouncer'
 import { formatDate } from '../../utils/date'
-import { useTaxaStore } from '../../stores/taxaStore'
 
 use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 
 const props = defineProps<{
-  // timeSeriesData: Record<
-  //   number, // taxonId
-  //   Record<string, number> // date (YYYY-MM-DD) -> count
-  // >
   timeSeriesData: Record<string, number> // date (YYYY-MM-DD) -> count
 }>()
 
@@ -121,7 +116,6 @@ type PlaybackSpeed = {
 }
 
 const observationsStore = useObservationsStore()
-const taxaStore = useTaxaStore()
 
 const menu = ref()
 
@@ -298,18 +292,22 @@ onMounted(() => {
 
 watch(
   () => props.timeSeriesData,
-  (newData) => {
+  (newData, oldData) => {
     if (Object.keys(newData).length === 0) return
+    console.log(observationsStore.dateFilter)
     fixDateAggregationData(newData)
     compressDataByMonth()
     const allDates = Object.keys(timeSeriesDataLocal.value)
-    originalDateLimits.value = {
-      start: allDates[0] as string,
-      end: allDates[allDates.length - 1] as string,
-    }
-    observationsStore.dateFilter = {
-      start: originalDateLimits.value.start,
-      end: originalDateLimits.value.end,
+    // If there was no previous data or the new data is empty, set the date limits to the full range of the new data
+    if (!oldData || Object.keys(newData || {}).length === 0) {
+      originalDateLimits.value = {
+        start: allDates[0] as string,
+        end: allDates[allDates.length - 1] as string,
+      }
+      observationsStore.dateFilter = {
+        start: originalDateLimits.value.start,
+        end: originalDateLimits.value.end,
+      }
     }
   },
   { immediate: true },

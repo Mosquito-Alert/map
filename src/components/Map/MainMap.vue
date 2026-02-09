@@ -129,7 +129,6 @@ worker.onmessage = (e) => {
   const taxonSelectedId = taxaStore.taxonSelected.id as number
 
   if (msg.type === MessageType.BUILT) {
-    // originalHexData.value[taxonSelectedId][msg.resolution] = msg.originalHexData
     originalHexData.value[taxonSelectedId] = originalHexData.value[taxonSelectedId] || {}
     originalHexData.value[taxonSelectedId][msg.resolution] = msg.originalHexData
 

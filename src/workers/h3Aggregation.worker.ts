@@ -58,7 +58,7 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
     console.log(
       'Building original data for resolution:',
       resolution,
-      ' and taxon id:',
+      'and taxon id:',
       selectedTaxonId,
     )
 
