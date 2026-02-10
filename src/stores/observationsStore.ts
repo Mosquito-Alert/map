@@ -38,11 +38,13 @@ export const useObservationsStore = defineStore('observations', {
     async fetchObservations() {
       const taxaStore = useTaxaStore()
       try {
-        const response = await observationsApi.geoList({
-          format: 'geojson',
-          identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
-          identificationTaxonIdsLookup: 'is_tree_of',
-        })
+        const response = await observationsApi.geoList(
+          {
+            identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
+            identificationTaxonIdsLookup: 'is_tree_of',
+          },
+          { headers: { Accept: 'application/geo+json' } },
+        )
         if (response.data) {
           return response.data as any
         }

@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
       ...(isDev && {
         proxy: {
           '/api': {
-            target: 'https://webdev.mosquitoalert.com/api/v1/',
+            target: 'https://apidev.mosquitoalert.com/v1/',
             changeOrigin: true,
             secure: false,
             rewrite: (path) => path.replace(/^\/api/, ''),
