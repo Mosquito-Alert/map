@@ -294,7 +294,6 @@ watch(
   () => props.timeSeriesData,
   (newData, oldData) => {
     if (Object.keys(newData).length === 0) return
-    console.log(observationsStore.dateFilter)
     fixDateAggregationData(newData)
     compressDataByMonth()
     const allDates = Object.keys(timeSeriesDataLocal.value)

@@ -549,7 +549,12 @@ watch(
 watch(
   () => mapStore.baselayer,
   (newBaselayer, oldBaselayer) => {
-    if (map.value && newBaselayer && newBaselayer.id !== oldBaselayer?.id && !oldBaselayer) {
+    if (
+      map.value &&
+      Object.keys(newBaselayer || {}).length > 0 &&
+      newBaselayer.id !== oldBaselayer?.id &&
+      Object.keys(oldBaselayer || {}).length > 0
+    ) {
       map.value.setStyle(newBaselayer.url)
       map.value.once('style.load', () => {
         addObservationLayers()
