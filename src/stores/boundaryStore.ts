@@ -17,38 +17,49 @@ interface TemporaryBoundaryWithExpiry extends TemporaryBoundary {
 export const useBoundaryStore = defineStore('boundary', () => {
   const temporaryBoundary = ref<TemporaryBoundaryWithExpiry | null>(null);
   const feature = ref<Feature<Polygon | MultiPolygon> | null>(null);
+  const pendingPromise = ref<Promise<TemporaryBoundaryWithExpiry | null> | null>(null);
 
   const geojsonFormatter = new GeoJSON();
 
   async function createTemporaryBoundary(): Promise<TemporaryBoundaryWithExpiry | null> {
     if (!feature.value) return null;
 
-    try {
-      const projection = feature.value.get('projection') as string;
-      const geometry = feature.value.getGeometry() as Polygon | MultiPolygon;
-      const transformed = projection
-        ? geometry.clone().transform(projection, 'EPSG:4326')
-        : geometry;
-      const geojson = geojsonFormatter.writeGeometryObject(transformed);
-      const response = await boundariesApi.createTemporary({
-        temporaryBoundaryRequest: {
-          geojson: geojson,
-        },
-      });
-
-      const boundary: TemporaryBoundaryWithExpiry = {
-        ...response.data,
-        expires_at: new Date(new Date().getTime() + response.data.expires_in * 1000),
-      };
-
-      temporaryBoundary.value = boundary;
-      // Refresh slightly before expiration
-      return boundary;
-    } catch (err) {
-      console.error('Failed to create temporary boundary', err);
-      temporaryBoundary.value = null;
-      return null;
+    // Singleton guard
+    if (pendingPromise.value) {
+      return pendingPromise.value;
     }
+
+    pendingPromise.value = (async () => {
+      try {
+        const projection = feature.value!.get('projection') as string;
+        const geometry = feature.value!.getGeometry() as Polygon | MultiPolygon;
+        const transformed = projection
+          ? geometry.clone().transform(projection, 'EPSG:4326')
+          : geometry;
+        const geojson = geojsonFormatter.writeGeometryObject(transformed);
+
+        const response = await boundariesApi.createTemporary({
+          temporaryBoundaryRequest: { geojson: geojson },
+        });
+
+        const boundary: TemporaryBoundaryWithExpiry = {
+          ...response.data,
+          expires_at: new Date(Date.now() + response.data.expires_in * 1000),
+        };
+
+        temporaryBoundary.value = boundary;
+        return boundary;
+      } catch (err) {
+        console.error('Failed to create temporary boundary', err);
+        temporaryBoundary.value = null;
+        return null;
+      } finally {
+        // Always clear pending promise
+        pendingPromise.value = null;
+      }
+    })();
+
+    return pendingPromise.value;
   }
 
   // Lazy getter: renew if expired
