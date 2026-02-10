@@ -78,9 +78,6 @@ const mosquitoLayers = useRouteQuery('mosquitoes', '', {
     set: v => v.join(','),
   },
 })
-if (mosquitoLayers.value.length == 0) {
-  mosquitoLayers.value = ['albopictus', 'culex']
-}
 
 const breedingSitesLayers = useRouteQuery('breeding_sites', '', {
   transform: {
@@ -102,6 +99,9 @@ const samplingEffortLayer = useRouteQuery('sampling_effort', 'false', {
     set: v => v ? 'true' : 'false',
   },
 })
+if (mosquitoLayers.value.length == 0 && breedingSitesLayers.value.length == 0 && !biteLayer.value && !samplingEffortLayer.value) {
+  mosquitoLayers.value = ['albopictus', 'culex']
+}
 
 const tagsQuery = useRouteQuery<string>('tags', '');
 const tags = computed<string[]>({
