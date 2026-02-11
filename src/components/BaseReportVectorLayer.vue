@@ -27,7 +27,7 @@ const sourceRef = ref<{ source: VectorSource }>();
 export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel;
 
 const props = withDefaults(defineProps<{
-  fetchReports?: () => Promise<GeoReport[]>;
+  fetchReports: () => Promise<GeoReport[]>;
   color: string;
   visible: boolean;
   type: ReportType
@@ -39,7 +39,7 @@ const loader = async function (extent: number[], resolution: number, projection:
   const featureProjection = getProjection('EPSG:4326')!;
 
   try {
-    const response = await props.fetchReports!();
+    const response = await props.fetchReports();
     const features = response.map((report) => {
       const feature = new Feature();
       const point = new Point([report.point.longitude, report.point.latitude]);
