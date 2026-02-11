@@ -47,9 +47,9 @@ import { useQuasar } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import type { Feature } from 'ol';
 
-import ReportsAnalyticsPieChart from 'src/components/ReportsAnalyticsPieChart.vue'
-import ReportsAnalyticsBarChart from 'src/components/ReportsAnalyticsBarChart.vue'
-import ReportsAnalyticsLastActivity from 'src/components/ReportsAnalyticsLastActivity.vue'
+import ReportsAnalyticsPieChart from 'src/components/reports/analytics/ReportsAnalyticsPieChart.vue'
+import ReportsAnalyticsBarChart from 'src/components/reports/analytics/ReportsAnalyticsBarChart.vue'
+import ReportsAnalyticsLastActivity from 'src/components/reports/analytics/ReportsAnalyticsLastActivity.vue'
 
 const props = withDefaults(defineProps<{
   modelValue?: boolean,

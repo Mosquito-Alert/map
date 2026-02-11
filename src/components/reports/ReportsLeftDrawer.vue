@@ -171,8 +171,8 @@ import { useQuasar, exportFile } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from "vue-i18n"
 
-import InnerDrawer from 'src/components/InnerDrawer.vue'
-import DateRangePickerWithPresets from 'src/components/DateRangePickerWithPresets.vue'
+import InnerDrawer from 'src/components/layout/InnerDrawer.vue'
+import { DateRangePickerWithPresets } from 'src/components/common'
 import type { DateRange } from 'src/types/date'
 
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api'

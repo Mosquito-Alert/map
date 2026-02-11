@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { BaseReportVectorLayer } from 'src/components/reports';
 import { breedingSitesApi } from 'src/boot/api';
 
 import { colors } from 'quasar'

@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { BaseReportVectorLayer } from 'src/components/reports';
 import { ReportType } from 'src/types/reportType';
 import { observationsApi } from 'src/boot/api';
 import type { ObservationGeoModel } from 'mosquito-alert';

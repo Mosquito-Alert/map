@@ -43,9 +43,9 @@ import type Map from "ol/Map";
 import type { SelectEvent } from 'ol/interaction/Select';
 import type LayerGroup from 'ol/layer/Group';
 
-import ObservationMapLayer from './ObservationMapLayer.vue';
-import BiteMapLayer from './BiteMapLayer.vue';
-import BreedingSiteMapLayer from './BreedingSiteMapLayer.vue';
+import { ObservationMapLayer } from 'src/components/observations';
+import { BiteMapLayer } from 'src/components/bites';
+import { BreedingSiteMapLayer } from 'src/components/breedingSites';
 
 import { useReportMapStore } from 'src/stores/reportMapStore';
 

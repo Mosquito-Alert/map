@@ -104,8 +104,8 @@ import { useRouteQuery, useRouteParams } from '@vueuse/router'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
-import InnerDrawer from 'src/components/InnerDrawer.vue'
-import ExposureRiskMapLayer from 'src/components/ExposureRiskMapLayer.vue'
+import InnerDrawer from 'src/components/layout/InnerDrawer.vue'
+import ExposureRiskMapLayer from 'src/components/exposureRisk/ExposureRiskMapLayer.vue'
 
 interface ModelEntry {
   fromYear: string;

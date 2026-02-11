@@ -10,8 +10,8 @@
 
 <script setup lang="ts">
 import type { BreedingSite } from 'mosquito-alert';
-import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
-import PhotoSliderHeader from 'src/components/PhotoSliderHeader.vue';
+import { BaseReportDetailDrawer } from 'src/components/reports';
+import { PhotoSliderHeader } from 'src/components/common';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

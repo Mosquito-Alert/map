@@ -1,5 +1,5 @@
 <template>
-  <ReportLeftDrawer :enabled-mosquitoes="mosquitoLayers" :enabled-breeding-sites="breedingSitesLayers"
+  <ReportsLeftDrawer :enabled-mosquitoes="mosquitoLayers" :enabled-breeding-sites="breedingSitesLayers"
     :enabled-bites="biteLayer" :enabled-sampling-effort="samplingEffortLayer" :from-date="fromDate" :to-date="toDate"
     :tags="tags" @update-layers:mosquitoes="handleMosquitoesLayerUpdate"
     @update-layers:breeding-sites="handleBreedingSitesLayerUpdate" @update-layers:bites="handleBitesLayerUpdate"
@@ -31,12 +31,11 @@ import debounce from 'debounce';
 
 import type Map from "ol/Map";
 
-import ReportLeftDrawer from 'src/components/ReportsLeftDrawer.vue'
-import ReportsMapLayer from 'src/components/ReportsMapLayer.vue'
-import SamplingEffortVectorLayer from 'src/components/SamplingEffortVectorLayer.vue'
-import ReportsAnalyticsDrawer from 'src/components/ReportsAnalyticsDrawer.vue'
-import ReportsFeatureDetail from 'src/components/ReportsFeatureDetail.vue'
-import LocationSearchBar from 'src/components/LocationSearchBar.vue';
+import { ReportsLeftDrawer, ReportsMapLayer } from 'src/components/reports'
+import SamplingEffortVectorLayer from 'src/components/samplingEffort/SamplingEffortVectorLayer.vue'
+import { ReportsAnalyticsDrawer } from 'src/components/reports/analytics'
+import { ReportsFeatureDetail } from 'src/components/reports'
+import LocationSearchBar from 'src/components/map/controls/LocationSearchBar.vue';
 
 import type { DateRange } from 'src/types/date'
 import type { ReportType } from 'src/types/reportType';

@@ -47,8 +47,7 @@
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 
-import LanguageSwitcher from 'src/components/LanguageSwitcher.vue'
-import ShareButton from 'src/components/ShareButton.vue'
+import { LanguageSwitcher, ShareButton } from './MainLeftDrawer'
 
 export default {
   components: {

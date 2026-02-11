@@ -10,8 +10,8 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Bite } from 'mosquito-alert';
-import BaseReportDetailDrawer from './BaseReportDetailDrawer.vue';
-import BitesStickman from './BitesStickman.vue';
+import { BaseReportDetailDrawer } from 'src/components/reports';
+import BitesStickman from 'src/components/bites/BitesStickman.vue';
 
 const { t } = useI18n();
 

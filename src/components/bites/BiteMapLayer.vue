@@ -7,7 +7,7 @@
 import { ref, watch } from 'vue';
 import { colors } from 'quasar'
 
-import BaseReportVectorLayer from './BaseReportVectorLayer.vue'
+import { BaseReportVectorLayer } from 'src/components/reports';
 import { bitesApi } from 'src/boot/api';
 import type { BiteGeoModel } from 'mosquito-alert';
 import { ReportType } from 'src/types/reportType';

@@ -1,5 +1,6 @@
 <template>
-  <GadmVectorTileLayer ref="layerRef" :level="level" :visible="visible" :opacity="opacity" v-bind="{ ...(minZoom !== undefined && { minZoom }), ...(maxZoom !== undefined && { maxZoom }) }">
+  <GadmVectorTileLayer ref="layerRef" :level="level" :visible="visible" :opacity="opacity"
+    v-bind="{ ...(minZoom !== undefined && { minZoom }), ...(maxZoom !== undefined && { maxZoom }) }">
     <ol-style :overrideStyleFunction="styleFn"></ol-style>
   </GadmVectorTileLayer>
 </template>
@@ -10,7 +11,7 @@ import { useQuasar } from 'quasar'
 import { ref, onMounted, watch } from 'vue'
 import { cdn } from 'boot/axios'
 
-import GadmVectorTileLayer from 'src/components/GadmVectorTileLayer.vue'
+import GadmVectorTileLayer from 'src/components/map/layers/GadmVectorTileLayer.vue'
 
 import { Style, Fill, Stroke } from 'ol/style'
 import type { Feature } from 'ol'

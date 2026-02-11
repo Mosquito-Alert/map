@@ -19,7 +19,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 import Worker from 'src/workers/ReportAnalyticsLastActivityWorker.js?worker'
 
-import ReportsAnalyticsLastActivityItem from 'src/components/ReportsAnalyticsLastActivityItem.vue'
+import ReportsAnalyticsLastActivityItem from 'src/components/reports/analytics/ReportsAnalyticsLastActivityItem.vue'
 import type { Feature } from 'ol'
 
 const worker = new Worker()

@@ -37,8 +37,8 @@ import { useI18n } from 'vue-i18n'
 import { useMapUiStore } from 'src/stores/mapUI';
 import { mapserver } from 'boot/axios'
 
-import InnerDrawer from 'src/components/InnerDrawer.vue'
-import DiscoveriesMapLayer from 'src/components/DiscoveriesMapLayer.vue'
+import InnerDrawer from 'src/components/layout/InnerDrawer.vue'
+import DiscoveriesMapLayer from 'src/components/discoveries/DiscoveriesMapLayer.vue'
 
 const selectedSpeciesCode = useRouteParams('speciesCode', '', { transform: String })
 

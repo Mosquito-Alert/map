@@ -26,9 +26,9 @@ import { inject, watch, computed } from 'vue'
 import { fromLonLat } from 'ol/proj'
 import type { Map } from 'ol'
 
-import ObservationDetailDrawer from './ObservationDetailDrawer.vue';
-import BiteDetailDrawer from './BiteDetailDrawer.vue';
-import BreedingSiteDetailDrawer from './BreedingSiteDetailDrawer.vue';
+import { ObservationDetailDrawer } from 'src/components/observations';
+import { BiteDetailDrawer } from 'src/components/bites';
+import { BreedingSiteDetailDrawer } from 'src/components/breedingSites';
 import { ReportType, type Report } from 'src/types/reportType';
 
 const emit = defineEmits<{

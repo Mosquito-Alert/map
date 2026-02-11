@@ -26,9 +26,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import MainLeftDrawer from 'src/components/MainLeftDrawer.vue'
-import MainMap from 'src/components/MainMap.vue'
-import MainFooter from 'src/components/MainFooter.vue'
+import { MainLeftDrawer, MainFooter } from 'src/components/layout'
+import MainMap from 'src/components/map/MainMap.vue'
 
 // Reference to the map component
 const mapRef = ref<InstanceType<typeof MainMap>>()
