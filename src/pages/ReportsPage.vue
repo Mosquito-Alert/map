@@ -136,7 +136,9 @@ const toDateQuery = useRouteQuery<string>('to', '');
 const toDate = computed<Date | undefined>({
   get() {
     if (!toDateQuery.value) return undefined;
-    return date.extractDate(toDateQuery.value, 'YYYY-MM-DD');
+    const extractedDate = date.extractDate(toDateQuery.value, 'YYYY-MM-DD');
+    extractedDate.setHours(23, 59, 59, 999);
+    return extractedDate;
   },
   set(val: Date | undefined) {
     if (!val) {
