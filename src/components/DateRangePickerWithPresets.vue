@@ -66,9 +66,13 @@ export default {
 
     watch(() => props.modelValue, () => {
       if (props.modelValue.from && props.modelValue.to) {
-        localDate.value = {
-          'from': date.formatDate(props.modelValue.from, 'YYYY/MM/DD'),
-          'to': date.formatDate(props.modelValue.to, 'YYYY/MM/DD')
+        if (date.isSameDate(props.modelValue.from, props.modelValue.to, 'days')) {
+          localDate.value = date.formatDate(props.modelValue.from, 'YYYY/MM/DD')
+        } else {
+          localDate.value = {
+            'from': date.formatDate(props.modelValue.from, 'YYYY/MM/DD'),
+            'to': date.formatDate(props.modelValue.to, 'YYYY/MM/DD')
+          }
         }
       } else {
         localDate.value = {
@@ -79,7 +83,7 @@ export default {
     }, { immediate: true })
 
     function handleShowDateSelector() {
-      if (localDate.value.to !== null) {
+      if (localDate.value.to !== null && localDate.value.to !== undefined) {
         const toDate = new Date(localDate.value.to)
         dateSelectorRef.value?.setCalendarTo(toDate.getFullYear(), toDate.getMonth() + 1)
       }
@@ -98,7 +102,7 @@ export default {
         month: 'short',
         day: 'numeric'
       }
-      const dateRange = date.isSameDate(props.modelValue.from, props.modelValue.to) ? [props.modelValue.from] : [props.modelValue.from, props.modelValue.to]
+      const dateRange = date.isSameDate(props.modelValue.from, props.modelValue.to, 'days') ? [props.modelValue.from] : [props.modelValue.from, props.modelValue.to]
       return dateRange.map(item => {
         return item.toLocaleDateString($q.lang.isoName, dateFormatOptions)
       }).join(' - ')
@@ -132,8 +136,10 @@ export default {
         }
 
         if (typeof value === 'string') {
-          newValue.from = new Date(value)
-          newValue.to = new Date(value)
+          const singleDateValue = new Date(value)
+          newValue.from = singleDateValue
+          newValue.to = singleDateValue
+          localDate.value = singleDateValue
         } else if (
           value &&
           typeof value === 'object' &&
@@ -143,15 +149,11 @@ export default {
           const val = value as { from: string | Date; to: string | Date }
           newValue.from = new Date(val.from)
           newValue.to = new Date(val.to)
-        }
-
-        if (value) {
           localDate.value = {
             'from': newValue.from ? date.formatDate(newValue.from, 'YYYY/MM/DD') : null,
             'to': newValue.to ? date.formatDate(newValue.to, 'YYYY/MM/DD') : null
           }
-
-        } else {
+        } else if (!value) {
           localDate.value = undefined
         }
 
