@@ -19,21 +19,21 @@
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { markRaw, onMounted, onUnmounted, ref, shallowRef, watch, computed } from 'vue'
+import { computed, markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
+import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { useUIStore } from '../../stores/uiStore'
 import { debounce } from '../../utils/debouncer'
 import type {
   BasemapType,
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
+import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
 import { quantile } from '../../utils/utils'
 import { MessageType } from '../../workers/h3Aggregation.worker'
 import MapLegend from './MapLegend.vue'
 import TimeSeries from './TimeSeries.vue'
-import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
-import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 
 const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
   type: 'module',
@@ -88,6 +88,12 @@ const renderedOriginalDateAggregationData = computed<Record<string, number>>(() 
   const taxonSelectedId = taxaStore.taxonSelected.id as number
   return originalDateAggregationData.value[taxonSelectedId] || {}
 })
+
+const observationPointsZoom = 10
+const observationPointsSourceLabel = 'observationsSource'
+const observationPointsLayerLabel = 'observationPointsLayer'
+let hoveredObservationId: string | null = null
+let observationEventsAttached = false
 
 // Define map styles
 const basemapOptions: MapLibreBasemapsControlOptions = {
@@ -308,12 +314,88 @@ const addOrUpdateH3Layer = () => {
   ])
 }
 
+const onObservationPointsMouseEnter = (e: any) => {
+  if (!map.value) return
+  map.value.getCanvas().style.cursor = 'pointer'
+
+  if (e.features && e.features.length > 0) {
+    if (hoveredObservationId) {
+      map.value.setFeatureState(
+        { source: observationPointsSourceLabel, id: hoveredObservationId },
+        { hover: false },
+      )
+    }
+
+    hoveredObservationId = e.features[0]?.properties.uuid as string
+
+    map.value.setFeatureState(
+      { source: observationPointsSourceLabel, id: hoveredObservationId },
+      { hover: true },
+    )
+  }
+}
+const onObservationPointsMouseLeave = () => {
+  if (!map.value) return
+  map.value.getCanvas().style.cursor = ''
+
+  if (hoveredObservationId) {
+    map.value.setFeatureState(
+      { source: observationPointsSourceLabel, id: hoveredObservationId },
+      { hover: false },
+    )
+    hoveredObservationId = null
+  }
+}
+const onObservationPointsClick = (e: any) => {
+  if (!map.value) return
+
+  const features = map.value.queryRenderedFeatures(e.point, {
+    layers: [observationPointsLayerLabel],
+  })
+
+  if (features.length > 0) {
+    const feature = features[0] as GeoJSON.Feature
+    const properties = feature.properties as any
+    const uuid = properties.uuid
+    const receivedAt = properties.received_at
+
+    alert(`Observation UUID: ${uuid}\nReceived at: ${receivedAt}`)
+  }
+}
+
+const attachObservationEvents = () => {
+  if (!map.value) return
+  if (observationEventsAttached) return
+  if (!map.value.getLayer(observationPointsLayerLabel)) return
+
+  map.value.on('mouseenter', observationPointsLayerLabel, onObservationPointsMouseEnter)
+  map.value.on('mouseleave', observationPointsLayerLabel, onObservationPointsMouseLeave)
+  map.value.on('click', observationPointsLayerLabel, onObservationPointsClick)
+
+  observationEventsAttached = true
+}
+
+const detachObservationEvents = () => {
+  if (!map.value) return
+  if (!observationEventsAttached) return
+  if (!map.value.getLayer(observationPointsLayerLabel)) return
+
+  map.value.off('mouseenter', observationPointsLayerLabel, onObservationPointsMouseEnter)
+  map.value.off('mouseleave', observationPointsLayerLabel, onObservationPointsMouseLeave)
+  map.value.off('click', observationPointsLayerLabel, onObservationPointsClick)
+
+  // Also cleanup hover state so you don't get "stuck hover"
+  onObservationPointsMouseLeave()
+
+  observationEventsAttached = false
+}
+
 // Function to hide all H3 layers except the target one
 const showOnlyResolution = () => {
   if (!map.value) return
 
   const zoom = map.value.getZoom()
-  const resolution = zoom >= 10 ? null : currentResolution.value
+  const resolution = zoom >= observationPointsZoom ? null : currentResolution.value
 
   const allResolutions = [4, 5, 6]
   allResolutions.forEach((res) => {
@@ -324,12 +406,17 @@ const showOnlyResolution = () => {
   })
 
   // Handle observation points
-  if (map.value.getLayer('observationsLayer')) {
+  if (map.value.getLayer(observationPointsLayerLabel)) {
+    const visible = resolution === null
+
     map.value.setLayoutProperty(
-      'observationsLayer',
+      observationPointsLayerLabel,
       'visibility',
       resolution === null ? 'visible' : 'none',
     )
+
+    if (visible) attachObservationEvents()
+    else detachObservationEvents()
   }
 }
 
@@ -337,24 +424,33 @@ const addObservationLayers = () => {
   if (!map.value || !geojsonCache.value) return
 
   // Observations
-  if (!map.value.getSource('observationsSource')) {
-    map.value.addSource('observationsSource', {
+  if (!map.value.getSource(observationPointsSourceLabel)) {
+    map.value.addSource(observationPointsSourceLabel, {
       type: 'geojson',
       data: geojsonCache.value as GeoJSON.FeatureCollection,
       buffer: 0,
       maxzoom: 14,
+      promoteId: 'uuid', // Promote feature id to top-level for better performance
     })
   }
 
-  if (!map.value.getLayer('observationsLayer')) {
+  if (!map.value.getLayer(observationPointsLayerLabel)) {
     map.value.addLayer({
-      id: 'observationsLayer',
-      source: 'observationsSource',
+      id: observationPointsLayerLabel,
+      source: observationPointsSourceLabel,
       type: 'circle',
-      minzoom: 10,
+      minzoom: observationPointsZoom,
       layout: { visibility: 'none' },
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 3, 18, 10],
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'], // NOTE: "zoom" expression may only be used as input to a top-level "interpolate" expression
+          11, // At zoom 11
+          ['case', ['boolean', ['feature-state', 'hover'], false], 5, 3],
+          18, // At zoom 18
+          ['case', ['boolean', ['feature-state', 'hover'], false], 16, 10],
+        ],
         'circle-color': '#FF5722',
         'circle-stroke-width': 1,
         'circle-stroke-color': '#FFFFFF',
