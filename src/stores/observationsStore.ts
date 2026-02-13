@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Observation } from 'mosquito-alert'
 import { observationsApi } from '../services/apiService'
-import { culicidaeTaxon, useTaxaStore } from './taxaStore'
+import { useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
   state: () => ({
@@ -12,6 +12,8 @@ export const useObservationsStore = defineStore('observations', {
       start: null as string | null,
       end: null as string | null,
     } as { start: string | null; end: string | null },
+    // This state tells the observation that is currently shown in the drawer to see its details
+    observationInDrawer: null as Observation | null,
   }),
   actions: {
     async fetchObservationsNearMe(
@@ -50,6 +52,18 @@ export const useObservationsStore = defineStore('observations', {
         }
       } catch (error) {
         console.error('Failed to fetch observations:', error)
+        throw error
+      }
+    },
+    async fetchObservationById(uuid: string) {
+      try {
+        const response = await observationsApi.retrieve({ uuid })
+        if (response.data) {
+          this.observationInDrawer = response.data as Observation
+          return response.data as any
+        }
+      } catch (error) {
+        console.error('Failed to fetch observation by ID:', error)
         throw error
       }
     },

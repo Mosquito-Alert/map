@@ -89,7 +89,7 @@ const renderedOriginalDateAggregationData = computed<Record<string, number>>(() 
   return originalDateAggregationData.value[taxonSelectedId] || {}
 })
 
-const observationPointsZoom = 10
+const observationPointsZoom = 2 //10
 const observationPointsSourceLabel = 'observationsSource'
 const observationPointsLayerLabel = 'observationPointsLayer'
 let hoveredObservationId: string | null = null
@@ -355,11 +355,8 @@ const onObservationPointsClick = (e: any) => {
 
   if (features.length > 0) {
     const feature = features[0] as GeoJSON.Feature
-    const properties = feature.properties as any
-    const uuid = properties.uuid
-    const receivedAt = properties.received_at
-
-    alert(`Observation UUID: ${uuid}\nReceived at: ${receivedAt}`)
+    const uuid = feature.properties?.uuid || ''
+    observationsStore.fetchObservationById(uuid)
   }
 }
 
@@ -384,7 +381,7 @@ const detachObservationEvents = () => {
   map.value.off('mouseleave', observationPointsLayerLabel, onObservationPointsMouseLeave)
   map.value.off('click', observationPointsLayerLabel, onObservationPointsClick)
 
-  // Also cleanup hover state so you don't get "stuck hover"
+  // Cleanup hover state, in case mouse is currently hovering an observation when layer is hidden
   onObservationPointsMouseLeave()
 
   observationEventsAttached = false
