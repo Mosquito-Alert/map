@@ -61,5 +61,5 @@ watch(coordinates, (newValue) => {
     center: newValue,
     zoom: 15
   })
-})
+}, { immediate: true })
 </script>
