@@ -6,6 +6,9 @@
         :photo-urls="observation.photos.map(photo => photo.url)" />
     </template>
     <template v-if="observation.identification?.result?.is_high_confidence" #header-icons>
+      <q-icon v-if="observation.identification?.result?.characteristics?.sex !== undefined"
+        :name="observation.identification.result.characteristics.sex === SpeciesCharacteristicsSex.Male ? 'fa fa-mars' : 'fa fa-venus'"
+        color="white" />
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
         name="fa fa-badge-check" color="white">
         <q-tooltip anchor="top middle" self="center middle">
@@ -58,7 +61,7 @@
 
 <script setup lang="ts">
 import type { Observation } from 'mosquito-alert';
-import { IdentificationTaskResultSource } from 'mosquito-alert';
+import { IdentificationTaskResultSource, SpeciesCharacteristicsSex } from 'mosquito-alert';
 import { BaseReportDetailDrawer } from 'src/components/reports';
 import { PhotoSliderHeader } from 'src/components/common';
 import { computed } from 'vue';

@@ -15,6 +15,7 @@
           {{ titleWithStyle.value }}
         </span>
         <q-skeleton v-else type="text" width="65%" />
+        <q-icon v-if="titleIcon" :name="titleIcon" />
       </q-item-label>
       <q-item-label v-if="report?.location?.display_name !== null" caption lines="2">
         <div class="row items-center no-wrap">
@@ -42,6 +43,7 @@ import toRelativeTime from 'src/utils/dateUtils'
 import { watch } from 'vue'
 import type { Feature } from 'ol';
 import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
+import { SpeciesCharacteristicsSex } from 'mosquito-alert';
 import { bitesApi, breedingSitesApi, observationsApi } from 'src/boot/api';
 import { type Report, ReportType } from 'src/types/reportType';
 import { useReportMapStore } from 'src/stores/reportMapStore';
@@ -106,6 +108,26 @@ const titleWithStyle = computed<TextWithStyle>(() => {
     }
     default:
       return { value: '', italicize: false }
+  }
+})
+
+const titleIcon = computed(() => {
+  if (!report.value) return undefined
+
+  switch (props.feature.get('type')) {
+    case ReportType.Observation: {
+      const observation = report.value as Observation
+      if (observation.identification?.result?.characteristics?.sex !== undefined) {
+        if (observation.identification.result.characteristics.sex === SpeciesCharacteristicsSex.Male) {
+          return 'fa fa-light fa-mars'
+        } else {
+          return 'fa fa-light fa-venus'
+        }
+      }
+      return undefined
+    }
+    default:
+      return undefined
   }
 })
 
