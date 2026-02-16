@@ -21,7 +21,7 @@
         <span
           class="material-icons-outlined"
           :class="{
-            'text-amber-500': showLayerStyleSelector,
+            'text-[#edb20c]': showLayerStyleSelector,
           }"
         >
           layers
@@ -42,7 +42,7 @@
           class="basemap-selector-button flex! justify-center! items-center! size-7.5 cursor-pointer border-1"
           :class="{
             'size-9': showLayerStyleSelector,
-            'border-2 border-amber-500': basemap.id === mapStore.baselayer.id,
+            'border-2 border-[#edb20c]': basemap.id === mapStore.baselayer.id,
           }"
         >
           <img :src="basemap.image" :alt="basemap.name" class="basemap-icon-option" />

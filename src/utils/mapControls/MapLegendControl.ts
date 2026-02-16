@@ -31,7 +31,7 @@ export class MapLegendControl implements IControl {
     }
 
     this._unsubscribe = mapStore.$subscribe((_mutation, state) => {
-      this._button.classList.toggle('text-amber-500!', state.showLegend)
+      this._button.classList.toggle('text-[#edb20c]!', state.showLegend)
     })
     this._unsubscribe = observationsStore.$subscribe((_mutation, state) => {
       this._button.disabled = !state.dataProcessed
