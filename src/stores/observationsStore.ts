@@ -57,6 +57,7 @@ export const useObservationsStore = defineStore('observations', {
     },
     async fetchObservationById(uuid: string) {
       try {
+        // TODO: Accept-language header
         const response = await observationsApi.retrieve({ uuid })
         if (response.data) {
           this.observationInDrawer = response.data as Observation

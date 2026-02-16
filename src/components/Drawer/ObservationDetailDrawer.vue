@@ -1,38 +1,50 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[25%] mx-auto pl-4 mt-4"
+    class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[20%] mx-auto pl-4 mt-4"
   >
-    <div class="overflow-y-auto flex-1 mb-0 p-0">
-      <CardDrawer class="px-0!">
-        <template #title>
-          <Button
-            severity="secondary"
-            rounded
-            size="small"
-            class="z-10 absolute right-0 top-0"
-            @click="observationStore.observationInDrawer = null"
-          >
-            <span class="material-icons-outlined"> close </span>
-          </Button>
-          <Carousel
-            :value="observationStore.observationInDrawer?.photos || []"
-            :numVisible="1"
-            :numScroll="1"
-            :showIndicators="true"
-            :circular="(observationStore.observationInDrawer?.photos || []).length > 1"
-            :pt="{
-              indicatorList:
-                'm-0 p-0 relative absolute right-0! left-0!  bottom-8! pl-4 flex justify-center w-full',
-              indicatorButton: 'size-4! mx-1! p-0! border-0!',
-            }"
-          >
-            <template #item="slotProps">
-              <div>
-                <img
-                  :src="slotProps.data.url"
-                  class="w-xs! aspect-3/3 border border-surface-200 dark:border-surface-700 object-cover rounded"
-                />
-                <Button
+    <div class="drawer-card rounded-lg border bg-gray-100 p-0 overflow-y-auto flex-1 mb-0">
+      <!-- TITLE -->
+      <!-- TODO: -->
+      <!-- <Button
+        severity="secondary"
+        rounded
+        size="small"
+        class="z-10 absolute right-0 top-0"
+        @click="observationStore.observationInDrawer = null"
+      >
+        <span class="material-icons-outlined"> close </span>
+      </Button> -->
+      <!-- TODO: Spinner -->
+      <Galleria
+        :value="images"
+        :numVisible="5"
+        :showThumbnails="false"
+        :showIndicators="images.length > 1"
+        :showItemNavigators="images.length > 1"
+        :circular="images.length > 1"
+        :changeItemOnIndicatorHover="false"
+        :showIndicatorsOnItem="images.length > 1"
+        :indicatorsPosition="'bottom'"
+        :pt="{
+          root: 'border-0! rounded-none!',
+          indicatorList: 'm-0 p-0 bg-[#00000055]',
+          prevButton: 'size-6! absolute left-4 top-1/2   m-0!',
+          prevIcon: 'size-4! text-white',
+          nextButton: 'size-6! absolute right-4 top-1/2   m-0!',
+          nextIcon: 'size-4! text-white',
+        }"
+      >
+        <template #item="slotProps">
+          <img
+            :src="slotProps.item.itemImageSrc"
+            :alt="slotProps.item.alt"
+            class="max-h-full aspect-3/2 object-cover!"
+          />
+        </template>
+      </Galleria>
+
+      <!-- TODO: -->
+      <!-- <Button
                   severity="secondary"
                   rounded
                   class="z-300 absolute bottom-6 right-5 w-4 h-2 flex items-center justify-center"
@@ -42,104 +54,98 @@
                   href="https://creativecommons.org/licenses/by/4.0/"
                 >
                   <span class="material-icons-outlined"> attribution </span>
-                </Button>
-              </div>
-            </template>
-          </Carousel>
-        </template>
-        <template #content>
-          <div class="flex row items-center px-2 py-1 m-0 bg-[#edb20c] text-white">
-            <span
-              class="text-xl font-medium py-none pr-2"
-              :class="titleWithStyle.italicize ? 'italic' : ''"
-            >
-              {{ titleWithStyle.value }}
-            </span>
-            <span
-              v-if="
-                observationStore.observationInDrawer?.identification?.result?.source ===
-                IdentificationTaskResultSource.Expert
-              "
-              v-tooltip.top="{
-                value: 'Confirmado por expertos',
-                pt: {
-                  text: 'whitespace-nowrap! text-sm!',
-                },
-              }"
-              class="material-icons text-base!"
-            >
-              verified
-            </span>
-            <span
-              v-if="
-                observationStore.observationInDrawer?.identification?.result?.source ===
-                IdentificationTaskResultSource.Ai
-              "
-              v-tooltip.top="{
-                value: 'Identificado por IA',
-                pt: {
-                  text: 'whitespace-nowrap! text-sm!',
-                },
-              }"
-              class="material-icons text-base!"
-            >
-              memory
-            </span>
-          </div>
-          <div class="px-4">
-            <div
-              v-for="{ value, icon } in overviewObservationData"
-              :key="icon"
-              class="flex items-center mt-2 mb-3 gap-2"
-            >
-              <span
-                class="material-icons-outlined mr-2 flex items-center justify-center text-[#edb20c]"
-              >
-                {{ icon }}
-              </span>
-              <span class="text-sm text-gray-900">{{ value }}</span>
-            </div>
-          </div>
-          <div v-if="overviewObservationReview.confidenceLevel" class="px-4 mt-4">
-            <Divider />
+                </Button> -->
 
-            <div class="flex items-center mb-3">
-              <span class="material-icons-outlined mr-2 text-gray-800 bg-gray-200 rounded-full p-2">
-                groups
-              </span>
-              <div class="flex flex-col">
-                <span class="text-sm text-gray-900 font-semibold">Comunidad de expertos</span>
-                <span class="text-xs text-gray-700">Miembro del proyecto</span>
-              </div>
-            </div>
+      <!-- CONTENT -->
+      <div class="flex row items-center px-2 py-1 m-0 mb-4 bg-[#edb20c] text-white">
+        <span
+          class="text-xl font-medium py-none pr-2"
+          :class="titleWithStyle.italicize ? 'italic' : ''"
+        >
+          {{ titleWithStyle.value }}
+        </span>
+        <span
+          v-if="
+            observationStore.observationInDrawer?.identification?.result?.source ===
+            IdentificationTaskResultSource.Expert
+          "
+          v-tooltip.top="{
+            value: 'Confirmado por expertos',
+            pt: {
+              text: 'whitespace-nowrap! text-sm!',
+            },
+          }"
+          class="material-icons text-base!"
+        >
+          verified
+        </span>
+        <span
+          v-if="
+            observationStore.observationInDrawer?.identification?.result?.source ===
+            IdentificationTaskResultSource.Ai
+          "
+          v-tooltip.top="{
+            value: 'Identificado por IA',
+            pt: {
+              text: 'whitespace-nowrap! text-sm!',
+            },
+          }"
+          class="material-icons text-base!"
+        >
+          memory
+        </span>
+      </div>
+      <div class="px-4">
+        <div
+          v-for="{ value, icon } in overviewObservationData"
+          :key="icon"
+          class="flex items-center mt-2 mb-3 gap-2"
+        >
+          <span
+            class="material-icons-outlined mr-2 flex items-center justify-center text-[#edb20c]"
+          >
+            {{ icon }}
+          </span>
+          <span class="text-sm text-gray-900">{{ value }}</span>
+        </div>
+      </div>
+      <div v-if="overviewObservationReview.confidenceLevel" class="px-4 mt-4">
+        <Divider />
 
-            <div class="confidence flex flex-col mb-3">
-              <div class="mb-1">
-                <span class="text-sm font-normal text-gray-700 leading-[1.8] mr-1"
-                  >NIVEL DE CONFIANZA:
-                </span>
-                <span
-                  v-for="i in overviewObservationReview.confidenceLevel"
-                  :key="i"
-                  class="material-icons font-normal text-xl! text-[#edb20c]"
-                >
-                  check_circle_outline
-                </span>
-              </div>
-              <span class="text-sm">{{ overviewObservationReview.publicNote }}</span>
-            </div>
+        <div class="flex items-center mb-3">
+          <span class="material-icons-outlined mr-2 text-gray-800 bg-gray-200 rounded-full p-2">
+            groups
+          </span>
+          <div class="flex flex-col">
+            <span class="text-sm text-gray-900 font-semibold">Comunidad de expertos</span>
+            <span class="text-xs text-gray-700">Miembro del proyecto</span>
           </div>
-        </template>
-      </CardDrawer>
+        </div>
+
+        <div class="confidence flex flex-col mb-3">
+          <div class="mb-1 flex items-center">
+            <span class="text-sm font-normal text-gray-700 leading-[1.8] mr-1"
+              >NIVEL DE CONFIANZA:
+            </span>
+            <span
+              v-for="i in overviewObservationReview.confidenceLevel"
+              :key="i"
+              class="material-icons font-normal text-xl! text-[#edb20c]"
+            >
+              check_circle_outline
+            </span>
+          </div>
+          <span class="text-sm">{{ overviewObservationReview.publicNote }}</span>
+        </div>
+      </div>
     </div>
   </aside>
 </template>
 <script lang="ts" setup>
-import { Button, Carousel, Divider } from 'primevue'
+import { IdentificationTaskResultSource } from 'mosquito-alert'
+import { Divider, Galleria } from 'primevue'
 import { computed, onMounted, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
-import CardDrawer from './CardDrawer.vue'
-import { IdentificationTaskResultSource } from 'mosquito-alert'
 
 const observationStore = useObservationsStore()
 
@@ -147,6 +153,15 @@ type TextWithStyle = {
   value: string
   italicize: boolean
 }
+
+const images = computed(() => {
+  return (
+    observationStore.observationInDrawer?.photos.map((photo) => ({
+      itemImageSrc: photo.url,
+      alt: `Photo ${photo.uuid}`,
+    })) || []
+  )
+})
 
 const hasTaxon = computed(() => {
   return observationStore.observationInDrawer?.identification?.result?.taxon !== undefined
