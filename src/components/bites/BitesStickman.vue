@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import type { Bite } from "mosquito-alert";
-import { reactive } from "vue";
+import { computed } from "vue";
 
 const props = withDefaults(defineProps<{
   bite: Bite,
@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<{
 });
 
 // All readonly body parts with their bite counts
-const bodyParts = reactive([
+const bodyParts = computed(() => [
   { name: "head", count: props.bite.counts.head, left: 0.448, top: 0.125, width: 0.15, height: 0.15 },
   { name: "chest", count: props.bite.counts.chest, left: 0.448, top: 0.32, width: 0.15, height: 0.15 },
   { name: "leftHand", count: props.bite.counts.left_arm, left: 0.28, top: 0.39, width: 0.15, height: 0.15 },
