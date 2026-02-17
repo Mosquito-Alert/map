@@ -5,18 +5,18 @@
       <PhotoSliderHeader v-if="observation.photos.length > 0"
         :photo-urls="observation.photos.map(photo => photo.url)" />
     </template>
-    <template v-if="observation.identification?.result?.is_high_confidence" #header-icons>
+    <template #header-icons>
       <q-icon v-if="observation.identification?.result?.characteristics?.sex !== undefined"
         :name="observation.identification.result.characteristics.sex === SpeciesCharacteristicsSex.Male ? 'fa fa-mars' : 'fa fa-venus'"
         color="white" />
       <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Expert"
-        name="fa fa-badge-check" color="white">
+        name="fa fa-users" color="white">
         <q-tooltip anchor="top middle" self="center middle">
-          {{ $t('expert_confirmed') }}
+          {{ $t('expert_identified') }}
         </q-tooltip>
       </q-icon>
-      <q-icon v-if="observation.identification?.result?.source === IdentificationTaskResultSource.Ai"
-        name="fa fa-microchip-ai" color="white">
+      <q-icon v-else-if="observation.identification?.result?.source === IdentificationTaskResultSource.Ai"
+        name="fa fa-robot" color="white">
         <q-tooltip anchor="top middle" self="center middle">
           {{ $t('ai_identified') }}
         </q-tooltip>

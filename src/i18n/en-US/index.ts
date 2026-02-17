@@ -51,7 +51,7 @@ export default {
   recent_activity: 'Recent activity',
   overview: 'Overview',
   review: 'Review',
-  expert_confirmed: 'Confirmed by the experts',
+  expert_identified: 'Identified by the experts',
   expert_community: 'Experts community',
   project_member: 'Project member',
   confidence_level: 'Confidence level',

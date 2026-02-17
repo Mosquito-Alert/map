@@ -51,7 +51,7 @@ export default {
   recent_activity: 'Actividad reciente',
   overview: 'Resumen',
   review: 'Revisión',
-  expert_confirmed: 'Confirmado por los expertos',
+  expert_identified: 'Identificado por los expertos',
   expert_community: 'Comunidad de expertos',
   project_member: 'Miembro del proyecto',
   confidence_level: 'Nivel de confianza',

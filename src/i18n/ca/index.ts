@@ -51,7 +51,7 @@ export default {
   recent_activity: 'Activitat recent',
   overview: 'Resum',
   review: 'Revisió',
-  expert_confirmed: 'Confirmat pels experts',
+  expert_identified: 'Identificat pels experts',
   expert_community: "Comunitat d'experts",
   project_member: 'Membre del projecte',
   confidence_level: 'Nivell de confiança',
