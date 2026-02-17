@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "@sentry/vite-plugin": "^4.9.1",
+    "@sentry/vue": "^10.39.0",
     "@vueuse/router": "^14.1.0",
     "axios": "^1.2.1",
     "debounce": "^3.0.0",

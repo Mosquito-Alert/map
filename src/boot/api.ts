@@ -9,10 +9,12 @@ import {
   TaxaApi,
   BoundariesApi,
 } from 'mosquito-alert';
+import { BASE_PATH } from 'mosquito-alert/base';
 
 const apiConfig = new Configuration({
   ...(import.meta.env.VITE_API_BASE_URL ? { basePath: import.meta.env.VITE_API_BASE_URL } : {}),
 });
+const apiUrl = apiConfig.basePath || BASE_PATH;
 
 const axiosInstance = axios.create({});
 
@@ -45,4 +47,4 @@ export default boot(({ app }) => {
   };
 });
 
-export { taxaApi, bitesApi, breedingSitesApi, observationsApi, boundariesApi };
+export { apiUrl, taxaApi, bitesApi, breedingSitesApi, observationsApi, boundariesApi };

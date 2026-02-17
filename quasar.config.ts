@@ -2,6 +2,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig((ctx) => {
@@ -12,7 +13,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers', 'api', 'analytics'],
+    boot: ['addressbar-color', 'i18n', 'axios', 'openlayers', 'api', 'analytics', 'sentry'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['fa.css', 'app.scss'],
@@ -59,8 +60,20 @@ export default defineConfig((ctx) => {
       // minify: false,
       // polyfillModulePreload: true,
       // distDir
-
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.plugins?.push(
+          sentryVitePlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: 'mosquito-alert',
+            project: 'map',
+          }),
+        );
+        return {
+          build: {
+            sourcemap: true, // Source map generation must be turned on
+          },
+        };
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
