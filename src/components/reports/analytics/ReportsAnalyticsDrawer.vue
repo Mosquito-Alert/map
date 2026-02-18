@@ -19,7 +19,7 @@
       </div>
       <!-- Charts -->
       <ReportsAnalyticsPieChart :features="features" />
-      <ReportsAnalyticsBarChart :features="features" :min-date="fromDate" :max-date="toDate" />
+      <ReportsAnalyticsBarChart :features="features" />
     </div>
     <div v-if="features?.length" class="col-auto">
       <q-separator spaced="sm" class="full-width" />
@@ -55,8 +55,6 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean,
   width?: number,
   features?: Feature[],
-  fromDate?: Date,
-  toDate?: Date,
   breakpoint?: keyof Screen["sizes"]
 }>(), {
   modelValue: true,

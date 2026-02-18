@@ -25,15 +25,20 @@ const worker = new Worker()
 
 const props = defineProps<{
   features?: Feature[]
-  minDate?: Date
-  maxDate?: Date
 }>()
 
-const data = ref([])
+const data = ref<CallbackDataParams[]>([])
 
 onMounted(() => {
   worker.onmessage = function (e) {
-    data.value = e.data
+    // NOTE: remeber to sort the data by date before sending it to the chart
+    //      otherwise the x-axis will be in random order
+    data.value = Object.entries(e.data).map(([key, value]) => ({
+      name: key,
+      value: value
+    } as CallbackDataParams)).sort((a, b) => {
+      return a.name < b.name ? -1 : 1;
+    })
   }
 })
 
@@ -42,15 +47,13 @@ onUnmounted(() => {
 })
 
 // Watch for changes in props and restart the worker when they change
-watch([() => props.features, () => props.minDate, () => props.maxDate], () => {
+watch([() => props.features], () => {
   if (!props.features) {
     data.value = []
     return
   }
   worker.postMessage({
     features: props.features.map(feature => { return { date: new Date(feature.getProperties().received_at) } }),
-    minDate: props.minDate,
-    maxDate: props.maxDate
   })
 }, { immediate: true })
 
