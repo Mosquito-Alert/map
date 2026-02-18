@@ -21,6 +21,8 @@ import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import enabledLanguages from 'src/i18n'
 
+const modules = import.meta.glob(`../../node_modules/quasar/lang/*.js`)
+
 export default {
   setup() {
     const $q = useQuasar()
@@ -36,12 +38,15 @@ export default {
       }
     }, { immediate: true })
 
-    watch(locale, async (newValue,) => {
+    watch(locale, (newValue,) => {
       // Both vue-i18n and quasar app must be set.
-      await import(`../../node_modules/quasar/lang/${newValue}.js`).then(lang => {
+      $q.cookies.set('language', newValue, { path: '/', secure: false })
+      localeQuery.value = newValue
+      modules[`../../node_modules/quasar/lang/${newValue}.js`]?.().then(langModule => {
+        const lang = langModule as { default: typeof $q.lang }
         $q.lang.set(lang.default)
-        $q.cookies.set('language', newValue, { path: '/', secure: false })
-        localeQuery.value = newValue
+      }).catch(() => {
+        console.warn(`Language ${newValue} is not supported by Quasar.`)
       })
     })
 
