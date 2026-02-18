@@ -17,7 +17,7 @@ import { colors } from 'quasar'
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 
 import type { Feature } from "ol"
-import type { CallbackDataParams } from "echarts/types/dist/shared"
+import type { BarDataItemOption } from "echarts/types/src/chart/bar/BarSeries.js"
 
 import Worker from 'src/workers/ReportAnalyticsBarChartWorker.js?worker'
 
@@ -27,7 +27,7 @@ const props = defineProps<{
   features?: Feature[]
 }>()
 
-const data = ref<CallbackDataParams[]>([])
+const data = ref<BarDataItemOption[]>([])
 
 onMounted(() => {
   worker.onmessage = function (e) {
@@ -35,8 +35,8 @@ onMounted(() => {
     //      otherwise the x-axis will be in random order
     data.value = Object.entries(e.data).map(([key, value]) => ({
       name: key,
-      value: value
-    } as CallbackDataParams)).sort((a, b) => {
+      value: Number(value)
+    })).sort((a, b) => {
       return a.name < b.name ? -1 : 1;
     })
   }
@@ -64,7 +64,7 @@ const option = computed(() => {
     },
     xAxis: {
       type: 'category',
-      data: data.value.map((item: CallbackDataParams) => item.name),
+      data: data.value.map((item) => item.name),
       axisTick: {
         show: false
       },
@@ -79,7 +79,7 @@ const option = computed(() => {
 
     series: [
       {
-        data: data.value.map((item: CallbackDataParams) => item.value),
+        data: data.value.map((item) => item.value),
         type: 'bar',
         itemStyle: {
           color: colors.getPaletteColor('grey-7')
