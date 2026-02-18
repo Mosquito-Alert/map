@@ -128,8 +128,9 @@ function getFeaturesInExtent(extent: Extent): Feature[] {
   layerGroupRef.value?.layerGroup.getLayersArray().forEach(layer => {
     if (!layer.getVisible()) return;
     const source = layer.getSource() as VectorSource;
-    const layerFeatures = source.getFeaturesInExtent(extent);
-    for (const f of layerFeatures) features.push(f);
+    source.forEachFeatureInExtent(extent, feature => {
+      features.push(feature);
+    })
   })
 
   return features;
