@@ -47,7 +47,7 @@ const loader = async function (extent: number[], resolution: number, projection:
       feature.setGeometry(point)
       feature.setId(report.uuid);
       feature.setProperties({
-        received_at: report.received_at,
+        received_at: new Date(report.received_at),
       });
       return feature;
     })

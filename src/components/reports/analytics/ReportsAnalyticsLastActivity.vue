@@ -13,53 +13,25 @@
 <script setup lang="ts">
 
 import { date } from 'quasar'
-
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-
-import Worker from 'src/workers/ReportAnalyticsLastActivityWorker.js?worker'
+import { computed } from 'vue'
 
 import ReportsAnalyticsLastActivityItem from 'src/components/reports/analytics/ReportsAnalyticsLastActivityItem.vue'
 import type { Feature } from 'ol'
-
-const worker = new Worker()
 
 const props = defineProps<{
   features?: Feature[]
 }>()
 
-const lastFeatureIds = ref<string[]>([])
-
-onMounted(() => {
-  worker.onmessage = function (e) {
-    lastFeatureIds.value = e.data
-  }
-})
-
-onUnmounted(() => {
-  worker.terminate()
-})
-
-// Watch for changes in props and restart the worker when they change
-watch([() => props.features], () => {
-  if (!props.features) {
-    lastFeatureIds.value = []
-    return
-  }
-  worker.postMessage({
-    features: props.features.map(feature => {
-      return {
-        ...Object.fromEntries(
-          Object.entries(feature.getProperties()).filter(([key]) => key !== 'geometry')
-        ), id: String(feature.getId())
-      }
-    }),
-    minDate: date.subtractFromDate(new Date(), { months: 2 })
-  })
-}, { immediate: true })
 
 const lastFeatures = computed<Feature[]>(() => {
-  if (!props.features || !lastFeatureIds.value.length) return []
-  return props.features.filter(feature => lastFeatureIds.value.includes(String(feature.getId())))
+  if (!props.features) return []
+
+  const now = new Date();
+  const minDate = date.subtractFromDate(new Date(), { months: 2 });
+
+  return props.features.
+    filter(feature => feature.getProperties().received_at >= minDate && feature.getProperties().received_at <= now)
+    .sort((a, b) => b.getProperties().received_at - a.getProperties().received_at)
 })
 
 </script>

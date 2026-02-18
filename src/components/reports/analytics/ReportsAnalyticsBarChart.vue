@@ -53,7 +53,7 @@ watch([() => props.features], () => {
     return
   }
   worker.postMessage({
-    features: props.features.map(feature => { return { date: new Date(feature.getProperties().received_at) } }),
+    features: props.features.map(feature => { return { date: feature.getProperties().received_at } }),
   })
 }, { immediate: true })
 
