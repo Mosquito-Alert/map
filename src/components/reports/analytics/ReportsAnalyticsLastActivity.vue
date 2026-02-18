@@ -4,9 +4,8 @@
       <div class="text-h6 text-primary">{{ $t('recent_activity') }}</div>
     </q-card-section>
     <q-virtual-scroll style="max-height: 25vh; overflow-x: hidden" virtual-scroll-slice-size="4"
-      virtual-scroll-item-size="56" :items-size="lastFeatureIds.length"
-      :items-fn="(from, size) => { return lastFeatureIds.slice(from, from + size) }" v-slot="{ item }">
-      <ReportsAnalyticsLastActivityItem :key="item" :feature="features?.find((feature) => feature.getId() === item)!" />
+      virtual-scroll-item-size="56" :items="lastFeatures" v-slot="{ item, index }">
+      <ReportsAnalyticsLastActivityItem :key="index" :feature="item" />
     </q-virtual-scroll>
   </q-card>
 </template>
@@ -15,7 +14,7 @@
 
 import { date } from 'quasar'
 
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 
 import Worker from 'src/workers/ReportAnalyticsLastActivityWorker.js?worker'
 
@@ -51,10 +50,16 @@ watch([() => props.features], () => {
       return {
         ...Object.fromEntries(
           Object.entries(feature.getProperties()).filter(([key]) => key !== 'geometry')
-        ), id: feature.getId()
+        ), id: String(feature.getId())
       }
     }),
     minDate: date.subtractFromDate(new Date(), { months: 2 })
   })
 }, { immediate: true })
+
+const lastFeatures = computed<Feature[]>(() => {
+  if (!props.features || !lastFeatureIds.value.length) return []
+  return props.features.filter(feature => lastFeatureIds.value.includes(String(feature.getId())))
+})
+
 </script>
