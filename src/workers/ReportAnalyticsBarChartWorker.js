@@ -1,26 +1,22 @@
+import { getHistogramDateKey } from '../components/reports/analytics/utils';
+
 self.onmessage = function (e) {
-  const { features } = e.data;
-  if (!features || !features.length) {
+  const { dateKeys } = e.data;
+  if (!dateKeys || !dateKeys.length) {
     postMessage([]);
     return;
-  }
-
-  function getDateKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
 
   let minDate = null;
   let maxDate = null;
   const histogram = {};
-  for (const feature of features) {
-    const dateStr = getDateKey(feature.date);
-
-    if (!histogram[dateStr]) {
-      histogram[dateStr] = 0;
+  for (const dateKey of dateKeys) {
+    if (!histogram[dateKey]) {
+      histogram[dateKey] = 0;
     }
-    histogram[dateStr]++;
+    histogram[dateKey]++;
 
-    const date = new Date(dateStr);
+    const date = new Date(dateKey);
     if (date < minDate || minDate === null) minDate = date;
     if (date > maxDate || maxDate === null) maxDate = date;
   }
@@ -28,7 +24,7 @@ self.onmessage = function (e) {
   // Initialize histogram object with 0 counts for all month-year combos
   let currentDate = minDate;
   while (currentDate <= maxDate) {
-    const key = getDateKey(currentDate);
+    const key = getHistogramDateKey(currentDate);
     if (!histogram[key]) {
       histogram[key] = 0;
     }

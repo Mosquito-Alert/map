@@ -53,7 +53,7 @@ watch([() => props.features], () => {
     return
   }
   worker.postMessage({
-    features: props.features.map(feature => { return { date: feature.getProperties().received_at } }),
+    dateKeys: props.features.map(feature => feature.getProperties().histogram_key),
   })
 }, { immediate: true })
 

@@ -18,6 +18,7 @@ import type { Projection } from 'ol/proj';
 import { get as getProjection } from 'ol/proj';
 
 import type { ReportType } from 'src/types/reportType';
+import { getHistogramDateKey } from 'src/components/reports/analytics/utils';
 import type VectorSource from 'ol/source/Vector';
 import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert';
 
@@ -46,8 +47,10 @@ const loader = async function (extent: number[], resolution: number, projection:
       point.transform(featureProjection, projection);
       feature.setGeometry(point)
       feature.setId(report.uuid);
+      const date = new Date(report.received_at);
       feature.setProperties({
-        received_at: new Date(report.received_at),
+        received_at: date,
+        histogram_key: getHistogramDateKey(date),
       });
       return feature;
     })
