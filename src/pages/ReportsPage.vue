@@ -172,10 +172,7 @@ function updateVisibleFeatures() {
   const view = map?.getView();
   if (!view) return;
   const extent = view.calculateExtent(map!.getSize());
-  // Run feature fetching asynchronously
-  requestIdleCallback(() => {
-    visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
-  })
+  visibleFeatures.value = layerRef.value?.getFeaturesInExtent(extent)
 }
 const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
 
