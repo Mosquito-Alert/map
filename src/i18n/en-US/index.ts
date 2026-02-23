@@ -4,7 +4,7 @@ import { ReportType } from 'src/types/reportType';
 export default {
   footer_collaborators_note: 'This interactive map has been funded by',
   url_copied: 'URL copied to clipboard',
-  reports: 'Reports',
+  observations: 'Observations',
   discoveries: 'Discoveries',
   exposure_risk: 'Exposure Risk',
   search: 'Search location',
@@ -47,7 +47,7 @@ export default {
   information: 'Information',
   select_species: 'Select species',
   summary: 'Summary',
-  total_reports: 'Total reports',
+  total_observations: 'Total observations',
   recent_activity: 'Recent activity',
   overview: 'Overview',
   review: 'Review',

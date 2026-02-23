@@ -4,7 +4,7 @@ import { ReportType } from 'src/types/reportType';
 export default {
   footer_collaborators_note: 'Este mapa interactivo ha sido financiado por',
   url_copied: 'URL copiada al portapapeles',
-  reports: 'Informes',
+  observations: 'Observaciones',
   discoveries: 'Descubrimientos',
   exposure_risk: 'Riesgo de exposición',
   layers: 'Capas',
@@ -47,7 +47,7 @@ export default {
   information: 'Información',
   select_species: 'Selecciona especie',
   summary: 'Resumen',
-  total_reports: 'Total de informes',
+  total_observations: 'Total de observaciones',
   recent_activity: 'Actividad reciente',
   overview: 'Resumen',
   review: 'Revisión',

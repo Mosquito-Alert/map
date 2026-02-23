@@ -4,7 +4,7 @@ import { ReportType } from 'src/types/reportType';
 export default {
   footer_collaborators_note: 'Aquest mapa interactiu ha estat finançat per',
   url_copied: 'URL copiat al porta-retalls',
-  reports: 'Informes',
+  observations: 'Observacions',
   discoveries: 'Descobriments',
   exposure_risk: "Risc d'exposició",
   search: 'Cerca localització',
@@ -47,7 +47,7 @@ export default {
   information: 'Informació',
   select_species: 'Selecciona espècie',
   summary: 'Resum',
-  total_reports: "Total d'informes",
+  total_observations: "Total d'observacions",
   recent_activity: 'Activitat recent',
   overview: 'Resum',
   review: 'Revisió',

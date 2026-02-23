@@ -10,7 +10,7 @@
       <q-tabs vertical switch-indicator shrink stretch outside-arrows active-color="primary">
         <q-route-tab icon="fa fa-thin fa-map-location-dot" active-class="bg-white" :to="{ 'name': 'reports' }">
           <q-tooltip anchor="center right" self="center left" class="text-capitalize">
-            {{ $t('reports') }}
+            {{ $t('observations') }}
           </q-tooltip>
         </q-route-tab>
         <q-route-tab icon="fa fat fa-radar" active-class="bg-white" :to="{ 'name': 'discoveries' }">

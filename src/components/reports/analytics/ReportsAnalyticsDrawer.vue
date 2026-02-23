@@ -8,7 +8,7 @@
         <h6 class="text-primary text-capitalize q-my-sm">{{ $t('summary') }}</h6>
         <div class="column q-pa-xs">
           <div class="row text-uppercase">
-            <span class="text-grey">{{ $t('total_reports') }}</span>
+            <span class="text-grey">{{ $t('total_observations') }}</span>
             <q-space />
             <span class="text-bold">{{ numFeatures }}</span>
           </div>
