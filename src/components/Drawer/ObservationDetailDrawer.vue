@@ -9,7 +9,7 @@
           severity="secondary"
           rounded
           size="small"
-          class="z-10 absolute right-0 top-0 p-0 m-2"
+          class="z-10 absolute right-0 top-0 p-0 m-2 animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
           @click="observationStore.observationInDrawer = null"
         >
           <span class="material-icons-outlined"> close </span>
@@ -47,7 +47,7 @@
         <Button
           severity="secondary"
           rounded
-          class="z-300 absolute right-2 w-4 h-2 flex items-center justify-center bg-gray-100/80 border-0 text-gray-700"
+          class="z-300 absolute right-2 w-4 h-2 flex items-center justify-center bg-gray-100/80 border-0 text-gray-700 animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
           :class="images.length > 1 ? 'bottom-6' : 'bottom-2'"
           v-tooltip.bottom="'Creative Commons Attribution License'"
           target="_blank"

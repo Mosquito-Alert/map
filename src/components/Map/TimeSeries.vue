@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center">
     <div
-      class="dates-controller inline-flex flex-nowrap items-center gap-6 px-3 py-2 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md"
+      class="dates-controller inline-flex flex-nowrap items-center gap-3 px-3 py-1 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
       :class="showChart ? 'mb-4' : 'mb-0'"
     >
       <div class="dates whitespace-nowrap pointer-events-auto">
@@ -9,85 +9,91 @@
         -
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
       </div>
-      <div class="flex items-end justify-end pointer-events-auto" v-if="!showChart">
+
+      <div key="open" class="flex items-end justify-end pointer-events-auto">
         <Button
           severity="secondary"
           size="small"
-          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
-          @click="showChart = true"
+          class="p-0.5 animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+          @click="showChart = !showChart"
         >
-          <span class="text-gray-700 material-icons-outlined"> open_in_full </span>
+          <Transition name="icon-rotate" mode="out-in">
+            <span
+              :key="showChart ? 'close' : 'open'"
+              class="text-gray-700 material-icons-outlined text-xl! p-0! m-0!"
+            >
+              {{ showChart ? 'close_fullscreen' : 'open_in_full' }}
+            </span>
+          </Transition>
         </Button>
       </div>
     </div>
-    <div
-      class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto"
-      v-if="showChart"
-    >
-      <div class="w-full flex items-end justify-end">
-        <Button
-          severity="secondary"
-          size="small"
-          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
-          @click="showChart = false"
-        >
-          <span class="text-gray-700 material-icons-outlined"> close_fullscreen </span>
-        </Button>
-      </div>
-      <VChart ref="chartRef" class="h-40! w-xl!" :option="option" :loading="loading" autoresize />
-      <div class="playback flex items-center justify-center gap-2 p-2">
-        <Button
-          severity="secondary"
-          size="small"
-          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
-          @click="playbackOngoing = !playbackOngoing"
-          v-tooltip.top="playbackOngoing ? 'Pause playback' : 'Start playback'"
-        >
-          <span class="text-gray-700 material-icons-outlined">
-            {{ playbackOngoing ? 'pause' : 'play_arrow' }}
-          </span>
-        </Button>
-        <!-- Only show the replay button when playback is paused -->
-        <Button
-          v-if="playbackCurrentDate"
-          severity="secondary"
-          size="small"
-          class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
-          @click="replay()"
-          v-tooltip.top="'Replay from start'"
-        >
-          <span class="text-gray-700 material-icons-outlined">
-            {{ 'replay' }}
-          </span>
-        </Button>
-        <div>
+    <Transition name="chart-expand">
+      <div
+        v-if="showChart"
+        class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto overflow-hidden"
+      >
+        <VChart
+          ref="chartRef"
+          class="h-40! w-xl! pt-1"
+          :option="option"
+          :loading="loading"
+          autoresize
+        />
+        <div class="playback flex items-center justify-center gap-2 p-2">
           <Button
-            type="button"
-            @click="(event) => menu.toggle(event)"
             severity="secondary"
             size="small"
-            class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer"
-            aria-haspopup="true"
-            aria-controls="overlay_menu"
-            v-tooltip.top="'Playback speed'"
+            class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+            @click="playbackOngoing = !playbackOngoing"
+            v-tooltip.top="playbackOngoing ? 'Pause playback' : 'Start playback'"
           >
             <span class="text-gray-700 material-icons-outlined">
-              {{ 'speed' }}
+              {{ playbackOngoing ? 'pause' : 'play_arrow' }}
             </span>
           </Button>
-          <Menu ref="menu" id="overlay_menu" :model="playbackMenuItems" :popup="true">
-            <template #item="{ item }">
-              <div class="flex items-center gap-2 px-2 py-1">
-                <span class="material-icons-outlined text-sm w-4">
-                  {{ item.isActive ? 'check' : '' }}
-                </span>
-                <span>{{ item.label }}</span>
-              </div>
-            </template>
-          </Menu>
+          <!-- Only show the replay button when playback is paused -->
+          <Button
+            v-if="playbackCurrentDate"
+            severity="secondary"
+            size="small"
+            class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+            @click="replay()"
+            v-tooltip.top="'Replay from start'"
+          >
+            <span class="text-gray-700 material-icons-outlined">
+              {{ 'replay' }}
+            </span>
+          </Button>
+          <div>
+            <Button
+              type="button"
+              @click="(event) => menu.toggle(event)"
+              severity="secondary"
+              size="small"
+              class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+              aria-haspopup="true"
+              aria-controls="overlay_menu"
+              v-tooltip.top="'Playback speed'"
+            >
+              <span class="text-gray-700 material-icons-outlined">
+                {{ 'speed' }}
+              </span>
+            </Button>
+            <Menu ref="menu" id="overlay_menu" :model="playbackMenuItems" :popup="true">
+              <template #item="{ item }">
+                <div class="flex items-center gap-2 px-2 py-1">
+                  <span class="material-icons-outlined text-sm w-4">
+                    {{ item.isActive ? 'check' : '' }}
+                  </span>
+                  <span>{{ item.label }}</span>
+                </div>
+              </template>
+            </Menu>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -383,3 +389,51 @@ const option = computed(() => ({
 
 const loading = false
 </script>
+<style>
+/* CHART ANIMATION */
+.chart-expand-enter-active,
+.chart-expand-leave-active {
+  transition:
+    height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.25s ease;
+  overflow: hidden;
+}
+
+.chart-expand-enter-from,
+.chart-expand-leave-to {
+  height: 0;
+  opacity: 0;
+}
+
+.chart-expand-enter-to,
+.chart-expand-leave-from {
+  height: 220px;
+  opacity: 1;
+}
+
+/* CLOSE BUTTON ANIMATION */
+.icon-rotate-enter-active,
+.icon-rotate-leave-active {
+  transition: all 0.2s ease;
+}
+
+.icon-rotate-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.8);
+}
+
+.icon-rotate-enter-to {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.icon-rotate-leave-from {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.icon-rotate-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.8);
+}
+</style>

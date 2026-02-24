@@ -7,8 +7,6 @@
         class="absolute left-0 top-0 h-full"
       />
     </Transition>
-    <!-- <MainDrawer v-if="!observationsStore.observationInDrawer" />
-    <ObservationDetailDrawer v-else /> -->
     <MainMap />
   </div>
 </template>
