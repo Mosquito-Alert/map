@@ -4,57 +4,59 @@
   >
     <div class="drawer-card rounded-lg border bg-gray-100 p-0 overflow-y-auto flex-1 mb-0">
       <!-- TITLE -->
-      <!-- TODO: -->
-      <!-- <Button
-        severity="secondary"
-        rounded
-        size="small"
-        class="z-10 absolute right-0 top-0"
-        @click="observationStore.observationInDrawer = null"
-      >
-        <span class="material-icons-outlined"> close </span>
-      </Button> -->
-      <!-- TODO: Spinner -->
-      <Galleria
-        :value="images"
-        :numVisible="5"
-        :showThumbnails="false"
-        :showIndicators="images.length > 1"
-        :showItemNavigators="images.length > 1"
-        :circular="images.length > 1"
-        :changeItemOnIndicatorHover="false"
-        :showIndicatorsOnItem="images.length > 1"
-        :indicatorsPosition="'bottom'"
-        :pt="{
-          root: 'border-0! rounded-none!',
-          indicatorList: 'm-0 p-0 bg-[#00000055]',
-          prevButton: 'size-6! absolute left-4 top-1/2   m-0!',
-          prevIcon: 'size-4! text-white',
-          nextButton: 'size-6! absolute right-4 top-1/2   m-0!',
-          nextIcon: 'size-4! text-white',
-        }"
-      >
-        <template #item="slotProps">
-          <img
-            :src="slotProps.item.itemImageSrc"
-            :alt="slotProps.item.alt"
-            class="max-h-full aspect-3/2 object-cover!"
-          />
-        </template>
-      </Galleria>
+      <div class="relative">
+        <Button
+          severity="secondary"
+          rounded
+          size="small"
+          class="z-10 absolute right-0 top-0 p-0 m-2"
+          @click="observationStore.observationInDrawer = null"
+        >
+          <span class="material-icons-outlined"> close </span>
+        </Button>
+        <Galleria
+          :value="images"
+          :numVisible="5"
+          :showThumbnails="false"
+          :showIndicators="images.length > 1"
+          :showItemNavigators="images.length > 1"
+          :circular="images.length > 1"
+          :changeItemOnIndicatorHover="false"
+          :showIndicatorsOnItem="images.length > 1"
+          :indicatorsPosition="'bottom'"
+          :pt="{
+            root: 'border-0! rounded-none!',
+            indicatorList: 'm-0 p-0 bg-[#00000055]',
+            indicator: 'flex items-center justify-center! my-1',
+            indicatorButton: 'size-3! rounded-full! m-0!',
+            prevButton: 'size-6! absolute left-4 top-1/2 m-0!',
+            prevIcon: 'size-4! text-white',
+            nextButton: 'size-6! absolute right-4 top-1/2 m-0!',
+            nextIcon: 'size-4! text-white',
+          }"
+        >
+          <template #item="slotProps">
+            <img
+              :src="slotProps.item.itemImageSrc"
+              :alt="slotProps.item.alt"
+              class="max-h-full aspect-3/2 object-cover!"
+            />
+          </template>
+        </Galleria>
 
-      <!-- TODO: -->
-      <!-- <Button
-                  severity="secondary"
-                  rounded
-                  class="z-300 absolute bottom-6 right-5 w-4 h-2 flex items-center justify-center"
-                  v-tooltip.bottom="'Creative Commons Attribution License'"
-                  target="_blank"
-                  as="a"
-                  href="https://creativecommons.org/licenses/by/4.0/"
-                >
-                  <span class="material-icons-outlined"> attribution </span>
-                </Button> -->
+        <Button
+          severity="secondary"
+          rounded
+          class="z-300 absolute right-2 w-4 h-2 flex items-center justify-center bg-gray-100/80 border-0 text-gray-700"
+          :class="images.length > 1 ? 'bottom-6' : 'bottom-2'"
+          v-tooltip.bottom="'Creative Commons Attribution License'"
+          target="_blank"
+          as="a"
+          href="https://creativecommons.org/licenses/by/4.0/"
+        >
+          <span class="material-icons-outlined"> attribution </span>
+        </Button>
+      </div>
 
       <!-- CONTENT -->
       <div class="flex row items-center px-2 py-1 m-0 mb-4 bg-[#edb20c] text-white">
@@ -143,7 +145,7 @@
 </template>
 <script lang="ts" setup>
 import { IdentificationTaskResultSource } from 'mosquito-alert'
-import { Divider, Galleria } from 'primevue'
+import { Button, Divider, Galleria } from 'primevue'
 import { computed, onMounted, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 
