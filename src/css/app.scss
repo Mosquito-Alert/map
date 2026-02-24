@@ -1,3 +1,86 @@
-html, body, #map{
-    height: 100%;
+// app global css in SCSS form
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
+// Mosquitoes colors
+.text-albopictus {
+  color: $orange-7 !important;
+}
+.bg-albopictus {
+  background: $orange-7 !important;
+}
+
+.text-aegypti {
+  color: $indigo-6 !important;
+}
+.bg-aegypti {
+  background: $indigo-6 !important;
+}
+
+.text-japonicus {
+  color: $green-6 !important;
+}
+.bg-japonicus {
+  background: $green-6 !important;
+}
+
+.text-koreicus {
+  color: $lime-8 !important;
+}
+.bg-koreicus {
+  background: $lime-8 !important;
+}
+
+.text-culex {
+  color: $purple-5 !important;
+}
+.bg-culex {
+  background: $purple-5 !important;
+}
+
+.text-unidentified-mosquito {
+  color: $grey-5 !important;
+}
+.bg-unidentified-mosquito {
+  background: $grey-5 !important;
+}
+
+.text-other-species {
+  color: $blue-grey-6 !important;
+}
+.bg-other-species {
+  background: $blue-grey-6 !important;
+}
+
+// Breeding sites colors
+.text-breeding-site {
+  color: $blue-6 !important;
+}
+.bg-breeding-site {
+  background: $blue-6 !important;
+}
+
+// Bites colors
+.text-bites {
+  color: $red-6 !important;
+}
+.bg-bites {
+  background: $red-6 !important;
+}
+
+// Sampling effort colors
+.text-sampling-effort {
+  color: $brown-6 !important;
+}
+.bg-sampling-effort {
+  background: $brown-6 !important;
 }

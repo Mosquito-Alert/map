@@ -1,16 +1,16 @@
 # build stage
-FROM node:lts-alpine as build-stage
+FROM node:lts-alpine AS build-stage
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
 COPY ./ .
+RUN npm install
 RUN npm run build
 
 
 # production stage
-FROM nginx:stable-alpine as production-stage
+FROM nginx:stable-alpine AS production-stage
 
 LABEL org.opencontainers.image.source=https://github.com/Mosquito-Alert/map
 

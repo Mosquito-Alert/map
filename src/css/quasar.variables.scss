@@ -11,95 +11,15 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
-$font-family: 'Roboto';
-$left-drawer-width: 350px;
-$left-toolbar-width: 60px;
-$header-height: 80px;
 
-// COLORS
-$primary-color: #efa501;
-$grey-color: #d5d5d5;
-$dark-grey: #666;
-$filter-grey: #ccc;
-$toolbar-icons-color: #000;
-$line-color: rgba(0, 0, 0, 0.12);
-$color-pestanya: white;
-$color-pestanya-text: black;
-$footer-background: #333;
-$footer-height: 50px;
-$primary-button-background: $primary-color;
-$primary-button-text: #f9db99;
-$primary-button-background-hover: #ffca56;
-$primary-button-text-hover: white;
-$box-shadow: 3px 0 6px rgba(0,0,0,0.25), 2px 0 2px rgba(0,0,0,0.22);
+$primary   : #1976D2;
+$secondary : #26A69A;
+$accent    : #9C27B0;
 
-// GRAPH LEGEND TRANSPARENCY FOR POSSIBLE CATEGORIES
-$graph-possible-transparency: .3;
+$dark      : #1D1D1D;
+$dark-page : #121212;
 
-// SHADOW
-$box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-// POP UP
-$popup-border-radius: 25px;
-$half-popup-width: 25vw;
-
-$popup-width-small: 25vw;
-
-$popup-height: 50vh; // MAX height when there is no image
-$popup-vertical-offset: 25px;
-$popup-padding-info: 25px;
-
-$popup-width-landscape: 25vw;
-$popup-height-landscape: 20vh;
-$popup-height-with-image-landscape: 35vh; // MAX height when there is an image
-
-$popup-width-portrait: 70vw;
-$popup-width-portrait-info: 15vw;
-$popup-height-with-image-portrait: 40vh; // MAX height when there is an image
-
-$popup-width-square: 70vw;
-$popup-width-square-info: 15vw;
-$popup-height-with-image-square: 30vh; // MAX height when there is an image
-
-$li-item-padding: 5px;
-
-// TOC ICONS (NOT MAP)
-// MAP ICONS ARE IN STORE
-$icon-tiger: '../assets/img/marker_tiger.svg';
-$icon-tiger-possible: '../assets/img/marker_tiger_probable.svg';
-$albopictus-cretinus: '../assets/img/marker_tiger.svg';
-$icon-yellow: '../assets/img/marker_yellow.svg';
-$icon-yellow-possible: '../assets/img/marker_yellow_probable.svg';
-$icon-koreicus: '../assets/img/marker_koreicus.svg';
-$icon-koreicus-possible: '../assets/img/marker_koreicus_probable.svg';
-$icon-japonicus: '../assets/img/marker_japonicus.svg';
-$icon-japonicus-possible: '../assets/img/marker_japonicus_probable.svg';
-$icon-culex: '../assets/img/marker_culex.svg';
-$icon-culex-possible: '../assets/img/marker_culex_probable.svg';
-$icon-unidentified: '../assets/img/marker_unidentified.svg';
-$icon-other: '../assets/img/marker_other.svg';
-$icon-mosquito-disabled: '../assets/img/marker_mosquito_disabled.svg';
-$icon-mosquito-possible-disabled: '../assets/img/marker_mosquito_probable_disabled.svg';
-$icon-unidentified-disabled: '../assets/img/marker_unidentified_disabled.svg';
-$icon-other-disabled: '../assets/img/marker_other_disabled.svg';
-$icon-not-yet-validated: '../assets/img/marker_not_yet_validated.svg';
-$icon-not-yet-validated-disabled: '../assets/img/marker_not_yet_validated_disabled.svg';
-
-$icon-bite: '../assets/img/marker_bite.svg';
-$icon-bite-disabled: '../assets/img/marker_bite_disabled.svg';
-
-$icon-with-water: '../assets/img/storm_drain_water.svg';
-$icon-with-water-disabled: '../assets/img/storm_drain_water_disabled.svg';
-
-$icon-without-water: '../assets/img/storm_drain_dry.svg';
-$icon-without-water-disabled: '../assets/img/storm_drain_dry_disabled.svg';
-
-$icon-other-water: '../assets/img/breeding_other.svg';
-$icon-other-water-disabled: '../assets/img/breeding_other_disabled.svg';
-
-
-$color-bites: #cc6677;
-$text-color-bites: #e2b3aa;
-$color-breeding: #a8b9c1;
-$text-color-breeding: #1072ad;
-
-$timeseries-height: 300px;
+$positive  : #21BA45;
+$negative  : #C10015;
+$info      : #31CCEC;
+$warning   : #F2C037;
