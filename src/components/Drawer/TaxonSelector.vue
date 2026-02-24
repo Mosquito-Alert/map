@@ -12,7 +12,7 @@
           (value) => (taxaStore.taxonSelected = value ? taxon : (culicidaeTaxon as Taxon))
         "
         size="small"
-        class="italic bg-gray-200 mx-1 my-1 rounded-xl text-gray-700"
+        class="italic bg-gray-200 mx-1 my-1 rounded-xl text-gray-700 animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
       >
       </ToggleButton>
       <TreeSelect
