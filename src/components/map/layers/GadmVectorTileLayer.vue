@@ -12,7 +12,8 @@
 import { ref, computed } from 'vue'
 
 import MVT from 'ol/format/MVT'
-// import Feature from 'ol/Feature'
+
+import { cdn } from 'boot/axios'
 
 const levelToId: Record<number, string> = {
   0: 'COUNTRY',
@@ -65,7 +66,7 @@ export default {
     const layerRef = ref()
 
     const url = computed(() => {
-      return `https://api.mosquitoalert.com/v1/map/tiles/gadm${props.level}/{z}/{x}/{y}.pbf`
+      return cdn.defaults.baseURL + `static/tiles/gadm${props.level}/{z}/{x}/{y}.pbf`
       // NOTE: If every want to start using geoserver:
       // const tilesUrl = 'https://mapserver-ifca.mosquitoalert.com/geoserver/gwc/service/tms/1.0.0/'
       // return tilesUrl + 'map_gadm:ADM_' + props.level + '@' + props.projection + '@pbf/{z}/{x}/{-y}.pbf'
