@@ -23,9 +23,9 @@
     "debounce": "^3.0.0",
     "echarts": "^6.0.0",
     "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.38",
-    "ol": "^10.0.0",
-    "ol-contextmenu": "^5.4.0",
-    "ol-ext": "^4.0.21",
+    "ol": "^10.6.0",
+    "ol-contextmenu": "^5.5.0",
+    "ol-ext": "^4.0.34",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "vue": "^3.5.22",
@@ -33,7 +33,7 @@
     "vue-gtag": "^3.6.3",
     "vue-i18n": "^11.0.0",
     "vue-router": "^4.0.12",
-    "vue3-openlayers": "^11.6.2"
+    "vue3-openlayers": "^12.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
@@ -54,7 +54,7 @@
     "vue-tsc": "^3.0.7"
   },
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20",
+    "node": "^28 || ^26 || ^24 || ^22",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }

@@ -19,7 +19,7 @@
     </ol-tile-layer>
 
     <ol-zoom-control />
-    <ol-scaleline-control :min-width="50" />
+    <ol-scale-line-control :min-width="50" />
     <ol-toggle-control ref="labelsToggleRef" html="T"
       :className="`ol-toggle-label-layer ${!labelsLayerVisible ? 'ol-disabled' : ''}`"
       :onToggle="() => labelsLayerVisible = !labelsLayerVisible" />
