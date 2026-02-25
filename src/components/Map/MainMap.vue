@@ -89,10 +89,11 @@ const renderedOriginalDateAggregationData = computed<Record<string, number>>(() 
   return originalDateAggregationData.value[taxonSelectedId] || {}
 })
 
-const observationPointsZoom = 2 //10
+const observationPointsZoom = 10
 const observationPointsSourceLabel = 'observationsSource'
 const observationPointsLayerLabel = 'observationPointsLayer'
 let hoveredObservationId: string | null = null
+let selectedObservationId: string | null = null
 let observationEventsAttached = false
 
 // Define map styles
@@ -353,11 +354,47 @@ const onObservationPointsClick = (e: any) => {
     layers: [observationPointsLayerLabel],
   })
 
-  if (features.length > 0) {
-    const feature = features[0] as GeoJSON.Feature
-    const uuid = feature.properties?.uuid || ''
-    observationsStore.fetchObservationById(uuid)
+  if (!features.length) return
+
+  if (selectedObservationId) {
+    map.value.setFeatureState(
+      { source: observationPointsSourceLabel, id: selectedObservationId },
+      { click: false },
+    )
   }
+
+  const clickedId = features[0]?.properties.uuid as string
+
+  // If clicking the already selected one → deselect
+  if (selectedObservationId === clickedId) {
+    map.value.setFeatureState(
+      { source: observationPointsSourceLabel, id: selectedObservationId },
+      { click: false },
+    )
+
+    selectedObservationId = null
+
+    // Reset: all red
+    map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', '#FF5722')
+    return
+  }
+
+  // Otherwise select new one
+  selectedObservationId = clickedId
+
+  // Selected = red, others = gray
+  map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', [
+    'case',
+    ['==', ['id'], selectedObservationId],
+    '#FF5722', // selected
+    '#888888', // others
+  ])
+
+  map.value.setFeatureState(
+    { source: observationPointsSourceLabel, id: clickedId },
+    { click: true },
+  )
+  observationsStore.fetchObservationById(selectedObservationId)
 }
 
 const attachObservationEvents = () => {
@@ -442,13 +479,33 @@ const addObservationLayers = () => {
         'circle-radius': [
           'interpolate',
           ['linear'],
-          ['zoom'], // NOTE: "zoom" expression may only be used as input to a top-level "interpolate" expression
-          11, // At zoom 11
-          ['case', ['boolean', ['feature-state', 'hover'], false], 5, 3],
-          18, // At zoom 18
-          ['case', ['boolean', ['feature-state', 'hover'], false], 16, 10],
+          ['zoom'],
+          11,
+          [
+            'case',
+            ['boolean', ['feature-state', 'click'], false],
+            6, // selected
+            ['boolean', ['feature-state', 'hover'], false],
+            5, // hover
+            3, // default
+          ],
+          18,
+          [
+            'case',
+            ['boolean', ['feature-state', 'click'], false],
+            17, // selected
+            ['boolean', ['feature-state', 'hover'], false],
+            16, // hover
+            10, // default
+          ],
         ],
-        'circle-color': '#FF5722',
+        'circle-color': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          // FF5722 but darker for better visibility on hover, while still keeping selected ones more prominent
+          '#FF1A00', // hover
+          '#FF5722',
+        ],
         'circle-stroke-width': 1,
         'circle-stroke-color': '#FFFFFF',
       },
@@ -637,6 +694,25 @@ watch(
     }
   },
   { deep: true },
+)
+
+watch(
+  () => observationsStore.observationInDrawer,
+  (newObservation) => {
+    console.log(newObservation)
+    if (!map.value) return
+    if (!newObservation) {
+      // No observation selected → reset all to red
+      map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', '#FF5722')
+      if (selectedObservationId) {
+        map.value.setFeatureState(
+          { source: observationPointsSourceLabel, id: selectedObservationId },
+          { click: false },
+        )
+      }
+      selectedObservationId = null
+    }
+  },
 )
 
 watch(
