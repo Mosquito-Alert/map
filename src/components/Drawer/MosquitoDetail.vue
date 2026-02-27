@@ -63,7 +63,28 @@
       </div>
 
       <div class="near-discoveries mt-6">
-        <h4 class="text-lg font-semibold text-gray-800 mb-2">Observaciones cerca de ti</h4>
+        <!-- <h4 class="text-lg font-semibold text-gray-800 mb-2">Observaciones cerca de ti</h4> -->
+        <div class="flex row items-center justify-between mb-2">
+          <h4 class="text-lg font-semibold text-gray-800">Observaciones</h4>
+          <div
+            class="flex items-center gap-2"
+            v-tooltip.right="{
+              value: userDeniedGeolocation
+                ? 'Permite el acceso a tu ubicación para ver las observaciones cerca de ti'
+                : 'Mostrar solo las observaciones cerca de tu ubicación',
+              pt: { root: { class: 'max-w-xs' } },
+            }"
+          >
+            <Checkbox
+              v-model="showObservationsNearMe"
+              :inputId="'showObservationsNearMe'"
+              name="showObservationsNearMe"
+              :disabled="userDeniedGeolocation"
+              binary
+            />
+            <label for="showObservationsNearMe" class="cursor-pointer"> Cerca de mi </label>
+          </div>
+        </div>
         <!-- TODO: Make this lazy: fetch photos on request -->
         <Carousel
           v-if="!fetchingObservations"
@@ -143,18 +164,16 @@
   </CardDrawer>
 </template>
 <script setup lang="ts">
-import { Button, Carousel, Checkbox, ProgressSpinner, RadioButton } from 'primevue'
-import Tag from 'primevue/tag'
-import { onMounted, ref } from 'vue'
+import type { Taxon } from 'mosquito-alert'
+import { Button, Carousel, Checkbox, ProgressSpinner, RadioButton, Tag } from 'primevue'
+import { onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
-
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
+import { mosquitoLayers } from '../../utils/constants'
 import { daysSince } from '../../utils/date'
 import CardDrawer from './CardDrawer.vue'
-import { mosquitoLayers } from '../../utils/constants'
-import type { Taxon } from 'mosquito-alert'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()
@@ -165,12 +184,26 @@ const diseases = ['Dengue', 'Fiebre Amarilla', 'Virus del Nilo Occidental']
 const seeAdditionalDetails = ref(false)
 const mosquitoInfo = ref('')
 const fetchingMosquitoInfo = ref(false)
+const showObservationsNearMe = ref(false)
+const userDeniedGeolocation = ref(false)
 
 onMounted(async () => {
   if (taxaStore.taxonSelected) {
     fetchingObservations.value = true
-    await observationsStore.fetchObservationsNearMe(10, 40.4168, -3.7038) // Example coordinates (Madrid)
+    await observationsStore.fetchObservationsNearMe(10)
     fetchingObservations.value = false
+  }
+
+  // Check if user has geolocation permissions
+  if (navigator.permissions) {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'geolocation' })
+      if (permissionStatus.state === 'denied') {
+        userDeniedGeolocation.value = true
+      }
+    } catch (error) {
+      console.error('Error checking geolocation permissions:', error)
+    }
   }
 })
 
@@ -207,4 +240,43 @@ const responsiveOptions = ref([
     numScroll: 1,
   },
 ])
+
+const getUserLocation = (): Promise<{ latitude: number; longitude: number }> => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocalización no es soportada por este navegador.'))
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+        },
+        (error) => {
+          showObservationsNearMe.value = false
+          userDeniedGeolocation.value = true
+          reject(new Error('No se pudo obtener la ubicación del usuario.'))
+        },
+      )
+    }
+  })
+}
+
+watch(showObservationsNearMe, async (newValue, oldValue) => {
+  if (oldValue === newValue) return
+  fetchingObservations.value = true
+  let latitude, longitude
+  if (newValue) {
+    try {
+      const location = await getUserLocation()
+      latitude = location.latitude
+      longitude = location.longitude
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  await observationsStore.fetchObservationsNearMe(10, latitude, longitude)
+  fetchingObservations.value = false
+})
 </script>

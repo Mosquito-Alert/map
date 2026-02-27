@@ -249,72 +249,7 @@ const getMapColors = () => {
   }
 }
 
-// Function to add/update H3 layer for a resolution
-const addOrUpdateH3Layer = () => {
-  const taxonSelectedId = taxaStore.taxonSelected.id as number
-  const resolution = currentResolution.value as number
-  const mapInstance = map.value
-
-  if (!mapInstance) return
-
-  const dataForRes = renderedHexData.value[taxonSelectedId]?.[resolution]
-  const colorsForRes = mapColors.value[taxonSelectedId]?.[resolution]
-
-  if (!dataForRes || !colorsForRes) return
-
-  const sourceId = `h3-res-${resolution}`
-  const layerId = `h3-layer-res-${resolution}`
-
-  const featureCollection: GeoJSON.FeatureCollection = {
-    type: 'FeatureCollection',
-    // Maplibre does not need reactivity inside features, so we can mark them as raw to optimize performance
-    features: markRaw(Object.values(dataForRes)),
-  }
-
-  // --------------------------------------------------
-  // Source: create once, then update via setData()
-  // --------------------------------------------------
-  const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
-
-  if (existingSource) {
-    existingSource.setData(featureCollection)
-  } else {
-    mapInstance.addSource(sourceId, {
-      type: 'geojson',
-      data: featureCollection,
-    })
-  }
-
-  // --------------------------------------------------
-  // Layer: create once
-  // --------------------------------------------------
-  if (!mapInstance.getLayer(layerId)) {
-    mapInstance.addLayer({
-      id: layerId,
-      source: sourceId,
-      type: 'fill',
-      layout: {
-        visibility: 'visible',
-      },
-      paint: {
-        'fill-outline-color': 'rgba(255, 255, 255, 0)',
-      },
-    })
-  }
-
-  // --------------------------------------------------
-  // Paint: update color stops dynamically
-  // --------------------------------------------------
-  const colorStops = Object.values(colorsForRes).flatMap((stop) => [stop.value, stop.color])
-
-  mapInstance.setPaintProperty(layerId, 'fill-color', [
-    'interpolate',
-    ['linear'],
-    ['get', 'count'],
-    ...colorStops,
-  ])
-}
-
+// ######### EVENT HANDLERS FOR OBSERVATION POINTS LAYER #########
 const onObservationPointsMouseEnter = (e: any) => {
   if (!map.value) return
   map.value.getCanvas().style.cursor = 'pointer'
@@ -424,6 +359,73 @@ const detachObservationEvents = () => {
   observationEventsAttached = false
 }
 
+// ########## LAYER HANDLING BASED ON ZOOM AND RESOLUTION #########
+// Function to add/update H3 layer for a resolution
+const addOrUpdateH3Layer = () => {
+  const taxonSelectedId = taxaStore.taxonSelected.id as number
+  const resolution = currentResolution.value as number
+  const mapInstance = map.value
+
+  if (!mapInstance) return
+
+  const dataForRes = renderedHexData.value[taxonSelectedId]?.[resolution]
+  const colorsForRes = mapColors.value[taxonSelectedId]?.[resolution]
+
+  if (!dataForRes || !colorsForRes) return
+
+  const sourceId = `h3-res-${resolution}`
+  const layerId = `h3-layer-res-${resolution}`
+
+  const featureCollection: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    // Maplibre does not need reactivity inside features, so we can mark them as raw to optimize performance
+    features: markRaw(Object.values(dataForRes)),
+  }
+
+  // --------------------------------------------------
+  // Source: create once, then update via setData()
+  // --------------------------------------------------
+  const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
+
+  if (existingSource) {
+    existingSource.setData(featureCollection)
+  } else {
+    mapInstance.addSource(sourceId, {
+      type: 'geojson',
+      data: featureCollection,
+    })
+  }
+
+  // --------------------------------------------------
+  // Layer: create once
+  // --------------------------------------------------
+  if (!mapInstance.getLayer(layerId)) {
+    mapInstance.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'fill',
+      layout: {
+        visibility: 'visible',
+      },
+      paint: {
+        'fill-outline-color': 'rgba(255, 255, 255, 0)',
+      },
+    })
+  }
+
+  // --------------------------------------------------
+  // Paint: update color stops dynamically
+  // --------------------------------------------------
+  const colorStops = Object.values(colorsForRes).flatMap((stop) => [stop.value, stop.color])
+
+  mapInstance.setPaintProperty(layerId, 'fill-color', [
+    'interpolate',
+    ['linear'],
+    ['get', 'count'],
+    ...colorStops,
+  ])
+}
+
 // Function to hide all H3 layers except the target one
 const showOnlyResolution = () => {
   if (!map.value) return
@@ -454,6 +456,7 @@ const showOnlyResolution = () => {
   }
 }
 
+// Function to add observation points layer for high zoom levels
 const addObservationLayers = () => {
   if (!map.value || !geojsonCache.value) return
 
@@ -573,26 +576,18 @@ onMounted(async () => {
       'top-right',
     )
     // Add geolocate control to the map.
-    map.value.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
-        trackUserLocation: true,
-        showUserLocation: false,
-      }),
-      'top-right',
-    )
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true,
+      },
+      trackUserLocation: true,
+      showUserLocation: false,
+    })
+    map.value.addControl(geolocate, 'top-right')
     map.value.addControl(new MapLegendControl(), 'top-right')
     map.value.addControl(new MapGlobeControl(), 'top-right')
     map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     // map.value.addControl(new MapInfoControl(), 'top-right')
-    // map.value.addControl(
-    //   new maplibregl.AttributionControl({
-    //     compact: true,
-    //   }),
-    //   'bottom-right',
-    // )
 
     // Start data loading in background
     const observationsPromise = observationsStore.fetchObservations()

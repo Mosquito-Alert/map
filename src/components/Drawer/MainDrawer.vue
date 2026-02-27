@@ -2,7 +2,8 @@
   <aside
     class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[30%] mx-auto pl-4 mt-4"
   >
-    <Summary />
+    <!-- <Summary /> -->
+    <HeaderDrawer />
     <SelectButton
       v-model="activeTab"
       :options="options"
@@ -35,8 +36,8 @@
 import { SelectButton } from 'primevue'
 import { onMounted, ref } from 'vue'
 import ScrollableDrawer from './ScrollableDrawer.vue'
-import Summary from './SummaryLocation.vue'
 import { useUIStore } from '../../stores/uiStore'
+import HeaderDrawer from './HeaderDrawer.vue'
 
 const uiStore = useUIStore()
 const activeTabClass = 'text-gray-700 font-semibold'
