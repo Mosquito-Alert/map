@@ -314,22 +314,7 @@ const onObservationPointsClick = (e: any) => {
     return
   }
 
-  // Otherwise select new one
-  selectedObservationId = clickedId
-
-  // Selected = red, others = gray
-  map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', [
-    'case',
-    ['==', ['id'], selectedObservationId],
-    '#FF5722', // selected
-    '#888888', // others
-  ])
-
-  map.value.setFeatureState(
-    { source: observationPointsSourceLabel, id: clickedId },
-    { click: true },
-  )
-  observationsStore.fetchObservationById(selectedObservationId)
+  observationsStore.fetchObservationById(clickedId)
 }
 
 const attachObservationEvents = () => {
@@ -694,7 +679,6 @@ watch(
 watch(
   () => observationsStore.observationInDrawer,
   (newObservation) => {
-    console.log(newObservation)
     if (!map.value) return
     if (!newObservation) {
       // No observation selected → reset all to red
@@ -706,6 +690,25 @@ watch(
         )
       }
       selectedObservationId = null
+    } else {
+      selectedObservationId = newObservation.uuid
+      // paint selected one as red, others as gray
+      map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', [
+        'case',
+        ['==', ['id'], newObservation.uuid],
+        '#FF5722', // selected
+        '#888888', // others
+      ])
+      map.value.setFeatureState(
+        { source: observationPointsSourceLabel, id: newObservation.uuid },
+        { click: true },
+      )
+      // zoom to selected observation
+      const { latitude, longitude } = newObservation.location.point
+      map.value.easeTo({
+        center: [longitude, latitude],
+        zoom: 14,
+      })
     }
   },
 )

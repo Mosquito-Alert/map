@@ -95,7 +95,10 @@
           :showIndicators="false"
         >
           <template #item="slotProps">
-            <div class="border border-surface-200 dark:border-surface-700 rounded mx-1">
+            <div
+              class="border border-surface-200 dark:border-surface-700 rounded mx-1 cursor-pointer"
+              @click="() => observationsStore.fetchObservationById(slotProps.data.uuid)"
+            >
               <div class="relative mx-auto">
                 <img
                   :src="slotProps.data.photos[0].url"
@@ -106,7 +109,7 @@
                   class="absolute text-xs"
                   style="right: 0.25rem; top: 0.25rem"
                 />
-                <Tag :value="'7 km'" class="absolute text-xs" style="right: 0.25rem; top: 2rem" />
+                <!-- <Tag :value="'7 km'" class="absolute text-xs" style="right: 0.25rem; top: 2rem" /> -->
               </div>
             </div>
           </template>
