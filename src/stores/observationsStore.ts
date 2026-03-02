@@ -34,9 +34,9 @@ export const useObservationsStore = defineStore('observations', {
             ? {
                 point: [longitude, latitude],
                 dist: 100 * 1000, // 100 km radius
-                orderBy: [BitesListOrderByParameter.Distance],
+                orderBy: [BitesListOrderByParameter.Distance, BitesListOrderByParameter.ReceivedAt],
               }
-            : {}),
+            : { orderBy: [BitesListOrderByParameter.ReceivedAt] }),
           receivedAtAfter: threeMonthsAgo.toISOString(),
         })
         if (response.data.results) {

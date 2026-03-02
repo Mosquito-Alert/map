@@ -63,27 +63,8 @@
       </div>
 
       <div class="near-discoveries mt-6">
-        <!-- <h4 class="text-lg font-semibold text-gray-800 mb-2">Observaciones cerca de ti</h4> -->
-        <div class="flex row items-center justify-between mb-2">
-          <h4 class="text-lg font-semibold text-gray-800">Observaciones</h4>
-          <div
-            class="flex items-center gap-2"
-            v-tooltip.right="{
-              value: userDeniedGeolocation
-                ? 'Permite el acceso a tu ubicación para ver las observaciones cerca de ti'
-                : 'Mostrar solo las observaciones cerca de tu ubicación',
-              pt: { root: { class: 'max-w-xs' } },
-            }"
-          >
-            <Checkbox
-              v-model="showObservationsNearMe"
-              :inputId="'showObservationsNearMe'"
-              name="showObservationsNearMe"
-              :disabled="userDeniedGeolocation"
-              binary
-            />
-            <label for="showObservationsNearMe" class="cursor-pointer"> Cerca de mi </label>
-          </div>
+        <div class="mb-2">
+          <h4 class="text-lg font-semibold text-gray-800">Observaciones recientes</h4>
         </div>
         <!-- TODO: Make this lazy: fetch photos on request -->
         <Carousel
@@ -105,16 +86,38 @@
                   class="w-2xs aspect-2/3 object-cover rounded"
                 />
                 <Tag
-                  :value="`Hace ${daysSince(slotProps.data.created_at)} días`"
-                  class="absolute text-xs"
+                  :value="slotProps.data.location.display_name.split(',')[0]"
+                  class="absolute text-xs font-normal"
+                  severity="secondary"
                   style="right: 0.25rem; top: 0.25rem"
-                />
-                <!-- <Tag :value="'7 km'" class="absolute text-xs" style="right: 0.25rem; top: 2rem" /> -->
+                  :pt="{ root: { class: 'py-0' } }"
+                >
+                  <template #icon>
+                    <span class="material-icons-outlined text-sm!"> location_on </span>
+                  </template>
+                </Tag>
               </div>
             </div>
           </template>
         </Carousel>
         <ProgressSpinner class="flex justify-center" v-else />
+        <div
+          class="flex items-center justify-self-end gap-2 mt-2"
+          v-tooltip.right="{
+            value: userDeniedGeolocation
+              ? 'Permite el acceso a tu ubicación para ver las observaciones cerca de ti'
+              : 'Mostrar solo las observaciones cerca de tu ubicación',
+            pt: { root: { class: 'max-w-xs' } },
+          }"
+        >
+          <label for="showObservationsNearMe" class="cursor-pointer"> Cerca de mi </label>
+          <ToggleSwitch
+            v-model="showObservationsNearMe"
+            :inputId="'showObservationsNearMe'"
+            name="showObservationsNearMe"
+            :disabled="userDeniedGeolocation"
+          />
+        </div>
       </div>
 
       <div v-if="seeAdditionalDetails" class="additional-details">
@@ -168,7 +171,15 @@
 </template>
 <script setup lang="ts">
 import type { Taxon } from 'mosquito-alert'
-import { Button, Carousel, Checkbox, ProgressSpinner, RadioButton, Tag } from 'primevue'
+import {
+  Button,
+  Carousel,
+  Checkbox,
+  ProgressSpinner,
+  RadioButton,
+  Tag,
+  ToggleSwitch,
+} from 'primevue'
 import { onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../stores/mapStore'
