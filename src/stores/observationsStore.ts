@@ -7,7 +7,10 @@ export const useObservationsStore = defineStore('observations', {
   state: () => ({
     // observations: {} as any,
     dataProcessed: false,
-    near_observations: [] as Observation[],
+    recent_observations: [] as Observation[],
+    are_observations_near: false, // This flag tells if recent_observations are near the user or not.
+    user_location: null as { latitude: number; longitude: number } | null,
+    radius_for_nearby_observations: 100, // in km
     dateFilter: {
       start: null as string | null,
       end: null as string | null,
@@ -33,14 +36,14 @@ export const useObservationsStore = defineStore('observations', {
           ...(latitude && longitude
             ? {
                 point: [longitude, latitude],
-                dist: 100 * 1000, // 100 km radius
+                dist: this.radius_for_nearby_observations * 1000, // 100 km radius
                 orderBy: [BitesListOrderByParameter.Distance, BitesListOrderByParameter.ReceivedAt],
               }
             : { orderBy: [BitesListOrderByParameter.ReceivedAt] }),
           receivedAtAfter: threeMonthsAgo.toISOString(),
         })
         if (response.data.results) {
-          this.near_observations = response.data.results
+          this.recent_observations = response.data.results
         }
       } catch (error) {
         console.error('Failed to fetch observations near me:', error)

@@ -98,17 +98,15 @@
         </span>
       </div>
       <div class="px-4">
-        <div
-          v-for="{ value, icon } in overviewObservationData"
-          :key="icon"
-          class="flex items-center mt-2 mb-3 gap-2"
-        >
-          <span
-            class="material-icons-outlined mr-2 flex items-center justify-center text-[#edb20c]"
-          >
-            {{ icon }}
-          </span>
-          <span class="text-sm text-gray-900">{{ value }}</span>
+        <div v-for="{ value, icon } in overviewObservationData" :key="icon" class="mt-2 mb-3 gap-2">
+          <div v-if="value" class="flex items-center gap-2">
+            <span
+              class="material-icons-outlined mr-2 flex items-center justify-center text-[#edb20c]"
+            >
+              {{ icon }}
+            </span>
+            <span class="text-sm text-gray-900">{{ value }}</span>
+          </div>
         </div>
       </div>
       <div v-if="overviewObservationReview.confidenceLevel" class="px-4 mt-4">

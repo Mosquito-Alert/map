@@ -69,7 +69,7 @@
         <!-- TODO: Make this lazy: fetch photos on request -->
         <Carousel
           v-if="!fetchingObservations"
-          :value="observationsStore.near_observations"
+          :value="observationsStore.recent_observations"
           :numVisible="2"
           :numScroll="1"
           :responsiveOptions="responsiveOptions"
@@ -86,7 +86,8 @@
                   class="w-2xs aspect-2/3 object-cover rounded"
                 />
                 <Tag
-                  :value="slotProps.data.location.display_name.split(',')[0]"
+                  v-if="slotProps.data.location?.display_name"
+                  :value="slotProps.data.location.display_name?.split(',')[0]"
                   class="absolute text-xs font-normal"
                   severity="secondary"
                   style="right: 0.25rem; top: 0.25rem"
@@ -112,7 +113,7 @@
         >
           <label for="showObservationsNearMe" class="cursor-pointer"> Cerca de mi </label>
           <ToggleSwitch
-            v-model="showObservationsNearMe"
+            v-model="observationsStore.are_observations_near"
             :inputId="'showObservationsNearMe'"
             name="showObservationsNearMe"
             :disabled="userDeniedGeolocation"
@@ -186,7 +187,6 @@ import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { mosquitoLayers } from '../../utils/constants'
-import { daysSince } from '../../utils/date'
 import CardDrawer from './CardDrawer.vue'
 
 const taxaStore = useTaxaStore()
@@ -198,7 +198,6 @@ const diseases = ['Dengue', 'Fiebre Amarilla', 'Virus del Nilo Occidental']
 const seeAdditionalDetails = ref(false)
 const mosquitoInfo = ref('')
 const fetchingMosquitoInfo = ref(false)
-const showObservationsNearMe = ref(false)
 const userDeniedGeolocation = ref(false)
 
 onMounted(async () => {
@@ -268,7 +267,7 @@ const getUserLocation = (): Promise<{ latitude: number; longitude: number }> => 
           })
         },
         (error) => {
-          showObservationsNearMe.value = false
+          observationsStore.are_observations_near = false
           userDeniedGeolocation.value = true
           reject(new Error('No se pudo obtener la ubicación del usuario.'))
         },
@@ -277,20 +276,24 @@ const getUserLocation = (): Promise<{ latitude: number; longitude: number }> => 
   })
 }
 
-watch(showObservationsNearMe, async (newValue, oldValue) => {
-  if (oldValue === newValue) return
-  fetchingObservations.value = true
-  let latitude, longitude
-  if (newValue) {
-    try {
-      const location = await getUserLocation()
-      latitude = location.latitude
-      longitude = location.longitude
-    } catch (error) {
-      console.error(error)
+watch(
+  () => observationsStore.are_observations_near,
+  async (newValue, oldValue) => {
+    if (oldValue === newValue) return
+    fetchingObservations.value = true
+    let latitude, longitude
+    if (newValue) {
+      try {
+        const location = await getUserLocation()
+        latitude = location.latitude
+        longitude = location.longitude
+        observationsStore.user_location = location
+      } catch (error) {
+        console.error(error)
+      }
     }
-  }
-  await observationsStore.fetchObservationsNearMe(10, latitude, longitude)
-  fetchingObservations.value = false
-})
+    await observationsStore.fetchObservationsNearMe(10, latitude, longitude)
+    fetchingObservations.value = false
+  },
+)
 </script>

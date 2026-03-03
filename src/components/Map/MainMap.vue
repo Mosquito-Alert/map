@@ -19,6 +19,7 @@
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import * as turf from '@turf/turf'
 import { computed, markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
@@ -92,6 +93,10 @@ const renderedOriginalDateAggregationData = computed<Record<string, number>>(() 
 const observationPointsZoom = 10
 const observationPointsSourceLabel = 'observationsSource'
 const observationPointsLayerLabel = 'observationPointsLayer'
+const nearObservationsCircleLabel = 'radius-near-observations'
+const nearObservationsCircleLayer = 'radius-near-observations-layer'
+const centerSourceId = 'radius-center-point'
+const centerLayerId = 'radius-center-point-layer'
 let hoveredObservationId: string | null = null
 let selectedObservationId: string | null = null
 let observationEventsAttached = false
@@ -501,6 +506,69 @@ const addObservationLayers = () => {
   }
 }
 
+// Function to add sources and layers for nearby observations circle
+const addNearbyObservationsCircleLayer = () => {
+  if (!map.value) return
+
+  // Add circle for nearby observations if enabled
+  map.value.addSource(nearObservationsCircleLabel, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[]], // Empty polygon by default
+      },
+      properties: null,
+    },
+  })
+
+  map.value.addLayer({
+    id: nearObservationsCircleLayer,
+    type: 'fill',
+    source: nearObservationsCircleLabel,
+    layout: {
+      visibility: 'none', // hidden by default
+    },
+    paint: {
+      'fill-color': '#007cbf',
+      'fill-opacity': 0.3,
+    },
+  })
+
+  // Center point that shows the user location
+  map.value.addSource(centerSourceId, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [0, 0], // Default coordinates, will be updated when shown
+      },
+      properties: null,
+    },
+  })
+
+  map.value.addLayer({
+    id: centerLayerId,
+    type: 'circle',
+    source: centerSourceId,
+    layout: {
+      visibility: 'none',
+    },
+    paint: {
+      'circle-radius': 4,
+      'circle-color': '#ffffff',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#007cbf',
+    },
+  })
+
+  // Ensure the circle layer is shown above all other layers
+  map.value.moveLayer(nearObservationsCircleLayer)
+  map.value.moveLayer(centerLayerId)
+}
+
 // Handle zoom events for dynamic resolution switching
 const handleZoomChange = async () => {
   if (!map.value) return
@@ -588,6 +656,9 @@ onMounted(async () => {
       // Process initial resolution (3) for immediate display
       const initialZoom = map.value.getZoom()
       currentResolution.value = getResolutionForZoom(initialZoom)
+
+      // Add sources and layers for nearby observations circle
+      addNearbyObservationsCircleLayer()
 
       buildOriginalData()
       filterData()
@@ -711,6 +782,73 @@ watch(
       })
     }
   },
+)
+
+watch(
+  () =>
+    [
+      observationsStore.are_observations_near,
+      observationsStore.user_location,
+      observationsStore.radius_for_nearby_observations,
+    ] as const,
+  async (
+    [areObservationsNear, location, radius],
+    [oldAreObservationsNear, oldLocation, oldRadius],
+  ) => {
+    if (!map.value || !map.value?.isStyleLoaded() || !location) return
+
+    const circleSource = map.value.getSource(
+      nearObservationsCircleLabel,
+    ) as maplibregl.GeoJSONSource
+    const centerSource = map.value.getSource(centerSourceId) as maplibregl.GeoJSONSource
+
+    if (!circleSource || !centerSource) return
+
+    // Toggle visibility of the layer
+    map.value.setLayoutProperty(
+      nearObservationsCircleLayer,
+      'visibility',
+      areObservationsNear ? 'visible' : 'none',
+    )
+
+    if (!areObservationsNear) return
+
+    // Only recreate circle if either location or radius changed, to avoid unnecessary updates
+    const locationChanged =
+      !oldLocation ||
+      location.latitude !== oldLocation.latitude ||
+      location.longitude !== oldLocation.longitude
+
+    const radiusChanged = radius !== oldRadius
+
+    if (!locationChanged && !radiusChanged && oldAreObservationsNear) return
+
+    const center = [location.longitude, location.latitude]
+
+    // Create circle polygon using Turf
+    const circle = turf.circle(center, radius, {
+      steps: 64,
+      units: 'kilometers',
+    })
+
+    circleSource.setData(circle)
+
+    // Update center point for better visibility
+    map.value.setLayoutProperty(
+      centerLayerId,
+      'visibility',
+      areObservationsNear ? 'visible' : 'none',
+    )
+
+    centerSource.setData({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: center,
+      },
+    } as GeoJSON.Feature)
+  },
+  { deep: true },
 )
 
 watch(
