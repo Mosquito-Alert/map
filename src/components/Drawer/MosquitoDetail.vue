@@ -113,7 +113,7 @@
             </Card>
           </template>
         </Carousel>
-        <Skeleton v-else height="250px" class="mx-1 my-0.5 my-2.5 rounded" />
+        <Skeleton v-else height="250px" class="mx-1 my-2.5 rounded" />
 
         <div
           class="flex items-center justify-self-end gap-2 mt-2"
@@ -259,7 +259,7 @@ const responsiveOptions = ref([
   },
   {
     breakpoint: '767px',
-    numVisible: 1,
+    numVisible: 2,
     numScroll: 1,
   },
   {

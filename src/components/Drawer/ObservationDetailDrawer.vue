@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[20%] mx-auto pl-4 mt-4"
+    class="fixed top-0 left-0 flex flex-col z-100 md:max-h-[calc(100vh-2rem)] md:w-[20%] md:pl-4 md:mt-4 mx-auto"
   >
     <div class="drawer-card rounded-lg border bg-gray-100 p-0 overflow-y-auto flex-1 mb-0">
       <!-- TITLE -->

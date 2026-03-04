@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 max-h-[calc(100vh-2rem)] sm:w-[30%] mx-auto pl-4 mt-4"
+    class="fixed top-0 left-0 flex flex-col z-100 md:max-h-[calc(100vh-2rem)] md:w-[30%] md:pl-4 md:mt-4 mx-auto"
   >
     <!-- <Summary /> -->
     <HeaderDrawer />

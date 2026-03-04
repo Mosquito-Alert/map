@@ -31,7 +31,7 @@
     <Transition name="chart-expand">
       <div
         v-if="showChart"
-        class="chart-window bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto overflow-hidden"
+        class="chart-window hidden lg:block bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto overflow-hidden"
       >
         <VChart
           ref="chartRef"
