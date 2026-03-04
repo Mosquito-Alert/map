@@ -77,13 +77,13 @@
         >
           <template #item="slotProps">
             <div
-              class="border border-surface-200 dark:border-surface-700 rounded mx-1 cursor-pointer"
+              class="outline outline-surface-200 dark:outline-surface-700 rounded my-0.5 mx-1 cursor-pointer"
               @click="() => observationsStore.fetchObservationById(slotProps.data.uuid)"
             >
               <div class="relative mx-auto">
                 <img
                   :src="slotProps.data.photos[0].url"
-                  class="w-2xs aspect-2/3 object-cover rounded"
+                  class="h-[250px] w-xs aspect-2/3 object-cover rounded"
                 />
                 <Tag
                   v-if="slotProps.data.location?.display_name"
@@ -100,8 +100,21 @@
               </div>
             </div>
           </template>
+          <template #empty>
+            <Card
+              class="h-[250px] flex items-center justify-center border-dashed border-1 border-gray-400 my-0.5"
+            >
+              <template #content>
+                <div class="flex flex-col items-center justify-center gap-3 py-10">
+                  <span class="material-icons-outlined text-4xl text-gray-400"> info </span>
+                  <p class="text-gray-500">No hay observaciones recientes para este mosquito.</p>
+                </div>
+              </template>
+            </Card>
+          </template>
         </Carousel>
-        <ProgressSpinner class="flex justify-center" v-else />
+        <Skeleton v-else height="250px" class="mx-1 my-0.5 my-2.5 rounded" />
+
         <div
           class="flex items-center justify-self-end gap-2 mt-2"
           v-tooltip.right="{
@@ -174,10 +187,12 @@
 import type { Taxon } from 'mosquito-alert'
 import {
   Button,
+  Card,
   Carousel,
   Checkbox,
   ProgressSpinner,
   RadioButton,
+  Skeleton,
   Tag,
   ToggleSwitch,
 } from 'primevue'
