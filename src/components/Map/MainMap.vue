@@ -17,14 +17,15 @@
 
 <script setup lang="ts">
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
+import * as turf from '@turf/turf'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import * as turf from '@turf/turf'
 import { computed, markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { useUIStore } from '../../stores/uiStore'
+import { MosquitoLayersEnum } from '../../utils/constants'
 import { debounce } from '../../utils/debouncer'
 import type {
   BasemapType,
@@ -90,6 +91,7 @@ const renderedOriginalDateAggregationData = computed<Record<string, number>>(() 
   return originalDateAggregationData.value[taxonSelectedId] || {}
 })
 
+const allResolutions = [4, 5, 6]
 const observationPointsZoom = 10
 const observationPointsSourceLabel = 'observationsSource'
 const observationPointsLayerLabel = 'observationPointsLayer'
@@ -97,6 +99,10 @@ const nearObservationsCircleLabel = 'radius-near-observations'
 const nearObservationsCircleLayer = 'radius-near-observations-layer'
 const centerSourceId = 'radius-center-point'
 const centerLayerId = 'radius-center-point-layer'
+const getH3SourceId = (resolution: number) => `h3-res-${resolution}`
+const getH3LayerId = (resolution: number) => `h3-layer-res-${resolution}`
+const getGbifSourceId = (gbifId: string) => `distribution-${gbifId}`
+const getGbifLayerId = (gbifId: string) => `distribution-layer-${gbifId}`
 let hoveredObservationId: string | null = null
 let selectedObservationId: string | null = null
 let observationEventsAttached = false
@@ -363,8 +369,8 @@ const addOrUpdateH3Layer = () => {
 
   if (!dataForRes || !colorsForRes) return
 
-  const sourceId = `h3-res-${resolution}`
-  const layerId = `h3-layer-res-${resolution}`
+  const sourceId = getH3SourceId(resolution)
+  const layerId = getH3LayerId(resolution)
 
   const featureCollection: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
@@ -419,13 +425,13 @@ const addOrUpdateH3Layer = () => {
 // Function to hide all H3 layers except the target one
 const showOnlyResolution = () => {
   if (!map.value) return
+  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
 
   const zoom = map.value.getZoom()
   const resolution = zoom >= observationPointsZoom ? null : currentResolution.value
 
-  const allResolutions = [4, 5, 6]
   allResolutions.forEach((res) => {
-    const layerId = `h3-layer-res-${res}`
+    const layerId = getH3LayerId(res)
     if (map.value!.getLayer(layerId)) {
       map.value!.setLayoutProperty(layerId, 'visibility', res === resolution ? 'visible' : 'none')
     }
@@ -569,9 +575,95 @@ const addNearbyObservationsCircleLayer = () => {
   map.value.moveLayer(centerLayerId)
 }
 
+// Function to add GBIF occurences for different species
+const addGBIFOccurrencesLayer = async () => {
+  if (!map.value) return
+
+  const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
+
+  const sourceId = getGbifSourceId(gbifId)
+  const layerId = getGbifLayerId(gbifId)
+
+  if (!map.value.getSource(sourceId)) {
+    const hexPerTile = 75 // Higher values mean more hexagons per tile === better representation of data but worse performance.
+    const srs = 'EPSG:3857'
+    const style = 'classic.poly'
+    map.value.addSource(sourceId, {
+      type: 'raster',
+      tiles: [
+        `https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=${style}&bin=hex&hexPerTile=${hexPerTile}&taxonKey=${gbifId}&srs=${srs}`,
+      ],
+      tileSize: 256,
+    })
+  }
+
+  if (!map.value.getLayer(layerId)) {
+    map.value.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'raster',
+      layout: {
+        visibility: 'none',
+      },
+      paint: {},
+    })
+  }
+}
+
+const toggleDataLayers = async () => {
+  if (!map.value) return
+
+  const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.observations
+  const showGbif = mapStore.layerSelected === MosquitoLayersEnum.distribution
+
+  // ---- Toggle H3 layers ----
+  if (showOwnData) {
+    showOnlyResolution()
+  } else {
+    allResolutions.forEach((res) => {
+      const layerId = getH3LayerId(res)
+      if (map.value!.getLayer(layerId)) {
+        map.value!.setLayoutProperty(layerId, 'visibility', 'none')
+      }
+    })
+  }
+
+  // ---- Toggle observation points ----
+  if (map.value.getLayer(observationPointsLayerLabel)) {
+    map.value.setLayoutProperty(
+      observationPointsLayerLabel,
+      'visibility',
+      showOwnData ? 'visible' : 'none',
+    )
+
+    if (showOwnData) attachObservationEvents()
+    else detachObservationEvents()
+  }
+
+  // ---- Handle GBIF layer ----
+  if (showGbif) {
+    //  Ensure GBIF layer exists
+    await addGBIFOccurrencesLayer()
+    // Ensure GBIF layer is visible
+    const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
+    const gbifLayerId = getGbifLayerId(gbifId)
+    map.value.setLayoutProperty(gbifLayerId, 'visibility', 'visible')
+  } else {
+    // Get all the GBIF layers and hide them.
+    // NOTE: we can have multiple GBIF layers if user switched between different taxa with GBIF data
+    const allLayers = map.value.getLayersOrder()
+    allLayers.forEach((layerId) => {
+      if (layerId.startsWith('distribution-layer-')) {
+        map.value!.setLayoutProperty(layerId, 'visibility', 'none')
+      }
+    })
+  }
+}
+
 // Handle zoom events for dynamic resolution switching
 const handleZoomChange = async () => {
   if (!map.value) return
+  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
 
   const zoom = map.value.getZoom()
   const targetResolution = getResolutionForZoom(zoom)
@@ -683,6 +775,13 @@ onMounted(async () => {
 onUnmounted(() => {
   worker.terminate()
 })
+
+watch(
+  () => mapStore.layerSelected,
+  async () => {
+    await toggleDataLayers()
+  },
+)
 
 watch(
   () => taxaStore.taxonSelected,
@@ -861,10 +960,11 @@ watch(
       Object.keys(oldBaselayer || {}).length > 0
     ) {
       map.value.setStyle(newBaselayer.url)
-      map.value.once('style.load', () => {
+      map.value.once('style.load', async () => {
         addObservationLayers()
         addOrUpdateH3Layer()
         showOnlyResolution()
+        await toggleDataLayers()
       })
     }
   },
