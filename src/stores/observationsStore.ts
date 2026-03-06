@@ -17,6 +17,7 @@ export const useObservationsStore = defineStore('observations', {
     } as { start: string | null; end: string | null },
     // This state tells the observation that is currently shown in the drawer to see its details
     observationInDrawer: null as Observation | null,
+    selectedObservationId: null as string | null, // This controls the observation point in the map
   }),
   actions: {
     async fetchObservationsNearMe(

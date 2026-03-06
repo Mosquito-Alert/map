@@ -20,7 +20,7 @@ import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
 import * as turf from '@turf/turf'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { computed, markRaw, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
@@ -32,14 +32,27 @@ import type {
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
-import { quantile } from '../../utils/utils'
-import { MessageType } from '../../workers/h3Aggregation.worker'
 import MapLegend from './MapLegend.vue'
 import TimeSeries from './TimeSeries.vue'
-
-const worker = new Worker(new URL('@/workers/h3Aggregation.worker.ts', import.meta.url), {
-  type: 'module',
-})
+import {
+  addNearbyObservationsCircleLayer,
+  addObservationLayers,
+  addOrUpdateH3Layer,
+  attachObservationEvents,
+  buildOriginalData,
+  currentResolution,
+  detachObservationEvents,
+  filterData,
+  geojsonCache,
+  getMapColors,
+  getResolutionForZoom,
+  h3AggregationWorker,
+  handleZoomChange,
+  mapColors,
+  renderedOriginalDateAggregationData,
+  showOnlyResolution,
+} from './ObservationsMap'
+import { addGBIFOccurrencesLayer } from './DistributionMap'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -47,16 +60,7 @@ const taxaStore = useTaxaStore()
 const uiStore = useUIStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
-const map = shallowRef<maplibregl.Map | null>(null) // Shallow ref to optimize performance of deep reactivity
-const geojsonCache = ref<ObservationFeatureCollection | null>(null)
-const currentResolution = ref<number | null>(null)
-const originalHexData = ref<Record<number, Record<number, Record<string, any>>>>({}) // taxonId -> resolution -> hex -> feature
-const originalDateAggregationData = ref<Record<number, Record<string, number>>>({}) // taxonId -> date -> count
-const renderedHexData = ref<Record<number, Record<number, Record<string, any>>>>({}) // taxonId -> resolution -> hex -> feature (after filtering)
-const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts for quantile calculation
-const mapColors = ref<
-  Record<number, Record<number, Record<string, { value: number; color: string }>>> // taxonId -> resolution -> quantile -> { value, color }
->({}) // Color mapping for current resolution
+const map = computed(() => mapStore.map) // Computed ref to react to map changes
 const observationsFilters = ref<Record<string, any>>({}) // Filters for observation points layer
 
 const styleEOX: StyleSpecification = {
@@ -85,27 +89,6 @@ const styleEOX: StyleSpecification = {
     position: [1.5, 90, 80],
   },
 } as StyleSpecification
-
-const renderedOriginalDateAggregationData = computed<Record<string, number>>(() => {
-  const taxonSelectedId = taxaStore.taxonSelected.id as number
-  return originalDateAggregationData.value[taxonSelectedId] || {}
-})
-
-const allResolutions = [4, 5, 6]
-const observationPointsZoom = 10
-const observationPointsSourceLabel = 'observationsSource'
-const observationPointsLayerLabel = 'observationPointsLayer'
-const nearObservationsCircleLabel = 'radius-near-observations'
-const nearObservationsCircleLayer = 'radius-near-observations-layer'
-const centerSourceId = 'radius-center-point'
-const centerLayerId = 'radius-center-point-layer'
-const getH3SourceId = (resolution: number) => `h3-res-${resolution}`
-const getH3LayerId = (resolution: number) => `h3-layer-res-${resolution}`
-const getGbifSourceId = (gbifId: string) => `distribution-${gbifId}`
-const getGbifLayerId = (gbifId: string) => `distribution-layer-${gbifId}`
-let hoveredObservationId: string | null = null
-let selectedObservationId: string | null = null
-let observationEventsAttached = false
 
 // Define map styles
 const basemapOptions: MapLibreBasemapsControlOptions = {
@@ -142,41 +125,6 @@ const basemapOptions: MapLibreBasemapsControlOptions = {
   initialBasemap: 'carto-positron',
 }
 
-worker.onmessage = (e) => {
-  const msg = e.data
-  const taxonSelectedId = taxaStore.taxonSelected.id as number
-
-  if (msg.type === MessageType.BUILT) {
-    originalHexData.value[taxonSelectedId] = originalHexData.value[taxonSelectedId] || {}
-    originalHexData.value[taxonSelectedId][msg.resolution] = msg.originalHexData
-
-    originalDateAggregationData.value[taxonSelectedId] = { ...msg.dateAggregation }
-  }
-
-  if (msg.type === MessageType.FILTERED) {
-    renderedHexData.value[taxonSelectedId] = renderedHexData.value[taxonSelectedId] || {}
-    renderedHexData.value[taxonSelectedId][msg.resolution] = Object.fromEntries(
-      msg.featureCollection.features.map((f: any) => [f.properties.hex, f]),
-    )
-
-    ascSortedArrHexCounts.value = msg.counts
-    getMapColors()
-    addOrUpdateH3Layer()
-    showOnlyResolution()
-    observationsStore.dataProcessed = true
-  }
-}
-
-type ObservationFeatureCollection = GeoJSON.FeatureCollection<
-  GeoJSON.Point,
-  {
-    uuid: string
-    received_at: string
-    ts?: number
-    day?: number
-  }
->
-
 const pushMapPaddingUpdate = debounce(() => {
   if (map.value) {
     map.value.easeTo({
@@ -188,428 +136,6 @@ const pushMapPaddingUpdate = debounce(() => {
   }
 }, 100)
 
-// Function to get appropriate resolution based on zoom level
-const getResolutionForZoom = (zoom: number): number => {
-  if (zoom <= 4) return 4
-  if (zoom <= 6) return 5
-  return 6
-}
-
-const buildOriginalData = () => {
-  worker.postMessage({
-    type: MessageType.BUILD_ORIGINAL,
-    features: geojsonCache.value?.features,
-    resolution: currentResolution.value,
-    selectedTaxonId: taxaStore.taxonSelected.id,
-  })
-}
-
-const filterData = () => {
-  const { start, end } = observationsStore.dateFilter
-
-  worker.postMessage({
-    type: MessageType.FILTER,
-    resolution: currentResolution.value,
-    selectedTaxonId: taxaStore.taxonSelected.id,
-    start: start ? Date.parse(start) : -Infinity,
-    end: end ? Date.parse(end) : Infinity,
-  })
-}
-
-const getMapColors = () => {
-  const taxonSelectedId = taxaStore.taxonSelected.id as number
-  const resolution = currentResolution.value as number
-  if (!renderedHexData.value[taxonSelectedId]?.[resolution]) return
-
-  if (ascSortedArrHexCounts.value.length === 0) {
-    ascSortedArrHexCounts.value = Object.values(
-      renderedHexData.value[taxonSelectedId][resolution],
-    ).map((f: any) => f.properties.count)
-    ascSortedArrHexCounts.value.sort((a, b) => a - b)
-  }
-  mapColors.value[taxonSelectedId] = mapColors.value[taxonSelectedId] || {}
-  mapColors.value[taxonSelectedId][resolution] = {
-    '0': { value: 0, color: 'rgba(255, 255, 204, 0.2)' },
-    '25': {
-      value: quantile(ascSortedArrHexCounts.value, 0.25),
-      color: 'rgba(255, 200, 150, 0.35)',
-    },
-    '50': { value: quantile(ascSortedArrHexCounts.value, 0.5), color: 'rgba(255, 100, 50, 0.5)' },
-    '75': { value: quantile(ascSortedArrHexCounts.value, 0.75), color: 'rgba(255, 50, 20, 0.7)' },
-    max: { value: quantile(ascSortedArrHexCounts.value, 0.95), color: 'rgba(204, 0, 0, 0.9)' }, // Cap at 95th percentile to avoid outliers
-    actualMax: {
-      value: ascSortedArrHexCounts.value[ascSortedArrHexCounts.value.length - 1] || 0,
-      color: 'rgba(204, 0, 0, 0.9)',
-    },
-  }
-
-  // Ensure quantiles are different, adding small offsets if necessary
-  for (let i = 0; i < Object.keys(mapColors.value[taxonSelectedId]![resolution]).length - 1; i++) {
-    const previousKey =
-      i > 0 ? Object.keys(mapColors.value[taxonSelectedId]![resolution])[i - 1] : null
-    const currentKey = Object.keys(mapColors.value[taxonSelectedId]![resolution])[i] as string
-    if (
-      previousKey &&
-      mapColors.value[taxonSelectedId]![resolution][currentKey] &&
-      mapColors.value[taxonSelectedId]![resolution][previousKey] &&
-      mapColors.value[taxonSelectedId]![resolution][currentKey].value ===
-        mapColors.value[taxonSelectedId]![resolution][previousKey].value
-    ) {
-      mapColors.value[taxonSelectedId]![resolution][currentKey].value += 0.1
-    }
-  }
-}
-
-// ######### EVENT HANDLERS FOR OBSERVATION POINTS LAYER #########
-const onObservationPointsMouseEnter = (e: any) => {
-  if (!map.value) return
-  map.value.getCanvas().style.cursor = 'pointer'
-
-  if (e.features && e.features.length > 0) {
-    if (hoveredObservationId) {
-      map.value.setFeatureState(
-        { source: observationPointsSourceLabel, id: hoveredObservationId },
-        { hover: false },
-      )
-    }
-
-    hoveredObservationId = e.features[0]?.properties.uuid as string
-
-    map.value.setFeatureState(
-      { source: observationPointsSourceLabel, id: hoveredObservationId },
-      { hover: true },
-    )
-  }
-}
-const onObservationPointsMouseLeave = () => {
-  if (!map.value) return
-  map.value.getCanvas().style.cursor = ''
-
-  if (hoveredObservationId) {
-    map.value.setFeatureState(
-      { source: observationPointsSourceLabel, id: hoveredObservationId },
-      { hover: false },
-    )
-    hoveredObservationId = null
-  }
-}
-const onObservationPointsClick = (e: any) => {
-  if (!map.value) return
-
-  const features = map.value.queryRenderedFeatures(e.point, {
-    layers: [observationPointsLayerLabel],
-  })
-
-  if (!features.length) return
-
-  if (selectedObservationId) {
-    map.value.setFeatureState(
-      { source: observationPointsSourceLabel, id: selectedObservationId },
-      { click: false },
-    )
-  }
-
-  const clickedId = features[0]?.properties.uuid as string
-
-  // If clicking the already selected one → deselect
-  if (selectedObservationId === clickedId) {
-    map.value.setFeatureState(
-      { source: observationPointsSourceLabel, id: selectedObservationId },
-      { click: false },
-    )
-
-    selectedObservationId = null
-
-    // Reset: all red
-    map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', '#FF5722')
-    return
-  }
-
-  observationsStore.fetchObservationById(clickedId)
-}
-
-const attachObservationEvents = () => {
-  if (!map.value) return
-  if (observationEventsAttached) return
-  if (!map.value.getLayer(observationPointsLayerLabel)) return
-
-  map.value.on('mouseenter', observationPointsLayerLabel, onObservationPointsMouseEnter)
-  map.value.on('mouseleave', observationPointsLayerLabel, onObservationPointsMouseLeave)
-  map.value.on('click', observationPointsLayerLabel, onObservationPointsClick)
-
-  observationEventsAttached = true
-}
-
-const detachObservationEvents = () => {
-  if (!map.value) return
-  if (!observationEventsAttached) return
-  if (!map.value.getLayer(observationPointsLayerLabel)) return
-
-  map.value.off('mouseenter', observationPointsLayerLabel, onObservationPointsMouseEnter)
-  map.value.off('mouseleave', observationPointsLayerLabel, onObservationPointsMouseLeave)
-  map.value.off('click', observationPointsLayerLabel, onObservationPointsClick)
-
-  // Cleanup hover state, in case mouse is currently hovering an observation when layer is hidden
-  onObservationPointsMouseLeave()
-
-  observationEventsAttached = false
-}
-
-// ########## LAYER HANDLING BASED ON ZOOM AND RESOLUTION #########
-// Function to add/update H3 layer for a resolution
-const addOrUpdateH3Layer = () => {
-  const taxonSelectedId = taxaStore.taxonSelected.id as number
-  const resolution = currentResolution.value as number
-  const mapInstance = map.value
-
-  if (!mapInstance) return
-
-  const dataForRes = renderedHexData.value[taxonSelectedId]?.[resolution]
-  const colorsForRes = mapColors.value[taxonSelectedId]?.[resolution]
-
-  if (!dataForRes || !colorsForRes) return
-
-  const sourceId = getH3SourceId(resolution)
-  const layerId = getH3LayerId(resolution)
-
-  const featureCollection: GeoJSON.FeatureCollection = {
-    type: 'FeatureCollection',
-    // Maplibre does not need reactivity inside features, so we can mark them as raw to optimize performance
-    features: markRaw(Object.values(dataForRes)),
-  }
-
-  // --------------------------------------------------
-  // Source: create once, then update via setData()
-  // --------------------------------------------------
-  const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
-
-  if (existingSource) {
-    existingSource.setData(featureCollection)
-  } else {
-    mapInstance.addSource(sourceId, {
-      type: 'geojson',
-      data: featureCollection,
-    })
-  }
-
-  // --------------------------------------------------
-  // Layer: create once
-  // --------------------------------------------------
-  if (!mapInstance.getLayer(layerId)) {
-    mapInstance.addLayer({
-      id: layerId,
-      source: sourceId,
-      type: 'fill',
-      layout: {
-        visibility: 'visible',
-      },
-      paint: {
-        'fill-outline-color': 'rgba(255, 255, 255, 0)',
-      },
-    })
-  }
-
-  // --------------------------------------------------
-  // Paint: update color stops dynamically
-  // --------------------------------------------------
-  const colorStops = Object.values(colorsForRes).flatMap((stop) => [stop.value, stop.color])
-
-  mapInstance.setPaintProperty(layerId, 'fill-color', [
-    'interpolate',
-    ['linear'],
-    ['get', 'count'],
-    ...colorStops,
-  ])
-}
-
-// Function to hide all H3 layers except the target one
-const showOnlyResolution = () => {
-  if (!map.value) return
-  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
-
-  const zoom = map.value.getZoom()
-  const resolution = zoom >= observationPointsZoom ? null : currentResolution.value
-
-  allResolutions.forEach((res) => {
-    const layerId = getH3LayerId(res)
-    if (map.value!.getLayer(layerId)) {
-      map.value!.setLayoutProperty(layerId, 'visibility', res === resolution ? 'visible' : 'none')
-    }
-  })
-
-  // Handle observation points
-  if (map.value.getLayer(observationPointsLayerLabel)) {
-    const visible = resolution === null
-
-    map.value.setLayoutProperty(
-      observationPointsLayerLabel,
-      'visibility',
-      resolution === null ? 'visible' : 'none',
-    )
-
-    if (visible) attachObservationEvents()
-    else detachObservationEvents()
-  }
-}
-
-// Function to add observation points layer for high zoom levels
-const addObservationLayers = () => {
-  if (!map.value || !geojsonCache.value) return
-
-  // Observations
-  if (!map.value.getSource(observationPointsSourceLabel)) {
-    map.value.addSource(observationPointsSourceLabel, {
-      type: 'geojson',
-      data: geojsonCache.value as GeoJSON.FeatureCollection,
-      buffer: 0,
-      maxzoom: 14,
-      promoteId: 'uuid', // Promote feature id to top-level for better performance
-    })
-  }
-
-  if (!map.value.getLayer(observationPointsLayerLabel)) {
-    map.value.addLayer({
-      id: observationPointsLayerLabel,
-      source: observationPointsSourceLabel,
-      type: 'circle',
-      minzoom: observationPointsZoom,
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11,
-          [
-            'case',
-            ['boolean', ['feature-state', 'click'], false],
-            6, // selected
-            ['boolean', ['feature-state', 'hover'], false],
-            5, // hover
-            3, // default
-          ],
-          18,
-          [
-            'case',
-            ['boolean', ['feature-state', 'click'], false],
-            17, // selected
-            ['boolean', ['feature-state', 'hover'], false],
-            16, // hover
-            10, // default
-          ],
-        ],
-        'circle-color': [
-          'case',
-          ['boolean', ['feature-state', 'hover'], false],
-          // FF5722 but darker for better visibility on hover, while still keeping selected ones more prominent
-          '#FF1A00', // hover
-          '#FF5722',
-        ],
-        'circle-stroke-width': 1,
-        'circle-stroke-color': '#FFFFFF',
-      },
-    })
-  }
-}
-
-// Function to add sources and layers for nearby observations circle
-const addNearbyObservationsCircleLayer = () => {
-  if (!map.value) return
-
-  // Add circle for nearby observations if enabled
-  map.value.addSource(nearObservationsCircleLabel, {
-    type: 'geojson',
-    data: {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[]], // Empty polygon by default
-      },
-      properties: null,
-    },
-  })
-
-  map.value.addLayer({
-    id: nearObservationsCircleLayer,
-    type: 'fill',
-    source: nearObservationsCircleLabel,
-    layout: {
-      visibility: 'none', // hidden by default
-    },
-    paint: {
-      'fill-color': '#007cbf',
-      'fill-opacity': 0.3,
-    },
-  })
-
-  // Center point that shows the user location
-  map.value.addSource(centerSourceId, {
-    type: 'geojson',
-    data: {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [0, 0], // Default coordinates, will be updated when shown
-      },
-      properties: null,
-    },
-  })
-
-  map.value.addLayer({
-    id: centerLayerId,
-    type: 'circle',
-    source: centerSourceId,
-    layout: {
-      visibility: 'none',
-    },
-    paint: {
-      'circle-radius': 4,
-      'circle-color': '#ffffff',
-      'circle-stroke-width': 2,
-      'circle-stroke-color': '#007cbf',
-    },
-  })
-
-  // Ensure the circle layer is shown above all other layers
-  map.value.moveLayer(nearObservationsCircleLayer)
-  map.value.moveLayer(centerLayerId)
-}
-
-// Function to add GBIF occurences for different species
-const addGBIFOccurrencesLayer = async () => {
-  if (!map.value) return
-
-  const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
-
-  const sourceId = getGbifSourceId(gbifId)
-  const layerId = getGbifLayerId(gbifId)
-
-  if (!map.value.getSource(sourceId)) {
-    const hexPerTile = 75 // Higher values mean more hexagons per tile === better representation of data but worse performance.
-    const srs = 'EPSG:3857'
-    const style = 'classic.poly'
-    map.value.addSource(sourceId, {
-      type: 'raster',
-      tiles: [
-        `https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=${style}&bin=hex&hexPerTile=${hexPerTile}&taxonKey=${gbifId}&srs=${srs}`,
-      ],
-      tileSize: 256,
-    })
-  }
-
-  if (!map.value.getLayer(layerId)) {
-    map.value.addLayer({
-      id: layerId,
-      source: sourceId,
-      type: 'raster',
-      layout: {
-        visibility: 'none',
-      },
-      paint: {},
-    })
-  }
-}
-
 const toggleDataLayers = async () => {
   if (!map.value) return
 
@@ -620,8 +146,8 @@ const toggleDataLayers = async () => {
   if (showOwnData) {
     showOnlyResolution()
   } else {
-    allResolutions.forEach((res) => {
-      const layerId = getH3LayerId(res)
+    mapStore.resolutionsAvailable.forEach((res) => {
+      const layerId = mapStore.getH3LayerId(res)
       if (map.value!.getLayer(layerId)) {
         map.value!.setLayoutProperty(layerId, 'visibility', 'none')
       }
@@ -629,9 +155,9 @@ const toggleDataLayers = async () => {
   }
 
   // ---- Toggle observation points ----
-  if (map.value.getLayer(observationPointsLayerLabel)) {
+  if (map.value.getLayer(mapStore.observationsPointsLayerId)) {
     map.value.setLayoutProperty(
-      observationPointsLayerLabel,
+      mapStore.observationsPointsLayerId,
       'visibility',
       showOwnData ? 'visible' : 'none',
     )
@@ -646,7 +172,7 @@ const toggleDataLayers = async () => {
     await addGBIFOccurrencesLayer()
     // Ensure GBIF layer is visible
     const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
-    const gbifLayerId = getGbifLayerId(gbifId)
+    const gbifLayerId = mapStore.getGbifLayerId(gbifId)
     map.value.setLayoutProperty(gbifLayerId, 'visibility', 'visible')
   } else {
     // Get all the GBIF layers and hide them.
@@ -660,58 +186,27 @@ const toggleDataLayers = async () => {
   }
 }
 
-// Handle zoom events for dynamic resolution switching
-const handleZoomChange = async () => {
-  if (!map.value) return
-  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
-
-  const zoom = map.value.getZoom()
-  const targetResolution = getResolutionForZoom(zoom)
-
-  // Skip everything if resolution did not change or zoom is high enough
-  if (zoom >= 10 || currentResolution.value === targetResolution) {
-    showOnlyResolution()
-    return
-  }
-
-  // Resolution actually changed
-  currentResolution.value = targetResolution
-
-  // Build original data ONLY if missing
-  if (!originalHexData.value[taxaStore.taxonSelected.id]?.[targetResolution]) {
-    buildOriginalData()
-  }
-
-  // Always filter + recolor + render
-  filterData()
-  getMapColors()
-  addOrUpdateH3Layer()
-
-  // Show appropriate hexagon resolution
-  showOnlyResolution()
-}
-
 onMounted(async () => {
   if (mapContainer.value) {
     // Initialize map immediately for faster perceived load time
-    map.value = new maplibregl.Map({
+    const mapDeclaration = new maplibregl.Map({
       container: mapContainer.value,
       center: [11.39831, 47.26244],
       zoom: 2,
       // attributionControl: false,
     })
-    if (!map.value) return
+    if (!mapDeclaration) return
     pushMapPaddingUpdate()
 
     mapStore.baselayer =
       // @ts-ignore // FIXME:
       basemapOptions?.basemaps.find((b) => b.id === basemapOptions?.initialBasemap) ||
       (basemapOptions.basemaps[0] as BasemapType)
-    map.value.setStyle(mapStore.baselayer?.url || '')
-    map.value.on('style.load', () => {
-      map.value?.setProjection({ type: 'globe' })
+    mapDeclaration.setStyle(mapStore.baselayer?.url || '')
+    mapDeclaration.on('style.load', () => {
+      mapDeclaration?.setProjection({ type: 'globe' })
     })
-    map.value.addControl(
+    mapDeclaration.addControl(
       new maplibregl.NavigationControl({
         visualizePitch: true,
         visualizeRoll: true,
@@ -720,7 +215,7 @@ onMounted(async () => {
       }),
       'top-right',
     )
-    // Add geolocate control to the map.
+    // Add geolocate control to the map
     const geolocate = new maplibregl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true,
@@ -728,16 +223,18 @@ onMounted(async () => {
       trackUserLocation: true,
       showUserLocation: false,
     })
-    map.value.addControl(geolocate, 'top-right')
-    map.value.addControl(new MapLegendControl(), 'top-right')
-    map.value.addControl(new MapGlobeControl(), 'top-right')
-    map.value.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
-    // map.value.addControl(new MapInfoControl(), 'top-right')
+    mapDeclaration.addControl(geolocate, 'top-right')
+    mapDeclaration.addControl(new MapLegendControl(), 'top-right')
+    mapDeclaration.addControl(new MapGlobeControl(), 'top-right')
+    mapDeclaration.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
+    // mapDeclaration.addControl(new MapInfoControl(), 'top-right')
 
     // Start data loading in background
     const observationsPromise = observationsStore.fetchObservations()
 
-    map.value.on('load', async () => {
+    mapDeclaration.on('load', async () => {
+      if (!mapDeclaration) return
+      mapStore.setMap(mapDeclaration)
       if (!map.value) return
 
       mapStore.mapLoaded = true
@@ -773,7 +270,10 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  worker.terminate()
+  h3AggregationWorker.terminate()
+  if (map.value) {
+    map.value.remove()
+  }
 })
 
 watch(
@@ -840,7 +340,7 @@ watch(
   (newFilters) => {
     if (map.value) {
       const filters = Object.values(newFilters)
-      map.value.setFilter('observationsLayer', ['all', ...filters])
+      map.value.setFilter(mapStore.observationsPointsLayerId, ['all', ...filters])
     }
   },
   { deep: true },
@@ -852,25 +352,28 @@ watch(
     if (!map.value) return
     if (!newObservation) {
       // No observation selected → reset all to red
-      map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', '#FF5722')
-      if (selectedObservationId) {
+      map.value.setPaintProperty(mapStore.observationsPointsLayerId, 'circle-color', '#FF5722')
+      if (observationsStore.selectedObservationId) {
         map.value.setFeatureState(
-          { source: observationPointsSourceLabel, id: selectedObservationId },
+          {
+            source: mapStore.observationsPointsSourceId,
+            id: observationsStore.selectedObservationId,
+          },
           { click: false },
         )
       }
-      selectedObservationId = null
+      observationsStore.selectedObservationId = null
     } else {
-      selectedObservationId = newObservation.uuid
+      observationsStore.selectedObservationId = newObservation.uuid
       // paint selected one as red, others as gray
-      map.value.setPaintProperty(observationPointsLayerLabel, 'circle-color', [
+      map.value.setPaintProperty(mapStore.observationsPointsLayerId, 'circle-color', [
         'case',
         ['==', ['id'], newObservation.uuid],
         '#FF5722', // selected
         '#888888', // others
       ])
       map.value.setFeatureState(
-        { source: observationPointsSourceLabel, id: newObservation.uuid },
+        { source: mapStore.observationsPointsSourceId, id: newObservation.uuid },
         { click: true },
       )
       // zoom to selected observation
@@ -897,15 +400,15 @@ watch(
     if (!map.value || !map.value?.isStyleLoaded() || !location) return
 
     const circleSource = map.value.getSource(
-      nearObservationsCircleLabel,
+      mapStore.nearObservationsCircleSourceId,
     ) as maplibregl.GeoJSONSource
-    const centerSource = map.value.getSource(centerSourceId) as maplibregl.GeoJSONSource
+    const centerSource = map.value.getSource(mapStore.centerSourceId) as maplibregl.GeoJSONSource
 
     if (!circleSource || !centerSource) return
 
     // Toggle visibility of the layer
     map.value.setLayoutProperty(
-      nearObservationsCircleLayer,
+      mapStore.nearObservationsCircleLayerId,
       'visibility',
       areObservationsNear ? 'visible' : 'none',
     )
@@ -934,7 +437,7 @@ watch(
 
     // Update center point for better visibility
     map.value.setLayoutProperty(
-      centerLayerId,
+      mapStore.centerLayerId,
       'visibility',
       areObservationsNear ? 'visible' : 'none',
     )
@@ -978,10 +481,4 @@ watch(
     }
   },
 )
-
-onUnmounted(() => {
-  if (map.value) {
-    map.value.remove()
-  }
-})
 </script>
