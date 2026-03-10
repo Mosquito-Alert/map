@@ -141,7 +141,11 @@
         <div class="mosquito-layers mt-6">
           <h4 class="text-lg font-semibold text-gray-800 mb-3">Capas</h4>
           <div class="flex flex-col gap-3">
-            <div v-for="layer in mosquitoLayers" :key="layer.key" class="flex items-start gap-2">
+            <div
+              v-for="layer in visibleMosquitoLayers"
+              :key="layer.key"
+              class="flex items-start gap-2"
+            >
               <RadioButton
                 v-model="mapStore.layerSelected"
                 :inputId="layer.key"
@@ -194,7 +198,7 @@ import {
   Tag,
   ToggleSwitch,
 } from 'primevue'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
@@ -212,6 +216,30 @@ const seeAdditionalDetails = ref(false)
 const mosquitoInfo = ref('')
 const fetchingMosquitoInfo = ref(false)
 const userDeniedGeolocation = ref(false)
+
+const visibleMosquitoLayers = computed(() => {
+  const taxonId = taxaStore.taxonSelected?.id
+  const discoveriesTaxonId = taxaStore.discoveriesTaxonId
+
+  return mosquitoLayers.filter((layer) => {
+    // Discoveries only if discovery id exists
+    if (layer.key === MosquitoLayersEnum.discoveries) {
+      return !!discoveriesTaxonId
+    }
+
+    // rm0 only for albopictus
+    if (layer.key === MosquitoLayersEnum.rm0) {
+      return taxonId === 112
+    }
+
+    // bite index only for culex
+    if (layer.key === MosquitoLayersEnum.bite_index) {
+      return taxonId === 10
+    }
+
+    return true
+  })
+})
 
 onMounted(async () => {
   if (taxaStore.taxonSelected) {
