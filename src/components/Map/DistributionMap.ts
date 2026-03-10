@@ -17,9 +17,9 @@ export const addGBIFOccurrencesLayer = async () => {
   const layerId = mapStore.getGbifLayerId(gbifId)
 
   if (!map.value.getSource(sourceId)) {
-    const hexPerTile = 75 // Higher values mean more hexagons per tile === better representation of data but worse performance.
+    const hexPerTile = 70 // Higher values mean more hexagons per tile === better representation of data but worse performance.
     const srs = 'EPSG:3857'
-    const style = 'classic.poly'
+    const style = 'green2.poly'
     map.value.addSource(sourceId, {
       type: 'raster',
       tiles: [

@@ -1,6 +1,7 @@
 export enum MosquitoLayersEnum {
   observations = 'observations',
   distribution = 'distribution',
+  discoveries = 'discoveries',
   rm0 = 'rm0',
   bite_index = 'bite_index',
 }
@@ -15,6 +16,11 @@ export const mosquitoLayers = [
     key: MosquitoLayersEnum.distribution,
     label: 'Distribución de la especie',
     info: 'Muestra la distribución geográfica de diferentes especies de mosquitos basada en datos científicos y observaciones. Datos obtenidos de la fuente GBIF.',
+  },
+  {
+    key: MosquitoLayersEnum.discoveries,
+    label: 'Descubrimientos de la comunidad',
+    info: 'Muestra los descubrimientos de mosquitos reportados por la comunidad en la aplicación Mosquito Alert, que pueden incluir avistamientos de especies invasoras o nuevas áreas de presencia.',
   },
   {
     key: MosquitoLayersEnum.rm0,

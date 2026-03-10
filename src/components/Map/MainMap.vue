@@ -32,8 +32,9 @@ import type {
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
+import { addDiscoveriesLayer } from './DiscoveriesMap'
+import { addGBIFOccurrencesLayer } from './DistributionMap'
 import MapLegend from './MapLegend.vue'
-import TimeSeries from './TimeSeries.vue'
 import {
   addNearbyObservationsCircleLayer,
   addObservationLayers,
@@ -52,7 +53,7 @@ import {
   renderedOriginalDateAggregationData,
   showOnlyResolution,
 } from './ObservationsMap'
-import { addGBIFOccurrencesLayer } from './DistributionMap'
+import TimeSeries from './TimeSeries.vue'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -141,7 +142,9 @@ const toggleDataLayers = async () => {
 
   const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.observations
   const showGbif = mapStore.layerSelected === MosquitoLayersEnum.distribution
+  const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.discoveries
 
+  // ######### OBSERVATIONS #########
   // ---- Toggle H3 layers ----
   if (showOwnData) {
     showOnlyResolution()
@@ -153,7 +156,6 @@ const toggleDataLayers = async () => {
       }
     })
   }
-
   // ---- Toggle observation points ----
   if (map.value.getLayer(mapStore.observationsPointsLayerId)) {
     map.value.setLayoutProperty(
@@ -166,7 +168,7 @@ const toggleDataLayers = async () => {
     else detachObservationEvents()
   }
 
-  // ---- Handle GBIF layer ----
+  // ########## DISTRIBUTION #########
   if (showGbif) {
     //  Ensure GBIF layer exists
     await addGBIFOccurrencesLayer()
@@ -183,6 +185,20 @@ const toggleDataLayers = async () => {
         map.value!.setLayoutProperty(layerId, 'visibility', 'none')
       }
     })
+  }
+
+  // ########## DISCOVERIES #########
+  if (showDiscoveries) {
+    // Ensure Discoveries layer exists
+    await addDiscoveriesLayer()
+    // Ensure Discoveries layer is visible
+    if (map.value.getLayer(mapStore.discoveriesLayerId)) {
+      map.value.setLayoutProperty(mapStore.discoveriesLayerId, 'visibility', 'visible')
+    }
+  } else {
+    if (map.value.getLayer(mapStore.discoveriesLayerId)) {
+      map.value.setLayoutProperty(mapStore.discoveriesLayerId, 'visibility', 'none')
+    }
   }
 }
 

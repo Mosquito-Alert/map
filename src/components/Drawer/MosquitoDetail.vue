@@ -60,13 +60,6 @@
         </div>
       </div>
 
-      <div class="discoveries flex items-center mt-5">
-        <Checkbox v-model="mapStore.showDiscoveries" :inputId="'showDiscoveries'" binary />
-        <label class="pl-3 font-semibold cursor-pointer" for="showDiscoveries">
-          Mostrar descubrimientos de la comunidad
-        </label>
-      </div>
-
       <div class="near-discoveries mt-6">
         <div class="mb-2">
           <h4 class="text-lg font-semibold text-gray-800">Observaciones recientes</h4>

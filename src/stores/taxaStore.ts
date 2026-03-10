@@ -1,10 +1,17 @@
-import { defineStore } from 'pinia'
 import { taxaApi } from '@/services/apiService'
 import type { Taxon, TaxonTreeNode } from 'mosquito-alert'
-import { summary as wikipediaSummary } from 'wikipedia'
+import { defineStore } from 'pinia'
 import wdk from 'wikibase-sdk/wikidata.org'
+import { summary as wikipediaSummary } from 'wikipedia'
 
 type extendedTaxon = Taxon & { wikidataId?: string; gbifId?: string }
+
+const mapTaxonToDiscoveriesId = {
+  112: 'albopictus',
+  113: 'aegypti',
+  114: 'japonicus',
+  115: 'koreicus',
+}
 
 export const culicidaeTaxon = {
   id: 7,
@@ -50,6 +57,12 @@ export const useTaxaStore = defineStore('taxa', {
     ] as extendedTaxon[],
     taxonSelected: culicidaeTaxon as extendedTaxon,
   }),
+  getters: {
+    // get discoveries taxon id for the currently selected taxon
+    discoveriesTaxonId: (state) => {
+      return mapTaxonToDiscoveriesId[state.taxonSelected.id as keyof typeof mapTaxonToDiscoveriesId]
+    },
+  },
   actions: {
     async fetchCulicidaeTaxaTree() {
       try {

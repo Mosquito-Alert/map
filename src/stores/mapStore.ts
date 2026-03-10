@@ -1,4 +1,3 @@
-import { cellToBoundary, latLngToCell } from 'h3-js'
 import { defineStore } from 'pinia'
 import { MosquitoLayersEnum, VariablesLayersEnum } from '../utils/constants'
 import type { BasemapType } from '../utils/mapControls/MapBaseLayerControl'
@@ -13,6 +12,7 @@ export const useMapStore = defineStore('map', {
     mapLoaded: false,
     baselayer: {} as BasemapType,
     globeView: true,
+    // TODO: Change this to different flags, so we can stack layers
     layerSelected: MosquitoLayersEnum.observations as MosquitoLayersEnum,
     variablesSelected: [] as VariablesLayersEnum[],
     hex_data: {} as Record<string, any>,
@@ -25,6 +25,8 @@ export const useMapStore = defineStore('map', {
     nearObservationsCircleLayerId: 'radius-near-observations-layer',
     centerSourceId: 'radius-center-point',
     centerLayerId: 'radius-center-point-layer',
+    discoveriesSourceId: 'discoveries-source',
+    discoveriesLayerId: 'discoveries-layer',
   }),
   getters: {
     getH3SourceId: (state) => (resolution: number) => `h3-res-${resolution}`,
