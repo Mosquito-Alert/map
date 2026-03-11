@@ -1,8 +1,10 @@
 <template>
   <div class="flex flex-col items-center">
     <div
-      class="dates-controller inline-flex flex-nowrap items-center gap-3 px-3 py-1 bg-gray-100 border-gray-400 border-1 rounded-2xl cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
-      :class="showChart ? 'mb-4' : 'mb-0'"
+      class="dates-controller inline-flex flex-nowrap self-end items-center gap-3 px-3 py-1 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-t-lg cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
+      :class="{
+        'rounded-lg border-b-1': !showChart,
+      }"
     >
       <div class="dates whitespace-nowrap pointer-events-auto">
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.start || '') }}</span>
@@ -31,7 +33,7 @@
     <Transition name="chart-expand">
       <div
         v-if="showChart"
-        class="chart-window hidden lg:block bg-white! border-gray-400! border-1! rounded-sm shadow-lg pointer-events-auto overflow-hidden"
+        class="chart-window hidden lg:block bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg pointer-events-auto overflow-hidden"
       >
         <VChart
           ref="chartRef"
