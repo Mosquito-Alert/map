@@ -140,9 +140,9 @@ const pushMapPaddingUpdate = debounce(() => {
 const toggleDataLayers = async () => {
   if (!map.value) return
 
-  const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.observations
-  const showGbif = mapStore.layerSelected === MosquitoLayersEnum.distribution
-  const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.discoveries
+  const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.OBSERVATIONS
+  const showGbif = mapStore.layerSelected === MosquitoLayersEnum.DISTRIBUTION
+  const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.DISCOVERIES
 
   // ######### OBSERVATIONS #########
   // ---- Toggle H3 layers ----

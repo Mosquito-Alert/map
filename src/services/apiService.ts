@@ -1,4 +1,4 @@
-import { Configuration, ObservationsApi, TaxaApi } from 'mosquito-alert'
+import { BoundariesApi, Configuration, ObservationsApi, TaxaApi } from 'mosquito-alert'
 
 const apiConfig = new Configuration({
   ...(import.meta.env.VITE_API_BASE_URL ? { basePath: import.meta.env.VITE_API_BASE_URL } : {}),
@@ -9,3 +9,4 @@ const apiConfig = new Configuration({
 
 export const taxaApi = new TaxaApi(apiConfig)
 export const observationsApi = new ObservationsApi(apiConfig)
+export const boundariesApi = new BoundariesApi(apiConfig)

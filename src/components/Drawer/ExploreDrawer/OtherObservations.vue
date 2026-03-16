@@ -46,6 +46,6 @@
   </CardDrawer>
 </template>
 <script setup lang="ts">
-import CardDrawer from './CardDrawer.vue'
-import { breedingObservations, bitesObservations } from '../../utils/other_observations'
+import CardDrawer from '../CardDrawer.vue'
+import { breedingObservations, bitesObservations } from '../../../utils/other_observations'
 </script>

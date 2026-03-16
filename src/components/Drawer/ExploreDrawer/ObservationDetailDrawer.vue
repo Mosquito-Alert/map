@@ -145,7 +145,7 @@
 import { IdentificationTaskResultSource } from 'mosquito-alert'
 import { Button, Divider, Galleria } from 'primevue'
 import { computed, onMounted, watch } from 'vue'
-import { useObservationsStore } from '../../stores/observationsStore'
+import { useObservationsStore } from '../../../stores/observationsStore'
 
 const observationStore = useObservationsStore()
 

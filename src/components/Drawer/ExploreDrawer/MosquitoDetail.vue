@@ -27,7 +27,7 @@
             @click="
               () => {
                 taxaStore.taxonSelected = culicidaeTaxon as Taxon
-                mapStore.layerSelected = MosquitoLayersEnum.observations
+                mapStore.layerSelected = MosquitoLayersEnum.OBSERVATIONS
               }
             "
           >
@@ -200,11 +200,11 @@ import {
 } from 'primevue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
-import { useMapStore } from '../../stores/mapStore'
-import { useObservationsStore } from '../../stores/observationsStore'
-import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
-import { mosquitoLayers, MosquitoLayersEnum } from '../../utils/constants'
-import CardDrawer from './CardDrawer.vue'
+import { useMapStore } from '../../../stores/mapStore'
+import { useObservationsStore } from '../../../stores/observationsStore'
+import { culicidaeTaxon, useTaxaStore } from '../../../stores/taxaStore'
+import { mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
+import CardDrawer from '../CardDrawer.vue'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()
@@ -223,17 +223,17 @@ const visibleMosquitoLayers = computed(() => {
 
   return mosquitoLayers.filter((layer) => {
     // Discoveries only if discovery id exists
-    if (layer.key === MosquitoLayersEnum.discoveries) {
+    if (layer.key === MosquitoLayersEnum.DISCOVERIES) {
       return !!discoveriesTaxonId
     }
 
     // rm0 only for albopictus
-    if (layer.key === MosquitoLayersEnum.rm0) {
+    if (layer.key === MosquitoLayersEnum.RM0) {
       return taxonId === 112
     }
 
     // bite index only for culex
-    if (layer.key === MosquitoLayersEnum.bite_index) {
+    if (layer.key === MosquitoLayersEnum.BITE_INDEX) {
       return taxonId === 10
     }
 

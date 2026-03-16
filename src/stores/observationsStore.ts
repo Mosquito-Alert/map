@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
 import { BitesListOrderByParameter, type Observation } from 'mosquito-alert'
-import { observationsApi } from '../services/apiService'
+import { defineStore } from 'pinia'
+import { boundariesApi, observationsApi } from '../services/apiService'
 import { useTaxaStore } from './taxaStore'
 
 export const useObservationsStore = defineStore('observations', {
@@ -51,16 +51,26 @@ export const useObservationsStore = defineStore('observations', {
         throw error
       }
     },
-    async fetchObservations() {
+    async fetchObservations(boundary?: any) {
       const taxaStore = useTaxaStore()
       try {
-        const response = await observationsApi.geoList(
-          {
-            identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
-            identificationTaxonIdsLookup: 'is_tree_of',
-          },
-          { headers: { Accept: 'application/geo+json' } },
-        )
+        let boundaryUuid = null
+        if (boundary) {
+          const response = await boundariesApi.createTemporary({
+            temporaryBoundaryRequest: {
+              geojson: boundary.features[0].geometry,
+            },
+          })
+          boundaryUuid = response.data.uuid
+        }
+        const requestParams = {
+          identificationTaxonIds: [taxaStore.taxonSelected.id.toString()],
+          identificationTaxonIdsLookup: 'is_tree_of',
+          ...(boundaryUuid ? { boundaryUuid: boundaryUuid } : {}),
+        }
+        const response = await observationsApi.geoList(requestParams as any, {
+          headers: { Accept: 'application/geo+json' },
+        })
         if (response.data) {
           return response.data as any
         }

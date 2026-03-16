@@ -18,7 +18,7 @@
 import ScrollPanel from 'primevue/scrollpanel'
 import VariablesLayers from './VariablesLayers.vue'
 import OtherObservations from './OtherObservations.vue'
-import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
+import { culicidaeTaxon, useTaxaStore } from '../../../stores/taxaStore'
 import MosquitoDetail from './MosquitoDetail.vue'
 import TaxonSelector from './TaxonSelector.vue'
 

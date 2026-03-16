@@ -13,7 +13,7 @@
 <script setup>
 import MainDrawer from '@/components/Drawer/MainDrawer.vue'
 import MainMap from '@/components/Map/MainMap.vue'
-import ObservationDetailDrawer from '@/components/Drawer/ObservationDetailDrawer.vue'
+import ObservationDetailDrawer from '@/components/Drawer/ExploreDrawer/ObservationDetailDrawer.vue'
 import { useObservationsStore } from '../stores/observationsStore'
 
 const observationsStore = useObservationsStore()

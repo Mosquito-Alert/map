@@ -19,9 +19,9 @@
 <script setup lang="ts">
 import { Checkbox } from 'primevue'
 
-import CardDrawer from './CardDrawer.vue'
-import { variablesLayers } from '../../utils/constants'
-import { useMapStore } from '../../stores/mapStore'
+import CardDrawer from '../CardDrawer.vue'
+import { variablesLayers } from '../../../utils/constants'
+import { useMapStore } from '../../../stores/mapStore'
 
 const mapStore = useMapStore()
 </script>

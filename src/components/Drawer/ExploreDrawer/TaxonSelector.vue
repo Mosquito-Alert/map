@@ -36,8 +36,8 @@ import type { TreeNode } from 'primevue/treenode'
 import TreeSelect from 'primevue/treeselect'
 import { computed, onMounted, ref } from 'vue'
 
-import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
-import CardDrawer from './CardDrawer.vue'
+import { culicidaeTaxon, useTaxaStore } from '../../../stores/taxaStore'
+import CardDrawer from '../CardDrawer.vue'
 
 const loading = ref<boolean>(false)
 const taxonTreeNode = ref<TaxonTreeNode>()

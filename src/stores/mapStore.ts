@@ -13,7 +13,7 @@ export const useMapStore = defineStore('map', {
     baselayer: {} as BasemapType,
     globeView: true,
     // TODO: Change this to different flags, so we can stack layers
-    layerSelected: MosquitoLayersEnum.observations as MosquitoLayersEnum,
+    layerSelected: MosquitoLayersEnum.OBSERVATIONS as MosquitoLayersEnum,
     variablesSelected: [] as VariablesLayersEnum[],
     hex_data: {} as Record<string, any>,
     dataDateCount: {} as Record<string, number>,

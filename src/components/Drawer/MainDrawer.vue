@@ -29,13 +29,15 @@
         </div>
       </template>
     </SelectButton>
-    <ScrollableDrawer class="overflow-y-auto flex-1 mb-0 p-0" />
+    <ExploreDrawer class="overflow-y-auto flex-1 mb-0 p-0" v-if="activeTab === 'explore'" />
+    <AnalizeDrawer class="overflow-y-auto flex-1 mb-0 p-0" v-if="activeTab === 'analize'" />
   </aside>
 </template>
 <script lang="ts" setup>
 import { SelectButton } from 'primevue'
 import { onMounted, ref } from 'vue'
-import ScrollableDrawer from './ScrollableDrawer.vue'
+import ExploreDrawer from './ExploreDrawer/ExploreDrawer.vue'
+import AnalizeDrawer from './AnalizeDrawer/AnalizeDrawer.vue'
 import { useUIStore } from '../../stores/uiStore'
 import HeaderDrawer from './HeaderDrawer.vue'
 

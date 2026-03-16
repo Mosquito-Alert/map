@@ -311,7 +311,7 @@ export const addOrUpdateH3Layer = () => {
 // Function to hide all H3 layers except the target one
 export const showOnlyResolution = () => {
   if (!map.value) return
-  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
+  if (mapStore.layerSelected !== MosquitoLayersEnum.OBSERVATIONS) return
 
   const zoom = map.value.getZoom()
   const resolution = zoom >= observationPointsZoom ? null : currentResolution.value
@@ -464,7 +464,7 @@ export const addNearbyObservationsCircleLayer = () => {
 // Handle zoom events for dynamic resolution switching
 export const handleZoomChange = async () => {
   if (!map.value) return
-  if (mapStore.layerSelected !== MosquitoLayersEnum.observations) return
+  if (mapStore.layerSelected !== MosquitoLayersEnum.OBSERVATIONS) return
 
   const zoom = map.value.getZoom()
   const targetResolution = getResolutionForZoom(zoom)
