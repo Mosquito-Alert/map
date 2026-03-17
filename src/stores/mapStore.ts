@@ -27,6 +27,8 @@ export const useMapStore = defineStore('map', {
     centerLayerId: 'radius-center-point-layer',
     discoveriesSourceId: 'discoveries-source',
     discoveriesLayerId: 'discoveries-layer',
+    selectedRegionSourceId: 'selected-region-source',
+    selectedRegionLayerId: 'selected-region-layer',
   }),
   getters: {
     getH3SourceId: (state) => (resolution: number) => `h3-res-${resolution}`,
