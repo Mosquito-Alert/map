@@ -45,8 +45,23 @@
               </InputGroupAddon>
             </InputGroup>
           </div>
-          <div>
+          <div class="mt-5">
             <span>O si tienes el hashtag de la región, puedes buscar por este.</span>
+            <InputGroup>
+              <InputGroupAddon>
+                <span class="material-icons-outlined"> tag </span>
+              </InputGroupAddon>
+              <InputText
+                v-model="searchTagQuery"
+                type="text"
+                id="hashtag-search"
+                placeholder="Busca por hashtag..."
+                disabled
+              />
+              <InputGroupAddon>
+                <span class="material-icons-outlined"> search </span>
+              </InputGroupAddon>
+            </InputGroup>
           </div>
         </div>
         <div v-else-if="analizeStore.toolSelected === toolsEnum.DRAW" class="p-2">
@@ -62,7 +77,7 @@ import { toolsEnum, useAnalizeStore } from '@/stores/analizeStore'
 import { useMapStore } from '@/stores/mapStore'
 import { useObservationsStore } from '@/stores/observationsStore'
 import { bbox } from '@turf/turf'
-import { AutoComplete, InputGroup, InputGroupAddon, SelectButton } from 'primevue'
+import { AutoComplete, InputGroup, InputGroupAddon, InputText, SelectButton } from 'primevue'
 import { computed, ref, shallowRef, watch } from 'vue'
 import CardDrawer from '../CardDrawer.vue'
 
@@ -78,6 +93,7 @@ const toolOptions = ref([
 ])
 const observationPointsInBoundary = shallowRef([])
 const searchQuery = ref('')
+const searchTagQuery = ref('')
 const searchResults = ref([])
 const loading = ref(false)
 
@@ -107,12 +123,14 @@ const selectResult = async (event: { value: any }) => {
     `&format=geojson` +
     `&polygon_geojson=1` +
     `&limit=1` +
-    `&addressdetails=1`
+    `&addressdetails=1` +
+    `&extratags=1`
 
   const res = await fetch(url)
 
   searchResults.value = []
   analizeStore.selectedRegion = await res.json()
+  await analizeStore.getDataOfRegion()
 }
 
 const showBoundary = (geojson: GeoJSON.FeatureCollection) => {
