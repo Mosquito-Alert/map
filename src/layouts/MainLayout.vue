@@ -20,6 +20,8 @@
 
     <MainFooter />
 
+    <ConsentBanner position="bottom" />
+    <ConsentPreferenceModal />
   </q-layout>
 </template>
 

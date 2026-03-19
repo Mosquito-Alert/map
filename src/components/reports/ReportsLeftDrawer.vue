@@ -170,7 +170,7 @@
 import { useQuasar, exportFile } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from "vue-i18n"
-import { event } from 'vue-gtag'
+import { useConsent } from '@structured-world/vue-privacy/vue';
 
 import InnerDrawer from 'src/components/layout/InnerDrawer.vue'
 import { DateRangePickerWithPresets } from 'src/components/common'
@@ -236,6 +236,8 @@ export default {
     const { t } = useI18n()
 
     const boundaryStore = useBoundaryStore();
+
+    const { trackEvent } = useConsent();
 
     // LAYERS
     const mosquitoLayers = ref({
@@ -391,9 +393,9 @@ export default {
       downloadProgress.value.bites.loading = true;
       downloadProgress.value.bites.percentage = 0;
 
-      event('clickDownload', {
-        event_category: 'download',
-        event_label: 'bites',
+      trackEvent('clickDownload', {
+        category: 'download',
+        label: 'bites',
         value: 1
       })
 
@@ -424,9 +426,9 @@ export default {
       downloadProgress.value.observations.loading = true;
       downloadProgress.value.observations.percentage = 0;
 
-      event('clickDownload', {
-        event_category: 'download',
-        event_label: 'observations',
+      trackEvent('clickDownload', {
+        category: 'download',
+        label: 'observations',
         value: 1
       })
 
@@ -461,9 +463,9 @@ export default {
       downloadProgress.value.breedingSites.loading = true;
       downloadProgress.value.breedingSites.percentage = 0;
 
-      event('clickDownload', {
-        event_category: 'download',
-        event_label: 'breeding_sites',
+      trackEvent('clickDownload', {
+        category: 'download',
+        label: 'breeding_sites',
         value: 1
       })
 
