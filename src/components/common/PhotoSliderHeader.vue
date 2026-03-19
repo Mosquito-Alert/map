@@ -1,7 +1,8 @@
 <template>
-  <q-carousel v-if="photoUrls?.length" animated v-model="slide" :arrows="photoUrls?.length > 1"
-    :navigation="photoUrls?.length > 1" infinite height="250px">
-    <q-carousel-slide v-for="(photoUrl, index) in photoUrls" :key="index" :name="index" :img-src="photoUrl" />
+  <q-carousel v-if="photoUrls?.length" animated v-model="slide" v-model:fullscreen="fullscreen"
+    :arrows="photoUrls?.length > 1" :navigation="photoUrls?.length > 1" infinite height="250px">
+    <q-carousel-slide v-for="(photoUrl, index) in photoUrls" :key="index" :name="index" :img-src="photoUrl"
+      @click="fullscreen = !fullscreen" class="cursor-pointer" />
     <template v-slot:control>
       <q-carousel-control position="bottom-right">
         <q-btn color="grey-14" unelevated padding="xs" :ripple=false target="_blank"
@@ -22,4 +23,5 @@ defineProps<{
 }>();
 
 const slide = ref(0);
+const fullscreen = ref(false);
 </script>
