@@ -51,7 +51,7 @@ export const useObservationsStore = defineStore('observations', {
         throw error
       }
     },
-    async fetchObservations(boundary?: any) {
+    async fetchObservations(geojsonFormat = false, boundary?: any) {
       const taxaStore = useTaxaStore()
       try {
         let boundaryUuid = null
@@ -69,7 +69,7 @@ export const useObservationsStore = defineStore('observations', {
           ...(boundaryUuid ? { boundaryUuid: boundaryUuid } : {}),
         }
         const response = await observationsApi.geoList(requestParams as any, {
-          headers: { Accept: 'application/geo+json' },
+          headers: { Accept: geojsonFormat ? 'application/geo+json' : 'application/json' },
         })
         if (response.data) {
           return response.data as any

@@ -246,7 +246,7 @@ onMounted(async () => {
     // mapDeclaration.addControl(new MapInfoControl(), 'top-right')
 
     // Start data loading in background
-    const observationsPromise = observationsStore.fetchObservations()
+    const observationsPromise = observationsStore.fetchObservations(true)
 
     mapDeclaration.on('load', async () => {
       if (!mapDeclaration) return
@@ -303,7 +303,7 @@ watch(
   () => taxaStore.taxonSelected,
   async (newTaxon, oldTaxon) => {
     if (!oldTaxon || newTaxon === oldTaxon) return
-    geojsonCache.value = markRaw(await observationsStore.fetchObservations())
+    geojsonCache.value = markRaw(await observationsStore.fetchObservations(true))
     buildOriginalData()
     filterData()
     // Add observation points layer for high zoom levels

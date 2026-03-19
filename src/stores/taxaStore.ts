@@ -60,6 +60,7 @@ export const useTaxaStore = defineStore('taxa', {
   getters: {
     // get discoveries taxon id for the currently selected taxon
     discoveriesTaxonId: (state) => {
+      // TODO: Do it with the API. At least the ones that are not in the mapTaxonToDiscoveriesId.
       return mapTaxonToDiscoveriesId[state.taxonSelected.id as keyof typeof mapTaxonToDiscoveriesId]
     },
   },
@@ -95,6 +96,28 @@ export const useTaxaStore = defineStore('taxa', {
         this.taxonSelected.gbifId = gbifId
       }
       return gbifId
+    },
+    getTaxonNameById(id: number) {
+      const findTaxonInTree = (node: TaxonTreeNode): Taxon | null => {
+        if (node.id === id) {
+          return node
+        }
+        if (node.children) {
+          for (const child of node.children) {
+            const result = findTaxonInTree(child)
+            if (result) {
+              return result
+            }
+          }
+        }
+        return null
+      }
+
+      if (this.taxaTree) {
+        const taxon = findTaxonInTree(this.taxaTree)
+        return taxon ? taxon.name : 'Otros'
+      }
+      return 'Otros'
     },
   },
 })

@@ -75,13 +75,11 @@
 <script setup lang="ts">
 import { toolsEnum, useAnalizeStore } from '@/stores/analizeStore'
 import { useMapStore } from '@/stores/mapStore'
-import { useObservationsStore } from '@/stores/observationsStore'
 import { bbox } from '@turf/turf'
 import { AutoComplete, InputGroup, InputGroupAddon, InputText, SelectButton } from 'primevue'
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CardDrawer from '../CardDrawer.vue'
 
-const observationsStore = useObservationsStore()
 const analizeStore = useAnalizeStore()
 const mapStore = useMapStore()
 
@@ -91,7 +89,6 @@ const toolOptions = ref([
   { value: toolsEnum.SEARCH, icon: 'search', text: 'Search' },
   { value: toolsEnum.DRAW, icon: 'architecture', text: 'Draw' },
 ])
-const observationPointsInBoundary = shallowRef([])
 const searchQuery = ref('')
 const searchTagQuery = ref('')
 const searchResults = ref([])
@@ -183,12 +180,8 @@ watch(
   () => analizeStore.selectedRegion,
   async (newBoundary: GeoJSON.FeatureCollection | null) => {
     if (newBoundary) {
-      // Fetch observation points within the boundary
-      const response = await observationsStore.fetchObservations(newBoundary)
-      observationPointsInBoundary.value = response
       showBoundary(newBoundary as any)
     } else {
-      observationPointsInBoundary.value = []
       map.value?.setLayoutProperty(mapStore.selectedRegionLayerId, 'visibility', 'none')
     }
   },

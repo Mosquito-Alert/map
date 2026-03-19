@@ -126,7 +126,6 @@ type PlaybackSpeed = {
 const observationsStore = useObservationsStore()
 
 const menu = ref()
-
 const originalDateLimits = ref<{ start: string; end: string } | null>(null)
 const timeSeriesDataLocal = ref<Record<string, number>>({}) //  date -> count
 const timeSeriesDataMonthly = ref<{
@@ -389,6 +388,7 @@ const option = computed(() => ({
   ],
 }))
 
+// TODO:
 const loading = false
 </script>
 <style>

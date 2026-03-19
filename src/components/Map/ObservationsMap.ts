@@ -64,7 +64,7 @@ h3AggregationWorker.onmessage = (e) => {
   }
 }
 
-type ObservationFeatureCollection = GeoJSON.FeatureCollection<
+export type ObservationFeatureCollection = GeoJSON.FeatureCollection<
   GeoJSON.Point,
   {
     uuid: string
