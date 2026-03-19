@@ -11,6 +11,10 @@
           <q-icon name="fa fa-brands fa-creative-commons-by" color="grey-4" />
         </q-btn>
       </q-carousel-control>
+      <q-carousel-control v-if="fullscreen" position="top-right">
+        <q-btn unelevated round color='grey-3' text-color='grey-14' icon="fa fat fa-xmark"
+          @click="fullscreen = false" />
+      </q-carousel-control>
     </template>
   </q-carousel>
 </template>
