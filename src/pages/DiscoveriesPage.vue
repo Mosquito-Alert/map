@@ -33,6 +33,7 @@ import { useQuasar, exportFile } from 'quasar'
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouteParams } from '@vueuse/router';
 import { useI18n } from 'vue-i18n'
+import { event } from 'vue-gtag'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 import { mapserver } from 'boot/axios'
@@ -85,6 +86,13 @@ function showInfoDialog() {
 async function downloadFile() {
   downloadProgress.value.loading = true;
   downloadProgress.value.percentage = 0;
+
+  event('clickDownload', {
+    event_category: 'download',
+    event_label: 'discoveries',
+    species: selectedSpeciesCode.value,
+    value: 1
+  })
 
   const params = {
     service: 'WFS',
