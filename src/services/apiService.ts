@@ -1,3 +1,4 @@
+import { MetricsApi, Configuration as MetricsConfiguration, RegionsApi } from 'metrics'
 import { BoundariesApi, Configuration, ObservationsApi, TaxaApi } from 'mosquito-alert'
 
 const apiConfig = new Configuration({
@@ -7,6 +8,17 @@ const apiConfig = new Configuration({
   //   : undefined,
 })
 
+const metricsConfig = new MetricsConfiguration({
+  ...(import.meta.env.VITE_METRICS_BASE_URL
+    ? { basePath: import.meta.env.VITE_METRICS_BASE_URL }
+    : {}),
+})
+
+// Mosquito Alert API
 export const taxaApi = new TaxaApi(apiConfig)
 export const observationsApi = new ObservationsApi(apiConfig)
 export const boundariesApi = new BoundariesApi(apiConfig)
+
+// Metrics API
+export const metricsApi = new MetricsApi(metricsConfig)
+export const regionsApi = new RegionsApi(metricsConfig)

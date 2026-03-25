@@ -22,6 +22,12 @@ export default defineConfig(({ mode }) => {
             secure: false,
             rewrite: (path) => path.replace(/^\/api/, ''),
           },
+          '/metrics': {
+            target: 'https://metrics.mosquitoalert.com/api/v1/',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/metrics/, ''),
+          },
         },
       }),
     },

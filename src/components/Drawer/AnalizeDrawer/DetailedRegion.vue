@@ -55,20 +55,22 @@
       </div>
     </template>
   </CardDrawer>
+  <BiteIndex />
 </template>
 <script setup lang="ts">
 import { useAnalizeStore } from '@/stores/analizeStore'
 import { useObservationsStore } from '@/stores/observationsStore'
+import { PieChart } from 'echarts/charts'
+import { GridComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import type { ObservationGeoModel } from 'mosquito-alert'
 import { Button } from 'primevue'
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import VChart from 'vue-echarts'
-import CardDrawer from '../CardDrawer.vue'
-import type { ObservationGeoModel } from 'mosquito-alert'
 import { useTaxaStore } from '../../../stores/taxaStore'
-import { use } from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { CanvasRenderer } from 'echarts/renderers'
-import { GridComponent } from 'echarts/components'
+import CardDrawer from '../CardDrawer.vue'
+import BiteIndex from './BiteIndex.vue'
 
 use([PieChart, CanvasRenderer, GridComponent])
 
