@@ -1,8 +1,8 @@
 <template>
   <div class="mt-3 bg-white rounded-borders">
     <div class="timeseries-header">
-      <h6 class="q-my-sm q-ml-sm text-weight-regular" style="color: #333">Time Series</h6>
-      <div class="timeseries-selector q-mr-md">
+      <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
+      <div class="timeseries-selector mr-4">
         <button
           v-for="option in chartDaysSelector"
           :key="option.value"
@@ -17,13 +17,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue'
-import { useAnalizeStore } from '../../../stores/analizeStore'
-import { metricsApi, regionsApi } from '../../../services/apiService'
-import type { Metric, MetricTrend, PaginatedMetricList } from 'metrics'
 import { LineChart, ScatterChart } from 'echarts/charts'
-import { use } from 'echarts/core'
-import VChart from 'vue-echarts'
 import {
   DataZoomComponent,
   GridComponent,
@@ -32,7 +26,12 @@ import {
   TitleComponent,
   TooltipComponent,
 } from 'echarts/components'
+import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
+import type { Metric } from 'metrics'
+import { computed, ref } from 'vue'
+import VChart from 'vue-echarts'
+import { useAnalizeStore } from '../../../stores/analizeStore'
 
 const analizeStore = useAnalizeStore()
 
@@ -48,99 +47,34 @@ use([
   MarkLineComponent,
 ])
 
-const biteIndexMetrics = shallowRef<PaginatedMetricList | null>(null)
-const biteIndexTrendRaw = shallowRef<MetricTrend | null>(null)
 const biteIndexTrend = computed(() => {
-  const data = biteIndexTrendRaw?.value?.trend || []
-  return trendDataCorrection(data, new Date(lastMetricWithPrediction.value?.date || ''))
-})
-const lastMetricWithPrediction = computed(() => {
-  if (!biteIndexMetrics.value) return null
-  // Find the last metric that has a non-null value and a non-null prediction
-  for (let i = biteIndexMetrics.value.results.length - 1; i >= 0; i--) {
-    const metric = biteIndexMetrics.value.results[i]
-    if (metric && metric.value !== null && metric.predicted_value !== null) {
-      return metric
-    }
-  }
-  return null
+  const data = analizeStore.biteIndexTrendRaw?.trend || []
+  return trendDataCorrection(data, new Date(analizeStore.lastMetricWithPrediction?.date || ''))
 })
 
-const dataLoading = ref(false)
-const trendDataLoading = ref(false)
-const loading = computed(() => dataLoading.value || biteIndexMetrics.value === null)
+const loading = computed(
+  () =>
+    analizeStore.metricsDataLoading ||
+    analizeStore.trendDataLoading ||
+    analizeStore.biteIndexMetrics === null ||
+    analizeStore.lastMetricWithPrediction === null,
+)
 
 const startDataZoom = ref(365 * 2) // Default to the last 2 years
 const updateDataZoom = ref(0.23) // Dummy ref to trigger reactivity
 const percentageLastMonth = computed(() => {
-  return 100 - (startDataZoom.value / (biteIndexMetrics.value?.results.length || 1)) * 100 // Assuming the last month has 30 days
+  return 100 - (startDataZoom.value / (analizeStore.biteIndexMetrics?.results.length || 1)) * 100 // Assuming the last month has 30 days
 })
 const chartDaysSelector = computed(() => [
   { label: '6M', value: 180 },
   { label: '1Y', value: 365 },
   { label: '3Y', value: 1095 },
-  { label: 'Max', value: biteIndexMetrics.value?.results.length || 0 },
+  { label: 'Max', value: analizeStore.biteIndexMetrics?.results.length || 0 },
 ])
 
 const timeseriesSelectOption = (value: number) => {
   startDataZoom.value = value
   updateDataZoom.value = Math.random()
-}
-
-const fetchBiteIndexMetrics = async (city: string) => {
-  try {
-    dataLoading.value = true
-    const response = await regionsApi.list({
-      regionName: city,
-      pageSize: 1,
-      ordering: 'name',
-    })
-    const regionCode = response.data?.results[0]?.code
-    if (regionCode) {
-      const pageSize = 10000000 // Large page size to fetch all the metrics
-      const daysSince = 10 * 365 // 10 years
-      const dateFrom = new Date()
-      dateFrom.setDate(dateFrom.getDate() - daysSince)
-      const metricsResponse = await metricsApi.list({
-        regionCode,
-        dateFrom: dateFrom.toISOString().split('T')[0], // Format as YYYY-MM-DD
-        page: 1,
-        pageSize,
-        ordering: 'date',
-      })
-      if (metricsResponse.status === 200 && metricsResponse.data.results.length > 0) {
-        biteIndexMetrics.value = metricsResponse.data
-      } else {
-        throw new Error('No metrics data found for the selected region.')
-      }
-    } else {
-      throw new Error('Region code not found for the selected region.')
-    }
-  } catch (error) {
-    console.error('Error fetching metrics data:', error)
-  } finally {
-    dataLoading.value = false
-  }
-}
-
-const fetchBiteIndexTrend = async (city: string) => {
-  try {
-    trendDataLoading.value = true
-    const id = lastMetricWithPrediction.value?.id || ''
-    if (!id) {
-      throw new Error('No valid metric found to fetch the trend.')
-    }
-    const response = await metricsApi.trendRetrieve({ id })
-    if (response.status === 200 && response.data) {
-      biteIndexTrendRaw.value = response.data
-    } else {
-      throw new Error('Failed to fetch trend for the selected region')
-    }
-  } catch (error) {
-    console.error('Error fetching bite index trend:', error)
-  } finally {
-    trendDataLoading.value = false
-  }
 }
 
 /**
@@ -161,18 +95,8 @@ const trendDataCorrection = (trend: number[], lastDate: Date): { value: number; 
   })
 }
 
-onMounted(async () => {
-  const selectedRegionAddress = analizeStore.selectedRegion?.features[0]?.properties?.address || {}
-  const selectedRegionAddressType =
-    analizeStore.selectedRegion?.features[0]?.properties?.addresstype || ''
-  const city = selectedRegionAddress[selectedRegionAddressType] || ''
-
-  await fetchBiteIndexMetrics(city)
-  await fetchBiteIndexTrend(city)
-})
-
 const option = computed(() => {
-  if (!biteIndexMetrics.value) return {}
+  if (!analizeStore.biteIndexMetrics) return {}
   updateDataZoom.value // Trigger reactivity
   return {
     tooltip: {
@@ -270,7 +194,7 @@ const option = computed(() => {
     },
     xAxis: {
       type: 'category',
-      data: biteIndexMetrics.value.results.map((item) => item.date), // TODO: date.formatDate(item.date, 'YYYY-MM-DD')),
+      data: analizeStore.biteIndexMetrics.results.map((item) => item.date), // TODO: date.formatDate(item.date, 'YYYY-MM-DD')),
       boundaryGap: false,
     },
     yAxis: {
@@ -327,7 +251,7 @@ const option = computed(() => {
           color: '#a8a8a8',
           width: 1.2,
         },
-        data: biteIndexMetrics.value.results.map((item: Metric) => ({
+        data: analizeStore.biteIndexMetrics.results.map((item: Metric) => ({
           value: (item.value || 0) * 100,
         })),
         showSymbol: false,
@@ -365,7 +289,7 @@ const option = computed(() => {
       {
         name: 'Uncertainty interval lower bound',
         type: 'line',
-        data: biteIndexMetrics.value.results.map((item) => (item.lower_value || 0) * 100),
+        data: analizeStore.biteIndexMetrics.results.map((item) => (item.lower_value || 0) * 100),
         lineStyle: {
           opacity: 0,
         },
@@ -375,7 +299,7 @@ const option = computed(() => {
       {
         name: 'Confidence band',
         type: 'line',
-        data: biteIndexMetrics.value.results.map(
+        data: analizeStore.biteIndexMetrics.results.map(
           (item) => (item.upper_value || 0) * 100 - (item.lower_value || 0) * 100,
         ),
         lineStyle: {
@@ -404,7 +328,7 @@ const option = computed(() => {
           borderWidth: 0.25,
           opacity: 1,
         },
-        data: biteIndexMetrics.value.results
+        data: analizeStore.biteIndexMetrics.results
           // .filter((item: Metric) => item.anomaly_degree !== null && item.anomaly_degree !== 0)
           .map((item: Metric) => ({
             value: (item.value as number) * 100,

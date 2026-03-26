@@ -23,6 +23,7 @@
     "@primeuix/themes": "^1.2.5",
     "@tailwindcss/vite": "^4.1.17",
     "@turf/turf": "^7.3.4",
+    "dayjs": "^1.11.20",
     "echarts": "^6.0.0",
     "h3-js": "^4.3.0",
     "maplibre-gl": "^5.11.0",
