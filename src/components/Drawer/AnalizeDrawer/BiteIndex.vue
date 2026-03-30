@@ -12,13 +12,15 @@
   </CardDrawer>
 </template>
 <script setup lang="ts">
-import BiteIndexTimeSeriesChart from './BiteIndexTimeSeriesChart.vue'
-import CardDrawer from '../CardDrawer.vue'
-import { useAnalizeStore } from '../../../stores/analizeStore'
 import { onMounted } from 'vue'
+import { useAnalizeStore } from '../../../stores/analizeStore'
+import { useBiteIndexStore } from '../../../stores/biteIndexStore'
+import CardDrawer from '../CardDrawer.vue'
 import BiteIndexSeasonalityChart from './BiteIndexSeasonalityChart.vue'
+import BiteIndexTimeSeriesChart from './BiteIndexTimeSeriesChart.vue'
 
 const analizeStore = useAnalizeStore()
+const biteIndexStore = useBiteIndexStore()
 
 onMounted(async () => {
   const selectedRegionAddress = analizeStore.selectedRegion?.features[0]?.properties?.address || {}
@@ -26,9 +28,10 @@ onMounted(async () => {
     analizeStore.selectedRegion?.features[0]?.properties?.addresstype || ''
   const city = selectedRegionAddress[selectedRegionAddressType] || ''
 
-  await analizeStore.fetchLastDate()
-  await analizeStore.fetchBiteIndexMetrics(city)
-  await analizeStore.fetchBiteIndexTrend()
-  await analizeStore.fetchSelectedMetricSeasonality()
+  // Initialize bite index data
+  await biteIndexStore.fetchLastDate()
+  await biteIndexStore.fetchMetrics(city)
+  await biteIndexStore.fetchTrend()
+  await biteIndexStore.fetchSeasonality()
 })
 </script>

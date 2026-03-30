@@ -32,8 +32,10 @@ import type { Metric } from 'metrics'
 import { computed, ref } from 'vue'
 import VChart from 'vue-echarts'
 import { useAnalizeStore } from '../../../stores/analizeStore'
+import { useBiteIndexStore } from '../../../stores/biteIndexStore'
 
 const analizeStore = useAnalizeStore()
+const biteIndexStore = useBiteIndexStore()
 
 use([
   TooltipComponent,
@@ -48,28 +50,28 @@ use([
 ])
 
 const biteIndexTrend = computed(() => {
-  const data = analizeStore.biteIndexTrendRaw?.trend || []
-  return trendDataCorrection(data, new Date(analizeStore.lastMetricWithPrediction?.date || ''))
+  const data = biteIndexStore.trendRaw?.trend || []
+  return trendDataCorrection(data, new Date(biteIndexStore.lastMetricWithPrediction?.date || ''))
 })
 
 const loading = computed(
   () =>
-    analizeStore.metricsDataLoading ||
-    analizeStore.trendDataLoading ||
-    analizeStore.biteIndexMetrics === null ||
-    analizeStore.lastMetricWithPrediction === null,
+    biteIndexStore.metricsDataLoading ||
+    biteIndexStore.trendDataLoading ||
+    biteIndexStore.metrics === null ||
+    biteIndexStore.lastMetricWithPrediction === null,
 )
 
 const startDataZoom = ref(365 * 2) // Default to the last 2 years
 const updateDataZoom = ref(0.23) // Dummy ref to trigger reactivity
 const percentageLastMonth = computed(() => {
-  return 100 - (startDataZoom.value / (analizeStore.biteIndexMetrics?.results.length || 1)) * 100 // Assuming the last month has 30 days
+  return 100 - (startDataZoom.value / (biteIndexStore.metrics?.results.length || 1)) * 100 // Assuming the last month has 30 days
 })
 const chartDaysSelector = computed(() => [
   { label: '6M', value: 180 },
   { label: '1Y', value: 365 },
   { label: '3Y', value: 1095 },
-  { label: 'Max', value: analizeStore.biteIndexMetrics?.results.length || 0 },
+  { label: 'Max', value: biteIndexStore.metrics?.results.length || 0 },
 ])
 
 const timeseriesSelectOption = (value: number) => {
@@ -96,7 +98,7 @@ const trendDataCorrection = (trend: number[], lastDate: Date): { value: number; 
 }
 
 const option = computed(() => {
-  if (!analizeStore.biteIndexMetrics) return {}
+  if (!biteIndexStore.metrics) return {}
   updateDataZoom.value // Trigger reactivity
   return {
     tooltip: {
@@ -194,7 +196,7 @@ const option = computed(() => {
     },
     xAxis: {
       type: 'category',
-      data: analizeStore.biteIndexMetrics.results.map((item) => item.date), // TODO: date.formatDate(item.date, 'YYYY-MM-DD')),
+      data: biteIndexStore.metrics?.results.map((item) => item.date), // TODO: date.formatDate(item.date, 'YYYY-MM-DD')),
       boundaryGap: false,
     },
     yAxis: {
@@ -251,9 +253,10 @@ const option = computed(() => {
           color: '#a8a8a8',
           width: 1.2,
         },
-        data: analizeStore.biteIndexMetrics.results.map((item: Metric) => ({
-          value: (item.value || 0) * 100,
-        })),
+        data:
+          biteIndexStore.metrics?.results.map((item: Metric) => ({
+            value: (item.value || 0) * 100,
+          })) || [],
         showSymbol: false,
         // markLine: {
         //   animation: false,
@@ -289,7 +292,7 @@ const option = computed(() => {
       {
         name: 'Uncertainty interval lower bound',
         type: 'line',
-        data: analizeStore.biteIndexMetrics.results.map((item) => (item.lower_value || 0) * 100),
+        data: biteIndexStore.metrics?.results.map((item) => (item.lower_value || 0) * 100) || [],
         lineStyle: {
           opacity: 0,
         },
@@ -299,9 +302,10 @@ const option = computed(() => {
       {
         name: 'Confidence band',
         type: 'line',
-        data: analizeStore.biteIndexMetrics.results.map(
-          (item) => (item.upper_value || 0) * 100 - (item.lower_value || 0) * 100,
-        ),
+        data:
+          biteIndexStore.metrics?.results.map(
+            (item) => (item.upper_value || 0) * 100 - (item.lower_value || 0) * 100,
+          ) || [],
         lineStyle: {
           opacity: 0,
         },
@@ -328,15 +332,16 @@ const option = computed(() => {
           borderWidth: 0.25,
           opacity: 1,
         },
-        data: analizeStore.biteIndexMetrics.results
-          // .filter((item: Metric) => item.anomaly_degree !== null && item.anomaly_degree !== 0)
-          .map((item: Metric) => ({
-            value: (item.value as number) * 100,
-            anomalyDegree: item.anomaly_degree,
-            itemStyle: {
-              color: (item.anomaly_degree as number) > 0 ? '#ff795b' : '#85b0d5BE',
-            },
-          })),
+        data:
+          biteIndexStore.metrics?.results
+            // .filter((item: Metric) => item.anomaly_degree !== null && item.anomaly_degree !== 0)
+            .map((item: Metric) => ({
+              value: (item.value as number) * 100,
+              anomalyDegree: item.anomaly_degree,
+              itemStyle: {
+                color: (item.anomaly_degree as number) > 0 ? '#ff795b' : '#85b0d5BE',
+              },
+            })) || [],
         showSymbol: false,
       },
       {
