@@ -32,12 +32,12 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { computed, ref } from 'vue'
 import VChart from 'vue-echarts'
-import { useAnalizeStore } from '../../../stores/analizeStore'
 import { getDayIndexInYear } from '../../../utils/date'
+import { useBiteIndexStore } from '../../../stores/biteIndexStore'
 
 use([TooltipComponent, LineChart, CanvasRenderer, GridComponent, TitleComponent])
 
-const analizeStore = useAnalizeStore()
+const biteIndexStore = useBiteIndexStore()
 
 const chartRef = ref(null as any)
 const seasonalitySelectorOptions = [
@@ -52,19 +52,19 @@ const seasonalitySelectOption = (value: string) => {
 }
 
 const loading = computed(
-  () => analizeStore.seasonalityDataLoading || analizeStore.biteIndexSeasonality === null,
+  () => biteIndexStore.seasonalityDataLoading || biteIndexStore.seasonality === null,
 )
 const seasonalityData = computed(() => {
-  const seasonality = analizeStore.biteIndexSeasonality?.yearly || []
+  const seasonality = biteIndexStore.seasonality?.yearly || []
   return seasonality.map((seasonalityItem: string, index: number) => ({
     date: new Date(2017, 0, index + 1), // Assuming index starts from 0 for January
     value: (Number(seasonalityItem) * 100).toFixed(2), // Convert to percentage
   }))
 })
 
-const trend = computed(() => analizeStore.biteIndexTrendRaw?.trend || [])
+const trend = computed(() => biteIndexStore.trendRaw?.trend || [])
 const anomaliesData = computed(() => {
-  const rawData = analizeStore.biteIndexMetrics?.results || []
+  const rawData = biteIndexStore.metrics?.results || []
   const groups: {
     [year: number]: {
       dayOfYear: number
@@ -126,7 +126,7 @@ const seriesValuesData = computed(() => {
     const chartData = sortedData.map((d) => [d.dayOfYear, d.value])
 
     if (isLastYear) {
-      const currentDate = new Date(analizeStore.lastDateAvailable || new Date())
+      const currentDate = new Date(biteIndexStore.lastDateAvailable || new Date())
       const currentDateIndex = getDayIndexInYear(currentDate)
       const lastPoint = sortedData.find((item) => item.dayOfYear === currentDateIndex) || null
       const xMarkLabelPadding =
@@ -176,7 +176,7 @@ const seriesValuesData = computed(() => {
                   xAxis: lastPoint.dayOfYear,
                   label: {
                     padding: [0, xMarkLabelPadding, 0, 0],
-                    formatter: () => analizeStore.lastDateAvailable, // TODO: ` ${date.formatDate(uiStore.getDate, 'MMM D, YYYY')} `,
+                    formatter: () => biteIndexStore.lastDateAvailable, // TODO: ` ${date.formatDate(uiStore.getDate, 'MMM D, YYYY')} `,
                     color: '#605158',
                   },
                   lineStyle: {

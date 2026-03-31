@@ -31,10 +31,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 import type { Metric } from 'metrics'
 import { computed, ref } from 'vue'
 import VChart from 'vue-echarts'
-import { useAnalizeStore } from '../../../stores/analizeStore'
 import { useBiteIndexStore } from '../../../stores/biteIndexStore'
 
-const analizeStore = useAnalizeStore()
 const biteIndexStore = useBiteIndexStore()
 
 use([
@@ -214,6 +212,7 @@ const option = computed(() => {
     dataZoom: [
       {
         type: 'slider',
+        bottom: '5%',
         show: true,
         xAxisIndex: [0],
         start: percentageLastMonth.value,

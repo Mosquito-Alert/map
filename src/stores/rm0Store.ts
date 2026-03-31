@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { useAnalizeStore } from './analizeStore'
 import { metricsApi } from '../services/apiService'
+import type { MetricValueMean } from 'metrics-dev'
 
 export const useRM0Store = defineStore('rm0', {
   state: () => ({
     metricsDataLoading: false,
-    metrics: null as any, // TODO: Type
+    metrics: null as MetricValueMean[] | null,
+    h3_indexes: null as string[] | null,
   }),
   actions: {
     async fetchRM0Data() {
@@ -23,8 +25,9 @@ export const useRM0Store = defineStore('rm0', {
           },
         })
 
-        if (response.status === 200 && response.data) {
-          this.metrics = response.data
+        if (response.status === 200 && response.data && response.data.values) {
+          this.metrics = response.data.values
+          this.h3_indexes = response.data.h3_indexes
         } else {
           throw new Error('Failed to fetch RM0 data')
         }
