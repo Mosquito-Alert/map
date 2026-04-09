@@ -55,8 +55,7 @@
       </div>
     </template>
   </CardDrawer>
-  <BiteIndex />
-  <RM0 />
+  <Models />
 </template>
 <script setup lang="ts">
 import { useAnalizeStore } from '@/stores/analizeStore'
@@ -71,8 +70,7 @@ import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import VChart from 'vue-echarts'
 import { useTaxaStore } from '../../../stores/taxaStore'
 import CardDrawer from '../CardDrawer.vue'
-import BiteIndex from './BiteIndex.vue'
-import RM0 from './RM0.vue'
+import Models from './Models.vue'
 
 use([PieChart, CanvasRenderer, GridComponent])
 

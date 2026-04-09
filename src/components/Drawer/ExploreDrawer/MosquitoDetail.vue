@@ -191,7 +191,6 @@ import {
   Button,
   Card,
   Carousel,
-  Checkbox,
   ProgressSpinner,
   RadioButton,
   Skeleton,
@@ -202,7 +201,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../../stores/mapStore'
 import { useObservationsStore } from '../../../stores/observationsStore'
-import { culicidaeTaxon, useTaxaStore } from '../../../stores/taxaStore'
+import { culicidaeTaxon, mapTaxonToDiscoveriesId, useTaxaStore } from '../../../stores/taxaStore'
 import { mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
 import CardDrawer from '../CardDrawer.vue'
 
@@ -229,12 +228,12 @@ const visibleMosquitoLayers = computed(() => {
 
     // rm0 only for albopictus
     if (layer.key === MosquitoLayersEnum.RM0) {
-      return taxonId === 112
+      return taxonId === mapTaxonToDiscoveriesId.albopictus
     }
 
     // bite index only for culex
     if (layer.key === MosquitoLayersEnum.BITE_INDEX) {
-      return taxonId === 10
+      return taxonId === mapTaxonToDiscoveriesId.culex_pipiens
     }
 
     return true

@@ -1,17 +1,9 @@
 <template>
-  <CardDrawer>
-    <template #title>
-      <h3 class="text-xl text-gray-700">
-        Ritmo reproductivo básico del mosquito (RM0) <span class="italic">(Aedes Albopictus)</span>
-      </h3>
-    </template>
-    <template #content>
-      <div class="timeseries-header">
-        <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
-      </div>
-      <v-chart style="height: 330px" :option="option" :loading="loading" autoresize />
-    </template>
-  </CardDrawer>
+  <h3 class="text-lg text-gray-700">Ritmo reproductivo básico del mosquito (RM0)</h3>
+  <div class="timeseries-header">
+    <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
+  </div>
+  <v-chart style="height: 330px" :option="option" :loading="loading" autoresize />
 </template>
 <script setup lang="ts">
 import { LineChart } from 'echarts/charts'
@@ -27,7 +19,6 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { computed, onMounted, ref } from 'vue'
 import VChart from 'vue-echarts'
 import { useRM0Store } from '../../../stores/rm0Store'
-import CardDrawer from '../CardDrawer.vue'
 
 const rm0Store = useRM0Store()
 

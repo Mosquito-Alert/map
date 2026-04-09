@@ -6,12 +6,16 @@ import { summary as wikipediaSummary } from 'wikipedia'
 
 type extendedTaxon = Taxon & { wikidataId?: string; gbifId?: string }
 
-const mapTaxonToDiscoveriesId = {
+export const mapDiscoveriesIdToTaxon = {
+  10: 'culex_pipiens',
   112: 'albopictus',
   113: 'aegypti',
   114: 'japonicus',
   115: 'koreicus',
 }
+export const mapTaxonToDiscoveriesId = Object.fromEntries(
+  Object.entries(mapDiscoveriesIdToTaxon).map(([key, value]) => [value, Number(key)]),
+)
 
 export const culicidaeTaxon = {
   id: 7,
@@ -60,8 +64,8 @@ export const useTaxaStore = defineStore('taxa', {
   getters: {
     // get discoveries taxon id for the currently selected taxon
     discoveriesTaxonId: (state) => {
-      // TODO: Do it with the API. At least the ones that are not in the mapTaxonToDiscoveriesId.
-      return mapTaxonToDiscoveriesId[state.taxonSelected.id as keyof typeof mapTaxonToDiscoveriesId]
+      // TODO: Do it with the API. At least the ones that are not in the mapDiscoveriesIdToTaxon.
+      return mapDiscoveriesIdToTaxon[state.taxonSelected.id as keyof typeof mapDiscoveriesIdToTaxon]
     },
   },
   actions: {

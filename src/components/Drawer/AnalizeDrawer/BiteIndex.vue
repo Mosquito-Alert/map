@@ -1,21 +1,12 @@
 <template>
-  <CardDrawer>
-    <template #title>
-      <h3 class="text-xl text-gray-700">
-        Índice de picadura del mosquito <span class="italic">(Culex pipiens)</span>
-      </h3>
-    </template>
-    <template #content>
-      <BiteIndexTimeSeriesChart class="mb-6" />
-      <BiteIndexSeasonalityChart />
-    </template>
-  </CardDrawer>
+  <h3 class="text-lg text-gray-700">Índice de picadura del mosquito</h3>
+  <BiteIndexTimeSeriesChart class="mb-6" />
+  <BiteIndexSeasonalityChart />
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAnalizeStore } from '../../../stores/analizeStore'
 import { useBiteIndexStore } from '../../../stores/biteIndexStore'
-import CardDrawer from '../CardDrawer.vue'
 import BiteIndexSeasonalityChart from './BiteIndexSeasonalityChart.vue'
 import BiteIndexTimeSeriesChart from './BiteIndexTimeSeriesChart.vue'
 
