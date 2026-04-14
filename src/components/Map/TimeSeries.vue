@@ -12,7 +12,11 @@
         <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
       </div>
 
-      <div key="open" class="flex items-end justify-end pointer-events-auto">
+      <div
+        v-if="uiStore.activeTab === drawerTabs.explore.value"
+        key="open"
+        class="flex items-end justify-end pointer-events-auto"
+      >
         <Button
           severity="secondary"
           size="small"
@@ -32,7 +36,7 @@
     </div>
     <Transition name="chart-expand">
       <div
-        v-if="showChart"
+        v-if="showChart && uiStore.activeTab === drawerTabs.explore.value"
         class="chart-window hidden lg:block bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg pointer-events-auto overflow-hidden"
       >
         <VChart
@@ -111,6 +115,7 @@ import VChart from 'vue-echarts'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { debounce } from '../../utils/debouncer'
 import { formatDate } from '../../utils/date'
+import { drawerTabs, useUIStore } from '../../stores/uiStore'
 
 use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 
@@ -124,6 +129,7 @@ type PlaybackSpeed = {
 }
 
 const observationsStore = useObservationsStore()
+const uiStore = useUIStore()
 
 const menu = ref()
 const timeSeriesDataLocal = ref<Record<string, number>>({}) //  date -> count
