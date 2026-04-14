@@ -15,6 +15,10 @@ export const useObservationsStore = defineStore('observations', {
       start: null as string | null,
       end: null as string | null,
     } as { start: string | null; end: string | null },
+    dateLimits: {
+      first: null as string | null,
+      last: null as string | null,
+    } as { first: string | null; last: string | null },
     // This state tells the observation that is currently shown in the drawer to see its details
     observationInDrawer: null as Observation | null,
     selectedObservationId: null as string | null, // This controls the observation point in the map
@@ -91,6 +95,9 @@ export const useObservationsStore = defineStore('observations', {
         console.error('Failed to fetch observation by ID:', error)
         throw error
       }
+    },
+    resetDateFilter() {
+      this.dateFilter = { start: this.dateLimits.first, end: this.dateLimits.last }
     },
   },
 })

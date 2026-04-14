@@ -126,12 +126,12 @@ type PlaybackSpeed = {
 const observationsStore = useObservationsStore()
 
 const menu = ref()
-const originalDateLimits = ref<{ start: string; end: string } | null>(null)
 const timeSeriesDataLocal = ref<Record<string, number>>({}) //  date -> count
 const timeSeriesDataMonthly = ref<{
   months: string[]
   values: number[]
 }>({ months: [], values: [] })
+const brushSelected = ref(false)
 const showChart = ref(true)
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const playbackOngoing = ref(false)
@@ -232,7 +232,9 @@ const playback = () => {
   const endingDate = new Date(
     playbackOriginalDateLimits.value?.end || observationsStore.dateFilter.end || '',
   )
-  let currentDate = new Date(playbackCurrentDate.value || observationsStore.dateFilter.start || '')
+  let currentDate = new Date(
+    playbackOriginalDateLimits.value?.start || observationsStore.dateFilter.start || '',
+  )
 
   playbackInterval.value = setInterval(() => {
     if (currentDate > endingDate) {
@@ -259,15 +261,14 @@ const playback = () => {
 
 const replay = () => {
   playbackInterval.value && clearInterval(playbackInterval.value)
-  playbackOngoing.value = false
-  if (playbackOriginalDateLimits.value) {
-    observationsStore.dateFilter.start = playbackOriginalDateLimits.value.start
-    observationsStore.dateFilter.end = playbackOriginalDateLimits.value.end
-    playbackCurrentDate.value = null
-    playbackOriginalDateLimits.value = null
-    playbackOngoing.value = true
-    playback()
-  }
+  observationsStore.dateFilter.start =
+    playbackOriginalDateLimits.value?.start || observationsStore.dateLimits.first
+  observationsStore.dateFilter.end =
+    playbackOriginalDateLimits.value?.end || observationsStore.dateLimits.last
+  playbackCurrentDate.value = null
+  playbackOriginalDateLimits.value = null
+  playbackOngoing.value = true
+  playback()
 }
 
 onMounted(() => {
@@ -279,7 +280,9 @@ onMounted(() => {
     debouncedUpdate(params)
     playbackOngoing.value = false
     playbackCurrentDate.value = null
-    playbackOriginalDateLimits.value = null
+    if (params.batch[0].areas.length > 0) {
+      brushSelected.value = true
+    }
   })
 
   chart.on('brush', (params: any) => {
@@ -287,12 +290,11 @@ onMounted(() => {
     if (areas.length === 0) {
       // Clear date filter
       observationsStore.dateFilter = {
-        start: originalDateLimits.value?.start ?? null,
-        end: originalDateLimits.value?.end ?? null,
+        start: observationsStore.dateLimits.first ?? null,
+        end: observationsStore.dateLimits.last ?? null,
       }
       playbackOngoing.value = false
       playbackCurrentDate.value = null
-      playbackOriginalDateLimits.value = null
     }
   })
 })
@@ -306,17 +308,39 @@ watch(
     const allDates = Object.keys(timeSeriesDataLocal.value)
     // If there was no previous data or the new data is empty, set the date limits to the full range of the new data
     if (!oldData || Object.keys(newData || {}).length === 0) {
-      originalDateLimits.value = {
-        start: allDates[0] as string,
-        end: allDates[allDates.length - 1] as string,
+      observationsStore.dateLimits = {
+        first: allDates[0] as string,
+        last: allDates[allDates.length - 1] as string,
       }
       observationsStore.dateFilter = {
-        start: originalDateLimits.value.start,
-        end: originalDateLimits.value.end,
+        start: observationsStore.dateLimits.first,
+        end: observationsStore.dateLimits.last,
       }
     }
   },
   { immediate: true },
+)
+
+watch(
+  () => observationsStore.dateFilter,
+  (newFilter, oldFilter) => {
+    // Throw brush event
+    if (
+      oldFilter &&
+      newFilter.start === observationsStore.dateLimits.first &&
+      newFilter.end === observationsStore.dateLimits.last &&
+      brushSelected.value
+    ) {
+      const chart = chartRef.value?.chart
+      if (chart) {
+        chart.dispatchAction({
+          type: 'brush',
+          areas: [],
+        })
+      }
+    }
+  },
+  { deep: true },
 )
 
 watch(playbackOngoing, (newValue) => {

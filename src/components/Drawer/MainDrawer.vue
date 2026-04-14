@@ -35,13 +35,18 @@
 </template>
 <script lang="ts" setup>
 import { SelectButton } from 'primevue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import ExploreDrawer from './ExploreDrawer/ExploreDrawer.vue'
 import AnalizeDrawer from './AnalizeDrawer/AnalizeDrawer.vue'
 import { useUIStore } from '../../stores/uiStore'
 import HeaderDrawer from './HeaderDrawer.vue'
+import { useTaxaStore } from '../../stores/taxaStore'
+import { useObservationsStore } from '../../stores/observationsStore'
 
+const taxaStore = useTaxaStore()
+const observationsStore = useObservationsStore()
 const uiStore = useUIStore()
+
 const activeTabClass = 'text-gray-700 font-semibold'
 const inactiveTabClass = 'text-gray-400'
 
@@ -58,5 +63,10 @@ onMounted(() => {
 })
 window.addEventListener('resize', () => {
   uiStore.drawerWidth = document.querySelector('aside')?.clientWidth || 0
+})
+
+watch(activeTab, () => {
+  taxaStore.resetSelectedTaxon()
+  observationsStore.resetDateFilter()
 })
 </script>

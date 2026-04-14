@@ -123,5 +123,8 @@ export const useTaxaStore = defineStore('taxa', {
       }
       return 'Otros'
     },
+    resetSelectedTaxon() {
+      this.taxonSelected = culicidaeTaxon
+    },
   },
 })
