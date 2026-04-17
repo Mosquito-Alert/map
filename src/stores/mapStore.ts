@@ -29,6 +29,8 @@ export const useMapStore = defineStore('map', {
     discoveriesLayerId: 'discoveries-layer',
     selectedRegionSourceId: 'selected-region-source',
     selectedRegionLayerId: 'selected-region-layer',
+    gadmSourceId: 'gadm-source',
+    gadmLayerId: 'gadm-layer',
   }),
   getters: {
     getH3SourceId: (state) => (resolution: number) => `h3-res-${resolution}`,

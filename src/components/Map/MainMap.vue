@@ -24,7 +24,7 @@ import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
-import { useUIStore } from '../../stores/uiStore'
+import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import { MosquitoLayersEnum } from '../../utils/constants'
 import { debounce } from '../../utils/debouncer'
 import type {
@@ -54,11 +54,14 @@ import {
   showOnlyResolution,
 } from './ObservationsMap'
 import TimeSeries from './TimeSeries.vue'
+import { addBoundaryLayers, attachBoundaryEvents, detachBoundaryEvents } from './BoundaryMap'
+import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
 const taxaStore = useTaxaStore()
 const uiStore = useUIStore()
+const analizeStore = useAnalizeStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = computed(() => mapStore.map) // Computed ref to react to map changes
@@ -276,6 +279,9 @@ onMounted(async () => {
       // Add initial H3 layer
       addOrUpdateH3Layer()
 
+      // Add boundary layer for selected region in Analize tab
+      addBoundaryLayers()
+
       // Debounced zoom event handler to prevent multiple calls
       const handleZoomChangeDebounced = debounce(handleZoomChange, 50)
 
@@ -465,6 +471,38 @@ watch(
         coordinates: center,
       },
     } as GeoJSON.Feature)
+  },
+  { deep: true },
+)
+
+watch(
+  () => [uiStore.activeTab, analizeStore.toolSelected],
+  ([activeTab, toolSelected], [oldActiveTab, oldToolSelected]) => {
+    if (!map.value) return
+
+    const isAnalizeTab = activeTab === drawerTabs.analize.value
+    const wasAnalizeTab = oldActiveTab === drawerTabs.analize.value
+    const isToolWithBoundaryLayer = toolSelected === toolsEnum.CLICK
+    const wasToolWithBoundaryLayer = oldToolSelected === toolsEnum.CLICK
+
+    // If switched away from Analize tab or switched to a tool that doesn't require boundary layer, turn visibility off
+    if ((!isAnalizeTab || !isToolWithBoundaryLayer) && wasAnalizeTab && wasToolWithBoundaryLayer) {
+      const gadmLayer = map.value.getLayer(mapStore.gadmLayerId)
+      if (gadmLayer) {
+        map.value.setLayoutProperty(mapStore.gadmLayerId, 'visibility', 'none')
+      }
+      detachBoundaryEvents()
+    }
+
+    // If switched to Analize tab and tool that requires boundary layer, turn visibility on
+    if (isAnalizeTab && isToolWithBoundaryLayer && (!wasAnalizeTab || !wasToolWithBoundaryLayer)) {
+      const gadmLayer = map.value.getLayer(mapStore.gadmLayerId)
+      if (gadmLayer) {
+        map.value.setLayoutProperty(mapStore.gadmLayerId, 'visibility', 'visible')
+      }
+      attachBoundaryEvents()
+      // TODO: Observations layers with less opacity (reset after analysis is done or tool is switched)
+    }
   },
   { deep: true },
 )

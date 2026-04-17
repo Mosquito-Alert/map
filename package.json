@@ -19,7 +19,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@geomatico/maplibre-cog-protocol": "^0.8.0",
+    "@esri/maplibre-arcgis": "^1.2.0",
     "@primeuix/themes": "^1.2.5",
     "@tailwindcss/vite": "^4.1.17",
     "@turf/turf": "^7.3.4",
