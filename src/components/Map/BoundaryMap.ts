@@ -85,11 +85,9 @@ const onBoundaryMouseMove = (e: any, gadmLevel: number) => {
 
   map.value.getCanvas().style.cursor = 'pointer'
 
-  // console.log(e.features[0])
-
   if (!e.features || e.features.length === 0) return
 
-  const newId = e.features[0].properties.id
+  const newId = e.features[0].id
 
   if (hoveredBoundaryId === newId) return
 
@@ -98,7 +96,7 @@ const onBoundaryMouseMove = (e: any, gadmLevel: number) => {
     map.value.setFeatureState(
       {
         source: mapStore.getGadmSourceId(gadmLevel),
-        sourceLayer: 'default',
+        sourceLayer: `ADM_${gadmLevel}`,
         id: hoveredBoundaryId,
       },
       { hover: false },
@@ -111,7 +109,7 @@ const onBoundaryMouseMove = (e: any, gadmLevel: number) => {
   map.value.setFeatureState(
     {
       source: mapStore.getGadmSourceId(gadmLevel),
-      sourceLayer: 'default',
+      sourceLayer: `ADM_${gadmLevel}`,
       id: hoveredBoundaryId as string,
     },
     { hover: true },
@@ -127,7 +125,7 @@ const onBoundaryMouseLeave = (gadmLevel: number) => {
     map.value.setFeatureState(
       {
         source: mapStore.getGadmSourceId(gadmLevel),
-        sourceLayer: 'default',
+        sourceLayer: `ADM_${gadmLevel}`,
         id: hoveredBoundaryId,
       },
       { hover: false },
