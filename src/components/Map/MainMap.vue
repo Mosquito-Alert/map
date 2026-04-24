@@ -48,13 +48,19 @@ import {
   getMapColors,
   getResolutionForZoom,
   h3AggregationWorker,
-  handleZoomChange,
+  handleZoomChangeInObservations,
   mapColors,
   renderedOriginalDateAggregationData,
   showOnlyResolution,
 } from './ObservationsMap'
 import TimeSeries from './TimeSeries.vue'
-import { addBoundaryLayers, attachBoundaryEvents, detachBoundaryEvents } from './BoundaryMap'
+import {
+  addBoundaryLayers,
+  attachBoundaryEvents,
+  detachBoundaryEvents,
+  gadmLevels,
+  handleZoomChangeInBoundaries,
+} from './BoundaryMap'
 import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
 
 const observationsStore = useObservationsStore()
@@ -283,7 +289,10 @@ onMounted(async () => {
       addBoundaryLayers()
 
       // Debounced zoom event handler to prevent multiple calls
-      const handleZoomChangeDebounced = debounce(handleZoomChange, 50)
+      const handleZoomChangeDebounced = debounce(() => {
+        handleZoomChangeInObservations()
+        handleZoomChangeInBoundaries()
+      }, 50)
 
       // Add zoom event listeners - only on zoomend to prevent constant processing
       map.value.on('zoomend', handleZoomChangeDebounced)
@@ -487,20 +496,33 @@ watch(
 
     // If switched away from Analize tab or switched to a tool that doesn't require boundary layer, turn visibility off
     if ((!isAnalizeTab || !isToolWithBoundaryLayer) && wasAnalizeTab && wasToolWithBoundaryLayer) {
-      const gadmLayer = map.value.getLayer(mapStore.gadmLayerId)
-      if (gadmLayer) {
-        map.value.setLayoutProperty(mapStore.gadmLayerId, 'visibility', 'none')
+      for (const gadmLevel of gadmLevels) {
+        const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevel.level))
+        if (gadmLayer) {
+          map.value.setLayoutProperty(
+            mapStore.getGadmLayerId(gadmLevel.level),
+            'visibility',
+            'none',
+          )
+        }
+        detachBoundaryEvents(gadmLevel.level)
       }
-      detachBoundaryEvents()
     }
 
     // If switched to Analize tab and tool that requires boundary layer, turn visibility on
     if (isAnalizeTab && isToolWithBoundaryLayer && (!wasAnalizeTab || !wasToolWithBoundaryLayer)) {
-      const gadmLayer = map.value.getLayer(mapStore.gadmLayerId)
+      const zoom = map.value.getZoom()
+      const gadmLevelToShow =
+        gadmLevels.find((level) => zoom >= level.minZoom && zoom <= level.maxZoom)?.level || 1
+      const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevelToShow))
       if (gadmLayer) {
-        map.value.setLayoutProperty(mapStore.gadmLayerId, 'visibility', 'visible')
+        map.value.setLayoutProperty(
+          mapStore.getGadmLayerId(gadmLevelToShow),
+          'visibility',
+          'visible',
+        )
       }
-      attachBoundaryEvents()
+      attachBoundaryEvents(gadmLevelToShow)
       // TODO: Observations layers with less opacity (reset after analysis is done or tool is switched)
     }
   },

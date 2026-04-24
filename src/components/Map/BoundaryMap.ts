@@ -8,57 +8,84 @@ const map = computed(() => mapStore.map) // Computed ref to react to map changes
 let hoveredBoundaryId: string | null = null
 let boundaryEventsAttached = false
 
+const getADMUrl = (level: number) => {
+  return (
+    import.meta.env.VITE_GEOSERVER_GWC_URL +
+    '?REQUEST=GetTile' +
+    '&SERVICE=WMTS' +
+    '&VERSION=1.0.0' +
+    `&LAYER=mosquitoalert:ADM_${level}` +
+    '&STYLE=' +
+    '&TILEMATRIXSET=EPSG:900913' +
+    '&TILEMATRIX=EPSG:900913:{z}' +
+    '&FORMAT=application/vnd.mapbox-vector-tile' +
+    '&TILECOL={x}' +
+    '&TILEROW={y}'
+  )
+}
+
+export const gadmLevels = [
+  {
+    level: 1,
+    minZoom: 0,
+    maxZoom: 6,
+    url: new URL(getADMUrl(1), window.location.origin).toString(),
+  },
+  {
+    level: 2,
+    minZoom: 6,
+    maxZoom: 8,
+    url: new URL(getADMUrl(2), window.location.origin).toString(),
+  },
+]
+
 // Function to add boundary layers for different regions
 export const addBoundaryLayers = async () => {
   if (!map.value) return
 
-  const sourceId = mapStore.gadmSourceId
-  const layerId = mapStore.gadmLayerId
+  for (const gadmLevel of Object.values(gadmLevels)) {
+    const sourceId = mapStore.getGadmSourceId(gadmLevel.level)
+    const layerId = mapStore.getGadmLayerId(gadmLevel.level)
 
-  if (!map.value.getSource(sourceId)) {
-    map.value.addSource(sourceId, {
-      type: 'vector',
-      tiles: ['https://maps.heigit.org/vector/tiles/public.admin_boundaries_layer/{z}/{x}/{y}.pbf'],
-      scheme: 'xyz',
-      minzoom: 0,
-      maxzoom: 22,
-      bounds: [-180, -90, 180, 90],
-      attribution: 'Data from OpenStreetMap',
-      promoteId: 'id',
-      volatile: false,
-      encoding: 'mvt',
-    })
-  }
+    if (!map.value.getSource(sourceId)) {
+      map.value.addSource(sourceId, {
+        type: 'vector',
+        tiles: [gadmLevel.url],
+        minzoom: gadmLevel.minZoom,
+        maxzoom: gadmLevel.maxZoom,
+      })
+    }
 
-  if (!map.value.getLayer(layerId)) {
-    map.value.addLayer({
-      id: layerId,
-      source: sourceId,
-      'source-layer': 'default',
-      type: 'fill',
-      layout: {
-        visibility: 'none',
-      },
-      paint: {
-        'fill-color': [
-          'case',
-          ['boolean', ['feature-state', 'hover'], false],
-          'rgba(255, 0, 0, 0.5)', // Red with opacity when hovered
-          'rgba(150, 180, 180, 0.5)', // Default color with opacity
-        ],
-        'fill-outline-color': 'rgba(150, 180, 180, 1)',
-      },
-    })
+    if (!map.value.getLayer(layerId)) {
+      map.value.addLayer({
+        id: layerId,
+        source: sourceId,
+        'source-layer': `ADM_${gadmLevel.level}`,
+        type: 'fill',
+        layout: {
+          visibility: 'none',
+        },
+        paint: {
+          'fill-color': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            'rgba(255, 0, 0, 0.5)', // Red with opacity when hovered
+            'rgba(150, 180, 180, 0.5)', // Default color with opacity
+          ],
+          'fill-outline-color': 'rgba(150, 180, 180, 1)',
+        },
+      })
+    }
   }
 }
 
 // ######### EVENT HANDLERS FOR LAYER #########
-const onBoundaryMouseMove = (e: any) => {
+const onBoundaryMouseMove = (e: any, gadmLevel: number) => {
   if (!map.value) return
 
   map.value.getCanvas().style.cursor = 'pointer'
 
-  console.log(e.features[0])
+  // console.log(e.features[0])
 
   if (!e.features || e.features.length === 0) return
 
@@ -69,7 +96,11 @@ const onBoundaryMouseMove = (e: any) => {
   // remove old hover
   if (hoveredBoundaryId) {
     map.value.setFeatureState(
-      { source: mapStore.gadmSourceId, sourceLayer: 'default', id: hoveredBoundaryId },
+      {
+        source: mapStore.getGadmSourceId(gadmLevel),
+        sourceLayer: 'default',
+        id: hoveredBoundaryId,
+      },
       { hover: false },
     )
   }
@@ -78,19 +109,27 @@ const onBoundaryMouseMove = (e: any) => {
 
   // set new hover
   map.value.setFeatureState(
-    { source: mapStore.gadmSourceId, sourceLayer: 'default', id: hoveredBoundaryId as string },
+    {
+      source: mapStore.getGadmSourceId(gadmLevel),
+      sourceLayer: 'default',
+      id: hoveredBoundaryId as string,
+    },
     { hover: true },
   )
 }
 
-const onBoundaryMouseLeave = () => {
+const onBoundaryMouseLeave = (gadmLevel: number) => {
   if (!map.value) return
 
   map.value.getCanvas().style.cursor = ''
 
   if (hoveredBoundaryId) {
     map.value.setFeatureState(
-      { source: mapStore.gadmSourceId, sourceLayer: 'default', id: hoveredBoundaryId },
+      {
+        source: mapStore.getGadmSourceId(gadmLevel),
+        sourceLayer: 'default',
+        id: hoveredBoundaryId,
+      },
       { hover: false },
     )
   }
@@ -133,28 +172,50 @@ const onBoundaryMouseLeave = () => {
 //   observationsStore.fetchObservationById(clickedId)
 // }
 
-export const attachBoundaryEvents = () => {
+export const attachBoundaryEvents = (gadmLevel: number) => {
   if (!map.value) return
   if (boundaryEventsAttached) return
-  if (!map.value.getLayer(mapStore.gadmLayerId)) return
+  if (!map.value.getLayer(mapStore.getGadmLayerId(gadmLevel))) return
 
-  map.value.on('mouseleave', mapStore.gadmLayerId, onBoundaryMouseLeave)
-  map.value.on('mousemove', mapStore.gadmLayerId, onBoundaryMouseMove)
-  // map.value.on('click', mapStore.gadmLayerId, onBoundaryClick)
+  map.value.on('mouseleave', mapStore.getGadmLayerId(gadmLevel), () =>
+    onBoundaryMouseLeave(gadmLevel),
+  )
+  map.value.on('mousemove', mapStore.getGadmLayerId(gadmLevel), (e) =>
+    onBoundaryMouseMove(e, gadmLevel),
+  )
+  // map.value.on('click', mapStore.getGadmLayerId(gadmLevel), (e) => onBoundaryClick(e, gadmLevel))
 
   boundaryEventsAttached = true
 }
-export const detachBoundaryEvents = () => {
+export const detachBoundaryEvents = (gadmLevel: number) => {
   if (!map.value) return
   if (!boundaryEventsAttached) return
-  if (!map.value.getLayer(mapStore.gadmLayerId)) return
+  if (!map.value.getLayer(mapStore.getGadmLayerId(gadmLevel))) return
 
-  map.value.on('mousemove', mapStore.gadmLayerId, onBoundaryMouseMove)
-  map.value.off('mouseleave', mapStore.gadmLayerId, onBoundaryMouseLeave)
-  // map.value.off('click', mapStore.gadmLayerId, onBoundaryClick)
+  map.value.on('mousemove', mapStore.getGadmLayerId(gadmLevel), (e) =>
+    onBoundaryMouseMove(e, gadmLevel),
+  )
+  map.value.off('mouseleave', mapStore.getGadmLayerId(gadmLevel), () =>
+    onBoundaryMouseLeave(gadmLevel),
+  )
+  // map.value.off('click', mapStore.getGadmLayerId(gadmLevel), (e) => onBoundaryClick(e, gadmLevel))
 
   // Cleanup hover state, in case mouse is currently hovering an observation when layer is hidden
-  onBoundaryMouseLeave()
+  onBoundaryMouseLeave(gadmLevel)
 
   boundaryEventsAttached = false
+}
+
+export const handleZoomChangeInBoundaries = async () => {
+  if (!map.value) return
+
+  const zoom = map.value.getZoom()
+
+  for (const gadmLevel of Object.values(gadmLevels)) {
+    if (zoom >= gadmLevel.minZoom && zoom <= gadmLevel.maxZoom) {
+      map.value.setLayoutProperty(mapStore.getGadmLayerId(gadmLevel.level), 'visibility', 'visible')
+    } else {
+      map.value.setLayoutProperty(mapStore.getGadmLayerId(gadmLevel.level), 'visibility', 'none')
+    }
+  }
 }

@@ -29,14 +29,14 @@ export const useMapStore = defineStore('map', {
     discoveriesLayerId: 'discoveries-layer',
     selectedRegionSourceId: 'selected-region-source',
     selectedRegionLayerId: 'selected-region-layer',
-    gadmSourceId: 'gadm-source',
-    gadmLayerId: 'gadm-layer',
   }),
   getters: {
     getH3SourceId: (state) => (resolution: number) => `h3-res-${resolution}`,
     getH3LayerId: (state) => (resolution: number) => `h3-layer-res-${resolution}`,
     getGbifSourceId: (state) => (gbifId: string) => `distribution-${gbifId}`,
     getGbifLayerId: (state) => (gbifId: string) => `distribution-layer-${gbifId}`,
+    getGadmSourceId: (state) => (level: number) => `gadm-level-${level}`,
+    getGadmLayerId: (state) => (level: number) => `gadm-layer-level-${level}`,
   },
   actions: {
     setMap(instance: Map) {

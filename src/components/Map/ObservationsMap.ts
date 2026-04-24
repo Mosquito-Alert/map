@@ -462,7 +462,7 @@ export const addNearbyObservationsCircleLayer = () => {
 }
 
 // Handle zoom events for dynamic resolution switching
-export const handleZoomChange = async () => {
+export const handleZoomChangeInObservations = async () => {
   if (!map.value) return
   if (mapStore.layerSelected !== MosquitoLayersEnum.OBSERVATIONS) return
 
