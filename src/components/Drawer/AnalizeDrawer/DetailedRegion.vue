@@ -71,6 +71,7 @@ import VChart from 'vue-echarts'
 import { useTaxaStore } from '../../../stores/taxaStore'
 import CardDrawer from '../CardDrawer.vue'
 import Models from './Models.vue'
+import { getRegionDetails } from '../../../utils/regionDetails'
 
 use([PieChart, CanvasRenderer, GridComponent])
 
@@ -81,12 +82,9 @@ const taxaStore = useTaxaStore()
 const observationPointsInBoundary = shallowRef([])
 const aggregatedObservations = shallowRef<{ name: string; value: number }[]>([])
 const loadingInfo = ref(false)
-const regionName = computed(
-  () => analizeStore.selectedRegion?.features?.[0]?.properties?.name || 'Región personalizada.',
-)
-const regionSubname = computed(
-  () => analizeStore.selectedRegion?.features?.[0]?.properties?.display_name || null,
-)
+const regionDetails = computed(() => getRegionDetails(analizeStore.selectedRegion?.features?.[0]))
+const regionName = computed(() => regionDetails.value.name || 'Región personalizada.')
+const regionSubname = computed(() => regionDetails.value.subname || null)
 
 const aggregateObservationsInBoundary = () => {
   const totalAggregation = observationPointsInBoundary.value.reduce(
