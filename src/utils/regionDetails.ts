@@ -1,3 +1,5 @@
+import { area } from '@turf/turf'
+
 type regionDetails = {
   name: string
   subname: string
@@ -88,4 +90,12 @@ export const getRegionDetails = (feature: GeoJSON.Feature | undefined): regionDe
   }
 
   return EMPTY_REGION_DETAILS
+}
+
+// Calculates the area of a GeoJSON feature in km².
+export const calculateArea = (feature: GeoJSON.Feature): number => {
+  if (!feature.geometry) return 0
+
+  const areaInSquareMeters = area(feature)
+  return areaInSquareMeters / 1000000 // Convert to km²
 }

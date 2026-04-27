@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
 import { useMapStore } from '../../stores/mapStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
+import { calculateArea } from '../../utils/regionDetails'
 
 const uiStore = useUIStore()
 const mapStore = useMapStore()
@@ -190,9 +191,8 @@ const onBoundaryClick = async (e: any, gadmLevel: number) => {
       console.error('Error fetching boundary details:', error)
     })
 
-  console.log(feature)
-
   analizeStore.selectedRegion = feature as GeoJSON.FeatureCollection
+  analizeStore.extensionOfSelectedRegion = calculateArea(feature.features[0])
 }
 
 export const attachBoundaryEvents = (gadmLevel: number) => {
