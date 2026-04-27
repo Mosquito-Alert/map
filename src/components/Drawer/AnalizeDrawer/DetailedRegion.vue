@@ -66,7 +66,7 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ObservationGeoModel } from 'mosquito-alert'
 import { Button } from 'primevue'
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { useTaxaStore } from '../../../stores/taxaStore'
 import CardDrawer from '../CardDrawer.vue'
@@ -157,7 +157,7 @@ const option = computed(() => ({
   ],
 }))
 
-onMounted(async () => {
+const fetchObservationsInBoundary = async () => {
   loadingInfo.value = true
   const response = await observationsStore.fetchObservations(false, analizeStore.selectedRegion)
   observationPointsInBoundary.value = response
@@ -169,7 +169,20 @@ onMounted(async () => {
     }),
   )
   loadingInfo.value = false
+}
+
+onMounted(async () => {
+  if (analizeStore.selectedRegion) {
+    fetchObservationsInBoundary()
+  }
 })
+
+watch(
+  () => analizeStore.selectedRegion,
+  async () => {
+    fetchObservationsInBoundary()
+  },
+)
 
 onUnmounted(() => {
   observationPointsInBoundary.value = []

@@ -191,6 +191,7 @@ const onBoundaryClick = async (e: any, gadmLevel: number) => {
       console.error('Error fetching boundary details:', error)
     })
 
+  analizeStore.clearSelectedRegion()
   analizeStore.selectedRegion = feature as GeoJSON.FeatureCollection
   analizeStore.extensionOfSelectedRegion = calculateArea(feature.features[0])
 }
