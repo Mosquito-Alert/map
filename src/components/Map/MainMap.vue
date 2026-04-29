@@ -2,11 +2,11 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
-        <TimeSeries
+        <MAObservationsTimeSeries
           :timeSeriesData="renderedOriginalDateAggregationData"
           v-if="observationsStore.dataProcessed"
         />
-        <MapLegend
+        <MAObservationsLegend
           v-if="mapStore.showLegend"
           :mapColors="mapColors[taxaStore.taxonSelected.id]![currentResolution as number]"
         />
@@ -41,9 +41,9 @@ import {
   gadmLevels,
   handleZoomChangeInBoundaries,
 } from './BoundaryMap'
-import { addDiscoveriesLayer } from './DiscoveriesMap'
-import { addGBIFOccurrencesLayer } from './DistributionMap'
-import MapLegend from './MapLegend.vue'
+import { addDiscoveriesLayer } from './DiscoveriesMap/DiscoveriesMap'
+import { addGBIFOccurrencesLayer } from './ExtendedObservationsMap/ExtendedObservationsMap'
+import MAObservationsLegend from './MAObservationsMap/MAObservationsLegend.vue'
 import {
   addNearbyObservationsCircleLayer,
   addObservationLayers,
@@ -61,9 +61,9 @@ import {
   mapColors,
   renderedOriginalDateAggregationData,
   showOnlyResolution,
-} from './ObservationsMap'
-import { addRM0Layer } from './RM0Map'
-import TimeSeries from './TimeSeries.vue'
+} from './MAObservationsMap/MAObservationsMap'
+import { addRM0Layer } from './RM0Map/RM0Map'
+import MAObservationsTimeSeries from './MAObservationsMap/MAObservationsTimeSeries.vue'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -151,8 +151,8 @@ const pushMapPaddingUpdate = debounce(() => {
 const toggleDataLayers = async () => {
   if (!map.value) return
 
-  const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.OBSERVATIONS
-  const showGbif = mapStore.layerSelected === MosquitoLayersEnum.DISTRIBUTION
+  const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.MA_OBSERVATIONS
+  const showGbif = mapStore.layerSelected === MosquitoLayersEnum.EXTENDED_OBSERVATIONS
   const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.DISCOVERIES
   const showRM0 = mapStore.layerSelected === MosquitoLayersEnum.RM0
 
@@ -169,9 +169,9 @@ const toggleDataLayers = async () => {
     })
   }
   // ---- Toggle observation points ----
-  if (map.value.getLayer(mapStore.observationsPointsLayerId)) {
+  if (map.value.getLayer(mapStore.maObservationsPointsLayerId)) {
     map.value.setLayoutProperty(
-      mapStore.observationsPointsLayerId,
+      mapStore.maObservationsPointsLayerId,
       'visibility',
       showOwnData ? 'visible' : 'none',
     )
@@ -180,7 +180,7 @@ const toggleDataLayers = async () => {
     else detachObservationEvents()
   }
 
-  // ########## DISTRIBUTION #########
+  // ########## EXTENDED OBSERVATIONS #########
   if (showGbif) {
     //  Ensure GBIF layer exists
     await addGBIFOccurrencesLayer()
@@ -193,7 +193,7 @@ const toggleDataLayers = async () => {
     // NOTE: we can have multiple GBIF layers if user switched between different taxa with GBIF data
     const allLayers = map.value.getLayersOrder()
     allLayers.forEach((layerId) => {
-      if (layerId.startsWith('distribution-layer-')) {
+      if (layerId.startsWith('extended-observations-layer-')) {
         map.value!.setLayoutProperty(layerId, 'visibility', 'none')
       }
     })
@@ -204,12 +204,12 @@ const toggleDataLayers = async () => {
     // Ensure Discoveries layer exists
     await addDiscoveriesLayer()
     // Ensure Discoveries layer is visible
-    if (map.value.getLayer(mapStore.discoveriesLayerId)) {
-      map.value.setLayoutProperty(mapStore.discoveriesLayerId, 'visibility', 'visible')
+    if (map.value.getLayer(mapStore.extObservationsLayerId)) {
+      map.value.setLayoutProperty(mapStore.extObservationsLayerId, 'visibility', 'visible')
     }
   } else {
-    if (map.value.getLayer(mapStore.discoveriesLayerId)) {
-      map.value.setLayoutProperty(mapStore.discoveriesLayerId, 'visibility', 'none')
+    if (map.value.getLayer(mapStore.extObservationsLayerId)) {
+      map.value.setLayoutProperty(mapStore.extObservationsLayerId, 'visibility', 'none')
     }
   }
 
@@ -390,7 +390,7 @@ watch(
   (newFilters) => {
     if (map.value) {
       const filters = Object.values(newFilters)
-      map.value.setFilter(mapStore.observationsPointsLayerId, ['all', ...filters])
+      map.value.setFilter(mapStore.maObservationsPointsLayerId, ['all', ...filters])
     }
   },
   { deep: true },
@@ -402,11 +402,11 @@ watch(
     if (!map.value) return
     if (!newObservation) {
       // No observation selected → reset all to red
-      map.value.setPaintProperty(mapStore.observationsPointsLayerId, 'circle-color', '#FF5722')
+      map.value.setPaintProperty(mapStore.maObservationsPointsLayerId, 'circle-color', '#FF5722')
       if (observationsStore.selectedObservationId) {
         map.value.setFeatureState(
           {
-            source: mapStore.observationsPointsSourceId,
+            source: mapStore.maObservationsPointsSourceId,
             id: observationsStore.selectedObservationId,
           },
           { click: false },
@@ -416,14 +416,14 @@ watch(
     } else {
       observationsStore.selectedObservationId = newObservation.uuid
       // paint selected one as red, others as gray
-      map.value.setPaintProperty(mapStore.observationsPointsLayerId, 'circle-color', [
+      map.value.setPaintProperty(mapStore.maObservationsPointsLayerId, 'circle-color', [
         'case',
         ['==', ['id'], newObservation.uuid],
         '#FF5722', // selected
         '#888888', // others
       ])
       map.value.setFeatureState(
-        { source: mapStore.observationsPointsSourceId, id: newObservation.uuid },
+        { source: mapStore.maObservationsPointsSourceId, id: newObservation.uuid },
         { click: true },
       )
       // zoom to selected observation

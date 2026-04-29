@@ -1,6 +1,6 @@
 export enum MosquitoLayersEnum {
-  OBSERVATIONS = 'observations',
-  DISTRIBUTION = 'distribution',
+  MA_OBSERVATIONS = 'ma observations',
+  EXTENDED_OBSERVATIONS = 'extended observations',
   DISCOVERIES = 'discoveries',
   RM0 = 'rm0',
   BITE_INDEX = 'bite_index',
@@ -8,14 +8,14 @@ export enum MosquitoLayersEnum {
 
 export const mosquitoLayers = [
   {
-    key: MosquitoLayersEnum.OBSERVATIONS,
+    key: MosquitoLayersEnum.MA_OBSERVATIONS,
     label: 'Observaciones de la comunidad',
     info: 'Muestra las observaciones de mosquitos reportadas por la comunidad en la aplicación Mosquito Alert.',
   },
   {
-    key: MosquitoLayersEnum.DISTRIBUTION,
+    key: MosquitoLayersEnum.EXTENDED_OBSERVATIONS,
     label: 'Distribución de la especie',
-    info: 'Muestra la distribución geográfica de diferentes especies de mosquitos basada en datos científicos y observaciones. Datos obtenidos de la fuente GBIF.',
+    info: 'Muestra las observaciones de mosquitos de la especie seleccionada obtenidas de fuentes externas como GBIF, lo que ayuda a entender su distribución global y local. GBIF usa datos de múltiples fuentes, incluyendo Mosquito Alert.',
   },
   {
     key: MosquitoLayersEnum.DISCOVERIES,

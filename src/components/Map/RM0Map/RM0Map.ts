@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { useMapStore } from '../../stores/mapStore'
+import { useMapStore } from '../../../stores/mapStore'
 
 const mapStore = useMapStore()
 

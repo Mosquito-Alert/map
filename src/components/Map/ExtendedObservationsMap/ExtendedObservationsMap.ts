@@ -1,6 +1,6 @@
 import { computed } from 'vue'
-import { useMapStore } from '../../stores/mapStore'
-import { useTaxaStore } from '../../stores/taxaStore'
+import { useMapStore } from '../../../stores/mapStore'
+import { useTaxaStore } from '../../../stores/taxaStore'
 
 const mapStore = useMapStore()
 const taxaStore = useTaxaStore()

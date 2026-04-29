@@ -1,12 +1,12 @@
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { computed, markRaw, ref } from 'vue'
-import { useMapStore } from '../../stores/mapStore'
-import { useObservationsStore } from '../../stores/observationsStore'
-import { useTaxaStore } from '../../stores/taxaStore'
-import { MosquitoLayersEnum } from '../../utils/constants'
-import { quantile } from '../../utils/utils'
-import { MessageType } from '../../workers/h3Aggregation.worker'
+import { useMapStore } from '../../../stores/mapStore'
+import { useObservationsStore } from '../../../stores/observationsStore'
+import { useTaxaStore } from '../../../stores/taxaStore'
+import { MosquitoLayersEnum } from '../../../utils/constants'
+import { quantile } from '../../../utils/utils'
+import { MessageType } from '../../../workers/h3Aggregation.worker'
 
 export const h3AggregationWorker = new Worker(
   new URL('@/workers/h3Aggregation.worker.ts', import.meta.url),
@@ -154,7 +154,7 @@ const onObservationPointsMouseEnter = (e: any) => {
   if (e.features && e.features.length > 0) {
     if (hoveredObservationId) {
       map.value.setFeatureState(
-        { source: mapStore.observationsPointsSourceId, id: hoveredObservationId },
+        { source: mapStore.maObservationsPointsSourceId, id: hoveredObservationId },
         { hover: false },
       )
     }
@@ -162,7 +162,7 @@ const onObservationPointsMouseEnter = (e: any) => {
     hoveredObservationId = e.features[0]?.properties.uuid as string
 
     map.value.setFeatureState(
-      { source: mapStore.observationsPointsSourceId, id: hoveredObservationId },
+      { source: mapStore.maObservationsPointsSourceId, id: hoveredObservationId },
       { hover: true },
     )
   }
@@ -173,7 +173,7 @@ const onObservationPointsMouseLeave = () => {
 
   if (hoveredObservationId) {
     map.value.setFeatureState(
-      { source: mapStore.observationsPointsSourceId, id: hoveredObservationId },
+      { source: mapStore.maObservationsPointsSourceId, id: hoveredObservationId },
       { hover: false },
     )
     hoveredObservationId = null
@@ -183,14 +183,17 @@ const onObservationPointsClick = (e: any) => {
   if (!map.value) return
 
   const features = map.value.queryRenderedFeatures(e.point, {
-    layers: [mapStore.observationsPointsLayerId],
+    layers: [mapStore.maObservationsPointsLayerId],
   })
 
   if (!features.length) return
 
   if (observationsStore.selectedObservationId) {
     map.value.setFeatureState(
-      { source: mapStore.observationsPointsSourceId, id: observationsStore.selectedObservationId },
+      {
+        source: mapStore.maObservationsPointsSourceId,
+        id: observationsStore.selectedObservationId,
+      },
       { click: false },
     )
   }
@@ -200,14 +203,17 @@ const onObservationPointsClick = (e: any) => {
   // If clicking the already selected one → deselect
   if (observationsStore.selectedObservationId === clickedId) {
     map.value.setFeatureState(
-      { source: mapStore.observationsPointsSourceId, id: observationsStore.selectedObservationId },
+      {
+        source: mapStore.maObservationsPointsSourceId,
+        id: observationsStore.selectedObservationId,
+      },
       { click: false },
     )
 
     observationsStore.selectedObservationId = null
 
     // Reset: all red
-    map.value.setPaintProperty(mapStore.observationsPointsLayerId, 'circle-color', '#FF5722')
+    map.value.setPaintProperty(mapStore.maObservationsPointsLayerId, 'circle-color', '#FF5722')
     return
   }
 
@@ -217,11 +223,11 @@ const onObservationPointsClick = (e: any) => {
 export const attachObservationEvents = () => {
   if (!map.value) return
   if (observationEventsAttached) return
-  if (!map.value.getLayer(mapStore.observationsPointsLayerId)) return
+  if (!map.value.getLayer(mapStore.maObservationsPointsLayerId)) return
 
-  map.value.on('mouseenter', mapStore.observationsPointsLayerId, onObservationPointsMouseEnter)
-  map.value.on('mouseleave', mapStore.observationsPointsLayerId, onObservationPointsMouseLeave)
-  map.value.on('click', mapStore.observationsPointsLayerId, onObservationPointsClick)
+  map.value.on('mouseenter', mapStore.maObservationsPointsLayerId, onObservationPointsMouseEnter)
+  map.value.on('mouseleave', mapStore.maObservationsPointsLayerId, onObservationPointsMouseLeave)
+  map.value.on('click', mapStore.maObservationsPointsLayerId, onObservationPointsClick)
 
   observationEventsAttached = true
 }
@@ -229,11 +235,11 @@ export const attachObservationEvents = () => {
 export const detachObservationEvents = () => {
   if (!map.value) return
   if (!observationEventsAttached) return
-  if (!map.value.getLayer(mapStore.observationsPointsLayerId)) return
+  if (!map.value.getLayer(mapStore.maObservationsPointsLayerId)) return
 
-  map.value.off('mouseenter', mapStore.observationsPointsLayerId, onObservationPointsMouseEnter)
-  map.value.off('mouseleave', mapStore.observationsPointsLayerId, onObservationPointsMouseLeave)
-  map.value.off('click', mapStore.observationsPointsLayerId, onObservationPointsClick)
+  map.value.off('mouseenter', mapStore.maObservationsPointsLayerId, onObservationPointsMouseEnter)
+  map.value.off('mouseleave', mapStore.maObservationsPointsLayerId, onObservationPointsMouseLeave)
+  map.value.off('click', mapStore.maObservationsPointsLayerId, onObservationPointsClick)
 
   // Cleanup hover state, in case mouse is currently hovering an observation when layer is hidden
   onObservationPointsMouseLeave()
@@ -324,11 +330,11 @@ export const showOnlyResolution = () => {
   })
 
   // Handle observation points
-  if (map.value.getLayer(mapStore.observationsPointsLayerId)) {
+  if (map.value.getLayer(mapStore.maObservationsPointsLayerId)) {
     const visible = resolution === null
 
     map.value.setLayoutProperty(
-      mapStore.observationsPointsLayerId,
+      mapStore.maObservationsPointsLayerId,
       'visibility',
       resolution === null ? 'visible' : 'none',
     )
@@ -343,8 +349,8 @@ export const addObservationLayers = () => {
   if (!map.value || !geojsonCache.value) return
 
   // Observations
-  if (!map.value.getSource(mapStore.observationsPointsSourceId)) {
-    map.value.addSource(mapStore.observationsPointsSourceId, {
+  if (!map.value.getSource(mapStore.maObservationsPointsSourceId)) {
+    map.value.addSource(mapStore.maObservationsPointsSourceId, {
       type: 'geojson',
       data: geojsonCache.value as GeoJSON.FeatureCollection,
       buffer: 0,
@@ -353,10 +359,10 @@ export const addObservationLayers = () => {
     })
   }
 
-  if (!map.value.getLayer(mapStore.observationsPointsLayerId)) {
+  if (!map.value.getLayer(mapStore.maObservationsPointsLayerId)) {
     map.value.addLayer({
-      id: mapStore.observationsPointsLayerId,
-      source: mapStore.observationsPointsSourceId,
+      id: mapStore.maObservationsPointsLayerId,
+      source: mapStore.maObservationsPointsSourceId,
       type: 'circle',
       minzoom: observationPointsZoom,
       layout: { visibility: 'none' },
