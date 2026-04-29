@@ -19,7 +19,7 @@ export const addDiscoveriesLayer = async () => {
     map.value.addSource(mapStore.discoveriesSourceId, {
       type: 'raster',
       tiles: [
-        `https://mapserver.mosquitoalert.com/geoserver/mosquitoalert/wms?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&TRANSPARENT=TRUE&FORMAT=image/png&env=field:${discoveriesTaxonId}&LAYERS=mosquitoalert:discoveries&WIDTH=${width}&HEIGHT=${height}&CRS=${crs}&bbox={bbox-epsg-3857}`,
+        `/geoserver/mosquitoalert/wms?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&TRANSPARENT=TRUE&FORMAT=image/png&env=field:${discoveriesTaxonId}&LAYERS=mosquitoalert:discoveries&WIDTH=${width}&HEIGHT=${height}&CRS=${crs}&bbox={bbox-epsg-3857}`,
       ],
       tileSize: 256,
     })

@@ -34,6 +34,11 @@ export default defineConfig(({ mode }) => {
             secure: false,
             rewrite: (path) => path.replace(/^\/metrics/, ''),
           },
+          '/geoserver': {
+            target: 'https://mapserver.mosquitoalert.com/',
+            changeOrigin: true,
+            secure: false,
+          },
         },
       }),
     },

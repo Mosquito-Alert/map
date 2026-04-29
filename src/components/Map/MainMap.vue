@@ -17,10 +17,12 @@
 
 <script setup lang="ts">
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
+import { cogProtocol } from '@geomatico/maplibre-cog-protocol'
 import * as turf from '@turf/turf'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
+import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
@@ -32,6 +34,13 @@ import type {
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
+import {
+  addBoundaryLayers,
+  attachBoundaryEvents,
+  detachBoundaryEvents,
+  gadmLevels,
+  handleZoomChangeInBoundaries,
+} from './BoundaryMap'
 import { addDiscoveriesLayer } from './DiscoveriesMap'
 import { addGBIFOccurrencesLayer } from './DistributionMap'
 import MapLegend from './MapLegend.vue'
@@ -53,15 +62,8 @@ import {
   renderedOriginalDateAggregationData,
   showOnlyResolution,
 } from './ObservationsMap'
+import { addRM0Layer } from './RM0Map'
 import TimeSeries from './TimeSeries.vue'
-import {
-  addBoundaryLayers,
-  attachBoundaryEvents,
-  detachBoundaryEvents,
-  gadmLevels,
-  handleZoomChangeInBoundaries,
-} from './BoundaryMap'
-import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -152,6 +154,7 @@ const toggleDataLayers = async () => {
   const showOwnData = mapStore.layerSelected === MosquitoLayersEnum.OBSERVATIONS
   const showGbif = mapStore.layerSelected === MosquitoLayersEnum.DISTRIBUTION
   const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.DISCOVERIES
+  const showRM0 = mapStore.layerSelected === MosquitoLayersEnum.RM0
 
   // ######### OBSERVATIONS #########
   // ---- Toggle H3 layers ----
@@ -209,6 +212,20 @@ const toggleDataLayers = async () => {
       map.value.setLayoutProperty(mapStore.discoveriesLayerId, 'visibility', 'none')
     }
   }
+
+  // ########## RM0 #########
+  if (showRM0) {
+    // Ensure RM0 layer exists
+    await addRM0Layer()
+    // Ensure RM0 layer is visible
+    if (map.value.getLayer(mapStore.rm0LayerId)) {
+      map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'visible')
+    }
+  } else {
+    if (map.value.getLayer(mapStore.rm0LayerId)) {
+      map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'none')
+    }
+  }
 }
 
 onMounted(async () => {
@@ -221,6 +238,8 @@ onMounted(async () => {
       // attributionControl: false,
     })
     if (!mapDeclaration) return
+    maplibregl.addProtocol('cog', cogProtocol)
+
     pushMapPaddingUpdate()
 
     mapStore.baselayer =

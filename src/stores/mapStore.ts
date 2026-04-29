@@ -27,6 +27,8 @@ export const useMapStore = defineStore('map', {
     centerLayerId: 'radius-center-point-layer',
     discoveriesSourceId: 'discoveries-source',
     discoveriesLayerId: 'discoveries-layer',
+    rm0SourceId: 'rm0-source',
+    rm0LayerId: 'rm0-layer',
     selectedRegionSourceId: 'selected-region-source',
     selectedRegionLayerId: 'selected-region-layer',
   }),
