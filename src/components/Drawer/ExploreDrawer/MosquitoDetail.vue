@@ -27,7 +27,7 @@
             @click="
               () => {
                 taxaStore.taxonSelected = culicidaeTaxon as Taxon
-                mapStore.layerSelected = MosquitoLayersEnum.OBSERVATIONS
+                mapStore.layerSelected = MosquitoLayersEnum.MA_OBSERVATIONS
               }
             "
           >

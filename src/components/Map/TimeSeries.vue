@@ -112,10 +112,10 @@ import Button from 'primevue/button'
 import Menu from 'primevue/menu'
 import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
-import { useObservationsStore } from '../../../stores/observationsStore'
-import { debounce } from '../../../utils/debouncer'
-import { formatDate } from '../../../utils/date'
-import { drawerTabs, useUIStore } from '../../../stores/uiStore'
+import { useObservationsStore } from '../../stores/observationsStore'
+import { debounce } from '../../utils/debouncer'
+import { formatDate } from '../../utils/date'
+import { drawerTabs, useUIStore } from '../../stores/uiStore'
 
 use([BarChart, CanvasRenderer, GridComponent, BrushComponent, ToolboxComponent])
 

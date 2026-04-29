@@ -2,11 +2,11 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
-        <MAObservationsTimeSeries
+        <TimeSeries
           :timeSeriesData="renderedOriginalDateAggregationData"
           v-if="observationsStore.dataProcessed"
         />
-        <MAObservationsLegend
+        <MapLegend
           v-if="mapStore.showLegend"
           :mapColors="mapColors[taxaStore.taxonSelected.id]![currentResolution as number]"
         />
@@ -40,10 +40,9 @@ import {
   detachBoundaryEvents,
   gadmLevels,
   handleZoomChangeInBoundaries,
-} from './BoundaryMap'
-import { addDiscoveriesLayer } from './DiscoveriesMap/DiscoveriesMap'
-import { addGBIFOccurrencesLayer } from './ExtendedObservationsMap/ExtendedObservationsMap'
-import MAObservationsLegend from './MAObservationsMap/MAObservationsLegend.vue'
+} from './Layers/BoundaryLayer'
+import { addDiscoveriesLayer } from './Layers/DiscoveriesLayer'
+import { addGBIFOccurrencesLayer } from './Layers/ExtendedObservationsLayer'
 import {
   addNearbyObservationsCircleLayer,
   addObservationLayers,
@@ -61,9 +60,10 @@ import {
   mapColors,
   renderedOriginalDateAggregationData,
   showOnlyResolution,
-} from './MAObservationsMap/MAObservationsMap'
-import { addRM0Layer } from './RM0Map/RM0Map'
-import MAObservationsTimeSeries from './MAObservationsMap/MAObservationsTimeSeries.vue'
+} from './Layers/MAObservationsLayer'
+import { addRM0Layer } from './Layers/RM0Layer'
+import MapLegend from './MapLegend.vue'
+import TimeSeries from './TimeSeries.vue'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
