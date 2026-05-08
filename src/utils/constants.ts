@@ -9,17 +9,17 @@ export enum MosquitoLayersEnum {
 export const mosquitoLayers = [
   {
     key: MosquitoLayersEnum.MA_OBSERVATIONS,
-    label: 'Observaciones de la comunidad Mosquito Alert',
+    label: 'Observaciones de nuestra comunidad',
     info: 'Muestra las observaciones de mosquitos reportadas por la comunidad en la aplicación Mosquito Alert.',
   },
   {
     key: MosquitoLayersEnum.EXTENDED_OBSERVATIONS,
-    label: 'Observaciones de fuentes externas (GBIF)',
-    info: 'Muestra las observaciones de mosquitos de la especie seleccionada obtenidas de fuentes externas como GBIF, lo que ayuda a entender su distribución global y local. GBIF usa datos de múltiples fuentes, incluyendo Mosquito Alert.',
+    label: 'Observaciones de la comunidad',
+    info: 'Muestra las observaciones de mosquitos de la especie seleccionada obtenidas de GBIF. GBIF usa datos de múltiples fuentes, incluyendo Mosquito Alert, lo que ayuda a entender su distribución global y local.',
   },
   {
     key: MosquitoLayersEnum.DISCOVERIES,
-    label: 'Descubrimientos de la comunidad Mosquito Alert',
+    label: 'Descubrimientos de nuestra comunidad',
     info: 'Muestra los descubrimientos de mosquitos reportados por la comunidad en la aplicación Mosquito Alert, que pueden incluir avistamientos de especies invasoras o nuevas áreas de presencia.',
   },
   {

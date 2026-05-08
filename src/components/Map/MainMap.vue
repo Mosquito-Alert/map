@@ -6,6 +6,7 @@
           :timeSeriesData="renderedOriginalDateAggregationData"
           v-if="observationsStore.dataProcessed"
         />
+        <!-- <TemporalFilter /> -->
         <MapLegend
           v-if="mapStore.showLegend"
           :mapColors="mapColors[taxaStore.taxonSelected.id]![currentResolution as number]"
@@ -63,6 +64,7 @@ import {
 } from './Layers/MAObservationsLayer'
 import { addRM0Layer } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
+import TemporalFilter from './TemporalFilter.vue'
 import TimeSeries from './TimeSeries.vue'
 
 const observationsStore = useObservationsStore()

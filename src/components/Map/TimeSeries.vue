@@ -127,6 +127,11 @@ type PlaybackSpeed = {
   label: string
   value: number
 }
+enum AggregationLevel {
+  Day = 'day',
+  Month = 'month',
+  Year = 'year',
+}
 
 const observationsStore = useObservationsStore()
 const uiStore = useUIStore()
@@ -165,7 +170,18 @@ const playbackMenuItems = computed(() =>
   })),
 )
 
-const fixDateAggregationData = (data: Record<string, number>) => {
+/**
+ * Ensure that the data doesn't have missing gaps for the aggregation selected (day, year, etc.) and fills them with 0 values.
+ * @param data The original time series data with potential gaps in the dates
+ * @param aggregation The aggregation level (day, month, year)
+ */
+const fixDateAggregationData = (
+  data: Record<string, number>,
+  aggregation:
+    | AggregationLevel
+    | AggregationLevel.Month
+    | AggregationLevel.Year = AggregationLevel.Day,
+) => {
   const timestamps = Object.keys(data)
     .map(Number)
     .sort((a, b) => a - b)
@@ -176,11 +192,17 @@ const fixDateAggregationData = (data: Record<string, number>) => {
   }
 
   const dayMs = 24 * 60 * 60 * 1000
+  const aggregationMs =
+    aggregation === AggregationLevel.Day
+      ? dayMs
+      : aggregation === AggregationLevel.Month
+        ? 30 * dayMs
+        : 365 * dayMs
   const start = timestamps[0] as number
   const end = timestamps[timestamps.length - 1] as number
   const result: Record<string, number> = {}
 
-  for (let ts = start; ts <= end; ts += dayMs) {
+  for (let ts = start; ts <= end; ts += aggregationMs) {
     const key = new Date(ts).toISOString().slice(0, 10)
     result[key] = data[ts] ?? 0
   }
@@ -188,6 +210,9 @@ const fixDateAggregationData = (data: Record<string, number>) => {
   timeSeriesDataLocal.value = result
 }
 
+/**
+ * Compresses daily data into monthly aggregates.
+ */
 const compressDataByMonth = () => {
   const monthlyMap: Record<string, number> = {}
 
