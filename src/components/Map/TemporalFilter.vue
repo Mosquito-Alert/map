@@ -112,23 +112,18 @@
 
 <script setup lang="ts">
 import Slider from 'primevue/slider'
-import Menu from 'primevue/menu'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
-import {
-  fillMissingDates,
-  formatDate,
-  getTimestampsBetween,
-  PeriodicityEnum,
-} from '../../utils/date'
+import { fillMissingDates, getTimestampsBetween, PeriodicityEnum } from '../../utils/date'
 
 const props = defineProps({
   dateLimits: {
-    type: Object as () => { min: Date; max: Date },
+    type: Object as () => { first: Date; last: Date },
     required: true,
   },
   dataPeriodicity: {
+    // This indicates the periodicity of the provided data, which can be used to correctly fill missing dates and aggregate data. For simplicity, we set it as a prop, but ideally it should be derived from the data itself (e.g., by checking the intervals between dates).
     type: String as () => PeriodicityEnum,
     required: true,
   },
@@ -158,8 +153,8 @@ const aggregationPeriodicity = PeriodicityEnum.Month // Indicates the periodicit
 
 onMounted(() => {
   observationsStore.dateLimits = {
-    first: props.dateLimits.min.toISOString(),
-    last: props.dateLimits.max.toISOString(),
+    first: props.dateLimits.first.toISOString(),
+    last: props.dateLimits.last.toISOString(),
   }
   observationsStore.dateFilter = {
     start: observationsStore.dateLimits.first,
@@ -187,7 +182,7 @@ const compressData = () => {
 watch(
   () => props.dateLimits,
   (newLimits) => {
-    if (!newLimits.min) {
+    if (!newLimits.first) {
       isDataASnapshot.value = true
       return
     }
@@ -195,8 +190,8 @@ watch(
     if (!props.data || Object.keys(props.data).length === 0) {
       // Expand dates with periodicity and keep values optional.
       timeSeries.value = getTimestampsBetween(
-        newLimits.min,
-        newLimits.max,
+        newLimits.first,
+        newLimits.last,
         props.dataPeriodicity,
       ).map((date) => ({ date }))
     } else {

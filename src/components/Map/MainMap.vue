@@ -2,11 +2,15 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
-        <TimeSeries
+        <!-- <TimeSeries
           :timeSeriesData="renderedOriginalDateAggregationData"
           v-if="observationsStore.dataProcessed"
+        /> -->
+        <TemporalFilter
+          v-if="mapStore.layerSelected !== MosquitoLayersEnum.DISCOVERIES"
+          :dateLimits="dateLimits"
+          :dataPeriodicity="dataPeriodicity"
         />
-        <!-- <TemporalFilter /> -->
         <MapLegend
           v-if="mapStore.showLegend"
           :mapColors="mapColors[taxaStore.taxonSelected.id]![currentResolution as number]"
@@ -66,6 +70,7 @@ import { addRM0Layer } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
 import TimeSeries from './TimeSeries.vue'
+import { PeriodicityEnum } from '../../utils/date'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -76,6 +81,11 @@ const analizeStore = useAnalizeStore()
 const mapContainer = ref<HTMLElement | null>(null)
 const map = computed(() => mapStore.map) // Computed ref to react to map changes
 const observationsFilters = ref<Record<string, any>>({}) // Filters for observation points layer
+const dateLimits = ref<{ first: Date; last: Date }>({
+  first: new Date(1970, 0, 1),
+  last: new Date(),
+}) // Date limits for temporal filter, derived from currently shown data
+const dataPeriodicity = ref(PeriodicityEnum.Day) // Periodicity of the provided data
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -162,6 +172,15 @@ const toggleDataLayers = async () => {
   // ---- Toggle H3 layers ----
   if (showOwnData) {
     showOnlyResolution()
+    // Date limits for temporal filter
+    const allDates = Object.keys(renderedOriginalDateAggregationData.value).sort(
+      (a, b) => Number(a) - Number(b),
+    )
+    observationsStore.dateLimits = {
+      first: allDates[0] || observationsStore.dateLimits.first,
+      last: allDates[allDates.length - 1] || observationsStore.dateLimits.last,
+    }
+    dataPeriodicity.value = PeriodicityEnum.Day // TODO: derive from data
   } else {
     mapStore.resolutionsAvailable.forEach((res) => {
       const layerId = mapStore.getH3LayerId(res)
@@ -190,6 +209,12 @@ const toggleDataLayers = async () => {
     const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
     const gbifLayerId = mapStore.getGbifLayerId(gbifId)
     map.value.setLayoutProperty(gbifLayerId, 'visibility', 'visible')
+    // Date Limits for temporal filter
+    dateLimits.value = {
+      first: new Date('1980'),
+      last: new Date(),
+    }
+    dataPeriodicity.value = PeriodicityEnum.Year
   } else {
     // Get all the GBIF layers and hide them.
     // NOTE: we can have multiple GBIF layers if user switched between different taxa with GBIF data
@@ -209,6 +234,7 @@ const toggleDataLayers = async () => {
     if (map.value.getLayer(mapStore.extObservationsLayerId)) {
       map.value.setLayoutProperty(mapStore.extObservationsLayerId, 'visibility', 'visible')
     }
+    dataPeriodicity.value = PeriodicityEnum.Day
   } else {
     if (map.value.getLayer(mapStore.extObservationsLayerId)) {
       map.value.setLayoutProperty(mapStore.extObservationsLayerId, 'visibility', 'none')
@@ -223,6 +249,12 @@ const toggleDataLayers = async () => {
     if (map.value.getLayer(mapStore.rm0LayerId)) {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'visible')
     }
+    // TODO: API endpoint
+    observationsStore.dateLimits = {
+      first: '2025-09-03',
+      last: new Date().toISOString().slice(0, 10),
+    }
+    dataPeriodicity.value = PeriodicityEnum.Day
   } else {
     if (map.value.getLayer(mapStore.rm0LayerId)) {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'none')
