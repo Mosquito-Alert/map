@@ -16,9 +16,9 @@ export const useObservationsStore = defineStore('observations', {
       end: null as string | null,
     } as { start: string | null; end: string | null },
     dateLimits: {
-      first: null as string | null,
-      last: null as string | null,
-    } as { first: string | null; last: string | null },
+      start: null as string | null,
+      end: null as string | null,
+    } as { start: string | null; end: string | null },
     // This state tells the observation that is currently shown in the drawer to see its details
     observationInDrawer: null as Observation | null,
     selectedObservationId: null as string | null, // This controls the observation point in the map
@@ -42,9 +42,12 @@ export const useObservationsStore = defineStore('observations', {
             ? {
                 point: [longitude, latitude],
                 dist: this.radius_for_nearby_observations * 1000, // 100 km radius
-                orderBy: [BitesListOrderByParameter.Distance, BitesListOrderByParameter.ReceivedAt],
+                orderBy: [
+                  BitesListOrderByParameter.Distance,
+                  BitesListOrderByParameter.MinusReceivedAt,
+                ],
               }
-            : { orderBy: [BitesListOrderByParameter.ReceivedAt] }),
+            : { orderBy: [BitesListOrderByParameter.MinusReceivedAt] }),
           receivedAtAfter: threeMonthsAgo.toISOString(),
         })
         if (response.data.results) {
@@ -97,7 +100,7 @@ export const useObservationsStore = defineStore('observations', {
       }
     },
     resetDateFilter() {
-      this.dateFilter = { start: this.dateLimits.first, end: this.dateLimits.last }
+      this.dateFilter = { start: this.dateLimits.start, end: this.dateLimits.end }
     },
   },
 })

@@ -393,8 +393,12 @@ watch(
 watch(
   () => observationsStore.dateFilter,
   async ({ start, end }, oldValue) => {
+    // Skip if is not observations
+    if (mapStore.layerSelected !== MosquitoLayersEnum.MA_OBSERVATIONS) return
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
     if (!oldValue.start && !oldValue.end) return
+    // If the new date filter is the same as the old one, skip processing to avoid unnecessary updates
+    if (oldValue.start === start && oldValue.end === end) return
 
     // Reprocess current zoom level
     if (map.value) {

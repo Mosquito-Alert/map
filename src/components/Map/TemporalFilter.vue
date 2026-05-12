@@ -11,14 +11,18 @@
         <!-- TODO: -->
 
         <div v-if="isDataASnapshot">
-          <span class="font-medium">01-01-2025</span>
+          <span class="font-bold">{{
+            formatDateByPeriodicity(observationsStore.dateFilter.end, props.dataPeriodicity)
+          }}</span>
         </div>
         <div v-else>
           <span class="font-medium">{{
-            formatDate(observationsStore.dateFilter.start || '')
+            formatDateByPeriodicity(observationsStore.dateFilter.start, props.dataPeriodicity)
           }}</span>
           -
-          <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
+          <span class="font-bold">{{
+            formatDateByPeriodicity(observationsStore.dateFilter.end, props.dataPeriodicity)
+          }}</span>
         </div>
       </div>
 
@@ -49,11 +53,18 @@
     <Transition name="chart-expand">
       <div
         v-if="showChart && uiStore.activeTab === drawerTabs.explore.value"
-        class="chart-window group flex justify-center h-20 w-full max-w-md p-4 hidden lg:block bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg pointer-events-auto overflow-hidden"
+        class="chart-window group hidden lg:flex items-center justify-center gap-3 h-20 w-full max-w-md p-4 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg pointer-events-auto overflow-hidden"
       >
+        <span class="font-medium whitespace-nowrap">{{
+          formatDateByPeriodicity(observationsStore.dateLimits.start, props.dataPeriodicity)
+        }}</span>
         <Slider
-          v-model="value"
-          class="max-w-sm w-xl! pt-1"
+          v-model="sliderValue"
+          :min="0"
+          :max="sliderMax"
+          :step="sliderStep"
+          :disabled="dates.length === 0"
+          class="max-w-sm w-xl! pt-1 flex-1"
           :pt="{
             root: { class: 'w-64' },
             range: { class: 'bg-sky-500 ' },
@@ -63,6 +74,9 @@
             },
           }"
         />
+        <span class="font-medium whitespace-nowrap">{{
+          formatDateByPeriodicity(observationsStore.dateLimits.end, props.dataPeriodicity)
+        }}</span>
 
         <!-- <div class="playback flex items-center justify-center gap-2 p-2">
           <Button
@@ -117,7 +131,7 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
   fillMissingDates,
-  formatDate,
+  formatDateByPeriodicity,
   getTimestampsBetween,
   PeriodicityEnum,
 } from '../../utils/date'
@@ -146,10 +160,12 @@ const props = defineProps({
 const observationsStore = useObservationsStore()
 const uiStore = useUIStore()
 
-const value = ref(60)
-const isDataASnapshot = ref(false) // Tells if the shown data is either a snapshot or an aggregation
+const isDataASnapshot = computed(() => props.isDataASnapshot)
+const sliderValue = ref(0)
 const menu = ref()
 const showChart = ref(true)
+const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
+const sliderStep = computed(() => 1) // One slider step equals one period entry (day, month, or year).
 // data
 type TimeSeriesPoint = { date: number; value?: number }
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
@@ -161,14 +177,65 @@ const aggregatedTimeSeries = ref<{
 }>({ keys: [], values: [] })
 const aggregationPeriodicity = PeriodicityEnum.Month // Indicates the periodicity of aggregation.
 
+/**
+ * Finds the index of the nearest date in the time series to the provided date string.
+ * If the date string is invalid or not provided, it returns the fallback index.
+ * @param dateAsString
+ * @param fallback
+ */
+const findNearestDateIndex = (dateAsString: string | null, fallback: number) => {
+  if (!dateAsString || dates.value.length === 0) return fallback
+
+  const timestamp = Date.parse(dateAsString)
+  if (Number.isNaN(timestamp)) return fallback
+
+  const nearestIndex = dates.value.findIndex((date) => date >= timestamp)
+  return nearestIndex === -1 ? sliderMax.value : nearestIndex
+}
+
+/**
+ * Syncs the slider position with the current date filter.
+ * This is useful to keep the slider in sync when the date filter is updated from other components
+ */
+const syncSliderFromDateFilter = () => {
+  if (dates.value.length === 0) {
+    sliderValue.value = 0
+    return
+  }
+
+  const endIndex = findNearestDateIndex(observationsStore.dateFilter.end, sliderMax.value)
+  sliderValue.value = Math.max(0, Math.min(endIndex, sliderMax.value))
+}
+
+/**
+ * Updates the date filter based on the current slider position.
+ */
+const updateDateFilterFromSlider = (endIndexValue: number) => {
+  if (dates.value.length === 0) return
+
+  const endIndex = Math.max(0, Math.min(endIndexValue, sliderMax.value))
+  const startDate = dates.value[0]
+  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
+
+  if (startDate === undefined || endDate === undefined) return
+
+  const start = new Date(startDate).toISOString()
+  const end = new Date(endDate).toISOString()
+
+  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
+    return
+
+  observationsStore.dateFilter = { start, end }
+}
+
 onMounted(() => {
   observationsStore.dateLimits = {
-    first: props.dateLimits.first.toISOString(),
-    last: props.dateLimits.last.toISOString(),
+    start: props.dateLimits.first.toISOString(),
+    end: props.dateLimits.last.toISOString(),
   }
   observationsStore.dateFilter = {
-    start: observationsStore.dateLimits.first,
-    end: observationsStore.dateLimits.last,
+    start: observationsStore.dateLimits.start,
+    end: observationsStore.dateLimits.end,
   }
 })
 
@@ -189,42 +256,76 @@ const compressData = () => {
   aggregatedTimeSeries.value.values = Object.values(aggregationMap)
 }
 
-watch(
-  () => props.dateLimits,
-  (newLimits) => {
-    console.log(newLimits)
-    // Date limits. FIXME:
-    observationsStore.dateLimits = {
-      first: newLimits.first.toISOString(),
-      last: newLimits.last.toISOString(),
-    }
-    observationsStore.dateFilter = {
-      start: observationsStore.dateLimits.first,
-      end: observationsStore.dateLimits.last,
-    }
-    // Data
-    if (!props.data || Object.keys(props.data).length === 0) {
-      // Expand dates with periodicity and keep values optional.
-      timeSeries.value = getTimestampsBetween(
-        newLimits.first,
-        newLimits.last,
-        props.dataPeriodicity,
-      ).map((date) => ({ date }))
-    } else {
-      // Fill missing dates with 0s
-      const timeseriesData = fillMissingDates(props.data, props.dataPeriodicity)
-
-      timeSeries.value = Object.entries(timeseriesData).map(([date, value]) => ({
+/**
+ * Regenerates the time series based on the provided date limits and the original data.
+ * @param start
+ * @param end
+ */
+const regenerateTimeSeries = (start: Date, end: Date) => {
+  if (!props.data || Object.keys(props.data).length === 0) {
+    timeSeries.value = getTimestampsBetween(start, end, props.dataPeriodicity).map((date) => ({
+      date,
+    }))
+  } else {
+    const timeseriesData = fillMissingDates(props.data, props.dataPeriodicity)
+    timeSeries.value = Object.entries(timeseriesData)
+      .sort(([firstDate], [secondDate]) => Number(firstDate) - Number(secondDate))
+      .map(([date, value]) => ({
         date: Number(date),
         value,
       }))
+    compressData()
+  }
+}
 
-      // Compress data into aggregation periodicity
-      compressData()
+watch(
+  () => props.dateLimits,
+  (newLimits) => {
+    observationsStore.dateLimits = {
+      start: newLimits.first.toISOString(),
+      end: newLimits.last.toISOString(),
     }
+    observationsStore.dateFilter = {
+      start: observationsStore.dateLimits.start,
+      end: observationsStore.dateLimits.end,
+    }
+    regenerateTimeSeries(newLimits.first, newLimits.last)
   },
   { immediate: true },
 )
+
+watch(dates, syncSliderFromDateFilter, { immediate: true })
+
+watch(
+  () => observationsStore.dateFilter,
+  () => {
+    syncSliderFromDateFilter()
+  },
+  { deep: true },
+)
+
+watch(
+  () => ({
+    start: observationsStore.dateLimits.start,
+    end: observationsStore.dateLimits.end,
+  }),
+  (newLimits) => {
+    // Only regenerate time series if observationsStore.dateLimits has real values
+    if (!newLimits.start || !newLimits.end) return
+
+    const start = new Date(newLimits.start)
+    const end = new Date(newLimits.end)
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return
+
+    regenerateTimeSeries(start, end)
+  },
+  { deep: true },
+)
+
+watch(sliderValue, (newValue) => {
+  updateDateFilterFromSlider(newValue)
+})
 </script>
 
 <style>

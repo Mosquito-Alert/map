@@ -293,9 +293,9 @@ const playback = () => {
 const replay = () => {
   playbackInterval.value && clearInterval(playbackInterval.value)
   observationsStore.dateFilter.start =
-    playbackOriginalDateLimits.value?.start || observationsStore.dateLimits.first
+    playbackOriginalDateLimits.value?.start || observationsStore.dateLimits.start
   observationsStore.dateFilter.end =
-    playbackOriginalDateLimits.value?.end || observationsStore.dateLimits.last
+    playbackOriginalDateLimits.value?.end || observationsStore.dateLimits.end
   playbackCurrentDate.value = null
   playbackOriginalDateLimits.value = null
   playbackOngoing.value = true
@@ -321,8 +321,8 @@ onMounted(() => {
     if (areas.length === 0) {
       // Clear date filter
       observationsStore.dateFilter = {
-        start: observationsStore.dateLimits.first ?? null,
-        end: observationsStore.dateLimits.last ?? null,
+        start: observationsStore.dateLimits.start ?? null,
+        end: observationsStore.dateLimits.end ?? null,
       }
       playbackOngoing.value = false
       playbackCurrentDate.value = null
@@ -340,12 +340,12 @@ watch(
     // If there was no previous data or the new data is empty, set the date limits to the full range of the new data
     if (!oldData || Object.keys(newData || {}).length === 0) {
       observationsStore.dateLimits = {
-        first: allDates[0] as string,
-        last: allDates[allDates.length - 1] as string,
+        start: allDates[0] as string,
+        end: allDates[allDates.length - 1] as string,
       }
       observationsStore.dateFilter = {
-        start: observationsStore.dateLimits.first,
-        end: observationsStore.dateLimits.last,
+        start: observationsStore.dateLimits.start,
+        end: observationsStore.dateLimits.end,
       }
     }
   },
@@ -358,8 +358,8 @@ watch(
     // Throw brush event
     if (
       oldFilter &&
-      newFilter.start === observationsStore.dateLimits.first &&
-      newFilter.end === observationsStore.dateLimits.last &&
+      newFilter.start === observationsStore.dateLimits.start &&
+      newFilter.end === observationsStore.dateLimits.end &&
       brushSelected.value
     ) {
       const chart = chartRef.value?.chart

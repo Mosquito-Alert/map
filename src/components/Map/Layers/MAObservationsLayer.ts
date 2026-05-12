@@ -65,9 +65,13 @@ h3AggregationWorker.onmessage = (e) => {
     addOrUpdateH3Layer()
     showOnlyResolution()
     const dateLimits = setDateLimitsForObservations()
-    observationsStore.dateFilter = {
+    observationsStore.dateLimits = {
       start: dateLimits.first ? dateLimits.first.toISOString() : null,
       end: dateLimits.last ? dateLimits.last.toISOString() : null,
+    }
+    // Initialize dateFilter on first load if not already set
+    if (!observationsStore.dateFilter.start) {
+      observationsStore.dateFilter = { ...observationsStore.dateLimits }
     }
     observationsStore.dataProcessed = true
   }

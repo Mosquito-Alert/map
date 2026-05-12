@@ -1,3 +1,32 @@
+export enum PeriodicityEnum {
+  Day = 'day',
+  Month = 'month',
+  Year = 'year',
+}
+
+export const formatDateByPeriodicity = (
+  dateString: string | null,
+  periodicity: PeriodicityEnum,
+) => {
+  if (!dateString) return ''
+
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return ''
+
+  if (periodicity === PeriodicityEnum.Year) {
+    return String(date.getFullYear())
+  }
+
+  if (periodicity === PeriodicityEnum.Month) {
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${month}/${date.getFullYear()}`
+  }
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${day}/${month}/${date.getFullYear()}`
+}
+
 export const daysSince = (dateString: string): number => {
   const pastDate = new Date(dateString)
   const now = new Date()
@@ -27,12 +56,6 @@ export const getDayIndexInYear = (date: any): number => {
   const diffInMs = date - startOfYear
   const dayIndex = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
   return dayIndex
-}
-
-export enum PeriodicityEnum {
-  Day = 'day',
-  Month = 'month',
-  Year = 'year',
 }
 
 /**
