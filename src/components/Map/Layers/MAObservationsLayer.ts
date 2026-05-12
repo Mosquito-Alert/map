@@ -29,6 +29,10 @@ const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts fo
 export const mapColors = ref<
   Record<number, Record<number, Record<string, { value: number; color: string }>>> // taxonId -> resolution -> quantile -> { value, color }
 >({}) // Color mapping for current resolution
+const observationsDateLimtis = ref<{ first: Date | null; last: Date | null }>({
+  first: null,
+  last: null,
+})
 
 export const renderedOriginalDateAggregationData = computed<Record<string, number>>(() => {
   const taxonSelectedId = taxaStore.taxonSelected.id as number
@@ -60,6 +64,11 @@ h3AggregationWorker.onmessage = (e) => {
     getMapColors()
     addOrUpdateH3Layer()
     showOnlyResolution()
+    const dateLimits = setDateLimitsForObservations()
+    observationsStore.dateFilter = {
+      start: dateLimits.first ? dateLimits.first.toISOString() : null,
+      end: dateLimits.last ? dateLimits.last.toISOString() : null,
+    }
     observationsStore.dataProcessed = true
   }
 }
@@ -143,6 +152,17 @@ export const getMapColors = () => {
     ) {
       mapColors.value[taxonSelectedId]![resolution][currentKey].value += 0.1
     }
+  }
+}
+
+export const setDateLimitsForObservations = () => {
+  // Date limits for temporal filter
+  const allDates = Object.keys(renderedOriginalDateAggregationData.value).sort(
+    (a, b) => Number(a) - Number(b),
+  )
+  return {
+    first: new Date(Number(allDates[0])),
+    last: new Date(Number(allDates[allDates.length - 1])),
   }
 }
 

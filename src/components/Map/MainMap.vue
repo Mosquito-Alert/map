@@ -10,6 +10,7 @@
           v-if="mapStore.layerSelected !== MosquitoLayersEnum.DISCOVERIES"
           :dateLimits="dateLimits"
           :dataPeriodicity="dataPeriodicity"
+          :isDataASnapshot="isDataASnapshot"
         />
         <MapLegend
           v-if="mapStore.showLegend"
@@ -64,6 +65,7 @@ import {
   handleZoomChangeInObservations,
   mapColors,
   renderedOriginalDateAggregationData,
+  setDateLimitsForObservations,
   showOnlyResolution,
 } from './Layers/MAObservationsLayer'
 import { addRM0Layer } from './Layers/RM0Layer'
@@ -86,6 +88,7 @@ const dateLimits = ref<{ first: Date; last: Date }>({
   last: new Date(),
 }) // Date limits for temporal filter, derived from currently shown data
 const dataPeriodicity = ref(PeriodicityEnum.Day) // Periodicity of the provided data
+const isDataASnapshot = ref(false) // Tells if the shown data is either a snapshot or an aggregation, used to adapt temporal filter behavior
 
 const styleEOX: StyleSpecification = {
   version: 8,
@@ -172,14 +175,8 @@ const toggleDataLayers = async () => {
   // ---- Toggle H3 layers ----
   if (showOwnData) {
     showOnlyResolution()
-    // Date limits for temporal filter
-    const allDates = Object.keys(renderedOriginalDateAggregationData.value).sort(
-      (a, b) => Number(a) - Number(b),
-    )
-    observationsStore.dateLimits = {
-      first: allDates[0] || observationsStore.dateLimits.first,
-      last: allDates[allDates.length - 1] || observationsStore.dateLimits.last,
-    }
+    dateLimits.value = setDateLimitsForObservations()
+    isDataASnapshot.value = false
     dataPeriodicity.value = PeriodicityEnum.Day // TODO: derive from data
   } else {
     mapStore.resolutionsAvailable.forEach((res) => {
@@ -215,6 +212,7 @@ const toggleDataLayers = async () => {
       last: new Date(),
     }
     dataPeriodicity.value = PeriodicityEnum.Year
+    isDataASnapshot.value = false
   } else {
     // Get all the GBIF layers and hide them.
     // NOTE: we can have multiple GBIF layers if user switched between different taxa with GBIF data
@@ -250,11 +248,13 @@ const toggleDataLayers = async () => {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'visible')
     }
     // TODO: API endpoint
-    observationsStore.dateLimits = {
-      first: '2025-09-03',
-      last: new Date().toISOString().slice(0, 10),
+    dateLimits.value = {
+      first: new Date(2025, 8, 3), // Note: Months are 0-indexed in JavaScript
+      last: new Date(),
     }
+
     dataPeriodicity.value = PeriodicityEnum.Day
+    isDataASnapshot.value = true
   } else {
     if (map.value.getLayer(mapStore.rm0LayerId)) {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'none')
@@ -392,7 +392,7 @@ watch(
 
 watch(
   () => observationsStore.dateFilter,
-  ({ start, end }, oldValue) => {
+  async ({ start, end }, oldValue) => {
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
     if (!oldValue.start && !oldValue.end) return
 

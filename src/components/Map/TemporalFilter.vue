@@ -14,12 +14,11 @@
           <span class="font-medium">01-01-2025</span>
         </div>
         <div v-else>
-          <span class="font-medium">01-01-2014</span>
+          <span class="font-medium">{{
+            formatDate(observationsStore.dateFilter.start || '')
+          }}</span>
           -
-          <span class="font-medium">20-01-2025</span>
-          <!-- <span class="font-medium">{{ formatDate(observationsStore.dateFilter.start || '') }}</span>
-            -
-            <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span> -->
+          <span class="font-medium">{{ formatDate(observationsStore.dateFilter.end || '') }}</span>
         </div>
       </div>
 
@@ -112,10 +111,16 @@
 
 <script setup lang="ts">
 import Slider from 'primevue/slider'
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
-import { fillMissingDates, getTimestampsBetween, PeriodicityEnum } from '../../utils/date'
+import {
+  fillMissingDates,
+  formatDate,
+  getTimestampsBetween,
+  PeriodicityEnum,
+} from '../../utils/date'
 
 const props = defineProps({
   dateLimits: {
@@ -125,6 +130,11 @@ const props = defineProps({
   dataPeriodicity: {
     // This indicates the periodicity of the provided data, which can be used to correctly fill missing dates and aggregate data. For simplicity, we set it as a prop, but ideally it should be derived from the data itself (e.g., by checking the intervals between dates).
     type: String as () => PeriodicityEnum,
+    required: true,
+  },
+  isDataASnapshot: {
+    // This indicates if the provided data is a snapshot (i.e., all data points have the same date) or a time series. This can be used to adapt the behavior of the temporal filter, for example by disabling the slider and only showing the date.
+    type: Boolean,
     required: true,
   },
   data: {
@@ -182,11 +192,17 @@ const compressData = () => {
 watch(
   () => props.dateLimits,
   (newLimits) => {
-    if (!newLimits.first) {
-      isDataASnapshot.value = true
-      return
+    console.log(newLimits)
+    // Date limits. FIXME:
+    observationsStore.dateLimits = {
+      first: newLimits.first.toISOString(),
+      last: newLimits.last.toISOString(),
     }
-    isDataASnapshot.value = false
+    observationsStore.dateFilter = {
+      start: observationsStore.dateLimits.first,
+      end: observationsStore.dateLimits.last,
+    }
+    // Data
     if (!props.data || Object.keys(props.data).length === 0) {
       // Expand dates with periodicity and keep values optional.
       timeSeries.value = getTimestampsBetween(
