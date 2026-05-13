@@ -33,7 +33,12 @@ import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
-import { MosquitoLayersEnum } from '../../utils/constants'
+import {
+  firstGbifDateAvailable,
+  firstRM0DateAvailable,
+  MosquitoLayersEnum,
+} from '../../utils/constants'
+import { PeriodicityEnum } from '../../utils/date'
 import { debounce } from '../../utils/debouncer'
 import type {
   BasemapType,
@@ -48,7 +53,7 @@ import {
   handleZoomChangeInBoundaries,
 } from './Layers/BoundaryLayer'
 import { addDiscoveriesLayer } from './Layers/DiscoveriesLayer'
-import { addGBIFOccurrencesLayer } from './Layers/ExtendedObservationsLayer'
+import { addGBIFOccurrencesLayer, updateGBIFSourceTiles } from './Layers/ExtendedObservationsLayer'
 import {
   addNearbyObservationsCircleLayer,
   addObservationLayers,
@@ -64,15 +69,12 @@ import {
   h3AggregationWorker,
   handleZoomChangeInObservations,
   mapColors,
-  renderedOriginalDateAggregationData,
   setDateLimitsForObservations,
   showOnlyResolution,
 } from './Layers/MAObservationsLayer'
 import { addRM0Layer } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
-import TimeSeries from './TimeSeries.vue'
-import { PeriodicityEnum } from '../../utils/date'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -201,14 +203,17 @@ const toggleDataLayers = async () => {
   // ########## EXTENDED OBSERVATIONS #########
   if (showGbif) {
     //  Ensure GBIF layer exists
-    await addGBIFOccurrencesLayer()
+    await addGBIFOccurrencesLayer(
+      observationsStore.dateFilter.start,
+      observationsStore.dateFilter.end,
+    )
     // Ensure GBIF layer is visible
     const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
     const gbifLayerId = mapStore.getGbifLayerId(gbifId)
     map.value.setLayoutProperty(gbifLayerId, 'visibility', 'visible')
     // Date Limits for temporal filter
     dateLimits.value = {
-      first: new Date('1980'),
+      first: firstGbifDateAvailable,
       last: new Date(),
     }
     dataPeriodicity.value = PeriodicityEnum.Year
@@ -249,7 +254,7 @@ const toggleDataLayers = async () => {
     }
     // TODO: API endpoint
     dateLimits.value = {
-      first: new Date(2025, 8, 3), // Note: Months are 0-indexed in JavaScript
+      first: firstRM0DateAvailable,
       last: new Date(),
     }
 
@@ -393,15 +398,13 @@ watch(
 watch(
   () => observationsStore.dateFilter,
   async ({ start, end }, oldValue) => {
-    // Skip if is not observations
-    if (mapStore.layerSelected !== MosquitoLayersEnum.MA_OBSERVATIONS) return
     // Skip initial assignment, because initially the dateFilter has null values and has to be computed
     if (!oldValue.start && !oldValue.end) return
     // If the new date filter is the same as the old one, skip processing to avoid unnecessary updates
     if (oldValue.start === start && oldValue.end === end) return
+    if (!map.value) return
 
-    // Reprocess current zoom level
-    if (map.value) {
+    if (mapStore.layerSelected === MosquitoLayersEnum.MA_OBSERVATIONS) {
       const zoom = map.value.getZoom()
       currentResolution.value = getResolutionForZoom(zoom)
       filterData()
@@ -418,6 +421,9 @@ watch(
       } else {
         delete observationsFilters.value['end']
       }
+    } else if (mapStore.layerSelected === MosquitoLayersEnum.EXTENDED_OBSERVATIONS) {
+      // Update only the GBIF source tiles with new date range
+      await updateGBIFSourceTiles(start, end)
     }
   },
   { deep: true },

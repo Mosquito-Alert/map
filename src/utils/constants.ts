@@ -54,3 +54,6 @@ export const variablesLayers = [
     label: 'Transporte humano',
   },
 ]
+
+export const firstGbifDateAvailable = new Date(1900, 0, 1)
+export const firstRM0DateAvailable = new Date(2025, 8, 3) // Note: Months are 0-indexed in JavaScript

@@ -7,24 +7,43 @@ const taxaStore = useTaxaStore()
 
 const map = computed(() => mapStore.map) // Computed ref to react to map changes
 
+// GBIF tile configuration constants
+const GBIF_CONFIG = {
+  hexPerTile: 70, // Higher values mean more hexagons per tile === better representation of data but worse performance.
+  srs: 'EPSG:3857',
+  style: 'green2.poly',
+  defaultFirstYear: 1900,
+}
+
+// Build GBIF tile URL with date range
+const buildGBIFTileUrl = (
+  gbifId: string,
+  startDate?: string | null,
+  endDate?: string | null,
+): string => {
+  const firstYear = startDate ? new Date(startDate).getFullYear() : GBIF_CONFIG.defaultFirstYear
+  const lastYear = endDate ? new Date(endDate).getFullYear() : new Date().getFullYear()
+  const { hexPerTile, srs, style } = GBIF_CONFIG
+
+  return `https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=${style}&bin=hex&hexPerTile=${hexPerTile}&taxonKey=${gbifId}&srs=${srs}&year=${firstYear},${lastYear}`
+}
+
 // Function to add GBIF occurences for different species
-export const addGBIFOccurrencesLayer = async () => {
+export const addGBIFOccurrencesLayer = async (
+  startDate?: string | null,
+  endDate?: string | null,
+) => {
   if (!map.value) return
 
   const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
-
   const sourceId = mapStore.getGbifSourceId(gbifId)
   const layerId = mapStore.getGbifLayerId(gbifId)
 
   if (!map.value.getSource(sourceId)) {
-    const hexPerTile = 70 // Higher values mean more hexagons per tile === better representation of data but worse performance.
-    const srs = 'EPSG:3857'
-    const style = 'green2.poly'
+    const tileUrl = buildGBIFTileUrl(gbifId, startDate, endDate)
     map.value.addSource(sourceId, {
       type: 'raster',
-      tiles: [
-        `https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=${style}&bin=hex&hexPerTile=${hexPerTile}&taxonKey=${gbifId}&srs=${srs}`,
-      ],
+      tiles: [tileUrl],
       tileSize: 256,
     })
   }
@@ -40,4 +59,18 @@ export const addGBIFOccurrencesLayer = async () => {
       paint: {},
     })
   }
+}
+
+// Function to update only the GBIF source tiles with new year range
+export const updateGBIFSourceTiles = async (startDate?: string | null, endDate?: string | null) => {
+  if (!map.value) return
+
+  const gbifId = (await taxaStore.getGbifIdForSelectedTaxon()) || ''
+  const sourceId = mapStore.getGbifSourceId(gbifId)
+  const source = map.value.getSource(sourceId) as maplibregl.RasterTileSource | undefined
+
+  if (!source) return
+
+  const tileUrl = buildGBIFTileUrl(gbifId, startDate, endDate)
+  source.setTiles([tileUrl])
 }
