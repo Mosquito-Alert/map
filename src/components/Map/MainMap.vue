@@ -36,6 +36,7 @@ import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
   firstGbifDateAvailable,
   firstRM0DateAvailable,
+  lastRM0DateAvailable,
   MosquitoLayersEnum,
 } from '../../utils/constants'
 import { PeriodicityEnum } from '../../utils/date'
@@ -72,7 +73,7 @@ import {
   setDateLimitsForObservations,
   showOnlyResolution,
 } from './Layers/MAObservationsLayer'
-import { addRM0Layer } from './Layers/RM0Layer'
+import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
 
@@ -247,7 +248,7 @@ const toggleDataLayers = async () => {
   // ########## RM0 #########
   if (showRM0) {
     // Ensure RM0 layer exists
-    await addRM0Layer()
+    await addRM0Layer(observationsStore.dateFilter.end)
     // Ensure RM0 layer is visible
     if (map.value.getLayer(mapStore.rm0LayerId)) {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'visible')
@@ -255,7 +256,7 @@ const toggleDataLayers = async () => {
     // TODO: API endpoint
     dateLimits.value = {
       first: firstRM0DateAvailable,
-      last: new Date(),
+      last: lastRM0DateAvailable,
     }
 
     dataPeriodicity.value = PeriodicityEnum.Day
@@ -424,6 +425,8 @@ watch(
     } else if (mapStore.layerSelected === MosquitoLayersEnum.EXTENDED_OBSERVATIONS) {
       // Update only the GBIF source tiles with new date range
       await updateGBIFSourceTiles(start, end)
+    } else if (mapStore.layerSelected === MosquitoLayersEnum.RM0) {
+      await updateRM0SourceUrl(end)
     }
   },
   { deep: true },
