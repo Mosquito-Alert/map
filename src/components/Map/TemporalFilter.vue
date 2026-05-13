@@ -135,6 +135,7 @@ import {
   getTimestampsBetween,
   PeriodicityEnum,
 } from '../../utils/date'
+import { debounce } from '../../utils/debouncer'
 
 const props = defineProps({
   dateLimits: {
@@ -323,8 +324,12 @@ watch(
   { deep: true },
 )
 
-watch(sliderValue, (newValue) => {
+const debouncedUpdateDateFilterFromSlider = debounce((newValue: number) => {
   updateDateFilterFromSlider(newValue)
+}, 150)
+
+watch(sliderValue, (newValue) => {
+  debouncedUpdateDateFilterFromSlider(newValue)
 })
 </script>
 
