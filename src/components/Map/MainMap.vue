@@ -2,10 +2,6 @@
   <main class="size-screen mx-auto relative">
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
-        <FilterTimeSeries
-          :timeSeriesData="renderedOriginalDateAggregationData"
-          v-if="observationsStore.dataProcessed"
-        />
         <TemporalFilter
           v-if="mapStore.layerSelected !== MosquitoLayersEnum.DISCOVERIES"
           :dateLimits="dateLimits"
@@ -78,7 +74,6 @@ import {
 import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
-import FilterTimeSeries from './FilterTimeSeries.vue'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()

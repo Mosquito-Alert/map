@@ -49,21 +49,20 @@ const option = computed(() => ({
   },
   series: [
     {
-      data: props.values,
-      // data: props.values.map((m, index) => {
-      //   const [year, month] = props.labels[index]?.split('-') || []
-      //   const date = new Date(Number(year), Number(month) - 1, 1)
-      //   return {
-      //     value: m,
-      //     itemStyle: {
-      //       color:
-      //         date >= new Date(observationsStore.dateFilter.start || '') &&
-      //         date <= new Date(observationsStore.dateFilter.end || '')
-      //           ? '#4473dc'
-      //           : '#cfd2d7',
-      //     },
-      //   }
-      // }),
+      data: props.values.map((m, index) => {
+        const [year, month] = props.labels[index]?.split('-') || []
+        const date = new Date(Number(year), Number(month) - 1, 1)
+        return {
+          value: m,
+          itemStyle: {
+            color:
+              date >= new Date(observationsStore.dateFilter.start || '') &&
+              date <= new Date(observationsStore.dateFilter.end || '')
+                ? '#4473dc'
+                : '#cfd2d7',
+          },
+        }
+      }),
       type: 'bar',
       showSymbol: false,
       // barCategoryGap: '10%',
