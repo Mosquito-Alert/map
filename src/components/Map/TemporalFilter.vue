@@ -4,7 +4,7 @@
     <div
       class="dates-controller inline-flex flex-nowrap self-end items-center gap-3 px-3 py-1 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-t-lg cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
       :class="{
-        'rounded-lg border-b-1': !showChart,
+        'rounded-lg border-b-1': !dateFilter,
       }"
     >
       <div class="dates whitespace-nowrap pointer-events-auto">
@@ -35,14 +35,14 @@
           severity="secondary"
           size="small"
           class="p-0.5 animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
-          @click="showChart = !showChart"
+          @click="dateFilter = !dateFilter"
         >
           <Transition name="icon-rotate" mode="out-in">
             <span
-              :key="showChart ? 'close' : 'open'"
+              :key="dateFilter ? 'close' : 'open'"
               class="text-gray-700 material-icons-outlined text-xl! p-0! m-0!"
             >
-              {{ showChart ? 'close_fullscreen' : 'open_in_full' }}
+              {{ dateFilter ? 'close_fullscreen' : 'open_in_full' }}
             </span>
           </Transition>
         </Button>
@@ -52,33 +52,42 @@
     <!-- ! Date Range Controller -->
     <Transition name="chart-expand">
       <div
-        v-if="showChart && uiStore.activeTab === drawerTabs.explore.value"
-        class="chart-window group hidden lg:flex items-center justify-center gap-3 h-20 w-full max-w-md p-4 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg pointer-events-auto overflow-hidden"
+        v-if="dateFilter && uiStore.activeTab === drawerTabs.explore.value"
+        class="chart-window hidden lg:block w-full max-w-md pointer-events-auto overflow-hidden"
       >
-        <span class="font-medium whitespace-nowrap">{{
-          formatDateByPeriodicity(observationsStore.dateLimits.start, props.dataPeriodicity)
-        }}</span>
-        <Slider
-          v-model="sliderValue"
-          :min="0"
-          :max="sliderMax"
-          :step="sliderStep"
-          :disabled="dates.length === 0"
-          class="max-w-sm w-xl! pt-1 flex-1"
-          :pt="{
-            root: { class: 'w-64' },
-            range: { class: 'bg-sky-500 ' },
-            handle: {
-              class:
-                'h-4 w-4 -m-2 rounded-full bg-sky-500 opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
-            },
-          }"
-        />
-        <span class="font-medium whitespace-nowrap">{{
-          formatDateByPeriodicity(observationsStore.dateLimits.end, props.dataPeriodicity)
-        }}</span>
+        <div
+          v-if="props.data && Object.keys(props.data).length > 0"
+          class="h-30 w-full max-w-md py-1 px-2 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg"
+        >
+          <TimeSeries :values="aggregatedTimeSeries.values" :labels="aggregatedTimeSeries.keys" />
+        </div>
+        <div
+          class="group flex items-center justify-center gap-3 h-20 w-full max-w-md p-4 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg"
+        >
+          <span class="font-medium whitespace-nowrap">{{
+            formatDateByPeriodicity(observationsStore.dateLimits.start, props.dataPeriodicity)
+          }}</span>
+          <Slider
+            v-model="sliderValue"
+            :min="0"
+            :max="sliderMax"
+            :step="sliderStep"
+            :disabled="dates.length === 0"
+            class="max-w-sm w-xl! pt-1 flex-1"
+            :pt="{
+              root: { class: 'w-64' },
+              range: { class: 'bg-sky-500 ' },
+              handle: {
+                class:
+                  'h-4 w-4 -m-2 rounded-full bg-sky-500 opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
+              },
+            }"
+          />
+          <span class="font-medium whitespace-nowrap">{{
+            formatDateByPeriodicity(observationsStore.dateLimits.end, props.dataPeriodicity)
+          }}</span>
 
-        <!-- <div class="playback flex items-center justify-center gap-2 p-2">
+          <!-- <div class="playback flex items-center justify-center gap-2 p-2">
           <Button
             severity="secondary"
             size="small"
@@ -118,14 +127,15 @@
             </Menu>
           </div>
         </div> -->
+        </div>
       </div>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import Slider from 'primevue/slider'
 import Button from 'primevue/button'
+import Slider from 'primevue/slider'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
@@ -136,6 +146,7 @@ import {
   PeriodicityEnum,
 } from '../../utils/date'
 import { debounce } from '../../utils/debouncer'
+import TimeSeries from './TimeSeries.vue'
 
 const props = defineProps({
   dateLimits: {
@@ -153,8 +164,8 @@ const props = defineProps({
     required: true,
   },
   data: {
-    type: Object as () => Record<string, number>, // date -> count
-    required: false,
+    type: Object as () => Record<string, number> | null, // date -> count
+    required: true,
   },
 })
 
@@ -164,14 +175,13 @@ const uiStore = useUIStore()
 const isDataASnapshot = computed(() => props.isDataASnapshot)
 const sliderValue = ref(0)
 const menu = ref()
-const showChart = ref(true)
+const dateFilter = ref(true)
 const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
 const sliderStep = computed(() => 1) // One slider step equals one period entry (day, month, or year).
 // data
 type TimeSeriesPoint = { date: number; value?: number }
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
 const dates = computed<number[]>(() => timeSeries.value.map((point) => point.date))
-const values = computed<Array<number>>(() => timeSeries.value.map((point) => point.value ?? 0))
 const aggregatedTimeSeries = ref<{
   keys: string[]
   values: number[]
@@ -238,6 +248,8 @@ onMounted(() => {
     start: observationsStore.dateLimits.start,
     end: observationsStore.dateLimits.end,
   }
+  console.log('Mounted TemporalFilter with data:', props.data)
+  console.log(props.data && Object.keys(props.data).length > 0)
 })
 
 /**
@@ -278,6 +290,24 @@ const regenerateTimeSeries = (start: Date, end: Date) => {
     compressData()
   }
 }
+
+watch(
+  () => props.data,
+  (newData) => {
+    if (!newData) return
+
+    const start = observationsStore.dateLimits.start
+    const end = observationsStore.dateLimits.end
+    if (!start || !end) return
+
+    const parsedStart = new Date(start)
+    const parsedEnd = new Date(end)
+    if (Number.isNaN(parsedStart.getTime()) || Number.isNaN(parsedEnd.getTime())) return
+
+    regenerateTimeSeries(parsedStart, parsedEnd)
+  },
+  { deep: true, immediate: true },
+)
 
 watch(
   () => props.dateLimits,

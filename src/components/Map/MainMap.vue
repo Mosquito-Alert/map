@@ -11,6 +11,7 @@
           :dateLimits="dateLimits"
           :dataPeriodicity="dataPeriodicity"
           :isDataASnapshot="isDataASnapshot"
+          :data="dataForTimeSeries"
         />
         <MapLegend
           v-if="mapStore.showLegend"
@@ -70,6 +71,7 @@ import {
   h3AggregationWorker,
   handleZoomChangeInObservations,
   mapColors,
+  renderedOriginalDateAggregationData,
   setDateLimitsForObservations,
   showOnlyResolution,
 } from './Layers/MAObservationsLayer'
@@ -90,6 +92,9 @@ const dateLimits = ref<{ first: Date; last: Date }>({
   first: new Date(1970, 0, 1),
   last: new Date(),
 }) // Date limits for temporal filter, derived from currently shown data
+const dataForTimeSeries = ref<Record<string, number> | null>(
+  renderedOriginalDateAggregationData.value,
+)
 const dataPeriodicity = ref(PeriodicityEnum.Day) // Periodicity of the provided data
 const isDataASnapshot = ref(false) // Tells if the shown data is either a snapshot or an aggregation, used to adapt temporal filter behavior
 
@@ -181,6 +186,7 @@ const toggleDataLayers = async () => {
     dateLimits.value = setDateLimitsForObservations()
     isDataASnapshot.value = false
     dataPeriodicity.value = PeriodicityEnum.Day // TODO: derive from data
+    dataForTimeSeries.value = renderedOriginalDateAggregationData.value
   } else {
     mapStore.resolutionsAvailable.forEach((res) => {
       const layerId = mapStore.getH3LayerId(res)
@@ -217,6 +223,7 @@ const toggleDataLayers = async () => {
       first: firstGbifDateAvailable,
       last: new Date(),
     }
+    dataForTimeSeries.value = null
     dataPeriodicity.value = PeriodicityEnum.Year
     isDataASnapshot.value = false
   } else {
@@ -238,6 +245,7 @@ const toggleDataLayers = async () => {
     if (map.value.getLayer(mapStore.extObservationsLayerId)) {
       map.value.setLayoutProperty(mapStore.extObservationsLayerId, 'visibility', 'visible')
     }
+    dataForTimeSeries.value = null
     dataPeriodicity.value = PeriodicityEnum.Day
   } else {
     if (map.value.getLayer(mapStore.extObservationsLayerId)) {
@@ -258,7 +266,7 @@ const toggleDataLayers = async () => {
       first: firstRM0DateAvailable,
       last: lastRM0DateAvailable,
     }
-
+    dataForTimeSeries.value = null
     dataPeriodicity.value = PeriodicityEnum.Day
     isDataASnapshot.value = true
   } else {
@@ -365,6 +373,13 @@ onUnmounted(() => {
     map.value.remove()
   }
 })
+
+watch(
+  () => renderedOriginalDateAggregationData.value,
+  (newData) => {
+    dataForTimeSeries.value = newData
+  },
+)
 
 watch(
   () => mapStore.layerSelected,
