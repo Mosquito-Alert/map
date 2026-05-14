@@ -248,8 +248,6 @@ onMounted(() => {
     start: observationsStore.dateLimits.start,
     end: observationsStore.dateLimits.end,
   }
-  console.log('Mounted TemporalFilter with data:', props.data)
-  console.log(props.data && Object.keys(props.data).length > 0)
 })
 
 /**
@@ -276,10 +274,13 @@ const compressData = () => {
  */
 const regenerateTimeSeries = (start: Date, end: Date) => {
   if (!props.data || Object.keys(props.data).length === 0) {
+    // If no original data is provided
     timeSeries.value = getTimestampsBetween(start, end, props.dataPeriodicity).map((date) => ({
       date,
     }))
   } else {
+    // If original data is provided
+    console.log(props.data)
     const timeseriesData = fillMissingDates(props.data, props.dataPeriodicity)
     timeSeries.value = Object.entries(timeseriesData)
       .sort(([firstDate], [secondDate]) => Number(firstDate) - Number(secondDate))

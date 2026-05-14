@@ -103,7 +103,17 @@ export const fillMissingDates = (
     return {}
   }
 
-  const sortedKeys = keys.sort()
+  const sortedKeys = [...keys].sort((a, b) => {
+    // Determine if keys are timestamps (numeric) or date strings, and sort accordingly
+    const aTimestamp = /^\d+$/.test(a)
+    const bTimestamp = /^\d+$/.test(b)
+
+    if (aTimestamp && bTimestamp) {
+      return Number(a) - Number(b)
+    }
+
+    return a.localeCompare(b)
+  })
   const isTimestampFormat = /^\d+$/.test(sortedKeys[0] as string)
 
   const start = isTimestampFormat
@@ -138,29 +148,29 @@ const addPeriod = (date: Date, periodicity: PeriodicityEnum): Date => {
 
   switch (periodicity) {
     case PeriodicityEnum.Day:
-      d.setDate(d.getDate() + 1)
+      d.setUTCDate(d.getUTCDate() + 1) // UTC to avoid timezone issues
       return d
 
     case PeriodicityEnum.Month: {
-      const day = d.getDate()
+      const day = d.getUTCDate()
 
-      d.setDate(1)
-      d.setMonth(d.getMonth() + 1)
+      d.setUTCDate(1)
+      d.setUTCMonth(d.getUTCMonth() + 1)
 
-      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+      const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate()
 
-      d.setDate(Math.min(day, lastDay))
+      d.setUTCDate(Math.min(day, lastDay))
       return d
     }
 
     case PeriodicityEnum.Year: {
-      const originalMonth = d.getMonth()
+      const originalMonth = d.getUTCMonth()
 
-      d.setFullYear(d.getFullYear() + 1)
+      d.setUTCFullYear(d.getUTCFullYear() + 1)
 
       // Handle Feb 29 rollover
-      if (d.getMonth() !== originalMonth) {
-        d.setDate(0)
+      if (d.getUTCMonth() !== originalMonth) {
+        d.setUTCDate(0)
       }
 
       return d
