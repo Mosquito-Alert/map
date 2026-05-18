@@ -1,5 +1,11 @@
 <template>
-  <VChart ref="chartRef" class="pt-0" :option="option" :loading="loading" autoresize />
+  <VChart
+    ref="chartRef"
+    class="block h-full w-full pt-0"
+    :option="option"
+    :loading="loading"
+    autoresize
+  />
 </template>
 <script lang="ts" setup>
 import { BarChart } from 'echarts/charts'
@@ -28,24 +34,25 @@ const observationsStore = useObservationsStore()
 const option = computed(() => ({
   xAxis: {
     type: 'category',
+    boundaryGap: false,
     data: props.labels.map((m) => {
       const [year, month] = m.split('-')
       const date = new Date(Number(year), Number(month) - 1, 1)
       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
     }),
-    // boundaryGap: false,
+    show: false,
   },
   yAxis: {
     type: 'value',
     show: false,
   },
   grid: {
-    show: false,
-    left: '0',
-    right: '0',
-    bottom: '0',
-    top: '0',
-    // containLabel: false,
+    // show: false,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    containLabel: false,
   },
   series: [
     {
@@ -58,14 +65,15 @@ const option = computed(() => ({
             color:
               date >= new Date(observationsStore.dateFilter.start || '') &&
               date <= new Date(observationsStore.dateFilter.end || '')
-                ? '#4473dc'
-                : '#cfd2d7',
+                ? '#2b7fff88'
+                : '#d1d5dc88',
           },
         }
       }),
       type: 'bar',
+      cursor: 'default',
       showSymbol: false,
-      // barCategoryGap: '10%',
+      barCategoryGap: '5%',
     },
   ],
 }))

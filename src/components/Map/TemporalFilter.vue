@@ -1,15 +1,81 @@
 <template>
-  <div class="flex flex-col items-center">
-    <!-- ! Date Information -->
-    <div
-      class="dates-controller inline-flex flex-nowrap self-end items-center gap-3 px-3 py-1 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-t-lg cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
-      :class="{
-        'rounded-lg border-b-1': !dateFilter,
-      }"
-    >
-      <div class="dates whitespace-nowrap pointer-events-auto">
-        <!-- TODO: -->
+  <div
+    class="flex flex-col md:flex-row justify-center items-stretch md:items-end w-screen max-w-[calc(100vw-1.5rem)] md:w-xl lg:w-2xl min-h-20 h-auto gap-3 p-2 bg-white! border-gray-400! border-1! rounded-lg! shadow-lg pointer-events-auto"
+  >
+    <!-- BUTTONS -->
+    <div class="playback flex items-center! justify-center! gap-2! py-2! shrink-0">
+      <Button
+        severity="secondary"
+        size="small"
+        class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+      >
+        <span class="text-gray-700 material-icons-outlined">
+          {{ 'play_arrow' }}
+        </span>
+      </Button>
+      <Button
+        severity="secondary"
+        size="small"
+        class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+      >
+        <span class="text-gray-700 material-icons-outlined">
+          {{ 'skip_previous' }}
+        </span>
+      </Button>
+      <Button
+        severity="secondary"
+        size="small"
+        class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+      >
+        <span class="text-gray-700 material-icons-outlined">
+          {{ 'skip_next' }}
+        </span>
+      </Button>
+    </div>
 
+    <!-- FILTER -->
+    <div class="temporal-filter group flex-col flex-1 w-full min-w-0">
+      <!-- Show chart if size is wider than md -->
+      <div v-if="showChart" class="group h-20 w-full hidden md:block px-0">
+        <TimeSeries :values="aggregatedTimeSeries.values" :labels="aggregatedTimeSeries.keys" />
+      </div>
+      <div class="w-full flex items-center flex-col">
+        <Slider
+          v-model="sliderValue"
+          :min="0"
+          :max="sliderMax"
+          :step="sliderStep"
+          :disabled="dates.length === 0"
+          class="w-full pt-1"
+          :pt="{
+            root: { class: 'bg-gray-300 cursor-pointer' },
+            range: { class: 'bg-sky-500' },
+            handle: {
+              class:
+                'h-4 w-4 -m-2 rounded-full bg-sky-500 opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
+            },
+          }"
+        />
+
+        <div
+          class="date-limits flex flex-row items-center justify-between pt-1 w-full min-w-0 text-xs font-medium text-gray-700 whitespace-nowrap"
+        >
+          <span>
+            {{ formatDateByPeriodicity(observationsStore.dateLimits.start, props.dataPeriodicity) }}
+          </span>
+          <span>
+            {{ formatDateByPeriodicity(observationsStore.dateLimits.end, props.dataPeriodicity) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATES INFORMATION -->
+  <!-- <div
+      class="dates-controller inline-flex flex-nowrap items-center gap-2 text-sm font-normal text-gray-700"
+    >
+      <div class="dates min-w-0 whitespace-nowrap">
         <div v-if="isDataASnapshot">
           <span class="font-bold">{{
             formatDateByPeriodicity(observationsStore.dateFilter.end, props.dataPeriodicity)
@@ -47,90 +113,7 @@
           </Transition>
         </Button>
       </div>
-    </div>
-
-    <!-- ! Date Range Controller -->
-    <Transition name="chart-expand">
-      <div
-        v-if="dateFilter && uiStore.activeTab === drawerTabs.explore.value"
-        class="chart-window hidden lg:block w-full max-w-md pointer-events-auto overflow-hidden"
-      >
-        <div
-          v-if="props.data && Object.keys(props.data).length > 0"
-          class="h-30 w-full max-w-md py-1 px-2 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg"
-        >
-          <TimeSeries :values="aggregatedTimeSeries.values" :labels="aggregatedTimeSeries.keys" />
-        </div>
-        <div
-          class="group flex items-center justify-center gap-3 h-20 w-full max-w-md p-4 bg-white! border-gray-400! border-1! rounded-tr-none rounded-lg shadow-lg"
-        >
-          <span class="font-medium whitespace-nowrap">{{
-            formatDateByPeriodicity(observationsStore.dateLimits.start, props.dataPeriodicity)
-          }}</span>
-          <Slider
-            v-model="sliderValue"
-            :min="0"
-            :max="sliderMax"
-            :step="sliderStep"
-            :disabled="dates.length === 0"
-            class="max-w-sm w-xl! pt-1 flex-1"
-            :pt="{
-              root: { class: 'w-64' },
-              range: { class: 'bg-sky-500 ' },
-              handle: {
-                class:
-                  'h-4 w-4 -m-2 rounded-full bg-sky-500 opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
-              },
-            }"
-          />
-          <span class="font-medium whitespace-nowrap">{{
-            formatDateByPeriodicity(observationsStore.dateLimits.end, props.dataPeriodicity)
-          }}</span>
-
-          <!-- <div class="playback flex items-center justify-center gap-2 p-2">
-          <Button
-            severity="secondary"
-            size="small"
-            class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
-            @click="playbackOngoing = !playbackOngoing"
-            v-tooltip.top="playbackOngoing ? 'Pause playback' : 'Start playback'"
-          >
-            <span class="text-gray-700 material-icons-outlined">
-              {{ playbackOngoing ? 'pause' : 'play_arrow' }}
-            </span>
-          </Button>
-
-          <div>
-            <Button
-              type="button"
-              @click="(event) => menu.toggle(event)"
-              severity="secondary"
-              size="small"
-              class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
-              aria-haspopup="true"
-              aria-controls="overlay_menu"
-              v-tooltip.top="'Playback speed'"
-            >
-              <span class="text-gray-700 material-icons-outlined">
-                {{ 'speed' }}
-              </span>
-            </Button>
-            <Menu ref="menu" id="overlay_menu" :model="playbackMenuItems" :popup="true">
-              <template #item="{ item }">
-                <div class="flex items-center gap-2 px-2 py-1">
-                  <span class="material-icons-outlined text-sm w-4">
-                    {{ item.isActive ? 'check' : '' }}
-                  </span>
-                  <span>{{ item.label }}</span>
-                </div>
-              </template>
-            </Menu>
-          </div>
-        </div> -->
-        </div>
-      </div>
-    </Transition>
-  </div>
+    </div> -->
 </template>
 
 <script setup lang="ts">
@@ -164,6 +147,7 @@ const props = defineProps({
     required: true,
   },
   data: {
+    // type object or null
     type: Object as () => Record<string, number> | null, // date -> count
     required: true,
   },
@@ -175,6 +159,7 @@ const uiStore = useUIStore()
 const isDataASnapshot = computed(() => props.isDataASnapshot)
 const sliderValue = ref(0)
 const menu = ref()
+const showChart = computed(() => props.data && Object.keys(props.data).length > 0)
 const dateFilter = ref(true)
 const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
 const sliderStep = computed(() => 1) // One slider step equals one period entry (day, month, or year).
@@ -280,7 +265,6 @@ const regenerateTimeSeries = (start: Date, end: Date) => {
     }))
   } else {
     // If original data is provided
-    console.log(props.data)
     const timeseriesData = fillMissingDates(props.data, props.dataPeriodicity)
     timeSeries.value = Object.entries(timeseriesData)
       .sort(([firstDate], [secondDate]) => Number(firstDate) - Number(secondDate))
