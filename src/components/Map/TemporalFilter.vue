@@ -39,7 +39,7 @@
       <div v-if="showChart" class="group h-20 w-full hidden md:block px-0">
         <TimeSeries :values="aggregatedTimeSeries.values" :labels="aggregatedTimeSeries.keys" />
       </div>
-      <div class="w-full flex items-center flex-col">
+      <div class="flex flex-1 items-center flex-col">
         <Slider
           v-model="sliderValue"
           :min="0"
@@ -48,11 +48,17 @@
           :disabled="dates.length === 0"
           class="w-full pt-1"
           :pt="{
-            root: { class: 'bg-gray-300 cursor-pointer' },
-            range: { class: 'bg-sky-500' },
+            root: {
+              class: 'bg-gray-300 cursor-pointer',
+            },
+            range: { class: [isDataASnapshot ? 'bg-gray-300' : 'bg-sky-500'] },
             handle: {
-              class:
-                'h-4 w-4 -m-2 rounded-full bg-sky-500 opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
+              class: [
+                'slider-hangler h-4 w-4 rounded-full ',
+                isDataASnapshot
+                  ? ''
+                  : ' opacity-0 scale-75 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
+              ],
             },
           }"
         />
@@ -349,6 +355,9 @@ watch(sliderValue, (newValue) => {
 </script>
 
 <style>
+.slider-hangler::before {
+  background: #2b5fff;
+}
 /* CHART ANIMATION */
 .chart-expand-enter-active,
 .chart-expand-leave-active {
