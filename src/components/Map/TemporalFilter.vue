@@ -35,11 +35,18 @@
     </div>
 
     <!-- ! TEMPORAL FILTER -->
-
-    <Transition name="chart-expand">
+    <Transition
+      name="chart-expand"
+      @before-enter="beforeExpandEnter"
+      @enter="expandEnter"
+      @after-enter="expandAfterEnter"
+      @before-leave="beforeExpandLeave"
+      @leave="expandLeave"
+      @after-leave="expandAfterLeave"
+    >
       <div
         v-if="showDateFilter && uiStore.activeTab === drawerTabs.explore.value"
-        class="flex flex-col md:flex-row justify-center items-stretch md:items-end w-screen max-w-[calc(100vw-1.5rem)] md:w-xl lg:w-2xl min-h-20 h-auto gap-3 p-2 bg-white! border-gray-400! border-1! rounded-lg! rounded-tr-none! shadow-lg pointer-events-auto"
+        class="flex flex-col md:flex-row justify-center items-stretch md:items-end w-screen max-w-[calc(100vw-1.5rem)] md:w-xl lg:w-2xl min-h-20 h-auto gap-3 p-2 bg-white! border-gray-400! border-1! rounded-lg! rounded-tr-none! shadow-lg pointer-events-auto overflow-hidden"
       >
         <!-- * BUTTONS -->
         <div class="playback flex items-center! justify-center! gap-2! py-2! shrink-0">
@@ -350,6 +357,46 @@ const debouncedUpdateDateFilterFromSlider = debounce((newValue: number) => {
   updateDateFilterFromSlider(newValue)
 }, 150)
 
+// * ANIMATIONS
+type TransitionElement = HTMLElement & { _expandHeight?: string }
+const beforeExpandEnter = (el: Element) => {
+  const element = el as TransitionElement
+  element._expandHeight = element.style.height
+  element.style.height = '0px'
+  element.style.overflow = 'hidden'
+}
+
+const expandEnter = (el: Element) => {
+  const element = el as TransitionElement
+  element.style.height = `${element.scrollHeight}px`
+}
+
+const expandAfterEnter = (el: Element) => {
+  const element = el as TransitionElement
+  element.style.height = 'auto'
+  element.style.overflow = ''
+}
+
+const beforeExpandLeave = (el: Element) => {
+  const element = el as TransitionElement
+  element._expandHeight = element.style.height
+  element.style.height = `${element.scrollHeight}px`
+  element.style.overflow = 'hidden'
+}
+
+const expandLeave = (el: Element) => {
+  const element = el as TransitionElement
+  requestAnimationFrame(() => {
+    element.style.height = '0px'
+  })
+}
+
+const expandAfterLeave = (el: Element) => {
+  const element = el as TransitionElement
+  element.style.height = element._expandHeight ?? ''
+  element.style.overflow = ''
+}
+
 watch(sliderValue, (newValue) => {
   debouncedUpdateDateFilterFromSlider(newValue)
 })
@@ -365,18 +412,15 @@ watch(sliderValue, (newValue) => {
   transition:
     height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.25s ease;
-  overflow: hidden;
 }
 
 .chart-expand-enter-from,
 .chart-expand-leave-to {
-  height: 0;
   opacity: 0;
 }
 
 .chart-expand-enter-to,
 .chart-expand-leave-from {
-  height: 80px;
   opacity: 1;
 }
 
