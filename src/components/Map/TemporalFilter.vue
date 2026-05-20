@@ -8,7 +8,7 @@
       }"
     >
       <span class="dates whitespace-nowrap pointer-events-auto font-medium text-sky-800">
-        {{ formatDateByPeriodicity(observationsStore.dateFilter.end, props.dataPeriodicity) }}
+        {{ formatDateByPeriodicity(previewDateFilter.end, props.dataPeriodicity) }}
       </span>
 
       <div
@@ -83,7 +83,11 @@
         <div class="temporal-filter group flex-col flex-1 w-full min-w-0">
           <!-- Show chart if size is wider than md -->
           <div v-if="showChart" class="group h-20 w-full hidden md:block px-0">
-            <TimeSeries :values="aggregatedTimeSeries.values" :labels="aggregatedTimeSeries.keys" />
+            <TimeSeries
+              :values="aggregatedTimeSeries.values"
+              :labels="aggregatedTimeSeries.keys"
+              :date-filter="previewDateFilter"
+            />
           </div>
           <div class="flex flex-1 items-center flex-col">
             <Slider
@@ -177,6 +181,23 @@ const showChart = computed(() => props.data && Object.keys(props.data).length > 
 const showDateFilter = ref(true)
 const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
 const sliderStep = computed(() => 1) // One slider step equals one period entry (day, month, or year).
+const previewDateFilter = computed(() => {
+  const startDate = dates.value[0]
+  const endIndex = Math.max(0, Math.min(sliderValue.value, sliderMax.value))
+  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
+
+  if (startDate === undefined || endDate === undefined) {
+    return {
+      start: observationsStore.dateFilter.start,
+      end: observationsStore.dateFilter.end,
+    }
+  }
+
+  return {
+    start: new Date(startDate).toISOString(),
+    end: new Date(endDate).toISOString(),
+  }
+})
 // data
 type TimeSeriesPoint = { date: number; value?: number }
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
@@ -215,27 +236,6 @@ const syncSliderFromDateFilter = () => {
 
   const endIndex = findNearestDateIndex(observationsStore.dateFilter.end, sliderMax.value)
   sliderValue.value = Math.max(0, Math.min(endIndex, sliderMax.value))
-}
-
-/**
- * Updates the date filter based on the current slider position.
- */
-const updateDateFilterFromSlider = (endIndexValue: number) => {
-  if (dates.value.length === 0) return
-
-  const endIndex = Math.max(0, Math.min(endIndexValue, sliderMax.value))
-  const startDate = dates.value[0]
-  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
-
-  if (startDate === undefined || endDate === undefined) return
-
-  const start = new Date(startDate).toISOString()
-  const end = new Date(endDate).toISOString()
-
-  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
-    return
-
-  observationsStore.dateFilter = { start, end }
 }
 
 onMounted(() => {
@@ -353,9 +353,31 @@ watch(
   { deep: true },
 )
 
-const debouncedUpdateDateFilterFromSlider = debounce((newValue: number) => {
-  updateDateFilterFromSlider(newValue)
+const debouncedUpdateDateFilter = debounce((start: string, end: string) => {
+  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
+    return
+
+  observationsStore.dateFilter = { start, end }
 }, 150)
+
+watch(sliderValue, (newValue) => {
+  // Updates the date filter based on the current slider position.
+  if (dates.value.length === 0) return
+
+  const endIndex = Math.max(0, Math.min(newValue, sliderMax.value))
+  const startDate = dates.value[0]
+  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
+
+  if (startDate === undefined || endDate === undefined) return
+
+  const start = new Date(startDate).toISOString()
+  const end = new Date(endDate).toISOString()
+
+  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
+    return
+
+  debouncedUpdateDateFilter(start, end)
+})
 
 // * ANIMATIONS
 type TransitionElement = HTMLElement & { _expandHeight?: string }
@@ -396,10 +418,6 @@ const expandAfterLeave = (el: Element) => {
   element.style.height = element._expandHeight ?? ''
   element.style.overflow = ''
 }
-
-watch(sliderValue, (newValue) => {
-  debouncedUpdateDateFilterFromSlider(newValue)
-})
 </script>
 
 <style>

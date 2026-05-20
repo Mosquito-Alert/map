@@ -27,6 +27,10 @@ const props = defineProps({
     type: Array as () => string[],
     required: true,
   },
+  dateFilter: {
+    type: Object as () => { start: string | null; end: string | null },
+    required: true,
+  },
 })
 
 const observationsStore = useObservationsStore()
@@ -63,8 +67,8 @@ const option = computed(() => ({
           value: m,
           itemStyle: {
             color:
-              date >= new Date(observationsStore.dateFilter.start || '') &&
-              date <= new Date(observationsStore.dateFilter.end || '')
+              date >= new Date(props.dateFilter.start || '') &&
+              date <= new Date(props.dateFilter.end || '')
                 ? '#2b7fff88'
                 : '#d1d5dc88',
           },
