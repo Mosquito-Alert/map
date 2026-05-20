@@ -83,6 +83,43 @@
               {{ 'skip_next' }}
             </span>
           </Button>
+
+          <div>
+            <Button
+              type="button"
+              @click="(event) => menu.toggle(event)"
+              severity="secondary"
+              size="small"
+              class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+              aria-haspopup="true"
+              aria-controls="overlay_menu"
+              v-tooltip.top="'Playback speed'"
+            >
+              <span class="text-gray-700 material-icons-outlined">
+                {{ 'speed' }}
+              </span>
+            </Button>
+            <Menu
+              ref="menu"
+              id="overlay_menu"
+              :model="playbackMenuItems"
+              :popup="true"
+              :pt="{
+                item: {
+                  class: 'cursor-pointer',
+                },
+              }"
+            >
+              <template #item="{ item }">
+                <div class="flex items-center gap-2 px-2 py-1">
+                  <span class="material-icons-outlined text-sm w-4">
+                    {{ item.isActive ? 'check' : '' }}
+                  </span>
+                  <span>{{ item.label }}</span>
+                </div>
+              </template>
+            </Menu>
+          </div>
         </div>
 
         <!-- * FILTER -->
@@ -143,6 +180,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Slider from 'primevue/slider'
+import Menu from 'primevue/menu'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
@@ -177,6 +215,11 @@ const props = defineProps({
   },
 })
 
+type PlaybackSpeed = {
+  label: string
+  value: number
+}
+
 const observationsStore = useObservationsStore()
 const uiStore = useUIStore()
 
@@ -204,9 +247,29 @@ const previewDateFilter = computed(() => {
     end: new Date(endDate).toISOString(),
   }
 })
+// Playback state
 const playbackOngoing = ref(false)
 const playbackInterval = ref<number | null>(null)
-const playbackStepMs = 500
+const _basePlaybackSpeed = 500 // 1x speed = 500ms per month
+const playbackSpeedOptions: PlaybackSpeed[] = [
+  { label: '0.5x', value: _basePlaybackSpeed / 0.5 },
+  { label: '0.75x', value: _basePlaybackSpeed / 0.75 },
+  { label: '1.0x', value: _basePlaybackSpeed },
+  { label: '1.5x', value: _basePlaybackSpeed / 1.5 },
+  { label: '2.0x', value: _basePlaybackSpeed / 2.0 },
+]
+const playbackSpeed = ref<PlaybackSpeed>(
+  playbackSpeedOptions.find((opt) => opt.label === '1.0x') as PlaybackSpeed,
+)
+const playbackMenuItems = computed(() =>
+  playbackSpeedOptions.map((opt) => ({
+    label: opt.label,
+    isActive: playbackSpeed.value.label === opt.label,
+    command: () => {
+      playbackSpeed.value = opt
+    },
+  })),
+)
 // data
 type TimeSeriesPoint = { date: number; value?: number }
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
@@ -474,7 +537,7 @@ const startPlayback = () => {
       getPlaybackIndex(sliderValue.value, PlaybackDirection.Next),
       sliderMax.value,
     )
-  }, playbackStepMs)
+  }, playbackSpeed.value.value)
 }
 
 watch(sliderValue, (newValue) => {
