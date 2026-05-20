@@ -54,15 +54,19 @@
             severity="secondary"
             size="small"
             class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+            @click="playbackOngoing = !playbackOngoing"
+            v-tooltip.top="playbackOngoing ? 'Pause playback' : 'Start playback'"
           >
             <span class="text-gray-700 material-icons-outlined">
-              {{ 'play_arrow' }}
+              {{ playbackOngoing ? 'pause' : 'play_arrow' }}
             </span>
           </Button>
           <Button
             severity="secondary"
             size="small"
             class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+            :disabled="sliderValue <= 0"
+            @click="goToPreviousPeriod"
           >
             <span class="text-gray-700 material-icons-outlined">
               {{ 'skip_previous' }}
@@ -72,6 +76,8 @@
             severity="secondary"
             size="small"
             class="flex! justify-center! items-center! p-0.5 bg-gray-200 rounded-sm cursor-pointer animated-btn transition-transform active:scale-90 hover:scale-105 duration-150"
+            :disabled="sliderValue >= sliderMax"
+            @click="goToNextPeriod"
           >
             <span class="text-gray-700 material-icons-outlined">
               {{ 'skip_next' }}
@@ -137,7 +143,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Slider from 'primevue/slider'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
@@ -180,7 +186,7 @@ const menu = ref()
 const showChart = computed(() => props.data && Object.keys(props.data).length > 0)
 const showDateFilter = ref(true)
 const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
-const sliderStep = computed(() => 1) // One slider step equals one period entry (day, month, or year).
+const sliderStep = ref(1) // One slider step equals one period entry (day, month, or year).
 const previewDateFilter = computed(() => {
   const startDate = dates.value[0]
   const endIndex = Math.max(0, Math.min(sliderValue.value, sliderMax.value))
@@ -198,6 +204,9 @@ const previewDateFilter = computed(() => {
     end: new Date(endDate).toISOString(),
   }
 })
+const playbackOngoing = ref(false)
+const playbackInterval = ref<number | null>(null)
+const playbackStepMs = 500
 // data
 type TimeSeriesPoint = { date: number; value?: number }
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
@@ -208,20 +217,41 @@ const aggregatedTimeSeries = ref<{
 }>({ keys: [], values: [] })
 const aggregationPeriodicity = PeriodicityEnum.Month // Indicates the periodicity of aggregation.
 
+/** Playback direction enum for clearer, typed calls */
+enum PlaybackDirection {
+  Next = 'next',
+  Prev = 'prev',
+}
+
 /**
  * Finds the index of the nearest date in the time series to the provided date string.
  * If the date string is invalid or not provided, it returns the fallback index.
  * @param dateAsString
  * @param fallback
+ * @param direction - 'next' to find the nearest date greater than or equal to the provided date, 'prev' to find the nearest date less than or equal to the provided date.
  */
-const findNearestDateIndex = (dateAsString: string | null, fallback: number) => {
+const findNearestDateIndex = (
+  dateAsString: string | null,
+  fallback: number,
+  direction: PlaybackDirection = PlaybackDirection.Next,
+) => {
   if (!dateAsString || dates.value.length === 0) return fallback
 
   const timestamp = Date.parse(dateAsString)
   if (Number.isNaN(timestamp)) return fallback
 
-  const nearestIndex = dates.value.findIndex((date) => date >= timestamp)
-  return nearestIndex === -1 ? sliderMax.value : nearestIndex
+  if (direction === PlaybackDirection.Next) {
+    const nearestIndex = dates.value.findIndex((date) => date >= timestamp)
+    return nearestIndex === -1 ? sliderMax.value : nearestIndex
+  }
+
+  // prev: find the last index <= timestamp
+  for (let i = dates.value.length - 1; i >= 0; i -= 1) {
+    const candidate = dates.value[i]
+    if (candidate !== undefined && candidate <= timestamp) return i
+  }
+
+  return fallback
 }
 
 /**
@@ -360,6 +390,93 @@ const debouncedUpdateDateFilter = debounce((start: string, end: string) => {
   observationsStore.dateFilter = { start, end }
 }, 150)
 
+/** PLAYBACK */
+const stopPlayback = () => {
+  if (playbackInterval.value === null) return
+
+  clearInterval(playbackInterval.value)
+  playbackInterval.value = null
+}
+
+const addPlaybackPeriod = (date: Date, periodicity: PeriodicityEnum, direction: 1 | -1 = 1) => {
+  const nextDate = new Date(date)
+  const offset = direction === 1 ? 1 : -1
+
+  switch (periodicity) {
+    case PeriodicityEnum.Day:
+      nextDate.setUTCDate(nextDate.getUTCDate() + offset)
+      return nextDate
+    case PeriodicityEnum.Month:
+      nextDate.setUTCMonth(nextDate.getUTCMonth() + offset)
+      return nextDate
+    case PeriodicityEnum.Year:
+      nextDate.setUTCFullYear(nextDate.getUTCFullYear() + offset)
+      return nextDate
+  }
+}
+
+/**
+ * Compute the next/previous playback index based on aggregation periodicity.
+ * Returns the best candidate index in the requested direction, falling back
+ * to a single-step move if no direct period match is found.
+ * @param currentIndex
+ * @param direction
+ */
+const getPlaybackIndex = (currentIndex: number, direction: PlaybackDirection) => {
+  const currentDate = dates.value[currentIndex]
+  if (currentDate === undefined) return currentIndex
+
+  const dir = direction === PlaybackDirection.Next ? 1 : -1
+  const targetDate = addPlaybackPeriod(new Date(currentDate), aggregationPeriodicity, dir)
+  const fallback = currentIndex + dir
+  const nearest = findNearestDateIndex(targetDate.toISOString(), fallback, direction)
+
+  if (direction === PlaybackDirection.Next)
+    return nearest <= currentIndex ? currentIndex + 1 : nearest
+  return nearest >= currentIndex ? currentIndex - 1 : nearest
+}
+
+const goToPreviousPeriod = () => {
+  playbackOngoing.value = false
+  stopPlayback()
+
+  if (sliderValue.value <= 0) return
+
+  sliderValue.value = Math.max(0, getPlaybackIndex(sliderValue.value, PlaybackDirection.Prev))
+}
+
+const goToNextPeriod = () => {
+  playbackOngoing.value = false
+  stopPlayback()
+
+  if (sliderValue.value >= sliderMax.value) return
+
+  sliderValue.value = Math.min(
+    getPlaybackIndex(sliderValue.value, PlaybackDirection.Next),
+    sliderMax.value,
+  )
+}
+
+const startPlayback = () => {
+  if (dates.value.length === 0 || playbackInterval.value !== null) return
+
+  if (sliderValue.value >= sliderMax.value) {
+    sliderValue.value = 0
+  }
+
+  playbackInterval.value = setInterval(() => {
+    if (sliderValue.value >= sliderMax.value) {
+      playbackOngoing.value = false
+      return
+    }
+
+    sliderValue.value = Math.min(
+      getPlaybackIndex(sliderValue.value, PlaybackDirection.Next),
+      sliderMax.value,
+    )
+  }, playbackStepMs)
+}
+
 watch(sliderValue, (newValue) => {
   // Updates the date filter based on the current slider position.
   if (dates.value.length === 0) return
@@ -377,6 +494,15 @@ watch(sliderValue, (newValue) => {
     return
 
   debouncedUpdateDateFilter(start, end)
+})
+
+watch(playbackOngoing, (newValue) => {
+  if (newValue) startPlayback()
+  else stopPlayback()
+})
+
+onBeforeUnmount(() => {
+  stopPlayback()
 })
 
 // * ANIMATIONS
