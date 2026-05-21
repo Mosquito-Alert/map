@@ -125,7 +125,7 @@
         <!-- * FILTER -->
         <div class="temporal-filter group flex-col flex-1 w-full min-w-0">
           <!-- Show chart if size is wider than md -->
-          <div v-if="showChart" class="group h-20 w-full hidden md:block px-0">
+          <div v-if="thereIsData" class="group h-20 w-full hidden md:block px-0">
             <TimeSeries
               :values="aggregatedTimeSeries.values"
               :labels="aggregatedTimeSeries.keys"
@@ -179,8 +179,8 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button'
-import Slider from 'primevue/slider'
 import Menu from 'primevue/menu'
+import Slider from 'primevue/slider'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
@@ -215,18 +215,12 @@ const props = defineProps({
   },
 })
 
-type PlaybackSpeed = {
-  label: string
-  value: number
-}
-
 const observationsStore = useObservationsStore()
 const uiStore = useUIStore()
 
 const isDataASnapshot = computed(() => props.isDataASnapshot)
 const sliderValue = ref(0)
 const menu = ref()
-const showChart = computed(() => props.data && Object.keys(props.data).length > 0)
 const showDateFilter = ref(true)
 const sliderMax = computed(() => Math.max(dates.value.length - 1, 0))
 const sliderStep = ref(1) // One slider step equals one period entry (day, month, or year).
@@ -248,8 +242,10 @@ const previewDateFilter = computed(() => {
   }
 })
 // Playback state
-const playbackOngoing = ref(false)
-const playbackInterval = ref<number | null>(null)
+type PlaybackSpeed = {
+  label: string
+  value: number
+}
 const _basePlaybackSpeed = 500 // 1x speed = 500ms per month
 const playbackSpeedOptions: PlaybackSpeed[] = [
   { label: '0.5x', value: _basePlaybackSpeed / 0.5 },
@@ -270,22 +266,32 @@ const playbackMenuItems = computed(() =>
     },
   })),
 )
-// data
+const playbackInterval = ref<number | null>(null)
+const playbackOngoing = ref(false)
+// Playback direction enum for clearer, typed calls
+enum PlaybackDirection {
+  Next = 'next',
+  Prev = 'prev',
+}
+
+// Data
 type TimeSeriesPoint = { date: number; value?: number }
+const thereIsData = computed(() => props.data && Object.keys(props.data).length > 0)
 const timeSeries = ref<TimeSeriesPoint[]>([]) // Sorted points by timestamp. Value can be missing when only date limits are available.
 const dates = computed<number[]>(() => timeSeries.value.map((point) => point.date))
 const aggregatedTimeSeries = ref<{
   keys: string[]
   values: number[]
 }>({ keys: [], values: [] })
-const aggregationPeriodicity = PeriodicityEnum.Month // Indicates the periodicity of aggregation.
+const aggregationPeriodicity = computed(() => {
+  if (thereIsData.value) {
+    // If we have data, we assume it's monthly aggregated (for now, this is the only supported periodicity for provided data). In the future, we could derive this from the data itself by checking the intervals between dates.
+    return PeriodicityEnum.Month
+  }
+  return props.dataPeriodicity
+}) // Indicates the periodicity of aggregation.
 
-/** Playback direction enum for clearer, typed calls */
-enum PlaybackDirection {
-  Next = 'next',
-  Prev = 'prev',
-}
-
+// * UTILS
 /**
  * Finds the index of the nearest date in the time series to the provided date string.
  * If the date string is invalid or not provided, it returns the fallback index.
@@ -331,17 +337,6 @@ const syncSliderFromDateFilter = () => {
   sliderValue.value = Math.max(0, Math.min(endIndex, sliderMax.value))
 }
 
-onMounted(() => {
-  observationsStore.dateLimits = {
-    start: props.dateLimits.first.toISOString(),
-    end: props.dateLimits.last.toISOString(),
-  }
-  observationsStore.dateFilter = {
-    start: observationsStore.dateLimits.start,
-    end: observationsStore.dateLimits.end,
-  }
-})
-
 /**
  * Compresses daily data into periodic aggregates.
  */
@@ -350,7 +345,7 @@ const compressData = () => {
 
   timeSeries.value.forEach(({ date, value }) => {
     const sliceLength =
-      aggregationPeriodicity === PeriodicityEnum.Month ? 7 : PeriodicityEnum.Year ? 4 : 10 // Adjust slice length based on periodicity
+      aggregationPeriodicity.value === PeriodicityEnum.Month ? 7 : PeriodicityEnum.Year ? 4 : 10 // Adjust slice length based on periodicity
     const periodKey = new Date(date).toISOString().slice(0, sliceLength) // Example: "2025-01" for monthly aggregation
     aggregationMap[periodKey] = (aggregationMap[periodKey] || 0) + (value ?? 0)
   })
@@ -365,14 +360,14 @@ const compressData = () => {
  * @param end
  */
 const regenerateTimeSeries = (start: Date, end: Date) => {
-  if (!props.data || Object.keys(props.data).length === 0) {
+  if (!thereIsData.value) {
     // If no original data is provided
     timeSeries.value = getTimestampsBetween(start, end, props.dataPeriodicity).map((date) => ({
       date,
     }))
   } else {
-    // If original data is provided
-    const timeseriesData = fillMissingDates(props.data, props.dataPeriodicity)
+    // If original data is provided.
+    const timeseriesData = fillMissingDates(props.data as any, props.dataPeriodicity) // (as any because we know it has a value, since we checked thereIsData)
     timeSeries.value = Object.entries(timeseriesData)
       .sort(([firstDate], [secondDate]) => Number(firstDate) - Number(secondDate))
       .map(([date, value]) => ({
@@ -382,6 +377,21 @@ const regenerateTimeSeries = (start: Date, end: Date) => {
     compressData()
   }
 }
+
+onMounted(() => {
+  observationsStore.dateLimits = {
+    start: props.dateLimits.first.toISOString(),
+    end: props.dateLimits.last.toISOString(),
+  }
+  observationsStore.dateFilter = {
+    start: observationsStore.dateLimits.start,
+    end: observationsStore.dateLimits.end,
+  }
+})
+
+onBeforeUnmount(() => {
+  stopPlayback()
+})
 
 watch(
   () => props.data,
@@ -453,7 +463,26 @@ const debouncedUpdateDateFilter = debounce((start: string, end: string) => {
   observationsStore.dateFilter = { start, end }
 }, 150)
 
-/** PLAYBACK */
+watch(sliderValue, (newValue) => {
+  // Updates the date filter based on the current slider position.
+  if (dates.value.length === 0) return
+
+  const endIndex = Math.max(0, Math.min(newValue, sliderMax.value))
+  const startDate = dates.value[0]
+  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
+
+  if (startDate === undefined || endDate === undefined) return
+
+  const start = new Date(startDate).toISOString()
+  const end = new Date(endDate).toISOString()
+
+  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
+    return
+
+  debouncedUpdateDateFilter(start, end)
+})
+
+/** * PLAYBACK */
 const stopPlayback = () => {
   if (playbackInterval.value === null) return
 
@@ -490,7 +519,7 @@ const getPlaybackIndex = (currentIndex: number, direction: PlaybackDirection) =>
   if (currentDate === undefined) return currentIndex
 
   const dir = direction === PlaybackDirection.Next ? 1 : -1
-  const targetDate = addPlaybackPeriod(new Date(currentDate), aggregationPeriodicity, dir)
+  const targetDate = addPlaybackPeriod(new Date(currentDate), aggregationPeriodicity.value, dir)
   const fallback = currentIndex + dir
   const nearest = findNearestDateIndex(targetDate.toISOString(), fallback, direction)
 
@@ -540,32 +569,9 @@ const startPlayback = () => {
   }, playbackSpeed.value.value)
 }
 
-watch(sliderValue, (newValue) => {
-  // Updates the date filter based on the current slider position.
-  if (dates.value.length === 0) return
-
-  const endIndex = Math.max(0, Math.min(newValue, sliderMax.value))
-  const startDate = dates.value[0]
-  const endDate = dates.value[endIndex] ?? dates.value[dates.value.length - 1]
-
-  if (startDate === undefined || endDate === undefined) return
-
-  const start = new Date(startDate).toISOString()
-  const end = new Date(endDate).toISOString()
-
-  if (observationsStore.dateFilter.start === start && observationsStore.dateFilter.end === end)
-    return
-
-  debouncedUpdateDateFilter(start, end)
-})
-
 watch(playbackOngoing, (newValue) => {
   if (newValue) startPlayback()
   else stopPlayback()
-})
-
-onBeforeUnmount(() => {
-  stopPlayback()
 })
 
 // * ANIMATIONS
