@@ -15,7 +15,7 @@ export default defineBoot(({ app, router }) => {
     // We recommend adjusting this value in production
     // Learn more at
     // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.2,
     // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
     tracePropagationTargets: ['localhost', apiUrl],
   });
