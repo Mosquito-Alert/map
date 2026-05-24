@@ -74,6 +74,7 @@ import {
 import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
+import { addBiteIndexLayers, selectedBiteIndexStyle } from './Layers/BiteIndexLayer'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -174,6 +175,7 @@ const toggleDataLayers = async () => {
   const showGbif = mapStore.layerSelected === MosquitoLayersEnum.EXTENDED_OBSERVATIONS
   const showDiscoveries = mapStore.layerSelected === MosquitoLayersEnum.DISCOVERIES
   const showRM0 = mapStore.layerSelected === MosquitoLayersEnum.RM0
+  const showBiteIndex = mapStore.layerSelected === MosquitoLayersEnum.BITE_INDEX
 
   // ######### OBSERVATIONS #########
   // ---- Toggle H3 layers ----
@@ -268,6 +270,21 @@ const toggleDataLayers = async () => {
   } else {
     if (map.value.getLayer(mapStore.rm0LayerId)) {
       map.value.setLayoutProperty(mapStore.rm0LayerId, 'visibility', 'none')
+    }
+  }
+
+  // ########## BITE INDEX #########
+  const biteIndexLayerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
+  if (showBiteIndex) {
+    // Ensure Bite Index layer exists
+    await addBiteIndexLayers()
+    // Ensure Bite Index layer is visible
+    if (map.value.getLayer(biteIndexLayerId)) {
+      map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'visible')
+    }
+  } else {
+    if (map.value.getLayer(biteIndexLayerId)) {
+      map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'none')
     }
   }
 }

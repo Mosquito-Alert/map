@@ -55,6 +55,14 @@ export const variablesLayers = [
   },
 ]
 
+// Values need to be the same as the names of the style in geoserver.
+export enum BiteIndexStyleEnum {
+  RISE = 'rise',
+  BALANCE = 'balance',
+  BINARY = 'binary',
+  ANOMALY = 'anomaly',
+}
+
 export const firstGbifDateAvailable = new Date(1900, 0, 1)
 export const firstRM0DateAvailable = new Date(2025, 8, 3) // Note: Months are 0-indexed in JavaScript
 // TODO: API endpoint

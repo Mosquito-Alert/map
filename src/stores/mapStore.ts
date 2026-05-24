@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { MosquitoLayersEnum, VariablesLayersEnum } from '../utils/constants'
+import { BiteIndexStyleEnum, MosquitoLayersEnum, VariablesLayersEnum } from '../utils/constants'
 import type { BasemapType } from '../utils/mapControls/MapBaseLayerControl'
 import { markRaw, shallowRef } from 'vue'
 import type { Map } from 'maplibre-gl'
@@ -39,6 +39,8 @@ export const useMapStore = defineStore('map', {
     getGbifLayerId: (state) => (gbifId: string) => `extended-observations-layer-${gbifId}`,
     getGadmSourceId: (state) => (level: number) => `gadm-level-${level}`,
     getGadmLayerId: (state) => (level: number) => `gadm-layer-level-${level}`,
+    getBiteIndexLayerId: (state) => (style: BiteIndexStyleEnum) => `bite-index-layer-${style}`,
+    getBiteIndexSourceId: (state) => (style: BiteIndexStyleEnum) => `bite-index-source-${style}`,
   },
   actions: {
     setMap(instance: Map) {
