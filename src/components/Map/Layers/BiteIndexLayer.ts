@@ -35,11 +35,11 @@ export const updateBiteIndexSourceUrl = async (date?: string | null) => {
 
   const source = map.value.getSource(
     mapStore.getBiteIndexSourceId(selectedBiteIndexStyle.value),
-  ) as { setUrl: (url: string) => void } | undefined
+  ) as { setTiles: (tiles: string[]) => void } | undefined
 
   if (!source) return
 
-  source.setUrl(buildBiteIndexSourceUrl(date, selectedBiteIndexStyle.value))
+  source.setTiles([buildBiteIndexSourceUrl(date, selectedBiteIndexStyle.value)])
 }
 
 // Function to add Bite Index layers

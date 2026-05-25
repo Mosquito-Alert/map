@@ -75,7 +75,11 @@ import {
 import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
-import { addBiteIndexLayers, selectedBiteIndexStyle } from './Layers/BiteIndexLayer'
+import {
+  addBiteIndexLayers,
+  selectedBiteIndexStyle,
+  updateBiteIndexSourceUrl,
+} from './Layers/BiteIndexLayer'
 import { useBiteIndexStore } from '../../stores/biteIndexStore'
 
 const observationsStore = useObservationsStore()
@@ -279,8 +283,9 @@ const toggleDataLayers = async () => {
   // ########## BITE INDEX #########
   const biteIndexLayerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
   if (showBiteIndex) {
+    const biteIndexDate = observationsStore.dateFilter.end || biteIndexStore.lastDateAvailable
     // Ensure Bite Index layer exists
-    await addBiteIndexLayers(biteIndexStore.lastDateAvailable)
+    await addBiteIndexLayers(biteIndexDate)
     // Ensure Bite Index layer is visible
     if (map.value.getLayer(biteIndexLayerId)) {
       map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'visible')
@@ -468,6 +473,8 @@ watch(
       await updateGBIFSourceTiles(start, end)
     } else if (mapStore.layerSelected === MosquitoLayersEnum.RM0) {
       await updateRM0SourceUrl(end)
+    } else if (mapStore.layerSelected === MosquitoLayersEnum.BITE_INDEX) {
+      await updateBiteIndexSourceUrl(end)
     }
   },
   { deep: true },

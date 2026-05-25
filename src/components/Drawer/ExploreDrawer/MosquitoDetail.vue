@@ -221,7 +221,7 @@ const visibleMosquitoLayers = computed(() => {
   const discoveriesTaxonId = taxaStore.discoveriesTaxonId
 
   return mosquitoLayers.filter((layer) => {
-    // Discoveries only if discovery id exists and is not culex
+    // Discoveries only if discovery id exists
     if (layer.key === MosquitoLayersEnum.DISCOVERIES) {
       return !!discoveriesTaxonId
     }
