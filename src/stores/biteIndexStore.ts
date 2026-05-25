@@ -28,6 +28,7 @@ export const useBiteIndexStore = defineStore('biteIndex', {
     },
     async fetchLastDate() {
       try {
+        if (this.lastDateAvailable) return // If we already have the date, no need to fetch it again
         this.dateLoading = true
         const response = await metricsV1Api.lastDateRetrieve()
         if (response.status === 200 && response.data) {

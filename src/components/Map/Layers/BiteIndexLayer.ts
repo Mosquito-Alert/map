@@ -9,8 +9,7 @@ export const selectedBiteIndexStyle = ref<BiteIndexStyleEnum>(BiteIndexStyleEnum
 
 const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
   const datePart = date.slice(0, 10)
-  // const styleName = `metricstyle-${style}`
-  const styleName = `metricstyle-rise`
+  const styleName = `metricstyle-${style}`
 
   return (
     `${import.meta.env.VITE_GEOSERVER_PROD_URL}/mosquitoalert/wms?` +
@@ -19,10 +18,9 @@ const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
     `request=GetMap&` +
     `layers=mosquitoalert:metric&` +
     `STYLES=${styleName}&` +
-    // `viewparams=date:${datePart}&` +
-    `viewparams=date:2025-05-05&` +
+    `viewparams=date:${datePart}&` +
     `format=image/png&` +
-    `transparent=true` +
+    `TRANSPARENT=TRUE&` +
     `tiled=true&` +
     `srs=EPSG:3857&` +
     `bbox={bbox-epsg-3857}&` +
@@ -32,7 +30,7 @@ const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
 }
 
 // Function to add Bite Index layers
-export const addBiteIndexLayers = async (date?: string | null) => {
+export const addBiteIndexLayers = async (date: string | null) => {
   if (!map.value) return
 
   for (const style of Object.values(BiteIndexStyleEnum)) {
@@ -52,6 +50,9 @@ export const addBiteIndexLayers = async (date?: string | null) => {
         id: layerId,
         type: 'raster',
         source: sourceId,
+        layout: {
+          visibility: 'none',
+        },
       })
     }
   }

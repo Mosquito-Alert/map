@@ -31,6 +31,7 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
+  firstBiteIndexDateAvailable,
   firstGbifDateAvailable,
   firstRM0DateAvailable,
   lastRM0DateAvailable,
@@ -75,12 +76,14 @@ import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
 import { addBiteIndexLayers, selectedBiteIndexStyle } from './Layers/BiteIndexLayer'
+import { useBiteIndexStore } from '../../stores/biteIndexStore'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
 const taxaStore = useTaxaStore()
 const uiStore = useUIStore()
 const analizeStore = useAnalizeStore()
+const biteIndexStore = useBiteIndexStore()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = computed(() => mapStore.map) // Computed ref to react to map changes
@@ -277,11 +280,18 @@ const toggleDataLayers = async () => {
   const biteIndexLayerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
   if (showBiteIndex) {
     // Ensure Bite Index layer exists
-    await addBiteIndexLayers()
+    await addBiteIndexLayers(biteIndexStore.lastDateAvailable)
     // Ensure Bite Index layer is visible
     if (map.value.getLayer(biteIndexLayerId)) {
       map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'visible')
     }
+    dateLimits.value = {
+      first: firstBiteIndexDateAvailable,
+      last: new Date(biteIndexStore.lastDateAvailable),
+    }
+    dataForTimeSeries.value = null
+    dataPeriodicity.value = PeriodicityEnum.Day
+    isDataASnapshot.value = true
   } else {
     if (map.value.getLayer(biteIndexLayerId)) {
       map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'none')
@@ -377,6 +387,9 @@ onMounted(async () => {
       // Add zoom event listeners - only on zoomend to prevent constant processing
       map.value.on('zoomend', handleZoomChangeDebounced)
     })
+
+    // Init state
+    biteIndexStore.fetchLastDate()
   }
 })
 
