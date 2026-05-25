@@ -7,14 +7,17 @@ import { summary as wikipediaSummary } from 'wikipedia'
 type extendedTaxon = Taxon & { wikidataId?: string; gbifId?: string }
 
 export const mapDiscoveriesIdToTaxon = {
-  10: 'culex_pipiens',
   112: 'albopictus',
   113: 'aegypti',
   114: 'japonicus',
   115: 'koreicus',
 }
-export const mapTaxonToDiscoveriesId = Object.fromEntries(
-  Object.entries(mapDiscoveriesIdToTaxon).map(([key, value]) => [value, Number(key)]),
+export const mapIdToTaxon = {
+  ...mapDiscoveriesIdToTaxon,
+  10: 'culex_pipiens',
+}
+export const mapTaxonToId = Object.fromEntries(
+  Object.entries(mapIdToTaxon).map(([key, value]) => [value, Number(key)]),
 )
 
 export const culicidaeTaxon = {

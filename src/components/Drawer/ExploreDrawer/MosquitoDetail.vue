@@ -201,7 +201,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../../stores/mapStore'
 import { useObservationsStore } from '../../../stores/observationsStore'
-import { culicidaeTaxon, mapTaxonToDiscoveriesId, useTaxaStore } from '../../../stores/taxaStore'
+import { culicidaeTaxon, mapTaxonToId, useTaxaStore } from '../../../stores/taxaStore'
 import { mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
 import CardDrawer from '../CardDrawer.vue'
 
@@ -221,19 +221,19 @@ const visibleMosquitoLayers = computed(() => {
   const discoveriesTaxonId = taxaStore.discoveriesTaxonId
 
   return mosquitoLayers.filter((layer) => {
-    // Discoveries only if discovery id exists
+    // Discoveries only if discovery id exists and is not culex
     if (layer.key === MosquitoLayersEnum.DISCOVERIES) {
       return !!discoveriesTaxonId
     }
 
     // rm0 only for albopictus
     if (layer.key === MosquitoLayersEnum.RM0) {
-      return taxonId === mapTaxonToDiscoveriesId.albopictus
+      return taxonId === mapTaxonToId.albopictus
     }
 
     // bite index only for culex
     if (layer.key === MosquitoLayersEnum.BITE_INDEX) {
-      return taxonId === mapTaxonToDiscoveriesId.culex_pipiens
+      return taxonId === mapTaxonToId.culex_pipiens
     }
 
     return true

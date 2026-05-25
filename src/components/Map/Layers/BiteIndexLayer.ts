@@ -12,7 +12,7 @@ const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
   const styleName = `metricstyle-${style}`
 
   return (
-    `${import.meta.env.VITE_GEOSERVER_PROD_URL}/mosquitoalert/wms?` +
+    `/geoserver/mosquitoalert/wms?` +
     `service=WMS&` +
     `version=1.3.0&` +
     `request=GetMap&` +
@@ -27,6 +27,19 @@ const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
     `width=256&` +
     `height=256`
   )
+}
+
+// Function to update Bite Index source URL (e.g., when date or style changes)
+export const updateBiteIndexSourceUrl = async (date?: string | null) => {
+  if (!map.value || !date) return
+
+  const source = map.value.getSource(
+    mapStore.getBiteIndexSourceId(selectedBiteIndexStyle.value),
+  ) as { setUrl: (url: string) => void } | undefined
+
+  if (!source) return
+
+  source.setUrl(buildBiteIndexSourceUrl(date, selectedBiteIndexStyle.value))
 }
 
 // Function to add Bite Index layers
