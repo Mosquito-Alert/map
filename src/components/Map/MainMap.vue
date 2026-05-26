@@ -31,6 +31,8 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
+  centerOfEurope,
+  centerOfSpain,
   firstBiteIndexDateAvailable,
   firstGbifDateAvailable,
   firstRM0DateAvailable,
@@ -102,6 +104,11 @@ const dataForTimeSeries = ref<Record<string, number> | null>(
 const dataPeriodicity = ref(PeriodicityEnum.Day) // Periodicity of the provided data
 const isDataASnapshot = ref(false) // Tells if the shown data is either a snapshot or an aggregation, used to adapt temporal filter behavior
 
+const getDrawerPaddingLeft = () => {
+  const drawerWidth = document.querySelector('aside')?.clientWidth || uiStore.drawerWidth || 0
+  return drawerWidth / 2 || 0
+}
+
 const styleEOX: StyleSpecification = {
   version: 8,
   sources: {
@@ -168,7 +175,7 @@ const pushMapPaddingUpdate = debounce(() => {
   if (map.value) {
     map.value.easeTo({
       padding: {
-        left: uiStore.drawerWidth / 2 || 0,
+        left: getDrawerPaddingLeft(),
       },
       duration: 100, // In ms, CSS transition duration property for the sidebar matches this value
     })
@@ -283,6 +290,11 @@ const toggleDataLayers = async () => {
   // ########## BITE INDEX #########
   const biteIndexLayerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
   if (showBiteIndex) {
+    // Zoom to Spain
+    map.value.easeTo({
+      center: centerOfSpain,
+      zoom: 5.75,
+    })
     const biteIndexDate = observationsStore.dateFilter.end || biteIndexStore.lastDateAvailable
     // Ensure Bite Index layer exists
     await addBiteIndexLayers(biteIndexDate)
@@ -309,14 +321,15 @@ onMounted(async () => {
     // Initialize map immediately for faster perceived load time
     const mapDeclaration = new maplibregl.Map({
       container: mapContainer.value,
-      center: [11.39831, 47.26244],
+      center: centerOfEurope,
       zoom: 2,
       // attributionControl: false,
     })
     if (!mapDeclaration) return
     maplibregl.addProtocol('cog', cogProtocol)
-
-    pushMapPaddingUpdate()
+    mapDeclaration.setPadding({
+      left: getDrawerPaddingLeft(),
+    })
 
     mapStore.baselayer =
       // @ts-ignore // FIXME:
@@ -664,9 +677,11 @@ watch(
 )
 
 watch(
-  () => uiStore.drawerWidth,
-  (newWidth, oldWidth) => {
-    if (map.value && newWidth !== oldWidth) {
+  // drawer width or zoom level
+  () => [uiStore.drawerWidth, map.value?.getZoom()],
+  ([newDrawerWidth, newZoom], [oldDrawerWidth, oldZoom]) => {
+    if (map.value) {
+      // && newDrawerWidth !== oldDrawerWidth) {
       pushMapPaddingUpdate()
     }
   },

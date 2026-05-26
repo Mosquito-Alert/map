@@ -70,3 +70,6 @@ export const firstRM0DateAvailable = new Date(2025, 8, 3) // Note: Months are 0-
 export const lastRM0DateAvailable = new Date(2026, 4, 12)
 // TODO: API endpoint. get date limits
 export const firstBiteIndexDateAvailable = new Date(2020, 0, 1)
+
+export const centerOfEurope: [number, number] = [11.39831, 47.26244]
+export const centerOfSpain: [number, number] = [-4.0, 39.75]
