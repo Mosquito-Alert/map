@@ -27,6 +27,9 @@ const emit = defineEmits(['selectStyle'])
 const styles = Object.values(BiteIndexStyleEnum)
 
 const selectStyle = (style: BiteIndexStyleEnum) => {
-  emit('selectStyle', style)
+  if (selectedBiteIndexStyle.value === style) return
+
+  selectedBiteIndexStyle.value = style
+  emit('selectStyle')
 }
 </script>

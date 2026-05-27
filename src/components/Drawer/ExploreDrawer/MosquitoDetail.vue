@@ -215,10 +215,9 @@ import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../../stores/mapStore'
 import { useObservationsStore } from '../../../stores/observationsStore'
 import { culicidaeTaxon, mapTaxonToId, useTaxaStore } from '../../../stores/taxaStore'
-import { BiteIndexStyleEnum, mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
+import { mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
 import CardDrawer from '../CardDrawer.vue'
 import BiteIndexStyleSelector from './BiteIndexStyleSelector.vue'
-import { selectedBiteIndexStyle } from '../../Map/Layers/BiteIndexLayer'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()
@@ -349,8 +348,7 @@ const toggleBiteIndexStyle = (event: MouseEvent) => {
   getBiteIndexStyleSelector()?.toggle(event)
 }
 
-const selectBiteIndexStyle = (style: BiteIndexStyleEnum) => {
-  selectedBiteIndexStyle.value = style
+const selectBiteIndexStyle = () => {
   getBiteIndexStyleSelector()?.hide()
 }
 
