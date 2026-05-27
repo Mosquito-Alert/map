@@ -144,7 +144,7 @@
             <div
               v-for="layer in visibleMosquitoLayers"
               :key="layer.key"
-              class="flex items-start gap-2"
+              class="flex flex items-start gap-2"
             >
               <RadioButton
                 v-model="mapStore.layerSelected"
@@ -153,6 +153,27 @@
                 :value="layer.key"
               />
               <label :for="layer.key" class="cursor-pointer">{{ layer.label }}</label>
+              <div
+                class="layer-information"
+                v-tooltip.right="{
+                  value: layer.info,
+                  pt: { root: { class: 'max-w-xs' } },
+                }"
+              >
+                <span class="material-icons-outlined text-gray-400"> info </span>
+              </div>
+              <Button
+                v-if="layer.key === MosquitoLayersEnum.BITE_INDEX"
+                aria-label="Select Style"
+                variant="text"
+                class="p-0 m-0"
+                @click="toggleBiteIndexStyle"
+              >
+                <span class="material-icons-outlined text-gray-500"> palette </span>
+              </Button>
+              <Popover ref="biteIndexStyleSelectorRef" :pt="{ content: { class: 'p-1' } }">
+                <BiteIndexStyleSelector @selectStyle="selectBiteIndexStyle" />
+              </Popover>
               <Button
                 aria-label="Download"
                 variant="text"
@@ -161,15 +182,6 @@
               >
                 <span class="material-icons-outlined text-gray-800"> file_download </span>
               </Button>
-              <div
-                class="layer-information"
-                v-tooltip.right="{
-                  value: layer.info,
-                  pt: { root: { class: 'max-w-xs' } },
-                }"
-              >
-                <span class="material-icons-outlined text-gray-800"> info </span>
-              </div>
             </div>
           </div>
         </div>
@@ -191,6 +203,7 @@ import {
   Button,
   Card,
   Carousel,
+  Popover,
   ProgressSpinner,
   RadioButton,
   Skeleton,
@@ -202,13 +215,29 @@ import { summary as wikipediaSummary } from 'wikipedia'
 import { useMapStore } from '../../../stores/mapStore'
 import { useObservationsStore } from '../../../stores/observationsStore'
 import { culicidaeTaxon, mapTaxonToId, useTaxaStore } from '../../../stores/taxaStore'
-import { mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
+import { BiteIndexStyleEnum, mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
 import CardDrawer from '../CardDrawer.vue'
+import BiteIndexStyleSelector from './BiteIndexStyleSelector.vue'
+import { selectedBiteIndexStyle } from '../../Map/Layers/BiteIndexLayer.ts'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()
 const observationsStore = useObservationsStore()
 
+const biteIndexStyleSelectorRef = ref()
+/**
+ * Get the Bite Index Style Selector component instance from the Popover ref.
+ * This is needed because the ref is an array when used inside a v-for.
+ */
+const getBiteIndexStyleSelector = () => {
+  const selector = biteIndexStyleSelectorRef.value
+
+  if (Array.isArray(selector)) {
+    return selector[0]
+  }
+
+  return selector
+}
 const fetchingObservations = ref(false)
 const diseases = ['Dengue', 'Fiebre Amarilla', 'Virus del Nilo Occidental']
 const seeAdditionalDetails = ref(false)
@@ -314,6 +343,15 @@ const getUserLocation = (): Promise<{ latitude: number; longitude: number }> => 
       )
     }
   })
+}
+
+const toggleBiteIndexStyle = (event: MouseEvent) => {
+  getBiteIndexStyleSelector()?.toggle(event)
+}
+
+const selectBiteIndexStyle = (style: BiteIndexStyleEnum) => {
+  selectedBiteIndexStyle.value = style
+  getBiteIndexStyleSelector()?.hide()
 }
 
 watch(

@@ -11,7 +11,7 @@ const buildRM0SourceUrl = (date: string) => {
   // of 7 or higher indicates a very high R0, so we set it as the upper bound for the color scale
   const maxValue = 7
   const datePart = date.slice(0, 10)
-
+  // Styles: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
   return `cog://${import.meta.env.VITE_METRICS_RASTER_URL}/${datePart}T00:00.tiff#color:BrewerOrRd9,${minValue},${maxValue},c`
 }
 

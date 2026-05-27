@@ -31,13 +31,13 @@ import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
-  centerOfEurope,
-  centerOfSpain,
   firstBiteIndexDateAvailable,
   firstGbifDateAvailable,
   firstRM0DateAvailable,
   lastRM0DateAvailable,
   MosquitoLayersEnum,
+  zoomToEurope,
+  zoomToSpain,
 } from '../../utils/constants'
 import { PeriodicityEnum } from '../../utils/date'
 import { debounce } from '../../utils/debouncer'
@@ -291,10 +291,7 @@ const toggleDataLayers = async () => {
   const biteIndexLayerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
   if (showBiteIndex) {
     // Zoom to Spain
-    map.value.easeTo({
-      center: centerOfSpain,
-      zoom: 5.75,
-    })
+    map.value.easeTo(zoomToSpain)
     const biteIndexDate = observationsStore.dateFilter.end || biteIndexStore.lastDateAvailable
     // Ensure Bite Index layer exists
     await addBiteIndexLayers(biteIndexDate)
@@ -310,6 +307,8 @@ const toggleDataLayers = async () => {
     dataPeriodicity.value = PeriodicityEnum.Day
     isDataASnapshot.value = true
   } else {
+    // Zoom to Europe
+    map.value.easeTo(zoomToEurope)
     if (map.value.getLayer(biteIndexLayerId)) {
       map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'none')
     }
@@ -321,8 +320,8 @@ onMounted(async () => {
     // Initialize map immediately for faster perceived load time
     const mapDeclaration = new maplibregl.Map({
       container: mapContainer.value,
-      center: centerOfEurope,
-      zoom: 2,
+      center: zoomToEurope.center,
+      zoom: zoomToEurope.zoom,
       // attributionControl: false,
     })
     if (!mapDeclaration) return
