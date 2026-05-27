@@ -35,6 +35,7 @@ import {
   firstGbifDateAvailable,
   firstRM0DateAvailable,
   lastRM0DateAvailable,
+  BiteIndexStyleEnum,
   MosquitoLayersEnum,
   zoomToEurope,
   zoomToSpain,
@@ -182,6 +183,26 @@ const pushMapPaddingUpdate = debounce(() => {
   }
 }, 100)
 
+const hideAllBiteIndexLayers = () => {
+  if (!map.value) return
+
+  Object.values(BiteIndexStyleEnum).forEach((style) => {
+    const layerId = mapStore.getBiteIndexLayerId(style)
+    if (map.value?.getLayer(layerId)) {
+      map.value.setLayoutProperty(layerId, 'visibility', 'none')
+    }
+  })
+}
+
+const showSelectedBiteIndexLayer = () => {
+  if (!map.value) return
+
+  const layerId = mapStore.getBiteIndexLayerId(selectedBiteIndexStyle.value)
+  if (map.value.getLayer(layerId)) {
+    map.value.setLayoutProperty(layerId, 'visibility', 'visible')
+  }
+}
+
 const toggleDataLayers = async () => {
   if (!map.value) return
 
@@ -295,9 +316,11 @@ const toggleDataLayers = async () => {
     const biteIndexDate = observationsStore.dateFilter.end || biteIndexStore.lastDateAvailable
     // Ensure Bite Index layer exists
     await addBiteIndexLayers(biteIndexDate)
+    await updateBiteIndexSourceUrl(biteIndexDate)
     // Ensure Bite Index layer is visible
+    hideAllBiteIndexLayers()
     if (map.value.getLayer(biteIndexLayerId)) {
-      map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'visible')
+      showSelectedBiteIndexLayer()
     }
     dateLimits.value = {
       first: firstBiteIndexDateAvailable,
@@ -309,9 +332,7 @@ const toggleDataLayers = async () => {
   } else {
     // Zoom to Europe
     map.value.easeTo(zoomToEurope)
-    if (map.value.getLayer(biteIndexLayerId)) {
-      map.value.setLayoutProperty(biteIndexLayerId, 'visibility', 'none')
-    }
+    hideAllBiteIndexLayers()
   }
 }
 
@@ -428,6 +449,21 @@ watch(
   () => mapStore.layerSelected,
   async () => {
     await toggleDataLayers()
+  },
+)
+
+watch(
+  () => selectedBiteIndexStyle.value,
+  async () => {
+    if (!map.value) return
+
+    const biteIndexDate = observationsStore.dateFilter.end || biteIndexStore.lastDateAvailable
+    await updateBiteIndexSourceUrl(biteIndexDate)
+    hideAllBiteIndexLayers()
+
+    if (mapStore.layerSelected === MosquitoLayersEnum.BITE_INDEX) {
+      showSelectedBiteIndexLayer()
+    }
   },
 )
 

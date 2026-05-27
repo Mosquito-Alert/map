@@ -218,7 +218,7 @@ import { culicidaeTaxon, mapTaxonToId, useTaxaStore } from '../../../stores/taxa
 import { BiteIndexStyleEnum, mosquitoLayers, MosquitoLayersEnum } from '../../../utils/constants'
 import CardDrawer from '../CardDrawer.vue'
 import BiteIndexStyleSelector from './BiteIndexStyleSelector.vue'
-import { selectedBiteIndexStyle } from '../../Map/Layers/BiteIndexLayer.ts'
+import { selectedBiteIndexStyle } from '../../Map/Layers/BiteIndexLayer'
 
 const taxaStore = useTaxaStore()
 const mapStore = useMapStore()
