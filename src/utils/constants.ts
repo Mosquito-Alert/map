@@ -103,7 +103,7 @@ export const biteIndexStyles = [
   {
     key: BiteIndexStyleEnum.ANOMALY,
     label: 'Anomalías en el índice de picadura',
-    info: 'Este estilo resalta las anomalías en el índice de picadura, donde el azul representa valores por debajo del valor esperado y el rojo representa valores por encima del valor esperado. Es útil para identificar áreas que tienen un índice de picadura inusualmente alto o bajo en comparación con lo que se esperaría normalmente.',
+    info: 'Este estilo resalta las anomalías en el índice de picadura, donde el azul representa valores por debajo del valor esperado y el rojo representa valores por encima del valor esperado.',
   },
 ]
 
