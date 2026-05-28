@@ -2,7 +2,7 @@
   <div class="row">
     <div
       :class="['col-12', `col-${breakpoint}`, 'absolute-left', 'inner-drawer', { 'inner-drawer-collapsed': drawerCollapsed }]"
-      :style="{ 'min-width': width, 'z-index': 10 }">
+      :style="{ 'width': width, 'z-index': 10 }">
       <div :class="['full-height', 'bg-white', { 'shadow-3': !drawerCollapsed }]" style="transform: translateX(0px);">
         <div class="flex q-pa-sm q-px-md bg-primary text-white items-center" :style="{ 'height': headerHeight }">
           <span class="text-capitalize text-h4">{{ title }}</span>
