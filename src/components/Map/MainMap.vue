@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
-import { cogProtocol } from '@geomatico/maplibre-cog-protocol'
+import MaplibreCOGProtocol, { cogProtocol } from '@geomatico/maplibre-cog-protocol'
 import * as turf from '@turf/turf'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -39,6 +39,7 @@ import {
   MosquitoLayersEnum,
   zoomToEurope,
   zoomToSpain,
+  RM0_PALETTE,
 } from '../../utils/constants'
 import { PeriodicityEnum } from '../../utils/date'
 import { debounce } from '../../utils/debouncer'
@@ -346,6 +347,8 @@ onMounted(async () => {
       // attributionControl: false,
     })
     if (!mapDeclaration) return
+    // set RMO_PALETTE as a custom color scheme for COG layers, to be used in Bite Index and RM0 layers. This allows us to have consistent colors between COG layers and legend, and to leverage MaplibreCOGProtocol's support for dynamic legends.
+
     maplibregl.addProtocol('cog', cogProtocol)
     mapDeclaration.setPadding({
       left: getDrawerPaddingLeft(),

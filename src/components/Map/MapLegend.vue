@@ -20,7 +20,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
-import { MosquitoLayersEnum, gradientStops } from '../../utils/constants'
+import {
+  gradientStops,
+  MosquitoLayersEnum,
+  RM0_MAX_VALUE,
+  RM0_PALETTE,
+} from '../../utils/constants'
 import { selectedBiteIndexStyle } from '../Map/Layers/BiteIndexLayer'
 
 const props = defineProps<{
@@ -28,7 +33,6 @@ const props = defineProps<{
 }>()
 
 const mapStore = useMapStore()
-const rm0LegendMaxValue = 7
 
 const observationMapColors = computed(
   () => props.mapColors as Record<string, { value: number; color: string }> | undefined,
@@ -53,28 +57,29 @@ const legend = computed(() => {
         ],
       }
     case MosquitoLayersEnum.RM0:
+      const step = 100 / (RM0_PALETTE.length - 1)
+      const grad = RM0_PALETTE.map((c, i) => `${c} ${(i * step).toFixed(2)}%`).join(', ')
+
       return {
-        style: { background: 'linear-gradient(to right, #ffffff 0%, #ff0000 100%)' },
+        style: { background: `linear-gradient(to right, ${grad})` },
         stops: [
           { key: 'min', value: 0 },
-          { key: 'max', value: rm0LegendMaxValue },
+          { key: 'max', value: RM0_MAX_VALUE },
         ],
       }
     case MosquitoLayersEnum.MA_OBSERVATIONS: {
-      const stops = Object.entries(observationMapColors.value ?? {})
+      const filteredColors = Object.entries(observationMapColors.value ?? {}).filter(
         // TODO: Review which value to show in legend labels (max or actualMax)
-        .filter(([key]) => key !== 'max')
-        .map(([key, stop]) => {
-          const percent = key === 'actualMax' ? 100 : Number(key)
-          return `${stop.color} ${percent}%`
-        })
+        ([key]) => key !== 'max',
+      )
+      const stops = filteredColors.map(([key, stop]) => {
+        const percent = key === 'actualMax' ? 100 : Number(key)
+        return `${stop.color} ${percent}%`
+      })
 
       return {
         style: { background: `linear-gradient(to right, ${stops.join(', ')})` },
-        stops: Object.entries(observationMapColors.value ?? {})
-          // TODO: Review which value to show in legend labels (max or actualMax)
-          .filter(([key]) => key !== 'max')
-          .map(([key, stop]) => ({ key, value: Math.round(stop.value) })),
+        stops: filteredColors.map(([key, stop]) => ({ key, value: Math.round(stop.value) })),
       }
     }
     default:

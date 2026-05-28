@@ -118,3 +118,27 @@ function hslToHex(h: any, s: any, l: any) {
 
   return rgbToHex({ r, g, b })
 }
+
+export const cogColorFunction = (min: number, max: number, palette: string[]) => {
+  return (pixel: any, color: any, metadata: any) => {
+    const value = pixel[0] as number
+
+    const paletteRgb = palette.map(hexToRgb)
+
+    // transparent nodata
+    if (value === metadata.noData || Number.isNaN(value)) {
+      color.set([0, 0, 0, 0])
+      return
+    }
+
+    // normalize 0..1
+    const t = Math.max(0, Math.min(1, (value - min) / (max - min)))
+
+    // palette index
+    const idx = Math.min(paletteRgb.length - 1, Math.floor(t * paletteRgb.length))
+
+    const { r, g, b } = paletteRgb[idx] as { r: number; g: number; b: number }
+
+    color.set([r, g, b, 255])
+  }
+}

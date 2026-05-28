@@ -1,5 +1,8 @@
+import { setColorFunction } from '@geomatico/maplibre-cog-protocol'
 import { computed } from 'vue'
 import { useMapStore } from '../../../stores/mapStore'
+import { RM0_MAX_VALUE, RM0_PALETTE } from '../../../utils/constants'
+import { cogColorFunction } from '../../../utils/colorConversor'
 
 const mapStore = useMapStore()
 
@@ -7,12 +10,12 @@ const map = computed(() => mapStore.map) // Computed ref to react to map changes
 
 const buildRM0SourceUrl = (date: string) => {
   const minValue = 1 // The minimum value in the dataset is 0, but 1 is the threshold for R0
-  // The maximum value in the dataset is dynamic, but we consider that a value
-  // of 7 or higher indicates a very high R0, so we set it as the upper bound for the color scale
-  const maxValue = 7
+  const maxValue = RM0_MAX_VALUE
   const datePart = date.slice(0, 10)
-  // Styles: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
-  return `cog://${import.meta.env.VITE_METRICS_RASTER_URL}/${datePart}T00:00.tiff#color:BrewerOrRd9,${minValue},${maxValue},c`
+  const cogUrl = `${import.meta.env.VITE_METRICS_RASTER_URL}/${datePart}T00:00.tiff`
+  // Default styles: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
+  setColorFunction(cogUrl, cogColorFunction(minValue, maxValue, RM0_PALETTE))
+  return `cog://${cogUrl}`
 }
 
 export const updateRM0SourceUrl = async (date?: string | null) => {

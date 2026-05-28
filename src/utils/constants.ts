@@ -172,3 +172,20 @@ export const gradientStops = (layerStyle: BiteIndexStyleEnum = BiteIndexStyleEnu
     })
     .join(', ')
 }
+
+// * RM0 LAYER
+// RM0 palette and settings
+export const RM0_PALETTE = [
+  '#fff7ec',
+  '#fee8c8',
+  '#fdd49e',
+  '#fdbb84',
+  '#fc8d59',
+  '#ef6548',
+  '#d7301f',
+  '#b30000',
+  '#7f0000',
+]
+// The maximum value in the dataset is dynamic, but we consider that a value
+// of 7 or higher indicates a very high R0, so we set it as the upper bound for the color scale
+export const RM0_MAX_VALUE = 7
