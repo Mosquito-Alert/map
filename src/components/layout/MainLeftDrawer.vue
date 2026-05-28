@@ -31,6 +31,8 @@
         <q-separator color="grey-4" />
         <ShareButton />
         <q-separator inset color="grey-4" />
+        <AuthButton />
+        <q-separator inset color="grey-4" />
         <LanguageSwitcher />
 
       </q-btn-group>
@@ -47,12 +49,13 @@
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 
-import { LanguageSwitcher, ShareButton } from './MainLeftDrawer'
+import { LanguageSwitcher, ShareButton, AuthButton } from './MainLeftDrawer'
 
 export default {
   components: {
     LanguageSwitcher,
-    ShareButton
+    ShareButton,
+    AuthButton
   },
   setup() {
 
