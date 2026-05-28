@@ -189,3 +189,22 @@ export const RM0_PALETTE = [
 // The maximum value in the dataset is dynamic, but we consider that a value
 // of 7 or higher indicates a very high R0, so we set it as the upper bound for the color scale
 export const RM0_MAX_VALUE = 7
+
+// * GBIF LAYER
+export const GBIF_DENSITY_STYLE = 'green2.poly'
+
+const GBIF_DENSITY_STYLE_PALETTES = {
+  'green2.poly': ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'],
+} as const
+
+const GBIF_DENSITY_STYLE_STOP_LABELS = {
+  'green2.poly': [1, 10, 100, 1000, 10000, '100000+'],
+} as const
+
+export const getGbifDensityPalette = (
+  style: keyof typeof GBIF_DENSITY_STYLE_PALETTES = GBIF_DENSITY_STYLE,
+) => GBIF_DENSITY_STYLE_PALETTES[style] ?? GBIF_DENSITY_STYLE_PALETTES[GBIF_DENSITY_STYLE]
+
+export const getGbifDensityLegendStops = (
+  style: keyof typeof GBIF_DENSITY_STYLE_STOP_LABELS = GBIF_DENSITY_STYLE,
+) => GBIF_DENSITY_STYLE_STOP_LABELS[style] ?? GBIF_DENSITY_STYLE_STOP_LABELS[GBIF_DENSITY_STYLE]

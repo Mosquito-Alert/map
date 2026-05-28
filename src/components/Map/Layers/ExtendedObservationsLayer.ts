@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useMapStore } from '../../../stores/mapStore'
 import { useTaxaStore } from '../../../stores/taxaStore'
+import { GBIF_DENSITY_STYLE } from '../../../utils/constants'
 
 const mapStore = useMapStore()
 const taxaStore = useTaxaStore()
@@ -11,7 +12,7 @@ const map = computed(() => mapStore.map) // Computed ref to react to map changes
 const GBIF_CONFIG = {
   hexPerTile: 70, // Higher values mean more hexagons per tile === better representation of data but worse performance.
   srs: 'EPSG:3857',
-  style: 'green2.poly',
+  style: GBIF_DENSITY_STYLE,
   defaultFirstYear: 1900,
 }
 

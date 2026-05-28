@@ -22,6 +22,8 @@ import { computed } from 'vue'
 import { useMapStore } from '../../stores/mapStore'
 import {
   gradientStops,
+  getGbifDensityLegendStops,
+  getGbifDensityPalette,
   MosquitoLayersEnum,
   RM0_MAX_VALUE,
   RM0_PALETTE,
@@ -37,6 +39,30 @@ const mapStore = useMapStore()
 const observationMapColors = computed(
   () => props.mapColors as Record<string, { value: number; color: string }> | undefined,
 )
+
+const gbifPalette = getGbifDensityPalette()
+const gbifStops = getGbifDensityLegendStops()
+
+const paletteGradient = (palette: readonly string[]) => {
+  const step = 100 / (palette.length - 1)
+  return palette.map((color, index) => `${color} ${(index * step).toFixed(2)}%`).join(', ')
+}
+
+const mapColorsGradientAndStops = (
+  mapColors: Record<string, { value: number; color: string }> | undefined,
+) => {
+  const filteredColors = Object.entries(mapColors ?? {}).filter(([key]) => key !== 'max')
+
+  return {
+    gradient: filteredColors
+      .map(([key, stop]) => {
+        const percent = key === 'actualMax' ? 100 : Number(key)
+        return `${stop.color} ${percent}%`
+      })
+      .join(', '),
+    stops: filteredColors.map(([key, stop]) => ({ key, value: Math.round(stop.value) })),
+  }
+}
 
 const showLegend = computed(() =>
   mapStore.layerSelected === MosquitoLayersEnum.MA_OBSERVATIONS
@@ -57,29 +83,24 @@ const legend = computed(() => {
         ],
       }
     case MosquitoLayersEnum.RM0:
-      const step = 100 / (RM0_PALETTE.length - 1)
-      const grad = RM0_PALETTE.map((c, i) => `${c} ${(i * step).toFixed(2)}%`).join(', ')
-
       return {
-        style: { background: `linear-gradient(to right, ${grad})` },
+        style: { background: `linear-gradient(to right, ${paletteGradient([...RM0_PALETTE])})` },
         stops: [
           { key: 'min', value: 0 },
           { key: 'max', value: RM0_MAX_VALUE },
         ],
       }
+    case MosquitoLayersEnum.EXTENDED_OBSERVATIONS:
+      return {
+        style: { background: `linear-gradient(to right, ${paletteGradient([...gbifPalette])})` },
+        stops: gbifStops.map((value, index) => ({ key: String(index), value })),
+      }
     case MosquitoLayersEnum.MA_OBSERVATIONS: {
-      const filteredColors = Object.entries(observationMapColors.value ?? {}).filter(
-        // TODO: Review which value to show in legend labels (max or actualMax)
-        ([key]) => key !== 'max',
-      )
-      const stops = filteredColors.map(([key, stop]) => {
-        const percent = key === 'actualMax' ? 100 : Number(key)
-        return `${stop.color} ${percent}%`
-      })
+      const { gradient, stops } = mapColorsGradientAndStops(observationMapColors.value)
 
       return {
-        style: { background: `linear-gradient(to right, ${stops.join(', ')})` },
-        stops: filteredColors.map(([key, stop]) => ({ key, value: Math.round(stop.value) })),
+        style: { background: `linear-gradient(to right, ${gradient})` },
+        stops,
       }
     }
     default:
