@@ -3,7 +3,7 @@
     <div class="map absolute h-screen w-screen" ref="mapContainer">
       <div class="absolute bottom-10 right-3 z-10 flex flex-row items-end pointer-events-none">
         <TemporalFilter
-          v-if="mapStore.layerSelected !== MosquitoLayersEnum.DISCOVERIES"
+          v-if="showTemporalFilter"
           :dateLimits="dateLimits"
           :dataPeriodicity="dataPeriodicity"
           :isDataASnapshot="isDataASnapshot"
@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { MapBaseLayerControl, MapLegendControl } from '@/utils/mapControls'
-import MaplibreCOGProtocol, { cogProtocol } from '@geomatico/maplibre-cog-protocol'
+import { cogProtocol } from '@geomatico/maplibre-cog-protocol'
 import * as turf from '@turf/turf'
 import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -39,7 +39,6 @@ import {
   MosquitoLayersEnum,
   zoomToEurope,
   zoomToSpain,
-  RM0_PALETTE,
 } from '../../utils/constants'
 import { PeriodicityEnum } from '../../utils/date'
 import { debounce } from '../../utils/debouncer'
@@ -96,6 +95,17 @@ const biteIndexStore = useBiteIndexStore()
 const mapContainer = ref<HTMLElement | null>(null)
 const map = computed(() => mapStore.map) // Computed ref to react to map changes
 const observationsFilters = ref<Record<string, any>>({}) // Filters for observation points layer
+const temporalFilterLayers = [
+  MosquitoLayersEnum.MA_OBSERVATIONS,
+  MosquitoLayersEnum.EXTENDED_OBSERVATIONS,
+  MosquitoLayersEnum.RM0,
+  MosquitoLayersEnum.BITE_INDEX,
+]
+const showTemporalFilter = computed(
+  () =>
+    uiStore.activeTab === drawerTabs.explore.value &&
+    temporalFilterLayers.includes(mapStore.layerSelected),
+)
 const dateLimits = ref<{ first: Date; last: Date }>({
   first: new Date(1970, 0, 1),
   last: new Date(),
