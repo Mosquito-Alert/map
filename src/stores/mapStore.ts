@@ -18,7 +18,7 @@ export const useMapStore = defineStore('map', {
     hex_data: {} as Record<string, any>,
     dataDateCount: {} as Record<string, number>,
     // Map config
-    resolutionsAvailable: [4, 5, 6],
+    resolutionsAvailable: [5, 6],
     maObservationsPointsSourceId: 'maObservationsSource',
     maObservationsPointsLayerId: 'maObservationsPointsLayer',
     nearObservationsCircleSourceId: 'radius-near-observations',

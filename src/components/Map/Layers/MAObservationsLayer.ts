@@ -29,17 +29,13 @@ const ascSortedArrHexCounts = ref<number[]>([]) // Sorted array of hex counts fo
 export const mapColors = ref<
   Record<number, Record<number, Record<string, { value: number; color: string }>>> // taxonId -> resolution -> quantile -> { value, color }
 >({}) // Color mapping for current resolution
-const observationsDateLimtis = ref<{ first: Date | null; last: Date | null }>({
-  first: null,
-  last: null,
-})
 
 export const renderedOriginalDateAggregationData = computed<Record<string, number>>(() => {
   const taxonSelectedId = taxaStore.taxonSelected.id as number
   return originalDateAggregationData.value[taxonSelectedId] || {}
 })
 
-const observationPointsZoom = 10
+const observationPointsZoom = 8
 let hoveredObservationId: string | null = null
 let observationEventsAttached = false
 
@@ -89,8 +85,7 @@ export type ObservationFeatureCollection = GeoJSON.FeatureCollection<
 
 // Function to get appropriate resolution based on zoom level
 export const getResolutionForZoom = (zoom: number): number => {
-  if (zoom <= 4) return 4
-  if (zoom <= 6) return 5
+  if (zoom <= 5) return 5
   return 6
 }
 

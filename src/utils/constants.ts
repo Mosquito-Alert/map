@@ -3,7 +3,7 @@ import { adjustSaturation } from './colorConversor'
 type zoomConfig = { center: [number, number]; zoom: number }
 export const zoomToEurope: zoomConfig = {
   center: [11.39831, 47.26244],
-  zoom: 2.25,
+  zoom: 3,
 }
 export const zoomToSpain: zoomConfig = {
   center: [-4.0, 39.75],
