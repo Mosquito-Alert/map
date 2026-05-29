@@ -146,42 +146,49 @@
               :key="layer.key"
               class="flex flex items-start gap-2"
             >
-              <RadioButton
-                v-model="mapStore.layerSelected"
-                :inputId="layer.key"
-                name="mosquito layer"
-                :value="layer.key"
-              />
-              <label :for="layer.key" class="cursor-pointer">{{ layer.label }}</label>
-              <div
-                class="layer-information"
-                v-tooltip.right="{
-                  value: layer.info,
-                  pt: { root: { class: 'max-w-xs' } },
-                }"
-              >
-                <span class="material-icons-outlined text-gray-400"> info </span>
+              <div class="grid grid-cols-12 w-full">
+                <div class="col-span-6 xl:col-span-9 flex items-center gap-2">
+                  <RadioButton
+                    v-model="mapStore.layerSelected"
+                    :inputId="layer.key"
+                    name="mosquito layer"
+                    :value="layer.key"
+                  />
+                  <label :for="layer.key" class="cursor-pointer">{{ layer.label }}</label>
+                </div>
+
+                <div class="col-span-6 xl:col-span-3 flex justify-end items-center gap-2">
+                  <div
+                    class="layer-information flex items-center leading-none"
+                    v-tooltip.right="{
+                      value: layer.info,
+                      pt: { root: { class: 'max-w-xs' } },
+                    }"
+                  >
+                    <span class="material-icons-outlined text-gray-400"> info </span>
+                  </div>
+                  <Button
+                    v-if="layer.key === MosquitoLayersEnum.BITE_INDEX"
+                    aria-label="Select Style"
+                    variant="text"
+                    class="p-0 m-0 flex items-center leading-none"
+                    @click="toggleBiteIndexStyle"
+                  >
+                    <span class="material-icons-outlined text-gray-500"> palette </span>
+                  </Button>
+                  <Popover ref="biteIndexStyleSelectorRef" :pt="{ content: { class: 'p-1' } }">
+                    <BiteIndexStyleSelector @selectStyle="selectBiteIndexStyle" />
+                  </Popover>
+                  <Button
+                    aria-label="Download"
+                    variant="text"
+                    class="hidden sm:inline p-0 m-0 flex items-center leading-none"
+                    disabled
+                  >
+                    <span class="material-icons-outlined text-gray-800">file_download</span>
+                  </Button>
+                </div>
               </div>
-              <Button
-                v-if="layer.key === MosquitoLayersEnum.BITE_INDEX"
-                aria-label="Select Style"
-                variant="text"
-                class="p-0 m-0"
-                @click="toggleBiteIndexStyle"
-              >
-                <span class="material-icons-outlined text-gray-500"> palette </span>
-              </Button>
-              <Popover ref="biteIndexStyleSelectorRef" :pt="{ content: { class: 'p-1' } }">
-                <BiteIndexStyleSelector @selectStyle="selectBiteIndexStyle" />
-              </Popover>
-              <Button
-                aria-label="Download"
-                variant="text"
-                class="hidden sm:inline p-0 m-0"
-                disabled
-              >
-                <span class="material-icons-outlined text-gray-800"> file_download </span>
-              </Button>
             </div>
           </div>
         </div>
