@@ -448,6 +448,7 @@ watch(
   },
 )
 
+// Switch layers
 watch(
   () => mapStore.layerSelected,
   async () => {
@@ -455,6 +456,7 @@ watch(
   },
 )
 
+// Switch style of Bite Index
 watch(
   () => selectedBiteIndexStyle.value,
   async () => {
@@ -470,6 +472,7 @@ watch(
   },
 )
 
+// Taxon selected
 watch(
   () => taxaStore.taxonSelected,
   async (newTaxon, oldTaxon) => {
@@ -493,6 +496,7 @@ watch(
   },
 )
 
+// Filter by date
 watch(
   () => observationsStore.dateFilter,
   async ({ start, end }, oldValue) => {
@@ -531,6 +535,7 @@ watch(
   { deep: true },
 )
 
+// Filters for observations points
 watch(
   () => observationsFilters.value,
   (newFilters) => {
@@ -542,6 +547,7 @@ watch(
   { deep: true },
 )
 
+// An observation has been clicked
 watch(
   () => observationsStore.observationInDrawer,
   (newObservation) => {
@@ -582,6 +588,7 @@ watch(
   },
 )
 
+// Zoom to user location when nearby observations are toggled on
 watch(
   () =>
     [
@@ -649,6 +656,7 @@ watch(
   { deep: true },
 )
 
+// Change of tab
 watch(
   () => [uiStore.activeTab, analizeStore.toolSelected],
   ([activeTab, toolSelected], [oldActiveTab, oldToolSelected]) => {
@@ -688,12 +696,20 @@ watch(
         )
       }
       attachBoundaryEvents(gadmLevelToShow)
-      // TODO: Observations layers with less opacity (reset after analysis is done or tool is switched)
     }
+
+    // Toggle visibility of mosquito layers
+    if (isAnalizeTab) {
+      mapStore.layerSelected = MosquitoLayersEnum.NONE
+    } else {
+      mapStore.layerSelected = MosquitoLayersEnum.MA_OBSERVATIONS
+    }
+    toggleDataLayers()
   },
   { deep: true },
 )
 
+// Switch base layer
 watch(
   () => mapStore.baselayer,
   (newBaselayer, oldBaselayer) => {
@@ -714,8 +730,8 @@ watch(
   },
 )
 
+// Drawer width or zoom level
 watch(
-  // drawer width or zoom level
   () => [uiStore.drawerWidth, map.value?.getZoom()],
   ([newDrawerWidth, newZoom], [oldDrawerWidth, oldZoom]) => {
     if (map.value) {

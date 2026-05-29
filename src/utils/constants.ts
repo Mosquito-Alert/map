@@ -24,6 +24,7 @@ export enum MosquitoLayersEnum {
   DISCOVERIES = 'discoveries',
   RM0 = 'rm0',
   BITE_INDEX = 'bite_index',
+  NONE = 'none',
 }
 
 export const mosquitoLayers = [
