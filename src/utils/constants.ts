@@ -193,6 +193,7 @@ export const RM0_MAX_VALUE = 7
 // * GBIF LAYER
 export const GBIF_DENSITY_STYLE = 'green2.poly'
 
+// NOTE: Styles come from here https://techdocs.gbif.org/en/openapi/v2/maps#/Occurrence%20maps/getDensityTile
 const GBIF_DENSITY_STYLE_PALETTES = {
   'green2.poly': ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'],
 } as const

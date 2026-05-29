@@ -14,6 +14,25 @@
           {{ stop.value }}
         </span>
       </div>
+
+      <div
+        v-if="
+          mapStore.layerSelected === MosquitoLayersEnum.BITE_INDEX &&
+          selectedBiteIndexStyle === BiteIndexStyleEnum.ANOMALY
+        "
+      >
+        <h5 class="text-base font-semibold text-gray-700 mb-1 mt-3">Bite Index Anomalies</h5>
+        <div>
+          <div class="legend-item flex items-center gap-3 mb-1">
+            <span class="legend-color anomaly-high bg-[#ff795b] size-5"></span>
+            <span class="legend-text text-gray-600 font-light! uppercase">Over-expected</span>
+          </div>
+          <div class="legend-item flex items-center gap-3">
+            <span class="legend-color anomaly-low bg-[#85b0d5be] size-5"></span>
+            <span class="legend-text text-gray-600 font-light! uppercase">Under-expected</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -27,6 +46,7 @@ import {
   MosquitoLayersEnum,
   RM0_MAX_VALUE,
   RM0_PALETTE,
+  BiteIndexStyleEnum,
 } from '../../utils/constants'
 import { selectedBiteIndexStyle } from '../Map/Layers/BiteIndexLayer'
 
