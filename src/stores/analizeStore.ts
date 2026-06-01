@@ -46,5 +46,8 @@ export const useAnalizeStore = defineStore('analize', {
       this.populationOfSelectedRegion = null
       this.extensionOfSelectedRegion = null
     },
+    setSelectedRegion(region: GeoJSON.FeatureCollection) {
+      this.selectedRegion = region
+    },
   },
 })

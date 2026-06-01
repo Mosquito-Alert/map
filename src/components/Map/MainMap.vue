@@ -53,6 +53,7 @@ import {
   detachBoundaryEvents,
   gadmLevels,
   handleZoomChangeInBoundaries,
+  showBoundary,
 } from './Layers/BoundaryLayer'
 import { addDiscoveriesLayer } from './Layers/DiscoveriesLayer'
 import { addGBIFOccurrencesLayer, updateGBIFSourceTiles } from './Layers/ExtendedObservationsLayer'
@@ -84,6 +85,7 @@ import {
   updateBiteIndexSourceUrl,
 } from './Layers/BiteIndexLayer'
 import { useBiteIndexStore } from '../../stores/biteIndexStore'
+import { bbox } from '@turf/turf'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -717,6 +719,20 @@ watch(
     toggleDataLayers()
   },
   { deep: true },
+)
+
+// Selected region in Analize tab
+watch(
+  () => analizeStore.selectedRegion,
+  async (newBoundary: GeoJSON.FeatureCollection | null) => {
+    const hasRegion =
+      newBoundary && Array.isArray(newBoundary.features) && newBoundary.features.length > 0
+    if (hasRegion) {
+      showBoundary(newBoundary as any)
+    } else {
+      map.value?.setLayoutProperty(mapStore.selectedRegionLayerId, 'visibility', 'none')
+    }
+  },
 )
 
 // Switch base layer

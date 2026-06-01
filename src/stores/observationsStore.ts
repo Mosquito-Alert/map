@@ -65,7 +65,7 @@ export const useObservationsStore = defineStore('observations', {
         if (boundary) {
           const response = await boundariesApi.createTemporary({
             temporaryBoundaryRequest: {
-              geojson: boundary.features[0].geometry,
+              geojson: boundary.features?.[0]?.geometry || null,
             },
           })
           boundaryUuid = response.data.uuid

@@ -3,6 +3,7 @@ import { toolsEnum, useAnalizeStore } from '../../../stores/analizeStore'
 import { useMapStore } from '../../../stores/mapStore'
 import { drawerTabs, useUIStore } from '../../../stores/uiStore'
 import { calculateArea } from '../../../utils/regionDetails'
+import { bbox } from '@turf/turf'
 
 const uiStore = useUIStore()
 const mapStore = useMapStore()
@@ -192,7 +193,8 @@ const onBoundaryClick = async (e: any, gadmLevel: number) => {
     })
 
   analizeStore.clearSelectedRegion()
-  analizeStore.selectedRegion = feature as GeoJSON.FeatureCollection
+  const selectedRegion = feature as GeoJSON.FeatureCollection
+  analizeStore.setSelectedRegion(selectedRegion)
   analizeStore.extensionOfSelectedRegion = calculateArea(feature.features[0])
 }
 
@@ -250,4 +252,50 @@ export const handleZoomChangeInBoundaries = async () => {
       detachBoundaryEvents(gadmLevel.level)
     }
   }
+}
+
+export const showBoundary = (geojson: GeoJSON.FeatureCollection) => {
+  if (!map.value) return
+
+  const selectedRegionSource = map.value.getSource(mapStore.selectedRegionSourceId) as
+    | maplibregl.GeoJSONSource
+    | undefined
+  const selectedRegionLayer = map.value.getLayer(mapStore.selectedRegionLayerId)
+  if (selectedRegionSource && selectedRegionLayer) {
+    selectedRegionSource.setData(geojson)
+    map.value.setLayoutProperty(mapStore.selectedRegionLayerId, 'visibility', 'visible')
+  } else {
+    map.value.addSource(mapStore.selectedRegionSourceId, {
+      type: 'geojson',
+      data: geojson,
+    })
+
+    map.value.addLayer({
+      id: mapStore.selectedRegionLayerId,
+      source: mapStore.selectedRegionSourceId,
+      type: 'line',
+      layout: {
+        visibility: 'visible',
+      },
+      paint: {
+        'line-color': '#0044aa',
+        'line-width': 2,
+      },
+    })
+  }
+
+  zoomToRegion(geojson)
+}
+
+const zoomToRegion = (geojson: GeoJSON.FeatureCollection) => {
+  if (!map.value) return
+  const bounds = geojson.features[0]?.bbox || bbox(geojson)
+
+  map.value.fitBounds(
+    [
+      [bounds[0], bounds[1]],
+      [bounds[2], bounds[3]],
+    ],
+    { padding: 40 },
+  )
 }
