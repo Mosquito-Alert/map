@@ -16,11 +16,13 @@ import {
 } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import { useAnalizeStore } from '../../../stores/analizeStore'
 import { useRM0Store } from '../../../stores/rm0Store'
 
 const rm0Store = useRM0Store()
+const analizeStore = useAnalizeStore()
 
 use([
   TooltipComponent,
@@ -45,6 +47,18 @@ onMounted(async () => {
   // Initialize RM0 data
   await rm0Store.fetchRM0Data()
 })
+
+// Selected region in Analize tab
+watch(
+  () => analizeStore.selectedRegion,
+  async (newBoundary: GeoJSON.FeatureCollection | null) => {
+    const hasRegion =
+      newBoundary && Array.isArray(newBoundary.features) && newBoundary.features.length > 0
+    if (hasRegion) {
+      await rm0Store.fetchRM0Data() // Fetch RM0 data for the new region
+    }
+  },
+)
 
 const option = computed(() => {
   if (!rm0Store.metrics || rm0Store.metrics.length === 0) {
