@@ -299,3 +299,28 @@ const zoomToRegion = (geojson: GeoJSON.FeatureCollection) => {
     { padding: 40 },
   )
 }
+
+export const turnOffBoundaryLayer = () => {
+  for (const gadmLevel of gadmLevels) {
+    if (!map.value) return
+
+    const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevel.level))
+    if (gadmLayer) {
+      map.value.setLayoutProperty(mapStore.getGadmLayerId(gadmLevel.level), 'visibility', 'none')
+    }
+    detachBoundaryEvents(gadmLevel.level)
+  }
+}
+
+export const turnOnBoundaryLayer = () => {
+  if (!map.value) return
+
+  const zoom = map.value.getZoom()
+  const gadmLevelToShow =
+    gadmLevels.find((level) => zoom >= level.minZoom && zoom <= level.maxZoom)?.level || 1
+  const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevelToShow))
+  if (gadmLayer) {
+    map.value.setLayoutProperty(mapStore.getGadmLayerId(gadmLevelToShow), 'visibility', 'visible')
+  }
+  attachBoundaryEvents(gadmLevelToShow)
+}

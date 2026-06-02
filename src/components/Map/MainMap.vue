@@ -54,6 +54,8 @@ import {
   gadmLevels,
   handleZoomChangeInBoundaries,
   showBoundary,
+  turnOffBoundaryLayer,
+  turnOnBoundaryLayer,
 } from './Layers/BoundaryLayer'
 import { addDiscoveriesLayer } from './Layers/DiscoveriesLayer'
 import { addGBIFOccurrencesLayer, updateGBIFSourceTiles } from './Layers/ExtendedObservationsLayer'
@@ -85,7 +87,6 @@ import {
   updateBiteIndexSourceUrl,
 } from './Layers/BiteIndexLayer'
 import { useBiteIndexStore } from '../../stores/biteIndexStore'
-import { bbox } from '@turf/turf'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
@@ -679,43 +680,27 @@ watch(
     const isToolWithBoundaryLayer = toolSelected === toolsEnum.CLICK
     const wasToolWithBoundaryLayer = oldToolSelected === toolsEnum.CLICK
 
-    // If switched away from Analize tab or switched to a tool that doesn't require boundary layer, turn visibility off
-    if ((!isAnalizeTab || !isToolWithBoundaryLayer) && wasAnalizeTab && wasToolWithBoundaryLayer) {
-      for (const gadmLevel of gadmLevels) {
-        const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevel.level))
-        if (gadmLayer) {
-          map.value.setLayoutProperty(
-            mapStore.getGadmLayerId(gadmLevel.level),
-            'visibility',
-            'none',
-          )
-        }
-        detachBoundaryEvents(gadmLevel.level)
-      }
-    }
-
-    // If switched to Analize tab and tool that requires boundary layer, turn visibility on
-    if (isAnalizeTab && isToolWithBoundaryLayer && (!wasAnalizeTab || !wasToolWithBoundaryLayer)) {
-      const zoom = map.value.getZoom()
-      const gadmLevelToShow =
-        gadmLevels.find((level) => zoom >= level.minZoom && zoom <= level.maxZoom)?.level || 1
-      const gadmLayer = map.value.getLayer(mapStore.getGadmLayerId(gadmLevelToShow))
-      if (gadmLayer) {
-        map.value.setLayoutProperty(
-          mapStore.getGadmLayerId(gadmLevelToShow),
-          'visibility',
-          'visible',
-        )
-      }
-      attachBoundaryEvents(gadmLevelToShow)
-    }
-
-    // Toggle visibility of mosquito layers
     if (isAnalizeTab) {
+      // Toggle visibility of mosquito layers
       mapStore.layerSelected = MosquitoLayersEnum.NONE
+      // If switched to Analize tab and tool that requires boundary layer, turn visibility on
+      if (isToolWithBoundaryLayer && (!wasAnalizeTab || !wasToolWithBoundaryLayer)) {
+        turnOnBoundaryLayer()
+      }
     } else {
+      // Removing selected region
+      analizeStore.clearSelectedRegion()
+      // Zoom out to Europe when leaving Analize tab
+      map.value.easeTo(zoomToEurope)
+      // * The actual tab is Explore (or others)
       mapStore.layerSelected = MosquitoLayersEnum.MA_OBSERVATIONS
     }
+
+    // If switched away from Analize tab or switched to a tool that doesn't require boundary layer, turn visibility off
+    if ((!isAnalizeTab || !isToolWithBoundaryLayer) && wasAnalizeTab && wasToolWithBoundaryLayer) {
+      turnOffBoundaryLayer()
+    }
+
     toggleDataLayers()
   },
   { deep: true },
