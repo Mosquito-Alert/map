@@ -40,7 +40,7 @@ export const gadmLevels = [
   {
     level: 2,
     minZoom: 6,
-    maxZoom: 8,
+    maxZoom: 13,
     url: new URL(getADMUrl(2), window.location.origin).toString(),
   },
 ]

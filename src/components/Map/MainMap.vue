@@ -26,16 +26,17 @@ import maplibregl, { type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
 import { toolsEnum, useAnalizeStore } from '../../stores/analizeStore'
+import { useBiteIndexStore } from '../../stores/biteIndexStore'
 import { useMapStore } from '../../stores/mapStore'
 import { useObservationsStore } from '../../stores/observationsStore'
 import { culicidaeTaxon, useTaxaStore } from '../../stores/taxaStore'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
 import {
+  BiteIndexStyleEnum,
   firstBiteIndexDateAvailable,
   firstGbifDateAvailable,
   firstRM0DateAvailable,
   lastRM0DateAvailable,
-  BiteIndexStyleEnum,
   MosquitoLayersEnum,
   zoomToEurope,
   zoomToSpain,
@@ -48,10 +49,12 @@ import type {
 } from '../../utils/mapControls/MapBaseLayerControl'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
 import {
+  addBiteIndexLayers,
+  selectedBiteIndexStyle,
+  updateBiteIndexSourceUrl,
+} from './Layers/BiteIndexLayer'
+import {
   addBoundaryLayers,
-  attachBoundaryEvents,
-  detachBoundaryEvents,
-  gadmLevels,
   handleZoomChangeInBoundaries,
   showBoundary,
   turnOffBoundaryLayer,
@@ -81,12 +84,6 @@ import {
 import { addRM0Layer, updateRM0SourceUrl } from './Layers/RM0Layer'
 import MapLegend from './MapLegend.vue'
 import TemporalFilter from './TemporalFilter.vue'
-import {
-  addBiteIndexLayers,
-  selectedBiteIndexStyle,
-  updateBiteIndexSourceUrl,
-} from './Layers/BiteIndexLayer'
-import { useBiteIndexStore } from '../../stores/biteIndexStore'
 
 const observationsStore = useObservationsStore()
 const mapStore = useMapStore()
