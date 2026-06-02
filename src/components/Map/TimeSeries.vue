@@ -9,14 +9,13 @@
 </template>
 <script lang="ts" setup>
 import { BarChart } from 'echarts/charts'
-import { GridComponent } from 'echarts/components'
+import { GridComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
-import { useObservationsStore } from '../../stores/observationsStore'
 
-use([BarChart, CanvasRenderer, GridComponent])
+use([BarChart, CanvasRenderer, GridComponent, TooltipComponent])
 
 const props = defineProps({
   values: {
@@ -32,8 +31,6 @@ const props = defineProps({
     required: true,
   },
 })
-
-const observationsStore = useObservationsStore()
 
 const option = computed(() => ({
   xAxis: {
@@ -57,6 +54,27 @@ const option = computed(() => ({
     bottom: 0,
     top: 0,
     containLabel: false,
+  },
+  tooltip: {
+    trigger: 'item',
+    position: (point: [number, number], params: any, dom: HTMLElement, rect: any, size: any) => {
+      const position: Record<string, any> = { top: '10%' }
+      const isReachingRightEdge = point[0] + size.contentSize[0] > size.viewSize[0]
+      position['left'] = isReachingRightEdge ? point[0] - size.contentSize[0] : point[0]
+      return position
+    },
+    formatter: (params: any) => {
+      console.log(params)
+      const date = new Date(params?.name || '')
+      const datePretty = `${date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}`
+      const value = params?.value || 'N/A'
+
+      return `
+          <strong>${datePretty}</strong>
+          <br/><hr>
+          <span>${value} observations</span><br/>
+        `
+    },
   },
   series: [
     {
