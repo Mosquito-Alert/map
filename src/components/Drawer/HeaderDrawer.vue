@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-gray-600 p-4 mb-3 drawer-card rounded-xl flex flex-col items-center gap-2">
+  <div
+    class="bg-gray-600 p-4 mb-3 drawer-card rounded-xl flex flex-col items-center gap-2 pointer-events-auto"
+  >
     <img
       src="@/assets/img/logos/logo_mosquitoalert_white.png"
       alt="Mosquito Alert Logo"

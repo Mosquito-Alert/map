@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 md:max-h-[calc(100vh-2rem)] md:w-[30%] md:pl-4 md:mt-4 mx-auto"
+    class="fixed top-0 left-0 flex flex-col z-100 md:max-h-[calc(100vh-2rem)] md:w-[30%] md:pl-4 md:mt-4 mx-auto pointer-events-none"
   >
     <!-- <Summary /> -->
     <HeaderDrawer />
@@ -10,7 +10,7 @@
       optionLabel="label"
       optionValue="value"
       fluid
-      class="mb-1"
+      class="mb-1 pointer-events-auto"
     >
       <template #option="slotProps">
         <div class="flex items-center justify-center">

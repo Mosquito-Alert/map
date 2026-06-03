@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-700 p-4 mb-3 drawer-card rounded-xl">
+  <div class="bg-gray-700 p-4 mb-3 drawer-card rounded-xl pointer-events-auto">
     <h2 class="text-4xl text-white font-bold">Blanes</h2>
     <p class="text-sm text-white">17 observaciones en los últimos 7 días</p>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="drawer-card rounded-lg border bg-gray-100 p-4"
+    class="drawer-card rounded-lg border bg-gray-100 p-4 pointer-events-auto"
     :class="[highlightBorder ? 'border-primary-700 border-2' : 'border-gray-700']"
   >
     <div class="cursor-pointer" @click="isUnfold = !isUnfold">

@@ -64,7 +64,6 @@ const option = computed(() => ({
       return position
     },
     formatter: (params: any) => {
-      console.log(params)
       const date = new Date(params?.name || '')
       const datePretty = `${date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}`
       const value = params?.value || 'N/A'
