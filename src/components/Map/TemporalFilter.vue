@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center">
+  <div class="hidden md:flex flex-col items-center">
     <!-- ! DATES INFORMATION -->
     <div
       class="dates-controller inline-flex flex-nowrap self-end items-center gap-3 px-4 py-1 bg-gray-100 border-gray-400 border-1 border-b-0 rounded-t-lg cursor-default text-gray-700 text-base font-normal shadow-md transition-all duration-300"
