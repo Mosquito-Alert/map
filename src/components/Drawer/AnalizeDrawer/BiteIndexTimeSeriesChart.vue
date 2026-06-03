@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-3 bg-white rounded-borders">
+  <div class="mt-3 bg-white rounded-borders w-full min-w-0 overflow-hidden">
     <div class="timeseries-header">
       <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
       <div class="timeseries-selector mr-4">
@@ -13,7 +13,13 @@
         </button>
       </div>
     </div>
-    <v-chart style="height: 330px" :option="option" :loading="loading" autoresize />
+    <v-chart
+      class="w-full min-w-0"
+      style="height: 330px; width: 100%"
+      :option="option"
+      :loading="loading"
+      autoresize
+    />
   </div>
 </template>
 <script setup lang="ts">

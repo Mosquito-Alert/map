@@ -1,6 +1,7 @@
 <template>
   <aside
-    class="fixed top-0 left-0 flex flex-col z-100 md:max-h-[calc(100vh-2rem)] md:w-[30%] md:pl-4 md:mt-4 mx-auto pointer-events-none"
+    ref="drawerRef"
+    class="fixed top-0 left-0 flex flex-col z-100 w-full max-w-full overflow-x-hidden md:max-h-[calc(100vh-2rem)] md:w-[30%] md:pl-4 md:mt-4 mx-auto pointer-events-none"
   >
     <!-- <Summary /> -->
     <HeaderDrawer />
@@ -39,7 +40,7 @@
 </template>
 <script lang="ts" setup>
 import { SelectButton } from 'primevue'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import ExploreDrawer from './ExploreDrawer/ExploreDrawer.vue'
 import AnalizeDrawer from './AnalizeDrawer/AnalizeDrawer.vue'
 import { drawerTabs, useUIStore } from '../../stores/uiStore'
@@ -53,15 +54,21 @@ const uiStore = useUIStore()
 
 const activeTabClass = 'text-gray-700 font-semibold'
 const inactiveTabClass = 'text-gray-400'
+const drawerRef = ref<HTMLElement | null>(null)
 
 const options = Object.values(drawerTabs)
 
 // Record drawer width in the store to adjust map padding
+const updateDrawerWidth = () => {
+  uiStore.drawerWidth = drawerRef.value?.clientWidth || 0
+}
+
 onMounted(() => {
-  uiStore.drawerWidth = document.querySelector('aside')?.clientWidth || 0
+  updateDrawerWidth()
+  window.addEventListener('resize', updateDrawerWidth)
 })
-window.addEventListener('resize', () => {
-  uiStore.drawerWidth = document.querySelector('aside')?.clientWidth || 0
+onUnmounted(() => {
+  window.removeEventListener('resize', updateDrawerWidth)
 })
 
 watch(

@@ -1,27 +1,30 @@
 <template>
-  <div class="seasonality-header">
-    <h6 class="my-2 ml-2 font-medium" style="color: #333">Seasonality</h6>
-    <div>
-      <div class="seasonality-selector mr-3">
-        <button
-          v-for="option in seasonalitySelectorOptions"
-          :key="option.value"
-          class="seasonality-selector-option"
-          @click="seasonalitySelectOption(option.value)"
-        >
-          {{ option.label }}
-        </button>
+  <div class="w-full min-w-0 overflow-hidden">
+    <div class="seasonality-header">
+      <h6 class="my-2 ml-2 font-medium" style="color: #333">Seasonality</h6>
+      <div>
+        <div class="seasonality-selector mr-3">
+          <button
+            v-for="option in seasonalitySelectorOptions"
+            :key="option.value"
+            class="seasonality-selector-option"
+            @click="seasonalitySelectOption(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
       </div>
     </div>
+    <v-chart
+      ref="chartRef"
+      class="w-full min-w-0"
+      style="height: 300px; width: 100%"
+      :option="option"
+      :loading="loading"
+      autoresize
+      @legendselectchanged="legendSelectChanged"
+    />
   </div>
-  <v-chart
-    ref="chartRef"
-    style="height: 300px"
-    :option="option"
-    :loading="loading"
-    autoresize
-    @legendselectchanged="legendSelectChanged"
-  />
 </template>
 
 <script setup lang="ts">

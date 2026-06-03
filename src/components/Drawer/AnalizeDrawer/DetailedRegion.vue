@@ -47,7 +47,7 @@
         </p>
         <VChart
           ref="chartRef"
-          class="h-40! pt-1"
+          class="h-40! pt-1 w-full min-w-0"
           :option="option"
           :loading="loadingInfo"
           autoresize

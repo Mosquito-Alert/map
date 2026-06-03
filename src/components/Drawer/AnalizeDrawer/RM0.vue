@@ -1,9 +1,17 @@
 <template>
-  <h3 class="text-lg text-gray-700">Ritmo reproductivo básico del mosquito (RM0)</h3>
-  <div class="timeseries-header">
-    <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
+  <div class="w-full min-w-0 overflow-hidden">
+    <h3 class="text-lg text-gray-700">Ritmo reproductivo básico del mosquito (RM0)</h3>
+    <div class="timeseries-header">
+      <h6 class="my-2 ml-2 font-medium" style="color: #333">Time Series</h6>
+    </div>
+    <v-chart
+      class="w-full min-w-0"
+      style="height: 330px; width: 100%"
+      :option="option"
+      :loading="loading"
+      autoresize
+    />
   </div>
-  <v-chart style="height: 330px" :option="option" :loading="loading" autoresize />
 </template>
 <script setup lang="ts">
 import { LineChart } from 'echarts/charts'
