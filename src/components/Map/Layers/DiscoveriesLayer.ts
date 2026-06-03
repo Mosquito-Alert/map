@@ -12,7 +12,8 @@ const buildDiscoveriesSourceUrl = () => {
   if (discoveriesTaxonId == null) return null
 
   return (
-    `/geoserver/mosquitoalert/wms?` +
+    import.meta.env.VITE_GEOSERVER_URL +
+    `/mosquitoalert/wms?` +
     `REQUEST=GetMap&` +
     `SERVICE=WMS&` +
     `VERSION=1.3.0&` +

@@ -12,7 +12,8 @@ const buildBiteIndexSourceUrl = (date: string, style: BiteIndexStyleEnum) => {
   const styleName = `metricstyle-${style}`
 
   return (
-    `/geoserver/mosquitoalert/wms?` +
+    import.meta.env.VITE_GEOSERVER_URL +
+    `/mosquitoalert/wms?` +
     `service=WMS&` +
     `version=1.3.0&` +
     `request=GetMap&` +
