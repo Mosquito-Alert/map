@@ -48,6 +48,7 @@ import type {
   MapLibreBasemapsControlOptions,
 } from '../../utils/mapControls/MapBaseLayerControl'
 import { MapGlobeControl } from '../../utils/mapControls/MapGlobeControl'
+import { drawTool, updateDrawArea } from '../Drawer/AnalizeDrawer/DrawTool.ts'
 import {
   addBiteIndexLayers,
   selectedBiteIndexStyle,
@@ -394,6 +395,12 @@ onMounted(async () => {
     mapDeclaration.addControl(new MapGlobeControl(), 'top-right')
     mapDeclaration.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     // mapDeclaration.addControl(new MapInfoControl(), 'top-right')
+    mapDeclaration.addControl(drawTool as any, 'top-right')
+
+    // Draw tool events for Analize tab
+    mapDeclaration.on('draw.create', updateDrawArea)
+    mapDeclaration.on('draw.delete', updateDrawArea)
+    mapDeclaration.on('draw.update', updateDrawArea)
 
     // Start data loading in background
     const observationsPromise = observationsStore.fetchObservations(true)

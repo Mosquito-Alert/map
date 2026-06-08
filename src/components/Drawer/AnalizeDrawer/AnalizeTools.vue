@@ -18,9 +18,13 @@
             </div>
           </template>
         </SelectButton>
+
+        <!-- * CLICK TOOL -->
         <div v-if="analizeStore.toolSelected === toolsEnum.CLICK" class="p-2">
           Haz click en el mapa para analizar una región administrativa.
         </div>
+
+        <!-- * SEARCH TOOL -->
         <div v-else-if="analizeStore.toolSelected === toolsEnum.SEARCH" class="p-2">
           <div>
             <span>Busca una región administrativa para analizarla.</span>
@@ -62,6 +66,8 @@
             </InputGroup>
           </div>
         </div>
+
+        <!-- * DRAW TOOL -->
         <div v-else-if="analizeStore.toolSelected === toolsEnum.DRAW" class="p-2">
           Dibuja un polígono en el mapa para analizar la región que delimites. Dibuja una región no
           muy grande para evitar tiempos de análisis prolongados.
@@ -88,12 +94,16 @@ const searchTagQuery = ref('')
 const searchResults = ref([])
 const loading = ref(false)
 
+// * CLICK TOOL
+// NOTE: Everything is handled in the click event of the boundary layer of the map.
+
+//  * SEARCH TOOL
 const searchNominatim = async (event: { query: string }) => {
   loading.value = true
 
   // Minimum data response (we only want the names)
   const url =
-    `https://nominatim.openstreetmap.org/search` +
+    import.meta.env.VITE_NOMINATIM_URL +
     `?q=${encodeURIComponent(event.query)}` +
     `&format=json` +
     `&limit=5`
@@ -109,7 +119,7 @@ const selectResult = async (event: { value: any }) => {
 
   // We want now the geometry and other details of the selected region
   const url =
-    `https://nominatim.openstreetmap.org/search` +
+    import.meta.env.VITE_NOMINATIM_URL +
     `?q=${encodeURIComponent(selectedRegion)}` +
     `&format=geojson` +
     `&polygon_geojson=1` +
@@ -123,4 +133,6 @@ const selectResult = async (event: { value: any }) => {
   analizeStore.selectedRegion = await res.json()
   await analizeStore.getDataOfRegion()
 }
+
+// DRAW TOOL
 </script>
