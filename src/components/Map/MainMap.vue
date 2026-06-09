@@ -220,15 +220,15 @@ const syncDrawToolControl = () => {
 
   const shouldShowDrawTool =
     uiStore.activeTab === drawerTabs.analize.value && analizeStore.toolSelected === toolsEnum.DRAW
+  const thereIsDrawControl = map.value._controls.some(
+    (control) => control instanceof (drawTool as any).constructor,
+  )
 
-  if (shouldShowDrawTool) {
+  if (shouldShowDrawTool && !thereIsDrawControl) {
     map.value.addControl(drawTool as any, 'top-right')
     return
   }
 
-  const thereIsDrawControl = map.value._controls.some(
-    (control) => control instanceof (drawTool as any).constructor,
-  )
   if (!shouldShowDrawTool && thereIsDrawControl) {
     map.value.removeControl(drawTool as any)
   }
@@ -700,8 +700,12 @@ watch(
 
     const isAnalizeTab = activeTab === drawerTabs.analize.value
     const wasAnalizeTab = oldActiveTab === drawerTabs.analize.value
+    const isDrawToolSelected = toolSelected === toolsEnum.DRAW
+    const wasDrawToolSelected = oldToolSelected === toolsEnum.DRAW
     const isToolWithBoundaryLayer = toolSelected === toolsEnum.CLICK
     const wasToolWithBoundaryLayer = oldToolSelected === toolsEnum.CLICK
+    const enteredAnalyzeDraw =
+      isAnalizeTab && isDrawToolSelected && (!wasAnalizeTab || !wasDrawToolSelected)
 
     if (isAnalizeTab) {
       // Toggle visibility of mosquito layers
@@ -725,6 +729,9 @@ watch(
     }
 
     syncDrawToolControl()
+    if (enteredAnalyzeDraw) {
+      drawTool.changeMode('draw_polygon')
+    }
     toggleDataLayers()
   },
   { deep: true },
