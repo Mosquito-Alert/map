@@ -136,3 +136,42 @@ const selectResult = async (event: { value: any }) => {
 
 // DRAW TOOL
 </script>
+<style lang="scss">
+/* Fix Mapbox Draw cursors: CSS classes to point to MapLibre GL classes */
+@mixin interactive-cursor($cursor) {
+  .maplibregl-canvas-container.maplibregl-interactive {
+    cursor: $cursor;
+  }
+}
+.maplibregl-map {
+  &.mouse-pointer {
+    @include interactive-cursor(pointer);
+  }
+
+  &.mouse-add {
+    @include interactive-cursor(crosshair);
+  }
+
+  &.mouse-move {
+    @include interactive-cursor(move);
+  }
+
+  &.mode-direct_select.feature-vertex.mouse-move,
+  &.mode-direct_select.feature-feature.mouse-move {
+    @include interactive-cursor(move);
+  }
+
+  &.mode-direct_select.feature-midpoint.mouse-pointer {
+    @include interactive-cursor(cell);
+  }
+
+  &.mouse-move.mode-direct_select,
+  &.mode-static.mouse-pointer {
+    .maplibregl-canvas-container.maplibregl-interactive {
+      cursor: grab;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
+    }
+  }
+}
+</style>
