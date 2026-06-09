@@ -215,6 +215,25 @@ const showSelectedBiteIndexLayer = () => {
   }
 }
 
+const syncDrawToolControl = () => {
+  if (!map.value) return
+
+  const shouldShowDrawTool =
+    uiStore.activeTab === drawerTabs.analize.value && analizeStore.toolSelected === toolsEnum.DRAW
+
+  if (shouldShowDrawTool) {
+    map.value.addControl(drawTool as any, 'top-right')
+    return
+  }
+
+  const thereIsDrawControl = map.value._controls.some(
+    (control) => control instanceof (drawTool as any).constructor,
+  )
+  if (!shouldShowDrawTool && thereIsDrawControl) {
+    map.value.removeControl(drawTool as any)
+  }
+}
+
 const toggleDataLayers = async () => {
   if (!map.value) return
 
@@ -395,7 +414,6 @@ onMounted(async () => {
     mapDeclaration.addControl(new MapGlobeControl(), 'top-right')
     mapDeclaration.addControl(new MapBaseLayerControl(basemapOptions), 'top-right')
     // mapDeclaration.addControl(new MapInfoControl(), 'top-right')
-    mapDeclaration.addControl(drawTool as any, 'top-right')
 
     // Draw tool events for Analize tab
     mapDeclaration.on('draw.create', updateDrawArea)
@@ -411,6 +429,7 @@ onMounted(async () => {
       if (!map.value) return
 
       mapStore.mapLoaded = true
+      syncDrawToolControl()
 
       // Load and cache data. Mark as raw to avoid deep reactivity overhead. This object is never modified.
       geojsonCache.value = markRaw(await observationsPromise)
@@ -705,6 +724,7 @@ watch(
       turnOffBoundaryLayer()
     }
 
+    syncDrawToolControl()
     toggleDataLayers()
   },
   { deep: true },

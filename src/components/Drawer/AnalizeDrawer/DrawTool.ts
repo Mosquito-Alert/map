@@ -172,14 +172,14 @@ export const updateDrawArea = (e: any) => {
   // Delete previously drawn features to allow only one feature at a time, but only if the event contains features (e.g. not on draw.selectionchange)
   if (e?.features?.length) {
     const createdFeatureIds = e.features
-      .map((feature: { id?: string }) => feature.id)
-      .filter((id: string | undefined): id is string => typeof id === 'string')
+      .map((feature: { id?: string | number }) => feature.id)
+      .filter((id: string | number | undefined): id is string => typeof id === 'string')
 
     const existingFeatureIds = drawTool
       .getAll()
-      .features.map((feature: { id?: string }) => feature.id)
+      .features.map((feature: { id?: string | number }) => feature.id)
       .filter(
-        (id: string | undefined): id is string =>
+        (id: string | number | undefined): id is string =>
           typeof id === 'string' && !createdFeatureIds.includes(id),
       )
 
