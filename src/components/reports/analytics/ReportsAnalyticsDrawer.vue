@@ -33,10 +33,9 @@
     </div>
   </q-drawer>
 
-  <div v-if="!visibleLocal" :class="[visibleLocal ? `gt-${breakpoint}` : '', 'absolute-right', 'q-px-sm']"
-    style="z-index: 1; top: 78.5px">
+  <q-page-sticky v-if="!visibleLocal" position="top-right" :offset="[8, 78.5]" style="z-index: 1">
     <q-btn dense round unelevated color="primary" icon="chevron_left" @click="toggleVisible(true)" />
-  </div>
+  </q-page-sticky>
 
 </template>
 
