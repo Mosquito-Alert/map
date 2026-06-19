@@ -13,11 +13,13 @@ import {
 } from 'mosquito-alert';
 import { BASE_PATH } from 'mosquito-alert/base';
 import { attachAuthInterceptor } from 'mosquito-alert/interceptors';
+import { useAuthStore } from 'src/stores/authStore';
 
 const apiConfig = new Configuration({
   ...(import.meta.env.VITE_API_BASE_URL ? { basePath: import.meta.env.VITE_API_BASE_URL } : {}),
-  accessToken: () => localStorage.getItem('access_token') || '',
+  // accessToken: localStorage.getItem('access_token') ?? undefined, // () => localStorage.getItem('access_token') || undefined
 });
+
 const apiUrl = apiConfig.basePath || BASE_PATH;
 
 const axiosInstance = axios.create({});
@@ -46,7 +48,12 @@ export default boot(({ app }) => {
   attachAuthInterceptor(axiosInstance, {
     configuration: apiConfig,
     refreshToken: () => localStorage.getItem('refresh_token') || '',
-    updateAccessToken: (newAccessToken) => localStorage.setItem('access_token', newAccessToken),
+    updateAccessToken: (newAccessToken) => {
+      localStorage.setItem('access_token', newAccessToken);
+      // Also update the store to maintain reactivity
+      const authStore = useAuthStore();
+      authStore.accessToken = newAccessToken;
+    },
   });
 
   // Make available in Options API components as this.$api...
