@@ -2,6 +2,14 @@ import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mos
 import { ReportType } from 'src/types/reportType';
 
 export default {
+  login: 'Iniciar sessió',
+  login_failed: 'Error en iniciar sessió',
+  logout: 'Tancar sessió',
+  username: "Nom d'usuari",
+  username_required: "Nom d'usuari requerit",
+  password_required: 'Contrasenya requerida',
+  password: 'Contrasenya',
+  cancel: 'Cancel·lar',
   footer_collaborators_note: 'Aquest mapa interactiu ha estat finançat per',
   url_copied: 'URL copiat al porta-retalls',
   observations: 'Observacions',
