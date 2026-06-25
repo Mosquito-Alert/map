@@ -3,7 +3,8 @@
   <!-- MAP -->
   <ol-map ref='mapRef' class="absolute-full" :loadTilesWhileAnimating='true' :loadTilesWhileInteracting='true'>
     <ol-view :projection="projection" :constrainResolution='true' :maxZoom=24 :center="center" :zoom="localZoom"
-      @change:center="setCenter($event.target.getCenter())" @change:resolution="zoom = $event.target.getZoom()" />
+      @change:center="debouncedSetCenter($event.target.getCenter())"
+      @change:resolution="debouncedSetZoom($event.target.getZoom())" />
 
     <ol-tile-layer ref="basemapRef">
       <!-- <ol-source-osm :preload="Infinity" /> -->
@@ -40,6 +41,7 @@
 <script lang="ts">
 
 import { onMounted, ref, watch } from 'vue'
+import debounce from 'debounce';
 
 import { useRouteQuery } from '@vueuse/router'
 
@@ -85,16 +87,19 @@ export default {
         set: (v: number) => v.toFixed(2).toString()
       }
     })
+    const debouncedSetZoom = debounce((value: number) => {
+      zoom.value = value
+    }, 1000)
     const localZoom = ref(zoom.value)
 
     const showSpinner = ref(true)
 
     const center = ref(fromLonLat([longitude.value, latitude.value], projection.value))
-    const setCenter = (value: [number, number]) => {
+    const debouncedSetCenter = debounce((value: [number, number]) => {
       const [lon, lat] = toLonLat(value, projection.value) as [number, number]
       longitude.value = lon
       latitude.value = lat
-    }
+    }, 1000)
 
     const grayscaleFilter = new Colorize({ operation: 'grayscale' });
     const labelsLayerVisible = ref(false);
@@ -128,7 +133,8 @@ export default {
       basemapRef,
       projection,
       center,
-      setCenter,
+      debouncedSetCenter,
+      debouncedSetZoom,
       localZoom,
       zoom,
       showSpinner,
