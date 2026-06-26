@@ -83,7 +83,7 @@ export default {
     }, { immediate: true })
 
     function handleShowDateSelector() {
-      if (localDate.value.to !== null && localDate.value.to !== undefined) {
+      if (localDate.value?.to !== null && localDate.value?.to !== undefined) {
         const toDate = new Date(localDate.value.to)
         dateSelectorRef.value?.setCalendarTo(toDate.getFullYear(), toDate.getMonth() + 1)
       }
