@@ -69,6 +69,15 @@
                 </div>
               </q-item-section>
             </q-item>
+            <q-item>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fa fa-light fa-share-nodes" />
+              </q-item-section>
+              <q-item-section class="col-auto">
+                <q-chip v-if="!report.published" icon="fa fa-lock" color="red" text-color="white" label="Not public" />
+                <span v-else>Public</span>
+              </q-item-section>
+            </q-item>
           </q-list>
         </q-tab-panel>
 

@@ -21,7 +21,9 @@ import type { ReportType } from 'src/types/reportType';
 import { getHistogramDateKey } from 'src/components/reports/analytics/utils';
 import type VectorSource from 'ol/source/Vector';
 import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert';
+import { useAuthStore } from 'src/stores/authStore';
 
+const authStore = useAuthStore();
 const layerRef = ref<{ webglVectorLayer: Layer }>();
 const sourceRef = ref<{ source: VectorSource }>();
 
@@ -75,6 +77,15 @@ defineExpose({
 watch(() => props.visible, (newValue) => {
   if (!layerRef.value) return
   layerRef.value.webglVectorLayer.setVisible(newValue === true)
+})
+
+// Refresh the layer when authentication state changes (e.g., after login)
+// This ensures authenticated users see observations they have access to
+watch(() => authStore.isAuthenticated, (newValue, oldValue) => {
+  // Refresh when authentication state changes (login or logout)
+  if (newValue !== oldValue) {
+    refresh();
+  }
 })
 
 const style = {
