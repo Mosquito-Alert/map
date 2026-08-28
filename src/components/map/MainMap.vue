@@ -50,15 +50,17 @@ import Colorize from 'ol-ext/filter/Colorize'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY
+
 export default {
   props: {
     basemapLayerUrl: {
       type: String,
-      default: "https://basemaps.cartocdn.com/rastertiles/voyager_no_labels_no_buildings/{z}/{x}/{y}.png"
+      default: `https://basemaps.cartocdn.com/rastertiles/voyager_no_labels_no_buildings/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`
     },
     labelsLayerUrl: {
       type: String,
-      default: "https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png"
+      default: `https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`
     },
   },
   setup() {
