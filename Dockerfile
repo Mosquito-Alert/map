@@ -19,3 +19,6 @@ HEALTHCHECK --interval=30s --retries=3 --timeout=5s CMD curl --fail http://local
 WORKDIR /app
 COPY --from=build-stage /app/dist/spa /app
 COPY nginx.conf /etc/nginx/nginx.conf
+
+COPY docker-entrypoint.d/40-config.sh /docker-entrypoint.d/40-config.sh
+RUN chmod +x /docker-entrypoint.d/40-config.sh

@@ -50,7 +50,9 @@ import Colorize from 'ol-ext/filter/Colorize'
 
 import { useMapUiStore } from 'src/stores/mapUI';
 
-const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY ||
+  window.APP_CONFIG?.CARTO_API_KEY ||
+  ''
 
 export default {
   props: {
