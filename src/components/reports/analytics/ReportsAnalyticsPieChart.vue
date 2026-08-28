@@ -3,35 +3,31 @@
 </template>
 
 <script setup lang="ts">
-import VChart from "vue-echarts"
+import VChart from 'vue-echarts';
 
-import { use } from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-import type { PieDataItemOption } from "echarts/types/src/chart/pie/PieSeries.js"
+import { use } from 'echarts/core';
+import { PieChart } from 'echarts/charts';
+import { TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import type { PieDataItemOption } from 'echarts/types/src/chart/pie/PieSeries.js';
 
-use([TooltipComponent, PieChart, CanvasRenderer])
+use([TooltipComponent, PieChart, CanvasRenderer]);
 
-import { computed } from 'vue'
-import type { Feature } from "ol"
-import type { CallbackDataParams } from "echarts/types/dist/shared"
+import { computed } from 'vue';
+import type { CallbackDataParams } from 'echarts/types/dist/shared';
+import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
 
 const props = defineProps<{
-  features?: Feature[]
-}>()
+  stats?: ReportAnalyticsStats;
+}>();
 
 const data = computed<PieDataItemOption[]>(() => {
-  if (!props.features) return []
-  return Object.values(props.features.reduce((acc, obj) => {
-    const key = obj.get('color') as string;
-    if (!acc[key]) {
-      acc[key] = { value: 0, itemStyle: { color: obj.get('color') } }
-    }
-    acc[key].value = (acc[key].value as number) + 1;
-    return acc;
-  }, {} as Record<string, PieDataItemOption>))
-})
+  if (!props.stats) return [];
+  return Object.entries(props.stats.colorCounts).map(([color, value]) => ({
+    value,
+    itemStyle: { color },
+  }));
+});
 
 const option = computed(() => ({
   series: [
@@ -43,29 +39,28 @@ const option = computed(() => ({
         show: false,
         position: 'center',
         formatter: (item: CallbackDataParams) => {
-          return item.value
-        }
+          return item.value;
+        },
       },
       emphasis: {
         label: {
           show: true,
           fontSize: '30',
-          fontWeight: 'bold'
-        }
+          fontWeight: 'bold',
+        },
       },
       labelLine: {
-        show: false
+        show: false,
       },
       itemStyle: {
         borderRadius: 10,
         borderColor: '#fff',
-        borderWidth: 2
+        borderWidth: 2,
       },
-      data: data.value
-    }
-  ]
-}))
-
+      data: data.value,
+    },
+  ],
+}));
 </script>
 
 <style scoped>

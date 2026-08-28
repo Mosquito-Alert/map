@@ -3,78 +3,55 @@
 </template>
 
 <script setup lang="ts">
-import VChart from "vue-echarts"
+import VChart from 'vue-echarts';
 
-import { use } from 'echarts/core'
-import { BarChart } from 'echarts/charts'
-import { TooltipComponent, GridComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
+import { use } from 'echarts/core';
+import { BarChart } from 'echarts/charts';
+import { TooltipComponent, GridComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 
-use([TooltipComponent, GridComponent, BarChart, CanvasRenderer])
+use([TooltipComponent, GridComponent, BarChart, CanvasRenderer]);
 
+import { colors } from 'quasar';
+import { computed } from 'vue';
 
-import { colors } from 'quasar'
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-
-import type { Feature } from "ol"
-import type { BarDataItemOption } from "echarts/types/src/chart/bar/BarSeries.js"
-
-import Worker from 'src/workers/ReportAnalyticsBarChartWorker.js?worker'
-
-const worker = new Worker()
+import type { BarDataItemOption } from 'echarts/types/src/chart/bar/BarSeries.js';
+import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
 
 const props = defineProps<{
-  features?: Feature[]
-}>()
+  stats?: ReportAnalyticsStats;
+}>();
 
-const data = ref<BarDataItemOption[]>([])
-
-onMounted(() => {
-  worker.onmessage = function (e) {
-    // NOTE: remeber to sort the data by date before sending it to the chart
-    //      otherwise the x-axis will be in random order
-    data.value = Object.entries(e.data).map(([key, value]) => ({
+const data = computed<BarDataItemOption[]>(() => {
+  if (!props.stats) return [];
+  return Object.entries(props.stats.histogramCounts)
+    .map(([key, value]) => ({
       name: key,
-      value: Number(value)
-    })).sort((a, b) => {
+      value: Number(value),
+    }))
+    .sort((a, b) => {
       return a.name < b.name ? -1 : 1;
-    })
-  }
-})
-
-onUnmounted(() => {
-  worker.terminate()
-})
-
-// Watch for changes in props and restart the worker when they change
-watch([() => props.features], () => {
-  if (!props.features) {
-    data.value = []
-    return
-  }
-  worker.postMessage({
-    dateKeys: props.features.map(feature => feature.getProperties().histogram_key),
-  })
-}, { immediate: true })
+    });
+});
 
 const option = computed(() => {
   return {
     tooltip: {
-      show: true
+      show: true,
     },
     xAxis: {
       type: 'category',
       data: data.value.map((item) => item.name),
       axisTick: {
-        show: false
+        show: false,
       },
       axisLine: {
-        show: false
+        show: false,
       },
     },
     yAxis: {
       show: false,
-      type: 'value'
+      type: 'value',
     },
 
     series: [
@@ -82,13 +59,12 @@ const option = computed(() => {
         data: data.value.map((item) => item.value),
         type: 'bar',
         itemStyle: {
-          color: colors.getPaletteColor('grey-7')
-        }
-      }
-    ]
-  }
-})
-
+          color: colors.getPaletteColor('grey-7'),
+        },
+      },
+    ],
+  };
+});
 </script>
 
 <style scoped>

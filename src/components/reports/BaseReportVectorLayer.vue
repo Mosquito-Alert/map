@@ -21,6 +21,7 @@ import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mo
 
 const layerRef = ref<{ webglVectorLayer: Layer }>();
 const sourceRef = ref<{ source: VectorSource }>();
+let loadVersion = 0;
 
 export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel;
 
@@ -40,42 +41,40 @@ const loader = async function (
   extent: number[],
   resolution: number,
   projection: Projection,
-  success: (features: Feature[]) => void,
-  failure: () => void,
-) {
+): Promise<Feature[]> {
+  const currentLoadVersion = loadVersion;
   const featureProjection = getProjection('EPSG:4326')!;
 
-  try {
-    const response = await props.fetchReports();
-    const features = response
-      .filter((report) => {
-        const lon = report.point?.longitude;
-        const lat = report.point?.latitude;
-        return Number.isFinite(lon) && Number.isFinite(lat);
-      })
-      .map((report) => {
-        const feature = new Feature();
-        const point = new Point([report.point.longitude, report.point.latitude]);
-        point.transform(featureProjection, projection);
-        feature.setGeometry(point);
-        feature.setId(report.uuid);
-        const date = new Date(report.received_at);
-        feature.setProperties({
-          received_at: date,
-          histogram_key: getHistogramDateKey(date),
-        });
-        return feature;
-      });
+  const response = await props.fetchReports();
+  if (currentLoadVersion !== loadVersion || !props.visible) return [];
 
-    sourceRef.value?.source.addFeatures(features);
-    success(features);
-  } catch (error) {
-    console.error('Failed to fetch geo reports:', error);
-    failure();
-  }
+  return response
+    .filter((report) => {
+      const lon = report.point?.longitude;
+      const lat = report.point?.latitude;
+      return Number.isFinite(lon) && Number.isFinite(lat);
+    })
+    .map((report) => {
+      const feature = new Feature();
+      const point = new Point([report.point.longitude, report.point.latitude]);
+      point.transform(featureProjection, projection);
+      feature.setGeometry(point);
+      feature.setId(report.uuid);
+      const date = new Date(report.received_at);
+      feature.setProperties({
+        received_at: date,
+        histogram_key: getHistogramDateKey(date),
+      });
+      return feature;
+    });
 };
 
 const refresh = function () {
+  loadVersion += 1;
+  if (!props.visible) {
+    sourceRef.value?.source.clear(true);
+    return;
+  }
   sourceRef.value?.source.refresh();
 };
 
@@ -89,6 +88,7 @@ watch(
   (newValue) => {
     if (!layerRef.value) return;
     layerRef.value.webglVectorLayer.setVisible(newValue === true);
+    refresh();
   },
 );
 
@@ -117,6 +117,6 @@ function onAddFeature(event: VectorSourceEvent) {
 onBeforeUnmount(() => {
   // See: https://github.com/openlayers/openlayers/blob/29c58d08fb8ddc22b4b7384b38851323359c5706/src/ol/layer/WebGLPoints.js#L58-L59
   // See: https://stackoverflow.com/questions/69295838/how-to-properly-release-webgl-resources-of-removed-layers-in-openlayers
-  layerRef.value!.webglVectorLayer.dispose();
+  layerRef.value?.webglVectorLayer.dispose();
 });
 </script>
