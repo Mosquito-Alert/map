@@ -34,7 +34,7 @@ export default {
         newValue = 'en-US'
       }
       if (newValue && newValue in enabledLanguages && locale.value !== newValue) {
-        locale.value = newValue as keyof typeof enabledLanguages
+        locale.value = newValue 
       }
     }, { immediate: true })
 
