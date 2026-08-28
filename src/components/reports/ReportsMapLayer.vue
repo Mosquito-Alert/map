@@ -3,83 +3,23 @@
   <ol-layer-group ref="layerGroupRef">
     <!-- Mosquito Layers -->
     <ObservationMapLayer
-      :visible="albopictus"
-      :taxon_ids="mosquitoTaxonIds.albopictus"
-      :color="colors.getPaletteColor('albopictus')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <ObservationMapLayer
-      :visible="aegypti"
-      :taxon_ids="mosquitoTaxonIds.aegypti"
-      :color="colors.getPaletteColor('aegypti')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <ObservationMapLayer
-      :visible="japonicus"
-      :taxon_ids="mosquitoTaxonIds.japonicus"
-      :color="colors.getPaletteColor('japonicus')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <ObservationMapLayer
-      :visible="koreicus"
-      :taxon_ids="mosquitoTaxonIds.koreicus"
-      :color="colors.getPaletteColor('koreicus')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <ObservationMapLayer
-      :visible="culex"
-      :taxon_ids="mosquitoTaxonIds.culex"
-      :color="colors.getPaletteColor('culex')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <ObservationMapLayer
-      :visible="unidentifiedMosquito"
-      :taxon_ids="mosquitoTaxonIds.unidentified"
-      :color="colors.getPaletteColor('unidentified-mosquito')"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-
-    <ObservationMapLayer
-      :visible="otherSpecies"
-      :taxon_ids="mosquitoTaxonIds.other"
-      negate
-      :color="colors.getPaletteColor('other-species')"
+      v-for="layer in observationLayers"
+      :key="`observation-${layer.key}`"
+      :visible="layerVisibility[layer.key]"
+      :taxon_ids="mosquitoTaxonIds[layer.taxonKey]"
+      :color="colors.getPaletteColor(layer.colorKey)"
+      :negate="layer.negate || false"
       :from-date="fromDate"
       :to-date="toDate"
       :tags="tags"
     />
     <!-- Breeding sites Layers -->
     <BreedingSiteMapLayer
-      :visible="stormDrainWater"
-      :siteTypes="breedingSiteTypes.stormDrain"
-      :hasWater="true"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <BreedingSiteMapLayer
-      :visible="stormDrainDry"
-      :siteTypes="breedingSiteTypes.stormDrain"
-      :hasWater="false"
-      :from-date="fromDate"
-      :to-date="toDate"
-      :tags="tags"
-    />
-    <BreedingSiteMapLayer
-      :visible="otherSite"
-      :siteTypes="breedingSiteTypes.other"
+      v-for="layer in breedingSiteLayers"
+      :key="`breeding-${layer.key}`"
+      :visible="layerVisibility[layer.key]"
+      :siteTypes="breedingSiteTypes[layer.siteTypeKey]"
+      v-bind="layer.hasWater !== undefined ? { hasWater: layer.hasWater } : {}"
       :from-date="fromDate"
       :to-date="toDate"
       :tags="tags"
@@ -104,7 +44,7 @@
 
 <script setup lang="ts">
 import { colors } from 'quasar';
-import { ref, inject } from 'vue';
+import { ref, inject, computed } from 'vue';
 
 import type { Feature } from 'ol';
 import type Map from 'ol/Map';
@@ -122,12 +62,33 @@ import type { ReportType } from 'src/types/reportType';
 import { mosquitoTaxonIds, breedingSiteTypes } from 'src/utils/constants';
 import type VectorSource from 'ol/source/Vector';
 import type { Extent } from 'ol/extent';
-import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
+import type {
+  BreedingSiteLayerConfig,
+  LayerVisibilityKey,
+  ObservationLayerConfig,
+  ReportAnalyticsStats,
+} from 'src/components/reports/analytics/types';
 import { createEmptyReportAnalyticsStats } from 'src/components/reports/analytics/utils';
 
 const reportMapStore = useReportMapStore();
 
-withDefaults(
+const observationLayers: ObservationLayerConfig[] = [
+  { key: 'albopictus', taxonKey: 'albopictus', colorKey: 'albopictus' },
+  { key: 'aegypti', taxonKey: 'aegypti', colorKey: 'aegypti' },
+  { key: 'japonicus', taxonKey: 'japonicus', colorKey: 'japonicus' },
+  { key: 'koreicus', taxonKey: 'koreicus', colorKey: 'koreicus' },
+  { key: 'culex', taxonKey: 'culex', colorKey: 'culex' },
+  { key: 'unidentifiedMosquito', taxonKey: 'unidentified', colorKey: 'unidentified-mosquito' },
+  { key: 'otherSpecies', taxonKey: 'other', colorKey: 'other-species', negate: true },
+];
+
+const breedingSiteLayers: BreedingSiteLayerConfig[] = [
+  { key: 'stormDrainWater', siteTypeKey: 'stormDrain', hasWater: true },
+  { key: 'stormDrainDry', siteTypeKey: 'stormDrain', hasWater: false },
+  { key: 'otherSite', siteTypeKey: 'other' },
+];
+
+const props = withDefaults(
   defineProps<{
     albopictus?: boolean;
     aegypti?: boolean;
@@ -158,6 +119,21 @@ withDefaults(
     otherSite: false,
     samplingEffort: false,
   },
+);
+
+const layerVisibility = computed(
+  (): Record<LayerVisibilityKey, boolean> => ({
+    albopictus: props.albopictus,
+    aegypti: props.aegypti,
+    japonicus: props.japonicus,
+    koreicus: props.koreicus,
+    culex: props.culex,
+    unidentifiedMosquito: props.unidentifiedMosquito,
+    otherSpecies: props.otherSpecies,
+    stormDrainWater: props.stormDrainWater,
+    stormDrainDry: props.stormDrainDry,
+    otherSite: props.otherSite,
+  }),
 );
 
 const layerGroupRef = ref<{ layerGroup: LayerGroup }>();

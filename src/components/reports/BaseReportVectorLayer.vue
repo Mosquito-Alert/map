@@ -1,5 +1,10 @@
 <template>
-  <ol-webgl-vector-layer ref="layerRef" :visible="renderVisible" :opacity="renderOpacity" :styles="style">
+  <ol-webgl-vector-layer
+    ref="layerRef"
+    :visible="renderVisible"
+    :opacity="renderOpacity"
+    :styles="style"
+  >
     <ol-source-vector ref="sourceRef" :loader="loader" @addfeature="onAddFeature" />
   </ol-webgl-vector-layer>
 </template>
