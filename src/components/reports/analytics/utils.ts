@@ -1,7 +1,7 @@
-import type { ReportAnalyticsStats } from './types';
+import type { ReportAnalyticsStats } from './types'
 
 export function getHistogramDateKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
 export function createEmptyReportAnalyticsStats(): ReportAnalyticsStats {
@@ -10,5 +10,5 @@ export function createEmptyReportAnalyticsStats(): ReportAnalyticsStats {
     colorCounts: {},
     histogramCounts: {},
     recentFeatures: [],
-  };
+  }
 }

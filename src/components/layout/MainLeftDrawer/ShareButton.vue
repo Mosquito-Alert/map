@@ -3,9 +3,8 @@
 </template>
 
 <script lang="ts">
-
 import { copyToClipboard, useQuasar } from 'quasar'
-import { useI18n } from "vue-i18n"
+import { useI18n } from 'vue-i18n'
 
 export default {
   setup() {
@@ -20,17 +19,14 @@ export default {
               type: 'positive',
               message: t('url_copied'),
               icon: 'fa fat fa-clipboard',
-              actions: [
-                { icon: 'close', color: 'white', round: true }
-              ]
+              actions: [{ icon: 'close', color: 'white', round: true }],
             })
           })
           .catch(() => {
             console.log('Failed coping URL to clipboard')
           })
-      }
+      },
     }
-  }
-
+  },
 }
 </script>

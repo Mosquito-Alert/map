@@ -1,20 +1,17 @@
 <template>
   <q-layout view="lHr LpR fFf">
-
     <MainLeftDrawer />
 
     <q-page-container>
       <q-page class="flex overflow-hidden">
-
         <q-resize-observer @resize="handlePageResize" debounce="0" />
 
-        <q-ajax-bar position='top' size="3px" color="primary" />
+        <q-ajax-bar position="top" size="3px" color="primary" />
 
         <!-- MAP -->
         <MainMap ref="mapRef">
           <router-view />
         </MainMap>
-
       </q-page>
     </q-page-container>
 

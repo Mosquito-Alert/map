@@ -1,6 +1,6 @@
-import { defineBoot } from '#q-app/wrappers';
-import * as Sentry from '@sentry/vue';
-import { apiUrl } from './api';
+import { defineBoot } from '#q-app/wrappers'
+import * as Sentry from '@sentry/vue'
+import { apiUrl } from './api'
 
 export default defineBoot(({ app, router }) => {
   Sentry.init({
@@ -18,5 +18,5 @@ export default defineBoot(({ app, router }) => {
     tracesSampleRate: 0.2,
     // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
     tracePropagationTargets: ['localhost', apiUrl],
-  });
-});
+  })
+})

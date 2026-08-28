@@ -65,57 +65,57 @@
 </template>
 
 <script setup lang="ts">
-import type { Screen } from 'quasar';
-import { useQuasar } from 'quasar';
-import { ref, computed, watch } from 'vue';
+import type { Screen } from 'quasar'
+import { useQuasar } from 'quasar'
+import { ref, computed, watch } from 'vue'
 
-import ReportsAnalyticsPieChart from 'src/components/reports/analytics/ReportsAnalyticsPieChart.vue';
-import ReportsAnalyticsBarChart from 'src/components/reports/analytics/ReportsAnalyticsBarChart.vue';
-import ReportsAnalyticsLastActivity from 'src/components/reports/analytics/ReportsAnalyticsLastActivity.vue';
-import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
+import ReportsAnalyticsPieChart from 'src/components/reports/analytics/ReportsAnalyticsPieChart.vue'
+import ReportsAnalyticsBarChart from 'src/components/reports/analytics/ReportsAnalyticsBarChart.vue'
+import ReportsAnalyticsLastActivity from 'src/components/reports/analytics/ReportsAnalyticsLastActivity.vue'
+import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types'
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: boolean;
-    width?: number;
-    stats?: ReportAnalyticsStats;
-    breakpoint?: keyof Screen['sizes'];
+    modelValue?: boolean
+    width?: number
+    stats?: ReportAnalyticsStats
+    breakpoint?: keyof Screen['sizes']
   }>(),
   {
     modelValue: true,
     width: 350,
     breakpoint: 'sm',
   },
-);
+)
 
-const $q = useQuasar();
+const $q = useQuasar()
 
 const drawerWidth = computed(() => {
-  return $q.screen.width <= $q.screen.sizes[props.breakpoint] ? $q.screen.width : props.width;
-});
+  return $q.screen.width <= $q.screen.sizes[props.breakpoint] ? $q.screen.width : props.width
+})
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-}>();
+  (e: 'update:modelValue', value: boolean): void
+}>()
 
 // local state synced with v-model
-const visibleLocal = ref(props.modelValue);
+const visibleLocal = ref(props.modelValue)
 
 // sync local state if parent changes it
 watch(
   () => props.modelValue,
   (val) => {
-    visibleLocal.value = val;
+    visibleLocal.value = val
   },
-);
+)
 
 // function to toggle visibility and emit event
 function toggleVisible(value: boolean) {
-  visibleLocal.value = value;
-  emit('update:modelValue', value);
+  visibleLocal.value = value
+  emit('update:modelValue', value)
 }
 
 const numFeatures = computed(() => {
-  return props.stats?.total || 0;
-});
+  return props.stats?.total || 0
+})
 </script>

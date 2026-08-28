@@ -1,4 +1,4 @@
-import type { Bite, BreedingSite, Observation } from 'mosquito-alert';
+import type { Bite, BreedingSite, Observation } from 'mosquito-alert'
 
 export enum ReportType {
   Bite = 'bite',
@@ -7,15 +7,15 @@ export enum ReportType {
 }
 
 interface BiteReport extends Bite {
-  type: ReportType.Bite;
+  type: ReportType.Bite
 }
 
 interface BreedingSiteReport extends BreedingSite {
-  type: ReportType.BreedingSite;
+  type: ReportType.BreedingSite
 }
 
 interface ObservationReport extends Observation {
-  type: ReportType.Observation;
+  type: ReportType.Observation
 }
 
-export type Report = BiteReport | BreedingSiteReport | ObservationReport;
+export type Report = BiteReport | BreedingSiteReport | ObservationReport
