@@ -1,5 +1,5 @@
 <template>
-  <ol-webgl-vector-layer ref="layerRef" :visible="visible" :styles="style">
+  <ol-webgl-vector-layer ref="layerRef" :visible="renderVisible" :opacity="renderOpacity" :styles="style">
     <ol-source-vector ref="sourceRef" :loader="loader" @addfeature="onAddFeature" />
   </ol-webgl-vector-layer>
 </template>
@@ -37,6 +37,9 @@ const props = withDefaults(
   },
 );
 
+const renderVisible = ref(props.visible);
+const renderOpacity = ref(props.visible ? 1 : 0);
+
 const loader = async function (
   extent: number[],
   resolution: number,
@@ -45,36 +48,55 @@ const loader = async function (
   const currentLoadVersion = loadVersion;
   const featureProjection = getProjection('EPSG:4326')!;
 
-  const response = await props.fetchReports();
-  if (currentLoadVersion !== loadVersion || !props.visible) return [];
+  try {
+    const response = await props.fetchReports();
+    if (currentLoadVersion !== loadVersion || !props.visible) return [];
 
-  return response
-    .filter((report) => {
-      const lon = report.point?.longitude;
-      const lat = report.point?.latitude;
-      return Number.isFinite(lon) && Number.isFinite(lat);
-    })
-    .map((report) => {
-      const feature = new Feature();
-      const point = new Point([report.point.longitude, report.point.latitude]);
-      point.transform(featureProjection, projection);
-      feature.setGeometry(point);
-      feature.setId(report.uuid);
-      const date = new Date(report.received_at);
-      feature.setProperties({
-        received_at: date,
-        histogram_key: getHistogramDateKey(date),
+    const features = response
+      .filter((report) => {
+        const lon = report.point?.longitude;
+        const lat = report.point?.latitude;
+        return Number.isFinite(lon) && Number.isFinite(lat);
+      })
+      .map((report) => {
+        const feature = new Feature();
+        const point = new Point([report.point.longitude, report.point.latitude]);
+        point.transform(featureProjection, projection);
+        feature.setGeometry(point);
+        feature.setId(report.uuid);
+        const date = new Date(report.received_at);
+        feature.setProperties({
+          received_at: date,
+          histogram_key: getHistogramDateKey(date),
+        });
+        return feature;
       });
-      return feature;
+
+    requestAnimationFrame(() => {
+      if (currentLoadVersion === loadVersion && props.visible) {
+        renderOpacity.value = 1;
+      }
     });
+
+    return features;
+  } catch (error) {
+    if (currentLoadVersion === loadVersion && props.visible) {
+      renderOpacity.value = 1;
+    }
+    throw error;
+  }
 };
 
 const refresh = function () {
   loadVersion += 1;
   if (!props.visible) {
+    renderOpacity.value = 0;
+    renderVisible.value = false;
     sourceRef.value?.source.clear(true);
     return;
   }
+  renderOpacity.value = 0;
+  renderVisible.value = true;
   sourceRef.value?.source.refresh();
 };
 
@@ -85,9 +107,8 @@ defineExpose({
 // There's a bug on visible change doing nothing in webgl: https://github.com/MelihAltintas/vue3-openlayers/issues/355
 watch(
   () => props.visible,
-  (newValue) => {
+  () => {
     if (!layerRef.value) return;
-    layerRef.value.webglVectorLayer.setVisible(newValue === true);
     refresh();
   },
 );
