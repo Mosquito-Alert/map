@@ -7,6 +7,10 @@ export const useReportMapStore = defineStore('reportMap', {
     selectedReport: null as Report | null,
   }),
   actions: {
+    // Event-like action used by map layers to announce that their source features changed.
+    notifyFeaturesUpdated() {
+      return undefined
+    },
     async setSelectedReport({ uuid, type }: { uuid: string; type: ReportType }) {
       if (uuid === null) {
         this.selectedReport = null

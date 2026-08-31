@@ -10,23 +10,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 
 import { Feature } from 'ol'
-import type { Layer } from 'ol/layer'
-import type { VectorSourceEvent } from 'ol/source/Vector'
 import { Point } from 'ol/geom'
+import type { Layer } from 'ol/layer'
 import type { Projection } from 'ol/proj'
 import { get as getProjection } from 'ol/proj'
+import type { VectorSourceEvent } from 'ol/source/Vector'
 
-import type { ReportType } from 'src/types/reportType'
-import { getHistogramDateKey } from 'src/components/reports/analytics/utils'
-import type VectorSource from 'ol/source/Vector'
 import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert'
+import type VectorSource from 'ol/source/Vector'
+import { getHistogramDateKey } from 'src/components/reports/analytics/utils'
+import { useReportMapStore } from 'src/stores/reportMapStore'
+import type { ReportType } from 'src/types/reportType'
 
 const layerRef = ref<{ webglVectorLayer: Layer }>()
 const sourceRef = ref<{ source: VectorSource }>()
 let loadVersion = 0
+
+const reportMapStore = useReportMapStore()
 
 export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel
 
@@ -80,6 +83,8 @@ const loader = async function (
     requestAnimationFrame(() => {
       if (currentLoadVersion === loadVersion && props.visible) {
         renderOpacity.value = 1
+        // Notify the store that features have been updated, so that any dependent components can react accordingly.
+        reportMapStore.notifyFeaturesUpdated()
       }
     })
 
@@ -98,6 +103,8 @@ const refresh = function () {
     renderOpacity.value = 0
     renderVisible.value = false
     sourceRef.value?.source.clear(true)
+    // Notify the store that features have been updated, so that any dependent components can react accordingly.
+    reportMapStore.notifyFeaturesUpdated()
     return
   }
   renderOpacity.value = 0

@@ -227,13 +227,26 @@ function updateVisibleFeatures() {
     layerRef.value?.getAnalyticsStatsInExtent(extent) ?? createEmptyReportAnalyticsStats()
 }
 const debouncedUpdate = debounce(updateVisibleFeatures, 1000)
+// Keep one stable caller for debounce; OpenLayers and Pinia invoke callbacks with different contexts.
+const scheduleUpdateVisibleFeatures = () => debouncedUpdate()
+
+// Listen to the store action as an event, avoiding prop/emit forwarding through map layer wrappers.
+const unsubscribeReportMapActions = reportMapStore.$onAction(({ name, after }) => {
+  if (name !== 'notifyFeaturesUpdated') return // If the action is not related to features being updated, we don't need to schedule an update.
+  // After the action is completed, we schedule an update to recalculate the visible features.
+  after(() => {
+    scheduleUpdateVisibleFeatures()
+  })
+})
 
 onMounted(() => {
-  map?.on('moveend', debouncedUpdate)
+  map?.on('moveend', scheduleUpdateVisibleFeatures)
 })
 
 onUnmounted(() => {
-  map?.un('moveend', debouncedUpdate)
+  map?.un('moveend', scheduleUpdateVisibleFeatures)
+  // Unsubscribe from the store action listener when the component is unmounted to prevent memory leaks.
+  unsubscribeReportMapActions()
 })
 
 function handleMosquitoesLayerUpdate(value: string[]) {
