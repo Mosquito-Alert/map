@@ -1,21 +1,23 @@
 <template>
-
   <ol-tile-layer :opacity="opacity" :visible="visible">
-    <ol-source-tile-wms ref="sourceRef" :url="mapserver.getUri({url: 'wms'})"
-      layers="mosquitoalert:discoveries" serverType="geoserver" :params="{
-        'env': `field:${speciesCode}`,
-      }" />
+    <ol-source-tile-wms
+      ref="sourceRef"
+      :url="mapserver.getUri({ url: 'wms' })"
+      layers="mosquitoalert:discoveries"
+      serverType="geoserver"
+      :params="{
+        env: `field:${speciesCode}`,
+      }"
+    />
   </ol-tile-layer>
-
 </template>
 
 <script lang="ts">
-
 import { ref, watchEffect, watch, inject, onMounted, onUnmounted } from 'vue'
 
 import MVT from 'ol/format/MVT'
 import type Feature from 'ol/Feature'
-import type Map from "ol/Map";
+import type Map from 'ol/Map'
 import { Style, Fill, Stroke, RegularShape, Text } from 'ol/style'
 
 import Legend from 'ol-ext/legend/Legend'
@@ -25,9 +27,9 @@ import { mapserver } from 'boot/axios'
 
 const choroplethData = {
   // Keys are the possible value of the geometry specie column.
-  mosquito_alert: { label: "Mosquito Alert discoveries", color: "#e34a33" },
-  official: { label: "Official data", color: "#fef0d9" },
-};
+  mosquito_alert: { label: 'Mosquito Alert discoveries', color: '#e34a33' },
+  official: { label: 'Official data', color: '#fef0d9' },
+}
 
 const mapStyleColor = ref({
   lowLevelStroke: '#E1C5C7',
@@ -42,22 +44,21 @@ export default {
     },
     opacity: {
       type: Number,
-      default: 1
+      default: 1,
     },
     visible: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   setup(props) {
-
     const layerRef = ref()
     const sourceRef = ref()
-    const map = inject<Map | undefined>("map");
+    const map = inject<Map | undefined>('map')
 
     const mvtFormat = new MVT({
       // featureClass: Feature,
-      idProperty: 'locCode'
+      idProperty: 'locCode',
     })
 
     // Create legend for the discoveries layer
@@ -66,14 +67,13 @@ export default {
       size: [14, 14],
       // layer: layerRef.value.vectorTileLayer,
       textStyle: new Text({
-        font: '14px Roboto'
+        font: '14px Roboto',
       }),
       titleStyle: new Text({
         font: '16px Roboto',
         textAlign: 'center',
-        justify: 'center'
-      })
-
+        justify: 'center',
+      }),
     })
 
     // Add legend items based on choropleth data
@@ -89,46 +89,47 @@ export default {
             angle: Math.PI / 4,
             stroke: new Stroke({
               color: 'gray',
-              width: 1.5
+              width: 1.5,
             }),
             fill: new Fill({
-              color: color
-            })
-          })
-        })
+              color: color,
+            }),
+          }),
+        }),
       })
     })
 
     // Create legend control and add it to the map
     const legendControl = new LegendControl({
       legend: legend,
-      collapsed: false
+      collapsed: false,
     })
 
     watchEffect(() => {
       if (layerRef.value === undefined) {
         return
       }
-      layerRef.value.vectorTileLayer.setProperties(
-        {
-          // This is for setting the MVT column to look at
-          statusProperty: props.speciesCode,
-          getFeatureStatus: function (feature: Feature) {
-            return feature.get(this.statusProperty)
-          }
-        }
-      )
+      layerRef.value.vectorTileLayer.setProperties({
+        // This is for setting the MVT column to look at
+        statusProperty: props.speciesCode,
+        getFeatureStatus: function (feature: Feature) {
+          return feature.get(this.statusProperty)
+        },
+      })
       layerRef.value.vectorTileLayer.changed()
     })
 
-    watch(() => props.speciesCode, () => {
-      if (sourceRef.value === undefined) {
-        return
-      }
-      sourceRef.value.source.updateParams({
-        'env': `field:${props.speciesCode}`,
-      })
-    })
+    watch(
+      () => props.speciesCode,
+      () => {
+        if (sourceRef.value === undefined) {
+          return
+        }
+        sourceRef.value.source.updateParams({
+          env: `field:${props.speciesCode}`,
+        })
+      },
+    )
 
     onMounted(() => {
       map?.addControl(legendControl)
@@ -146,7 +147,9 @@ export default {
       styleFn(feature: Feature) {
         if (feature.get('leave') === 1) {
           // Setting to unknown if undefined.
-          const statusValue = layerRef.value.vectorTileLayer.getProperties().getFeatureStatus(feature)
+          const statusValue = layerRef.value.vectorTileLayer
+            .getProperties()
+            .getFeatureStatus(feature)
           if (statusValue === undefined) {
             return
           }
@@ -158,7 +161,7 @@ export default {
           if ((zoomLevel !== undefined && zoomLevel >= 6 && codeLevel > 4) || codeLevel <= 4) {
             stroke = new Stroke({
               color: mapStyleColor.value.lowLevelStroke,
-              width: 0.25
+              width: 0.25,
             })
           } else {
             // Polygons are not perfect and there are holes between them.
@@ -166,19 +169,19 @@ export default {
             // base map color between the polygons.
             stroke = new Stroke({
               color: fillColor,
-              width: 1
+              width: 1,
             })
           }
 
           return new Style({
             fill: new Fill({
-              color: fillColor
+              color: fillColor,
             }),
-            stroke: stroke
+            stroke: stroke,
           })
         }
-      }
+      },
     }
-  }
+  },
 }
 </script>

@@ -3,36 +3,36 @@
 </template>
 
 <script setup lang="ts">
-import VChart from 'vue-echarts';
+import VChart from 'vue-echarts'
 
-import { use } from 'echarts/core';
-import { BarChart } from 'echarts/charts';
-import { TooltipComponent, GridComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { use } from 'echarts/core'
+import { BarChart } from 'echarts/charts'
+import { TooltipComponent, GridComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 
-use([TooltipComponent, GridComponent, BarChart, CanvasRenderer]);
+use([TooltipComponent, GridComponent, BarChart, CanvasRenderer])
 
-import { colors } from 'quasar';
-import { computed } from 'vue';
+import { colors } from 'quasar'
+import { computed } from 'vue'
 
-import type { BarDataItemOption } from 'echarts/types/src/chart/bar/BarSeries.js';
-import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
+import type { BarDataItemOption } from 'echarts/types/src/chart/bar/BarSeries.js'
+import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types'
 
 const props = defineProps<{
-  stats?: ReportAnalyticsStats;
-}>();
+  stats?: ReportAnalyticsStats
+}>()
 
 const data = computed<BarDataItemOption[]>(() => {
-  if (!props.stats) return [];
+  if (!props.stats) return []
   return Object.entries(props.stats.histogramCounts)
     .map(([key, value]) => ({
       name: key,
       value: Number(value),
     }))
     .sort((a, b) => {
-      return a.name < b.name ? -1 : 1;
-    });
-});
+      return a.name < b.name ? -1 : 1
+    })
+})
 
 const option = computed(() => {
   return {
@@ -63,8 +63,8 @@ const option = computed(() => {
         },
       },
     ],
-  };
-});
+  }
+})
 </script>
 
 <style scoped>

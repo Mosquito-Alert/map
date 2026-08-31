@@ -10,113 +10,113 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue'
 
-import { Feature } from 'ol';
-import type { Layer } from 'ol/layer';
-import type { VectorSourceEvent } from 'ol/source/Vector';
-import { Point } from 'ol/geom';
-import type { Projection } from 'ol/proj';
-import { get as getProjection } from 'ol/proj';
+import { Feature } from 'ol'
+import type { Layer } from 'ol/layer'
+import type { VectorSourceEvent } from 'ol/source/Vector'
+import { Point } from 'ol/geom'
+import type { Projection } from 'ol/proj'
+import { get as getProjection } from 'ol/proj'
 
-import type { ReportType } from 'src/types/reportType';
-import { getHistogramDateKey } from 'src/components/reports/analytics/utils';
-import type VectorSource from 'ol/source/Vector';
-import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert';
+import type { ReportType } from 'src/types/reportType'
+import { getHistogramDateKey } from 'src/components/reports/analytics/utils'
+import type VectorSource from 'ol/source/Vector'
+import type { BiteGeoModel, BreedingSiteGeoModel, ObservationGeoModel } from 'mosquito-alert'
 
-const layerRef = ref<{ webglVectorLayer: Layer }>();
-const sourceRef = ref<{ source: VectorSource }>();
-let loadVersion = 0;
+const layerRef = ref<{ webglVectorLayer: Layer }>()
+const sourceRef = ref<{ source: VectorSource }>()
+let loadVersion = 0
 
-export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel;
+export type GeoReport = BiteGeoModel | BreedingSiteGeoModel | ObservationGeoModel
 
 const props = withDefaults(
   defineProps<{
-    fetchReports: () => Promise<GeoReport[]>;
-    color: string;
-    visible: boolean;
-    type: ReportType;
+    fetchReports: () => Promise<GeoReport[]>
+    color: string
+    visible: boolean
+    type: ReportType
   }>(),
   {
     visible: true,
   },
-);
+)
 
-const renderVisible = ref(props.visible);
-const renderOpacity = ref(props.visible ? 1 : 0);
+const renderVisible = ref(props.visible)
+const renderOpacity = ref(props.visible ? 1 : 0)
 
 const loader = async function (
   extent: number[],
   resolution: number,
   projection: Projection,
 ): Promise<Feature[]> {
-  const currentLoadVersion = loadVersion;
-  const featureProjection = getProjection('EPSG:4326')!;
+  const currentLoadVersion = loadVersion
+  const featureProjection = getProjection('EPSG:4326')!
 
   try {
-    const response = await props.fetchReports();
-    if (currentLoadVersion !== loadVersion || !props.visible) return [];
+    const response = await props.fetchReports()
+    if (currentLoadVersion !== loadVersion || !props.visible) return []
 
     const features = response
       .filter((report) => {
-        const lon = report.point?.longitude;
-        const lat = report.point?.latitude;
-        return Number.isFinite(lon) && Number.isFinite(lat);
+        const lon = report.point?.longitude
+        const lat = report.point?.latitude
+        return Number.isFinite(lon) && Number.isFinite(lat)
       })
       .map((report) => {
-        const feature = new Feature();
-        const point = new Point([report.point.longitude, report.point.latitude]);
-        point.transform(featureProjection, projection);
-        feature.setGeometry(point);
-        feature.setId(report.uuid);
-        const date = new Date(report.received_at);
+        const feature = new Feature()
+        const point = new Point([report.point.longitude, report.point.latitude])
+        point.transform(featureProjection, projection)
+        feature.setGeometry(point)
+        feature.setId(report.uuid)
+        const date = new Date(report.received_at)
         feature.setProperties({
           received_at: date,
           histogram_key: getHistogramDateKey(date),
-        });
-        return feature;
-      });
+        })
+        return feature
+      })
 
     requestAnimationFrame(() => {
       if (currentLoadVersion === loadVersion && props.visible) {
-        renderOpacity.value = 1;
+        renderOpacity.value = 1
       }
-    });
+    })
 
-    return features;
+    return features
   } catch (error) {
     if (currentLoadVersion === loadVersion && props.visible) {
-      renderOpacity.value = 1;
+      renderOpacity.value = 1
     }
-    throw error;
+    throw error
   }
-};
+}
 
 const refresh = function () {
-  loadVersion += 1;
+  loadVersion += 1
   if (!props.visible) {
-    renderOpacity.value = 0;
-    renderVisible.value = false;
-    sourceRef.value?.source.clear(true);
-    return;
+    renderOpacity.value = 0
+    renderVisible.value = false
+    sourceRef.value?.source.clear(true)
+    return
   }
-  renderOpacity.value = 0;
-  renderVisible.value = true;
-  sourceRef.value?.source.refresh();
-};
+  renderOpacity.value = 0
+  renderVisible.value = true
+  sourceRef.value?.source.refresh()
+}
 
 defineExpose({
   refresh,
-});
+})
 
 // There's a bug on visible change doing nothing in webgl: https://github.com/MelihAltintas/vue3-openlayers/issues/355
 watch(
   () => props.visible,
   () => {
-    if (!layerRef.value) return;
-    refresh();
+    if (!layerRef.value) return
+    refresh()
   },
-);
+)
 
 const style = {
   'circle-fill-color': ['get', 'color'],
@@ -130,19 +130,19 @@ const style = {
   'circle-opacity': 0.6,
   'circle-stroke-width': ['match', ['get', 'hover'], 1, 2, 0],
   'circle-stroke-color': ['match', ['get', 'hover'], 1, '#000000', ['get', 'color']],
-};
+}
 
 function onAddFeature(event: VectorSourceEvent) {
-  const feature = event.feature;
-  if (!feature) return;
-  feature.set('hover', 0);
-  feature.set('color', props.color);
-  feature.set('type', props.type);
+  const feature = event.feature
+  if (!feature) return
+  feature.set('hover', 0)
+  feature.set('color', props.color)
+  feature.set('type', props.type)
 }
 
 onBeforeUnmount(() => {
   // See: https://github.com/openlayers/openlayers/blob/29c58d08fb8ddc22b4b7384b38851323359c5706/src/ol/layer/WebGLPoints.js#L58-L59
   // See: https://stackoverflow.com/questions/69295838/how-to-properly-release-webgl-resources-of-removed-layers-in-openlayers
-  layerRef.value?.webglVectorLayer.dispose();
-});
+  layerRef.value?.webglVectorLayer.dispose()
+})
 </script>

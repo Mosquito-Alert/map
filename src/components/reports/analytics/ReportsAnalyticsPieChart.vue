@@ -3,31 +3,31 @@
 </template>
 
 <script setup lang="ts">
-import VChart from 'vue-echarts';
+import VChart from 'vue-echarts'
 
-import { use } from 'echarts/core';
-import { PieChart } from 'echarts/charts';
-import { TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
-import type { PieDataItemOption } from 'echarts/types/src/chart/pie/PieSeries.js';
+import { use } from 'echarts/core'
+import { PieChart } from 'echarts/charts'
+import { TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+import type { PieDataItemOption } from 'echarts/types/src/chart/pie/PieSeries.js'
 
-use([TooltipComponent, PieChart, CanvasRenderer]);
+use([TooltipComponent, PieChart, CanvasRenderer])
 
-import { computed } from 'vue';
-import type { CallbackDataParams } from 'echarts/types/dist/shared';
-import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types';
+import { computed } from 'vue'
+import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import type { ReportAnalyticsStats } from 'src/components/reports/analytics/types'
 
 const props = defineProps<{
-  stats?: ReportAnalyticsStats;
-}>();
+  stats?: ReportAnalyticsStats
+}>()
 
 const data = computed<PieDataItemOption[]>(() => {
-  if (!props.stats) return [];
+  if (!props.stats) return []
   return Object.entries(props.stats.colorCounts).map(([color, value]) => ({
     value,
     itemStyle: { color },
-  }));
-});
+  }))
+})
 
 const option = computed(() => ({
   series: [
@@ -39,7 +39,7 @@ const option = computed(() => ({
         show: false,
         position: 'center',
         formatter: (item: CallbackDataParams) => {
-          return item.value;
+          return item.value
         },
       },
       emphasis: {
@@ -60,7 +60,7 @@ const option = computed(() => ({
       data: data.value,
     },
   ],
-}));
+}))
 </script>
 
 <style scoped>

@@ -16,17 +16,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from 'vue'
 
-import ReportsAnalyticsLastActivityItem from 'src/components/reports/analytics/ReportsAnalyticsLastActivityItem.vue';
-import type { Feature } from 'ol';
+import ReportsAnalyticsLastActivityItem from 'src/components/reports/analytics/ReportsAnalyticsLastActivityItem.vue'
+import type { Feature } from 'ol'
 
 const props = defineProps<{
-  features?: Feature[];
-}>();
+  features?: Feature[]
+}>()
 
 const lastFeatures = computed<Feature[]>(() => {
-  if (!props.features) return [];
-  return props.features;
-});
+  if (!props.features) return []
+  return props.features
+})
 </script>

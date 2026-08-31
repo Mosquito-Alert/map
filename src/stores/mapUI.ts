@@ -1,5 +1,5 @@
 // stores/mapUi.ts
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
 export const useMapUiStore = defineStore('mapUi', {
   state: () => ({
@@ -7,7 +7,7 @@ export const useMapUiStore = defineStore('mapUi', {
   }),
   actions: {
     setGrayscale(value: boolean) {
-      this.grayscaleBasemap = value;
+      this.grayscaleBasemap = value
     },
   },
-});
+})

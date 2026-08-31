@@ -1,9 +1,9 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { defineConfig } from '#q-app/wrappers';
-import { sentryVitePlugin } from '@sentry/vite-plugin';
-import { fileURLToPath } from 'node:url';
+import { defineConfig } from '#q-app/wrappers'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { fileURLToPath } from 'node:url'
 
 export default defineConfig((ctx) => {
   return {
@@ -67,12 +67,12 @@ export default defineConfig((ctx) => {
             org: 'mosquito-alert',
             project: 'map',
           }),
-        );
+        )
         return {
           build: {
             sourcemap: true, // Source map generation must be turned on
           },
-        };
+        }
       },
       // viteVuePluginOptions: {},
 
@@ -261,5 +261,5 @@ export default defineConfig((ctx) => {
        */
       extraScripts: [],
     },
-  };
-});
+  }
+})

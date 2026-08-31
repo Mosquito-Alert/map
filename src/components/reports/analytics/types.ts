@@ -1,11 +1,11 @@
-import type { Feature } from 'ol';
-import type { breedingSiteTypes, mosquitoTaxonIds } from '../../../utils/constants';
+import type { Feature } from 'ol'
+import type { breedingSiteTypes, mosquitoTaxonIds } from '../../../utils/constants'
 
 export interface ReportAnalyticsStats {
-  total: number;
-  colorCounts: Record<string, number>;
-  histogramCounts: Record<string, number>;
-  recentFeatures: Feature[];
+  total: number
+  colorCounts: Record<string, number>
+  histogramCounts: Record<string, number>
+  recentFeatures: Feature[]
 }
 
 export type LayerVisibilityKey =
@@ -20,17 +20,17 @@ export type LayerVisibilityKey =
   // Breeding sites
   | 'stormDrainWater'
   | 'stormDrainDry'
-  | 'otherSite';
+  | 'otherSite'
 
 export interface ObservationLayerConfig {
-  key: LayerVisibilityKey;
-  taxonKey: keyof typeof mosquitoTaxonIds;
-  colorKey: string;
-  negate?: boolean;
+  key: LayerVisibilityKey
+  taxonKey: keyof typeof mosquitoTaxonIds
+  colorKey: string
+  negate?: boolean
 }
 
 export interface BreedingSiteLayerConfig {
-  key: LayerVisibilityKey;
-  siteTypeKey: keyof typeof breedingSiteTypes;
-  hasWater?: boolean;
+  key: LayerVisibilityKey
+  siteTypeKey: keyof typeof breedingSiteTypes
+  hasWater?: boolean
 }

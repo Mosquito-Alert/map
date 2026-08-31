@@ -10,8 +10,10 @@
       icon="location_on"
       :label="boundaryStore.getBoundaryName || ''"
       @remove="
-        boundaryStore.setPolygon(null);
-        uniquePlaceId = undefined;
+        () => {
+          boundaryStore.setPolygon(null)
+          uniquePlaceId = undefined
+        }
       "
     />
   </Teleport>
@@ -33,39 +35,39 @@
 </template>
 
 <script setup lang="ts">
-import { colors } from 'quasar';
-import { computed, watch, onMounted, onUnmounted, inject } from 'vue';
+import { colors } from 'quasar'
+import { computed, watch, onMounted, onUnmounted, inject } from 'vue'
 
-import { useRouteQuery } from '@vueuse/router';
-import { useI18n } from 'vue-i18n';
+import { useRouteQuery } from '@vueuse/router'
+import { useI18n } from 'vue-i18n'
 
-import type Map from 'ol/Map';
-import GeoJSON from 'ol/format/GeoJSON';
-import Polygon from 'ol/geom/Polygon';
-import MultiPolygon from 'ol/geom/MultiPolygon';
-import SearchNominatim from 'ol-ext/control/SearchNominatim';
-import type { SearchEvent } from 'ol-ext/control/Search';
+import type Map from 'ol/Map'
+import GeoJSON from 'ol/format/GeoJSON'
+import Polygon from 'ol/geom/Polygon'
+import MultiPolygon from 'ol/geom/MultiPolygon'
+import SearchNominatim from 'ol-ext/control/SearchNominatim'
+import type { SearchEvent } from 'ol-ext/control/Search'
 
-import { useBoundaryStore } from 'src/stores/boundaryStore';
+import { useBoundaryStore } from 'src/stores/boundaryStore'
 
-const { t, locale } = useI18n();
-const boundaryStore = useBoundaryStore();
+const { t, locale } = useI18n()
+const boundaryStore = useBoundaryStore()
 
-const map = inject<Map>('map');
+const map = inject<Map>('map')
 
-const uniquePlaceId = useRouteQuery<string | undefined>('place_id', undefined);
+const uniquePlaceId = useRouteQuery<string | undefined>('place_id', undefined)
 // NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
-const osmType = computed(() => `${uniquePlaceId.value?.split(':')[0]}`);
-const osmId = computed(() => `${uniquePlaceId.value?.split(':')[1]}`);
-const osmClass = computed(() => `${uniquePlaceId.value?.split(':')[2]}`);
+const osmType = computed(() => `${uniquePlaceId.value?.split(':')[0]}`)
+const osmId = computed(() => `${uniquePlaceId.value?.split(':')[1]}`)
+const osmClass = computed(() => `${uniquePlaceId.value?.split(':')[2]}`)
 
 const geometryComponent = computed(() => {
-  if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon';
-  if (boundaryStore.getPolygon instanceof MultiPolygon) return 'ol-geom-multi-polygon';
-  return null; // fallback if needed
-});
+  if (boundaryStore.getPolygon instanceof Polygon) return 'ol-geom-polygon'
+  if (boundaryStore.getPolygon instanceof MultiPolygon) return 'ol-geom-multi-polygon'
+  return null // fallback if needed
+})
 
-const geoJson = new GeoJSON();
+const geoJson = new GeoJSON()
 const searchControl = new SearchNominatim({
   polygon: true,
   maxItems: 10,
@@ -80,43 +82,46 @@ const searchControl = new SearchNominatim({
     const geometry = geoJson.readGeometry(e.search.geojson, {
       dataProjection: 'EPSG:4326',
       featureProjection: map!.getView().getProjection(),
-    });
+    })
     boundaryStore.setPolygon(
       geometry as Polygon | MultiPolygon,
       map!.getView().getProjection(),
-      e.search.name
-    );
+      e.search.name,
+    )
     const osmType =
       e.search.osm_type.toString() === 'relation'
         ? 'R'
         : e.search.osm_type.toString() === 'way'
           ? 'W'
-          : 'N';
-    uniquePlaceId.value = `${osmType}:${e.search.osm_id.toString()}:${e.search.class.toString()}`;
+          : 'N'
+    uniquePlaceId.value = `${osmType}:${e.search.osm_id.toString()}:${e.search.class.toString()}`
   },
-});
+})
 // Disable attribution copy
-searchControl.set('copy', '');
+searchControl.set('copy', '')
 // Overwrite requestData to add 'accept-language' header.
 // See: https://github.com/Viglino/ol-ext/issues/559
 searchControl.requestData = function (s) {
-  const data = SearchNominatim.prototype.requestData.call(this, s);
-  data['accept-language'] = locale.value;
-  data['polygon_threshold'] = 0.001;
+  const data = SearchNominatim.prototype.requestData.call(this, s)
+  data['accept-language'] = locale.value
+  data['polygon_threshold'] = 0.001
   return data
 }
 searchControl.getTitle = function (f) {
   // @ts-expect-error: 'f' may not have display_name according to TypeScript types
-  return f.display_name;
-};
+  return f.display_name
+}
 
-watch(() => boundaryStore.getPolygon, (newValue) => {
-  if (!newValue) {
-    map?.addControl(searchControl)
-  } else {
-    map?.removeControl(searchControl)
-  }
-});
+watch(
+  () => boundaryStore.getPolygon,
+  (newValue) => {
+    if (!newValue) {
+      map?.addControl(searchControl)
+    } else {
+      map?.removeControl(searchControl)
+    }
+  },
+)
 
 onMounted(async () => {
   map?.addControl(searchControl)
@@ -129,27 +134,26 @@ onMounted(async () => {
       class: osmClass.value,
       polygon_geojson: '1',
       'accept-language': locale.value,
-      polygon_threshold: '0.001'
+      polygon_threshold: '0.001',
     })
     url.search = urlparams.toString()
-    await fetch(url.toString()).then(res => res.json()).then(data => {
-      const geometry = geoJson.readGeometry(
-        data.geometry,
-        {
+    await fetch(url.toString())
+      .then((res) => res.json())
+      .then((data) => {
+        const geometry = geoJson.readGeometry(data.geometry, {
           dataProjection: 'EPSG:4326',
-          featureProjection: map!.getView().getProjection()
-        }
-      );
-      boundaryStore.setPolygon(
-        geometry as Polygon | MultiPolygon,
-        map!.getView().getProjection(),
-        data.localname
-      );
-    });
+          featureProjection: map!.getView().getProjection(),
+        })
+        boundaryStore.setPolygon(
+          geometry as Polygon | MultiPolygon,
+          map!.getView().getProjection(),
+          data.localname,
+        )
+      })
   }
 })
 
 onUnmounted(() => {
-  map?.removeControl(searchControl);
-});
+  map?.removeControl(searchControl)
+})
 </script>

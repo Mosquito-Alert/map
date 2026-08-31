@@ -1,14 +1,27 @@
 <template>
-  <ol-vector-tile-layer ref="layerRef" renderMode='hybrid' :visible="visible" :opacity="opacity" :minZoom="minZoom"
-    :maxZoom="maxZoom" :zIndex="zIndex" :background="backgroundColor">
-    <ol-source-vector-tile :url="url" :format="mvtFormat" attributions='© GADM' :minZoom='2' :maxZoom='7'>
+  <ol-vector-tile-layer
+    ref="layerRef"
+    renderMode="hybrid"
+    :visible="visible"
+    :opacity="opacity"
+    :minZoom="minZoom"
+    :maxZoom="maxZoom"
+    :zIndex="zIndex"
+    :background="backgroundColor"
+  >
+    <ol-source-vector-tile
+      :url="url"
+      :format="mvtFormat"
+      attributions="© GADM"
+      :minZoom="2"
+      :maxZoom="7"
+    >
       <slot></slot>
     </ol-source-vector-tile>
   </ol-vector-tile-layer>
 </template>
 
 <script lang="ts">
-
 import { ref, computed } from 'vue'
 
 import MVT from 'ol/format/MVT'
@@ -20,7 +33,7 @@ const levelToId: Record<number, string> = {
   1: 'GID_1',
   2: 'GID_2',
   3: 'GID_3',
-  4: 'GID_4'
+  4: 'GID_4',
 }
 
 export default {
@@ -31,36 +44,36 @@ export default {
       validator: function (value: number) {
         // Check if the value is an integer and between 0 and 4
         return Number.isInteger(value) && value >= 0 && value <= 4
-      }
+      },
     },
     backgroundColor: {
-      type: String
+      type: String,
     },
     opacity: {
       type: Number,
-      default: 1
+      default: 1,
     },
     visible: {
       type: Boolean,
-      default: true
+      default: true,
     },
     zIndex: {
       type: Number,
-      default: 0
+      default: 0,
     },
     minZoom: {
-      type: Number
+      type: Number,
     },
     maxZoom: {
-      type: Number
+      type: Number,
     },
     projection: {
       type: String,
-      default: 'EPSG:900913'
+      default: 'EPSG:900913',
     },
     source: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   setup(props) {
     const layerRef = ref()
@@ -75,7 +88,7 @@ export default {
     const mvtFormat = computed(() => {
       return new MVT({
         // featureClass: Feature,
-        idProperty: levelToId[props.level]
+        idProperty: levelToId[props.level],
       })
     })
 
@@ -85,8 +98,8 @@ export default {
       mvtFormat,
       changed() {
         layerRef.value.vectorTileLayer.changed()
-      }
+      },
     }
-  }
+  },
 }
 </script>

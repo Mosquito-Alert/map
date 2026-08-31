@@ -1,9 +1,9 @@
-import { ReportType } from 'src/types/reportType';
-import type { RouteRecordRaw } from 'vue-router';
+import { ReportType } from 'src/types/reportType'
+import type { RouteRecordRaw } from 'vue-router'
 
-import { DEFAULT_LOCALE, i18n } from 'src/boot/i18n';
+import { DEFAULT_LOCALE, i18n } from 'src/boot/i18n'
 
-const reportTypeRegex = Object.values(ReportType).join('|');
+const reportTypeRegex = Object.values(ReportType).join('|')
 
 const routes: RouteRecordRaw[] = [
   {
@@ -11,31 +11,31 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     redirect: '/reports',
     beforeEnter: (to, from, next) => {
-      const LOCALES = i18n.global.availableLocales;
-      const pathParts = to.path.split('/').filter(Boolean); // split and remove empty parts
+      const LOCALES = i18n.global.availableLocales
+      const pathParts = to.path.split('/').filter(Boolean) // split and remove empty parts
 
       // Check if first part is a locale
-      let firstPart = pathParts[0];
+      let firstPart = pathParts[0]
       if (firstPart === 'en') {
-        firstPart = 'en-US';
+        firstPart = 'en-US'
       }
       if (firstPart && LOCALES.includes(firstPart as (typeof LOCALES)[number])) {
-        next(); // already has locale at start, continue
-        return;
+        next() // already has locale at start, continue
+        return
       }
 
       // Check if last part is a locale
-      const lastPart = pathParts[pathParts.length - 1];
+      const lastPart = pathParts[pathParts.length - 1]
       if (lastPart && LOCALES.includes(lastPart as (typeof LOCALES)[number])) {
         // Move locale from end to start
-        pathParts.pop(); // remove from end
-        pathParts.unshift(lastPart); // add at start
-        next('/' + pathParts.join('/'));
-        return;
+        pathParts.pop() // remove from end
+        pathParts.unshift(lastPart) // add at start
+        next('/' + pathParts.join('/'))
+        return
       }
 
       // No locale found, prepend default
-      next(`/${DEFAULT_LOCALE}${to.fullPath}`);
+      next(`/${DEFAULT_LOCALE}${to.fullPath}`)
     },
     children: [
       {
@@ -48,7 +48,7 @@ const routes: RouteRecordRaw[] = [
               reportType: ReportType.Observation,
               uuid: to.params.uuid,
             },
-          };
+          }
         },
       },
       {
@@ -75,6 +75,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+export default routes

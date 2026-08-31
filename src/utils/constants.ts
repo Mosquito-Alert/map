@@ -1,4 +1,4 @@
-import { BreedingSiteSiteType } from 'mosquito-alert';
+import { BreedingSiteSiteType } from 'mosquito-alert'
 
 export const mosquitoTaxonIds = {
   albopictus: [112],
@@ -8,7 +8,7 @@ export const mosquitoTaxonIds = {
   culex: [10],
   unidentified: [null],
   other: [112, 113, 114, 115, 10, null], // This will be negated
-};
+}
 
 export const breedingSiteTypes = {
   stormDrain: [BreedingSiteSiteType.StormDrain],
@@ -20,4 +20,4 @@ export const breedingSiteTypes = {
     BreedingSiteSiteType.SmallContainer,
     BreedingSiteSiteType.Well,
   ],
-};
+}

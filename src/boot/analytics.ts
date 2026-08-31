@@ -1,5 +1,5 @@
-import { defineBoot } from '#q-app/wrappers';
-import { createConsentPlugin } from '@structured-world/vue-privacy/vue';
+import { defineBoot } from '#q-app/wrappers'
+import { createConsentPlugin } from '@structured-world/vue-privacy/vue'
 
 export default defineBoot(({ app, router }) => {
   const gtag = createConsentPlugin({
@@ -9,16 +9,16 @@ export default defineBoot(({ app, router }) => {
     banner: {
       privacyLink: 'https://app.mosquitoalert.com/legal/privacy',
     },
-  });
+  })
 
-  const root = document.documentElement;
+  const root = document.documentElement
 
-  const primaryColor = getComputedStyle(document.body).getPropertyValue('--q-primary').trim();
-  const font = getComputedStyle(document.body).getPropertyValue('font-family').trim();
+  const primaryColor = getComputedStyle(document.body).getPropertyValue('--q-primary').trim()
+  const font = getComputedStyle(document.body).getPropertyValue('font-family').trim()
 
-  root.style.setProperty('--consent-btn-accept-bg', primaryColor);
-  root.style.setProperty('--consent-link', primaryColor);
-  root.style.setProperty('--consent-font', font);
+  root.style.setProperty('--consent-btn-accept-bg', primaryColor)
+  root.style.setProperty('--consent-link', primaryColor)
+  root.style.setProperty('--consent-font', font)
 
-  app.use(gtag);
-});
+  app.use(gtag)
+})

@@ -1,5 +1,5 @@
-import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mosquito-alert';
-import { ReportType } from 'src/types/reportType';
+import { BreedingSiteSiteType, BiteEventEnvironment, BiteEventMoment } from 'mosquito-alert'
+import { ReportType } from 'src/types/reportType'
 
 export default {
   footer_collaborators_note: 'Aquest mapa interactiu ha estat finançat per',
@@ -84,4 +84,4 @@ export default {
   [ReportType.Bite]: 'Picada',
   [ReportType.Observation]: 'Observació',
   [ReportType.BreedingSite]: 'Lloc de cria',
-};
+}

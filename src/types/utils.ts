@@ -1,4 +1,4 @@
 export type TextWithStyle = {
-  value: string;
-  italicize: boolean;
-};
+  value: string
+  italicize: boolean
+}

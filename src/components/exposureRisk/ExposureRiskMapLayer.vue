@@ -1,12 +1,19 @@
 <template>
-  <GadmVectorTileLayer ref="layerRef" :level="level" :visible="visible" :opacity="opacity"
-    v-bind="{ ...(minZoom !== undefined && { minZoom }), ...(maxZoom !== undefined && { maxZoom }) }">
+  <GadmVectorTileLayer
+    ref="layerRef"
+    :level="level"
+    :visible="visible"
+    :opacity="opacity"
+    v-bind="{
+      ...(minZoom !== undefined && { minZoom }),
+      ...(maxZoom !== undefined && { maxZoom }),
+    }"
+  >
     <ol-style :overrideStyleFunction="styleFn"></ol-style>
   </GadmVectorTileLayer>
 </template>
 
 <script lang="ts">
-
 import { useQuasar } from 'quasar'
 import { ref, onMounted, watch } from 'vue'
 import { cdn } from 'boot/axios'
@@ -23,60 +30,67 @@ const mapStyleColor = {
 
 export default {
   components: {
-    GadmVectorTileLayer
+    GadmVectorTileLayer,
   },
   props: {
     palette: {
       type: Array<string>,
-      required: true
+      required: true,
     },
     speciesCode: {
       type: String,
-      required: true
+      required: true,
     },
     date: {
       type: Date,
-      required: true
+      required: true,
     },
     level: {
       type: Number,
-      required: true
+      required: true,
     },
     opacity: {
       type: Number,
-      default: 1
+      default: 1,
     },
     visible: {
       type: Boolean,
-      default: true
+      default: true,
     },
     minZoom: {
-      type: Number
+      type: Number,
     },
     maxZoom: {
-      type: Number
+      type: Number,
     },
     filters: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   setup(props) {
     const $q = useQuasar()
 
     const layerRef = ref()
 
-    let dataObj: Record<string, { prob: number, se: number }> = {}
+    let dataObj: Record<string, { prob: number; se: number }> = {}
 
     // Watcher for props
-    watch(() => [props.speciesCode, props.date] as const, ([newSpeciesCode, newDate]) => {
-      if ([newSpeciesCode, newDate].every(item => item !== undefined)) {
-        load(newSpeciesCode, newDate)
-      }
-    })
+    watch(
+      () => [props.speciesCode, props.date] as const,
+      ([newSpeciesCode, newDate]) => {
+        if ([newSpeciesCode, newDate].every((item) => item !== undefined)) {
+          load(newSpeciesCode, newDate)
+        }
+      },
+    )
 
-    watch(() => props.filters, () => {
-      layerRef.value.changed()
-    }, { deep: true })
+    watch(
+      () => props.filters,
+      () => {
+        layerRef.value.changed()
+      },
+      { deep: true },
+    )
 
     onMounted(() => {
       load(props.speciesCode, props.date)
@@ -105,10 +119,7 @@ export default {
       }
 
       const palette = props.palette
-      const index = Math.min(
-        Math.floor(dataObj[id].prob * palette.length),
-        palette.length - 1
-      )
+      const index = Math.min(Math.floor(dataObj[id].prob * palette.length), palette.length - 1)
 
       return palette[index]
     }
@@ -120,7 +131,8 @@ export default {
       dataObj = {}
 
       const urlPath = `static/models/global_minimal_model_estimates/gadm${props.level}/${speciesCode}/${year}/${month}/gadm${props.level}_monthly.csv`
-      cdn.get(urlPath)
+      cdn
+        .get(urlPath)
         .then((response) => {
           const lines = response.data.split(/\r?\n/)
           const headers = lines[0].split(',')
@@ -143,9 +155,10 @@ export default {
             color: 'negative',
             position: 'bottom',
             message: `Loading ${speciesCode} model for GADM${props.level} failed`,
-            icon: 'report_problem'
+            icon: 'report_problem',
           })
-        }).finally(() => {
+        })
+        .finally(() => {
           layerRef.value.changed()
         })
     }
@@ -161,15 +174,15 @@ export default {
 
         return new Style({
           fill: new Fill({
-            color: String(fillColor)
+            color: String(fillColor),
           }),
           stroke: new Stroke({
             color: mapStyleColor.lowLevelStroke,
-            width: 0.4
-          })
+            width: 0.4,
+          }),
         })
-      }
+      },
     }
-  }
+  },
 }
 </script>

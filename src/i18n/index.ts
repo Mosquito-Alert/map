@@ -4,6 +4,6 @@ import ca from './ca'
 
 export default {
   'en-US': enUS,
-  'es': es,
-  'ca': ca
+  es: es,
+  ca: ca,
 }

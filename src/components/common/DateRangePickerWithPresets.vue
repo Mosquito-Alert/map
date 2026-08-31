@@ -1,32 +1,72 @@
 <template>
-  <q-input :model-value="formatedDateRange" input-class="cursor-pointer" readonly autogrow borderless label-slot>
+  <q-input
+    :model-value="formatedDateRange"
+    input-class="cursor-pointer"
+    readonly
+    autogrow
+    borderless
+    label-slot
+  >
     <template v-slot:label>
       {{ $t('date') }}
     </template>
     <template v-slot:after v-if="formatedDateRange">
-      <q-btn round outline size='xs' color='grey-6' icon="fa fat fa-xmark"
-        @click="handleDatePick(null, 'clear')"></q-btn>
+      <q-btn
+        round
+        outline
+        size="xs"
+        color="grey-6"
+        icon="fa fat fa-xmark"
+        @click="handleDatePick(null, 'clear')"
+      ></q-btn>
     </template>
     <template v-slot:default>
-      <q-popup-proxy transition-show="scale" transition-hide="scale" @show="handleShowDateSelector()">
+      <q-popup-proxy
+        transition-show="scale"
+        transition-hide="scale"
+        @show="handleShowDateSelector()"
+      >
         <div class="row">
-          <div class='column q-py-sm'>
-            <q-btn flat @click="handleDatePick({ 'from': new Date(), 'to': new Date() }, 'preset')">
+          <div class="column q-py-sm">
+            <q-btn flat @click="handleDatePick({ from: new Date(), to: new Date() }, 'preset')">
               {{ $t('today') }}
             </q-btn>
-            <q-btn flat
-              @click="handleDatePick({ 'from': date.startOfDate(new Date(), 'month'), 'to': new Date() }, 'preset')">
+            <q-btn
+              flat
+              @click="
+                handleDatePick(
+                  { from: date.startOfDate(new Date(), 'month'), to: new Date() },
+                  'preset',
+                )
+              "
+            >
               {{ $t('this_month') }}
             </q-btn>
-            <q-btn flat
-              @click="handleDatePick({ 'from': date.startOfDate(new Date(), 'year'), 'to': new Date() }, 'preset')">
+            <q-btn
+              flat
+              @click="
+                handleDatePick(
+                  { from: date.startOfDate(new Date(), 'year'), to: new Date() },
+                  'preset',
+                )
+              "
+            >
               {{ $t('this_year') }}
             </q-btn>
           </div>
           <q-separator vertical />
-          <q-date ref="dateSelectorRef" class='no-shadow' :model-value="localDate" range minimal color="primary"
-            :options="optionsFn" :navigation-min-year-month="minYearMonth" :navigation-max-year-month="maxYearMonth"
-            @update:model-value="handleDatePick">
+          <q-date
+            ref="dateSelectorRef"
+            class="no-shadow"
+            :model-value="localDate"
+            range
+            minimal
+            color="primary"
+            :options="optionsFn"
+            :navigation-min-year-month="minYearMonth"
+            :navigation-max-year-month="maxYearMonth"
+            @update:model-value="handleDatePick"
+          >
             <div class="row items-center justify-end">
               <q-btn v-close-popup color="primary" flat>{{ $q.lang.label.close }}</q-btn>
             </div>
@@ -38,25 +78,23 @@
 </template>
 
 <script lang="ts">
-
 import { useQuasar, date } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import type { DateRange } from 'src/types/date'
-
 
 export default {
   emit: ['update:modelValue'],
   props: {
     modelValue: {
       type: Object,
-      required: true
+      required: true,
     },
     minDate: {
-      type: Date
+      type: Date,
     },
     maxDate: {
-      type: Date
-    }
+      type: Date,
+    },
   },
   setup(props, { emit }) {
     const $q = useQuasar()
@@ -64,23 +102,27 @@ export default {
     const dateSelectorRef = ref()
     const localDate = ref()
 
-    watch(() => props.modelValue, () => {
-      if (props.modelValue.from && props.modelValue.to) {
-        if (date.isSameDate(props.modelValue.from, props.modelValue.to, 'days')) {
-          localDate.value = date.formatDate(props.modelValue.from, 'YYYY/MM/DD')
+    watch(
+      () => props.modelValue,
+      () => {
+        if (props.modelValue.from && props.modelValue.to) {
+          if (date.isSameDate(props.modelValue.from, props.modelValue.to, 'days')) {
+            localDate.value = date.formatDate(props.modelValue.from, 'YYYY/MM/DD')
+          } else {
+            localDate.value = {
+              from: date.formatDate(props.modelValue.from, 'YYYY/MM/DD'),
+              to: date.formatDate(props.modelValue.to, 'YYYY/MM/DD'),
+            }
+          }
         } else {
           localDate.value = {
-            'from': date.formatDate(props.modelValue.from, 'YYYY/MM/DD'),
-            'to': date.formatDate(props.modelValue.to, 'YYYY/MM/DD')
+            from: null,
+            to: null,
           }
         }
-      } else {
-        localDate.value = {
-          'from': null,
-          'to': null
-        }
-      }
-    }, { immediate: true })
+      },
+      { immediate: true },
+    )
 
     function handleShowDateSelector() {
       if (localDate.value?.to !== null && localDate.value?.to !== undefined) {
@@ -100,12 +142,16 @@ export default {
       const dateFormatOptions = {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       }
-      const dateRange = date.isSameDate(props.modelValue.from, props.modelValue.to, 'days') ? [props.modelValue.from] : [props.modelValue.from, props.modelValue.to]
-      return dateRange.map(item => {
-        return item.toLocaleDateString($q.lang.isoName, dateFormatOptions)
-      }).join(' - ')
+      const dateRange = date.isSameDate(props.modelValue.from, props.modelValue.to, 'days')
+        ? [props.modelValue.from]
+        : [props.modelValue.from, props.modelValue.to]
+      return dateRange
+        .map((item) => {
+          return item.toLocaleDateString($q.lang.isoName, dateFormatOptions)
+        })
+        .join(' - ')
     })
 
     return {
@@ -131,8 +177,8 @@ export default {
       handleShowDateSelector,
       handleDatePick(value: string | Array<string> | object | null, reason: string) {
         const newValue: DateRange = {
-          'from': null,
-          'to': null
+          from: null,
+          to: null,
         }
 
         if (typeof value === 'string') {
@@ -140,18 +186,13 @@ export default {
           newValue.from = singleDateValue
           newValue.to = singleDateValue
           localDate.value = singleDateValue
-        } else if (
-          value &&
-          typeof value === 'object' &&
-          'from' in value &&
-          'to' in value
-        ) {
+        } else if (value && typeof value === 'object' && 'from' in value && 'to' in value) {
           const val = value as { from: string | Date; to: string | Date }
           newValue.from = new Date(val.from)
           newValue.to = new Date(val.to)
           localDate.value = {
-            'from': newValue.from ? date.formatDate(newValue.from, 'YYYY/MM/DD') : null,
-            'to': newValue.to ? date.formatDate(newValue.to, 'YYYY/MM/DD') : null
+            from: newValue.from ? date.formatDate(newValue.from, 'YYYY/MM/DD') : null,
+            to: newValue.to ? date.formatDate(newValue.to, 'YYYY/MM/DD') : null,
           }
         } else if (!value) {
           localDate.value = undefined
@@ -159,9 +200,8 @@ export default {
 
         if (!newValue || reason === 'remove-range') return
         emit('update:modelValue', newValue)
-      }
+      },
     }
-  }
+  },
 }
-
 </script>

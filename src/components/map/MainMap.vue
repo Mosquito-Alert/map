@@ -1,15 +1,29 @@
 <template>
-
   <!-- MAP -->
-  <ol-map ref='mapRef' class="absolute-full" :loadTilesWhileAnimating='true' :loadTilesWhileInteracting='true'>
-    <ol-view :projection="projection" :constrainResolution='true' :maxZoom=24 :center="center" :zoom="localZoom"
+  <ol-map
+    ref="mapRef"
+    class="absolute-full"
+    :loadTilesWhileAnimating="true"
+    :loadTilesWhileInteracting="true"
+  >
+    <ol-view
+      :projection="projection"
+      :constrainResolution="true"
+      :maxZoom="24"
+      :center="center"
+      :zoom="localZoom"
       @change:center="debouncedSetCenter($event.target.getCenter())"
-      @change:resolution="debouncedSetZoom($event.target.getZoom())" />
+      @change:resolution="debouncedSetZoom($event.target.getZoom())"
+    />
 
     <ol-tile-layer ref="basemapRef">
       <!-- <ol-source-osm :preload="Infinity" /> -->
-      <ol-source-xyz :url="basemapLayerUrl" :preload="Infinity" :attributions-collapsible="false"
-        attributions="© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>" />
+      <ol-source-xyz
+        :url="basemapLayerUrl"
+        :preload="Infinity"
+        :attributions-collapsible="false"
+        attributions="© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap </a> contributors, © <a href='https://carto.com/about-carto'>Carto</a>"
+      />
     </ol-tile-layer>
 
     <slot></slot>
@@ -21,52 +35,68 @@
 
     <ol-zoom-control />
     <ol-scale-line-control :min-width="50" />
-    <ol-toggle-control ref="labelsToggleRef" html="T"
+    <ol-toggle-control
+      ref="labelsToggleRef"
+      html="T"
       :className="`ol-toggle-label-layer ${!labelsLayerVisible ? 'ol-disabled' : ''}`"
-      :onToggle="() => labelsLayerVisible = !labelsLayerVisible" />
-    <q-tooltip v-if="labelsToggleHasInit" v-model="labelsToggleShow" target=".ol-toggle-label-layer"
-      anchor="center left" self="center right">
+      :onToggle="() => (labelsLayerVisible = !labelsLayerVisible)"
+    />
+    <q-tooltip
+      v-if="labelsToggleHasInit"
+      v-model="labelsToggleShow"
+      target=".ol-toggle-label-layer"
+      anchor="center left"
+      self="center right"
+    >
       {{ $t('toggle_map_labels') }}
     </q-tooltip>
 
-    <q-img style='z-index: 1' class='absolute-bottom q-mb-sm mobile-only' position="calc(50% - 11px) center"
-      fit='contain' src="/img/mosquitoalert_horizontal.png" height="30px" />
+    <q-img
+      style="z-index: 1"
+      class="absolute-bottom q-mb-sm mobile-only"
+      position="calc(50% - 11px) center"
+      fit="contain"
+      src="/img/mosquitoalert_horizontal.png"
+      height="30px"
+    />
 
-    <q-spinner v-if="showSpinner" style='z-index: 1' class="absolute-center" size="5em" :thickness="2"
-      color="primary" />
+    <q-spinner
+      v-if="showSpinner"
+      style="z-index: 1"
+      class="absolute-center"
+      size="5em"
+      :thickness="2"
+      color="primary"
+    />
   </ol-map>
-
 </template>
 
 <script lang="ts">
-
 import { onMounted, ref, watch } from 'vue'
-import debounce from 'debounce';
+import debounce from 'debounce'
 
 import { useRouteQuery } from '@vueuse/router'
 
 import { toLonLat, fromLonLat } from 'ol/proj.js'
 import Colorize from 'ol-ext/filter/Colorize'
 
-import { useMapUiStore } from 'src/stores/mapUI';
+import { useMapUiStore } from 'src/stores/mapUI'
 
-const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY ||
-  window.APP_CONFIG?.CARTO_API_KEY ||
-  ''
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || window.APP_CONFIG?.CARTO_API_KEY || ''
 
 export default {
   props: {
     basemapLayerUrl: {
       type: String,
-      default: `https://basemaps.cartocdn.com/rastertiles/voyager_no_labels_no_buildings/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`
+      default: `https://basemaps.cartocdn.com/rastertiles/voyager_no_labels_no_buildings/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`,
     },
     labelsLayerUrl: {
       type: String,
-      default: `https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`
+      default: `https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`,
     },
   },
   setup() {
-    const mapUi = useMapUiStore();
+    const mapUi = useMapUiStore()
 
     // Map
     const mapRef = ref()
@@ -76,20 +106,20 @@ export default {
     const latitude = useRouteQuery('lat', '42', {
       transform: {
         get: (v: string) => Number(v),
-        set: (v: number) => v.toFixed(5).toString()
-      }
+        set: (v: number) => v.toFixed(5).toString(),
+      },
     })
     const longitude = useRouteQuery('lon', '0', {
       transform: {
         get: (v: string) => Number(v),
-        set: (v: number) => v.toFixed(5).toString()
-      }
+        set: (v: number) => v.toFixed(5).toString(),
+      },
     })
     const zoom = useRouteQuery('zoom', '4.00', {
       transform: {
         get: (v: string) => Number(v),
-        set: (v: number) => v.toFixed(2).toString()
-      }
+        set: (v: number) => v.toFixed(2).toString(),
+      },
     })
     const debouncedSetZoom = debounce((value: number) => {
       zoom.value = value
@@ -105,31 +135,31 @@ export default {
       latitude.value = lat
     }, 1000)
 
-    const grayscaleFilter = new Colorize({ operation: 'grayscale' });
-    const labelsLayerVisible = ref(false);
+    const grayscaleFilter = new Colorize({ operation: 'grayscale' })
+    const labelsLayerVisible = ref(false)
     const labelsToggleRef = ref()
     const labelsToggleHasInit = ref(false)
     const labelsToggleShow = ref(true)
 
     onMounted(() => {
-      basemapRef.value.tileLayer.addFilter(grayscaleFilter);
+      basemapRef.value.tileLayer.addFilter(grayscaleFilter)
       mapRef.value.map.on('loadstart', () => {
         showSpinner.value = true
-      });
+      })
       mapRef.value.map.on('loadend', () => {
         showSpinner.value = false
       })
 
       const control = labelsToggleRef.value?.control
       labelsToggleHasInit.value = !!control
-    });
+    })
 
     watch(
       () => mapUi.grayscaleBasemap,
       (newVal) => {
         grayscaleFilter.setActive(newVal)
       },
-      { immediate: true }
+      { immediate: true },
     )
 
     return {
@@ -148,9 +178,9 @@ export default {
       labelsToggleShow,
       updateSize() {
         mapRef.value.updateSize()
-      }
+      },
     }
-  }
+  },
 }
 </script>
 
@@ -159,7 +189,7 @@ export default {
 .ol-control:hover,
 .ol-control:focus {
   background-color: transparent;
-  border-radius: .3em !important;
+  border-radius: 0.3em !important;
 }
 
 .ol-control button {
@@ -173,7 +203,7 @@ export default {
 }
 
 .ol-control button:not(:last-child) {
-  margin-bottom: .1em;
+  margin-bottom: 0.1em;
 }
 
 .ol-control button:hover,
@@ -193,7 +223,7 @@ export default {
 .ol-scale-line-inner {
   color: $grey-14;
   border-color: $grey-14 !important;
-  font-size: .65em !important;
+  font-size: 0.65em !important;
 }
 
 .ol-attribution a {
@@ -212,13 +242,13 @@ export default {
   top: unset;
   left: unset;
   bottom: 2em;
-  right: .2em;
+  right: 0.2em;
 }
 
 .ol-toggle-label-layer {
   left: unset;
   top: 0.5em;
-  right: .5em;
+  right: 0.5em;
 }
 
 /* Button inside disabled div */
@@ -234,6 +264,6 @@ export default {
 
 .ol-scale-line {
   right: 2.5em;
-  line-height: .8em;
+  line-height: 0.8em;
 }
 </style>
