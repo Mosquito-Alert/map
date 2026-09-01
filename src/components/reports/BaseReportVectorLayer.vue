@@ -80,13 +80,11 @@ const loader = async function (
         return feature
       })
 
-    requestAnimationFrame(() => {
-      if (currentLoadVersion === loadVersion && props.visible) {
-        renderOpacity.value = 1
-        // Notify the store that features have been updated, so that any dependent components can react accordingly.
-        reportMapStore.notifyFeaturesUpdated()
-      }
-    })
+    if (currentLoadVersion === loadVersion && props.visible) {
+      renderOpacity.value = 1
+      // Notify the store that features have been updated, so that any dependent components can react accordingly.
+      reportMapStore.notifyFeaturesUpdated()
+    }
 
     return features
   } catch (error) {
