@@ -60,6 +60,7 @@ jobs:
           # Override with environment-specific secrets from GitHub
           echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.local
+          echo "CARTO_API_KEY=${{ secrets.CARTO_API_KEY }}" >> .env.local
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
