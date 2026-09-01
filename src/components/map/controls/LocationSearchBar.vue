@@ -26,8 +26,8 @@
           :coordinates="boundaryStore.getPolygon.getCoordinates()"
         />
         <ol-style>
-          <ol-style-stroke :color="colors.getPaletteColor('primary')" :width="2" />
-          <ol-style-fill :color="colors.getPaletteColor('primary') + '33'" />
+          <ol-style-stroke :color="colors.getPaletteColor('info')" :width="2" />
+          <ol-style-fill :color="colors.getPaletteColor('info') + '33'" />
         </ol-style>
       </ol-feature>
     </ol-source-vector>
