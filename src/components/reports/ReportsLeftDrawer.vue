@@ -456,6 +456,14 @@ export default {
     // FILTERS
     const defaultFrom = new Date('2014-01-01')
     const defaultTo = new Date()
+    // Match the map's inclusive end-of-day filter; picker values begin at midnight.
+    const getReceivedAtBefore = () => {
+      if (!selectedDateRange.value.to) return undefined
+
+      const endOfDay = new Date(selectedDateRange.value.to)
+      endOfDay.setHours(23, 59, 59, 999)
+      return endOfDay.toISOString()
+    }
     const selectedDateRange = ref<DateRange>({
       from: props.fromDate || defaultFrom,
       to: props.toDate || defaultTo,
@@ -524,9 +532,7 @@ export default {
             receivedAtAfter: selectedDateRange.value.from
               ? selectedDateRange.value.from.toISOString()
               : undefined,
-            receivedAtBefore: selectedDateRange.value.to
-              ? selectedDateRange.value.to.toISOString()
-              : undefined,
+            receivedAtBefore: getReceivedAtBefore(),
             tags: tagsSelected.value.length ? tagsSelected.value : undefined,
             boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
           },
@@ -575,9 +581,7 @@ export default {
             receivedAtAfter: selectedDateRange.value.from
               ? selectedDateRange.value.from.toISOString()
               : undefined,
-            receivedAtBefore: selectedDateRange.value.to
-              ? selectedDateRange.value.to.toISOString()
-              : undefined,
+            receivedAtBefore: getReceivedAtBefore(),
             tags: tagsSelected.value.length ? tagsSelected.value : undefined,
             boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
           },
@@ -634,9 +638,7 @@ export default {
             receivedAtAfter: selectedDateRange.value.from
               ? selectedDateRange.value.from.toISOString()
               : undefined,
-            receivedAtBefore: selectedDateRange.value.to
-              ? selectedDateRange.value.to.toISOString()
-              : undefined,
+            receivedAtBefore: getReceivedAtBefore(),
             tags: tagsSelected.value.length ? tagsSelected.value : undefined,
             boundaryUuid: selectedBoundary ? selectedBoundary.uuid : undefined,
           },
